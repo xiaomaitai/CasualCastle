@@ -1,0 +1,23 @@
+# ====================================
+# Godot 4+ — Editor / Import / Cache
+# ====================================
+.godot/
+
+# Mono / .NET temp files
+.mono/
+data_*/
+mono_crash.*.json
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# User-specific project files
+*.csproj.user
+*.suo
+*.user
+*.userprops
+
+# Export templates / builds
+export_presets.cfg
