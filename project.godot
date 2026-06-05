@@ -12,11 +12,11 @@ config_version=5
 
 config/name="CasualCastle"
 config/features=PackedStringArray("4.6", "Forward Plus")
-config/icon="res://icon.svg"
+config/icon="res://textures/icon.svg"
 
 [dotnet]
 
-project/assembly_name="新建游戏项目"
+project/assembly_name="CasualCastle"
 
 [physics]
 
