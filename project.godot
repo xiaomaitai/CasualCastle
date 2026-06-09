@@ -11,8 +11,15 @@ config_version=5
 [application]
 
 config/name="CasualCastle"
+run/main_scene="res://scenes/main/main_game.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://textures/icon.svg"
+
+[display]
+
+window/size/viewport_width=1000
+window/size/viewport_height=600
+window/size/resizable=false
 
 [dotnet]
 

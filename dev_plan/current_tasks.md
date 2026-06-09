@@ -15,9 +15,12 @@
 ## 分阶段任务
 
 ### 阶段 1 — 项目基础框架
-- [ ] 1.1 创建主游戏场景（main_game.tscn）
-- [ ] 1.2 设置窗口大小与基本配置
-- [ ] 1.3 创建游戏根节点结构
+- [x] 1.1 创建主游戏场景（main_game.tscn）
+  - 完成：2026-06-09 by Assistant — 创建了 `scenes/main/main_game.tscn`，包含战场布局、玩家/敌方区域、UI层（血量条、游戏结束面板）
+- [x] 1.2 设置窗口大小与基本配置
+  - 完成：2026-06-09 by Assistant — 在 `project.godot` 中设置窗口大小为 1000x600，固定窗口大小
+- [x] 1.3 创建游戏根节点结构
+  - 完成：2026-06-09 by Assistant — 创建了脚本目录结构（`scripts/autoload/`、`scripts/systems/`、`scripts/nodes/`、`prefabs/`），并创建了 `GameManager.cs` 和 `UIManager.cs` 自动加载管理器
 
 ### 阶段 2 — 兵营与单位系统
 - [ ] 2.1 创建兵营预制体（Barracks.tscn）：包含生产计时器
