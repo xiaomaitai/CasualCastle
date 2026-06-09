@@ -2,24 +2,23 @@
 
 ## Project Overview
 
-**CasualCastle** is a card-based game built in **Godot 4.6** using **C# / .NET** (Mono). The project uses Jolt Physics for 3D simulations and Forward+ rendering. This is an early-stage project with established architectural patterns ready for feature development.
+**CasualCastle** is a 2D RTS game built in **Godot 4.6** using **C# / .NET** (Mono), similar to Clash Royale. The game features auto-generating barracks, unit combat, and castle destruction mechanics. This is an early-stage project focused on MVP development.
 
 ## Architecture & Directory Structure
 
 ### Core Organization
 - **`scripts/`** - All C# code organized by purpose:
   - `autoload/` - Global singletons and managers (auto-loaded services)
-  - `systems/` - Game systems (e.g., CardSystem, UISystem, PhysicsSystem)
+  - `systems/` - Game systems (e.g., BattleSystem, UISystem)
   - `utils/` - Shared utility classes and helper functions
 - **`scenes/`** - Scene files organized by context:
   - `main/` - Main entry point scene(s)
   - `ui/` - UI components and screens
   - `levels/` - Level-specific scenes
-- **`prefabs/`** - Reusable scene templates
+- **`prefabs/`** - Reusable scene templates (Barracks, Soldier, Castle)
 - **`resources/`** - Godot resource files (.tres, custom resources)
 - **`assets/`** - Game content:
-  - `art/cards/` - Card graphics (card_border.png, character sprites)
-  - `art/placeholders/` - Temporary/test assets
+  - `art/` - Game graphics (sprites, UI elements)
   - `audio/` - Sound files
   - `fonts/` - Custom fonts
 
@@ -33,31 +32,30 @@
 1. **Language**: Use C# (not GDScript). The project is configured with .NET assembly name "CasualCastle".
 2. **Scene Structure**: Scenes are `.tscn` files (Godot text format); attach C# scripts as nodes.
 3. **Autoload Pattern**: Place global managers in `scripts/autoload/` to auto-initialize singletons.
-4. **Systems Architecture**: Implement game systems (CardSystem, UISystem, etc.) in `scripts/systems/` as stateful managers that handle specific domains.
+4. **Systems Architecture**: Implement game systems in `scripts/systems/` as stateful managers that handle specific domains.
 
 ### Node Attachment & Script Organization
 - Attach scripts directly to scene nodes for node-specific logic
-- Use inheritance from Node3D (3D) or Node2D (2D) based on scene context
+- Use inheritance from Node2D for 2D game elements
 - Component-based composition: Keep scripts focused on single responsibility
 
-### AsynchronousOperations & Signal Patterns
+### Signal Patterns
 - Use Godot signals for inter-system communication
 - Emit signals from systems; subscribe in UI or other systems
-- Example: CardSystem emits `card_played` signal → UISystem listens and updates display
 
 ## Coding Practices
 
 ### File Naming
-- C# scripts: `PascalCase.cs` (e.g., `CardSystem.cs`, `GameManager.cs`)
-- Scene files: `snake_case.tscn` (e.g., `main_menu.tscn`, `card_display.tscn`)
-- Prefab scenes: `[ComponentName]_prefab.tscn`
+- C# scripts: `PascalCase.cs` (e.g., `BattleSystem.cs`, `GameManager.cs`)
+- Scene files: `snake_case.tscn` (e.g., `main_game.tscn`, `barracks.tscn`)
+- Prefab scenes: `[ComponentName].tscn`
 
 ### Code Structure
 ```csharp
-public partial class CardSystem : Node3D
+public partial class BattleSystem : Node2D
 {
     [Signal]
-    public delegate void CardPlayedEventHandler(Card card);
+    public delegate void UnitSpawnedEventHandler(Unit unit);
     
     public override void _Ready()
     {
@@ -67,18 +65,17 @@ public partial class CardSystem : Node3D
 ```
 
 ### Import Path Convention
-- Reference scenes: `res://scenes/main/node_2d.tscn`
-- Reference assets: `res://assets/art/cards/card_border.png`
+- Reference scenes: `res://scenes/main/main_game.tscn`
+- Reference assets: `res://assets/art/sprites/barracks.png`
 - Reference scripts: Attach directly as nodes in Godot editor
 
 ## Common Tasks
 
 ### Adding a New System
-1. Create `scripts/systems/YourSystem.cs` inheriting from `Node3D` or appropriate base
+1. Create `scripts/systems/YourSystem.cs` inheriting from `Node2D` or appropriate base
 2. Implement `_Ready()` for initialization
 3. Define signals for output events
 4. Register in autoload or attach to main scene
-5. Example structure in `scripts/systems/` if others exist for reference
 
 ### Adding UI Elements
 1. Create scene in `scenes/ui/YourUI.tscn`
@@ -86,22 +83,16 @@ public partial class CardSystem : Node3D
 3. Connect signals from game systems
 4. Place prefabs in `prefabs/` if reusable
 
-### Working with Assets
-- Card art: place in `assets/art/cards/`
-- Character sprites: reference by filename (e.g., `goblin.png`)
-- Ensure PNG files are imported (Godot auto-imports on project load)
-
 ## Physics & Rendering
 
 ### Physics Engine
 - **Godot 4.6** uses **Jolt Physics** (configured in project.godot)
-- Use `PhysicsBody3D` nodes for dynamic objects
-- Use `StaticBody3D` for fixed environment
-- Query PhysicsServer for raycasts/shapecast checks
+- Use `Area2D` and `CollisionShape2D` for 2D collision detection
+- Query PhysicsServer2D for raycasts/shape checks
 
 ### Rendering
-- **Forward+ renderer** (efficient for many lights)
-- **D3D12 backend** on Windows (fallback to OpenGL if needed)
+- **Forward+ renderer**
+- Use CanvasLayer for UI elements
 - Adjust in project.godot `[rendering]` section if testing cross-platform
 
 ## Build & Deployment
@@ -139,5 +130,5 @@ public partial class CardSystem : Node3D
 ## Development Plan Folder
 
 - 项目开发大纲存放于 dev_plan 文件夹，主文件为 dev_plan/development_outline.md。
+- 当前任务文件为 dev_plan/current_tasks.md，包含极简MVP的分阶段开发任务。
 - 当 agent 需要读取开发计划、当前任务、里程碑或任务优先级时，应首先读取该文件夹内容以获取最新计划。
-
