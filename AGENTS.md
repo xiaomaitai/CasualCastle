@@ -136,3 +136,8 @@ public partial class CardSystem : Node3D
 - **Jolt Physics**: https://godotengine.org/news/godot-4-0-brings-powerful-vulkan-rendering-support/
 - **Project-specific patterns**: See existing code in `scripts/systems/` and `scenes/`
 
+## Development Plan Folder
+
+- 项目开发大纲存放于 dev_plan 文件夹，主文件为 dev_plan/development_outline.md。
+- 当 agent 需要读取开发计划、当前任务、里程碑或任务优先级时，应首先读取该文件夹内容以获取最新计划。
+
