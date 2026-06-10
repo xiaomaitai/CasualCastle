@@ -132,3 +132,14 @@ public partial class BattleSystem : Node2D
 - 项目开发大纲存放于 dev_plan 文件夹，主文件为 dev_plan/development_outline.md。
 - 当前任务文件为 dev_plan/current_tasks.md，包含极简MVP的分阶段开发任务。
 - 当 agent 需要读取开发计划、当前任务、里程碑或任务优先级时，应首先读取该文件夹内容以获取最新计划。
+
+## 开发规则
+
+### Git提交规则
+- **只有用户明确要求时才提交代码**
+- 不要自动提交任何更改
+- 等待用户明确指示后才执行 git add 和 git commit
+
+### 当前状态
+- 项目回滚到 commit 573cbb5 (Phase 2.1 Complete)
+- 等待用户指示继续开发或修复问题
