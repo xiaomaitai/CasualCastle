@@ -4,6 +4,10 @@
 
 **CasualCastle** is a 2D RTS game built in **Godot 4.6** using **C# / .NET** (Mono), similar to Clash Royale. The game features auto-generating barracks, unit combat, and castle destruction mechanics. This is an early-stage project focused on MVP development.
 
+## Game Concepts
+
+> 遇到游戏术语（如地块、城堡、建筑卡、建筑、战场等）时，优先参考 `dev_plan/concepts.md` 中的定义，确保术语使用与概念文档一致。
+
 ## Architecture & Directory Structure
 
 ### Core Organization
