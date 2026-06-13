@@ -74,7 +74,7 @@ public partial class GameManager : Node2D
     public void EndGame(bool playerWon)
     {
         CurrentState = GameState.GameOver;
-        EmitSignal(nameof(GameStateChangedEventHandler), CurrentState);
+        EmitSignal(nameof(GameStateChangedEventHandler), (int)CurrentState);
         GD.Print(playerWon ? "Player Wins!" : "Enemy Wins!");
     }
 
@@ -83,7 +83,7 @@ public partial class GameManager : Node2D
         PlayerHealth = PlayerMaxHealth;
         EnemyHealth = EnemyMaxHealth;
         CurrentState = GameState.Playing;
-        EmitSignal(nameof(GameStateChangedEventHandler), CurrentState);
+        EmitSignal(nameof(GameStateChangedEventHandler), (int)CurrentState);
         EmitSignal(nameof(PlayerHealthChangedEventHandler), PlayerHealth);
         EmitSignal(nameof(EnemyHealthChangedEventHandler), EnemyHealth);
     }

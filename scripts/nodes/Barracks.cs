@@ -25,6 +25,9 @@ public partial class Barracks : Node2D
             IsPlayerBarracks = true;
         }
 
+        string side = IsPlayerBarracks ? "玩家" : "敌方";
+        GD.Print($"[Barracks _Ready] {side}兵营初始化，全局位置: {GlobalPosition}, 父节点: {GetParent().Name}");
+
         // 创建产兵计时器
         _spawnTimer = new Timer();
         _spawnTimer.WaitTime = SpawnInterval;
@@ -33,20 +36,25 @@ public partial class Barracks : Node2D
         _spawnTimer.Connect("timeout", Callable.From(SpawnUnit));
         AddChild(_spawnTimer);
 
-        // 获取战场引用
-        _battlefield = GetParent() as Node2D;
+        // 获取战场引用（通过场景树路径）
+        _battlefield = GetNodeOrNull<Node2D>("/root/MainGame/Battlefield");
         if (_battlefield == null)
         {
             _battlefield = GetTree().Root.GetNodeOrNull<Node2D>("MainGame/Battlefield");
         }
+
+        GD.Print($"[Barracks _Ready] 战场节点: {(_battlefield != null ? _battlefield.Name : "null")}, 位置: {(_battlefield?.GlobalPosition ?? Vector2.Zero)}");
     }
 
     private void SpawnUnit()
     {
+        GD.Print($"[Barracks SpawnUnit] 开始产兵，_isActive={_isActive}, _battlefield={(_battlefield != null ? _battlefield.Name : "null")}");
+
         if (!_isActive || _battlefield == null) return;
 
-        // 士兵预制体将在阶段2.2创建，这里先检查是否存在
+        // 加载士兵预制体
         PackedScene soldierScene = GD.Load<PackedScene>("res://prefabs/Soldier.tscn");
+        GD.Print($"[Barracks SpawnUnit] 加载Soldier预制体: {(soldierScene != null ? "成功" : "失败 - 文件不存在")}");
         if (soldierScene == null) return;
 
         // 根据阵营决定生成位置
@@ -54,10 +62,14 @@ public partial class Barracks : Node2D
             ? GlobalPosition + new Vector2(50, 0)
             : GlobalPosition + new Vector2(-50, 0);
 
+        string side = IsPlayerBarracks ? "玩家" : "敌方";
+        GD.Print($"[Barracks SpawnUnit] 生成{side}士兵，兵营位置: {GlobalPosition}, 生成位置: {spawnPosition}");
+
         Soldier soldier = soldierScene.Instantiate<Soldier>();
         soldier.GlobalPosition = spawnPosition;
         soldier.IsPlayerUnit = IsPlayerBarracks;
         _battlefield.AddChild(soldier);
+        GD.Print($"[Barracks SpawnUnit] 士兵添加完成，子节点数: {_battlefield.GetChildCount()}");
     }
 
     public void SetActive(bool active)

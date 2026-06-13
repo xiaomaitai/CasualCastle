@@ -40,9 +40,9 @@ public partial class UIManager : Node2D
 
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.Connect(nameof(GameManager.PlayerHealthChangedEventHandler), Callable.From(UpdatePlayerHealth));
-            GameManager.Instance.Connect(nameof(GameManager.EnemyHealthChangedEventHandler), Callable.From(UpdateEnemyHealth));
-            GameManager.Instance.Connect(nameof(GameManager.GameStateChangedEventHandler), Callable.From(OnGameStateChanged));
+            GameManager.Instance.Connect(nameof(GameManager.PlayerHealthChangedEventHandler), Callable.From((int health) => UpdatePlayerHealth(health)));
+            GameManager.Instance.Connect(nameof(GameManager.EnemyHealthChangedEventHandler), Callable.From((int health) => UpdateEnemyHealth(health)));
+            GameManager.Instance.Connect(nameof(GameManager.GameStateChangedEventHandler), Callable.From((GameManager.GameState state) => OnGameStateChanged(state)));
         }
     }
 
