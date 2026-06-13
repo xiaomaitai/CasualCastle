@@ -23,7 +23,8 @@
   - 完成：2026-06-09 by Assistant — 创建了脚本目录结构（`scripts/autoload/`、`scripts/systems/`、`scripts/nodes/`、`prefabs/`），并创建了 `GameManager.cs` 和 `UIManager.cs` 自动加载管理器
 
 ### 阶段 2 — 兵营与单位系统
-- [ ] 2.1 创建兵营预制体（Barracks.tscn）：包含生产计时器
+- [x] 2.1 创建兵营预制体（Barracks.tscn）：包含生产计时器
+  - 完成：2026-06-13 by git commit 573cbb5 — 创建 `prefabs/barracks.tscn` 和 `scripts/nodes/Barracks.cs`，包含生产计时器
 - [ ] 2.2 创建士兵预制体（Soldier.tscn）：包含血量、伤害、速度属性
 - [ ] 2.3 兵营自动产兵逻辑：每隔N秒生成一个士兵
 
@@ -62,8 +63,8 @@
 ## 当前进度
 | 阶段 | 状态 | 完成率 |
 |------|------|--------|
-| 1 - 基础框架 | 待开始 | 0% |
-| 2 - 兵营与单位 | 待开始 | 0% |
+| 1 - 基础框架 | ✅ 已完成 | 100% |
+| 2 - 兵营与单位 | 🏗️ 进行中 | 33% (2.1 done) |
 | 3 - 战斗系统 | 待开始 | 0% |
 | 4 - 城堡与胜负 | 待开始 | 0% |
 | 5 - 场景配置 | 待开始 | 0% |
