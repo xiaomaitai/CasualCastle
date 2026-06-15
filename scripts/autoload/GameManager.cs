@@ -38,19 +38,21 @@ public partial class GameManager : Node2D
         Instance = this;
         PlayerHealth = PlayerMaxHealth;
         EnemyHealth = EnemyMaxHealth;
+        CallDeferred(MethodName.BindPlayerBarracks);
+    }
+
+    private void BindPlayerBarracks()
+    {
         _playerBarracks = GetNodeOrNull<Barracks>("Battlefield/PlayerSide/PlayerCastle/Barracks");
     }
 
-    public override void _UnhandledInput(InputEvent @event)
+    public override void _Input(InputEvent @event)
     {
         if (CurrentState != GameState.Playing) return;
         if (@event is not InputEventKey keyEvent || !keyEvent.Pressed || keyEvent.Echo) return;
+        if (keyEvent.Keycode != Key.P) return;
 
-        bool isPlusKey = keyEvent.Keycode == Key.KpAdd
-            || (keyEvent.Keycode == Key.Equal && keyEvent.ShiftPressed);
-
-        if (!isPlusKey) return;
-
+        _playerBarracks ??= GetNodeOrNull<Barracks>("Battlefield/PlayerSide/PlayerCastle/Barracks");
         _playerBarracks?.SpawnUnits(10);
         GetViewport().SetInputAsHandled();
     }

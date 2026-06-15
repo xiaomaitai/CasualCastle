@@ -4,8 +4,12 @@
 [ext_resource type="Script" path="res://scripts/autoload/GameManager.cs" id="3"]
 [ext_resource type="Script" path="res://scripts/autoload/UIManager.cs" id="4"]
 [ext_resource type="Script" path="res://scripts/nodes/BgmPlayer.cs" id="5"]
+[ext_resource type="Script" path="res://scripts/utils/DevInputLogger.cs" id="6"]
 
 [node name="MainGame" type="Node2D" unique_id=1]
+
+[node name="DevInputLogger" type="Node" parent="."]
+script = ExtResource("6")
 
 [node name="BGM" type="AudioStreamPlayer" parent="."]
 volume_db = -8.0
