@@ -24,7 +24,7 @@ public partial class Soldier : Area2D
 	private Vector2 _moveDirection;
 	private float _attackTimer = 0f;
 	private Soldier _targetEnemy;
-	private CastleArea _targetCastle;
+	private Castle _targetCastle;
 	private Sprite2D _sprite;
 	private CollisionShape2D _collisionShape;
 
@@ -130,7 +130,7 @@ public partial class Soldier : Area2D
 			return;
 		}
 
-		CastleArea castle = area as CastleArea;
+		Castle castle = area as Castle;
 		if (castle != null && castle.IsPlayerCastle != IsPlayerUnit)
 		{
 			_targetCastle = castle;
@@ -145,7 +145,7 @@ public partial class Soldier : Area2D
 			_targetEnemy = null;
 		}
 
-		CastleArea castle = area as CastleArea;
+		Castle castle = area as Castle;
 		if (castle == _targetCastle)
 		{
 			_targetCastle = null;

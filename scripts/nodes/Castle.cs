@@ -1,7 +1,14 @@
 using Godot;
+using System;
 
-public partial class CastleArea : Area2D
+public partial class Castle : Area2D
 {
+	[Export]
+	public bool IsPlayerCastle;
+
+	[Export]
+	public int MaxHealth = 100;
+
 	[Export]
 	public int GridColumns = 8;
 
@@ -20,22 +27,35 @@ public partial class CastleArea : Area2D
 	[Export]
 	public Color AreaBgColor = new Color(1, 1, 1, 0.03f);
 
-	public bool IsPlayerCastle { get; private set; }
+	public int Health { get; private set; }
+
+	private ProgressBar _healthBar;
 
 	public override void _Ready()
 	{
-		Node2D parent = GetParent() as Node2D;
-		IsPlayerCastle = parent != null && parent.Name == "PlayerSide";
+		Health = MaxHealth;
+		_healthBar = GetNodeOrNull<ProgressBar>("HealthBar");
+		UpdateHealthBar();
+	}
 
-		CollisionLayer = 4;
-		CollisionMask = 0;
+	public void TakeDamage(int amount)
+	{
+		Health = Math.Max(0, Health - amount);
+		UpdateHealthBar();
+		GameManager.Instance?.TakeDamage(IsPlayerCastle, amount);
+	}
 
-		var shape = new CollisionShape2D();
-		var rect = new RectangleShape2D();
-		rect.Size = new Vector2(GridColumns * CellSize, GridRows * CellSize);
-		shape.Shape = rect;
-		shape.Position = rect.Size / 2;
-		AddChild(shape);
+	public void ResetHealth()
+	{
+		Health = MaxHealth;
+		UpdateHealthBar();
+	}
+
+	private void UpdateHealthBar()
+	{
+		if (_healthBar == null) return;
+		_healthBar.MaxValue = MaxHealth;
+		_healthBar.Value = Health;
 	}
 
 	public override void _Draw()
