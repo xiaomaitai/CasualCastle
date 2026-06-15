@@ -24,6 +24,7 @@ public partial class Soldier : Area2D
 	private Vector2 _moveDirection;
 	private float _attackTimer = 0f;
 	private Soldier _targetEnemy;
+	private CastleArea _targetCastle;
 	private Sprite2D _sprite;
 	private CollisionShape2D _collisionShape;
 
@@ -71,10 +72,13 @@ public partial class Soldier : Area2D
 				MoveToward(dt, _targetEnemy.GlobalPosition);
 			}
 		}
+		else if (_targetCastle != null)
+		{
+			_targetEnemy = null;
+		}
 		else
 		{
 			_targetEnemy = null;
-			// 向敌方方向移动
 			MoveToward(dt, GlobalPosition + _moveDirection * 1000);
 		}
 	}
@@ -123,6 +127,13 @@ public partial class Soldier : Area2D
 		if (other != null && other.IsAlive && other.IsPlayerUnit != IsPlayerUnit)
 		{
 			_targetEnemy = other;
+			return;
+		}
+
+		CastleArea castle = area as CastleArea;
+		if (castle != null && castle.IsPlayerCastle != IsPlayerUnit)
+		{
+			_targetCastle = castle;
 		}
 	}
 
@@ -132,6 +143,12 @@ public partial class Soldier : Area2D
 		if (other == _targetEnemy)
 		{
 			_targetEnemy = null;
+		}
+
+		CastleArea castle = area as CastleArea;
+		if (castle == _targetCastle)
+		{
+			_targetCastle = null;
 		}
 	}
 }

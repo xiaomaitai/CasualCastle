@@ -17,7 +17,7 @@ offset_bottom = 720.0
 [node name="PlayerSide" type="Node2D" parent="Battlefield" unique_id=3]
 position = Vector2(50, 104)
 
-[node name="PlayerCastleArea" type="Node2D" parent="Battlefield/PlayerSide" unique_id=14]
+[node name="PlayerCastleArea" type="Area2D" parent="Battlefield/PlayerSide" unique_id=14]
 script = ExtResource("2")
 
 [node name="PlayerBarracks" parent="Battlefield/PlayerSide" unique_id=11 instance=ExtResource("1")]
@@ -26,7 +26,7 @@ position = Vector2(256, 256)
 [node name="EnemySide" type="Node2D" parent="Battlefield" unique_id=4]
 position = Vector2(718, 104)
 
-[node name="EnemyCastleArea" type="Node2D" parent="Battlefield/EnemySide" unique_id=15]
+[node name="EnemyCastleArea" type="Area2D" parent="Battlefield/EnemySide" unique_id=15]
 script = ExtResource("2")
 
 [node name="EnemyBarracks" parent="Battlefield/EnemySide" unique_id=12 instance=ExtResource("1")]
