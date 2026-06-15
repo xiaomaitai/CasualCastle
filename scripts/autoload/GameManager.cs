@@ -31,30 +31,62 @@ public partial class GameManager : Node2D
     public int PlayerHealth { get; private set; }
     public int EnemyHealth { get; private set; }
 
-    private Barracks _playerBarracks;
+    private Node2D _battlefield;
+    private Castle _playerCastle;
+    private int _cheatSpawnCount;
 
     public override void _Ready()
     {
         Instance = this;
         PlayerHealth = PlayerMaxHealth;
         EnemyHealth = EnemyMaxHealth;
-        CallDeferred(MethodName.BindPlayerBarracks);
-    }
-
-    private void BindPlayerBarracks()
-    {
-        _playerBarracks = GetNodeOrNull<Barracks>("Battlefield/PlayerSide/PlayerCastle/Barracks");
+        SetProcessInput(true);
+        var root = GetParent();
+        _battlefield = root.GetNode<Node2D>("Battlefield");
+        _playerCastle = root.GetNode<Castle>("Battlefield/PlayerSide/PlayerCastle");
     }
 
     public override void _Input(InputEvent @event)
     {
         if (CurrentState != GameState.Playing) return;
         if (@event is not InputEventKey keyEvent || !keyEvent.Pressed || keyEvent.Echo) return;
-        if (keyEvent.Keycode != Key.P) return;
+        if (!IsCheatKey(keyEvent)) return;
 
-        _playerBarracks ??= GetNodeOrNull<Barracks>("Battlefield/PlayerSide/PlayerCastle/Barracks");
-        _playerBarracks?.SpawnUnits(10);
+        SpawnCheatSoldiers(10);
         GetViewport().SetInputAsHandled();
+    }
+
+    private static bool IsCheatKey(InputEventKey keyEvent)
+    {
+        return keyEvent.Keycode == Key.P
+            || keyEvent.PhysicalKeycode == Key.P
+            || keyEvent.Unicode == 'p'
+            || keyEvent.Unicode == 'P';
+    }
+
+    private void SpawnCheatSoldiers(int count)
+    {
+        if (_battlefield == null || _playerCastle == null || count <= 0) return;
+
+        PackedScene soldierScene = GD.Load<PackedScene>("res://prefabs/Soldier.tscn");
+        if (soldierScene == null) return;
+
+        const int spawnGridX = 7;
+        const int spawnGridY = 4;
+
+        for (int i = 0; i < count; i++)
+        {
+            Vector2 spawnLocal = _playerCastle.GetBuildingSpawnPosition(
+                spawnGridX, spawnGridY, Vector2I.Right, _cheatSpawnCount);
+            _cheatSpawnCount++;
+
+            Soldier soldier = soldierScene.Instantiate<Soldier>();
+            soldier.GlobalPosition = _playerCastle.ToGlobal(spawnLocal);
+            soldier.IsPlayerUnit = true;
+            _battlefield.AddChild(soldier);
+        }
+
+        GD.Print($"[Cheat] Spawned {count} soldiers");
     }
 
     public override void _ExitTree()
