@@ -9,7 +9,9 @@ public partial class UIManager : Node2D
     private ProgressBar _enemyHealthBar;
     private Panel _gameOverPanel;
     private Label _gameOverLabel;
-    private Button _restartButton;
+    private Button _backToTitleButton;
+
+    private const string TitleScene = "res://scenes/ui/title_screen.tscn";
 
     public override void _Ready()
     {
@@ -32,9 +34,9 @@ public partial class UIManager : Node2D
             _enemyHealthBar = uiRoot.GetNode<ProgressBar>("EnemyHealthBar");
             _gameOverPanel = uiRoot.GetNode<Panel>("GameOverPanel");
             _gameOverLabel = uiRoot.GetNode<Label>("GameOverPanel/GameOverLabel");
-            _restartButton = uiRoot.GetNode<Button>("GameOverPanel/RestartButton");
+            _backToTitleButton = uiRoot.GetNode<Button>("GameOverPanel/BackToTitleButton");
 
-            _restartButton?.Connect("pressed", Callable.From(RestartGame));
+            _backToTitleButton?.Connect("pressed", Callable.From(GoToTitle));
         }
 
         if (GameManager.Instance != null)
@@ -62,13 +64,13 @@ public partial class UIManager : Node2D
             _gameOverPanel.Visible = state == GameManager.GameState.GameOver;
             if (_gameOverLabel != null)
             {
-                _gameOverLabel.Text = GameManager.Instance.PlayerHealth > 0 ? "Victory!" : "Defeat!";
+                _gameOverLabel.Text = GameManager.Instance.PlayerHealth > 0 ? "胜利！" : "失败！";
             }
         }
     }
 
-    private void RestartGame()
+    private void GoToTitle()
     {
-        GetTree().ReloadCurrentScene();
+        GetTree().ChangeSceneToFile(TitleScene);
     }
 }

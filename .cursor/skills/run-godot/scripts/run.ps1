@@ -1,7 +1,7 @@
 param(
     [string]$GodotDir = "C:\Program Files (x86)\Godot_v4.6.2-stable_mono_win64",
     [string]$ProjectPath = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..\..")).Path,
-    [string]$MainScene = "res://scenes/main/main_game.tscn",
+    [string]$MainScene = "res://scenes/ui/title_screen.tscn",
     [int]$EditorStartupSeconds = 3
 )
 

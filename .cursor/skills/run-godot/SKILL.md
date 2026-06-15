@@ -22,7 +22,7 @@ description: >-
 | Godot 安装目录 | `C:\Program Files (x86)\Godot_v4.6.2-stable_mono_win64` |
 | 可执行文件 | 安装目录下 `Godot*.exe`（当前为 `Godot_v4.6.2-stable_mono_win64.exe`） |
 | 项目目录 | 仓库根目录 |
-| 主场景 | `res://scenes/main/main_game.tscn` |
+| 主场景 | `res://scenes/ui/title_screen.tscn`（标题）；对战 `res://scenes/main/main_game.tscn` |
 
 ## 启动流程
 
