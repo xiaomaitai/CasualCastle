@@ -145,5 +145,5 @@ public partial class BattleSystem : Node2D
 - 等待用户明确指示后才执行 git add 和 git commit
 
 ### 当前状态
-- 项目回滚到 commit 573cbb5 (Phase 2.1 Complete)
-- 等待用户指示继续开发或修复问题
+- 极简 MVP 已完成（见 `dev_plan/development_outline.md` §2.0）
+- `dev_plan/current_tasks.md` 已清空，待下一版本任务
