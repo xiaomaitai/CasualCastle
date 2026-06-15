@@ -1,5 +1,4 @@
 using Godot;
-using System;
 
 public partial class UIManager : Node2D
 {
@@ -7,6 +6,7 @@ public partial class UIManager : Node2D
 
     private ProgressBar _playerHealthBar;
     private ProgressBar _enemyHealthBar;
+    private ColorRect _gameOverOverlay;
     private Panel _gameOverPanel;
     private Label _gameOverLabel;
     private Button _backToTitleButton;
@@ -27,23 +27,23 @@ public partial class UIManager : Node2D
 
     private void InitializeUI()
     {
-        var uiRoot = GetNodeOrNull<CanvasLayer>("/root/MainGame/UI");
-        if (uiRoot != null)
-        {
-            _playerHealthBar = uiRoot.GetNode<ProgressBar>("PlayerHealthBar");
-            _enemyHealthBar = uiRoot.GetNode<ProgressBar>("EnemyHealthBar");
-            _gameOverPanel = uiRoot.GetNode<Panel>("GameOverPanel");
-            _gameOverLabel = uiRoot.GetNode<Label>("GameOverPanel/GameOverLabel");
-            _backToTitleButton = uiRoot.GetNode<Button>("GameOverPanel/BackToTitleButton");
+        var uiRoot = GetParent()?.GetNodeOrNull<CanvasLayer>("UI");
+        if (uiRoot == null) return;
 
-            _backToTitleButton?.Connect("pressed", Callable.From(GoToTitle));
-        }
+        _playerHealthBar = uiRoot.GetNode<ProgressBar>("PlayerHealthBar");
+        _enemyHealthBar = uiRoot.GetNode<ProgressBar>("EnemyHealthBar");
+        _gameOverOverlay = uiRoot.GetNode<ColorRect>("GameOverOverlay");
+        _gameOverPanel = uiRoot.GetNode<Panel>("GameOverPanel");
+        _gameOverLabel = uiRoot.GetNode<Label>("GameOverPanel/GameOverLabel");
+        _backToTitleButton = uiRoot.GetNode<Button>("GameOverPanel/BackToTitleButton");
+
+        _backToTitleButton.Pressed += GoToTitle;
 
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.Connect(nameof(GameManager.PlayerHealthChangedEventHandler), Callable.From((int health) => UpdatePlayerHealth(health)));
-            GameManager.Instance.Connect(nameof(GameManager.EnemyHealthChangedEventHandler), Callable.From((int health) => UpdateEnemyHealth(health)));
-            GameManager.Instance.Connect(nameof(GameManager.GameStateChangedEventHandler), Callable.From((GameManager.GameState state) => OnGameStateChanged(state)));
+            GameManager.Instance.PlayerHealthChanged += UpdatePlayerHealth;
+            GameManager.Instance.EnemyHealthChanged += UpdateEnemyHealth;
+            GameManager.Instance.GameStateChanged += OnGameStateChanged;
         }
     }
 
@@ -59,13 +59,17 @@ public partial class UIManager : Node2D
 
     public void OnGameStateChanged(GameManager.GameState state)
     {
+        bool show = state == GameManager.GameState.GameOver;
+
+        if (_gameOverOverlay != null)
+            _gameOverOverlay.Visible = show;
+
         if (_gameOverPanel != null)
+            _gameOverPanel.Visible = show;
+
+        if (show && _gameOverLabel != null && GameManager.Instance != null)
         {
-            _gameOverPanel.Visible = state == GameManager.GameState.GameOver;
-            if (_gameOverLabel != null)
-            {
-                _gameOverLabel.Text = GameManager.Instance.PlayerHealth > 0 ? "胜利！" : "失败！";
-            }
+            _gameOverLabel.Text = GameManager.Instance.PlayerHealth > 0 ? "胜利！" : "失败！";
         }
     }
 

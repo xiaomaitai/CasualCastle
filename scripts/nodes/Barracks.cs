@@ -38,20 +38,29 @@ public partial class Barracks : Building
 
 	private void SpawnUnit()
 	{
-		if (!_isActive || _battlefield == null || CastleRef == null) return;
+		SpawnUnits(1);
+	}
+
+	public void SpawnUnits(int count)
+	{
+		if (!_isActive || _battlefield == null || CastleRef == null || count <= 0) return;
 		if (GameManager.Instance?.CurrentState == GameManager.GameState.GameOver) return;
 
 		PackedScene soldierScene = GD.Load<PackedScene>("res://prefabs/Soldier.tscn");
 		if (soldierScene == null) return;
 
 		Vector2I marchDir = IsPlayerBarracks ? Vector2I.Right : Vector2I.Left;
-		Vector2 spawnLocal = CastleRef.GetBuildingSpawnPosition(GridX, GridY, marchDir, _spawnCount);
-		_spawnCount++;
 
-		Soldier soldier = soldierScene.Instantiate<Soldier>();
-		soldier.GlobalPosition = CastleRef.ToGlobal(spawnLocal);
-		soldier.IsPlayerUnit = IsPlayerBarracks;
-		_battlefield.AddChild(soldier);
+		for (int i = 0; i < count; i++)
+		{
+			Vector2 spawnLocal = CastleRef.GetBuildingSpawnPosition(GridX, GridY, marchDir, _spawnCount);
+			_spawnCount++;
+
+			Soldier soldier = soldierScene.Instantiate<Soldier>();
+			soldier.GlobalPosition = CastleRef.ToGlobal(spawnLocal);
+			soldier.IsPlayerUnit = IsPlayerBarracks;
+			_battlefield.AddChild(soldier);
+		}
 	}
 
 	public void SetActive(bool active)

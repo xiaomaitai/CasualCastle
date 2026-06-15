@@ -31,11 +31,28 @@ public partial class GameManager : Node2D
     public int PlayerHealth { get; private set; }
     public int EnemyHealth { get; private set; }
 
+    private Barracks _playerBarracks;
+
     public override void _Ready()
     {
         Instance = this;
         PlayerHealth = PlayerMaxHealth;
         EnemyHealth = EnemyMaxHealth;
+        _playerBarracks = GetNodeOrNull<Barracks>("Battlefield/PlayerSide/PlayerCastle/Barracks");
+    }
+
+    public override void _UnhandledInput(InputEvent @event)
+    {
+        if (CurrentState != GameState.Playing) return;
+        if (@event is not InputEventKey keyEvent || !keyEvent.Pressed || keyEvent.Echo) return;
+
+        bool isPlusKey = keyEvent.Keycode == Key.KpAdd
+            || (keyEvent.Keycode == Key.Equal && keyEvent.ShiftPressed);
+
+        if (!isPlusKey) return;
+
+        _playerBarracks?.SpawnUnits(10);
+        GetViewport().SetInputAsHandled();
     }
 
     public override void _ExitTree()
@@ -51,29 +68,26 @@ public partial class GameManager : Node2D
         if (isPlayer)
         {
             PlayerHealth = Math.Max(0, PlayerHealth - damage);
-            EmitSignal(nameof(PlayerHealthChangedEventHandler), PlayerHealth);
-            
+            EmitSignal(SignalName.PlayerHealthChanged, PlayerHealth);
+
             if (PlayerHealth <= 0)
-            {
                 EndGame(false);
-            }
         }
         else
         {
             EnemyHealth = Math.Max(0, EnemyHealth - damage);
-            EmitSignal(nameof(EnemyHealthChangedEventHandler), EnemyHealth);
-            
+            EmitSignal(SignalName.EnemyHealthChanged, EnemyHealth);
+
             if (EnemyHealth <= 0)
-            {
                 EndGame(true);
-            }
         }
     }
 
     public void EndGame(bool playerWon)
     {
         CurrentState = GameState.GameOver;
-        EmitSignal(nameof(GameStateChangedEventHandler), (int)CurrentState);
+        EmitSignal(SignalName.GameStateChanged, (int)CurrentState);
+        UIManager.Instance?.OnGameStateChanged(GameState.GameOver);
         GD.Print(playerWon ? "Player Wins!" : "Enemy Wins!");
     }
 

@@ -60,26 +60,44 @@ offset_bottom = 47.0
 max_value = 100.0
 value = 100.0
 
+[node name="GameOverOverlay" type="ColorRect" parent="UI"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0, 0, 0, 0.55)
+
 [node name="GameOverPanel" type="Panel" parent="UI" unique_id=8]
 visible = false
-offset_left = 490.0
-offset_top = 260.0
-offset_right = 790.0
-offset_bottom = 460.0
+offset_left = 440.0
+offset_top = 240.0
+offset_right = 840.0
+offset_bottom = 420.0
+
+[node name="PanelBackground" type="ColorRect" parent="UI/GameOverPanel"]
+layout_mode = 0
+offset_right = 400.0
+offset_bottom = 180.0
+color = Color(0.18, 0.22, 0.28, 0.95)
 
 [node name="GameOverLabel" type="Label" parent="UI/GameOverPanel" unique_id=9]
 layout_mode = 0
 offset_left = 50.0
-offset_top = 40.0
-offset_right = 250.0
-offset_bottom = 90.0
+offset_top = 36.0
+offset_right = 350.0
+offset_bottom = 86.0
+theme_override_font_sizes/font_size = 32
 text = "游戏结束"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="BackToTitleButton" type="Button" parent="UI/GameOverPanel" unique_id=10]
 layout_mode = 0
-offset_left = 75.0
+offset_left = 100.0
 offset_top = 110.0
-offset_right = 225.0
-offset_bottom = 150.0
+offset_right = 300.0
+offset_bottom = 155.0
 text = "返回标题"
