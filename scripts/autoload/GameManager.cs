@@ -33,16 +33,15 @@ public partial class GameManager : Node2D
 
     public override void _Ready()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-            PlayerHealth = PlayerMaxHealth;
-            EnemyHealth = EnemyMaxHealth;
-        }
-        else
-        {
-            QueueFree();
-        }
+        Instance = this;
+        PlayerHealth = PlayerMaxHealth;
+        EnemyHealth = EnemyMaxHealth;
+    }
+
+    public override void _ExitTree()
+    {
+        if (Instance == this)
+            Instance = null;
     }
 
     public void TakeDamage(bool isPlayer, int damage)
@@ -80,11 +79,6 @@ public partial class GameManager : Node2D
 
     public void RestartGame()
     {
-        PlayerHealth = PlayerMaxHealth;
-        EnemyHealth = EnemyMaxHealth;
         CurrentState = GameState.Playing;
-        EmitSignal(nameof(GameStateChangedEventHandler), (int)CurrentState);
-        EmitSignal(nameof(PlayerHealthChangedEventHandler), PlayerHealth);
-        EmitSignal(nameof(EnemyHealthChangedEventHandler), EnemyHealth);
     }
 }

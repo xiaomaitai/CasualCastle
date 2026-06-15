@@ -45,6 +45,7 @@ public partial class Soldier : Area2D
 	public override void _Process(double delta)
 	{
 		if (!IsAlive) return;
+		if (GameManager.Instance?.CurrentState == GameManager.GameState.GameOver) return;
 
 		float dt = (float)delta;
 
@@ -72,9 +73,14 @@ public partial class Soldier : Area2D
 				MoveToward(dt, _targetEnemy.GlobalPosition);
 			}
 		}
-		else if (_targetCastle != null)
+		else if (_targetCastle != null && _targetCastle.Health > 0)
 		{
 			_targetEnemy = null;
+			if (_attackTimer <= 0)
+			{
+				_targetCastle.TakeDamage(Damage);
+				_attackTimer = AttackCooldown;
+			}
 		}
 		else
 		{
@@ -130,10 +136,14 @@ public partial class Soldier : Area2D
 			return;
 		}
 
-		Castle castle = area as Castle;
-		if (castle != null && castle.IsPlayerCastle != IsPlayerUnit)
+		Building building = area as Building;
+		if (building != null)
 		{
-			_targetCastle = castle;
+			Castle castle = building.GetCastle();
+			if (castle != null && castle.Health > 0 && castle.IsPlayerCastle != IsPlayerUnit)
+			{
+				_targetCastle = castle;
+			}
 		}
 	}
 
@@ -145,8 +155,8 @@ public partial class Soldier : Area2D
 			_targetEnemy = null;
 		}
 
-		Castle castle = area as Castle;
-		if (castle == _targetCastle)
+		Building building = area as Building;
+		if (building != null && building.GetCastle() == _targetCastle)
 		{
 			_targetCastle = null;
 		}

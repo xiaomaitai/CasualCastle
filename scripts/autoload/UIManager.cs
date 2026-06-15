@@ -13,15 +13,14 @@ public partial class UIManager : Node2D
 
     public override void _Ready()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-            InitializeUI();
-        }
-        else
-        {
-            QueueFree();
-        }
+        Instance = this;
+        InitializeUI();
+    }
+
+    public override void _ExitTree()
+    {
+        if (Instance == this)
+            Instance = null;
     }
 
     private void InitializeUI()
@@ -70,6 +69,6 @@ public partial class UIManager : Node2D
 
     private void RestartGame()
     {
-        GameManager.Instance?.RestartGame();
+        GetTree().ReloadCurrentScene();
     }
 }

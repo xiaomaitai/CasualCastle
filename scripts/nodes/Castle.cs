@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public partial class Castle : Area2D
+public partial class Castle : Node2D
 {
 	[Export]
 	public bool IsPlayerCastle;
@@ -27,19 +27,85 @@ public partial class Castle : Area2D
 	[Export]
 	public Color AreaBgColor = new Color(1, 1, 1, 0.03f);
 
+	[Export]
+	public PackedScene BarracksScene;
+
+	[Export]
+	public int BarracksGridX = 6;
+
+	[Export]
+	public int BarracksGridY = 4;
+
+	[Export]
+	public float SpawnInset = 8f;
+
 	public int Health { get; private set; }
 
 	private ProgressBar _healthBar;
+	private bool[,] _occupied;
 
 	public override void _Ready()
 	{
 		Health = MaxHealth;
+		_occupied = new bool[GridColumns, GridRows];
 		_healthBar = GetNodeOrNull<ProgressBar>("HealthBar");
 		UpdateHealthBar();
+		SetupBarracks();
+	}
+
+	public Vector2 GetCellCenter(int gridX, int gridY)
+	{
+		return new Vector2((gridX + 0.5f) * CellSize, (gridY + 0.5f) * CellSize);
+	}
+
+	public bool IsInBounds(int gridX, int gridY)
+	{
+		return gridX >= 0 && gridX < GridColumns && gridY >= 0 && gridY < GridRows;
+	}
+
+	public bool IsCellPassable(int gridX, int gridY)
+	{
+		return IsInBounds(gridX, gridY) && !_occupied[gridX, gridY];
+	}
+
+	public bool PlaceBuilding(Building building, int gridX, int gridY)
+	{
+		if (!IsInBounds(gridX, gridY) || _occupied[gridX, gridY])
+			return false;
+
+		_occupied[gridX, gridY] = true;
+		building.Position = GetCellCenter(gridX, gridY);
+		AddChild(building);
+		return true;
+	}
+
+	public Vector2 GetBuildingSpawnPosition(int gridX, int gridY, Vector2I outwardDir, int spawnIndex = 0)
+	{
+		int spawnGridX = gridX + outwardDir.X;
+		int spawnGridY = gridY + outwardDir.Y;
+		float spreadX = (spawnIndex % 3) * 10f;
+		float spreadY = (spawnIndex % 3) * 8f;
+
+		return new Vector2(
+			spawnGridX * CellSize + SpawnInset + spreadX,
+			(spawnGridY + 1) * CellSize - SpawnInset - spreadY
+		);
+	}
+
+	private void SetupBarracks()
+	{
+		PackedScene scene = BarracksScene ?? GD.Load<PackedScene>("res://prefabs/Barracks.tscn");
+		if (scene == null) return;
+
+		Barracks barracks = scene.Instantiate<Barracks>();
+		barracks.BindToGrid(this, BarracksGridX, BarracksGridY);
+		PlaceBuilding(barracks, BarracksGridX, BarracksGridY);
 	}
 
 	public void TakeDamage(int amount)
 	{
+		if (Health <= 0) return;
+
 		Health = Math.Max(0, Health - amount);
 		UpdateHealthBar();
 		GameManager.Instance?.TakeDamage(IsPlayerCastle, amount);
