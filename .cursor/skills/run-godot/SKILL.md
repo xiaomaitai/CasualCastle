@@ -67,3 +67,11 @@ Start-Process $godot -ArgumentList '--path',$project,'res://scenes/main/main_gam
 ```powershell
 dotnet build
 ```
+
+## Godot `.uid` 文件（必须提交）
+
+在编辑器中新建 C# 脚本、场景（`.tscn`）、资源（`.tres`）时，Godot 会自动生成同名 `.uid` 文件（如 `DevInputLogger.cs.uid`）。
+
+- 这些文件**不是**可丢弃的缓存，**必须**与对应资源一起纳入 git
+- Agent 新增脚本/场景后，提交时**不要遗漏** `.uid`；否则他人拉代码或场景引用可能不稳定
+- 本仓库惯例：`scripts/**/*.cs.uid` 等与源文件成对提交

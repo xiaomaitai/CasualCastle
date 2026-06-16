@@ -37,6 +37,20 @@ git commit -m "Add castle grid buildings and passable empty cells"
 
 需要 push 时用户会单独说明；默认 **不 push**。
 
+## Godot `.uid` 文件（必须提交）
+
+Godot 4 会为脚本、场景等资源生成旁路文件，例如 `Foo.cs` 对应 `Foo.cs.uid`，内容为 `uid://...`，用于场景内稳定引用。
+
+- **新建或修改** `.cs`、`.tscn`、`.tres` 等资源时，**必须一并 `git add` 同名的 `.uid` 文件**
+- **不要**把 `.uid` 当成可忽略的缓存而跳过提交；本仓库其他脚本（如 `GameManager.cs.uid`）已在版本库中
+- 提交前用 `git status` 检查：若存在未跟踪的 `*.uid` 且与本次新增/修改的资源相关，**纳入同一 commit**
+
+```powershell
+# 示例：新增 DevInputLogger 时同时加入 .uid
+git add scripts/utils/DevInputLogger.cs scripts/utils/DevInputLogger.cs.uid
+git commit -m "Add DevInputLogger for global key logging"
+```
+
 ## 提交说明
 
 - 一行英文或中文均可，简洁说明「为什么」
@@ -56,3 +70,4 @@ Fix bug
 # 错误 — PowerShell 不支持
 git add . && git commit -m "msg"
 ```
+
