@@ -3,10 +3,20 @@ name: run-godot
 description: >-
   启动 CasualCastle 的 Godot 编辑器与游戏。从本机 Godot 安装目录解析可执行文件；
   编辑器未运行时同时启动编辑器和游戏，编辑器已运行时仅启动游戏。
-  在用户要求运行、启动、测试 Godot 项目或打开游戏时使用。
+  在用户说「启动游戏」「运行游戏」「打开游戏」「启动 Godot」「打开 Godot」「运行项目」
+  「启动项目」「测试游戏」「玩一下」或要求运行、启动、测试 Godot 项目时使用。
 ---
 
 # 启动 Godot 编辑器与游戏
+
+## 触发词
+
+以下说法应触发本 skill：
+
+- 启动游戏、运行游戏、打开游戏、测试游戏、玩一下
+- 启动 Godot、打开 Godot、运行 Godot
+- 运行项目、启动项目、测试项目
+- run game、start game、launch Godot、play the game
 
 ## 约束
 
