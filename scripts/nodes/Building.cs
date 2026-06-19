@@ -1,5 +1,4 @@
 using Godot;
-using System;
 
 public partial class Building : Area2D
 {
@@ -16,13 +15,13 @@ public partial class Building : Area2D
 	private Sprite2D _sprite;
 	private ShaderMaterial _workMaterial;
 	private Material _originalMaterial;
-	private Tween _workTween;
+	private Tween _jumpTween;
 	private Vector2 _spriteBasePosition;
-	private bool _workCycleActive;
-	private bool _workCyclePaused;
-	private bool _tweenAwaitingResume;
 	private float _workInterval;
-	private Action _workCallback;
+	private float _workElapsed;
+	private bool _workActive;
+	private bool _workPaused;
+	private bool _jumpTweenAwaitingResume;
 
 	public void BindToGrid(Castle castle, int gridX, int gridY)
 	{
@@ -61,7 +60,23 @@ public partial class Building : Area2D
 	{
 		if (GameManager.Instance != null)
 			GameManager.Instance.PhaseChanged -= OnPhaseChanged;
-		CancelWorkEffect();
+		StopWork();
+	}
+
+	public override void _Process(double delta)
+	{
+		if (!_workActive || _workPaused || !CanWork)
+			return;
+
+		_workElapsed += (float)delta;
+		UpdateWorkEffectFromProgress();
+
+		if (_workElapsed < _workInterval)
+			return;
+
+		_workElapsed = 0f;
+		PerformWork();
+		PlayWorkJumpVisual();
 	}
 
 	protected virtual void OnPhaseChanged(GameManager.GamePhase phase)
@@ -73,14 +88,14 @@ public partial class Building : Area2D
 	{
 		if (CanWork)
 		{
-			if (_workCyclePaused)
-				ResumeWorkCycle();
-			else if (!_workCycleActive)
+			if (_workPaused)
+				ResumeWork();
+			else if (!_workActive)
 				StartWorkCycle();
 		}
 		else
 		{
-			PauseWorkCycle();
+			PauseWork();
 		}
 	}
 
@@ -88,123 +103,81 @@ public partial class Building : Area2D
 	{
 	}
 
-	protected void PauseWorkCycle()
+	protected virtual void PerformWork()
 	{
-		if (!_workCycleActive || _workCyclePaused)
-			return;
-
-		_workCyclePaused = true;
-		if (_workTween != null && _workTween.IsValid() && _workTween.IsRunning())
-		{
-			_workTween.Pause();
-			_tweenAwaitingResume = true;
-		}
 	}
 
-	private void ResumeWorkCycle()
-	{
-		if (!_workCycleActive || !_workCyclePaused)
-			return;
-
-		_workCyclePaused = false;
-		if (!CanWork)
-			return;
-
-		if (_tweenAwaitingResume && _workTween != null && _workTween.IsValid())
-		{
-			_tweenAwaitingResume = false;
-			_workTween.Play();
-			return;
-		}
-
-		_tweenAwaitingResume = false;
-		RunWorkCycle(_workInterval, _workCallback);
-	}
-
-	protected void BeginWorkCycle(float interval, Action onWorkComplete)
+	protected void BeginWork(float interval)
 	{
 		_workInterval = interval;
-		_workCallback = onWorkComplete;
-		if (_workCycleActive)
+
+		if (_workActive)
 			return;
 
-		_workCycleActive = true;
-		_workCyclePaused = false;
-		RunWorkCycle(interval, onWorkComplete);
+		_workActive = true;
+		_workPaused = false;
+		_workElapsed = 0f;
+		SetProcess(true);
 	}
 
-	private void RunWorkCycle(float interval, Action onWorkComplete)
+	protected void PauseWork()
 	{
-		if (!_workCycleActive)
+		if (!_workActive || _workPaused)
 			return;
 
+		_workPaused = true;
+
+		if (_jumpTween != null && _jumpTween.IsValid() && _jumpTween.IsRunning())
+		{
+			_jumpTween.Pause();
+			_jumpTweenAwaitingResume = true;
+		}
+	}
+
+	protected void ResumeWork()
+	{
+		if (!_workActive || !_workPaused)
+			return;
+
+		_workPaused = false;
 		if (!CanWork)
-		{
-			PauseWorkCycle();
 			return;
-		}
 
-		PlayWorkEffect(interval, () =>
+		if (_jumpTweenAwaitingResume && _jumpTween != null && _jumpTween.IsValid())
 		{
-			if (!_workCycleActive)
-				return;
-
-			if (!CanWork)
-			{
-				PauseWorkCycle();
-				return;
-			}
-
-			onWorkComplete?.Invoke();
-			RunWorkCycle(interval, onWorkComplete);
-		});
+			_jumpTweenAwaitingResume = false;
+			_jumpTween.Play();
+		}
 	}
 
-	public void PlayWorkEffect(float duration, Action onWorkComplete)
+	private void UpdateWorkEffectFromProgress()
 	{
-		CancelWorkEffectTween();
-		_tweenAwaitingResume = false;
-
-		if (_sprite == null || duration <= 0f)
-		{
-			PlayWorkJump(onWorkComplete);
+		if (_sprite == null || _workInterval <= 0f)
 			return;
-		}
 
 		EnsureWorkMaterial();
 		_sprite.Material = _workMaterial;
-		_workMaterial.SetShaderParameter("fill_amount", 0f);
-
-		_workTween = CreateTween();
-		_workTween.TweenMethod(
-			Callable.From<float>(v => _workMaterial.SetShaderParameter("fill_amount", v)),
-			0f, 1f, duration);
-		_workTween.TweenCallback(Callable.From(() => PlayWorkJump(onWorkComplete)));
+		float progress = Mathf.Clamp(_workElapsed / _workInterval, 0f, 1f);
+		_workMaterial.SetShaderParameter("fill_amount", progress);
 	}
 
-	private void PlayWorkJump(Action onWorkComplete)
+	private void PlayWorkJumpVisual()
 	{
 		if (_sprite == null)
-		{
-			ResetWorkVisual();
-			onWorkComplete?.Invoke();
 			return;
-		}
+
+		CancelJumpTween();
+		_jumpTweenAwaitingResume = false;
 
 		const float jumpOffset = -6f;
 		const float jumpUpDuration = 0.08f;
 		const float jumpDownDuration = 0.1f;
 
-		_workTween = CreateTween();
-		_workTween.TweenProperty(_sprite, "position:y", _spriteBasePosition.Y + jumpOffset, jumpUpDuration)
+		_jumpTween = CreateTween();
+		_jumpTween.TweenProperty(_sprite, "position:y", _spriteBasePosition.Y + jumpOffset, jumpUpDuration)
 			.SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
-		_workTween.TweenProperty(_sprite, "position:y", _spriteBasePosition.Y, jumpDownDuration)
+		_jumpTween.TweenProperty(_sprite, "position:y", _spriteBasePosition.Y, jumpDownDuration)
 			.SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.In);
-		_workTween.TweenCallback(Callable.From(() =>
-		{
-			ResetWorkVisual();
-			onWorkComplete?.Invoke();
-		}));
 	}
 
 	private void EnsureWorkMaterial()
@@ -217,20 +190,22 @@ public partial class Building : Area2D
 		_workMaterial.SetShaderParameter("brighten", 0.35f);
 	}
 
-	private void CancelWorkEffect()
+	private void StopWork()
 	{
-		_workCycleActive = false;
-		_workCyclePaused = false;
-		_tweenAwaitingResume = false;
-		CancelWorkEffectTween();
+		_workActive = false;
+		_workPaused = false;
+		_workElapsed = 0f;
+		_jumpTweenAwaitingResume = false;
+		SetProcess(false);
+		CancelJumpTween();
 		ResetWorkVisual();
 	}
 
-	private void CancelWorkEffectTween()
+	private void CancelJumpTween()
 	{
-		if (_workTween != null && _workTween.IsValid())
-			_workTween.Kill();
-		_workTween = null;
+		if (_jumpTween != null && _jumpTween.IsValid())
+			_jumpTween.Kill();
+		_jumpTween = null;
 	}
 
 	private void ResetWorkVisual()

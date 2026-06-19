@@ -29,10 +29,10 @@ public partial class Barracks : Building
 
 	protected override void StartWorkCycle()
 	{
-		BeginWorkCycle(SpawnInterval, SpawnUnit);
+		BeginWork(SpawnInterval);
 	}
 
-	private void SpawnUnit()
+	protected override void PerformWork()
 	{
 		SpawnUnits(1);
 	}
