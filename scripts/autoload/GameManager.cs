@@ -14,13 +14,26 @@ public partial class GameManager : Node2D
     [Signal]
     public delegate void EnemyHealthChangedEventHandler(int health);
 
+    [Signal]
+    public delegate void PhaseChangedEventHandler(GamePhase newPhase);
+
     public enum GameState
     {
         Playing,
         GameOver
     }
 
+    public enum GamePhase
+    {
+        Day,
+        Night
+    }
+
     public GameState CurrentState { get; private set; } = GameState.Playing;
+    public GamePhase CurrentPhase { get; private set; } = GamePhase.Day;
+    public bool IsDay => CurrentPhase == GamePhase.Day;
+    public bool IsNight => CurrentPhase == GamePhase.Night;
+    public float PhaseTimeRemaining { get; private set; }
 
     [Export]
     public int PlayerMaxHealth = 100;
@@ -40,10 +53,21 @@ public partial class GameManager : Node2D
         Instance = this;
         PlayerHealth = PlayerMaxHealth;
         EnemyHealth = EnemyMaxHealth;
+        SetProcess(true);
         SetProcessInput(true);
         var root = GetParent();
         _battlefield = root.GetNode<Node2D>("Battlefield");
         _playerCastle = root.GetNode<Castle>("Battlefield/PlayerSide/PlayerCastle");
+        BeginPhase(GamePhase.Day);
+    }
+
+    public override void _Process(double delta)
+    {
+        if (CurrentState != GameState.Playing) return;
+
+        PhaseTimeRemaining -= (float)delta;
+        if (PhaseTimeRemaining <= 0f)
+            AdvancePhase();
     }
 
     public override void _Input(InputEvent @event)
@@ -95,6 +119,29 @@ public partial class GameManager : Node2D
             Instance = null;
     }
 
+    public bool CanUnitWork(bool hasNightCombat)
+    {
+        if (CurrentState != GameState.Playing) return false;
+        if (CurrentPhase == GamePhase.Day) return true;
+        return hasNightCombat;
+    }
+
+    public void AdvancePhase()
+    {
+        if (CurrentState != GameState.Playing) return;
+        BeginPhase(CurrentPhase == GamePhase.Day ? GamePhase.Night : GamePhase.Day);
+    }
+
+    private void BeginPhase(GamePhase phase)
+    {
+        CurrentPhase = phase;
+        PhaseTimeRemaining = phase == GamePhase.Day
+            ? GameConfig.DayDurationSeconds
+            : GameConfig.NightDurationSeconds;
+        EmitSignal(SignalName.PhaseChanged, (int)phase);
+        GD.Print(phase == GamePhase.Day ? "Phase: Day" : "Phase: Night");
+    }
+
     public void TakeDamage(bool isPlayer, int damage)
     {
         if (CurrentState != GameState.Playing) return;
@@ -120,6 +167,7 @@ public partial class GameManager : Node2D
     public void EndGame(bool playerWon)
     {
         CurrentState = GameState.GameOver;
+        SetProcess(false);
         EmitSignal(SignalName.GameStateChanged, (int)CurrentState);
         UIManager.Instance?.OnGameStateChanged(GameState.GameOver);
         GD.Print(playerWon ? "Player Wins!" : "Enemy Wins!");
@@ -128,5 +176,6 @@ public partial class GameManager : Node2D
     public void RestartGame()
     {
         CurrentState = GameState.Playing;
+        SetProcess(true);
     }
 }

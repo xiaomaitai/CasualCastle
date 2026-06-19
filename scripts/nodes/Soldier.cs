@@ -18,6 +18,9 @@ public partial class Soldier : Area2D
 	[Export]
 	public float AttackCooldown = 1.0f;
 
+	[Export]
+	public bool HasNightCombat = false;
+
 	public bool IsPlayerUnit { get; set; }
 	public bool IsAlive { get; private set; } = true;
 
@@ -30,34 +33,52 @@ public partial class Soldier : Area2D
 
 	public override void _Ready()
 	{
-		// 根据阵营决定移动方向
 		_moveDirection = IsPlayerUnit ? Vector2.Right : Vector2.Left;
 
-		// 获取子节点
 		_sprite = GetNodeOrNull<Sprite2D>("Sprite");
 		_collisionShape = GetNodeOrNull<CollisionShape2D>("CollisionShape");
 
-		// 自动连接 Area2D 信号
 		AreaEntered += OnAreaEntered;
 		AreaExited += OnAreaExited;
+
+		if (GameManager.Instance != null)
+			GameManager.Instance.PhaseChanged += OnPhaseChanged;
+
+		UpdateSleepVisual();
+	}
+
+	public override void _ExitTree()
+	{
+		if (GameManager.Instance != null)
+			GameManager.Instance.PhaseChanged -= OnPhaseChanged;
+	}
+
+	private void OnPhaseChanged(GameManager.GamePhase phase)
+	{
+		UpdateSleepVisual();
+	}
+
+	private bool IsActive => NightSystem.CanUnitWork(HasNightCombat);
+
+	private void UpdateSleepVisual()
+	{
+		if (_sprite == null) return;
+		_sprite.Modulate = IsActive ? Colors.White : new Color(0.75f, 0.8f, 1f, 0.85f);
 	}
 
 	public override void _Process(double delta)
 	{
 		if (!IsAlive) return;
 		if (GameManager.Instance?.CurrentState == GameManager.GameState.GameOver) return;
+		if (!IsActive) return;
 
 		float dt = (float)delta;
 
-		// 攻击冷却
 		if (_attackTimer > 0)
-		{
 			_attackTimer -= dt;
-		}
 
 		if (_targetEnemy != null && _targetEnemy.IsAlive)
 		{
-			// 攻击范围内则攻击
 			float dist = GlobalPosition.DistanceTo(_targetEnemy.GlobalPosition);
 			if (dist <= AttackRange)
 			{
@@ -69,7 +90,6 @@ public partial class Soldier : Area2D
 			}
 			else
 			{
-				// 追击敌人
 				MoveToward(dt, _targetEnemy.GlobalPosition);
 			}
 		}
@@ -106,20 +126,16 @@ public partial class Soldier : Area2D
 
 		Health -= amount;
 		if (Health <= 0)
-		{
 			Die();
-		}
 	}
 
 	private void Die()
 	{
 		IsAlive = false;
 
-		// 禁用碰撞
 		if (_collisionShape != null)
 			_collisionShape.Disabled = true;
 
-		// 简单的死亡效果：隐藏后删除
 		Modulate = new Color(1, 1, 1, 0.3f);
 		var timer = GetTree().CreateTimer(0.5f);
 		timer.Timeout += () => QueueFree();
@@ -141,9 +157,7 @@ public partial class Soldier : Area2D
 		{
 			Castle castle = building.GetCastle();
 			if (castle != null && castle.Health > 0 && castle.IsPlayerCastle != IsPlayerUnit)
-			{
 				_targetCastle = castle;
-			}
 		}
 	}
 
@@ -151,14 +165,10 @@ public partial class Soldier : Area2D
 	{
 		Soldier other = area as Soldier;
 		if (other == _targetEnemy)
-		{
 			_targetEnemy = null;
-		}
 
 		Building building = area as Building;
 		if (building != null && building.GetCastle() == _targetCastle)
-		{
 			_targetCastle = null;
-		}
 	}
 }

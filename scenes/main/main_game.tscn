@@ -5,6 +5,9 @@
 [ext_resource type="Script" path="res://scripts/autoload/UIManager.cs" id="4"]
 [ext_resource type="Script" path="res://scripts/nodes/BgmPlayer.cs" id="5"]
 [ext_resource type="Script" path="res://scripts/utils/DevInputLogger.cs" id="6"]
+[ext_resource type="Script" path="res://scripts/systems/NightSystem.cs" id="7"]
+[ext_resource type="Script" path="res://scripts/systems/ShopSystem.cs" id="8"]
+[ext_resource type="Script" path="res://scripts/systems/CardSystem.cs" id="9"]
 
 [node name="MainGame" type="Node2D" unique_id=1]
 
@@ -20,6 +23,15 @@ script = ExtResource("3")
 
 [node name="UIManager" type="Node2D" parent="." unique_id=17]
 script = ExtResource("4")
+
+[node name="NightSystem" type="Node" parent="."]
+script = ExtResource("7")
+
+[node name="ShopSystem" type="Node" parent="."]
+script = ExtResource("8")
+
+[node name="CardSystem" type="Node" parent="."]
+script = ExtResource("9")
 
 [node name="Battlefield" type="Node2D" parent="." unique_id=2]
 
@@ -63,6 +75,30 @@ offset_right = 1230.0
 offset_bottom = 47.0
 max_value = 100.0
 value = 100.0
+
+[node name="PhasePanel" type="VBoxContainer" parent="UI"]
+offset_left = 540.0
+offset_top = 12.0
+offset_right = 740.0
+offset_bottom = 92.0
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="PhaseLabel" type="Label" parent="UI/PhasePanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "白天"
+horizontal_alignment = 1
+
+[node name="PhaseTimerLabel" type="Label" parent="UI/PhasePanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "1:00"
+horizontal_alignment = 1
+
+[node name="SkipPhaseButton" type="Button" parent="UI/PhasePanel"]
+layout_mode = 2
+text = "切换昼夜"
 
 [node name="GameOverOverlay" type="ColorRect" parent="UI"]
 visible = false

@@ -7,8 +7,6 @@ public partial class Barracks : Building
 
 	public bool IsPlayerBarracks { get; private set; }
 
-	private Timer _spawnTimer;
-	private bool _isActive = true;
 	private Node2D _battlefield;
 	private int _spawnCount;
 
@@ -22,18 +20,16 @@ public partial class Barracks : Building
 	{
 		base._Ready();
 
-		_spawnTimer = new Timer();
-		_spawnTimer.WaitTime = SpawnInterval;
-		_spawnTimer.Autostart = true;
-		_spawnTimer.OneShot = false;
-		_spawnTimer.Connect("timeout", Callable.From(SpawnUnit));
-		AddChild(_spawnTimer);
-
 		_battlefield = GetNodeOrNull<Node2D>("/root/MainGame/Battlefield");
 		if (_battlefield == null)
-		{
 			_battlefield = GetTree().Root.GetNodeOrNull<Node2D>("MainGame/Battlefield");
-		}
+
+		UpdateWorkCycle();
+	}
+
+	protected override void StartWorkCycle()
+	{
+		BeginWorkCycle(SpawnInterval, SpawnUnit);
 	}
 
 	private void SpawnUnit()
@@ -43,7 +39,7 @@ public partial class Barracks : Building
 
 	public void SpawnUnits(int count)
 	{
-		if (!_isActive || _battlefield == null || CastleRef == null || count <= 0) return;
+		if (!CanWork || _battlefield == null || CastleRef == null || count <= 0) return;
 		if (GameManager.Instance?.CurrentState == GameManager.GameState.GameOver) return;
 
 		PackedScene soldierScene = GD.Load<PackedScene>("res://prefabs/Soldier.tscn");
@@ -60,18 +56,6 @@ public partial class Barracks : Building
 			soldier.GlobalPosition = CastleRef.ToGlobal(spawnLocal);
 			soldier.IsPlayerUnit = IsPlayerBarracks;
 			_battlefield.AddChild(soldier);
-		}
-	}
-
-	public void SetActive(bool active)
-	{
-		_isActive = active;
-		if (_spawnTimer != null)
-		{
-			if (active)
-				_spawnTimer.Start();
-			else
-				_spawnTimer.Stop();
 		}
 	}
 }

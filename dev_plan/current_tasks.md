@@ -6,78 +6,67 @@
 
 ## 进行中
 
-暂无。
+M1 核心实现已完成，待游戏内人工验证。
 
 ## 待办（M1）
 
 ### 1. 阶段状态机（`GameManager`）
 
-- [ ] 新增 `GamePhase` 枚举：`Day`、`Night`（保留 `GameOver`）
-- [ ] 初始阶段设为 `Day`
-- [ ] 实现 `AdvancePhase()`：`Day` ↔ `Night` 切换
-- [ ] 发出 `PhaseChanged(GamePhase)` 信号
-- [ ] 提供 `IsDay` / `IsNight` 只读属性供其他系统查询
+- [x] 新增 `GamePhase` 枚举：`Day`、`Night`（保留 `GameOver`）
+- [x] 初始阶段设为 `Day`
+- [x] 实现 `AdvancePhase()`：`Day` ↔ `Night` 切换
+- [x] 发出 `PhaseChanged(GamePhase)` 信号
+- [x] 提供 `IsDay` / `IsNight` 只读属性供其他系统查询
+- [x] 按时间自动切换：白天 60s、夜晚 30s（`GameConfig`）
 
-**涉及文件：** `scripts/autoload/GameManager.cs`
+**涉及文件：** `scripts/autoload/GameManager.cs`, `scripts/utils/GameConfig.cs`
 
 ### 2. 夜战词条占位（`Building` / `Soldier`）
 
-- [ ] `Building` 增加 `HasNightCombat` 属性，默认 `false`
-- [ ] `Soldier` 增加 `HasNightCombat` 属性，默认 `false`
-- [ ] M1 不实现夜战单位，仅预留接口供 M4 使用
+- [x] `Building` 增加 `HasNightCombat` 属性，默认 `false`
+- [x] `Soldier` 增加 `HasNightCombat` 属性，默认 `false`
+- [x] M1 不实现夜战单位，仅预留接口供 M4 使用
 
 **涉及文件：** `scripts/nodes/Building.cs`, `scripts/nodes/Soldier.cs`
 
 ### 3. 夜晚休眠门控
 
-- [ ] `Barracks`：监听 `PhaseChanged`；夜晚且 `!HasNightCombat` 时 `SpawnTimer.Stop()`，白天或夜战时 `Start()`
-- [ ] `Soldier`：夜晚且 `!HasNightCombat` 时跳过 `_PhysicsProcess` 中的移动与攻击逻辑
-- [ ] 阶段切换时，已在场上的士兵立即响应（无需等下一帧产兵）
+- [x] `Barracks`：夜晚且 `!HasNightCombat` 时停止工作循环
+- [x] `Soldier`：夜晚且 `!HasNightCombat` 时跳过 `_Process` 中的移动与攻击逻辑
+- [x] 阶段切换时，已在场上的士兵立即响应
 
-**涉及文件：** `scripts/nodes/Barracks.cs`, `scripts/nodes/Soldier.cs`
+**涉及文件：** `scripts/nodes/Barracks.cs`, `scripts/nodes/Soldier.cs`, `scripts/systems/NightSystem.cs`
 
 ### 4. 阶段 UI
 
-- [ ] 主游戏顶部显示当前阶段文字：「白天」/「夜晚」
-- [ ] 开发用按钮「切换昼夜」，点击调用 `GameManager.AdvancePhase()`
-- [ ] `UIManager` 监听 `PhaseChanged` 更新显示
+- [x] 主游戏顶部显示当前阶段文字：「白天」/「夜晚」
+- [x] 显示阶段剩余时间倒计时
+- [x] 开发用按钮「切换昼夜」，点击调用 `GameManager.AdvancePhase()`
+- [x] `UIManager` 监听 `PhaseChanged` 更新显示
 
 **涉及文件：** `scenes/main/main_game.tscn`, `scripts/autoload/UIManager.cs`
 
 ### 5. 数据层与目录骨架
 
-- [ ] 创建 `scripts/systems/NightSystem.cs`（阶段切换时批量休眠/唤醒，可先薄封装）
-- [ ] 创建 `scripts/systems/ShopSystem.cs`、`CardSystem.cs` 占位类
-- [ ] 创建 `scripts/utils/GameConfig.cs`（白天/夜晚时长、初始金币）
+- [x] 创建 `scripts/systems/NightSystem.cs`
+- [x] 创建 `scripts/systems/ShopSystem.cs`、`CardSystem.cs` 占位类
+- [x] 创建 `scripts/utils/GameConfig.cs`（白天 60s / 夜晚 30s、初始金币）
 - [ ] 创建 `resources/buildings/barracks.tres`（产出间隔、`HasNightCombat = false`）
 
 ### 6. 建筑工作特效
 
-建筑完成一次工作时播放统一的视觉反馈，适用于产兵、攻击、生产资源等所有「工作」行为。
+- [x] `Building` 基类 `PlayWorkEffect()` + 自下而上变亮 Shader
+- [x] 完全变亮时触发工作 + 跳动 + 恢复亮度
+- [x] `Barracks` 以 `SpawnInterval` 为周期接入工作特效产兵
 
-**表现（按顺序）：**
-
-1. **充能变亮**：建筑从下往上逐渐变亮，亮度随进度上升
-2. **工作完成**：完全变亮时，代表建筑完成一次工作
-3. **完成跳动**：略微往上跳一下，再回到原位
-4. **恢复常态**：整体亮度恢复正常，等待下一次工作
-
-**实现要点：**
-
-- [ ] 在 `Building` 基类提供 `PlayWorkEffect()`（或 `WorkPerformed` 信号 + 统一播放逻辑）
-- [ ] 变亮：自下而上的亮度遮罩/渐变（Shader、`CanvasItemMaterial` 或分块 Sprite 叠色均可）
-- [ ] 变亮时长与建筑工作间隔对齐（兵营 = `SpawnInterval`）；完全变亮时刻 = 工作触发时刻
-- [ ] 跳动：完全变亮时用 `Tween` 做短暂 Y 轴位移（跳起 → 落回）
-- [ ] 恢复：跳动结束后重置亮度/材质参数
-- [ ] `Barracks` 产兵时调用工作特效（M1 唯一接入点；攻击/产资源建筑后续复用）
-
-**涉及文件：** `scripts/nodes/Building.cs`, `scripts/nodes/Barracks.cs`, 建筑 Sprite 节点（或子节点材质）
+**涉及文件：** `scripts/nodes/Building.cs`, `scripts/nodes/Barracks.cs`, `assets/shaders/building_work.gdshader`
 
 ### 7. 人工验证
 
 - [ ] 标题 → 主游戏，默认显示「白天」，产兵与战斗正常
-- [ ] 切换至「夜晚」，双方兵营停产、士兵停动
-- [ ] 切回「白天」，产兵与战斗恢复
+- [ ] 白天倒计时 60s 后自动切至「夜晚」，兵营停产、士兵停动
+- [ ] 夜晚 30s 后自动切回「白天」，产兵与战斗恢复
+- [ ] 「切换昼夜」按钮可手动跳转阶段
 - [ ] 白天兵营产兵时，可见自下而上变亮 → 跳一下 → 恢复正常的完整特效
 - [ ] 胜负结算与返回标题不受影响
 
@@ -90,7 +79,7 @@
 
 ## 验收标准
 
-- 游戏仅在白天 / 夜晚两阶段间切换
+- 游戏仅在白天 / 夜晚两阶段间切换，按 60s / 30s 自动循环
 - 白天一切正常，与 M0 行为一致
 - 夜晚无夜战词条的兵营与士兵全部休眠
 - 兵营每次产兵时播放工作特效（自下而上变亮 → 跳动 → 恢复）
