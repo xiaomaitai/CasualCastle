@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-**CasualCastle** is a 2D RTS game built in **Godot 4.6** using **C# / .NET** (Mono), similar to Clash Royale. The game features auto-generating barracks, unit combat, and castle destruction mechanics. This is an early-stage project focused on MVP development.
+**CasualCastle** is a 2D RTS game built in **Godot 4.6** using **C# / .NET** (Mono), similar to Clash Royale. The game features auto-generating barracks, unit combat, castle destruction mechanics, and an in-progress day/night loop for the MVP roadmap.
 
 ## Game Concepts
 
@@ -12,8 +12,8 @@
 
 ### Core Organization
 - **`scripts/`** - All C# code organized by purpose:
-  - `autoload/` - Global singletons and managers (auto-loaded services)
-  - `systems/` - Game systems (e.g., BattleSystem, UISystem)
+  - `autoload/` - Scene-attached manager singletons such as `GameManager` and `UIManager`; they are not currently registered as Godot Project Settings autoloads
+  - `systems/` - Game systems and placeholders such as `NightSystem`, `ShopSystem`, and `CardSystem`
   - `utils/` - Shared utility classes and helper functions
 - **`scenes/`** - Scene files organized by context:
   - `main/` - Main entry point scene(s)
@@ -35,7 +35,7 @@
 ### Godot 4.6 + C# Conventions
 1. **Language**: Use C# (not GDScript). The project is configured with .NET assembly name "CasualCastle".
 2. **Scene Structure**: Scenes are `.tscn` files (Godot text format); attach C# scripts as nodes.
-3. **Autoload Pattern**: Place global managers in `scripts/autoload/` to auto-initialize singletons.
+3. **Manager Singleton Pattern**: Current `scripts/autoload/` managers are scene nodes with static `Instance` references. Do not assume they are Project Settings autoloads unless `project.godot` is updated.
 4. **Systems Architecture**: Implement game systems in `scripts/systems/` as stateful managers that handle specific domains.
 
 ### Node Attachment & Script Organization
@@ -134,8 +134,10 @@ public partial class BattleSystem : Node2D
 ## Development Plan Folder
 
 - 项目开发大纲存放于 dev_plan 文件夹，主文件为 dev_plan/development_outline.md。
-- 当前任务文件为 dev_plan/current_tasks.md，包含极简MVP的分阶段开发任务。
-- 当 agent 需要读取开发计划、当前任务、里程碑或任务优先级时，应首先读取该文件夹内容以获取最新计划。
+- 当前任务文件为 dev_plan/current_tasks.md，记录当前阶段任务、验收项和待办。
+- 运行时代码结构文档为 dev_plan/code_structure.md，记录现有系统、类图、主要运行链路和维护建议。
+- 数据结构设计见 dev_plan/data_structures.md。
+- 当 agent 需要读取开发计划、当前任务、系统模块、里程碑或任务优先级时，应首先读取 dev_plan 文件夹内容以获取最新计划。
 
 ## 开发规则
 
@@ -145,5 +147,6 @@ public partial class BattleSystem : Node2D
 - 等待用户明确指示后才执行 git add 和 git commit
 
 ### 当前状态
-- 极简 MVP 已完成（见 `dev_plan/development_outline.md` §2.0）
-- `dev_plan/current_tasks.md` 已清空，待下一版本任务
+- M0 极简 MVP 与 M0+ 体验增强已完成。
+- 当前焦点是 M1 白天 / 夜晚流程框架；核心实现已完成，待游戏内人工验证（见 `dev_plan/current_tasks.md`）。
+- `dev_plan/development_outline.md` §5.4 记录系统模块设计和模块依赖图。

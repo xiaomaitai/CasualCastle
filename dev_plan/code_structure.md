@@ -144,29 +144,69 @@ CasualCastle 是 Godot 4.6 C# 项目，主入口配置在 `project.godot`：
 
 ## 类图
 
+### 总览类图
+
+总览类图只展示系统级关系，具体字段、方法和继承关系放在后面的分系统类图中。
+
 ```mermaid
 classDiagram
-    class Node
-    class Node2D
-    class Area2D
+    class TitleScreen
+    class GameManager
+    class UIManager
+    class NightSystem
+    class Castle
+    class Building
+    class Barracks
+    class Soldier
+    class ShopSystem
+    class CardSystem
+    class BgmPlayer
+    class DevInputLogger
+
+    TitleScreen --> GameManager : 进入主游戏场景
+    GameManager --> UIManager : 状态/血量/阶段信号
+    GameManager --> Castle : 读取城堡与同步血量
+    GameManager --> Soldier : 开发作弊生成
+    GameManager --> NightSystem : 提供阶段判断
+    UIManager --> GameManager : 查询状态与跳过阶段
+    NightSystem --> GameManager : 委托行动判断
+
+    Castle --> Building : 放置建筑
+    Castle --> Barracks : 初始化兵营
+    Building --> NightSystem : 判断昼夜工作
+    Barracks --> Soldier : 周期产兵
+    Soldier --> NightSystem : 判断昼夜行动
+    Soldier --> Building : 检测建筑碰撞
+    Soldier --> Castle : 攻击城堡
+
+    ShopSystem ..> GameManager : 预留
+    CardSystem ..> Building : 预留
+    BgmPlayer ..> TitleScreen : 标题音乐
+    BgmPlayer ..> GameManager : 主游戏音乐
+    DevInputLogger ..> GameManager : 开发调试
+```
+
+### 启动与场景切换系统类图
+
+```mermaid
+classDiagram
     class Control
-    class AudioStreamPlayer
+    class TitleScreen {
+        -OnStartPressed()
+        -OnExitPressed()
+    }
+    class BgmPlayer
 
-    Node <|-- Node2D
-    Node2D <|-- GameManager
-    Node2D <|-- UIManager
-    Node2D <|-- Castle
-    Node2D <|-- Area2D
-    Area2D <|-- Building
-    Building <|-- Barracks
-    Area2D <|-- Soldier
     Control <|-- TitleScreen
-    AudioStreamPlayer <|-- BgmPlayer
-    Node <|-- NightSystem
-    Node <|-- ShopSystem
-    Node <|-- CardSystem
-    Node <|-- DevInputLogger
+    TitleScreen --> BgmPlayer : 标题音乐
+    TitleScreen --> GameManager : 切换到主游戏场景
+```
 
+### 全局游戏状态系统类图
+
+```mermaid
+classDiagram
+    class Node2D
     class GameManager {
         +Instance GameManager
         +CurrentState GameState
@@ -179,31 +219,16 @@ classDiagram
         +TakeDamage(bool, int)
         +EndGame(bool)
     }
-
     class GameState {
         <<enumeration>>
         Playing
         GameOver
     }
-
     class GamePhase {
         <<enumeration>>
         Day
         Night
     }
-
-    class UIManager {
-        +Instance UIManager
-        +UpdatePlayerHealth(int)
-        +UpdateEnemyHealth(int)
-        +OnGameStateChanged(GameState)
-    }
-
-    class NightSystem {
-        +Instance NightSystem
-        +CanUnitWork(bool) bool
-    }
-
     class GameConfig {
         <<static>>
         +DayDurationSeconds float
@@ -211,6 +236,49 @@ classDiagram
         +InitialGold int
     }
 
+    Node2D <|-- GameManager
+    GameManager --> GameState : 使用
+    GameManager --> GamePhase : 使用
+    GameManager --> GameConfig : 读取阶段时长
+    GameManager --> Castle : 获取玩家城堡
+    GameManager --> Soldier : 开发作弊生成
+    GameManager --> UIManager : 游戏结束时通知
+```
+
+### 昼夜系统类图
+
+```mermaid
+classDiagram
+    class Node
+    class NightSystem {
+        +Instance NightSystem
+        +CanUnitWork(bool) bool
+    }
+    class GameManager {
+        +CurrentPhase GamePhase
+        +CanUnitWork(bool) bool
+    }
+    class Building {
+        +HasNightCombat bool
+        +CanWork bool
+    }
+    class Soldier {
+        +HasNightCombat bool
+        +IsActive bool
+    }
+
+    Node <|-- NightSystem
+    NightSystem --> GameManager : 委托行动判断
+    Building --> NightSystem : 判断是否工作
+    Soldier --> NightSystem : 判断是否行动
+```
+
+### 城堡与建筑系统类图
+
+```mermaid
+classDiagram
+    class Node2D
+    class Area2D
     class Castle {
         +IsPlayerCastle bool
         +MaxHealth int
@@ -223,7 +291,6 @@ classDiagram
         +TakeDamage(int)
         +ResetHealth()
     }
-
     class Building {
         +CollisionSize int
         +HasNightCombat bool
@@ -234,7 +301,6 @@ classDiagram
         #PerformWork()
         #BeginWork(float)
     }
-
     class Barracks {
         +SpawnInterval float
         +IsPlayerBarracks bool
@@ -242,6 +308,23 @@ classDiagram
         +SpawnUnits(int)
     }
 
+    Node2D <|-- Castle
+    Area2D <|-- Building
+    Building <|-- Barracks
+    Castle --> Barracks : 初始化兵营
+    Castle --> Building : 放置建筑
+    Castle --> GameManager : 同步城堡伤害
+    Building --> Castle : 绑定所属城堡
+    Building --> GameManager : 订阅阶段变化
+    Barracks --> Castle : 计算出生点
+    Barracks --> Soldier : 生成士兵
+```
+
+### 士兵与战斗系统类图
+
+```mermaid
+classDiagram
+    class Area2D
     class Soldier {
         +Health int
         +Damage int
@@ -253,51 +336,71 @@ classDiagram
         +IsAlive bool
         +TakeDamage(int)
     }
-
-    class TitleScreen {
-        -OnStartPressed()
-        -OnExitPressed()
+    class Building {
+        +GetCastle() Castle
+    }
+    class Castle {
+        +TakeDamage(int)
+    }
+    class GameManager {
+        +CurrentState GameState
     }
 
-    class BgmPlayer {
-        +_Ready()
-    }
-
-    class DevInputLogger {
-        +_Input(InputEvent)
-    }
-
-    class ShopSystem
-    class CardSystem
-
-    GameManager --> GameState : 使用
-    GameManager --> GamePhase : 使用
-    GameManager --> GameConfig : 读取阶段时长
-    GameManager --> Castle : 获取玩家城堡
-    GameManager --> Soldier : 开发作弊生成
-    GameManager --> UIManager : 游戏结束时通知
-
-    UIManager --> GameManager : 订阅信号/查询阶段
-    UIManager --> TitleScreen : 返回标题场景
-
-    NightSystem --> GameManager : 委托行动判断
-    Building --> NightSystem : 判断是否工作
-    Soldier --> NightSystem : 判断是否行动
-
-    Castle --> Barracks : 初始化兵营
-    Castle --> Building : 放置建筑
-    Castle --> GameManager : 同步城堡伤害
-
-    Building --> Castle : 绑定所属城堡
-    Building --> GameManager : 订阅阶段变化
-
-    Barracks --> Soldier : 生成士兵
-    Barracks --> Castle : 计算出生点
-
+    Area2D <|-- Soldier
     Soldier --> Soldier : 攻击敌方士兵
     Soldier --> Building : 碰撞检测建筑
     Soldier --> Castle : 攻击所属城堡
     Soldier --> GameManager : 查询游戏状态/订阅阶段
+    Soldier --> NightSystem : 判断昼夜行动
+```
+
+### UI、音频与开发辅助系统类图
+
+```mermaid
+classDiagram
+    class Node
+    class Node2D
+    class AudioStreamPlayer
+    class GameManager {
+        +AdvancePhase()
+    }
+    class UIManager {
+        +Instance UIManager
+        +UpdatePlayerHealth(int)
+        +UpdateEnemyHealth(int)
+        +OnGameStateChanged(GameState)
+    }
+    class BgmPlayer {
+        +_Ready()
+    }
+    class DevInputLogger {
+        +_Input(InputEvent)
+    }
+
+    Node2D <|-- UIManager
+    AudioStreamPlayer <|-- BgmPlayer
+    Node <|-- DevInputLogger
+    UIManager --> GameManager : 订阅信号/查询阶段
+    UIManager --> TitleScreen : 返回标题场景
+    DevInputLogger ..> GameManager : 开发调试
+    BgmPlayer ..> TitleScreen : 标题音乐
+    BgmPlayer ..> GameManager : 主游戏音乐
+```
+
+### 待扩展系统类图
+
+```mermaid
+classDiagram
+    class Node
+    class ShopSystem
+    class CardSystem
+    class GameManager
+    class Building
+
+    Node <|-- ShopSystem
+    Node <|-- CardSystem
+    ShopSystem ..> GameManager : 预留夜晚商店
+    CardSystem ..> Building : 预留建筑卡
 ```
 
 ---
