@@ -19,6 +19,10 @@ public partial class Building : Area2D
 	private Tween _workTween;
 	private Vector2 _spriteBasePosition;
 	private bool _workCycleActive;
+	private bool _workCyclePaused;
+	private bool _tweenAwaitingResume;
+	private float _workInterval;
+	private Action _workCallback;
 
 	public void BindToGrid(Castle castle, int gridX, int gridY)
 	{
@@ -57,6 +61,7 @@ public partial class Building : Area2D
 	{
 		if (GameManager.Instance != null)
 			GameManager.Instance.PhaseChanged -= OnPhaseChanged;
+		CancelWorkEffect();
 	}
 
 	protected virtual void OnPhaseChanged(GameManager.GamePhase phase)
@@ -67,41 +72,86 @@ public partial class Building : Area2D
 	protected void UpdateWorkCycle()
 	{
 		if (CanWork)
-			StartWorkCycle();
+		{
+			if (_workCyclePaused)
+				ResumeWorkCycle();
+			else if (!_workCycleActive)
+				StartWorkCycle();
+		}
 		else
-			StopWorkCycle();
+		{
+			PauseWorkCycle();
+		}
 	}
 
 	protected virtual void StartWorkCycle()
 	{
 	}
 
-	protected void StopWorkCycle()
+	protected void PauseWorkCycle()
 	{
-		_workCycleActive = false;
-		CancelWorkEffect();
+		if (!_workCycleActive || _workCyclePaused)
+			return;
+
+		_workCyclePaused = true;
+		if (_workTween != null && _workTween.IsValid() && _workTween.IsRunning())
+		{
+			_workTween.Pause();
+			_tweenAwaitingResume = true;
+		}
+	}
+
+	private void ResumeWorkCycle()
+	{
+		if (!_workCycleActive || !_workCyclePaused)
+			return;
+
+		_workCyclePaused = false;
+		if (!CanWork)
+			return;
+
+		if (_tweenAwaitingResume && _workTween != null && _workTween.IsValid())
+		{
+			_tweenAwaitingResume = false;
+			_workTween.Play();
+			return;
+		}
+
+		_tweenAwaitingResume = false;
+		RunWorkCycle(_workInterval, _workCallback);
 	}
 
 	protected void BeginWorkCycle(float interval, Action onWorkComplete)
 	{
-		if (_workCycleActive) return;
+		_workInterval = interval;
+		_workCallback = onWorkComplete;
+		if (_workCycleActive)
+			return;
+
 		_workCycleActive = true;
+		_workCyclePaused = false;
 		RunWorkCycle(interval, onWorkComplete);
 	}
 
 	private void RunWorkCycle(float interval, Action onWorkComplete)
 	{
-		if (!_workCycleActive || !CanWork)
+		if (!_workCycleActive)
+			return;
+
+		if (!CanWork)
 		{
-			_workCycleActive = false;
+			PauseWorkCycle();
 			return;
 		}
 
 		PlayWorkEffect(interval, () =>
 		{
-			if (!_workCycleActive || !CanWork)
+			if (!_workCycleActive)
+				return;
+
+			if (!CanWork)
 			{
-				_workCycleActive = false;
+				PauseWorkCycle();
 				return;
 			}
 
@@ -113,6 +163,7 @@ public partial class Building : Area2D
 	public void PlayWorkEffect(float duration, Action onWorkComplete)
 	{
 		CancelWorkEffectTween();
+		_tweenAwaitingResume = false;
 
 		if (_sprite == null || duration <= 0f)
 		{
@@ -158,15 +209,19 @@ public partial class Building : Area2D
 
 	private void EnsureWorkMaterial()
 	{
-		if (_workMaterial != null) return;
+		if (_workMaterial != null)
+			return;
 
 		Shader shader = GD.Load<Shader>("res://assets/shaders/building_work.gdshader");
 		_workMaterial = new ShaderMaterial { Shader = shader };
+		_workMaterial.SetShaderParameter("brighten", 0.35f);
 	}
 
 	private void CancelWorkEffect()
 	{
 		_workCycleActive = false;
+		_workCyclePaused = false;
+		_tweenAwaitingResume = false;
 		CancelWorkEffectTween();
 		ResetWorkVisual();
 	}
@@ -180,7 +235,8 @@ public partial class Building : Area2D
 
 	private void ResetWorkVisual()
 	{
-		if (_sprite == null) return;
+		if (_sprite == null)
+			return;
 		_sprite.Material = _originalMaterial;
 		_sprite.Position = _spriteBasePosition;
 	}
