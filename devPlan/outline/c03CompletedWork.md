@@ -35,7 +35,19 @@
 
 **入口流程：** `project.godot` → `title_screen.tscn` → `main_game.tscn`。
 
-## 3.3 已具备、可复用的基础 API
+## 3.3 游戏流程框架（M1）
+
+白天 / 夜晚两阶段循环已完成，并完成游戏内人工验证。
+
+| 模块 | 交付内容 | 关键文件 |
+|------|----------|----------|
+| 阶段状态机 | `Day` / `Night` 自动循环，支持手动跳过阶段 | `scripts/autoload/GameManager.cs`, `scripts/utils/GameConfig.cs` |
+| 夜晚休眠门控 | 普通兵营与士兵夜晚停止工作/行动，白天恢复 | `scripts/systems/NightSystem.cs`, `scripts/nodes/Building.cs`, `scripts/nodes/Soldier.cs` |
+| 阶段 UI | 显示当前阶段、剩余时间和跳过阶段按钮 | `scripts/autoload/UIManager.cs`, `scenes/main/main_game.tscn` |
+| 系统占位 | `ShopSystem`、`CardSystem` 占位，供 M2 扩展 | `scripts/systems/ShopSystem.cs`, `scripts/systems/CardSystem.cs` |
+| 建筑工作特效 | 兵营产兵前播放自下而上变亮、跳动、恢复效果 | `scripts/nodes/Building.cs`, `scripts/nodes/Barracks.cs`, `assets/shaders/building_work.gdshader` |
+
+## 3.4 已具备、可复用的基础 API
 
 以下代码为完整版开发提供了基础，但尚未接入玩家交互：
 

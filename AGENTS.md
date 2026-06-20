@@ -134,10 +134,10 @@ public partial class BattleSystem : Node2D
 ## Development Plan Folder
 
 - 项目开发大纲按章节拆分存放于 devPlan/outline/ 文件夹。
-- 当前任务文件为 devPlan/currentTasks.md，记录当前阶段任务、验收项和待办。
+- 当前任务文件为 devPlan/currentTasks.md，记录执行任务、验收项和待办；阶段状态以大纲为准。
 - 运行时代码结构文档为 devPlan/codeStructure.md，记录现有系统、类图、主要运行链路和维护建议。
 - 数据结构设计见 devPlan/dataStructures.md。
-- 当 agent 需要读取开发计划、当前任务、系统模块、里程碑或任务优先级时，应首先读取 devPlan 文件夹内容以获取最新计划。
+- 当 agent 需要读取开发计划、当前任务、系统模块、里程碑或任务优先级时，应首先读取 devPlan 文件夹内容以获取最新计划；当前进度与里程碑状态以 devPlan/outline/ 为准。
 
 ## 开发规则
 
@@ -146,7 +146,7 @@ public partial class BattleSystem : Node2D
 - 不要自动提交任何更改
 - 等待用户明确指示后才执行 git add 和 git commit
 
-### 当前状态
-- M0 极简 MVP 与 M0+ 体验增强已完成。
-- 当前焦点是 M1 白天 / 夜晚流程框架；核心实现已完成，待游戏内人工验证（见 `devPlan/currentTasks.md`）。
+### 项目状态维护规则
+- `AGENTS.md` 不维护当前进度、当前焦点或里程碑状态。
+- 项目状态以 `devPlan/outline/` 下的大纲章节为准。
 - `devPlan/outline/c05ProjectArchitecture.md` 记录系统模块设计和模块依赖图。
