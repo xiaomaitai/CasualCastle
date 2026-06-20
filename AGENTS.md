@@ -6,7 +6,7 @@
 
 ## Game Concepts
 
-> 遇到游戏术语（如地块、城堡、建筑卡、建筑、战场等）时，优先参考 `dev_plan/concepts.md` 中的定义，确保术语使用与概念文档一致。
+> 遇到游戏术语（如地块、城堡、建筑卡、建筑、战场等）时，优先参考 `devPlan/concepts.md` 中的定义，确保术语使用与概念文档一致。
 
 ## Architecture & Directory Structure
 
@@ -133,11 +133,11 @@ public partial class BattleSystem : Node2D
 
 ## Development Plan Folder
 
-- 项目开发大纲存放于 dev_plan 文件夹，主文件为 dev_plan/development_outline.md。
-- 当前任务文件为 dev_plan/current_tasks.md，记录当前阶段任务、验收项和待办。
-- 运行时代码结构文档为 dev_plan/code_structure.md，记录现有系统、类图、主要运行链路和维护建议。
-- 数据结构设计见 dev_plan/data_structures.md。
-- 当 agent 需要读取开发计划、当前任务、系统模块、里程碑或任务优先级时，应首先读取 dev_plan 文件夹内容以获取最新计划。
+- 项目开发大纲按章节拆分存放于 devPlan/outline/ 文件夹。
+- 当前任务文件为 devPlan/currentTasks.md，记录当前阶段任务、验收项和待办。
+- 运行时代码结构文档为 devPlan/codeStructure.md，记录现有系统、类图、主要运行链路和维护建议。
+- 数据结构设计见 devPlan/dataStructures.md。
+- 当 agent 需要读取开发计划、当前任务、系统模块、里程碑或任务优先级时，应首先读取 devPlan 文件夹内容以获取最新计划。
 
 ## 开发规则
 
@@ -148,5 +148,5 @@ public partial class BattleSystem : Node2D
 
 ### 当前状态
 - M0 极简 MVP 与 M0+ 体验增强已完成。
-- 当前焦点是 M1 白天 / 夜晚流程框架；核心实现已完成，待游戏内人工验证（见 `dev_plan/current_tasks.md`）。
-- `dev_plan/development_outline.md` §5.4 记录系统模块设计和模块依赖图。
+- 当前焦点是 M1 白天 / 夜晚流程框架；核心实现已完成，待游戏内人工验证（见 `devPlan/currentTasks.md`）。
+- `devPlan/outline/c05ProjectArchitecture.md` 记录系统模块设计和模块依赖图。

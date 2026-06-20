@@ -2,7 +2,7 @@
 
 极简 MVP（M0）已于 2026-06-15 完成；体验增强（M0+：标题、BGM、结算）已完成。
 
-**当前焦点：M1 白天 / 夜晚流程框架。** 阶段规则见 `concepts.md` §昼夜阶段，路线图见 `development_outline.md` §七。
+**当前焦点：M1 白天 / 夜晚流程框架。** 阶段规则见 `concepts.md` §昼夜阶段，路线图见 `outline/c07NextSteps.md`。
 
 ## 进行中
 

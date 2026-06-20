@@ -1,6 +1,6 @@
 # 数据结构设计 — CasualCastle
 
-卡牌、建筑、部队等核心运行时/配置数据的 C# 结构草案。概念定义见 `dev_plan/concepts.md`，开发顺序与系统划分见 `dev_plan/development_outline.md`。
+卡牌、建筑、部队等核心运行时/配置数据的 C# 结构草案。概念定义见 `concepts.md`，开发顺序与系统划分见 `outline/`。
 
 ---
 
