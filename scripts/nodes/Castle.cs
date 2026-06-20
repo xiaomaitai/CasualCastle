@@ -43,6 +43,10 @@ public partial class Castle : Node2D
 
 	private ProgressBar _healthBar;
 	private bool[,] _occupied;
+	private bool _showPlacementPreview;
+	private int _previewGridX;
+	private int _previewGridY;
+	private bool _previewValid;
 
 	public override void _Ready()
 	{
@@ -66,6 +70,28 @@ public partial class Castle : Node2D
 	public bool IsCellPassable(int gridX, int gridY)
 	{
 		return IsInBounds(gridX, gridY) && !_occupied[gridX, gridY];
+	}
+
+	public bool TryGetGridFromGlobalPoint(Vector2 globalPoint, out int gridX, out int gridY)
+	{
+		Vector2 localPoint = ToLocal(globalPoint);
+		gridX = (int)(localPoint.X / CellSize);
+		gridY = (int)(localPoint.Y / CellSize);
+		return IsInBounds(gridX, gridY);
+	}
+
+	public void SetPlacementPreview(bool show, int gridX, int gridY, bool valid)
+	{
+		_showPlacementPreview = show;
+		_previewGridX = gridX;
+		_previewGridY = gridY;
+		_previewValid = valid;
+		QueueRedraw();
+	}
+
+	public void ClearPlacementPreview()
+	{
+		SetPlacementPreview(false, 0, 0, false);
 	}
 
 	public bool PlaceBuilding(Building building, int gridX, int gridY)
@@ -141,5 +167,14 @@ public partial class Castle : Node2D
 				DrawRect(new Rect2(position, new Vector2(BlockSize, BlockSize)), BlockColor);
 			}
 		}
+
+		if (!_showPlacementPreview || !IsInBounds(_previewGridX, _previewGridY))
+			return;
+
+		Color previewColor = _previewValid
+			? new Color(0.2f, 0.85f, 0.35f, 0.35f)
+			: new Color(0.9f, 0.2f, 0.2f, 0.35f);
+		Vector2 previewPos = new Vector2(_previewGridX * CellSize, _previewGridY * CellSize);
+		DrawRect(new Rect2(previewPos, new Vector2(CellSize, CellSize)), previewColor);
 	}
 }

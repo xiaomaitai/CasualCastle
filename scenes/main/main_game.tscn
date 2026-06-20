@@ -21,9 +21,6 @@ script = ExtResource("5")
 [node name="GameManager" type="Node2D" parent="." unique_id=16]
 script = ExtResource("3")
 
-[node name="UIManager" type="Node2D" parent="." unique_id=17]
-script = ExtResource("4")
-
 [node name="NightSystem" type="Node" parent="."]
 script = ExtResource("7")
 
@@ -32,6 +29,9 @@ script = ExtResource("8")
 
 [node name="CardSystem" type="Node" parent="."]
 script = ExtResource("9")
+
+[node name="UIManager" type="Node2D" parent="." unique_id=17]
+script = ExtResource("4")
 
 [node name="Battlefield" type="Node2D" parent="." unique_id=2]
 
@@ -76,6 +76,14 @@ offset_bottom = 47.0
 max_value = 100.0
 value = 100.0
 
+[node name="GoldLabel" type="Label" parent="UI"]
+offset_left = 280.0
+offset_top = 20.0
+offset_right = 420.0
+offset_bottom = 47.0
+theme_override_font_sizes/font_size = 22
+text = "金币：30"
+
 [node name="PhasePanel" type="VBoxContainer" parent="UI"]
 offset_left = 540.0
 offset_top = 12.0
@@ -99,6 +107,176 @@ horizontal_alignment = 1
 [node name="SkipPhaseButton" type="Button" parent="UI/PhasePanel"]
 layout_mode = 2
 text = "切换昼夜"
+
+[node name="ShopButton" type="Button" parent="UI"]
+disabled = true
+offset_left = 1050.0
+offset_top = 620.0
+offset_right = 1170.0
+offset_bottom = 676.0
+text = "商店（夜晚）"
+
+[node name="HandPanel" type="HBoxContainer" parent="UI"]
+offset_left = 307.0
+offset_top = 605.0
+offset_right = 973.0
+offset_bottom = 695.0
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="HandSlot1" type="Button" parent="UI/HandPanel"]
+custom_minimum_size = Vector2(120, 80)
+layout_mode = 2
+disabled = true
+text = "空"
+
+[node name="HandSlot2" type="Button" parent="UI/HandPanel"]
+custom_minimum_size = Vector2(120, 80)
+layout_mode = 2
+disabled = true
+text = "空"
+
+[node name="HandSlot3" type="Button" parent="UI/HandPanel"]
+custom_minimum_size = Vector2(120, 80)
+layout_mode = 2
+disabled = true
+text = "空"
+
+[node name="HandSlot4" type="Button" parent="UI/HandPanel"]
+custom_minimum_size = Vector2(120, 80)
+layout_mode = 2
+disabled = true
+text = "空"
+
+[node name="HandSlot5" type="Button" parent="UI/HandPanel"]
+custom_minimum_size = Vector2(120, 80)
+layout_mode = 2
+disabled = true
+text = "空"
+
+[node name="PlacementHintLabel" type="Label" parent="UI"]
+visible = false
+offset_left = 460.0
+offset_top = 575.0
+offset_right = 820.0
+offset_bottom = 600.0
+theme_override_font_sizes/font_size = 16
+text = "左键放置，右键或 Esc 取消"
+horizontal_alignment = 1
+
+[node name="ShopOverlay" type="ColorRect" parent="UI"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0, 0, 0, 0.25)
+
+[node name="ShopPanel" type="Panel" parent="UI"]
+visible = false
+offset_left = 819.0
+offset_top = 72.0
+offset_right = 1254.0
+offset_bottom = 605.0
+
+[node name="ShopPanelBackground" type="ColorRect" parent="UI/ShopPanel"]
+layout_mode = 0
+offset_right = 435.0
+offset_bottom = 533.0
+color = Color(0.12, 0.16, 0.22, 0.96)
+
+[node name="ShopTitleLabel" type="Label" parent="UI/ShopPanel"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 16.0
+offset_right = 220.0
+offset_bottom = 48.0
+theme_override_font_sizes/font_size = 24
+text = "夜晚商店"
+
+[node name="ShopCloseButton" type="Button" parent="UI/ShopPanel"]
+layout_mode = 0
+offset_left = 388.0
+offset_top = 12.0
+offset_right = 420.0
+offset_bottom = 44.0
+text = "X"
+
+[node name="ShopGoldLabel" type="Label" parent="UI/ShopPanel"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 56.0
+offset_right = 260.0
+offset_bottom = 84.0
+theme_override_font_sizes/font_size = 18
+text = "当前金币：30"
+
+[node name="OfferSlot1" type="HBoxContainer" parent="UI/ShopPanel"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 104.0
+offset_right = 411.0
+offset_bottom = 152.0
+theme_override_constants/separation = 12
+
+[node name="OfferLabel" type="Label" parent="UI/ShopPanel/OfferSlot1"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "兵营  费用：10"
+
+[node name="BuyButton" type="Button" parent="UI/ShopPanel/OfferSlot1"]
+custom_minimum_size = Vector2(96, 40)
+layout_mode = 2
+text = "购买"
+
+[node name="OfferSlot2" type="HBoxContainer" parent="UI/ShopPanel"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 176.0
+offset_right = 411.0
+offset_bottom = 224.0
+theme_override_constants/separation = 12
+
+[node name="OfferLabel" type="Label" parent="UI/ShopPanel/OfferSlot2"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "强化兵营  费用：15"
+
+[node name="BuyButton" type="Button" parent="UI/ShopPanel/OfferSlot2"]
+custom_minimum_size = Vector2(96, 40)
+layout_mode = 2
+text = "购买"
+
+[node name="OfferSlot3" type="HBoxContainer" parent="UI/ShopPanel"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 248.0
+offset_right = 411.0
+offset_bottom = 296.0
+theme_override_constants/separation = 12
+
+[node name="OfferLabel" type="Label" parent="UI/ShopPanel/OfferSlot3"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "精英兵营  费用：20"
+
+[node name="BuyButton" type="Button" parent="UI/ShopPanel/OfferSlot3"]
+custom_minimum_size = Vector2(96, 40)
+layout_mode = 2
+text = "购买"
+
+[node name="ShopRefreshButton" type="Button" parent="UI/ShopPanel"]
+layout_mode = 0
+offset_left = 140.0
+offset_top = 468.0
+offset_right = 295.0
+offset_bottom = 512.0
+text = "刷新商品"
 
 [node name="GameOverOverlay" type="ColorRect" parent="UI"]
 visible = false

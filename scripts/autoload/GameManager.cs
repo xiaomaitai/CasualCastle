@@ -43,6 +43,7 @@ public partial class GameManager : Node2D
 
     public int PlayerHealth { get; private set; }
     public int EnemyHealth { get; private set; }
+    public Castle PlayerCastle => _playerCastle;
 
     private Node2D _battlefield;
     private Castle _playerCastle;
