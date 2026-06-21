@@ -5,9 +5,11 @@
 ```
 CasualCastle/
 ├── scripts/
-│   ├── autoload/              # 场景内单例（未注册 Godot Autoload）
-│   │   ├── GameManager.cs
-│   │   └── UIManager.cs
+│   ├── autoload/
+│   │   ├── GameManager.cs     # Godot Autoload
+│   │   └── UIManager.cs       # 主游戏场景内 UI 控制器
+│   ├── systems/
+│   │   └── MainGameController.cs
 │   ├── nodes/
 │   │   ├── Building.cs        # 建筑基类
 │   │   ├── Barracks.cs
@@ -15,7 +17,11 @@ CasualCastle/
 │   │   ├── Castle.cs
 │   │   └── BgmPlayer.cs
 │   ├── ui/
-│   │   └── TitleScreen.cs
+│   │   ├── TitleScreen.cs
+│   │   ├── HudUiController.cs
+│   │   ├── ShopUiController.cs
+│   │   ├── HandUiController.cs
+│   │   └── GameOverUiController.cs
 │   └── utils/
 │       └── DevInputLogger.cs
 ├── scenes/
@@ -64,8 +70,8 @@ resources/
 
 | 系统 | 职责 | 当前状态 |
 |------|------|----------|
-| GameManager | 游戏状态、阶段切换、胜负 | 仅 Playing / GameOver |
-| UIManager | HUD、结算、场景跳转 | 血条 + 结算 |
+| GameManager | 游戏状态、阶段切换、胜负 | Godot Autoload，当前支持 Playing / GameOver |
+| UIManager | HUD、结算、商店、手牌与场景跳转 | 已拆分为 UI 入口和多个子控制器 |
 | CardSystem | 手牌管理、打出逻辑 | 未建 |
 | ShopSystem | 商店刷新、购买、金币 | 未建 |
 | BuildingSystem | 放置验证、属性、产出 | 逻辑散落在 Castle / Barracks |
@@ -80,9 +86,9 @@ resources/
 
 | 模块 | 职责 | 主要依赖 |
 |------|------|----------|
-| SceneFlow | 标题页、进入主游戏、返回标题 | `TitleScreen`, `GameManager` |
-| GameManager | 游戏状态、昼夜阶段、胜负、全局信号 | `GameConfig`, `Castle`, `UIManager` |
-| UIManager | HUD、结算、阶段显示、商店/手牌入口 | `GameManager`, `ShopSystem`, `CardSystem` |
+| SceneFlow | 标题页、进入主游戏、返回标题 | `TitleScreen`, `MainGameController`, `GameManager` |
+| GameManager | 游戏状态、昼夜阶段、胜负、全局信号 | `GameConfig`, `MainGameController`, `Castle`, `UIManager` |
+| UIManager | HUD、结算、阶段显示、商店/手牌入口 | `HudUiController`, `ShopUiController`, `HandUiController`, `GameOverUiController` |
 | NightSystem | 昼夜行动门控、夜战词条判定 | `GameManager`, `BuildingSystem`, `BattleSystem` |
 | ShopSystem | 商店、刷新、购买、金币消费、夜晚自动弹出 | `GameManager`, `CardSystem`, `CardData` |
 | CardSystem | 手牌、卡牌打出、卡牌到建筑的转换 | `CardData`, `BuildingSystem`, `UIManager` |

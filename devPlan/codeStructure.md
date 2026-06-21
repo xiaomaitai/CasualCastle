@@ -18,7 +18,6 @@ CasualCastle 是 Godot 4.6 C# 项目，主入口配置在 `project.godot`：
 - `MainGame`
 - `DevInputLogger`
 - `BGM`
-- `GameManager`
 - `UIManager`
 - `NightSystem`
 - `ShopSystem`
@@ -52,14 +51,15 @@ CasualCastle 是 Godot 4.6 C# 项目，主入口配置在 `project.godot`：
 
 | 类 | 文件 | Godot 基类 | 职责 |
 | --- | --- | --- | --- |
-| `GameManager` | `scripts/autoload/GameManager.cs` | `Node2D` | 维护 `GameState`、`GamePhase`、双方血量、阶段计时；发出血量/状态/阶段信号；处理 P 键开发出兵。 |
+| `GameManager` | `scripts/autoload/GameManager.cs` | `Node2D` | Godot Autoload；维护 `GameState`、`GamePhase`、双方血量、阶段计时；发出血量/状态/阶段信号；处理 P 键开发出兵。 |
+| `MainGameController` | `scripts/systems/MainGameController.cs` | `Node2D` | 主游戏场景控制器；进入场景时把 `Battlefield` 和玩家 `Castle` 注册给 `GameManager`，离开场景时清理本局引用。 |
 | `GameManager.GameState` | `scripts/autoload/GameManager.cs` | `enum` | 当前游戏状态：`Playing` / `GameOver`。 |
 | `GameManager.GamePhase` | `scripts/autoload/GameManager.cs` | `enum` | 当前昼夜阶段：`Day` / `Night`。 |
 
 结构关系：
 
-- `GameManager.Instance` 是运行时单例入口。
-- `GameManager` 读取主场景中的 `Battlefield` 和玩家 `Castle`。
+- `GameManager.Instance` 是 Godot Autoload 单例入口。
+- `MainGameController` 在主游戏场景进入树时调用 `GameManager.StartGameSession()` 注册 `Battlefield` 和玩家 `Castle`。
 - `Castle.TakeDamage()` 会调用 `GameManager.TakeDamage()` 同步顶部 UI 血量与胜负。
 - `UIManager`、`Building`、`Soldier` 订阅或查询 `GameManager` 的状态与阶段。
 - `NightSystem` 最终委托 `GameManager.CanUnitWork()` 判断单位是否可行动。
@@ -119,16 +119,21 @@ CasualCastle 是 Godot 4.6 C# 项目，主入口配置在 `project.godot`：
 
 | 类 | 文件 | Godot 基类 | 职责 |
 | --- | --- | --- | --- |
-| `UIManager` | `scripts/autoload/UIManager.cs` | `Node2D` | 更新顶部血条、昼夜显示、阶段倒计时、游戏结束面板，并处理返回标题和跳过阶段按钮。 |
+| `UIManager` | `scripts/autoload/UIManager.cs` | `Node2D` | 主游戏 UI 入口；组合 HUD、商店、手牌和结算 UI 控制器，并转发输入与游戏状态变化。 |
+| `HudUiController` | `scripts/ui/HudUiController.cs` | 普通 C# 类 | 更新顶部血条、金币、昼夜显示、阶段倒计时，并处理跳过阶段按钮。 |
+| `ShopUiController` | `scripts/ui/ShopUiController.cs` | 普通 C# 类 | 控制商店开关、商品显示、购买、刷新和商店金币显示。 |
+| `HandUiController` | `scripts/ui/HandUiController.cs` | 普通 C# 类 | 控制手牌显示、选中态、放置提示、鼠标放置预览和取消输入。 |
+| `GameOverUiController` | `scripts/ui/GameOverUiController.cs` | 普通 C# 类 | 控制游戏结束遮罩、胜负文字和返回标题按钮。 |
 | `BgmPlayer` | `scripts/nodes/BgmPlayer.cs` | `AudioStreamPlayer` | 加载并循环播放背景音乐。 |
 | `DevInputLogger` | `scripts/utils/DevInputLogger.cs` | `Node` | 打印按键输入信息，用于开发调试。 |
 
 结构关系：
 
-- `UIManager` 从父节点获取 `CanvasLayer` 下的 UI 节点。
-- `UIManager` 订阅 `GameManager` 的血量、状态和阶段信号。
-- `UIManager` 的跳过阶段按钮调用 `GameManager.AdvancePhase()`。
-- `UIManager` 的返回标题按钮切回 `title_screen.tscn`。
+- `UIManager` 从父节点获取 `CanvasLayer` 下的 UI 根节点，并创建各子 UI 控制器。
+- `HudUiController` 订阅 `GameManager` 的血量和阶段信号，跳过阶段按钮调用 `GameManager.AdvancePhase()`。
+- `ShopUiController` 订阅 `ShopSystem` 的金币、商品、可用性和打开请求信号。
+- `HandUiController` 订阅 `CardSystem` 的手牌和选中信号，并负责玩家城堡上的放置预览。
+- `GameOverUiController` 的返回标题按钮切回 `title_screen.tscn`。
 - `BgmPlayer` 同时用于标题场景和主游戏场景。
 
 ### 待扩展系统
@@ -409,14 +414,15 @@ classDiagram
 
 1. `project.godot` 启动 `title_screen.tscn`。
 2. `TitleScreen` 点击开始后进入 `main_game.tscn`。
-3. `main_game.tscn` 创建 `GameManager`、`UIManager`、`NightSystem`、`ShopSystem`、`CardSystem`、`Battlefield` 和双方 `Castle`。
-4. 每个 `Castle` 初始化网格和血条，并创建一座 `Barracks`。
-5. `Barracks` 绑定所属 `Castle` 后进入 `Building` 工作循环。
-6. `GameManager` 维护昼夜倒计时，阶段变化时发出 `PhaseChanged`。
-7. `Building` 和 `Soldier` 根据 `NightSystem.CanUnitWork()` 在夜晚休眠或继续行动。
-8. `Barracks` 周期性生成 `Soldier`；`Soldier` 推进、索敌、攻击敌方士兵或敌方城堡。
-9. `Castle.TakeDamage()` 同步到 `GameManager.TakeDamage()`；血量归零后进入 `GameOver`。
-10. `UIManager` 根据 `GameManager` 信号刷新血条、阶段显示和游戏结束界面。
+3. `GameManager` 作为 Godot Autoload 常驻；`main_game.tscn` 创建 `UIManager`、`NightSystem`、`ShopSystem`、`CardSystem`、`Battlefield` 和双方 `Castle`。
+4. `MainGameController` 进入场景时调用 `GameManager.StartGameSession()` 开始本局。
+5. 每个 `Castle` 初始化网格和血条，并创建一座 `Barracks`。
+6. `Barracks` 绑定所属 `Castle` 后进入 `Building` 工作循环。
+7. `GameManager` 维护昼夜倒计时，阶段变化时发出 `PhaseChanged`。
+8. `Building` 和 `Soldier` 根据 `NightSystem.CanUnitWork()` 在夜晚休眠或继续行动。
+9. `Barracks` 周期性生成 `Soldier`；`Soldier` 推进、索敌、攻击敌方士兵或敌方城堡。
+10. `Castle.TakeDamage()` 同步到 `GameManager.TakeDamage()`；血量归零后进入 `GameOver`。
+11. `UIManager` 根据 `GameManager` 信号刷新血条、阶段显示和游戏结束界面。
 
 ---
 
@@ -424,4 +430,4 @@ classDiagram
 
 - 新增运行时类时，同步更新“系统划分与现有类”和类图。
 - `CardSystem`、`ShopSystem` 开始实现后，应补充它们与 `GameManager`、`UIManager`、建筑卡数据的关系。
-- 如果后续将 `GameManager`、`UIManager` 改为真正的 Godot Autoload，需要在本文档中区分“场景节点单例”和“项目 Autoload 单例”。
+- `GameManager` 是真正的 Godot Autoload；`UIManager` 仍是主游戏场景内 UI 控制节点。

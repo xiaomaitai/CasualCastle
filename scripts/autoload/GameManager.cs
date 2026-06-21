@@ -52,14 +52,8 @@ public partial class GameManager : Node2D
     public override void _Ready()
     {
         Instance = this;
-        PlayerHealth = PlayerMaxHealth;
-        EnemyHealth = EnemyMaxHealth;
-        SetProcess(true);
+        SetProcess(false);
         SetProcessInput(true);
-        var root = GetParent();
-        _battlefield = root.GetNode<Node2D>("Battlefield");
-        _playerCastle = root.GetNode<Castle>("Battlefield/PlayerSide/PlayerCastle");
-        BeginPhase(GamePhase.Day);
     }
 
     public override void _Process(double delta)
@@ -120,6 +114,29 @@ public partial class GameManager : Node2D
             Instance = null;
     }
 
+    public void StartGameSession(Node2D battlefield, Castle playerCastle)
+    {
+        _battlefield = battlefield;
+        _playerCastle = playerCastle;
+        _cheatSpawnCount = 0;
+
+        CurrentState = GameState.Playing;
+        PlayerHealth = PlayerMaxHealth;
+        EnemyHealth = EnemyMaxHealth;
+
+        EmitSignal(SignalName.PlayerHealthChanged, PlayerHealth);
+        EmitSignal(SignalName.EnemyHealthChanged, EnemyHealth);
+        BeginPhase(GamePhase.Day);
+        SetProcess(true);
+    }
+
+    public void ClearGameSession()
+    {
+        SetProcess(false);
+        _battlefield = null;
+        _playerCastle = null;
+    }
+
     public bool CanUnitWork(bool hasNightCombat)
     {
         if (CurrentState != GameState.Playing) return false;
@@ -170,7 +187,6 @@ public partial class GameManager : Node2D
         CurrentState = GameState.GameOver;
         SetProcess(false);
         EmitSignal(SignalName.GameStateChanged, (int)CurrentState);
-        UIManager.Instance?.OnGameStateChanged(GameState.GameOver);
         GD.Print(playerWon ? "Player Wins!" : "Enemy Wins!");
     }
 

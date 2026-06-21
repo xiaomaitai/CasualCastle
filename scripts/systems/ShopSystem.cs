@@ -48,6 +48,9 @@ public partial class ShopSystem : Node
 
     public override void _ExitTree()
     {
+        GameManager.Instance.PhaseChanged -= OnPhaseChanged;
+        GameManager.Instance.GameStateChanged -= OnGameStateChanged;
+
         if (Instance == this)
             Instance = null;
     }

@@ -1,15 +1,16 @@
 [gd_scene format=3 uid="uid://c4j2n4cvyoaq0"]
 
 [ext_resource type="PackedScene" uid="uid://c8a3s7l4e9012" path="res://prefabs/Castle.tscn" id="2"]
-[ext_resource type="Script" path="res://scripts/autoload/GameManager.cs" id="3"]
 [ext_resource type="Script" path="res://scripts/autoload/UIManager.cs" id="4"]
 [ext_resource type="Script" path="res://scripts/nodes/BgmPlayer.cs" id="5"]
 [ext_resource type="Script" path="res://scripts/utils/DevInputLogger.cs" id="6"]
 [ext_resource type="Script" path="res://scripts/systems/NightSystem.cs" id="7"]
 [ext_resource type="Script" path="res://scripts/systems/ShopSystem.cs" id="8"]
 [ext_resource type="Script" path="res://scripts/systems/CardSystem.cs" id="9"]
+[ext_resource type="Script" path="res://scripts/systems/MainGameController.cs" id="10"]
 
 [node name="MainGame" type="Node2D" unique_id=1]
+script = ExtResource("10")
 
 [node name="DevInputLogger" type="Node" parent="."]
 script = ExtResource("6")
@@ -17,9 +18,6 @@ script = ExtResource("6")
 [node name="BGM" type="AudioStreamPlayer" parent="."]
 volume_db = -8.0
 script = ExtResource("5")
-
-[node name="GameManager" type="Node2D" parent="." unique_id=16]
-script = ExtResource("3")
 
 [node name="NightSystem" type="Node" parent="."]
 script = ExtResource("7")
