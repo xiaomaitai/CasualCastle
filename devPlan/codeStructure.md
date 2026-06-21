@@ -138,7 +138,7 @@ CasualCastle 是 Godot 4.6 C# 项目，主入口配置在 `project.godot`：
 | 类 | 文件 | Godot 基类 | 当前状态 |
 | --- | --- | --- | --- |
 | `CardSystem` | `scripts/systems/CardSystem.cs` | `Node` | 空实现，预留建筑卡系统。 |
-| `ShopSystem` | `scripts/systems/ShopSystem.cs` | `Node` | 空实现，预留夜晚商店系统。 |
+| `ShopSystem` | `scripts/systems/ShopSystem.cs` | `Node` | 已实现商店商品、刷新、购买、金币消费和夜晚自动弹出。 |
 
 ---
 
@@ -399,7 +399,7 @@ classDiagram
 
     Node <|-- ShopSystem
     Node <|-- CardSystem
-    ShopSystem ..> GameManager : 预留夜晚商店
+    ShopSystem ..> GameManager : 阶段联动
     CardSystem ..> Building : 预留建筑卡
 ```
 

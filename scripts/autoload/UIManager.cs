@@ -198,9 +198,6 @@ public partial class UIManager : Node2D
     private void OnPhaseChanged(GameManager.GamePhase phase)
     {
         UpdatePhaseDisplay();
-
-        if (phase == GameManager.GamePhase.Day)
-            CloseShop();
     }
 
     private void UpdatePhaseDisplay()
@@ -247,7 +244,7 @@ public partial class UIManager : Node2D
         if (_shopButton == null) return;
 
         _shopButton.Disabled = !available || _shopOpen;
-        _shopButton.Text = available ? "商店" : "商店（夜晚）";
+        _shopButton.Text = "商店";
     }
 
     private void OpenShop()

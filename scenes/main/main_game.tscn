@@ -109,12 +109,11 @@ layout_mode = 2
 text = "切换昼夜"
 
 [node name="ShopButton" type="Button" parent="UI"]
-disabled = true
 offset_left = 1050.0
 offset_top = 620.0
 offset_right = 1170.0
 offset_bottom = 676.0
-text = "商店（夜晚）"
+text = "商店"
 
 [node name="HandPanel" type="HBoxContainer" parent="UI"]
 offset_left = 307.0
@@ -194,7 +193,7 @@ offset_top = 16.0
 offset_right = 220.0
 offset_bottom = 48.0
 theme_override_font_sizes/font_size = 24
-text = "夜晚商店"
+text = "商店"
 
 [node name="ShopCloseButton" type="Button" parent="UI/ShopPanel"]
 layout_mode = 0

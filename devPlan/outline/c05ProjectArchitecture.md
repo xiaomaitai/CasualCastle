@@ -84,7 +84,7 @@ resources/
 | GameManager | 游戏状态、昼夜阶段、胜负、全局信号 | `GameConfig`, `Castle`, `UIManager` |
 | UIManager | HUD、结算、阶段显示、商店/手牌入口 | `GameManager`, `ShopSystem`, `CardSystem` |
 | NightSystem | 昼夜行动门控、夜战词条判定 | `GameManager`, `BuildingSystem`, `BattleSystem` |
-| ShopSystem | 夜晚商店、刷新、购买、金币消费 | `GameManager`, `CardSystem`, `CardData` |
+| ShopSystem | 商店、刷新、购买、金币消费、夜晚自动弹出 | `GameManager`, `CardSystem`, `CardData` |
 | CardSystem | 手牌、卡牌打出、卡牌到建筑的转换 | `CardData`, `BuildingSystem`, `UIManager` |
 | BuildingSystem | 建筑放置、占格验证、建筑工作调度 | `Castle`, `BuildingData`, `NightSystem` |
 | AdjacentSystem | 建筑邻接检测、加成刷新 | `BuildingSystem`, `Castle` |
@@ -101,7 +101,7 @@ flowchart LR
     GameManager[GameManager<br/>状态/阶段/胜负]
     UIManager[UIManager<br/>HUD/商店/手牌 UI]
     NightSystem[NightSystem<br/>昼夜门控]
-    ShopSystem[ShopSystem<br/>夜晚商店]
+    ShopSystem[ShopSystem<br/>商店]
     CardSystem[CardSystem<br/>手牌/打出]
     BuildingSystem[BuildingSystem<br/>放置/建筑调度]
     AdjacentSystem[AdjacentSystem<br/>邻接加成]

@@ -118,6 +118,9 @@ public partial class ShopSystem : Node
     private void OnPhaseChanged(GameManager.GamePhase phase)
     {
         UpdateShopAvailability();
+
+        if (phase == GameManager.GamePhase.Night)
+            RequestOpenShop();
     }
 
     private void OnGameStateChanged(GameManager.GameState state)
@@ -127,8 +130,7 @@ public partial class ShopSystem : Node
 
     private void UpdateShopAvailability()
     {
-        bool available = GameManager.Instance.CurrentState == GameManager.GameState.Playing
-            && GameManager.Instance.IsNight;
+        bool available = GameManager.Instance.CurrentState == GameManager.GameState.Playing;
 
         if (IsShopAvailable == available)
             return;
