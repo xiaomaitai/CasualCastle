@@ -58,15 +58,15 @@ resources/
 
 | 系统 | 职责 | 当前状态 |
 |------|------|----------|
-| GameManager | 游戏状态、阶段切换、胜负 | Godot Autoload，当前支持 Playing / GameOver |
+| GameManager | 游戏状态、阶段切换、胜负 | Godot Autoload，支持 Playing / GameOver |
 | UIManager | HUD、结算、商店、手牌与场景跳转 | 已拆分为 UI 入口和多个子控制器 |
-| CardSystem | 手牌管理、打出逻辑 | 未建 |
-| ShopSystem | 商店刷新、购买、金币 | 未建 |
-| BuildingSystem | 放置验证、属性、产出 | 逻辑散落在 Castle / Barracks |
+| ShopSystem | 商店刷新、购买、金币、拖拽直放 | 已实现 |
+| CardSystem | 手牌管理、点击/拖拽打出 | 已实现（当前仅兵营） |
+| NightSystem | 夜晚休眠门控、夜战词条判定 | 已实现 |
+| BuildingSystem | 放置验证、属性、产出 | 逻辑散落在 Castle / CardSystem，待 M3 抽离 |
 | BattleSystem | 部队生成、战斗 AI | 逻辑在 Soldier.cs |
 | AdjacentSystem | 邻接检测与加成 | 未建 |
 | FusionSystem | 融合条件与升级 | 未建 |
-| NightSystem | 夜晚休眠门控、夜战词条判定 | 未建 |
 
 ## 5.4 系统模块设计
 

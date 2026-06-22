@@ -137,8 +137,8 @@ CasualCastle 是 Godot 4.6 C# 项目，主入口配置在 `project.godot`：
 | --- | --- | --- | --- |
 | `UIManager` | `scripts/ui/UIManager.cs` | `Node2D` | 主游戏 UI 入口；组合 HUD、商店、手牌和结算 UI 控制器，并转发输入与游戏状态变化。 |
 | `HudUiController` | `scripts/ui/HudUiController.cs` | 普通 C# 类 | 更新顶部血条、金币、昼夜显示、阶段倒计时，并处理跳过阶段按钮。 |
-| `ShopUiController` | `scripts/ui/ShopUiController.cs` | 普通 C# 类 | 控制商店开关、商品显示、购买、刷新和商店金币显示。 |
-| `HandUiController` | `scripts/ui/HandUiController.cs` | 普通 C# 类 | 控制手牌显示、选中态、放置提示、鼠标放置预览和取消输入。 |
+| `ShopUiController` | `scripts/ui/ShopUiController.cs` | 普通 C# 类 | 控制商店开关、商品显示、购买、刷新、拖拽商品直放与商店金币显示。 |
+| `HandUiController` | `scripts/ui/HandUiController.cs` | 普通 C# 类 | 控制手牌显示、选中态、点击/拖拽放置、放置提示与预览。 |
 | `GameOverUiController` | `scripts/ui/GameOverUiController.cs` | 普通 C# 类 | 控制游戏结束遮罩、胜负文字和返回标题按钮。 |
 | `BgmPlayer` | `scripts/audio/BgmPlayer.cs` | `AudioStreamPlayer` | 加载并循环播放背景音乐。 |
 | `DevInputLogger` | `scripts/dev/DevInputLogger.cs` | `Node` | 打印按键输入信息，用于开发调试。 |
@@ -147,20 +147,36 @@ CasualCastle 是 Godot 4.6 C# 项目，主入口配置在 `project.godot`：
 
 - `UIManager` 从父节点获取 `CanvasLayer` 下的 UI 根节点，并创建各子 UI 控制器。
 - `HudUiController` 订阅 `GameManager` 的血量和阶段信号，跳过阶段按钮调用 `GameManager.AdvancePhase()`。
-- `ShopUiController` 订阅 `ShopSystem` 的金币、商品、可用性和打开请求信号。
-- `HandUiController` 订阅 `CardSystem` 的手牌和选中信号，并负责玩家城堡上的放置预览。
+- `ShopUiController` 订阅 `ShopSystem` 的金币、商品、可用性和打开请求信号；商品名支持拖拽直放到城堡。
+- `HandUiController` 订阅 `CardSystem` 的手牌和选中信号；支持点击选中后点击城堡放置，或拖拽手牌到城堡放置。
 - `GameOverUiController` 的返回标题按钮切回 `title_screen.tscn`。
 - `BgmPlayer` 同时用于标题场景和主游戏场景。
 
+### 商店与手牌系统
+
+负责金币消费、商品刷新、手牌管理与建筑卡放置。
+
+| 类 | 文件 | Godot 基类 | 职责 |
+| --- | --- | --- | --- |
+| `ShopSystem` | `scripts/shop/ShopSystem.cs` | `Node` | 维护金币、商品槽、刷新与购买；支持 `TryPlaceOfferDirect` 拖拽直放。 |
+| `CardSystem` | `scripts/card/CardSystem.cs` | `Node` | 维护手牌、选中态；`TryPlaceCard` / `TryPlaceAtIndex` 放置建筑并更新手牌。 |
+| `CardData` | `scripts/card/CardData.cs` | `class` | 卡牌运行时数据（Id、Name、Cost、BuildingType）。 |
+
+结构关系：
+
+- `ShopSystem` 订阅 `GameManager` 阶段与状态，夜晚自动请求打开商店。
+- `ShopSystem.TryPurchase` 扣费后将卡牌加入 `CardSystem` 手牌。
+- `CardSystem.TryPlaceCard` 根据 `BuildingType` 实例化预制体并调用 `Castle.PlaceBuilding`。
+- `UIManager` 转发 Esc、鼠标输入，协调商店拖拽与手牌拖拽的优先级。
+
 ### 待扩展系统
 
-当前存在脚本与场景节点，但尚未实现业务逻辑。
+以下模块尚未实现，M3 起逐步建设：
 
-| 类 | 文件 | Godot 基类 | 当前状态 |
-| --- | --- | --- | --- |
-| `CardSystem` | `scripts/card/CardSystem.cs` | `Node` | 手牌管理、选牌与建筑卡放置。 |
-| `CardData` | `scripts/card/CardData.cs` | `class` | 卡牌运行时数据结构。 |
-| `ShopSystem` | `scripts/shop/ShopSystem.cs` | `Node` | 商店商品、刷新、购买、金币消费和夜晚自动弹出。 |
+| 类 | 文件 | 当前状态 |
+| --- | --- | --- |
+| `BuildingSystem` | 待建 | 放置与调度逻辑仍在 `Castle` / `CardSystem` |
+| `AdjacentSystem` | 待建 | 邻接加成未实现 |
 
 ---
 
@@ -201,8 +217,9 @@ classDiagram
     Soldier --> Building : 检测建筑碰撞
     Soldier --> Castle : 攻击城堡
 
-    ShopSystem ..> GameManager : 预留
-    CardSystem ..> Building : 预留
+    ShopSystem --> GameManager : 阶段联动
+    ShopSystem --> CardSystem : 购买入牌
+    CardSystem --> Castle : 放置建筑
     BgmPlayer ..> TitleScreen : 标题音乐
     BgmPlayer ..> GameManager : 主游戏音乐
     DevInputLogger ..> GameManager : 开发调试
@@ -409,20 +426,46 @@ classDiagram
     BgmPlayer ..> GameManager : 主游戏音乐
 ```
 
-### 待扩展系统类图
+### 商店与手牌系统类图
 
 ```mermaid
 classDiagram
     class Node
-    class ShopSystem
-    class CardSystem
-    class GameManager
-    class Building
+    class ShopSystem {
+        +Instance ShopSystem
+        +Gold int
+        +TryPurchase(int) bool
+        +TryPlaceOfferDirect(int, Castle, int, int) bool
+        +RefreshOffers()
+    }
+    class CardSystem {
+        +Instance CardSystem
+        +TryAddCard(CardData) bool
+        +TryPlaceCard(CardData, Castle, int, int) bool
+        +TryPlaceAtIndex(int, Castle, int, int) bool
+        +SelectCard(int)
+        +ClearSelection()
+    }
+    class CardData {
+        +Id string
+        +Name string
+        +Cost int
+        +BuildingType string
+    }
+    class Castle {
+        +PlaceBuilding(Building, int, int) bool
+        +IsCellPassable(int, int) bool
+    }
+    class GameManager {
+        +CurrentPhase GamePhase
+    }
 
     Node <|-- ShopSystem
     Node <|-- CardSystem
-    ShopSystem ..> GameManager : 阶段联动
-    CardSystem ..> Building : 预留建筑卡
+    ShopSystem --> GameManager : 阶段联动
+    ShopSystem --> CardSystem : 购买入牌
+    CardSystem --> CardData : 使用
+    CardSystem --> Castle : 放置建筑
 ```
 
 ---
@@ -440,11 +483,13 @@ classDiagram
 9. `Barracks` 周期性生成 `Soldier`；`Soldier` 推进、索敌、攻击敌方士兵或敌方城堡。
 10. `Castle.TakeDamage()` 同步到 `GameManager.TakeDamage()`；血量归零后进入 `GameOver`。
 11. `UIManager` 根据 `GameManager` 信号刷新血条、阶段显示和游戏结束界面。
+12. 玩家打开商店购买或拖拽商品直放；手牌点击或拖拽放置兵营到己方城堡格子。
+13. `CardSystem` / `ShopSystem` 通过 `Castle.PlaceBuilding` 落子并更新手牌或商品槽。
 
 ---
 
 ## 维护建议
 
 - 新增运行时类时，同步更新“系统划分与现有类”和类图。
-- `CardSystem`、`ShopSystem` 开始实现后，应补充它们与 `GameManager`、`UIManager`、建筑卡数据的关系。
+- `BuildingSystem`、`AdjacentSystem` 开始实现后，应补充它们与 `Castle`、`CardSystem` 的关系。
 - `GameManager` 是真正的 Godot Autoload；`UIManager` 仍是主游戏场景内 UI 控制节点。
