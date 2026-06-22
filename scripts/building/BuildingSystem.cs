@@ -20,22 +20,26 @@ public partial class BuildingSystem : Node
 
     private static readonly Dictionary<string, BuildingShape> Shapes = new()
     {
-        ["Barracks"] = BuildingShape.Create(Single, new(0, 0)),
-        ["ArcheryRange"] = BuildingShape.Create(ArcheryRangeCells, new(0, 0)),
-        ["Stable"] = BuildingShape.Create(StableCells, new(0, 1)),
+        ["Barracks"] = BuildingShape.Create(Single, new(0, 0), "兵营", 100),
+        ["ArcheryRange"] = BuildingShape.Create(ArcheryRangeCells, new(0, 0), "靶场", 120),
+        ["Stable"] = BuildingShape.Create(StableCells, new(0, 1), "马厩", 150),
     };
 
     private readonly struct BuildingShape
     {
         public Vector2I[] Footprint { get; init; }
         public Vector2I MainCellOffset { get; init; }
+        public string DisplayName { get; init; }
+        public int MaxHealth { get; init; }
 
-        public static BuildingShape Create(Vector2I[] footprint, Vector2I mainCellOffset)
+        public static BuildingShape Create(Vector2I[] footprint, Vector2I mainCellOffset, string displayName, int maxHealth)
         {
             return new BuildingShape
             {
                 Footprint = footprint,
                 MainCellOffset = mainCellOffset,
+                DisplayName = displayName,
+                MaxHealth = maxHealth,
             };
         }
     }
@@ -62,6 +66,10 @@ public partial class BuildingSystem : Node
     public static IReadOnlyList<Vector2I> GetFootprint(string buildingType) => GetShape(buildingType).Footprint;
 
     public static Vector2I GetMainCellOffset(string buildingType) => GetShape(buildingType).MainCellOffset;
+
+    public static string GetDisplayName(string buildingType) => GetShape(buildingType).DisplayName;
+
+    public static int GetMaxHealth(string buildingType) => GetShape(buildingType).MaxHealth;
 
     public bool CanPlace(Castle castle, string buildingType, int anchorX, int anchorY)
     {
@@ -90,6 +98,7 @@ public partial class BuildingSystem : Node
             return false;
 
         building.TypeId = buildingType;
+        building.InitFromType(buildingType);
         building.BindToGrid(castle, anchorX, anchorY);
         if (!castle.PlaceBuilding(building, anchorX, anchorY, buildingType))
         {

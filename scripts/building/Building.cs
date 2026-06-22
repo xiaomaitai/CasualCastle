@@ -26,6 +26,9 @@ public partial class Building : Area2D
 	private bool _jumpTweenAwaitingResume;
 
 	public string TypeId { get; set; } = "Barracks";
+	public int MaxHealth { get; private set; }
+	public int Health { get; private set; }
+	public string DisplayName => BuildingSystem.GetDisplayName(TypeId);
 	public int AnchorGridX => GridX;
 	public int AnchorGridY => GridY;
 
@@ -46,6 +49,13 @@ public partial class Building : Area2D
 		CastleRef = castle;
 		GridX = gridX;
 		GridY = gridY;
+	}
+
+	public void InitFromType(string buildingType)
+	{
+		TypeId = buildingType;
+		MaxHealth = BuildingSystem.GetMaxHealth(buildingType);
+		Health = MaxHealth;
 	}
 
 	public Castle GetCastle() => CastleRef;

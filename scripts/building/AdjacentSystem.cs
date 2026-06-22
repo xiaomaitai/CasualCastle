@@ -61,6 +61,30 @@ public partial class AdjacentSystem : Node
         castle.AddChild(pulse);
     }
 
+    public IReadOnlyList<Building> GetAdjacencyEffectTargets(Building source)
+    {
+        if (source?.GetCastle() == null)
+            return System.Array.Empty<Building>();
+
+        return GetAdjacencyEffectTargets(source, source.GetCastle().GetBuildings());
+    }
+
+    private static List<Building> GetAdjacencyEffectTargets(Building source, List<Building> buildings)
+    {
+        List<Building> targets = new();
+
+        if (source.TypeId == "Barracks")
+        {
+            foreach (Building neighbor in GetAdjacentBuildings(source, buildings))
+            {
+                if (neighbor.TypeId == "Barracks")
+                    targets.Add(neighbor);
+            }
+        }
+
+        return targets;
+    }
+
     private static void ApplyBonuses(Building building, List<Building> buildings)
     {
         if (building.TypeId != "Barracks")

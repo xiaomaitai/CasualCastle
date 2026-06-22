@@ -49,6 +49,7 @@ public partial class Castle : Node2D
 	private int _previewGridY;
 	private bool _previewValid;
 	private IReadOnlyList<Vector2I> _previewFootprint = BuildingSystem.GetFootprint("Barracks");
+	private CastleHighlightOverlay _highlightOverlay;
 
 	public override void _Ready()
 	{
@@ -56,7 +57,18 @@ public partial class Castle : Node2D
 		_occupied = new bool[GridColumns, GridRows];
 		_healthBar = GetNodeOrNull<ProgressBar>("HealthBar");
 		UpdateHealthBar();
+		SetupHighlightOverlay();
 		SetupBarracks();
+	}
+
+	private void SetupHighlightOverlay()
+	{
+		_highlightOverlay = new CastleHighlightOverlay
+		{
+			ZIndex = 15,
+		};
+		_highlightOverlay.Bind(this);
+		AddChild(_highlightOverlay);
 	}
 
 	public Vector2 GetCellCenter(int gridX, int gridY)
@@ -114,6 +126,37 @@ public partial class Castle : Node2D
 		SetPlacementPreview(false, 0, 0, false);
 	}
 
+	public bool TryGetBuildingAtGlobalPoint(Vector2 globalPoint, out Building building)
+	{
+		building = null;
+		if (!TryGetGridFromGlobalPoint(globalPoint, out int gridX, out int gridY))
+			return false;
+
+		foreach (Building candidate in GetBuildings())
+		{
+			foreach (Vector2I offset in BuildingSystem.GetFootprint(candidate.TypeId))
+			{
+				if (candidate.AnchorGridX + offset.X != gridX || candidate.AnchorGridY + offset.Y != gridY)
+					continue;
+
+				building = candidate;
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public void SetAdjacencyHighlightBuildings(IEnumerable<Building> buildings)
+	{
+		_highlightOverlay?.SetBuildings(buildings);
+	}
+
+	public void ClearAdjacencyHighlight()
+	{
+		_highlightOverlay?.ClearHighlights();
+	}
+
 	public bool PlaceBuilding(Building building, int gridX, int gridY)
 	{
 		return PlaceBuilding(building, gridX, gridY, "Barracks");
@@ -161,7 +204,7 @@ public partial class Castle : Node2D
 		if (scene == null) return;
 
 		Barracks barracks = scene.Instantiate<Barracks>();
-		barracks.TypeId = "Barracks";
+		barracks.InitFromType("Barracks");
 		barracks.BindToGrid(this, BarracksGridX, BarracksGridY);
 		PlaceBuilding(barracks, BarracksGridX, BarracksGridY);
 	}
@@ -206,22 +249,22 @@ public partial class Castle : Node2D
 			}
 		}
 
-		if (!_showPlacementPreview)
-			return;
-
-		Color previewColor = _previewValid
-			? new Color(0.2f, 0.85f, 0.35f, 0.35f)
-			: new Color(0.9f, 0.2f, 0.2f, 0.35f);
-
-		foreach (Vector2I offset in _previewFootprint)
+		if (_showPlacementPreview)
 		{
-			int col = _previewGridX + offset.X;
-			int row = _previewGridY + offset.Y;
-			if (!IsInBounds(col, row))
-				continue;
+			Color previewColor = _previewValid
+				? new Color(0.2f, 0.85f, 0.35f, 0.35f)
+				: new Color(0.9f, 0.2f, 0.2f, 0.35f);
 
-			Vector2 previewPos = new Vector2(col * CellSize, row * CellSize);
-			DrawRect(new Rect2(previewPos, new Vector2(CellSize, CellSize)), previewColor);
+			foreach (Vector2I offset in _previewFootprint)
+			{
+				int col = _previewGridX + offset.X;
+				int row = _previewGridY + offset.Y;
+				if (!IsInBounds(col, row))
+					continue;
+
+				Vector2 previewPos = new Vector2(col * CellSize, row * CellSize);
+				DrawRect(new Rect2(previewPos, new Vector2(CellSize, CellSize)), previewColor);
+			}
 		}
 	}
 }

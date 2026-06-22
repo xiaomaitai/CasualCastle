@@ -9,6 +9,7 @@ public partial class UIManager : Node2D
     private HudUiController _hudUi;
     private ShopUiController _shopUi;
     private HandUiController _handUi;
+    private BuildingInfoUiController _buildingInfoUi;
     private GameOverUiController _gameOverUi;
     private bool _gameOver;
 
@@ -39,6 +40,11 @@ public partial class UIManager : Node2D
         _shopUi?.Process();
         if (_shopUi?.IsDragging != true)
             _handUi?.Process();
+
+        _buildingInfoUi?.SetPlacementActive(
+            _handUi?.IsPlacementActive == true || _shopUi?.IsDragging == true);
+        _buildingInfoUi?.SetShopOpen(_shopUi?.IsOpen == true);
+        _buildingInfoUi?.Process();
     }
 
     public override void _Input(InputEvent @event)
@@ -85,6 +91,7 @@ public partial class UIManager : Node2D
         _hudUi = new HudUiController(uiRoot);
         _shopUi = new ShopUiController(this, uiRoot);
         _handUi = new HandUiController(this, uiRoot);
+        _buildingInfoUi = new BuildingInfoUiController(this, uiRoot);
         _gameOverUi = new GameOverUiController(uiRoot, GoToTitle);
 
         if (GameManager.Instance != null)
@@ -101,6 +108,7 @@ public partial class UIManager : Node2D
         _hudUi.SetGameOverVisible(show);
         _shopUi.SetGameOver(show);
         _handUi.SetInputBlocked(_gameOver);
+        _buildingInfoUi.SetInputBlocked(_gameOver);
         _gameOverUi.SetState(state);
     }
 

@@ -169,6 +169,37 @@ theme_override_font_sizes/font_size = 16
 text = "左键放置，右键或 Esc 取消"
 horizontal_alignment = 1
 
+[node name="BuildingInfoPanel" type="Panel" parent="UI"]
+visible = false
+offset_left = 922.0
+offset_top = 130.0
+offset_right = 1229.0
+offset_bottom = 332.0
+
+[node name="PanelBackground" type="ColorRect" parent="UI/BuildingInfoPanel"]
+layout_mode = 0
+offset_right = 307.0
+offset_bottom = 202.0
+color = Color(0.1, 0.14, 0.2, 0.92)
+
+[node name="NameLabel" type="Label" parent="UI/BuildingInfoPanel"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 291.0
+offset_bottom = 52.0
+theme_override_font_sizes/font_size = 22
+text = "兵营"
+
+[node name="HealthLabel" type="Label" parent="UI/BuildingInfoPanel"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 60.0
+offset_right = 291.0
+offset_bottom = 92.0
+theme_override_font_sizes/font_size = 18
+text = "生命：100/100"
+
 [node name="ShopPanel" type="Panel" parent="UI"]
 visible = false
 offset_left = 819.0

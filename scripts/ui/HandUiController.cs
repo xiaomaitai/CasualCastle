@@ -17,6 +17,7 @@ public sealed class HandUiController
     private int _selectedIndex = -1;
 
     public bool IsDragging => _dragging;
+    public bool IsPlacementActive => _dragging || CardSystem.Instance?.HasSelection == true;
 
     public HandUiController(Node owner, CanvasLayer uiRoot)
     {
