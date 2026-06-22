@@ -1,0 +1,82 @@
+[gd_scene format=3 uid="uid://cshaderpreview01"]
+
+[ext_resource type="Script" path="res://scripts/dev/ShaderPreviewController.cs" id="1"]
+
+[node name="ShaderPreview" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="HSplit" type="HSplitContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+split_offset = 620
+
+[node name="EditorColumn" type="VBoxContainer" parent="HSplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="Toolbar" type="HBoxContainer" parent="HSplit/EditorColumn"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="CompileButton" type="Button" parent="HSplit/EditorColumn/Toolbar"]
+custom_minimum_size = Vector2(120, 36)
+layout_mode = 2
+text = "编译 (F5)"
+
+[node name="ResetButton" type="Button" parent="HSplit/EditorColumn/Toolbar"]
+custom_minimum_size = Vector2(100, 36)
+layout_mode = 2
+text = "恢复默认"
+
+[node name="StatusLabel" type="Label" parent="HSplit/EditorColumn/Toolbar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "就绪"
+vertical_alignment = 1
+
+[node name="CodeEdit" type="CodeEdit" parent="HSplit/EditorColumn"]
+layout_mode = 2
+size_flags_vertical = 3
+placeholder_text = "在此编写 canvas_item shader…"
+gutters_draw_line_numbers = true
+scroll_smooth = true
+
+[node name="PreviewColumn" type="VBoxContainer" parent="HSplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="PreviewTitle" type="Label" parent="HSplit/PreviewColumn"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "预览（uniform: resolution, time, mouse）"
+
+[node name="PreviewFrame" type="PanelContainer" parent="HSplit/PreviewColumn"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Preview" type="ColorRect" parent="HSplit/PreviewColumn/PreviewFrame"]
+custom_minimum_size = Vector2(320, 320)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.08, 0.08, 0.1, 1)
