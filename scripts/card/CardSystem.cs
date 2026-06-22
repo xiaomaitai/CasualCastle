@@ -101,25 +101,7 @@ public partial class CardSystem : Node
         if (card == null || castle == null || !castle.IsPlayerCastle)
             return false;
 
-        if (card.BuildingType != "Barracks")
-            return false;
-
-        if (!castle.IsCellPassable(gridX, gridY))
-            return false;
-
-        PackedScene scene = GD.Load<PackedScene>("res://prefabs/Barracks.tscn");
-        if (scene == null)
-            return false;
-
-        Barracks barracks = scene.Instantiate<Barracks>();
-        barracks.BindToGrid(castle, gridX, gridY);
-        if (!castle.PlaceBuilding(barracks, gridX, gridY))
-        {
-            barracks.QueueFree();
-            return false;
-        }
-
-        return true;
+        return BuildingSystem.Instance?.TryPlace(castle, card.BuildingType, gridX, gridY) == true;
     }
 
     public void ResetHand()

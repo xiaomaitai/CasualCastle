@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public partial class Castle : Node2D
 {
@@ -47,6 +48,7 @@ public partial class Castle : Node2D
 	private int _previewGridX;
 	private int _previewGridY;
 	private bool _previewValid;
+	private IReadOnlyList<Vector2I> _previewFootprint = BuildingSystem.GetFootprint("Barracks");
 
 	public override void _Ready()
 	{
@@ -80,12 +82,30 @@ public partial class Castle : Node2D
 		return IsInBounds(gridX, gridY);
 	}
 
-	public void SetPlacementPreview(bool show, int gridX, int gridY, bool valid)
+	public bool CanPlaceFootprint(string buildingType, int anchorX, int anchorY)
+	{
+		return BuildingSystem.Instance?.CanPlace(this, buildingType, anchorX, anchorY) == true;
+	}
+
+	public List<Building> GetBuildings()
+	{
+		List<Building> buildings = new();
+		foreach (Node child in GetChildren())
+		{
+			if (child is Building building)
+				buildings.Add(building);
+		}
+
+		return buildings;
+	}
+
+	public void SetPlacementPreview(bool show, int gridX, int gridY, bool valid, string buildingType = "Barracks")
 	{
 		_showPlacementPreview = show;
 		_previewGridX = gridX;
 		_previewGridY = gridY;
 		_previewValid = valid;
+		_previewFootprint = BuildingSystem.GetFootprint(buildingType);
 		QueueRedraw();
 	}
 
@@ -96,13 +116,30 @@ public partial class Castle : Node2D
 
 	public bool PlaceBuilding(Building building, int gridX, int gridY)
 	{
-		if (!IsInBounds(gridX, gridY) || _occupied[gridX, gridY])
+		return PlaceBuilding(building, gridX, gridY, "Barracks");
+	}
+
+	public bool PlaceBuilding(Building building, int anchorX, int anchorY, string buildingType)
+	{
+		IReadOnlyList<Vector2I> footprint = BuildingSystem.GetFootprint(buildingType);
+		if (!CanPlaceFootprint(buildingType, anchorX, anchorY))
 			return false;
 
-		_occupied[gridX, gridY] = true;
-		building.Position = GetCellCenter(gridX, gridY);
+		foreach (Vector2I offset in footprint)
+			_occupied[anchorX + offset.X, anchorY + offset.Y] = true;
+
+		building.Position = GetFootprintCenter(anchorX, anchorY, footprint);
 		AddChild(building);
 		return true;
+	}
+
+	public Vector2 GetFootprintCenter(int anchorX, int anchorY, IReadOnlyList<Vector2I> footprint)
+	{
+		Vector2 sum = Vector2.Zero;
+		foreach (Vector2I offset in footprint)
+			sum += GetCellCenter(anchorX + offset.X, anchorY + offset.Y);
+
+		return sum / footprint.Count;
 	}
 
 	public Vector2 GetBuildingSpawnPosition(int gridX, int gridY, Vector2I outwardDir, int spawnIndex = 0)
@@ -124,6 +161,7 @@ public partial class Castle : Node2D
 		if (scene == null) return;
 
 		Barracks barracks = scene.Instantiate<Barracks>();
+		barracks.TypeId = "Barracks";
 		barracks.BindToGrid(this, BarracksGridX, BarracksGridY);
 		PlaceBuilding(barracks, BarracksGridX, BarracksGridY);
 	}
@@ -157,24 +195,33 @@ public partial class Castle : Node2D
 
 		DrawRect(new Rect2(0, 0, totalWidth, totalHeight), AreaBgColor);
 
-		int offset = (CellSize - BlockSize) / 2;
+		int blockInset = (CellSize - BlockSize) / 2;
 
 		for (int row = 0; row < GridRows; row++)
 		{
 			for (int col = 0; col < GridColumns; col++)
 			{
-				Vector2 position = new Vector2(col * CellSize + offset, row * CellSize + offset);
+				Vector2 position = new Vector2(col * CellSize + blockInset, row * CellSize + blockInset);
 				DrawRect(new Rect2(position, new Vector2(BlockSize, BlockSize)), BlockColor);
 			}
 		}
 
-		if (!_showPlacementPreview || !IsInBounds(_previewGridX, _previewGridY))
+		if (!_showPlacementPreview)
 			return;
 
 		Color previewColor = _previewValid
 			? new Color(0.2f, 0.85f, 0.35f, 0.35f)
 			: new Color(0.9f, 0.2f, 0.2f, 0.35f);
-		Vector2 previewPos = new Vector2(_previewGridX * CellSize, _previewGridY * CellSize);
-		DrawRect(new Rect2(previewPos, new Vector2(CellSize, CellSize)), previewColor);
+
+		foreach (Vector2I offset in _previewFootprint)
+		{
+			int col = _previewGridX + offset.X;
+			int row = _previewGridY + offset.Y;
+			if (!IsInBounds(col, row))
+				continue;
+
+			Vector2 previewPos = new Vector2(col * CellSize, row * CellSize);
+			DrawRect(new Rect2(previewPos, new Vector2(CellSize, CellSize)), previewColor);
+		}
 	}
 }

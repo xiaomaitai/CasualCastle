@@ -29,7 +29,7 @@ public partial class Barracks : Building
 
 	protected override void StartWorkCycle()
 	{
-		BeginWork(SpawnInterval);
+		BeginWork(GetWorkInterval(SpawnInterval));
 	}
 
 	protected override void PerformWork()

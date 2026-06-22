@@ -280,8 +280,23 @@ public sealed class HandUiController
             return;
         }
 
-        bool valid = playerCastle.IsCellPassable(gridX, gridY);
-        playerCastle.SetPlacementPreview(true, gridX, gridY, valid);
+        string buildingType = GetPreviewBuildingType();
+        bool valid = BuildingSystem.Instance?.CanPlace(playerCastle, buildingType, gridX, gridY) == true;
+        playerCastle.SetPlacementPreview(true, gridX, gridY, valid, buildingType);
+    }
+
+    private string GetPreviewBuildingType()
+    {
+        if (CardSystem.Instance == null)
+            return "Barracks";
+
+        if (_dragging && _dragHandIndex >= 0 && _dragHandIndex < CardSystem.Instance.Hand.Count)
+            return CardSystem.Instance.Hand[_dragHandIndex].BuildingType;
+
+        if (CardSystem.Instance.HasSelection)
+            return CardSystem.Instance.SelectedCard.BuildingType;
+
+        return "Barracks";
     }
 
     private static void TryPlaceAtMouse(Vector2 globalPosition)

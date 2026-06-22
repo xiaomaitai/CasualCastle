@@ -219,8 +219,10 @@ public sealed class ShopUiController
             return;
         }
 
-        bool valid = playerCastle.IsCellPassable(gridX, gridY);
-        playerCastle.SetPlacementPreview(true, gridX, gridY, valid);
+        CardData offer = ShopSystem.Instance.GetOffer(_dragSlotIndex);
+        string buildingType = offer?.BuildingType ?? "Barracks";
+        bool valid = BuildingSystem.Instance?.CanPlace(playerCastle, buildingType, gridX, gridY) == true;
+        playerCastle.SetPlacementPreview(true, gridX, gridY, valid, buildingType);
     }
 
     private void UpdateGoldDisplay(int gold)

@@ -8,6 +8,8 @@
 [ext_resource type="Script" path="res://scripts/shop/ShopSystem.cs" id="8"]
 [ext_resource type="Script" path="res://scripts/card/CardSystem.cs" id="9"]
 [ext_resource type="Script" path="res://scripts/flow/MainGameController.cs" id="10"]
+[ext_resource type="Script" path="res://scripts/building/BuildingSystem.cs" id="11"]
+[ext_resource type="Script" path="res://scripts/building/AdjacentSystem.cs" id="12"]
 
 [node name="MainGame" type="Node2D" unique_id=1]
 script = ExtResource("10")
@@ -27,6 +29,12 @@ script = ExtResource("8")
 
 [node name="CardSystem" type="Node" parent="."]
 script = ExtResource("9")
+
+[node name="BuildingSystem" type="Node" parent="."]
+script = ExtResource("11")
+
+[node name="AdjacentSystem" type="Node" parent="."]
+script = ExtResource("12")
 
 [node name="UIManager" type="Node2D" parent="." unique_id=17]
 script = ExtResource("4")

@@ -12,6 +12,8 @@ public partial class Building : Area2D
 	protected int GridX;
 	protected int GridY;
 
+	private float _workSpeedMultiplier = 1f;
+
 	private Sprite2D _sprite;
 	private ShaderMaterial _workMaterial;
 	private Material _originalMaterial;
@@ -22,6 +24,10 @@ public partial class Building : Area2D
 	private bool _workActive;
 	private bool _workPaused;
 	private bool _jumpTweenAwaitingResume;
+
+	public string TypeId { get; set; } = "Barracks";
+	public int AnchorGridX => GridX;
+	public int AnchorGridY => GridY;
 
 	public void BindToGrid(Castle castle, int gridX, int gridY)
 	{
@@ -97,6 +103,21 @@ public partial class Building : Area2D
 		{
 			PauseWork();
 		}
+	}
+
+	protected float GetWorkInterval(float baseInterval) => baseInterval / _workSpeedMultiplier;
+
+	public void SetWorkSpeedMultiplier(float multiplier)
+	{
+		_workSpeedMultiplier = Mathf.Max(0.1f, multiplier);
+		if (_workActive)
+			RestartWorkCycle();
+	}
+
+	protected virtual void RestartWorkCycle()
+	{
+		StopWork();
+		StartWorkCycle();
 	}
 
 	protected virtual void StartWorkCycle()
