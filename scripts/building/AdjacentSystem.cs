@@ -24,6 +24,12 @@ public partial class AdjacentSystem : Node
             Instance = null;
     }
 
+    public void OnBuildingPlaced(Castle castle, Building placedBuilding)
+    {
+        RefreshCastle(castle);
+        PlayAdjacencyPulses(castle, placedBuilding);
+    }
+
     public void RefreshCastle(Castle castle)
     {
         if (castle == null)
@@ -37,6 +43,24 @@ public partial class AdjacentSystem : Node
             ApplyBonuses(building, buildings);
     }
 
+    private void PlayAdjacencyPulses(Castle castle, Building placedBuilding)
+    {
+        List<Building> buildings = castle.GetBuildings();
+        foreach (Building neighbor in GetAdjacentBuildings(placedBuilding, buildings))
+            SpawnPulse(castle, neighbor);
+    }
+
+    private static void SpawnPulse(Castle castle, Building building)
+    {
+        Vector2I mainGrid = building.GetMainGridPosition();
+        Vector2 localPos = castle.GetCellCenter(mainGrid.X, mainGrid.Y);
+
+        var pulse = new AdjacentLinkPulse();
+        pulse.Configure(castle.CellSize);
+        pulse.Position = localPos;
+        castle.AddChild(pulse);
+    }
+
     private static void ApplyBonuses(Building building, List<Building> buildings)
     {
         if (building.TypeId != "Barracks")
@@ -47,7 +71,7 @@ public partial class AdjacentSystem : Node
             building.SetWorkSpeedMultiplier(1f + 0.2f * adjacentBarracks);
     }
 
-    private static int CountAdjacentBuildings(Building source, List<Building> buildings, string targetTypeId)
+    private static HashSet<Building> GetAdjacentBuildings(Building source, List<Building> buildings)
     {
         HashSet<Building> neighbors = new();
         Dictionary<Vector2I, Building> cellOwners = BuildCellOwnerMap(buildings);
@@ -59,14 +83,26 @@ public partial class AdjacentSystem : Node
                 if (!cellOwners.TryGetValue(cell + direction, out Building neighbor))
                     continue;
 
-                if (neighbor == source || neighbor.TypeId != targetTypeId)
+                if (neighbor == source)
                     continue;
 
                 neighbors.Add(neighbor);
             }
         }
 
-        return neighbors.Count;
+        return neighbors;
+    }
+
+    private static int CountAdjacentBuildings(Building source, List<Building> buildings, string targetTypeId)
+    {
+        int count = 0;
+        foreach (Building neighbor in GetAdjacentBuildings(source, buildings))
+        {
+            if (neighbor.TypeId == targetTypeId)
+                count++;
+        }
+
+        return count;
     }
 
     private static Dictionary<Vector2I, Building> BuildCellOwnerMap(List<Building> buildings)

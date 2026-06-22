@@ -10,14 +10,16 @@ Godot **4.6** + **C# / .NET** 的 2D RTS 项目（类皇室战争）。物理：
 
 代码按业务模块放在 `scripts/`：
 
-| 目录 | 用途 |
-|------|------|
-| `autoload/` | Godot Autoload（`GameManager`） |
-| `core/` | 全局配置（`GameConfig`） |
-| `flow/` | 场景流转（`TitleScreen`、`MainGameController`） |
-| `ui/` | `UIManager` 及子控制器 |
-| `shop/` `card/` `night/` `building/` `battle/` | 对应玩法系统 |
-| `audio/` `dev/` | 音频与开发工具 |
+
+| 目录                                             | 用途                                       |
+| ---------------------------------------------- | ---------------------------------------- |
+| `autoload/`                                    | Godot Autoload（`GameManager`）            |
+| `core/`                                        | 全局配置（`GameConfig`）                       |
+| `flow/`                                        | 场景流转（`TitleScreen`、`MainGameController`） |
+| `ui/`                                          | `UIManager` 及子控制器                        |
+| `shop/` `card/` `night/` `building/` `battle/` | 对应玩法系统                                   |
+| `audio/` `dev/`                                | 音频与开发工具                                  |
+
 
 场景：`scenes/`；预制体：`prefabs/`；资源：`resources/`、`assets/`。
 
@@ -36,19 +38,21 @@ Godot **4.6** + **C# / .NET** 的 2D RTS 项目（类皇室战争）。物理：
 
 **不要在本文件维护里程碑或当前任务。**
 
-| 需要了解 | 读取 |
-|----------|------|
-| 当前任务、验收项 | `devPlan/currentTasks.md` |
-| 里程碑与路线图 | `devPlan/outline/` |
-| 模块设计与依赖 | `devPlan/outline/c05ProjectArchitecture.md` |
-| 运行时代码结构 | `devPlan/codeStructure.md` |
-| 数据结构 | `devPlan/dataStructures.md` |
+
+| 需要了解     | 读取                                          |
+| -------- | ------------------------------------------- |
+| 当前任务、验收项 | `devPlan/currentTasks.md`                   |
+| 里程碑与路线图  | `devPlan/outline/`                          |
+| 模块设计与依赖  | `devPlan/outline/c05ProjectArchitecture.md` |
+| 运行时代码结构  | `devPlan/codeStructure.md`                  |
+| 数据结构     | `devPlan/dataStructures.md`                 |
+
 
 涉及计划、优先级、阶段状态时，**先读 `devPlan/`**。
 
 ## 工作规则
 
-- 实现任务时若发现**需要重构**的结构（职责混乱、重复逻辑、模块边界不清、技术债阻碍当前改动），在回复中**明确提出来**，说明问题、影响和建议方向
+- 实现任务时若发现**需要重构**的结构（职责混乱、重复逻辑、模块边界不清、技术债阻碍当前改动），在回复中**明确提出来**，说明问题、影响和建议方向。
 - 不要擅自扩大范围做大规模重构；是否纳入当前任务或记入 `devPlan` 由用户决定
 
 ## Git 规则
@@ -56,3 +60,4 @@ Godot **4.6** + **C# / .NET** 的 2D RTS 项目（类皇室战争）。物理：
 - **仅用户明确要求时**才 `git add` / `git commit`；不要自动提交
 - 新建 `.cs`、`.tscn`、`.tres` 时，**一并提交**同名 `.uid` 文件
 - 不提交 `.godot/`、`.mono/`、`*.csproj.user` 等缓存（已在 gitignore）
+

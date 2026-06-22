@@ -36,6 +36,43 @@ public partial class BuildingSystem : Node
         _ => Single,
     };
 
+    public static Vector2I GetMainCellOffset(string buildingType)
+    {
+        IReadOnlyList<Vector2I> cells = GetFootprint(buildingType);
+        if (cells.Count == 1)
+            return cells[0];
+
+        int minX = cells[0].X;
+        int maxX = cells[0].X;
+        int minY = cells[0].Y;
+        int maxY = cells[0].Y;
+        foreach (Vector2I cell in cells)
+        {
+            minX = Mathf.Min(minX, cell.X);
+            maxX = Mathf.Max(maxX, cell.X);
+            minY = Mathf.Min(minY, cell.Y);
+            maxY = Mathf.Max(maxY, cell.Y);
+        }
+
+        float centerX = (minX + maxX) / 2f;
+        float centerY = (minY + maxY) / 2f;
+        Vector2I best = cells[0];
+        float bestDistSq = float.MaxValue;
+        foreach (Vector2I cell in cells)
+        {
+            float dx = cell.X - centerX;
+            float dy = cell.Y - centerY;
+            float distSq = dx * dx + dy * dy;
+            if (distSq < bestDistSq)
+            {
+                bestDistSq = distSq;
+                best = cell;
+            }
+        }
+
+        return best;
+    }
+
     public bool CanPlace(Castle castle, string buildingType, int anchorX, int anchorY)
     {
         if (castle == null)
@@ -71,7 +108,7 @@ public partial class BuildingSystem : Node
         }
 
         EmitSignal(SignalName.BuildingPlaced, castle, building, buildingType);
-        AdjacentSystem.Instance?.RefreshCastle(castle);
+        AdjacentSystem.Instance?.OnBuildingPlaced(castle, building);
         return true;
     }
 

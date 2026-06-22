@@ -29,6 +29,18 @@ public partial class Building : Area2D
 	public int AnchorGridX => GridX;
 	public int AnchorGridY => GridY;
 
+	public Vector2I GetMainGridPosition()
+	{
+		Vector2I offset = BuildingSystem.GetMainCellOffset(TypeId);
+		return new Vector2I(AnchorGridX + offset.X, AnchorGridY + offset.Y);
+	}
+
+	public Vector2 GetMainCellLocalPosition()
+	{
+		Vector2I mainGrid = GetMainGridPosition();
+		return CastleRef.GetCellCenter(mainGrid.X, mainGrid.Y);
+	}
+
 	public void BindToGrid(Castle castle, int gridX, int gridY)
 	{
 		CastleRef = castle;
