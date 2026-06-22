@@ -24,7 +24,7 @@ CasualCastle 是 Godot 4.6 C# 项目，主入口配置在 `project.godot`：
 | `shop/` | ShopSystem | `ShopSystem.cs` |
 | `card/` | CardSystem | `CardSystem.cs`, `CardData.cs` |
 | `night/` | NightSystem | `NightSystem.cs` |
-| `building/` | BuildingSystem | `Castle.cs`, `Building.cs`, `Barracks.cs` |
+| `building/` | BuildingSystem | `Castle.cs`, `Building.cs`, `Barracks.cs`, `ArcheryRange.cs`, `Stable.cs`, `BuildingSystem.cs`, `AdjacentSystem.cs` |
 | `battle/` | BattleSystem | `Soldier.cs` |
 | `audio/` | 音频 | `BgmPlayer.cs` |
 | `dev/` | 开发辅助 | `DevInputLogger.cs` |
@@ -38,6 +38,8 @@ CasualCastle 是 Godot 4.6 C# 项目，主入口配置在 `project.godot`：
 - `NightSystem`
 - `ShopSystem`
 - `CardSystem`
+- `BuildingSystem`
+- `AdjacentSystem`
 - `Battlefield`
   - `PlayerSide/PlayerCastle`
   - `EnemySide/EnemyCastle`
@@ -101,9 +103,14 @@ CasualCastle 是 Godot 4.6 C# 项目，主入口配置在 `project.godot`：
 
 | 类 | 文件 | Godot 基类 | 职责 |
 | --- | --- | --- | --- |
-| `Castle` | `scripts/building/Castle.cs` | `Node2D` | 管理城堡地块网格、生命值、血条、建筑放置和兵营初始化。 |
-| `Building` | `scripts/building/Building.cs` | `Area2D` | 建筑基类；记录所属城堡与地块坐标；处理工作循环、昼夜暂停和工作视觉效果。 |
-| `Barracks` | `scripts/building/Barracks.cs` | `Building` | 兵营建筑；按间隔生成士兵，阵营由所属城堡决定。 |
+| `Castle` | `scripts/building/Castle.cs` | `Node2D` | 城堡网格、占格、血条、放置预览绘制、初始兵营。 |
+| `Building` | `scripts/building/Building.cs` | `Area2D` | 建筑基类；main 格、工作循环、工作速度倍率（邻接加成）。 |
+| `Barracks` | `scripts/building/Barracks.cs` | `Building` | 兵营；周期产兵。 |
+| `ArcheryRange` | `scripts/building/ArcheryRange.cs` | `Building` | 靶场（2 格）；产远程士兵。 |
+| `Stable` | `scripts/building/Stable.cs` | `Building` | 马厩（L 形 4 格）；产快速士兵。 |
+| `BuildingSystem` | `scripts/building/BuildingSystem.cs` | `Node` | 统一放置入口；占地与 main 格配置表。 |
+| `AdjacentSystem` | `scripts/building/AdjacentSystem.cs` | `Node` | 邻接检测、兵营加速、放置光圈触发。 |
+| `AdjacentLinkPulse` | `scripts/building/AdjacentLinkPulse.cs` | `Node2D` | 邻接反馈 shader 光圈（挂在 main 格）。 |
 
 结构关系：
 
@@ -166,17 +173,16 @@ CasualCastle 是 Godot 4.6 C# 项目，主入口配置在 `project.godot`：
 
 - `ShopSystem` 订阅 `GameManager` 阶段与状态，夜晚自动请求打开商店。
 - `ShopSystem.TryPurchase` 扣费后将卡牌加入 `CardSystem` 手牌。
-- `CardSystem.TryPlaceCard` 根据 `BuildingType` 实例化预制体并调用 `Castle.PlaceBuilding`。
+- `CardSystem.TryPlaceCard` 委托 `BuildingSystem.TryPlace`。
+- `BuildingSystem.TryPlace` 成功后由 `AdjacentSystem.OnBuildingPlaced` 刷新加成并播放邻接光圈。
 - `UIManager` 转发 Esc、鼠标输入，协调商店拖拽与手牌拖拽的优先级。
 
 ### 待扩展系统
 
-以下模块尚未实现，M3 起逐步建设：
-
 | 类 | 文件 | 当前状态 |
 | --- | --- | --- |
-| `BuildingSystem` | 待建 | 放置与调度逻辑仍在 `Castle` / `CardSystem` |
-| `AdjacentSystem` | 待建 | 邻接加成未实现 |
+| `BuildingData` .tres | 待建 | 建筑数据仍硬编码在 `BuildingSystem` 配置表 |
+| 建筑信息面板 UI | 待建 | M3 收尾 |
 
 ---
 
@@ -219,7 +225,8 @@ classDiagram
 
     ShopSystem --> GameManager : 阶段联动
     ShopSystem --> CardSystem : 购买入牌
-    CardSystem --> Castle : 放置建筑
+    CardSystem --> BuildingSystem : 委托放置
+    BuildingSystem --> Castle : 占格落子
     BgmPlayer ..> TitleScreen : 标题音乐
     BgmPlayer ..> GameManager : 主游戏音乐
     DevInputLogger ..> GameManager : 开发调试
@@ -465,7 +472,8 @@ classDiagram
     ShopSystem --> GameManager : 阶段联动
     ShopSystem --> CardSystem : 购买入牌
     CardSystem --> CardData : 使用
-    CardSystem --> Castle : 放置建筑
+    CardSystem --> BuildingSystem : 委托放置
+    BuildingSystem --> Castle : 占格落子
 ```
 
 ---
@@ -483,13 +491,12 @@ classDiagram
 9. `Barracks` 周期性生成 `Soldier`；`Soldier` 推进、索敌、攻击敌方士兵或敌方城堡。
 10. `Castle.TakeDamage()` 同步到 `GameManager.TakeDamage()`；血量归零后进入 `GameOver`。
 11. `UIManager` 根据 `GameManager` 信号刷新血条、阶段显示和游戏结束界面。
-12. 玩家打开商店购买或拖拽商品直放；手牌点击或拖拽放置兵营到己方城堡格子。
-13. `CardSystem` / `ShopSystem` 通过 `Castle.PlaceBuilding` 落子并更新手牌或商品槽。
+12. 玩家打开商店购买或拖拽商品直放；手牌点击或拖拽经 `BuildingSystem` 放置建筑。
+13. `AdjacentSystem` 刷新邻接加成，并在邻接建筑 main 格播放光圈特效。
 
 ---
 
 ## 维护建议
 
-- 新增运行时类时，同步更新“系统划分与现有类”和类图。
-- `BuildingSystem`、`AdjacentSystem` 开始实现后，应补充它们与 `Castle`、`CardSystem` 的关系。
+- 新增建筑类型时，同步更新 `BuildingSystem` 配置表与 `devPlan` 文档。
 - `GameManager` 是真正的 Godot Autoload；`UIManager` 仍是主游戏场景内 UI 控制节点。

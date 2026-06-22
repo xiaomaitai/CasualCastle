@@ -63,17 +63,29 @@
 - 商店可随时手动打开/关闭；进入夜晚自动弹出
 - 购买按钮将卡牌加入手牌；拖拽商品名可在金币足够时直接放置
 - 手牌支持点击选中后点击城堡放置，或拖拽到城堡放置
-- 当前仅支持兵营（`BuildingType = "Barracks"`）
+- 支持兵营、靶场、马厩三种建筑及多格占地
 
-## 3.5 已具备、可复用的基础 API
+## 3.5 建筑与邻接（M3）
+
+多建筑放置、统一放置系统与邻接加成已完成最小切片。
+
+| 模块 | 交付内容 | 关键文件 |
+|------|----------|----------|
+| BuildingSystem | 统一 `TryPlace`、占地与 main 格配置 | `scripts/building/BuildingSystem.cs` |
+| 多建筑 | 兵营、靶场（2 格）、马厩（L 形 4 格） | `ArcheryRange.cs`, `Stable.cs`, `prefabs/` |
+| AdjacentSystem | 邻接检测、兵营加速、放置触发刷新 | `scripts/building/AdjacentSystem.cs` |
+| 邻接特效 | main 格 shader 光圈 | `assets/shaders/adjacent_link_pulse.gdshader`, `AdjacentLinkPulse.cs` |
+
+## 3.6 已具备、可复用的基础 API
 
 以下代码为完整版开发提供了基础，但尚未接入玩家交互：
 
 | API / 能力 | 位置 | 说明 |
 |------------|------|------|
 | 城堡格子与放置 | `Castle.PlaceBuilding`, `IsCellPassable`, `SetPlacementPreview` | 手牌与商店直放已接入 |
-| 手牌放置 | `CardSystem.TryPlaceCard`, `TryPlaceAtIndex`, `TryPlaceSelected` | 点击与拖拽共用放置逻辑 |
-| 商店直放 | `ShopSystem.TryPlaceOfferDirect` | 拖拽商品到城堡时扣费并刷新商品位 |
+| 手牌放置 | `BuildingSystem.TryPlace` | 手牌与商店直放统一入口 |
+| 占地与 main 格 | `BuildingSystem.GetFootprint`, `GetMainCellOffset` | 按建筑类型配置 |
+| 邻接加成 | `AdjacentSystem.RefreshCastle` | 兵营邻接产兵加速 |
 | 格子通行检测 | `Castle.IsCellPassable` | 士兵未使用寻路，API 已预留 |
 | 建筑基类 | `Building.cs` | 碰撞层、阵营、昼夜工作循环；无独立 HP |
 | 卡牌边框素材 | `assets/art/cards/card_border.png` | 已导入，UI 尚未引用 |
