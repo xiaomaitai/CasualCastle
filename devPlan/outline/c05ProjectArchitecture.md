@@ -5,25 +5,17 @@
 ```
 CasualCastle/
 ├── scripts/
-│   ├── autoload/
-│   │   ├── GameManager.cs     # Godot Autoload
-│   │   └── UIManager.cs       # 主游戏场景内 UI 控制器
-│   ├── systems/
-│   │   └── MainGameController.cs
-│   ├── nodes/
-│   │   ├── Building.cs        # 建筑基类
-│   │   ├── Barracks.cs
-│   │   ├── Soldier.cs
-│   │   ├── Castle.cs
-│   │   └── BgmPlayer.cs
-│   ├── ui/
-│   │   ├── TitleScreen.cs
-│   │   ├── HudUiController.cs
-│   │   ├── ShopUiController.cs
-│   │   ├── HandUiController.cs
-│   │   └── GameOverUiController.cs
-│   └── utils/
-│       └── DevInputLogger.cs
+│   ├── autoload/              # GameManager（Godot Autoload）
+│   ├── core/                  # GameConfig 等全局配置
+│   ├── flow/                  # TitleScreen、MainGameController
+│   ├── ui/                    # UIManager 与子 UI 控制器
+│   ├── shop/                  # ShopSystem
+│   ├── card/                  # CardSystem、CardData
+│   ├── night/                 # NightSystem
+│   ├── building/              # Castle、Building、Barracks
+│   ├── battle/                # Soldier
+│   ├── audio/                 # BgmPlayer
+│   └── dev/                   # DevInputLogger
 ├── scenes/
 │   ├── main/main_game.tscn
 │   └── ui/title_screen.tscn
@@ -45,21 +37,17 @@ CasualCastle/
 
 ```
 scripts/
-├── autoload/
-│   ├── GameManager.cs         # 扩展：阶段状态机
-│   ├── CardSystem.cs          # 待建
-│   └── UIManager.cs           # 扩展：商店/手牌 UI
-├── systems/
-│   ├── ShopSystem.cs          # 待建
-│   ├── BuildingSystem.cs      # 待建
-│   ├── AdjacentSystem.cs      # 待建
-│   ├── FusionSystem.cs        # 待建
-│   ├── BattleSystem.cs        # 待建（从 Soldier 逻辑抽离）
-│   └── NightSystem.cs         # 待建（夜晚休眠与夜战判定）
-├── utils/
-│   ├── GameConfig.cs          # 待建
-│   └── Pathfinding.cs         # 待建
-└── nodes/                     # 已有，持续扩展
+├── autoload/GameManager.cs
+├── core/GameConfig.cs
+├── flow/TitleScreen.cs, MainGameController.cs
+├── ui/UIManager.cs + UI 子控制器
+├── shop/ShopSystem.cs
+├── card/CardSystem.cs, CardData.cs
+├── night/NightSystem.cs
+├── building/Castle.cs, Building.cs, Barracks.cs, BuildingSystem.cs（待建）
+├── battle/Soldier.cs, BattleSystem.cs（待建）
+├── audio/BgmPlayer.cs
+└── dev/DevInputLogger.cs
 resources/
 ├── cards/                     # CardData .tres
 ├── buildings/                 # BuildingData .tres

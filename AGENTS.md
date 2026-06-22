@@ -11,10 +11,18 @@
 ## Architecture & Directory Structure
 
 ### Core Organization
-- **`scripts/`** - All C# code organized by purpose:
-  - `autoload/` - Scene-attached manager singletons such as `GameManager` and `UIManager`; they are not currently registered as Godot Project Settings autoloads
-  - `systems/` - Game systems and placeholders such as `NightSystem`, `ShopSystem`, and `CardSystem`
-  - `utils/` - Shared utility classes and helper functions
+- **`scripts/`** - All C# code organized by business module:
+  - `autoload/` - Godot Project Settings autoloads (`GameManager`)
+  - `core/` - Global config and shared game constants (`GameConfig`)
+  - `flow/` - Scene flow (`TitleScreen`, `MainGameController`)
+  - `ui/` - Main game UI entry and UI sub-controllers (`UIManager`, `HudUiController`, etc.)
+  - `shop/` - Shop logic (`ShopSystem`)
+  - `card/` - Hand and card placement (`CardSystem`, `CardData`)
+  - `night/` - Day/night action gating (`NightSystem`)
+  - `building/` - Castle grid and buildings (`Castle`, `Building`, `Barracks`)
+  - `battle/` - Combat units (`Soldier`)
+  - `audio/` - Audio helpers (`BgmPlayer`)
+  - `dev/` - Development utilities (`DevInputLogger`)
 - **`scenes/`** - Scene files organized by context:
   - `main/` - Main entry point scene(s)
   - `ui/` - UI components and screens
@@ -35,8 +43,8 @@
 ### Godot 4.6 + C# Conventions
 1. **Language**: Use C# (not GDScript). The project is configured with .NET assembly name "CasualCastle".
 2. **Scene Structure**: Scenes are `.tscn` files (Godot text format); attach C# scripts as nodes.
-3. **Manager Singleton Pattern**: Current `scripts/autoload/` managers are scene nodes with static `Instance` references. Do not assume they are Project Settings autoloads unless `project.godot` is updated.
-4. **Systems Architecture**: Implement game systems in `scripts/systems/` as stateful managers that handle specific domains.
+3. **Manager Singleton Pattern**: `GameManager` is a Godot Autoload singleton. Scene-local controllers such as `UIManager` and systems such as `ShopSystem` use static `Instance` references while attached to `main_game.tscn`.
+4. **Module Architecture**: Place new code in the business module folder that owns the feature. Scene-attached systems such as `ShopSystem` use static `Instance` references while attached to `main_game.tscn`.
 
 ### Node Attachment & Script Organization
 - Attach scripts directly to scene nodes for node-specific logic
@@ -76,7 +84,7 @@ public partial class BattleSystem : Node2D
 ## Common Tasks
 
 ### Adding a New System
-1. Create `scripts/systems/YourSystem.cs` inheriting from `Node2D` or appropriate base
+1. Create the script under the matching module folder, e.g. `scripts/shop/YourSystem.cs`
 2. Implement `_Ready()` for initialization
 3. Define signals for output events
 4. Register in autoload or attach to main scene
@@ -118,10 +126,10 @@ public partial class BattleSystem : Node2D
 
 ## When Extending This Project
 
-1. **Before adding code**: Check if it belongs in `systems/`, `utils/`, or `autoload/`
+1. **Before adding code**: Check which business module owns the feature (`shop/`, `card/`, `building/`, etc.)
 2. **New game systems**: Use signal-based architecture for loose coupling
-3. **UI elements**: Keep in `scenes/ui/` and use separate scripts per component
-4. **Utilities**: Pure functions in `scripts/utils/` (no external state)
+3. **UI elements**: Keep scene files in `scenes/ui/` and scripts in `scripts/ui/` or `scripts/flow/`
+4. **Global config**: Put shared constants in `scripts/core/`
 5. **Test with Godot editor**: Most issues caught in real-time editing
 
 ## References
@@ -129,7 +137,7 @@ public partial class BattleSystem : Node2D
 - **Godot 4.6 C# Docs**: https://docs.godotengine.org/en/4.6/tutorials/scripting/c_sharp/
 - **Godot Signals**: https://docs.godotengine.org/en/4.6/tutorials/step_by_step/signals.html
 - **Jolt Physics**: https://godotengine.org/news/godot-4-0-brings-powerful-vulkan-rendering-support/
-- **Project-specific patterns**: See existing code in `scripts/systems/` and `scenes/`
+- **Project-specific patterns**: See existing code in `scripts/` module folders and `scenes/`
 
 ## Development Plan Folder
 

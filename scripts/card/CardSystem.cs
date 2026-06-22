@@ -70,10 +70,37 @@ public partial class CardSystem : Node
 
     public bool TryPlaceSelected(Castle castle, int gridX, int gridY)
     {
-        if (!HasSelection || castle == null || !castle.IsPlayerCastle)
+        if (!HasSelection)
             return false;
 
-        CardData card = SelectedCard;
+        return TryPlaceAtIndex(_selectedIndex, castle, gridX, gridY);
+    }
+
+    public bool TryPlaceAtIndex(int index, Castle castle, int gridX, int gridY)
+    {
+        if (index < 0 || index >= _hand.Count)
+            return false;
+
+        CardData card = _hand[index];
+        if (!TryPlaceCard(card, castle, gridX, gridY))
+            return false;
+
+        _hand.RemoveAt(index);
+        if (_selectedIndex == index)
+            _selectedIndex = -1;
+        else if (_selectedIndex > index)
+            _selectedIndex--;
+
+        EmitSignal(SignalName.HandChanged);
+        EmitSignal(SignalName.SelectionChanged, _selectedIndex);
+        return true;
+    }
+
+    public bool TryPlaceCard(CardData card, Castle castle, int gridX, int gridY)
+    {
+        if (card == null || castle == null || !castle.IsPlayerCastle)
+            return false;
+
         if (card.BuildingType != "Barracks")
             return false;
 
@@ -92,10 +119,6 @@ public partial class CardSystem : Node
             return false;
         }
 
-        _hand.RemoveAt(_selectedIndex);
-        _selectedIndex = -1;
-        EmitSignal(SignalName.HandChanged);
-        EmitSignal(SignalName.SelectionChanged, _selectedIndex);
         return true;
     }
 

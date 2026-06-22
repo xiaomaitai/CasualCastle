@@ -24,9 +24,6 @@ public partial class UIManager : Node2D
         if (GameManager.Instance != null)
             GameManager.Instance.GameStateChanged -= OnGameStateChanged;
 
-        if (_shopUi != null)
-            _shopUi.OpenChanged -= OnShopOpenChanged;
-
         _hudUi?.Dispose();
         _shopUi?.Dispose();
         _handUi?.Dispose();
@@ -39,20 +36,42 @@ public partial class UIManager : Node2D
     public override void _Process(double _)
     {
         _hudUi?.Process();
-        _handUi?.Process();
+        _shopUi?.Process();
+        if (_shopUi?.IsDragging != true)
+            _handUi?.Process();
     }
 
     public override void _Input(InputEvent @event)
     {
         if (@event is InputEventKey keyEvent && keyEvent.Pressed && !keyEvent.Echo
-            && keyEvent.Keycode == Key.Escape
-            && _shopUi?.Close() == true)
+            && keyEvent.Keycode == Key.Escape)
+        {
+            if (_handUi?.TryHandleEscape() == true)
+            {
+                GetViewport().SetInputAsHandled();
+                return;
+            }
+
+            if (_shopUi?.CancelDrag() == true)
+            {
+                GetViewport().SetInputAsHandled();
+                return;
+            }
+
+            if (_shopUi?.Close() == true)
+            {
+                GetViewport().SetInputAsHandled();
+                return;
+            }
+        }
+
+        if (_handUi?.HandleInput(@event) == true)
         {
             GetViewport().SetInputAsHandled();
             return;
         }
 
-        if (_handUi?.HandleInput(@event) == true)
+        if (_shopUi?.HandleInput(@event) == true)
         {
             GetViewport().SetInputAsHandled();
         }
@@ -64,11 +83,9 @@ public partial class UIManager : Node2D
         if (uiRoot == null) return;
 
         _hudUi = new HudUiController(uiRoot);
-        _shopUi = new ShopUiController(uiRoot);
+        _shopUi = new ShopUiController(this, uiRoot);
         _handUi = new HandUiController(this, uiRoot);
         _gameOverUi = new GameOverUiController(uiRoot, GoToTitle);
-
-        _shopUi.OpenChanged += OnShopOpenChanged;
 
         if (GameManager.Instance != null)
             GameManager.Instance.GameStateChanged += OnGameStateChanged;
@@ -83,13 +100,8 @@ public partial class UIManager : Node2D
 
         _hudUi.SetGameOverVisible(show);
         _shopUi.SetGameOver(show);
-        _handUi.SetInputBlocked(_gameOver || _shopUi.IsOpen);
+        _handUi.SetInputBlocked(_gameOver);
         _gameOverUi.SetState(state);
-    }
-
-    private void OnShopOpenChanged(bool open)
-    {
-        _handUi.SetInputBlocked(_gameOver || open);
     }
 
     private void GoToTitle()

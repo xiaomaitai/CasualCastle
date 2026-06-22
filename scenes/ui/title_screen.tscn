@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://b8t7l3e5s0c1n"]
 
-[ext_resource type="Script" path="res://scripts/ui/TitleScreen.cs" id="1"]
-[ext_resource type="Script" path="res://scripts/nodes/BgmPlayer.cs" id="2"]
+[ext_resource type="Script" path="res://scripts/flow/TitleScreen.cs" id="1"]
+[ext_resource type="Script" path="res://scripts/audio/BgmPlayer.cs" id="2"]
 
 [node name="TitleScreen" type="Control"]
 layout_mode = 3

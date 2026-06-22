@@ -105,9 +105,31 @@ public partial class ShopSystem : Node
             return false;
 
         TrySpendGold(offer.Cost);
+        RefreshOfferSlot(slotIndex);
+        return true;
+    }
+
+    public bool TryPlaceOfferDirect(int slotIndex, Castle castle, int gridX, int gridY)
+    {
+        if (!IsShopAvailable)
+            return false;
+
+        CardData offer = GetOffer(slotIndex);
+        if (offer == null || !CanAfford(offer.Cost))
+            return false;
+
+        if (CardSystem.Instance == null || !CardSystem.Instance.TryPlaceCard(offer, castle, gridX, gridY))
+            return false;
+
+        TrySpendGold(offer.Cost);
+        RefreshOfferSlot(slotIndex);
+        return true;
+    }
+
+    private void RefreshOfferSlot(int slotIndex)
+    {
         _offers[slotIndex] = Catalog[_random.Next(Catalog.Length)];
         EmitSignal(SignalName.ShopOffersChanged);
-        return true;
     }
 
     public void RequestOpenShop()

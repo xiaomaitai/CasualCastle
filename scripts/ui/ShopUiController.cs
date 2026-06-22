@@ -3,24 +3,28 @@ using System;
 
 public sealed class ShopUiController
 {
+    private readonly Node _owner;
     private readonly Button _shopButton;
-    private readonly ColorRect _overlay;
     private readonly Panel _panel;
     private readonly Label _shopGoldLabel;
     private readonly Button _closeButton;
     private readonly Button _refreshButton;
     private readonly Button[] _buyButtons = new Button[ShopSystem.OfferCount];
     private readonly Label[] _offerLabels = new Label[ShopSystem.OfferCount];
+    private readonly Control.GuiInputEventHandler[] _offerGuiInputHandlers = new Control.GuiInputEventHandler[ShopSystem.OfferCount];
 
     private bool _gameOver;
+    private bool _dragging;
+    private int _dragSlotIndex = -1;
 
     public bool IsOpen { get; private set; }
+    public bool IsDragging => _dragging;
     public event Action<bool> OpenChanged;
 
-    public ShopUiController(CanvasLayer uiRoot)
+    public ShopUiController(Node owner, CanvasLayer uiRoot)
     {
+        _owner = owner;
         _shopButton = uiRoot.GetNode<Button>("ShopButton");
-        _overlay = uiRoot.GetNode<ColorRect>("ShopOverlay");
         _panel = uiRoot.GetNode<Panel>("ShopPanel");
         _shopGoldLabel = uiRoot.GetNode<Label>("ShopPanel/ShopGoldLabel");
         _closeButton = uiRoot.GetNode<Button>("ShopPanel/ShopCloseButton");
@@ -30,8 +34,12 @@ public sealed class ShopUiController
         {
             _offerLabels[i] = uiRoot.GetNode<Label>($"ShopPanel/OfferSlot{i + 1}/OfferLabel");
             _buyButtons[i] = uiRoot.GetNode<Button>($"ShopPanel/OfferSlot{i + 1}/BuyButton");
+            _offerLabels[i].MouseFilter = Control.MouseFilterEnum.Stop;
+
             int slotIndex = i;
             _buyButtons[i].Pressed += () => OnBuyButtonPressed(slotIndex);
+            _offerGuiInputHandlers[i] = inputEvent => OnOfferGuiInput(slotIndex, inputEvent);
+            _offerLabels[i].GuiInput += _offerGuiInputHandlers[i];
         }
 
         _shopButton.Pressed += OnShopButtonPressed;
@@ -57,6 +65,9 @@ public sealed class ShopUiController
         _closeButton.Pressed -= OnClosePressed;
         _refreshButton.Pressed -= OnRefreshPressed;
 
+        for (int i = 0; i < ShopSystem.OfferCount; i++)
+            _offerLabels[i].GuiInput -= _offerGuiInputHandlers[i];
+
         if (ShopSystem.Instance != null)
         {
             ShopSystem.Instance.GoldChanged -= UpdateGoldDisplay;
@@ -73,7 +84,51 @@ public sealed class ShopUiController
         if (_gameOver)
             Close();
 
+        CancelDrag();
         UpdateShopButtonAvailability(ShopSystem.Instance?.IsShopAvailable == true);
+    }
+
+    public void Process()
+    {
+        if (!_dragging)
+            return;
+
+        UpdateDragPreview();
+    }
+
+    public bool HandleInput(InputEvent @event)
+    {
+        if (!_dragging)
+            return false;
+
+        if (@event is InputEventMouseButton mouseButton && !mouseButton.Pressed)
+        {
+            if (mouseButton.ButtonIndex == MouseButton.Left)
+            {
+                TryCompleteDrag(mouseButton.GlobalPosition);
+                CancelDrag();
+                return true;
+            }
+
+            if (mouseButton.ButtonIndex == MouseButton.Right)
+            {
+                CancelDrag();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool CancelDrag()
+    {
+        if (!_dragging)
+            return false;
+
+        _dragging = false;
+        _dragSlotIndex = -1;
+        GameManager.Instance.PlayerCastle?.ClearPlacementPreview();
+        return true;
     }
 
     public bool Close()
@@ -82,8 +137,8 @@ public sealed class ShopUiController
             return false;
 
         IsOpen = false;
-        _overlay.Visible = false;
         _panel.Visible = false;
+        CancelDrag();
         UpdateShopButtonAvailability(ShopSystem.Instance?.IsShopAvailable == true);
         OpenChanged?.Invoke(IsOpen);
         return true;
@@ -95,8 +150,6 @@ public sealed class ShopUiController
             return;
 
         IsOpen = true;
-        CardSystem.Instance?.ClearSelection();
-        _overlay.Visible = true;
         _panel.Visible = true;
         UpdateShopButtonAvailability(ShopSystem.Instance.IsShopAvailable);
         RefreshOffers();
@@ -121,6 +174,53 @@ public sealed class ShopUiController
     private void OnBuyButtonPressed(int slotIndex)
     {
         ShopSystem.Instance?.TryPurchase(slotIndex);
+    }
+
+    private void OnOfferGuiInput(int slotIndex, InputEvent @event)
+    {
+        if (@event is not InputEventMouseButton mouseButton
+            || !mouseButton.Pressed
+            || mouseButton.ButtonIndex != MouseButton.Left)
+            return;
+
+        if (_gameOver || ShopSystem.Instance?.IsShopAvailable != true)
+            return;
+
+        CardData offer = ShopSystem.Instance.GetOffer(slotIndex);
+        if (offer == null || !ShopSystem.Instance.CanAfford(offer.Cost))
+            return;
+
+        _dragging = true;
+        _dragSlotIndex = slotIndex;
+    }
+
+    private void TryCompleteDrag(Vector2 globalPosition)
+    {
+        Castle playerCastle = GameManager.Instance.PlayerCastle;
+        if (playerCastle == null || ShopSystem.Instance == null || _dragSlotIndex < 0)
+            return;
+
+        if (!playerCastle.TryGetGridFromGlobalPoint(globalPosition, out int gridX, out int gridY))
+            return;
+
+        ShopSystem.Instance.TryPlaceOfferDirect(_dragSlotIndex, playerCastle, gridX, gridY);
+    }
+
+    private void UpdateDragPreview()
+    {
+        Castle playerCastle = GameManager.Instance.PlayerCastle;
+        if (playerCastle == null)
+            return;
+
+        Vector2 mouseGlobal = _owner.GetViewport().GetMousePosition();
+        if (!playerCastle.TryGetGridFromGlobalPoint(mouseGlobal, out int gridX, out int gridY))
+        {
+            playerCastle.ClearPlacementPreview();
+            return;
+        }
+
+        bool valid = playerCastle.IsCellPassable(gridX, gridY);
+        playerCastle.SetPlacementPreview(true, gridX, gridY, valid);
     }
 
     private void UpdateGoldDisplay(int gold)

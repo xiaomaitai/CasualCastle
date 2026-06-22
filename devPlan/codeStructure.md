@@ -13,6 +13,22 @@ CasualCastle 是 Godot 4.6 C# 项目，主入口配置在 `project.godot`：
 - C# 脚本根目录：`scripts/`
 - 可复用预制体：`prefabs/`
 
+当前 `scripts/` 按业务模块划分：
+
+| 模块目录 | 业务模块 | 主要文件 |
+| --- | --- | --- |
+| `autoload/` | GameManager | `GameManager.cs` |
+| `core/` | DataResources | `GameConfig.cs` |
+| `flow/` | SceneFlow | `TitleScreen.cs`, `MainGameController.cs` |
+| `ui/` | UIManager | `UIManager.cs` 及 UI 子控制器 |
+| `shop/` | ShopSystem | `ShopSystem.cs` |
+| `card/` | CardSystem | `CardSystem.cs`, `CardData.cs` |
+| `night/` | NightSystem | `NightSystem.cs` |
+| `building/` | BuildingSystem | `Castle.cs`, `Building.cs`, `Barracks.cs` |
+| `battle/` | BattleSystem | `Soldier.cs` |
+| `audio/` | 音频 | `BgmPlayer.cs` |
+| `dev/` | 开发辅助 | `DevInputLogger.cs` |
+
 当前 `main_game.tscn` 的核心节点结构：
 
 - `MainGame`
@@ -37,7 +53,7 @@ CasualCastle 是 Godot 4.6 C# 项目，主入口配置在 `project.godot`：
 
 | 类 | 文件 | Godot 基类 | 职责 |
 | --- | --- | --- | --- |
-| `TitleScreen` | `scripts/ui/TitleScreen.cs` | `Control` | 绑定标题界面按钮，开始游戏时切换到 `main_game.tscn`，退出时关闭游戏。 |
+| `TitleScreen` | `scripts/flow/TitleScreen.cs` | `Control` | 绑定标题界面按钮，开始游戏时切换到 `main_game.tscn`，退出时关闭游戏。 |
 
 结构关系：
 
@@ -52,7 +68,7 @@ CasualCastle 是 Godot 4.6 C# 项目，主入口配置在 `project.godot`：
 | 类 | 文件 | Godot 基类 | 职责 |
 | --- | --- | --- | --- |
 | `GameManager` | `scripts/autoload/GameManager.cs` | `Node2D` | Godot Autoload；维护 `GameState`、`GamePhase`、双方血量、阶段计时；发出血量/状态/阶段信号；处理 P 键开发出兵。 |
-| `MainGameController` | `scripts/systems/MainGameController.cs` | `Node2D` | 主游戏场景控制器；进入场景时把 `Battlefield` 和玩家 `Castle` 注册给 `GameManager`，离开场景时清理本局引用。 |
+| `MainGameController` | `scripts/flow/MainGameController.cs` | `Node2D` | 主游戏场景控制器；进入场景时把 `Battlefield` 和玩家 `Castle` 注册给 `GameManager`，离开场景时清理本局引用。 |
 | `GameManager.GameState` | `scripts/autoload/GameManager.cs` | `enum` | 当前游戏状态：`Playing` / `GameOver`。 |
 | `GameManager.GamePhase` | `scripts/autoload/GameManager.cs` | `enum` | 当前昼夜阶段：`Day` / `Night`。 |
 
@@ -70,8 +86,8 @@ CasualCastle 是 Godot 4.6 C# 项目，主入口配置在 `project.godot`：
 
 | 类 | 文件 | Godot 基类 | 职责 |
 | --- | --- | --- | --- |
-| `NightSystem` | `scripts/systems/NightSystem.cs` | `Node` | 提供 `CanUnitWork()` 静态方法，根据 `GameManager` 当前阶段判断单位/建筑是否可工作。 |
-| `GameConfig` | `scripts/utils/GameConfig.cs` | `static class` | 保存昼夜时长和初始金币等全局配置常量。 |
+| `NightSystem` | `scripts/night/NightSystem.cs` | `Node` | 提供 `CanUnitWork()` 静态方法，根据 `GameManager` 当前阶段判断单位/建筑是否可工作。 |
+| `GameConfig` | `scripts/core/GameConfig.cs` | `static class` | 保存昼夜时长和初始金币等全局配置常量。 |
 
 结构关系：
 
@@ -85,9 +101,9 @@ CasualCastle 是 Godot 4.6 C# 项目，主入口配置在 `project.godot`：
 
 | 类 | 文件 | Godot 基类 | 职责 |
 | --- | --- | --- | --- |
-| `Castle` | `scripts/nodes/Castle.cs` | `Node2D` | 管理城堡地块网格、生命值、血条、建筑放置和兵营初始化。 |
-| `Building` | `scripts/nodes/Building.cs` | `Area2D` | 建筑基类；记录所属城堡与地块坐标；处理工作循环、昼夜暂停和工作视觉效果。 |
-| `Barracks` | `scripts/nodes/Barracks.cs` | `Building` | 兵营建筑；按间隔生成士兵，阵营由所属城堡决定。 |
+| `Castle` | `scripts/building/Castle.cs` | `Node2D` | 管理城堡地块网格、生命值、血条、建筑放置和兵营初始化。 |
+| `Building` | `scripts/building/Building.cs` | `Area2D` | 建筑基类；记录所属城堡与地块坐标；处理工作循环、昼夜暂停和工作视觉效果。 |
+| `Barracks` | `scripts/building/Barracks.cs` | `Building` | 兵营建筑；按间隔生成士兵，阵营由所属城堡决定。 |
 
 结构关系：
 
@@ -103,7 +119,7 @@ CasualCastle 是 Godot 4.6 C# 项目，主入口配置在 `project.godot`：
 
 | 类 | 文件 | Godot 基类 | 职责 |
 | --- | --- | --- | --- |
-| `Soldier` | `scripts/nodes/Soldier.cs` | `Area2D` | 基础战斗单位；按阵营推进，检测敌方士兵/建筑，攻击目标并处理死亡。 |
+| `Soldier` | `scripts/battle/Soldier.cs` | `Area2D` | 基础战斗单位；按阵营推进，检测敌方士兵/建筑，攻击目标并处理死亡。 |
 
 结构关系：
 
@@ -119,13 +135,13 @@ CasualCastle 是 Godot 4.6 C# 项目，主入口配置在 `project.godot`：
 
 | 类 | 文件 | Godot 基类 | 职责 |
 | --- | --- | --- | --- |
-| `UIManager` | `scripts/autoload/UIManager.cs` | `Node2D` | 主游戏 UI 入口；组合 HUD、商店、手牌和结算 UI 控制器，并转发输入与游戏状态变化。 |
+| `UIManager` | `scripts/ui/UIManager.cs` | `Node2D` | 主游戏 UI 入口；组合 HUD、商店、手牌和结算 UI 控制器，并转发输入与游戏状态变化。 |
 | `HudUiController` | `scripts/ui/HudUiController.cs` | 普通 C# 类 | 更新顶部血条、金币、昼夜显示、阶段倒计时，并处理跳过阶段按钮。 |
 | `ShopUiController` | `scripts/ui/ShopUiController.cs` | 普通 C# 类 | 控制商店开关、商品显示、购买、刷新和商店金币显示。 |
 | `HandUiController` | `scripts/ui/HandUiController.cs` | 普通 C# 类 | 控制手牌显示、选中态、放置提示、鼠标放置预览和取消输入。 |
 | `GameOverUiController` | `scripts/ui/GameOverUiController.cs` | 普通 C# 类 | 控制游戏结束遮罩、胜负文字和返回标题按钮。 |
-| `BgmPlayer` | `scripts/nodes/BgmPlayer.cs` | `AudioStreamPlayer` | 加载并循环播放背景音乐。 |
-| `DevInputLogger` | `scripts/utils/DevInputLogger.cs` | `Node` | 打印按键输入信息，用于开发调试。 |
+| `BgmPlayer` | `scripts/audio/BgmPlayer.cs` | `AudioStreamPlayer` | 加载并循环播放背景音乐。 |
+| `DevInputLogger` | `scripts/dev/DevInputLogger.cs` | `Node` | 打印按键输入信息，用于开发调试。 |
 
 结构关系：
 
@@ -142,8 +158,9 @@ CasualCastle 是 Godot 4.6 C# 项目，主入口配置在 `project.godot`：
 
 | 类 | 文件 | Godot 基类 | 当前状态 |
 | --- | --- | --- | --- |
-| `CardSystem` | `scripts/systems/CardSystem.cs` | `Node` | 空实现，预留建筑卡系统。 |
-| `ShopSystem` | `scripts/systems/ShopSystem.cs` | `Node` | 已实现商店商品、刷新、购买、金币消费和夜晚自动弹出。 |
+| `CardSystem` | `scripts/card/CardSystem.cs` | `Node` | 手牌管理、选牌与建筑卡放置。 |
+| `CardData` | `scripts/card/CardData.cs` | `class` | 卡牌运行时数据结构。 |
+| `ShopSystem` | `scripts/shop/ShopSystem.cs` | `Node` | 商店商品、刷新、购买、金币消费和夜晚自动弹出。 |
 
 ---
 

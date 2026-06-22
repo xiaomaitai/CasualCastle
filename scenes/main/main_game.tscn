@@ -1,13 +1,13 @@
 [gd_scene format=3 uid="uid://c4j2n4cvyoaq0"]
 
 [ext_resource type="PackedScene" uid="uid://c8a3s7l4e9012" path="res://prefabs/Castle.tscn" id="2"]
-[ext_resource type="Script" path="res://scripts/autoload/UIManager.cs" id="4"]
-[ext_resource type="Script" path="res://scripts/nodes/BgmPlayer.cs" id="5"]
-[ext_resource type="Script" path="res://scripts/utils/DevInputLogger.cs" id="6"]
-[ext_resource type="Script" path="res://scripts/systems/NightSystem.cs" id="7"]
-[ext_resource type="Script" path="res://scripts/systems/ShopSystem.cs" id="8"]
-[ext_resource type="Script" path="res://scripts/systems/CardSystem.cs" id="9"]
-[ext_resource type="Script" path="res://scripts/systems/MainGameController.cs" id="10"]
+[ext_resource type="Script" path="res://scripts/ui/UIManager.cs" id="4"]
+[ext_resource type="Script" path="res://scripts/audio/BgmPlayer.cs" id="5"]
+[ext_resource type="Script" path="res://scripts/dev/DevInputLogger.cs" id="6"]
+[ext_resource type="Script" path="res://scripts/night/NightSystem.cs" id="7"]
+[ext_resource type="Script" path="res://scripts/shop/ShopSystem.cs" id="8"]
+[ext_resource type="Script" path="res://scripts/card/CardSystem.cs" id="9"]
+[ext_resource type="Script" path="res://scripts/flow/MainGameController.cs" id="10"]
 
 [node name="MainGame" type="Node2D" unique_id=1]
 script = ExtResource("10")
@@ -160,16 +160,6 @@ offset_bottom = 600.0
 theme_override_font_sizes/font_size = 16
 text = "左键放置，右键或 Esc 取消"
 horizontal_alignment = 1
-
-[node name="ShopOverlay" type="ColorRect" parent="UI"]
-visible = false
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 0
-color = Color(0, 0, 0, 0.25)
 
 [node name="ShopPanel" type="Panel" parent="UI"]
 visible = false

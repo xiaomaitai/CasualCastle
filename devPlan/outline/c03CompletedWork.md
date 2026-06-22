@@ -14,11 +14,11 @@
 
 | 模块 | 交付内容 | 关键文件 |
 |------|----------|----------|
-| 基础框架 | 主场景 1280×720、`GameManager` / `UIManager` | `scenes/main/main_game.tscn`, `scripts/autoload/` |
-| 兵营与单位 | 兵营计时产兵、士兵属性与预制体 | `prefabs/Barracks.tscn`, `prefabs/Soldier.tscn`, `scripts/nodes/Barracks.cs`, `scripts/nodes/Soldier.cs` |
-| 战斗系统 | 移动、互殴、攻建筑、死亡 | `scripts/nodes/Soldier.cs` |
-| 城堡与胜负 | 城堡预制体、扣血、结算 | `prefabs/Castle.tscn`, `scripts/nodes/Castle.cs` |
-| 场景配置 | 格子放置兵营、碰撞层、战场布局 | `scripts/nodes/Building.cs`, `scripts/nodes/Castle.cs` |
+| 基础框架 | 主场景 1280×720、`GameManager` / `UIManager` | `scenes/main/main_game.tscn`, `scripts/autoload/`, `scripts/ui/`, `scripts/flow/` |
+| 兵营与单位 | 兵营计时产兵、士兵属性与预制体 | `prefabs/Barracks.tscn`, `prefabs/Soldier.tscn`, `scripts/building/Barracks.cs`, `scripts/battle/Soldier.cs` |
+| 战斗系统 | 移动、互殴、攻建筑、死亡 | `scripts/battle/Soldier.cs` |
+| 城堡与胜负 | 城堡预制体、扣血、结算 | `prefabs/Castle.tscn`, `scripts/building/Castle.cs` |
+| 场景配置 | 格子放置兵营、碰撞层、战场布局 | `scripts/building/Building.cs`, `scripts/building/Castle.cs` |
 
 **场景约定：** 玩家兵营 (7,4)、敌方 (0,4)；建筑碰撞 56×56；产兵于相邻格左下角。
 
@@ -29,9 +29,9 @@
 | 模块 | 交付内容 | 关键文件 |
 |------|----------|----------|
 | 标题界面 | 开始游戏 / 退出，场景切换 | `scenes/ui/title_screen.tscn`, `scripts/ui/TitleScreen.cs` |
-| 基础 UI | 双方血条、结算遮罩、「返回标题」 | `scripts/autoload/UIManager.cs`, `main_game.tscn` UI 节点 |
-| BGM | 标题与主游戏循环播放 | `scripts/nodes/BgmPlayer.cs`, `assets/audio/bgm/` |
-| 开发工具 | 按键日志、作弊产兵（P 键） | `scripts/utils/DevInputLogger.cs`, `GameManager.cs` |
+| 基础 UI | 双方血条、结算遮罩、「返回标题」 | `scripts/ui/UIManager.cs`, `main_game.tscn` UI 节点 |
+| BGM | 标题与主游戏循环播放 | `scripts/audio/BgmPlayer.cs`, `assets/audio/bgm/` |
+| 开发工具 | 按键日志、作弊产兵（P 键） | `scripts/dev/DevInputLogger.cs`, `GameManager.cs` |
 
 **入口流程：** `project.godot` → `title_screen.tscn` → `main_game.tscn`。
 
@@ -41,11 +41,11 @@
 
 | 模块 | 交付内容 | 关键文件 |
 |------|----------|----------|
-| 阶段状态机 | `Day` / `Night` 自动循环，支持手动跳过阶段 | `scripts/autoload/GameManager.cs`, `scripts/utils/GameConfig.cs` |
-| 夜晚休眠门控 | 普通兵营与士兵夜晚停止工作/行动，白天恢复 | `scripts/systems/NightSystem.cs`, `scripts/nodes/Building.cs`, `scripts/nodes/Soldier.cs` |
-| 阶段 UI | 显示当前阶段、剩余时间和跳过阶段按钮 | `scripts/autoload/UIManager.cs`, `scenes/main/main_game.tscn` |
-| 系统占位 | `ShopSystem`、`CardSystem` 占位，供 M2 扩展 | `scripts/systems/ShopSystem.cs`, `scripts/systems/CardSystem.cs` |
-| 建筑工作特效 | 兵营产兵前播放自下而上变亮、跳动、恢复效果 | `scripts/nodes/Building.cs`, `scripts/nodes/Barracks.cs`, `assets/shaders/building_work.gdshader` |
+| 阶段状态机 | `Day` / `Night` 自动循环，支持手动跳过阶段 | `scripts/autoload/GameManager.cs`, `scripts/core/GameConfig.cs` |
+| 夜晚休眠门控 | 普通兵营与士兵夜晚停止工作/行动，白天恢复 | `scripts/night/NightSystem.cs`, `scripts/building/Building.cs`, `scripts/battle/Soldier.cs` |
+| 阶段 UI | 显示当前阶段、剩余时间和跳过阶段按钮 | `scripts/ui/UIManager.cs`, `scenes/main/main_game.tscn` |
+| 系统占位 | `ShopSystem`、`CardSystem` 占位，供 M2 扩展 | `scripts/shop/ShopSystem.cs`, `scripts/card/CardSystem.cs` |
+| 建筑工作特效 | 兵营产兵前播放自下而上变亮、跳动、恢复效果 | `scripts/building/Building.cs`, `scripts/building/Barracks.cs`, `assets/shaders/building_work.gdshader` |
 
 ## 3.4 已具备、可复用的基础 API
 

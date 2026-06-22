@@ -13,7 +13,7 @@
 | 夜晚休眠门控 | 夜晚暂停无夜战词条的兵营产兵与士兵行动 | 1 天 |
 | 夜战词条占位 | `Building` / `Soldier` 增加 `HasNightCombat` 属性（默认 false） | 0.5 天 |
 | 数据资源骨架 | 创建 `GameConfig`、首批 `BuildingData` .tres | 1 天 |
-| 目录搭建 | 建立 `scripts/systems/`、`resources/` 子目录 | 0.5 天 |
+| 目录搭建 | 建立按业务模块划分的 `scripts/` 子目录与 `resources/` 子目录 | 0.5 天 |
 
 **交付物：**
 
