@@ -41,6 +41,12 @@ public partial class Castle : Node2D
 	public int BarracksGridY = 4;
 
 	[Export]
+	public int SecondBarracksGridX = -1;
+
+	[Export]
+	public int SecondBarracksGridY = -1;
+
+	[Export]
 	public float SpawnInset = 8f;
 
 	public CastleHeart Heart { get; private set; }
@@ -218,14 +224,21 @@ public partial class Castle : Node2D
 
 	private void SetupBarracks()
 	{
+		PlaceInitialBarracks(BarracksGridX, BarracksGridY);
+		if (SecondBarracksGridX >= 0 && SecondBarracksGridY >= 0)
+			PlaceInitialBarracks(SecondBarracksGridX, SecondBarracksGridY);
+	}
+
+	private void PlaceInitialBarracks(int gridX, int gridY)
+	{
 		PackedScene scene = BarracksScene ?? GD.Load<PackedScene>("res://prefabs/Barracks.tscn");
 		if (scene == null)
 			return;
 
 		Barracks barracks = scene.Instantiate<Barracks>();
 		barracks.InitFromType("Barracks");
-		barracks.BindToGrid(this, BarracksGridX, BarracksGridY);
-		PlaceBuilding(barracks, BarracksGridX, BarracksGridY);
+		barracks.BindToGrid(this, gridX, gridY);
+		PlaceBuilding(barracks, gridX, gridY);
 	}
 
 	private void OnHeartHealthChanged(int health, int maxHealth)
