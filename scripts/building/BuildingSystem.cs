@@ -18,8 +18,17 @@ public partial class BuildingSystem : Node
         new(1, 2),
     };
 
+    private static readonly Vector2I[] CastleHeartCells =
+    {
+        Vector2I.Zero,
+        new(1, 0),
+        new(0, 1),
+        new(1, 1),
+    };
+
     private static readonly Dictionary<string, BuildingShape> Shapes = new()
     {
+        ["CastleHeart"] = BuildingShape.Create(CastleHeartCells, new(0, 0), "城堡之心", GameConfig.CastleHeartMaxHealth),
         ["Barracks"] = BuildingShape.Create(Single, new(0, 0), "兵营", 100),
         ["ArcheryRange"] = BuildingShape.Create(ArcheryRangeCells, new(0, 0), "靶场", 120),
         ["Stable"] = BuildingShape.Create(StableCells, new(0, 1), "马厩", 150),
@@ -71,6 +80,8 @@ public partial class BuildingSystem : Node
 
     public static int GetMaxHealth(string buildingType) => GetShape(buildingType).MaxHealth;
 
+    public static bool IsCoreBuilding(string buildingType) => buildingType == "CastleHeart";
+
     public bool CanPlace(Castle castle, string buildingType, int anchorX, int anchorY)
     {
         if (castle == null)
@@ -115,6 +126,7 @@ public partial class BuildingSystem : Node
     {
         PackedScene scene = buildingType switch
         {
+            "CastleHeart" => GD.Load<PackedScene>("res://prefabs/CastleHeart.tscn"),
             "ArcheryRange" => GD.Load<PackedScene>("res://prefabs/ArcheryRange.tscn"),
             "Stable" => GD.Load<PackedScene>("res://prefabs/Stable.tscn"),
             _ => GD.Load<PackedScene>("res://prefabs/Barracks.tscn"),

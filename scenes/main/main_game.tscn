@@ -71,16 +71,16 @@ offset_left = 50.0
 offset_top = 20.0
 offset_right = 250.0
 offset_bottom = 47.0
-max_value = 100.0
-value = 100.0
+max_value = 500.0
+value = 500.0
 
 [node name="EnemyHealthBar" type="ProgressBar" parent="UI" unique_id=7]
 offset_left = 1030.0
 offset_top = 20.0
 offset_right = 1230.0
 offset_bottom = 47.0
-max_value = 100.0
-value = 100.0
+max_value = 500.0
+value = 500.0
 
 [node name="GoldLabel" type="Label" parent="UI"]
 offset_left = 280.0

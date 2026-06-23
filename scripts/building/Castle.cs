@@ -8,9 +8,6 @@ public partial class Castle : Node2D
 	public bool IsPlayerCastle;
 
 	[Export]
-	public int MaxHealth = 100;
-
-	[Export]
 	public int GridColumns = 8;
 
 	[Export]
@@ -32,6 +29,12 @@ public partial class Castle : Node2D
 	public PackedScene BarracksScene;
 
 	[Export]
+	public int CastleHeartGridX = 3;
+
+	[Export]
+	public int CastleHeartGridY = 3;
+
+	[Export]
 	public int BarracksGridX = 6;
 
 	[Export]
@@ -40,7 +43,8 @@ public partial class Castle : Node2D
 	[Export]
 	public float SpawnInset = 8f;
 
-	public int Health { get; private set; }
+	public CastleHeart Heart { get; private set; }
+	public bool IsAlive => Heart != null && Heart.Health > 0;
 
 	private ProgressBar _healthBar;
 	private bool[,] _occupied;
@@ -53,12 +57,12 @@ public partial class Castle : Node2D
 
 	public override void _Ready()
 	{
-		Health = MaxHealth;
 		_occupied = new bool[GridColumns, GridRows];
 		_healthBar = GetNodeOrNull<ProgressBar>("HealthBar");
-		UpdateHealthBar();
 		SetupHighlightOverlay();
+		SetupCastleHeart();
 		SetupBarracks();
+		UpdateHealthBar();
 	}
 
 	private void SetupHighlightOverlay()
@@ -198,10 +202,25 @@ public partial class Castle : Node2D
 		);
 	}
 
+	private void SetupCastleHeart()
+	{
+		PackedScene scene = GD.Load<PackedScene>("res://prefabs/CastleHeart.tscn");
+		if (scene == null)
+			return;
+
+		CastleHeart heart = scene.Instantiate<CastleHeart>();
+		heart.InitFromType("CastleHeart");
+		heart.BindToGrid(this, CastleHeartGridX, CastleHeartGridY);
+		PlaceBuilding(heart, CastleHeartGridX, CastleHeartGridY, "CastleHeart");
+		Heart = heart;
+		heart.HealthChanged += OnHeartHealthChanged;
+	}
+
 	private void SetupBarracks()
 	{
 		PackedScene scene = BarracksScene ?? GD.Load<PackedScene>("res://prefabs/Barracks.tscn");
-		if (scene == null) return;
+		if (scene == null)
+			return;
 
 		Barracks barracks = scene.Instantiate<Barracks>();
 		barracks.InitFromType("Barracks");
@@ -209,26 +228,18 @@ public partial class Castle : Node2D
 		PlaceBuilding(barracks, BarracksGridX, BarracksGridY);
 	}
 
-	public void TakeDamage(int amount)
+	private void OnHeartHealthChanged(int health, int maxHealth)
 	{
-		if (Health <= 0) return;
-
-		Health = Math.Max(0, Health - amount);
-		UpdateHealthBar();
-		GameManager.Instance?.TakeDamage(IsPlayerCastle, amount);
-	}
-
-	public void ResetHealth()
-	{
-		Health = MaxHealth;
 		UpdateHealthBar();
 	}
 
 	private void UpdateHealthBar()
 	{
-		if (_healthBar == null) return;
-		_healthBar.MaxValue = MaxHealth;
-		_healthBar.Value = Health;
+		if (_healthBar == null || Heart == null)
+			return;
+
+		_healthBar.MaxValue = Heart.MaxHealth;
+		_healthBar.Value = Heart.Health;
 	}
 
 	public override void _Draw()

@@ -139,7 +139,7 @@ public partial class ShopSystem : Node
 
         foreach (Building building in castle.GetBuildings())
         {
-            if (building.IsDamaged)
+            if (building.IsDamaged && !BuildingSystem.IsCoreBuilding(building.TypeId))
                 damaged.Add(building);
         }
 
@@ -148,7 +148,8 @@ public partial class ShopSystem : Node
 
     public bool TryRepairBuilding(Building building)
     {
-        if (!IsRepairAvailable || building == null || !building.IsDamaged)
+        if (!IsRepairAvailable || building == null || !building.IsDamaged
+            || BuildingSystem.IsCoreBuilding(building.TypeId))
             return false;
 
         Castle castle = GameManager.Instance?.PlayerCastle;

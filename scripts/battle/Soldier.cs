@@ -94,15 +94,13 @@ public partial class Soldier : Area2D
 				MoveToward(dt, _targetEnemy.GlobalPosition);
 			}
 		}
-		else if (_targetCastle != null && _targetCastle.Health > 0)
+		else if (_targetCastle != null && _targetCastle.IsAlive)
 		{
 			_targetEnemy = null;
 			if (_attackTimer <= 0)
 			{
 				if (_targetBuilding != null && _targetBuilding.Health > 0)
 					_targetBuilding.TakeDamage(Damage);
-				else
-					_targetCastle.TakeDamage(Damage);
 
 				_attackTimer = AttackCooldown;
 			}
@@ -161,7 +159,7 @@ public partial class Soldier : Area2D
 		if (building != null)
 		{
 			Castle castle = building.GetCastle();
-			if (castle != null && castle.Health > 0 && castle.IsPlayerCastle != IsPlayerUnit)
+			if (castle != null && castle.IsAlive && castle.IsPlayerCastle != IsPlayerUnit)
 			{
 				_targetCastle = castle;
 				_targetBuilding = building;

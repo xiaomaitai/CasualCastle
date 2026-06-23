@@ -70,11 +70,13 @@ public sealed class HudUiController
 
     private void UpdatePlayerHealth(int health)
     {
+        _playerHealthBar.MaxValue = GameManager.Instance.PlayerMaxHealth;
         _playerHealthBar.SetValue(health);
     }
 
     private void UpdateEnemyHealth(int health)
     {
+        _enemyHealthBar.MaxValue = GameManager.Instance.EnemyMaxHealth;
         _enemyHealthBar.SetValue(health);
     }
 

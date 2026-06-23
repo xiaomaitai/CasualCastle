@@ -45,9 +45,11 @@ public partial class GameManager : Node2D
     public int PlayerHealth { get; private set; }
     public int EnemyHealth { get; private set; }
     public Castle PlayerCastle => _playerCastle;
+    public Castle EnemyCastle => _enemyCastle;
 
     private Node2D _battlefield;
     private Castle _playerCastle;
+    private Castle _enemyCastle;
     private int _cheatSpawnCount;
 
     public override void _Ready()
@@ -115,21 +117,45 @@ public partial class GameManager : Node2D
             Instance = null;
     }
 
-    public void StartGameSession(Node2D battlefield, Castle playerCastle)
+    public void StartGameSession(Node2D battlefield, Castle playerCastle, Castle enemyCastle)
     {
         _battlefield = battlefield;
         _playerCastle = playerCastle;
+        _enemyCastle = enemyCastle;
         _cheatSpawnCount = 0;
 
         CurrentState = GameState.Playing;
         IsPaused = false;
-        PlayerHealth = PlayerMaxHealth;
-        EnemyHealth = EnemyMaxHealth;
+        SyncHeartHealthFromCastles();
+
+        BeginPhase(GamePhase.Day);
+        SetProcess(true);
+    }
+
+    private void SyncHeartHealthFromCastles()
+    {
+        if (_playerCastle?.Heart != null)
+        {
+            PlayerMaxHealth = _playerCastle.Heart.MaxHealth;
+            PlayerHealth = _playerCastle.Heart.Health;
+        }
+        else
+        {
+            PlayerHealth = PlayerMaxHealth;
+        }
+
+        if (_enemyCastle?.Heart != null)
+        {
+            EnemyMaxHealth = _enemyCastle.Heart.MaxHealth;
+            EnemyHealth = _enemyCastle.Heart.Health;
+        }
+        else
+        {
+            EnemyHealth = EnemyMaxHealth;
+        }
 
         EmitSignal(SignalName.PlayerHealthChanged, PlayerHealth);
         EmitSignal(SignalName.EnemyHealthChanged, EnemyHealth);
-        BeginPhase(GamePhase.Day);
-        SetProcess(true);
     }
 
     public void ClearGameSession()
@@ -137,6 +163,7 @@ public partial class GameManager : Node2D
         SetProcess(false);
         _battlefield = null;
         _playerCastle = null;
+        _enemyCastle = null;
     }
 
     public bool CanUnitWork(bool hasNightCombat)
@@ -171,13 +198,15 @@ public partial class GameManager : Node2D
         GD.Print(phase == GamePhase.Day ? "Phase: Day" : "Phase: Night");
     }
 
-    public void TakeDamage(bool isPlayer, int damage)
+    public void OnCastleHeartHealthChanged(bool isPlayer, int health, int maxHealth)
     {
-        if (CurrentState != GameState.Playing) return;
+        if (CurrentState != GameState.Playing)
+            return;
 
         if (isPlayer)
         {
-            PlayerHealth = Math.Max(0, PlayerHealth - damage);
+            PlayerMaxHealth = maxHealth;
+            PlayerHealth = health;
             EmitSignal(SignalName.PlayerHealthChanged, PlayerHealth);
 
             if (PlayerHealth <= 0)
@@ -185,7 +214,8 @@ public partial class GameManager : Node2D
         }
         else
         {
-            EnemyHealth = Math.Max(0, EnemyHealth - damage);
+            EnemyMaxHealth = maxHealth;
+            EnemyHealth = health;
             EmitSignal(SignalName.EnemyHealthChanged, EnemyHealth);
 
             if (EnemyHealth <= 0)

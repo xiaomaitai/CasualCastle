@@ -76,6 +76,9 @@ public partial class Building : Area2D
 
 		if (Health <= 0)
 			PauseWork();
+
+		if (TypeId == "CastleHeart" && CastleRef != null)
+			GameManager.Instance?.OnCastleHeartHealthChanged(CastleRef.IsPlayerCastle, Health, MaxHealth);
 	}
 
 	public void Repair()
