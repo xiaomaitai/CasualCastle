@@ -31,6 +31,7 @@ public partial class Soldier : Area2D
 	private Building _targetBuilding;
 	private Sprite2D _sprite;
 	private CollisionShape2D _collisionShape;
+	private SoldierSleepZEffect _sleepZEffect;
 
 	public override void _Ready()
 	{
@@ -38,6 +39,7 @@ public partial class Soldier : Area2D
 
 		_sprite = GetNodeOrNull<Sprite2D>("Sprite");
 		_collisionShape = GetNodeOrNull<CollisionShape2D>("CollisionShape");
+		_sleepZEffect = GetNodeOrNull<SoldierSleepZEffect>("SleepZEffect");
 
 		AreaEntered += OnAreaEntered;
 		AreaExited += OnAreaExited;
@@ -61,16 +63,27 @@ public partial class Soldier : Area2D
 
 	private bool IsActive => NightSystem.CanUnitWork(HasNightCombat);
 
+	private bool IsSleeping =>
+		IsAlive
+		&& GameManager.Instance?.CurrentState == GameManager.GameState.Playing
+		&& GameManager.Instance.IsNight
+		&& !GameManager.Instance.IsPaused
+		&& !HasNightCombat;
+
 	private void UpdateSleepVisual()
 	{
-		if (_sprite == null) return;
-		_sprite.Modulate = IsActive ? Colors.White : new Color(0.75f, 0.8f, 1f, 0.85f);
+		if (_sprite != null)
+			_sprite.Modulate = IsActive ? Colors.White : new Color(0.75f, 0.8f, 1f, 0.85f);
+
+		_sleepZEffect?.SetSleeping(IsSleeping);
 	}
 
 	public override void _Process(double delta)
 	{
 		if (!IsAlive) return;
 		if (GameManager.Instance?.CurrentState == GameManager.GameState.GameOver) return;
+
+		UpdateSleepVisual();
 		if (!IsActive) return;
 
 		float dt = (float)delta;
@@ -135,6 +148,7 @@ public partial class Soldier : Area2D
 	private void Die()
 	{
 		IsAlive = false;
+		_sleepZEffect?.SetSleeping(false);
 
 		if (_collisionShape != null)
 			_collisionShape.Disabled = true;
