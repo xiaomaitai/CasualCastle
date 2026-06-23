@@ -24,6 +24,7 @@ public partial class Building : Area2D
 	private bool _workActive;
 	private bool _workPaused;
 	private bool _jumpTweenAwaitingResume;
+	private BuildingStateIcon _stateIcon;
 
 	[Signal]
 	public delegate void HealthChangedEventHandler(int health, int maxHealth);
@@ -31,6 +32,10 @@ public partial class Building : Area2D
 	public string TypeId { get; set; } = "Barracks";
 	public int MaxHealth { get; private set; }
 	public int Health { get; private set; }
+	public bool IsManuallyPaused { get; private set; }
+	public bool IsDestroyed => Health <= 0;
+	public bool IsOperational => Health > 0 && !IsManuallyPaused;
+	public bool ContributesToAdjacency => !IsDestroyed;
 	public bool IsDamaged => Health < MaxHealth;
 	public string DisplayName => BuildingSystem.GetDisplayName(TypeId);
 	public int AnchorGridX => GridX;
@@ -53,6 +58,16 @@ public partial class Building : Area2D
 		CastleRef = castle;
 		GridX = gridX;
 		GridY = gridY;
+		SyncStateIconPosition();
+	}
+
+	public void SetManuallyPaused(bool paused)
+	{
+		if (BuildingSystem.IsCoreBuilding(TypeId) || IsManuallyPaused == paused)
+			return;
+
+		IsManuallyPaused = paused;
+		RefreshOperationalState();
 	}
 
 	public void InitFromType(string buildingType)
@@ -74,11 +89,13 @@ public partial class Building : Area2D
 		EmitSignal(SignalName.HealthChanged, Health, MaxHealth);
 		UpdateDamageVisual();
 
-		if (Health <= 0)
-			PauseWork();
-
 		if (TypeId == "CastleHeart" && CastleRef != null)
 			GameManager.Instance?.OnCastleHeartHealthChanged(CastleRef.IsPlayerCastle, Health, MaxHealth);
+
+		if (TypeId != "CastleHeart")
+			RefreshOperationalState();
+		else if (Health <= 0)
+			PauseWork();
 	}
 
 	public void Repair()
@@ -89,12 +106,12 @@ public partial class Building : Area2D
 		Health = MaxHealth;
 		EmitSignal(SignalName.HealthChanged, Health, MaxHealth);
 		UpdateDamageVisual();
-		UpdateWorkCycle();
+		RefreshOperationalState();
 	}
 
 	public int GetRepairCost() => (MaxHealth - Health) * GameConfig.RepairGoldPerHealth;
 
-	public bool CanWork => NightSystem.CanUnitWork(HasNightCombat);
+	public bool CanWork => IsOperational && NightSystem.CanUnitWork(HasNightCombat);
 
 	public override void _Ready()
 	{
@@ -116,6 +133,11 @@ public partial class Building : Area2D
 
 		if (GameManager.Instance != null)
 			GameManager.Instance.PhaseChanged += OnPhaseChanged;
+
+		_stateIcon = new BuildingStateIcon();
+		AddChild(_stateIcon);
+		SyncStateIconPosition();
+		RefreshOperationalState();
 	}
 
 	public override void _ExitTree()
@@ -305,5 +327,46 @@ public partial class Building : Area2D
 			_sprite.Modulate = new Color(0.85f, 0.75f, 0.75f);
 		else
 			_sprite.Modulate = Colors.White;
+	}
+
+	private void RefreshOperationalState()
+	{
+		SyncStateIconPosition();
+		UpdateStateIcon();
+
+		if (!IsOperational)
+			StopWork();
+		else
+			UpdateWorkCycle();
+
+		Castle castle = CastleRef;
+		if (castle != null)
+			AdjacentSystem.Instance?.RefreshCastle(castle);
+	}
+
+	private void SyncStateIconPosition()
+	{
+		if (_stateIcon == null || CastleRef == null)
+			return;
+
+		Vector2I mainOffset = BuildingSystem.GetMainCellOffset(TypeId);
+		Vector2 mainCenter = CastleRef.GetCellCenter(GridX + mainOffset.X, GridY + mainOffset.Y);
+		_stateIcon.Position = mainCenter - Position;
+	}
+
+	private void UpdateStateIcon()
+	{
+		if (_stateIcon == null || BuildingSystem.IsCoreBuilding(TypeId))
+		{
+			_stateIcon?.SetIcon(BuildingStateIcon.IconType.None);
+			return;
+		}
+
+		if (IsDestroyed)
+			_stateIcon.SetIcon(BuildingStateIcon.IconType.Destroyed);
+		else if (IsManuallyPaused)
+			_stateIcon.SetIcon(BuildingStateIcon.IconType.Paused);
+		else
+			_stateIcon.SetIcon(BuildingStateIcon.IconType.None);
 	}
 }

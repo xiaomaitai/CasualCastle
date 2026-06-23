@@ -14,6 +14,7 @@ public sealed class BuildingInfoUiController
     private bool _shopOpen;
     private bool _placementActive;
     private bool _pauseOpen;
+    private bool _toolActive;
 
     public BuildingInfoUiController(Node owner, CanvasLayer uiRoot)
     {
@@ -57,9 +58,16 @@ public sealed class BuildingInfoUiController
             ClearHover();
     }
 
+    public void SetToolActive(bool active)
+    {
+        _toolActive = active;
+        if (active)
+            ClearHover();
+    }
+
     public void Process()
     {
-        if (_inputBlocked || _shopOpen || _placementActive || _pauseOpen)
+        if (_inputBlocked || _shopOpen || _placementActive || _pauseOpen || _toolActive)
             return;
 
         Vector2 mouseGlobal = _owner.GetViewport().GetMousePosition();

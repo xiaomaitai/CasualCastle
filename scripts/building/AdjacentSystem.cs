@@ -37,7 +37,10 @@ public partial class AdjacentSystem : Node
 
         List<Building> buildings = castle.GetBuildings();
         foreach (Building building in buildings)
-            building.SetWorkSpeedMultiplier(1f);
+        {
+            if (building.ContributesToAdjacency)
+                building.SetWorkSpeedMultiplier(1f);
+        }
 
         foreach (Building building in buildings)
             ApplyBonuses(building, buildings);
@@ -73,11 +76,11 @@ public partial class AdjacentSystem : Node
     {
         List<Building> targets = new();
 
-        if (source.TypeId == "Barracks")
+        if (source.TypeId == "Barracks" && source.ContributesToAdjacency)
         {
             foreach (Building neighbor in GetAdjacentBuildings(source, buildings))
             {
-                if (neighbor.TypeId == "Barracks")
+                if (neighbor.TypeId == "Barracks" && neighbor.ContributesToAdjacency)
                     targets.Add(neighbor);
             }
         }
@@ -87,7 +90,7 @@ public partial class AdjacentSystem : Node
 
     private static void ApplyBonuses(Building building, List<Building> buildings)
     {
-        if (building.TypeId != "Barracks")
+        if (!building.ContributesToAdjacency || building.TypeId != "Barracks")
             return;
 
         int adjacentBarracks = CountAdjacentBuildings(building, buildings, "Barracks");
@@ -122,7 +125,7 @@ public partial class AdjacentSystem : Node
         int count = 0;
         foreach (Building neighbor in GetAdjacentBuildings(source, buildings))
         {
-            if (neighbor.TypeId == targetTypeId)
+            if (neighbor.TypeId == targetTypeId && neighbor.ContributesToAdjacency)
                 count++;
         }
 

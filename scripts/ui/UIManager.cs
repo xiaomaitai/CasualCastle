@@ -10,6 +10,7 @@ public partial class UIManager : Node2D
     private ShopUiController _shopUi;
     private HandUiController _handUi;
     private BuildingInfoUiController _buildingInfoUi;
+    private BuildingManageUiController _buildingManageUi;
     private PauseMenuUiController _pauseMenuUi;
     private GameOverUiController _gameOverUi;
     private bool _gameOver;
@@ -27,8 +28,13 @@ public partial class UIManager : Node2D
             GameManager.Instance.GameStateChanged -= OnGameStateChanged;
 
         _hudUi?.Dispose();
-        _shopUi?.Dispose();
+        if (_shopUi != null)
+        {
+            _shopUi.OpenChanged -= OnShopOpenChanged;
+            _shopUi.Dispose();
+        }
         _handUi?.Dispose();
+        _buildingManageUi?.Dispose();
         if (_pauseMenuUi != null)
         {
             _pauseMenuUi.OpenChanged -= OnPauseMenuOpenChanged;
@@ -44,13 +50,14 @@ public partial class UIManager : Node2D
     {
         _hudUi?.Process();
         _shopUi?.Process();
-        if (_shopUi?.IsDragging != true)
+        if (_shopUi?.IsDragging != true && _buildingManageUi?.IsToolActive != true)
             _handUi?.Process();
 
         _buildingInfoUi?.SetPlacementActive(
             _handUi?.IsPlacementActive == true || _shopUi?.IsDragging == true);
         _buildingInfoUi?.SetShopOpen(_shopUi?.IsOpen == true);
         _buildingInfoUi?.SetPauseOpen(_pauseMenuUi?.IsOpen == true);
+        _buildingInfoUi?.SetToolActive(_buildingManageUi?.IsToolActive == true);
         _buildingInfoUi?.Process();
     }
 
@@ -59,6 +66,12 @@ public partial class UIManager : Node2D
         if (@event is InputEventKey keyEvent && keyEvent.Pressed && !keyEvent.Echo
             && keyEvent.Keycode == Key.Escape)
         {
+            if (_buildingManageUi?.TryHandleEscape() == true)
+            {
+                GetViewport().SetInputAsHandled();
+                return;
+            }
+
             if (_pauseMenuUi?.Close() == true)
             {
                 GetViewport().SetInputAsHandled();
@@ -93,6 +106,12 @@ public partial class UIManager : Node2D
         if (_pauseMenuUi?.IsOpen == true)
             return;
 
+        if (_buildingManageUi?.HandleInput(@event) == true)
+        {
+            GetViewport().SetInputAsHandled();
+            return;
+        }
+
         if (_handUi?.HandleInput(@event) == true)
         {
             GetViewport().SetInputAsHandled();
@@ -114,10 +133,12 @@ public partial class UIManager : Node2D
         _shopUi = new ShopUiController(this, uiRoot);
         _handUi = new HandUiController(this, uiRoot);
         _buildingInfoUi = new BuildingInfoUiController(this, uiRoot);
+        _buildingManageUi = new BuildingManageUiController(this, uiRoot);
         _pauseMenuUi = new PauseMenuUiController(uiRoot, GoToTitle);
         _gameOverUi = new GameOverUiController(uiRoot, GoToTitle);
 
         _pauseMenuUi.OpenChanged += OnPauseMenuOpenChanged;
+        _shopUi.OpenChanged += OnShopOpenChanged;
 
         if (GameManager.Instance != null)
             GameManager.Instance.GameStateChanged += OnGameStateChanged;
@@ -134,8 +155,24 @@ public partial class UIManager : Node2D
         _shopUi.SetGameOver(show);
         _handUi.SetInputBlocked(_gameOver);
         _buildingInfoUi.SetInputBlocked(_gameOver);
+        _buildingManageUi.SetGameOver(_gameOver);
         _pauseMenuUi.SetGameOver(_gameOver);
         _gameOverUi.SetState(state);
+    }
+
+    private void OnShopOpenChanged(bool open)
+    {
+        if (open)
+        {
+            _handUi?.TryHandleEscape();
+            _buildingManageUi?.SetInputBlocked(true);
+        }
+        else
+        {
+            _buildingManageUi?.SetInputBlocked(_gameOver);
+        }
+
+        _handUi?.SetInputBlocked(open || _buildingManageUi?.IsToolActive == true || _gameOver);
     }
 
     private void OnPauseMenuOpenChanged(bool open)
@@ -145,9 +182,14 @@ public partial class UIManager : Node2D
             _shopUi?.Close();
             _handUi?.TryHandleEscape();
             _shopUi?.CancelDrag();
+            _buildingManageUi?.SetInputBlocked(true);
+        }
+        else
+        {
+            _buildingManageUi?.SetInputBlocked(_gameOver);
         }
 
-        _handUi?.SetInputBlocked(open || _gameOver);
+        _handUi?.SetInputBlocked(open || _buildingManageUi?.IsToolActive == true || _gameOver);
     }
 
     public void GoToTitle()

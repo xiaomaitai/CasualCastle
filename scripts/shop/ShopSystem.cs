@@ -128,23 +128,8 @@ public partial class ShopSystem : Node
     }
 
     public bool IsRepairAvailable =>
-        IsShopAvailable && GameManager.Instance?.IsNight == true;
-
-    public List<Building> GetDamagedPlayerBuildings()
-    {
-        List<Building> damaged = new();
-        Castle castle = GameManager.Instance?.PlayerCastle;
-        if (castle == null)
-            return damaged;
-
-        foreach (Building building in castle.GetBuildings())
-        {
-            if (building.IsDamaged && !BuildingSystem.IsCoreBuilding(building.TypeId))
-                damaged.Add(building);
-        }
-
-        return damaged;
-    }
+        GameManager.Instance?.CurrentState == GameManager.GameState.Playing
+        && GameManager.Instance.IsNight;
 
     public bool TryRepairBuilding(Building building)
     {

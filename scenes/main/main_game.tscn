@@ -130,6 +130,26 @@ offset_right = 1170.0
 offset_bottom = 676.0
 text = "商店"
 
+[node name="BuildingPauseToolButton" type="Button" parent="UI"]
+custom_minimum_size = Vector2(52, 52)
+offset_left = 918.0
+offset_top = 620.0
+offset_right = 970.0
+offset_bottom = 672.0
+toggle_mode = true
+expand_icon = true
+tooltip_text = "暂停建筑"
+
+[node name="BuildingRepairToolButton" type="Button" parent="UI"]
+custom_minimum_size = Vector2(52, 52)
+offset_left = 984.0
+offset_top = 620.0
+offset_right = 1036.0
+offset_bottom = 672.0
+toggle_mode = true
+expand_icon = true
+tooltip_text = "修复建筑（仅夜晚）"
+
 [node name="HandPanel" type="HBoxContainer" parent="UI"]
 offset_left = 307.0
 offset_top = 605.0
@@ -214,12 +234,12 @@ visible = false
 offset_left = 819.0
 offset_top = 72.0
 offset_right = 1254.0
-offset_bottom = 605.0
+offset_bottom = 380.0
 
 [node name="ShopPanelBackground" type="ColorRect" parent="UI/ShopPanel"]
 layout_mode = 0
 offset_right = 435.0
-offset_bottom = 533.0
+offset_bottom = 308.0
 color = Color(0.12, 0.16, 0.22, 0.96)
 
 [node name="ShopTitleLabel" type="Label" parent="UI/ShopPanel"]
@@ -308,86 +328,10 @@ text = "购买"
 [node name="ShopRefreshButton" type="Button" parent="UI/ShopPanel"]
 layout_mode = 0
 offset_left = 140.0
-offset_top = 492.0
+offset_top = 320.0
 offset_right = 295.0
-offset_bottom = 528.0
+offset_bottom = 364.0
 text = "刷新商品"
-
-[node name="RepairTitleLabel" type="Label" parent="UI/ShopPanel"]
-layout_mode = 0
-offset_left = 24.0
-offset_top = 312.0
-offset_right = 380.0
-offset_bottom = 340.0
-theme_override_font_sizes/font_size = 18
-text = "建筑修复（仅夜晚）"
-
-[node name="RepairEmptyLabel" type="Label" parent="UI/ShopPanel"]
-visible = false
-layout_mode = 0
-offset_left = 24.0
-offset_top = 344.0
-offset_right = 380.0
-offset_bottom = 372.0
-theme_override_font_sizes/font_size = 16
-text = "暂无受损建筑"
-
-[node name="RepairSlot1" type="HBoxContainer" parent="UI/ShopPanel"]
-layout_mode = 0
-offset_left = 24.0
-offset_top = 344.0
-offset_right = 411.0
-offset_bottom = 384.0
-theme_override_constants/separation = 12
-
-[node name="RepairLabel" type="Label" parent="UI/ShopPanel/RepairSlot1"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 16
-text = "兵营  80/100  费用：20"
-
-[node name="RepairButton" type="Button" parent="UI/ShopPanel/RepairSlot1"]
-custom_minimum_size = Vector2(96, 36)
-layout_mode = 2
-text = "修复"
-
-[node name="RepairSlot2" type="HBoxContainer" parent="UI/ShopPanel"]
-layout_mode = 0
-offset_left = 24.0
-offset_top = 392.0
-offset_right = 411.0
-offset_bottom = 432.0
-theme_override_constants/separation = 12
-
-[node name="RepairLabel" type="Label" parent="UI/ShopPanel/RepairSlot2"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 16
-text = "靶场  90/120  费用：30"
-
-[node name="RepairButton" type="Button" parent="UI/ShopPanel/RepairSlot2"]
-custom_minimum_size = Vector2(96, 36)
-layout_mode = 2
-text = "修复"
-
-[node name="RepairSlot3" type="HBoxContainer" parent="UI/ShopPanel"]
-layout_mode = 0
-offset_left = 24.0
-offset_top = 440.0
-offset_right = 411.0
-offset_bottom = 480.0
-theme_override_constants/separation = 12
-
-[node name="RepairLabel" type="Label" parent="UI/ShopPanel/RepairSlot3"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 16
-text = "马厩  100/150  费用：50"
-
-[node name="RepairButton" type="Button" parent="UI/ShopPanel/RepairSlot3"]
-custom_minimum_size = Vector2(96, 36)
-layout_mode = 2
-text = "修复"
 
 [node name="PauseOverlay" type="ColorRect" parent="UI"]
 visible = false
