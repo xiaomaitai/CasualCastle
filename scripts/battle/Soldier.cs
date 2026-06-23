@@ -28,6 +28,7 @@ public partial class Soldier : Area2D
 	private float _attackTimer = 0f;
 	private Soldier _targetEnemy;
 	private Castle _targetCastle;
+	private Building _targetBuilding;
 	private Sprite2D _sprite;
 	private CollisionShape2D _collisionShape;
 
@@ -98,7 +99,11 @@ public partial class Soldier : Area2D
 			_targetEnemy = null;
 			if (_attackTimer <= 0)
 			{
-				_targetCastle.TakeDamage(Damage);
+				if (_targetBuilding != null && _targetBuilding.Health > 0)
+					_targetBuilding.TakeDamage(Damage);
+				else
+					_targetCastle.TakeDamage(Damage);
+
 				_attackTimer = AttackCooldown;
 			}
 		}
@@ -157,7 +162,10 @@ public partial class Soldier : Area2D
 		{
 			Castle castle = building.GetCastle();
 			if (castle != null && castle.Health > 0 && castle.IsPlayerCastle != IsPlayerUnit)
+			{
 				_targetCastle = castle;
+				_targetBuilding = building;
+			}
 		}
 	}
 
@@ -169,6 +177,9 @@ public partial class Soldier : Area2D
 
 		Building building = area as Building;
 		if (building != null && building.GetCastle() == _targetCastle)
+		{
 			_targetCastle = null;
+			_targetBuilding = null;
+		}
 	}
 }

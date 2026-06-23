@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public sealed class ShopUiController
 {
@@ -12,6 +13,11 @@ public sealed class ShopUiController
     private readonly Button[] _buyButtons = new Button[ShopSystem.OfferCount];
     private readonly Label[] _offerLabels = new Label[ShopSystem.OfferCount];
     private readonly Control.GuiInputEventHandler[] _offerGuiInputHandlers = new Control.GuiInputEventHandler[ShopSystem.OfferCount];
+    private readonly Label _repairTitleLabel;
+    private readonly Label _repairEmptyLabel;
+    private readonly Label[] _repairLabels = new Label[3];
+    private readonly Button[] _repairButtons = new Button[3];
+    private readonly Building[] _repairTargets = new Building[3];
 
     private bool _gameOver;
     private bool _dragging;
@@ -29,6 +35,8 @@ public sealed class ShopUiController
         _shopGoldLabel = uiRoot.GetNode<Label>("ShopPanel/ShopGoldLabel");
         _closeButton = uiRoot.GetNode<Button>("ShopPanel/ShopCloseButton");
         _refreshButton = uiRoot.GetNode<Button>("ShopPanel/ShopRefreshButton");
+        _repairTitleLabel = uiRoot.GetNode<Label>("ShopPanel/RepairTitleLabel");
+        _repairEmptyLabel = uiRoot.GetNode<Label>("ShopPanel/RepairEmptyLabel");
 
         for (int i = 0; i < ShopSystem.OfferCount; i++)
         {
@@ -40,6 +48,15 @@ public sealed class ShopUiController
             _buyButtons[i].Pressed += () => OnBuyButtonPressed(slotIndex);
             _offerGuiInputHandlers[i] = inputEvent => OnOfferGuiInput(slotIndex, inputEvent);
             _offerLabels[i].GuiInput += _offerGuiInputHandlers[i];
+        }
+
+        for (int i = 0; i < _repairLabels.Length; i++)
+        {
+            _repairLabels[i] = uiRoot.GetNode<Label>($"ShopPanel/RepairSlot{i + 1}/RepairLabel");
+            _repairButtons[i] = uiRoot.GetNode<Button>($"ShopPanel/RepairSlot{i + 1}/RepairButton");
+
+            int slotIndex = i;
+            _repairButtons[i].Pressed += () => OnRepairButtonPressed(slotIndex);
         }
 
         _shopButton.Pressed += OnShopButtonPressed;
@@ -57,6 +74,9 @@ public sealed class ShopUiController
             UpdateShopButtonAvailability(ShopSystem.Instance.IsShopAvailable);
             RefreshOffers();
         }
+
+        if (GameManager.Instance != null)
+            GameManager.Instance.PhaseChanged += OnPhaseChanged;
     }
 
     public void Dispose()
@@ -75,6 +95,9 @@ public sealed class ShopUiController
             ShopSystem.Instance.ShopOpenRequested -= Open;
             ShopSystem.Instance.ShopOffersChanged -= RefreshOffers;
         }
+
+        if (GameManager.Instance != null)
+            GameManager.Instance.PhaseChanged -= OnPhaseChanged;
     }
 
     public void SetGameOver(bool gameOver)
@@ -153,6 +176,7 @@ public sealed class ShopUiController
         _panel.Visible = true;
         UpdateShopButtonAvailability(ShopSystem.Instance.IsShopAvailable);
         RefreshOffers();
+        RefreshRepairs();
         OpenChanged?.Invoke(IsOpen);
     }
 
@@ -164,6 +188,25 @@ public sealed class ShopUiController
     private void OnRefreshPressed()
     {
         ShopSystem.Instance?.RefreshOffers();
+    }
+
+    private void OnPhaseChanged(GameManager.GamePhase _)
+    {
+        if (IsOpen)
+            RefreshRepairs();
+    }
+
+    private void OnRepairButtonPressed(int slotIndex)
+    {
+        if (slotIndex < 0 || slotIndex >= _repairTargets.Length)
+            return;
+
+        Building building = _repairTargets[slotIndex];
+        if (building == null || ShopSystem.Instance == null)
+            return;
+
+        if (ShopSystem.Instance.TryRepairBuilding(building))
+            RefreshRepairs();
     }
 
     private void OnClosePressed()
@@ -229,6 +272,8 @@ public sealed class ShopUiController
     {
         _shopGoldLabel.Text = $"当前金币：{gold}";
         RefreshOffers();
+        if (IsOpen)
+            RefreshRepairs();
     }
 
     private void UpdateShopButtonAvailability(bool available)
@@ -252,6 +297,35 @@ public sealed class ShopUiController
             bool canBuy = offer != null && ShopSystem.Instance.CanAfford(offer.Cost);
             _buyButtons[i].Disabled = offer == null || !canBuy;
             _buyButtons[i].Text = canBuy ? "购买" : "金币不足";
+        }
+    }
+
+    private void RefreshRepairs()
+    {
+        bool repairAvailable = ShopSystem.Instance?.IsRepairAvailable == true;
+        _repairTitleLabel.Text = repairAvailable ? "建筑修复（夜晚）" : "建筑修复（仅夜晚）";
+
+        List<Building> damaged = ShopSystem.Instance?.GetDamagedPlayerBuildings() ?? new List<Building>();
+        _repairEmptyLabel.Visible = repairAvailable && damaged.Count == 0;
+
+        for (int i = 0; i < _repairLabels.Length; i++)
+        {
+            bool hasTarget = repairAvailable && i < damaged.Count;
+            _repairTargets[i] = hasTarget ? damaged[i] : null;
+
+            var slot = _repairLabels[i].GetParent<Control>();
+            slot.Visible = hasTarget;
+
+            if (!hasTarget)
+                continue;
+
+            Building building = damaged[i];
+            int cost = building.GetRepairCost();
+            _repairLabels[i].Text = $"{building.DisplayName}  {building.Health}/{building.MaxHealth}  费用：{cost}";
+
+            bool canAfford = ShopSystem.Instance.CanAfford(cost);
+            _repairButtons[i].Disabled = !canAfford;
+            _repairButtons[i].Text = canAfford ? "修复" : "金币不足";
         }
     }
 }

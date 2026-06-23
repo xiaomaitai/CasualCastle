@@ -25,9 +25,13 @@ public partial class Building : Area2D
 	private bool _workPaused;
 	private bool _jumpTweenAwaitingResume;
 
+	[Signal]
+	public delegate void HealthChangedEventHandler(int health, int maxHealth);
+
 	public string TypeId { get; set; } = "Barracks";
 	public int MaxHealth { get; private set; }
 	public int Health { get; private set; }
+	public bool IsDamaged => Health < MaxHealth;
 	public string DisplayName => BuildingSystem.GetDisplayName(TypeId);
 	public int AnchorGridX => GridX;
 	public int AnchorGridY => GridY;
@@ -56,9 +60,36 @@ public partial class Building : Area2D
 		TypeId = buildingType;
 		MaxHealth = BuildingSystem.GetMaxHealth(buildingType);
 		Health = MaxHealth;
+		UpdateDamageVisual();
 	}
 
 	public Castle GetCastle() => CastleRef;
+
+	public void TakeDamage(int amount)
+	{
+		if (amount <= 0 || Health <= 0)
+			return;
+
+		Health = Mathf.Max(0, Health - amount);
+		EmitSignal(SignalName.HealthChanged, Health, MaxHealth);
+		UpdateDamageVisual();
+
+		if (Health <= 0)
+			PauseWork();
+	}
+
+	public void Repair()
+	{
+		if (Health >= MaxHealth)
+			return;
+
+		Health = MaxHealth;
+		EmitSignal(SignalName.HealthChanged, Health, MaxHealth);
+		UpdateDamageVisual();
+		UpdateWorkCycle();
+	}
+
+	public int GetRepairCost() => (MaxHealth - Health) * GameConfig.RepairGoldPerHealth;
 
 	public bool CanWork => NightSystem.CanUnitWork(HasNightCombat);
 
@@ -257,5 +288,19 @@ public partial class Building : Area2D
 			return;
 		_sprite.Material = _originalMaterial;
 		_sprite.Position = _spriteBasePosition;
+		UpdateDamageVisual();
+	}
+
+	private void UpdateDamageVisual()
+	{
+		if (_sprite == null)
+			return;
+
+		if (Health <= 0)
+			_sprite.Modulate = new Color(0.55f, 0.55f, 0.6f, 0.75f);
+		else if (IsDamaged)
+			_sprite.Modulate = new Color(0.85f, 0.75f, 0.75f);
+		else
+			_sprite.Modulate = Colors.White;
 	}
 }

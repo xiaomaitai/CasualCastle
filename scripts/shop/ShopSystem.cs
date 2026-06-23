@@ -127,6 +127,42 @@ public partial class ShopSystem : Node
         return true;
     }
 
+    public bool IsRepairAvailable =>
+        IsShopAvailable && GameManager.Instance?.IsNight == true;
+
+    public List<Building> GetDamagedPlayerBuildings()
+    {
+        List<Building> damaged = new();
+        Castle castle = GameManager.Instance?.PlayerCastle;
+        if (castle == null)
+            return damaged;
+
+        foreach (Building building in castle.GetBuildings())
+        {
+            if (building.IsDamaged)
+                damaged.Add(building);
+        }
+
+        return damaged;
+    }
+
+    public bool TryRepairBuilding(Building building)
+    {
+        if (!IsRepairAvailable || building == null || !building.IsDamaged)
+            return false;
+
+        Castle castle = GameManager.Instance?.PlayerCastle;
+        if (castle == null || building.GetCastle() != castle)
+            return false;
+
+        int cost = building.GetRepairCost();
+        if (!TrySpendGold(cost))
+            return false;
+
+        building.Repair();
+        return true;
+    }
+
     private void RefreshOfferSlot(int slotIndex)
     {
         _offers[slotIndex] = Catalog[_random.Next(Catalog.Length)];

@@ -33,6 +33,7 @@ public partial class GameManager : Node2D
     public GamePhase CurrentPhase { get; private set; } = GamePhase.Day;
     public bool IsDay => CurrentPhase == GamePhase.Day;
     public bool IsNight => CurrentPhase == GamePhase.Night;
+    public bool IsPaused { get; private set; }
     public float PhaseTimeRemaining { get; private set; }
 
     [Export]
@@ -58,7 +59,7 @@ public partial class GameManager : Node2D
 
     public override void _Process(double delta)
     {
-        if (CurrentState != GameState.Playing) return;
+        if (CurrentState != GameState.Playing || IsPaused) return;
 
         PhaseTimeRemaining -= (float)delta;
         if (PhaseTimeRemaining <= 0f)
@@ -121,6 +122,7 @@ public partial class GameManager : Node2D
         _cheatSpawnCount = 0;
 
         CurrentState = GameState.Playing;
+        IsPaused = false;
         PlayerHealth = PlayerMaxHealth;
         EnemyHealth = EnemyMaxHealth;
 
@@ -139,9 +141,18 @@ public partial class GameManager : Node2D
 
     public bool CanUnitWork(bool hasNightCombat)
     {
-        if (CurrentState != GameState.Playing) return false;
+        if (CurrentState != GameState.Playing || IsPaused) return false;
         if (CurrentPhase == GamePhase.Day) return true;
         return hasNightCombat;
+    }
+
+    public void SetPaused(bool paused)
+    {
+        if (CurrentState != GameState.Playing)
+            return;
+
+        IsPaused = paused;
+        SetProcess(!paused);
     }
 
     public void AdvancePhase()
@@ -185,6 +196,7 @@ public partial class GameManager : Node2D
     public void EndGame(bool playerWon)
     {
         CurrentState = GameState.GameOver;
+        IsPaused = false;
         SetProcess(false);
         EmitSignal(SignalName.GameStateChanged, (int)CurrentState);
         GD.Print(playerWon ? "Player Wins!" : "Enemy Wins!");

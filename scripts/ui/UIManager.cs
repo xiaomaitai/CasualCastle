@@ -10,6 +10,7 @@ public partial class UIManager : Node2D
     private ShopUiController _shopUi;
     private HandUiController _handUi;
     private BuildingInfoUiController _buildingInfoUi;
+    private PauseMenuUiController _pauseMenuUi;
     private GameOverUiController _gameOverUi;
     private bool _gameOver;
 
@@ -28,6 +29,11 @@ public partial class UIManager : Node2D
         _hudUi?.Dispose();
         _shopUi?.Dispose();
         _handUi?.Dispose();
+        if (_pauseMenuUi != null)
+        {
+            _pauseMenuUi.OpenChanged -= OnPauseMenuOpenChanged;
+            _pauseMenuUi.Dispose();
+        }
         _gameOverUi?.Dispose();
 
         if (Instance == this)
@@ -44,6 +50,7 @@ public partial class UIManager : Node2D
         _buildingInfoUi?.SetPlacementActive(
             _handUi?.IsPlacementActive == true || _shopUi?.IsDragging == true);
         _buildingInfoUi?.SetShopOpen(_shopUi?.IsOpen == true);
+        _buildingInfoUi?.SetPauseOpen(_pauseMenuUi?.IsOpen == true);
         _buildingInfoUi?.Process();
     }
 
@@ -52,6 +59,12 @@ public partial class UIManager : Node2D
         if (@event is InputEventKey keyEvent && keyEvent.Pressed && !keyEvent.Echo
             && keyEvent.Keycode == Key.Escape)
         {
+            if (_pauseMenuUi?.Close() == true)
+            {
+                GetViewport().SetInputAsHandled();
+                return;
+            }
+
             if (_handUi?.TryHandleEscape() == true)
             {
                 GetViewport().SetInputAsHandled();
@@ -69,7 +82,16 @@ public partial class UIManager : Node2D
                 GetViewport().SetInputAsHandled();
                 return;
             }
+
+            if (_pauseMenuUi?.Open() == true)
+            {
+                GetViewport().SetInputAsHandled();
+                return;
+            }
         }
+
+        if (_pauseMenuUi?.IsOpen == true)
+            return;
 
         if (_handUi?.HandleInput(@event) == true)
         {
@@ -92,7 +114,10 @@ public partial class UIManager : Node2D
         _shopUi = new ShopUiController(this, uiRoot);
         _handUi = new HandUiController(this, uiRoot);
         _buildingInfoUi = new BuildingInfoUiController(this, uiRoot);
+        _pauseMenuUi = new PauseMenuUiController(uiRoot, GoToTitle);
         _gameOverUi = new GameOverUiController(uiRoot, GoToTitle);
+
+        _pauseMenuUi.OpenChanged += OnPauseMenuOpenChanged;
 
         if (GameManager.Instance != null)
             GameManager.Instance.GameStateChanged += OnGameStateChanged;
@@ -109,11 +134,25 @@ public partial class UIManager : Node2D
         _shopUi.SetGameOver(show);
         _handUi.SetInputBlocked(_gameOver);
         _buildingInfoUi.SetInputBlocked(_gameOver);
+        _pauseMenuUi.SetGameOver(_gameOver);
         _gameOverUi.SetState(state);
     }
 
-    private void GoToTitle()
+    private void OnPauseMenuOpenChanged(bool open)
     {
+        if (open)
+        {
+            _shopUi?.Close();
+            _handUi?.TryHandleEscape();
+            _shopUi?.CancelDrag();
+        }
+
+        _handUi?.SetInputBlocked(open || _gameOver);
+    }
+
+    public void GoToTitle()
+    {
+        GameManager.Instance?.SetPaused(false);
         CardSystem.Instance?.ResetHand();
         GetTree().ChangeSceneToFile(TitleScene);
     }
