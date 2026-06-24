@@ -26,39 +26,74 @@ public partial class BuildingSystem : Node
         new(1, 1),
     };
 
-    private static readonly Dictionary<string, BuildingShape> Shapes = new()
+    private static readonly Dictionary<string, BuildingDefinition> Definitions = new()
     {
-        ["CastleHeart"] = BuildingShape.Create(CastleHeartCells, new(0, 0), "城堡之心", GameConfig.CastleHeartMaxHealth),
-        ["Barracks"] = BuildingShape.Create(Single, new(0, 0), "兵营", 100),
-        ["ArcheryRange"] = BuildingShape.Create(ArcheryRangeCells, new(0, 0), "靶场", 120),
-        ["Stable"] = BuildingShape.Create(StableCells, new(0, 1), "马厩", 150),
+        ["CastleHeart"] = BuildingDefinition.Create(
+            CastleHeartCells, new(0, 0), "城堡之心", GameConfig.CastleHeartMaxHealth,
+            "res://prefabs/CastleHeart.tscn"),
+        ["Barracks"] = BuildingDefinition.Create(
+            Single, new(0, 0), "兵营", 100,
+            "res://prefabs/Barracks.tscn",
+            spawnInterval: 5f),
+        ["ArcheryRange"] = BuildingDefinition.Create(
+            ArcheryRangeCells, new(0, 0), "靶场", 120,
+            "res://prefabs/ArcheryRange.tscn",
+            spawnInterval: 6f, spawnCellOffset: new(1, 0),
+            soldierDamage: 8, soldierAttackRange: 50f),
+        ["Stable"] = BuildingDefinition.Create(
+            StableCells, new(0, 1), "马厩", 150,
+            "res://prefabs/Stable.tscn",
+            spawnInterval: 5f, spawnCellOffset: new(1, 2),
+            soldierSpeed: 120f),
     };
 
-    private readonly struct BuildingShape
+    private readonly struct BuildingDefinition
     {
         public Vector2I[] Footprint { get; init; }
         public Vector2I MainCellOffset { get; init; }
         public string DisplayName { get; init; }
         public int MaxHealth { get; init; }
+        public string PrefabPath { get; init; }
+        public float SpawnInterval { get; init; }
+        public Vector2I SpawnCellOffset { get; init; }
+        public int? SoldierDamage { get; init; }
+        public float? SoldierAttackRange { get; init; }
+        public float? SoldierSpeed { get; init; }
 
-        public static BuildingShape Create(Vector2I[] footprint, Vector2I mainCellOffset, string displayName, int maxHealth)
+        public static BuildingDefinition Create(
+            Vector2I[] footprint,
+            Vector2I mainCellOffset,
+            string displayName,
+            int maxHealth,
+            string prefabPath,
+            float spawnInterval = 0f,
+            Vector2I? spawnCellOffset = null,
+            int? soldierDamage = null,
+            float? soldierAttackRange = null,
+            float? soldierSpeed = null)
         {
-            return new BuildingShape
+            return new BuildingDefinition
             {
                 Footprint = footprint,
                 MainCellOffset = mainCellOffset,
                 DisplayName = displayName,
                 MaxHealth = maxHealth,
+                PrefabPath = prefabPath,
+                SpawnInterval = spawnInterval,
+                SpawnCellOffset = spawnCellOffset ?? Vector2I.Zero,
+                SoldierDamage = soldierDamage,
+                SoldierAttackRange = soldierAttackRange,
+                SoldierSpeed = soldierSpeed,
             };
         }
     }
 
-    private static BuildingShape GetShape(string buildingType)
+    private static BuildingDefinition GetDefinition(string buildingType)
     {
-        if (Shapes.TryGetValue(buildingType, out BuildingShape shape))
-            return shape;
+        if (Definitions.TryGetValue(buildingType, out BuildingDefinition definition))
+            return definition;
 
-        return Shapes["Barracks"];
+        return Definitions["Barracks"];
     }
 
     public override void _Ready()
@@ -72,13 +107,28 @@ public partial class BuildingSystem : Node
             Instance = null;
     }
 
-    public static IReadOnlyList<Vector2I> GetFootprint(string buildingType) => GetShape(buildingType).Footprint;
+    public static IReadOnlyList<Vector2I> GetFootprint(string buildingType) => GetDefinition(buildingType).Footprint;
 
-    public static Vector2I GetMainCellOffset(string buildingType) => GetShape(buildingType).MainCellOffset;
+    public static Vector2I GetMainCellOffset(string buildingType) => GetDefinition(buildingType).MainCellOffset;
 
-    public static string GetDisplayName(string buildingType) => GetShape(buildingType).DisplayName;
+    public static string GetDisplayName(string buildingType) => GetDefinition(buildingType).DisplayName;
 
-    public static int GetMaxHealth(string buildingType) => GetShape(buildingType).MaxHealth;
+    public static int GetMaxHealth(string buildingType) => GetDefinition(buildingType).MaxHealth;
+
+    public static float GetSpawnInterval(string buildingType) => GetDefinition(buildingType).SpawnInterval;
+
+    public static Vector2I GetSpawnCellOffset(string buildingType) => GetDefinition(buildingType).SpawnCellOffset;
+
+    public static void ApplySoldierSpawnStats(string buildingType, Soldier soldier)
+    {
+        BuildingDefinition definition = GetDefinition(buildingType);
+        if (definition.SoldierDamage.HasValue)
+            soldier.Damage = definition.SoldierDamage.Value;
+        if (definition.SoldierAttackRange.HasValue)
+            soldier.AttackRange = definition.SoldierAttackRange.Value;
+        if (definition.SoldierSpeed.HasValue)
+            soldier.Speed = definition.SoldierSpeed.Value;
+    }
 
     public static bool IsCoreBuilding(string buildingType) => buildingType == "CastleHeart";
 
@@ -124,14 +174,8 @@ public partial class BuildingSystem : Node
 
     private static Building InstantiateBuilding(string buildingType)
     {
-        PackedScene scene = buildingType switch
-        {
-            "CastleHeart" => GD.Load<PackedScene>("res://prefabs/CastleHeart.tscn"),
-            "ArcheryRange" => GD.Load<PackedScene>("res://prefabs/ArcheryRange.tscn"),
-            "Stable" => GD.Load<PackedScene>("res://prefabs/Stable.tscn"),
-            _ => GD.Load<PackedScene>("res://prefabs/Barracks.tscn"),
-        };
-
+        string prefabPath = GetDefinition(buildingType).PrefabPath;
+        PackedScene scene = GD.Load<PackedScene>(prefabPath);
         return scene?.Instantiate<Building>();
     }
 }

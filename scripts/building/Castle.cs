@@ -250,10 +250,10 @@ public partial class Castle : Node2D
 		if (scene == null)
 			return;
 
-		Barracks barracks = scene.Instantiate<Barracks>();
-		barracks.InitFromType("Barracks");
-		barracks.BindToGrid(this, gridX, gridY);
-		PlaceBuilding(barracks, gridX, gridY);
+		Building building = scene.Instantiate<Building>();
+		building.InitFromType("Barracks");
+		building.BindToGrid(this, gridX, gridY);
+		PlaceBuilding(building, gridX, gridY);
 	}
 
 	private void OnHeartHealthChanged(int health, int maxHealth)

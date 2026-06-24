@@ -25,6 +25,9 @@ public partial class Building : Area2D
 	private bool _workPaused;
 	private bool _jumpTweenAwaitingResume;
 	private BuildingStateIcon _stateIcon;
+	private Node2D _battlefield;
+	private int _spawnCount;
+	private bool _isPlayerBuilding;
 
 	[Signal]
 	public delegate void HealthChangedEventHandler(int health, int maxHealth);
@@ -75,6 +78,7 @@ public partial class Building : Area2D
 		CastleRef = castle;
 		GridX = gridX;
 		GridY = gridY;
+		_isPlayerBuilding = castle.IsPlayerCastle;
 		SyncStateIconPosition();
 	}
 
@@ -199,6 +203,14 @@ public partial class Building : Area2D
 		AddChild(_stateIcon);
 		SyncStateIconPosition();
 		RefreshOperationalState();
+
+		if (BuildingSystem.GetSpawnInterval(TypeId) > 0f)
+		{
+			_battlefield = GetNodeOrNull<Node2D>("/root/MainGame/Battlefield");
+			if (_battlefield == null)
+				_battlefield = GetTree().Root.GetNodeOrNull<Node2D>("MainGame/Battlefield");
+			UpdateWorkCycle();
+		}
 	}
 
 	public override void _ExitTree()
@@ -259,12 +271,45 @@ public partial class Building : Area2D
 		StartWorkCycle();
 	}
 
-	protected virtual void StartWorkCycle()
+	private void StartWorkCycle()
 	{
+		float spawnInterval = BuildingSystem.GetSpawnInterval(TypeId);
+		if (spawnInterval > 0f)
+			BeginWork(GetWorkInterval(spawnInterval));
 	}
 
-	protected virtual void PerformWork()
+	private void PerformWork()
 	{
+		SpawnUnits(1);
+	}
+
+	private void SpawnUnits(int count)
+	{
+		if (!CanWork || _battlefield == null || CastleRef == null || count <= 0)
+			return;
+		if (GameManager.Instance?.CurrentState == GameManager.GameState.GameOver)
+			return;
+
+		PackedScene soldierScene = GD.Load<PackedScene>("res://prefabs/Soldier.tscn");
+		if (soldierScene == null)
+			return;
+
+		Vector2I marchDir = _isPlayerBuilding ? Vector2I.Right : Vector2I.Left;
+		Vector2I spawnOffset = BuildingSystem.GetSpawnCellOffset(TypeId);
+		int spawnGridX = GridX + spawnOffset.X;
+		int spawnGridY = GridY + spawnOffset.Y;
+
+		for (int i = 0; i < count; i++)
+		{
+			Vector2 spawnLocal = CastleRef.GetBuildingSpawnPosition(spawnGridX, spawnGridY, marchDir, _spawnCount);
+			_spawnCount++;
+
+			Soldier soldier = soldierScene.Instantiate<Soldier>();
+			soldier.GlobalPosition = CastleRef.ToGlobal(spawnLocal);
+			soldier.IsPlayerUnit = _isPlayerBuilding;
+			BuildingSystem.ApplySoldierSpawnStats(TypeId, soldier);
+			_battlefield.AddChild(soldier);
+		}
 	}
 
 	protected void BeginWork(float interval)
