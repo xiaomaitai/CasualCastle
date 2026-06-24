@@ -11,10 +11,8 @@ public sealed class BuildingInfoUiController
     private readonly Castle _enemyCastle;
     private Building _hoveredBuilding;
     private bool _inputBlocked;
-    private bool _shopOpen;
     private bool _placementActive;
     private bool _pauseOpen;
-    private bool _toolActive;
 
     public BuildingInfoUiController(Node owner, CanvasLayer uiRoot)
     {
@@ -37,13 +35,6 @@ public sealed class BuildingInfoUiController
             ClearHover();
     }
 
-    public void SetShopOpen(bool open)
-    {
-        _shopOpen = open;
-        if (open)
-            ClearHover();
-    }
-
     public void SetPlacementActive(bool active)
     {
         _placementActive = active;
@@ -58,16 +49,9 @@ public sealed class BuildingInfoUiController
             ClearHover();
     }
 
-    public void SetToolActive(bool active)
-    {
-        _toolActive = active;
-        if (active)
-            ClearHover();
-    }
-
     public void Process()
     {
-        if (_inputBlocked || _shopOpen || _placementActive || _pauseOpen || _toolActive)
+        if (_inputBlocked || _placementActive || _pauseOpen)
             return;
 
         Vector2 mouseGlobal = _owner.GetViewport().GetMousePosition();

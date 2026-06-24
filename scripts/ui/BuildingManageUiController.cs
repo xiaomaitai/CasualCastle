@@ -89,7 +89,7 @@ public sealed class BuildingManageUiController
 			return false;
 
 		if (!CanManage(building))
-			return true;
+			return false;
 
 		if (_mode == ToolMode.Pause)
 			TogglePause(building);
