@@ -41,6 +41,23 @@ public partial class Building : Area2D
 	public int AnchorGridX => GridX;
 	public int AnchorGridY => GridY;
 
+	public bool HasEnemyOnTop
+	{
+		get
+		{
+			if (CastleRef == null)
+				return false;
+
+			bool isPlayerCastle = CastleRef.IsPlayerCastle;
+			foreach (Area2D area in GetOverlappingAreas())
+			{
+				if (area is Soldier soldier && soldier.IsAlive && soldier.IsPlayerUnit != isPlayerCastle)
+					return true;
+			}
+			return false;
+		}
+	}
+
 	public Vector2I GetMainGridPosition()
 	{
 		Vector2I offset = BuildingSystem.GetMainCellOffset(TypeId);
@@ -92,10 +109,21 @@ public partial class Building : Area2D
 		if (TypeId == "CastleHeart" && CastleRef != null)
 			GameManager.Instance?.OnCastleHeartHealthChanged(CastleRef.IsPlayerCastle, Health, MaxHealth);
 
+		if (Health <= 0)
+			OnDestroyed();
+		else if (TypeId != "CastleHeart")
+			RefreshOperationalState();
+		else
+			PauseWork();
+	}
+
+	private void OnDestroyed()
+	{
+		if (TypeId != "CastleHeart" && CastleRef != null)
+			CastleRef.ReleaseBuildingFootprint(this);
+		
 		if (TypeId != "CastleHeart")
 			RefreshOperationalState();
-		else if (Health <= 0)
-			PauseWork();
 	}
 
 	public void Repair()

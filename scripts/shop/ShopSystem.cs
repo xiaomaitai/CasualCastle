@@ -141,6 +141,9 @@ public partial class ShopSystem : Node
         if (castle == null || building.GetCastle() != castle)
             return false;
 
+        if (building.HasEnemyOnTop)
+            return false;
+
         int cost = building.GetRepairCost();
         if (!TrySpendGold(cost))
             return false;

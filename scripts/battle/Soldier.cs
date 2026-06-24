@@ -110,7 +110,13 @@ public partial class Soldier : Area2D
 		else if (_targetCastle != null && _targetCastle.IsAlive)
 		{
 			_targetEnemy = null;
-			if (_attackTimer <= 0)
+			
+			if (_targetBuilding != null && _targetBuilding.IsDestroyed)
+			{
+				_targetCastle = null;
+				_targetBuilding = null;
+			}
+			else if (_attackTimer <= 0)
 			{
 				if (_targetBuilding != null && _targetBuilding.Health > 0)
 					_targetBuilding.TakeDamage(Damage);
@@ -170,7 +176,7 @@ public partial class Soldier : Area2D
 		}
 
 		Building building = area as Building;
-		if (building != null)
+		if (building != null && !building.IsDestroyed)
 		{
 			Castle castle = building.GetCastle();
 			if (castle != null && castle.IsAlive && castle.IsPlayerCastle != IsPlayerUnit)

@@ -186,6 +186,21 @@ public partial class Castle : Node2D
 		return true;
 	}
 
+	public void ReleaseBuildingFootprint(Building building)
+	{
+		if (building == null)
+			return;
+
+		IReadOnlyList<Vector2I> footprint = BuildingSystem.GetFootprint(building.TypeId);
+		foreach (Vector2I offset in footprint)
+		{
+			int gridX = building.AnchorGridX + offset.X;
+			int gridY = building.AnchorGridY + offset.Y;
+			if (IsInBounds(gridX, gridY))
+				_occupied[gridX, gridY] = false;
+		}
+	}
+
 	public Vector2 GetFootprintCenter(int anchorX, int anchorY, IReadOnlyList<Vector2I> footprint)
 	{
 		Vector2 sum = Vector2.Zero;
