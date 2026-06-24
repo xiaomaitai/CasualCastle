@@ -5,6 +5,9 @@ public partial class BuildingSystem : Node
 {
     public static BuildingSystem Instance { get; private set; }
 
+    private const string BuildingPrefabPath = "res://prefabs/Building.tscn";
+    private const string PlaceholderTexturePath = "res://assets/art/placeholders/test_image.png";
+
     [Signal]
     public delegate void BuildingPlacedEventHandler(Castle castle, Building building, string buildingType);
 
@@ -30,19 +33,31 @@ public partial class BuildingSystem : Node
     {
         ["CastleHeart"] = BuildingDefinition.Create(
             CastleHeartCells, new(0, 0), "城堡之心", GameConfig.CastleHeartMaxHealth,
-            "res://prefabs/CastleHeart.tscn"),
+            PlaceholderTexturePath,
+            new Vector2(0.125f, 0.125f),
+            new Color(1f, 0.82f, 0.35f),
+            new Vector2(120f, 120f)),
         ["Barracks"] = BuildingDefinition.Create(
             Single, new(0, 0), "兵营", 100,
-            "res://prefabs/Barracks.tscn",
+            PlaceholderTexturePath,
+            new Vector2(0.0625f, 0.0625f),
+            Colors.White,
+            new Vector2(56f, 56f),
             spawnInterval: 5f),
         ["ArcheryRange"] = BuildingDefinition.Create(
             ArcheryRangeCells, new(0, 0), "靶场", 120,
-            "res://prefabs/ArcheryRange.tscn",
+            PlaceholderTexturePath,
+            new Vector2(0.125f, 0.0625f),
+            new Color(0.55f, 0.85f, 0.45f),
+            new Vector2(124f, 56f),
             spawnInterval: 6f, spawnCellOffset: new(1, 0),
             soldierDamage: 8, soldierAttackRange: 50f),
         ["Stable"] = BuildingDefinition.Create(
             StableCells, new(0, 1), "马厩", 150,
-            "res://prefabs/Stable.tscn",
+            PlaceholderTexturePath,
+            new Vector2(0.125f, 0.1875f),
+            new Color(0.75f, 0.55f, 0.3f),
+            new Vector2(124f, 188f),
             spawnInterval: 5f, spawnCellOffset: new(1, 2),
             soldierSpeed: 120f),
     };
@@ -53,7 +68,11 @@ public partial class BuildingSystem : Node
         public Vector2I MainCellOffset { get; init; }
         public string DisplayName { get; init; }
         public int MaxHealth { get; init; }
-        public string PrefabPath { get; init; }
+        public string TexturePath { get; init; }
+        public Vector2 SpriteScale { get; init; }
+        public Color SpriteModulate { get; init; }
+        public Vector2 CollisionSize { get; init; }
+        public string MaterialPath { get; init; }
         public float SpawnInterval { get; init; }
         public Vector2I SpawnCellOffset { get; init; }
         public int? SoldierDamage { get; init; }
@@ -65,12 +84,16 @@ public partial class BuildingSystem : Node
             Vector2I mainCellOffset,
             string displayName,
             int maxHealth,
-            string prefabPath,
+            string texturePath,
+            Vector2 spriteScale,
+            Color spriteModulate,
+            Vector2 collisionSize,
             float spawnInterval = 0f,
             Vector2I? spawnCellOffset = null,
             int? soldierDamage = null,
             float? soldierAttackRange = null,
-            float? soldierSpeed = null)
+            float? soldierSpeed = null,
+            string materialPath = null)
         {
             return new BuildingDefinition
             {
@@ -78,7 +101,11 @@ public partial class BuildingSystem : Node
                 MainCellOffset = mainCellOffset,
                 DisplayName = displayName,
                 MaxHealth = maxHealth,
-                PrefabPath = prefabPath,
+                TexturePath = texturePath,
+                SpriteScale = spriteScale,
+                SpriteModulate = spriteModulate,
+                CollisionSize = collisionSize,
+                MaterialPath = materialPath,
                 SpawnInterval = spawnInterval,
                 SpawnCellOffset = spawnCellOffset ?? Vector2I.Zero,
                 SoldierDamage = soldierDamage,
@@ -115,6 +142,8 @@ public partial class BuildingSystem : Node
 
     public static int GetMaxHealth(string buildingType) => GetDefinition(buildingType).MaxHealth;
 
+    public static Color GetSpriteModulate(string buildingType) => GetDefinition(buildingType).SpriteModulate;
+
     public static float GetSpawnInterval(string buildingType) => GetDefinition(buildingType).SpawnInterval;
 
     public static Vector2I GetSpawnCellOffset(string buildingType) => GetDefinition(buildingType).SpawnCellOffset;
@@ -130,7 +159,44 @@ public partial class BuildingSystem : Node
             soldier.Speed = definition.SoldierSpeed.Value;
     }
 
+    public static void ApplyVisual(Building building)
+    {
+        BuildingDefinition definition = GetDefinition(building.TypeId);
+
+        Sprite2D sprite = building.GetNodeOrNull<Sprite2D>("Sprite");
+        if (sprite != null)
+        {
+            Texture2D texture = GD.Load<Texture2D>(definition.TexturePath);
+            if (texture != null)
+                sprite.Texture = texture;
+
+            sprite.Scale = definition.SpriteScale;
+            sprite.Modulate = definition.SpriteModulate;
+
+            if (!string.IsNullOrEmpty(definition.MaterialPath))
+            {
+                Material material = GD.Load<Material>(definition.MaterialPath);
+                if (material != null)
+                    sprite.Material = material;
+            }
+        }
+
+        CollisionShape2D shapeNode = building.GetNodeOrNull<CollisionShape2D>("CollisionShape");
+        if (shapeNode?.Shape is RectangleShape2D rect)
+            rect.Size = definition.CollisionSize;
+    }
+
     public static bool IsCoreBuilding(string buildingType) => buildingType == "CastleHeart";
+
+    public static Building CreateBuilding(string buildingType)
+    {
+        Building building = InstantiateBuilding();
+        if (building == null)
+            return null;
+
+        building.InitFromType(buildingType);
+        return building;
+    }
 
     public bool CanPlace(Castle castle, string buildingType, int anchorX, int anchorY)
     {
@@ -154,12 +220,10 @@ public partial class BuildingSystem : Node
         if (!CanPlace(castle, buildingType, anchorX, anchorY))
             return false;
 
-        Building building = InstantiateBuilding(buildingType);
+        Building building = CreateBuilding(buildingType);
         if (building == null)
             return false;
 
-        building.TypeId = buildingType;
-        building.InitFromType(buildingType);
         building.BindToGrid(castle, anchorX, anchorY);
         if (!castle.PlaceBuilding(building, anchorX, anchorY, buildingType))
         {
@@ -172,10 +236,9 @@ public partial class BuildingSystem : Node
         return true;
     }
 
-    private static Building InstantiateBuilding(string buildingType)
+    private static Building InstantiateBuilding()
     {
-        string prefabPath = GetDefinition(buildingType).PrefabPath;
-        PackedScene scene = GD.Load<PackedScene>(prefabPath);
+        PackedScene scene = GD.Load<PackedScene>(BuildingPrefabPath);
         return scene?.Instantiate<Building>();
     }
 }

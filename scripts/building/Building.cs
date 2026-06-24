@@ -3,9 +3,6 @@ using Godot;
 public partial class Building : Area2D
 {
 	[Export]
-	public int CollisionSize = 56;
-
-	[Export]
 	public bool HasNightCombat = false;
 
 	protected Castle CastleRef;
@@ -13,14 +10,16 @@ public partial class Building : Area2D
 	protected int GridY;
 
 	private float _workSpeedMultiplier = 1f;
+	private Color _baseModulate = Colors.White;
+	private bool _visualApplied;
 
 	private Sprite2D _sprite;
 	private ShaderMaterial _workMaterial;
 	private Material _originalMaterial;
 	private Tween _jumpTween;
 	private Vector2 _spriteBasePosition;
-	private float _workInterval;
-	private float _workElapsed;
+	private float _workRequired;
+	private float _workDone;
 	private bool _workActive;
 	private bool _workPaused;
 	private bool _jumpTweenAwaitingResume;
@@ -96,7 +95,27 @@ public partial class Building : Area2D
 		TypeId = buildingType;
 		MaxHealth = BuildingSystem.GetMaxHealth(buildingType);
 		Health = MaxHealth;
+		_baseModulate = BuildingSystem.GetSpriteModulate(buildingType);
+		TryApplyVisual();
 		UpdateDamageVisual();
+	}
+
+	private void TryApplyVisual()
+	{
+		Sprite2D sprite = _sprite ?? GetNodeOrNull<Sprite2D>("Sprite");
+		if (sprite == null)
+			return;
+
+		if (!_visualApplied)
+		{
+			BuildingSystem.ApplyVisual(this);
+			_visualApplied = true;
+		}
+
+		_sprite = sprite;
+		_spriteBasePosition = sprite.Position;
+		if (_originalMaterial == null)
+			_originalMaterial = sprite.Material;
 	}
 
 	public Castle GetCastle() => CastleRef;
@@ -115,9 +134,7 @@ public partial class Building : Area2D
 
 		if (Health <= 0)
 			OnDestroyed();
-		else if (TypeId != "CastleHeart")
-			RefreshOperationalState();
-		else
+		else if (TypeId == "CastleHeart")
 			PauseWork();
 	}
 
@@ -183,18 +200,8 @@ public partial class Building : Area2D
 		CollisionLayer = 4;
 		CollisionMask = 0;
 
-		CollisionShape2D shapeNode = GetNodeOrNull<CollisionShape2D>("CollisionShape");
-		if (shapeNode?.Shape is RectangleShape2D rect)
-		{
-			rect.Size = new Vector2(CollisionSize, CollisionSize);
-		}
-
 		_sprite = GetNodeOrNull<Sprite2D>("Sprite");
-		if (_sprite != null)
-		{
-			_spriteBasePosition = _sprite.Position;
-			_originalMaterial = _sprite.Material;
-		}
+		TryApplyVisual();
 
 		if (GameManager.Instance != null)
 			GameManager.Instance.PhaseChanged += OnPhaseChanged;
@@ -225,13 +232,13 @@ public partial class Building : Area2D
 		if (!_workActive || _workPaused || !CanWork)
 			return;
 
-		_workElapsed += (float)delta;
+		_workDone += (float)delta * _workSpeedMultiplier;
 		UpdateWorkEffectFromProgress();
 
-		if (_workElapsed < _workInterval)
+		if (_workDone < _workRequired)
 			return;
 
-		_workElapsed = 0f;
+		_workDone -= _workRequired;
 		PerformWork();
 		PlayWorkJumpVisual();
 	}
@@ -256,26 +263,20 @@ public partial class Building : Area2D
 		}
 	}
 
-	protected float GetWorkInterval(float baseInterval) => baseInterval / _workSpeedMultiplier;
-
 	public void SetWorkSpeedMultiplier(float multiplier)
 	{
-		_workSpeedMultiplier = Mathf.Max(0.1f, multiplier);
-		if (_workActive)
-			RestartWorkCycle();
-	}
+		multiplier = Mathf.Max(0.1f, multiplier);
+		if (Mathf.IsEqualApprox(_workSpeedMultiplier, multiplier))
+			return;
 
-	protected virtual void RestartWorkCycle()
-	{
-		StopWork();
-		StartWorkCycle();
+		_workSpeedMultiplier = multiplier;
 	}
 
 	private void StartWorkCycle()
 	{
-		float spawnInterval = BuildingSystem.GetSpawnInterval(TypeId);
-		if (spawnInterval > 0f)
-			BeginWork(GetWorkInterval(spawnInterval));
+		float workRequired = BuildingSystem.GetSpawnInterval(TypeId);
+		if (workRequired > 0f)
+			BeginWork(workRequired);
 	}
 
 	private void PerformWork()
@@ -312,16 +313,16 @@ public partial class Building : Area2D
 		}
 	}
 
-	protected void BeginWork(float interval)
+	protected void BeginWork(float workRequired)
 	{
-		_workInterval = interval;
+		_workRequired = workRequired;
 
 		if (_workActive)
 			return;
 
 		_workActive = true;
 		_workPaused = false;
-		_workElapsed = 0f;
+		_workDone = 0f;
 		SetProcess(true);
 	}
 
@@ -357,12 +358,12 @@ public partial class Building : Area2D
 
 	private void UpdateWorkEffectFromProgress()
 	{
-		if (_sprite == null || _workInterval <= 0f)
+		if (_sprite == null || _workRequired <= 0f)
 			return;
 
 		EnsureWorkMaterial();
 		_sprite.Material = _workMaterial;
-		float progress = Mathf.Clamp(_workElapsed / _workInterval, 0f, 1f);
+		float progress = Mathf.Clamp(_workDone / _workRequired, 0f, 1f);
 		_workMaterial.SetShaderParameter("fill_amount", progress);
 	}
 
@@ -399,7 +400,7 @@ public partial class Building : Area2D
 	{
 		_workActive = false;
 		_workPaused = false;
-		_workElapsed = 0f;
+		_workDone = 0f;
 		_jumpTweenAwaitingResume = false;
 		SetProcess(false);
 		CancelJumpTween();
@@ -432,7 +433,7 @@ public partial class Building : Area2D
 		else if (IsDamaged)
 			_sprite.Modulate = new Color(0.85f, 0.75f, 0.75f);
 		else
-			_sprite.Modulate = Colors.White;
+			_sprite.Modulate = _baseModulate;
 	}
 
 	private void RefreshOperationalState()

@@ -26,9 +26,6 @@ public partial class Castle : Node2D
 	public Color AreaBgColor = new Color(1, 1, 1, 0.03f);
 
 	[Export]
-	public PackedScene BarracksScene;
-
-	[Export]
 	public int CastleHeartGridX = 3;
 
 	[Export]
@@ -49,7 +46,7 @@ public partial class Castle : Node2D
 	[Export]
 	public float SpawnInset = 8f;
 
-	public CastleHeart Heart { get; private set; }
+	public Building Heart { get; private set; }
 	public bool IsAlive => Heart != null && Heart.Health > 0;
 
 	private ProgressBar _healthBar;
@@ -225,12 +222,10 @@ public partial class Castle : Node2D
 
 	private void SetupCastleHeart()
 	{
-		PackedScene scene = GD.Load<PackedScene>("res://prefabs/CastleHeart.tscn");
-		if (scene == null)
+		Building heart = BuildingSystem.CreateBuilding("CastleHeart");
+		if (heart == null)
 			return;
 
-		CastleHeart heart = scene.Instantiate<CastleHeart>();
-		heart.InitFromType("CastleHeart");
 		heart.BindToGrid(this, CastleHeartGridX, CastleHeartGridY);
 		PlaceBuilding(heart, CastleHeartGridX, CastleHeartGridY, "CastleHeart");
 		Heart = heart;
@@ -246,12 +241,10 @@ public partial class Castle : Node2D
 
 	private void PlaceInitialBarracks(int gridX, int gridY)
 	{
-		PackedScene scene = BarracksScene ?? GD.Load<PackedScene>("res://prefabs/Barracks.tscn");
-		if (scene == null)
+		Building building = BuildingSystem.CreateBuilding("Barracks");
+		if (building == null)
 			return;
 
-		Building building = scene.Instantiate<Building>();
-		building.InitFromType("Barracks");
 		building.BindToGrid(this, gridX, gridY);
 		PlaceBuilding(building, gridX, gridY);
 	}
