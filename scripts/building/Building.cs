@@ -126,11 +126,44 @@ public partial class Building : Area2D
 			RefreshOperationalState();
 	}
 
-	public void Repair()
+	public bool TryRepair()
+	{
+		if (!CanRepair())
+			return false;
+
+		int cost = GetRepairCost();
+		if (!ShopSystem.Instance?.TrySpendGold(cost) ?? false)
+			return false;
+
+		Repair();
+		return true;
+	}
+
+	public bool CanRepair()
 	{
 		if (Health >= MaxHealth)
-			return;
+			return false;
 
+		if (BuildingSystem.IsCoreBuilding(TypeId))
+			return false;
+
+		if (CastleRef == null || !CastleRef.IsPlayerCastle)
+			return false;
+
+		if (HasEnemyOnTop)
+			return false;
+
+		if (GameManager.Instance?.CurrentState != GameManager.GameState.Playing)
+			return false;
+
+		if (!GameManager.Instance.IsNight)
+			return false;
+
+		return true;
+	}
+
+	private void Repair()
+	{
 		Health = MaxHealth;
 		EmitSignal(SignalName.HealthChanged, Health, MaxHealth);
 		UpdateDamageVisual();

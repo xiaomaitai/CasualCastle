@@ -131,4 +131,4 @@
 | 格子占用管理 | `scripts/building/Castle.cs` |
 | 敌方检测 | `scripts/building/Building.cs` |
 | 士兵目标更新 | `scripts/battle/Soldier.cs` |
-| 修复逻辑 | `scripts/shop/ShopSystem.cs` |
+| 修复逻辑 | `scripts/building/Building.cs` |

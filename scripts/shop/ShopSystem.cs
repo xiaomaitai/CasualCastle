@@ -133,23 +133,7 @@ public partial class ShopSystem : Node
 
     public bool TryRepairBuilding(Building building)
     {
-        if (!IsRepairAvailable || building == null || !building.IsDamaged
-            || BuildingSystem.IsCoreBuilding(building.TypeId))
-            return false;
-
-        Castle castle = GameManager.Instance?.PlayerCastle;
-        if (castle == null || building.GetCastle() != castle)
-            return false;
-
-        if (building.HasEnemyOnTop)
-            return false;
-
-        int cost = building.GetRepairCost();
-        if (!TrySpendGold(cost))
-            return false;
-
-        building.Repair();
-        return true;
+        return building?.TryRepair() ?? false;
     }
 
     private void RefreshOfferSlot(int slotIndex)
