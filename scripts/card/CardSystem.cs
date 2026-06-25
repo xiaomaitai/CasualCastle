@@ -5,7 +5,7 @@ public partial class CardSystem : Node
 {
     public static CardSystem Instance { get; private set; }
 
-    public const int MaxHandSize = 5;
+    public const int MaxHandSize = 7;
 
     [Signal]
     public delegate void HandChangedEventHandler();

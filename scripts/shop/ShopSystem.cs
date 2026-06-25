@@ -6,7 +6,7 @@ public partial class ShopSystem : Node
 {
     public static ShopSystem Instance { get; private set; }
 
-    public const int OfferCount = 3;
+    public const int OfferCount = 5;
 
     [Signal]
     public delegate void GoldChangedEventHandler(int gold);

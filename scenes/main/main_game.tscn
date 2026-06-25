@@ -124,17 +124,17 @@ offset_bottom = 58.0
 text = "☰"
 
 [node name="ShopButton" type="Button" parent="UI"]
-offset_left = 1050.0
+offset_left = 1101.0
 offset_top = 620.0
-offset_right = 1170.0
+offset_right = 1221.0
 offset_bottom = 676.0
 text = "商店"
 
 [node name="BuildingPauseToolButton" type="Button" parent="UI"]
 custom_minimum_size = Vector2(48, 36)
-offset_left = 918.0
+offset_left = 989.0
 offset_top = 628.0
-offset_right = 966.0
+offset_right = 1037.0
 offset_bottom = 664.0
 toggle_mode = true
 expand_icon = true
@@ -142,9 +142,9 @@ tooltip_text = "暂停建筑"
 
 [node name="BuildingRepairToolButton" type="Button" parent="UI"]
 custom_minimum_size = Vector2(48, 36)
-offset_left = 974.0
+offset_left = 1045.0
 offset_top = 628.0
-offset_right = 1022.0
+offset_right = 1093.0
 offset_bottom = 664.0
 toggle_mode = true
 expand_icon = true
@@ -159,31 +159,43 @@ theme_override_constants/separation = 12
 alignment = 1
 
 [node name="HandSlot1" type="Button" parent="UI/HandPanel"]
-custom_minimum_size = Vector2(120, 80)
+custom_minimum_size = Vector2(84, 80)
 layout_mode = 2
 disabled = true
 text = "空"
 
 [node name="HandSlot2" type="Button" parent="UI/HandPanel"]
-custom_minimum_size = Vector2(120, 80)
+custom_minimum_size = Vector2(84, 80)
 layout_mode = 2
 disabled = true
 text = "空"
 
 [node name="HandSlot3" type="Button" parent="UI/HandPanel"]
-custom_minimum_size = Vector2(120, 80)
+custom_minimum_size = Vector2(84, 80)
 layout_mode = 2
 disabled = true
 text = "空"
 
 [node name="HandSlot4" type="Button" parent="UI/HandPanel"]
-custom_minimum_size = Vector2(120, 80)
+custom_minimum_size = Vector2(84, 80)
 layout_mode = 2
 disabled = true
 text = "空"
 
 [node name="HandSlot5" type="Button" parent="UI/HandPanel"]
-custom_minimum_size = Vector2(120, 80)
+custom_minimum_size = Vector2(84, 80)
+layout_mode = 2
+disabled = true
+text = "空"
+
+[node name="HandSlot6" type="Button" parent="UI/HandPanel"]
+custom_minimum_size = Vector2(84, 80)
+layout_mode = 2
+disabled = true
+text = "空"
+
+[node name="HandSlot7" type="Button" parent="UI/HandPanel"]
+custom_minimum_size = Vector2(84, 80)
 layout_mode = 2
 disabled = true
 text = "空"
@@ -234,12 +246,12 @@ visible = false
 offset_left = 819.0
 offset_top = 72.0
 offset_right = 1254.0
-offset_bottom = 380.0
+offset_bottom = 548.0
 
 [node name="ShopPanelBackground" type="ColorRect" parent="UI/ShopPanel"]
 layout_mode = 0
 offset_right = 435.0
-offset_bottom = 308.0
+offset_bottom = 476.0
 color = Color(0.12, 0.16, 0.22, 0.96)
 
 [node name="ShopTitleLabel" type="Label" parent="UI/ShopPanel"]
@@ -325,12 +337,50 @@ custom_minimum_size = Vector2(96, 40)
 layout_mode = 2
 text = "购买"
 
+[node name="OfferSlot4" type="HBoxContainer" parent="UI/ShopPanel"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 320.0
+offset_right = 411.0
+offset_bottom = 368.0
+theme_override_constants/separation = 12
+
+[node name="OfferLabel" type="Label" parent="UI/ShopPanel/OfferSlot4"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "马厩  费用：18"
+
+[node name="BuyButton" type="Button" parent="UI/ShopPanel/OfferSlot4"]
+custom_minimum_size = Vector2(96, 40)
+layout_mode = 2
+text = "购买"
+
+[node name="OfferSlot5" type="HBoxContainer" parent="UI/ShopPanel"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 392.0
+offset_right = 411.0
+offset_bottom = 440.0
+theme_override_constants/separation = 12
+
+[node name="OfferLabel" type="Label" parent="UI/ShopPanel/OfferSlot5"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "兵营  费用：10"
+
+[node name="BuyButton" type="Button" parent="UI/ShopPanel/OfferSlot5"]
+custom_minimum_size = Vector2(96, 40)
+layout_mode = 2
+text = "购买"
+
 [node name="ShopRefreshButton" type="Button" parent="UI/ShopPanel"]
 layout_mode = 0
 offset_left = 140.0
-offset_top = 320.0
+offset_top = 464.0
 offset_right = 295.0
-offset_bottom = 364.0
+offset_bottom = 508.0
 text = "刷新商品"
 
 [node name="PauseOverlay" type="ColorRect" parent="UI"]
