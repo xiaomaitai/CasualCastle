@@ -45,7 +45,6 @@ public class FusionRecipe
 	public string MainTypeId;      // 主体建筑类型（结果落点）
 	public string MaterialTypeId;  // 辅材建筑类型
 	public int MaterialCount;      // 须与主体邻接的辅材数量
-	public int GoldCost;           // 融合金币
 	public string ResultTypeId;    // 结果建筑类型
 }
 ```

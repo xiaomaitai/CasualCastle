@@ -16,7 +16,6 @@ public partial class FusionSystem : Node
             MainTypeId = "Barracks",
             MaterialTypeId = "Barracks",
             MaterialCount = 1,
-            GoldCost = 8,
             ResultTypeId = "BarracksT2",
         },
         new()
@@ -24,7 +23,6 @@ public partial class FusionSystem : Node
             MainTypeId = "WolfDen",
             MaterialTypeId = "WolfDen",
             MaterialCount = 1,
-            GoldCost = 10,
             ResultTypeId = "WolfDenT2",
         },
     };
@@ -108,18 +106,12 @@ public partial class FusionSystem : Node
                 return false;
         }
 
-        if (ShopSystem.Instance == null || !ShopSystem.Instance.CanAfford(recipe.GoldCost))
-            return false;
-
         return true;
     }
 
     public bool TryFuseGroup(Castle castle, FusionGroup group)
     {
         if (!CanFuseGroup(castle, group.Main, group.Materials, group.Recipe))
-            return false;
-
-        if (!ShopSystem.Instance.TrySpendGold(group.Recipe.GoldCost))
             return false;
 
         int anchorX = group.Main.AnchorGridX;
