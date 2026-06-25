@@ -90,4 +90,22 @@
 | 建筑基类 | `Building.cs` | 碰撞层、阵营、昼夜工作循环；无独立 HP |
 | 卡牌边框素材 | `assets/art/cards/card_border.png` | 已导入，UI 尚未引用 |
 
+## 3.6 夜战单位（M4）
+
+| 模块 | 交付内容 | 关键文件 |
+|------|----------|----------|
+| 夜战词条 | `HasNightCombat` 数据化，入夜休眠门控 | `BuildingSystem`, `Building`, `Soldier`, `NightSystem` |
+| 狼穴 | 夜战建筑，产紫色狼人 | `WolfDen` 定义，`ShopSystem` 目录 |
+| UI | 信息面板「夜晚可行动 / 夜晚休眠」 | `BuildingInfoUiController` |
+
+## 3.7 融合系统（M5）
+
+| 模块 | 交付内容 | 关键文件 |
+|------|----------|----------|
+| 入夜融合 | 配方匹配、主体邻接、免费、满血结果 | `FusionSystem`, `FusionRecipe` |
+| 强化建筑 | `BarracksT2`、`WolfDenT2` | `BuildingSystem` |
+| 禁止融合 | 工具按钮 + `IsFusionProhibited` | `FusionProhibitUiController`, `BuildingStateIcon` |
+
+设计文档：`../fusionSystemDesign.md`。
+
 ---

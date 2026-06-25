@@ -1,29 +1,29 @@
 # 八、下一步开发内容（立即行动）
 
-**当前焦点：M5 融合系统。**
+**当前焦点：M6 AI 对手。**
 
-M4 夜战单位已完成：`HasNightCombat` 数据化、狼穴产狼人、夜晚豁免休眠。
+M5 融合系统已完成：入夜自动融合（免费）、禁止融合工具、强化兵营 / 强化狼穴。
 
-建议按 `../fusionSystemDesign.md` 与 `../currentTasks.md` 推进：
+建议按 `../aiSystemDesign.md` 与 `../currentTasks.md` 推进：
 
-1. **配方与强化建筑数据**
-   - `FusionRecipe`（含 `MainTypeId`、辅材数量）+ `FusionSystem` 配方表
-   - `BuildingSystem` 登记 `BarracksT2`、`WolfDenT2`
-   - `Building.IsFusionProhibited`
+1. **AISystem 骨架**
+   - `scripts/ai/AISystem.cs` + 场景节点
+   - 敌方金币、虚拟手牌
 
-2. **入夜自动融合**
-   - `FindFusibleGroups` / `TryFuseGroup`：辅材均与主体邻接、满血结果、扣费
-   - `ResolveNightFusions` + `GameManager` 入夜钩子
-   - 融合后刷新 `AdjacentSystem`
+2. **放置入口**
+   - `BuildingSystem` 支持敌方城堡 `TryPlace`
+   - 夜晚扫描合法地块 + 简单评分选位
 
-3. **禁止融合 UI**
-   - 底部「禁止融合」工具按钮（无融合工具按钮）
-   - 与暂停 / 修复互斥
+3. **入夜流程**
+   - 双侧 `ResolveNightFusions`
+   - `AISystem.OnNightBegin` 购卡并放置
 
 4. **验收**
-   - 邻接双兵营入夜 → 强化兵营（4s 产兵、130 生命、满血）
-   - 禁止融合标记生效；金币不足不融合
+   - 多夜对局观察敌方扩建与融合
+   - 玩家功能无回归
 
-**当前可玩基线：** 标题页 → 昼夜循环 → 商店 / 手牌放置 → 邻接加成 → 夜晚修复与暂停 → 狼穴夜战 → 对战 → 结算。
+**当前可玩基线（玩家侧）：** 标题页 → 昼夜循环 → 商店 / 手牌 → 多建筑放置 → 邻接加成 → 入夜融合 → 修复 / 暂停 / 禁止融合 → 狼穴夜战 → 对战 → 结算。
+
+**M6 完成后：** 上述循环加上**敌方自主扩建与融合**，形成完整单人 MVP。
 
 ---

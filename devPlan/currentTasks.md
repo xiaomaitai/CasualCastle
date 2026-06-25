@@ -1,33 +1,43 @@
 # 当前任务
 
-M0–M5 已完成。**可进入 M6（AI 对手）或 M5.1（多格融合扩展）。**
+M0–M5 已完成。**当前焦点：M6 AI 对手。**
 
-## 已完成（M5 融合系统）
+规则见 `aiSystemDesign.md`；融合规则见 `fusionSystemDesign.md`。
 
-- [x] `FusionRecipe` + `FusionSystem` 配方表（主体 / 辅材 / 费用）
-- [x] `BarracksT2`、`WolfDenT2` 强化建筑数据
-- [x] 入夜 `ResolveNightFusions` 自动融合（满血结果、邻接刷新）
-- [x] `Building.IsFusionProhibited` + 「禁止融合」工具按钮
-- [x] 建筑状态图标与信息面板显示禁止融合
+## 下一步（M6）
 
-## 已完成（M4 夜战单位）
+### 1. 基础与放置入口
 
-- [x] `HasNightCombat` 接入 `BuildingSystem` 定义与 `InitFromType` / 产兵传递
-- [x] 狼穴（`WolfDen`）夜战建筑，产狼人单位
-- [x] 夜战单位夜晚豁免休眠；建筑信息面板显示「夜晚可行动 / 夜晚休眠」
+- [ ] `scripts/ai/AISystem.cs` 挂 `main_game.tscn`
+- [ ] `BuildingSystem` 开放非玩家城堡放置（如 `TryPlaceForCastle`），AI 与玩家共用验证逻辑
+- [ ] 敌方独立金币与虚拟手牌（不经过玩家 UI）
 
-## 下一步（M6 / M5.1）
+### 2. 夜晚经济回合
 
-- M6：AI 对手、AI 购卡与放置
-- M5.1：靶场 / 马厩多格融合、2 阶链式融合
+- [ ] `AISystem.OnNightBegin`：按 Catalog 购卡（够钱、手牌未满）
+- [ ] 放置决策：邻接同类优先、朝玩家方向扩建（见 `aiSystemDesign.md` 评分表）
+- [ ] 购后放置失败则保留手牌至下一夜
 
-## 暂不进入范围
+### 3. 入夜融合（双侧）
 
-- 完整设置界面
+- [ ] `GameManager.BeginPhase(Night)` 对 `EnemyCastle` 也调用 `ResolveNightFusions`
+- [ ] 顺序：玩家融合 → 敌方融合 → AI 购卡放置 → 玩家商店 UI
 
-## 验收标准（M5）
+### 4. 联调与验收
 
-- [x] 入夜自动将满足配方、且辅材与主体邻接的单格建筑组融合为强化版
-- [x] 结果满血、占格释放正确
-- [x] 「禁止融合」工具可阻止指定建筑参与融合
-- [x] 融合与商店 / 修复 / 手牌 / 昼夜循环输入不冲突
+- [ ] 完整单局：敌方随夜晚扩建、可融合，胜负正常
+- [ ] 玩家商店 / 手牌 / 禁止融合不受影响
+- [ ] （可选）结算优化、已知 Bug 修复
+
+## 暂不进入范围（M6）
+
+- M5.1 多格融合、2 阶链式融合
+- 敌方修复、禁止融合、难度档位
+- BattleSystem 抽离、寻路
+- 完整设置界面、存档
+
+## 验收标准（M6）
+
+- [ ] 敌方夜晚自主购卡并放置建筑
+- [ ] 敌方入夜自动融合（与玩家同规则）
+- [ ] 完整单人对战 AI 可玩至结算

@@ -12,10 +12,12 @@ CasualCastle/
 │   ├── shop/                  # ShopSystem
 │   ├── card/                  # CardSystem、CardData
 │   ├── night/                 # NightSystem
-│   ├── building/              # Castle、Building、Barracks
+│   ├── building/              # Castle、Building、BuildingSystem、AdjacentSystem
 │   ├── battle/                # Soldier
+│   ├── fusion/                # FusionSystem、FusionRecipe
 │   ├── audio/                 # BgmPlayer
 │   └── dev/                   # DevInputLogger
+│   # M6 规划：scripts/ai/     # AISystem
 ├── scenes/
 │   ├── main/main_game.tscn
 │   └── ui/title_screen.tscn
@@ -28,6 +30,8 @@ CasualCastle/
 │   ├── outline/               # 开发大纲，按章节拆分
 │   ├── concepts.md
 │   ├── currentTasks.md
+│   ├── fusionSystemDesign.md
+│   ├── aiSystemDesign.md
 │   ├── codeStructure.md
 │   └── dataStructures.md
 └── resources/                 # 空，待放 .tres 数据资源
@@ -66,7 +70,8 @@ resources/
 | NightSystem | 夜晚休眠门控、夜战词条判定 | 已实现 |
 | AdjacentSystem | 邻接检测与加成、放置光圈 | 已实现（兵营规则） |
 | BattleSystem | 部队生成、战斗 AI | 逻辑在 Soldier.cs |
-| FusionSystem | 入夜自动融合、禁止融合标记 | 待建（M5） |
+| FusionSystem | 入夜自动融合、禁止融合标记 | 已实现 |
+| AISystem | 敌方购卡、放置、入夜融合 | 待建（M6） |
 
 ## 5.4 系统模块设计
 
@@ -84,7 +89,7 @@ resources/
 | AdjacentSystem | 建筑邻接检测、加成刷新 | `BuildingSystem`, `Castle` |
 | FusionSystem | 入夜自动融合、配方与主体邻接判定、升级结果生成 | `BuildingSystem`, `GameManager`, `UIManager` |
 | BattleSystem | 士兵生成、行动、索敌、攻击与死亡 | `UnitData`, `NightSystem`, `Castle` |
-| AISystem | 敌方购卡、放置、战术决策 | `GameManager`, `ShopSystem`, `CardSystem`, `BuildingSystem` |
+| AISystem | 敌方金币与手牌、夜晚购卡放置、双侧融合调度 | `GameManager`, `BuildingSystem`, `FusionSystem`, `ShopSystem` |
 | DataResources | 卡牌、建筑、单位、全局配置数据 | `CardData`, `BuildingData`, `UnitData`, `GameConfig` |
 
 模块依赖关系如下：
