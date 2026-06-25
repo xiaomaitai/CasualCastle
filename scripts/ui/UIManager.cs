@@ -13,6 +13,7 @@ public partial class UIManager : Node2D
     private BuildingManageUiController _buildingManageUi;
     private PauseMenuUiController _pauseMenuUi;
     private GameOverUiController _gameOverUi;
+    private SettingsUiController _settingsUi;
     private bool _gameOver;
 
     public override void _Ready()
@@ -40,7 +41,10 @@ public partial class UIManager : Node2D
             _pauseMenuUi.OpenChanged -= OnPauseMenuOpenChanged;
             _pauseMenuUi.Dispose();
         }
+        if (_settingsUi != null)
+            _settingsUi.OpenChanged -= OnSettingsOpenChanged;
         _gameOverUi?.Dispose();
+        _settingsUi?.Dispose();
 
         if (Instance == this)
             Instance = null;
@@ -56,7 +60,7 @@ public partial class UIManager : Node2D
 
         _buildingInfoUi?.SetPlacementActive(
             _handUi?.IsPlacementActive == true || _shopUi?.IsDragging == true);
-        _buildingInfoUi?.SetPauseOpen(_pauseMenuUi?.IsOpen == true);
+        _buildingInfoUi?.SetPauseOpen(_pauseMenuUi?.IsOpen == true || _settingsUi?.IsOpen == true);
         _buildingInfoUi?.Process();
     }
 
@@ -65,6 +69,12 @@ public partial class UIManager : Node2D
         if (@event is InputEventKey keyEvent && keyEvent.Pressed && !keyEvent.Echo
             && keyEvent.Keycode == Key.Escape)
         {
+            if (_settingsUi?.Close() == true)
+            {
+                GetViewport().SetInputAsHandled();
+                return;
+            }
+
             if (_buildingManageUi?.TryHandleEscape() == true)
             {
                 GetViewport().SetInputAsHandled();
@@ -105,6 +115,9 @@ public partial class UIManager : Node2D
         if (_pauseMenuUi?.IsOpen == true)
             return;
 
+        if (_settingsUi?.IsOpen == true)
+            return;
+
         if (_buildingManageUi?.HandleInput(@event) == true)
         {
             GetViewport().SetInputAsHandled();
@@ -133,10 +146,12 @@ public partial class UIManager : Node2D
         _handUi = new HandUiController(this, uiRoot);
         _buildingInfoUi = new BuildingInfoUiController(this, uiRoot);
         _buildingManageUi = new BuildingManageUiController(this, uiRoot);
-        _pauseMenuUi = new PauseMenuUiController(uiRoot, GoToTitle);
+        _settingsUi = new SettingsUiController(uiRoot.GetNode<Control>("SettingsPanel"));
+        _pauseMenuUi = new PauseMenuUiController(uiRoot, GoToTitle, OpenSettings);
         _gameOverUi = new GameOverUiController(uiRoot, GoToTitle);
 
         _pauseMenuUi.OpenChanged += OnPauseMenuOpenChanged;
+        _settingsUi.OpenChanged += OnSettingsOpenChanged;
 
         if (GameManager.Instance != null)
             GameManager.Instance.GameStateChanged += OnGameStateChanged;
@@ -160,7 +175,22 @@ public partial class UIManager : Node2D
 
     private void UpdateHandInputBlocked()
     {
-        _handUi?.SetInputBlocked(_pauseMenuUi?.IsOpen == true || _gameOver);
+        _handUi?.SetInputBlocked(_pauseMenuUi?.IsOpen == true || _settingsUi?.IsOpen == true || _gameOver);
+    }
+
+    private void OpenSettings()
+    {
+        _settingsUi?.Open();
+    }
+
+    private void OnSettingsOpenChanged(bool open)
+    {
+        if (open)
+            _buildingManageUi?.SetInputBlocked(true);
+        else if (_pauseMenuUi?.IsOpen != true)
+            _buildingManageUi?.SetInputBlocked(_gameOver);
+
+        UpdateHandInputBlocked();
     }
 
     private void OnPauseMenuOpenChanged(bool open)

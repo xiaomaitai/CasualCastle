@@ -10,6 +10,7 @@
 [ext_resource type="Script" path="res://scripts/flow/MainGameController.cs" id="10"]
 [ext_resource type="Script" path="res://scripts/building/BuildingSystem.cs" id="11"]
 [ext_resource type="Script" path="res://scripts/building/AdjacentSystem.cs" id="12"]
+[ext_resource type="PackedScene" uid="uid://d4settingspanel01" path="res://scenes/ui/settings_panel.tscn" id="13"]
 
 [node name="MainGame" type="Node2D" unique_id=1]
 script = ExtResource("10")
@@ -438,8 +439,7 @@ offset_left = 92.0
 offset_top = 224.0
 offset_right = 292.0
 offset_bottom = 272.0
-disabled = true
-text = "设置（待开发）"
+text = "设置"
 
 [node name="GameOverOverlay" type="ColorRect" parent="UI"]
 visible = false
@@ -482,3 +482,5 @@ offset_top = 110.0
 offset_right = 300.0
 offset_bottom = 155.0
 text = "返回标题"
+
+[node name="SettingsPanel" parent="UI" instance=ExtResource("13")]

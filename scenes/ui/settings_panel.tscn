@@ -1,0 +1,99 @@
+[gd_scene format=3 uid="uid://bygrrmvcskot1"]
+
+[node name="SettingsPanel" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="Overlay" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0, 0, 0, 0.55)
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -220.0
+offset_right = 300.0
+offset_bottom = 220.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelBackground" type="ColorRect" parent="Panel"]
+layout_mode = 0
+offset_right = 600.0
+offset_bottom = 440.0
+color = Color(0.12, 0.16, 0.22, 0.96)
+
+[node name="TitleLabel" type="Label" parent="Panel"]
+layout_mode = 0
+offset_left = 48.0
+offset_top = 24.0
+offset_right = 552.0
+offset_bottom = 72.0
+theme_override_font_sizes/font_size = 32
+text = "设置"
+horizontal_alignment = 1
+
+[node name="WindowModeLabel" type="Label" parent="Panel"]
+layout_mode = 0
+offset_left = 48.0
+offset_top = 96.0
+offset_right = 200.0
+offset_bottom = 132.0
+theme_override_font_sizes/font_size = 20
+text = "显示模式"
+
+[node name="WindowModeOption" type="OptionButton" parent="Panel"]
+layout_mode = 0
+offset_left = 220.0
+offset_top = 92.0
+offset_right = 552.0
+offset_bottom = 136.0
+
+[node name="ResolutionLabel" type="Label" parent="Panel"]
+layout_mode = 0
+offset_left = 48.0
+offset_top = 156.0
+offset_right = 200.0
+offset_bottom = 192.0
+theme_override_font_sizes/font_size = 20
+text = "输出分辨率"
+
+[node name="ResolutionOption" type="OptionButton" parent="Panel"]
+layout_mode = 0
+offset_left = 220.0
+offset_top = 152.0
+offset_right = 552.0
+offset_bottom = 196.0
+
+[node name="ApplyButton" type="Button" parent="Panel"]
+layout_mode = 0
+offset_left = 96.0
+offset_top = 300.0
+offset_right = 296.0
+offset_bottom = 356.0
+text = "应用"
+
+[node name="BackButton" type="Button" parent="Panel"]
+layout_mode = 0
+offset_left = 304.0
+offset_top = 300.0
+offset_right = 504.0
+offset_bottom = 356.0
+text = "返回"

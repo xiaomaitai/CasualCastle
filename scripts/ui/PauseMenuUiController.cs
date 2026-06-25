@@ -10,13 +10,14 @@ public sealed class PauseMenuUiController
     private readonly Button _backToTitleButton;
     private readonly Button _settingsButton;
     private readonly Action _goToTitle;
+    private readonly Action _openSettings;
 
     private bool _gameOver;
 
     public bool IsOpen { get; private set; }
     public event Action<bool> OpenChanged;
 
-    public PauseMenuUiController(CanvasLayer uiRoot, Action goToTitle)
+    public PauseMenuUiController(CanvasLayer uiRoot, Action goToTitle, Action openSettings)
     {
         _overlay = uiRoot.GetNode<ColorRect>("PauseOverlay");
         _panel = uiRoot.GetNode<Panel>("PausePanel");
@@ -25,10 +26,12 @@ public sealed class PauseMenuUiController
         _backToTitleButton = uiRoot.GetNode<Button>("PausePanel/BackToTitleButton");
         _settingsButton = uiRoot.GetNode<Button>("PausePanel/SettingsButton");
         _goToTitle = goToTitle;
+        _openSettings = openSettings;
 
         _menuButton.Pressed += OnMenuButtonPressed;
         _continueButton.Pressed += OnContinuePressed;
         _backToTitleButton.Pressed += OnBackToTitlePressed;
+        _settingsButton.Pressed += OnSettingsPressed;
 
         Hide();
     }
@@ -38,6 +41,7 @@ public sealed class PauseMenuUiController
         _menuButton.Pressed -= OnMenuButtonPressed;
         _continueButton.Pressed -= OnContinuePressed;
         _backToTitleButton.Pressed -= OnBackToTitlePressed;
+        _settingsButton.Pressed -= OnSettingsPressed;
     }
 
     public void SetGameOver(bool gameOver)
@@ -87,6 +91,11 @@ public sealed class PauseMenuUiController
     {
         Close();
         _goToTitle();
+    }
+
+    private void OnSettingsPressed()
+    {
+        _openSettings?.Invoke();
     }
 
     private void Hide()

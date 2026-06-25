@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/flow/TitleScreen.cs" id="1"]
 [ext_resource type="Script" path="res://scripts/audio/BgmPlayer.cs" id="2"]
+[ext_resource type="PackedScene" uid="uid://d4settingspanel01" path="res://scenes/ui/settings_panel.tscn" id="3"]
 
 [node name="TitleScreen" type="Control"]
 layout_mode = 3
@@ -52,7 +53,14 @@ custom_minimum_size = Vector2(240, 48)
 layout_mode = 2
 text = "开始游戏"
 
+[node name="SettingsButton" type="Button" parent="UI"]
+custom_minimum_size = Vector2(240, 48)
+layout_mode = 2
+text = "设置"
+
 [node name="ExitButton" type="Button" parent="UI"]
 custom_minimum_size = Vector2(240, 48)
 layout_mode = 2
 text = "退出"
+
+[node name="SettingsPanel" parent="." instance=ExtResource("3")]
