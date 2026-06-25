@@ -15,9 +15,10 @@ CasualCastle/
 │   ├── building/              # Castle、Building、BuildingSystem、AdjacentSystem
 │   ├── battle/                # Soldier
 │   ├── fusion/                # FusionSystem、FusionRecipe
+│   ├── battle_report/         # BattleReportSystem（M6 规划）
+│   ├── replay/                # ReplayAiSystem（M6 规划）
 │   ├── audio/                 # BgmPlayer
 │   └── dev/                   # DevInputLogger
-│   # M6 规划：scripts/ai/     # AISystem
 ├── scenes/
 │   ├── main/main_game.tscn
 │   └── ui/title_screen.tscn
@@ -31,6 +32,7 @@ CasualCastle/
 │   ├── concepts.md
 │   ├── currentTasks.md
 │   ├── fusionSystemDesign.md
+│   ├── battleReportDesign.md
 │   ├── aiSystemDesign.md
 │   ├── codeStructure.md
 │   └── dataStructures.md
@@ -71,7 +73,8 @@ resources/
 | AdjacentSystem | 邻接检测与加成、放置光圈 | 已实现（兵营规则） |
 | BattleSystem | 部队生成、战斗 AI | 逻辑在 Soldier.cs |
 | FusionSystem | 入夜自动融合、禁止融合标记 | 已实现 |
-| AISystem | 敌方购卡、放置、入夜融合 | 待建（M6） |
+| BattleReportSystem | 夜末快照、战报缓存与持久化 | 待建（M6） |
+| ReplayAiSystem | 选定战报、入夜镜像复刻敌方 | 待建（M6） |
 
 ## 5.4 系统模块设计
 
@@ -89,7 +92,7 @@ resources/
 | AdjacentSystem | 建筑邻接检测、加成刷新 | `BuildingSystem`, `Castle` |
 | FusionSystem | 入夜自动融合、配方与主体邻接判定、升级结果生成 | `BuildingSystem`, `GameManager`, `UIManager` |
 | BattleSystem | 士兵生成、行动、索敌、攻击与死亡 | `UnitData`, `NightSystem`, `Castle` |
-| AISystem | 敌方金币与手牌、夜晚购卡放置、双侧融合调度 | `GameManager`, `BuildingSystem`, `FusionSystem`, `ShopSystem` |
+| ReplayAiSystem | 战报选取、入夜镜像同步敌方城堡、士兵挡格跳过 | `BattleReportSystem`, `BuildingSystem`, `GameManager` |
 | DataResources | 卡牌、建筑、单位、全局配置数据 | `CardData`, `BuildingData`, `UnitData`, `GameConfig` |
 
 模块依赖关系如下：
@@ -106,7 +109,8 @@ flowchart LR
     AdjacentSystem[AdjacentSystem<br/>邻接加成]
     FusionSystem[FusionSystem<br/>融合升级]
     BattleSystem[BattleSystem<br/>单位/战斗]
-    AISystem[AISystem<br/>敌方决策]
+    BattleReportSystem[BattleReportSystem<br/>战报快照]
+    ReplayAiSystem[ReplayAiSystem<br/>战报复刻敌方]
     DataResources[DataResources<br/>Card/Building/Unit/GameConfig]
     RuntimeNodes[RuntimeNodes<br/>Castle/Building/Soldier]
 
@@ -146,10 +150,13 @@ flowchart LR
     BattleSystem --> DataResources
     BattleSystem --> GameManager
 
-    AISystem --> GameManager
-    AISystem --> ShopSystem
-    AISystem --> CardSystem
-    AISystem --> BuildingSystem
+    GameManager --> BattleReportSystem
+    GameManager --> ReplayAiSystem
+
+    BattleReportSystem --> DataResources
+    ReplayAiSystem --> BattleReportSystem
+    ReplayAiSystem --> BuildingSystem
+    ReplayAiSystem --> GameManager
 
     RuntimeNodes --> GameManager
 ```

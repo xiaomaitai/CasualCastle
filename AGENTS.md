@@ -50,7 +50,7 @@ Godot **4.6** + **C# / .NET** 的 2D RTS 项目（类皇室战争）。物理：
 | 当前任务、验收项 | `devPlan/currentTasks.md`                   |
 | 里程碑与路线图  | `devPlan/outline/`                          |
 | 模块设计与依赖  | `devPlan/outline/c05ProjectArchitecture.md` |
-| 融合 / AI 规则 | `devPlan/fusionSystemDesign.md`、`devPlan/aiSystemDesign.md` |
+| 融合 / AI 规则 | `devPlan/fusionSystemDesign.md`、`devPlan/battleReportDesign.md`、`devPlan/aiSystemDesign.md` |
 | 运行时代码结构  | `devPlan/codeStructure.md`                  |
 | 数据结构     | `devPlan/dataStructures.md`                 |
 

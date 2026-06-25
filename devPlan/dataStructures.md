@@ -53,6 +53,38 @@ public class FusionRecipe
 
 ---
 
+## 战报（M6）
+
+```csharp
+public class BuildingSnapshot
+{
+	public string TypeId;
+	public int AnchorGridX;
+	public int AnchorGridY;
+	public int Health;
+	public bool IsManuallyPaused;
+	public bool IsFusionProhibited;
+}
+
+public class CastleSnapshot
+{
+	public int NightIndex;              // 第几夜结束时的快照
+	public List<BuildingSnapshot> Buildings;
+}
+
+public class BattleReport
+{
+	public string ReportId;
+	public string DisplayName;          // 可选，默认时间戳
+	public long SavedAtUnix;            // 保存时间
+	public List<CastleSnapshot> Nights;
+}
+```
+
+局内缓存可用 `BattleReport` 不含 `ReportId`；持久化时分配 ID 并写入磁盘。
+
+---
+
 ## 部队数据
 
 ```csharp

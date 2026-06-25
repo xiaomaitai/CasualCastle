@@ -1,102 +1,54 @@
-# AI 对手系统设计 — M6
+# 敌方复刻（回放式 AI）— M6
 
-敌方城堡在昼夜循环中自主购卡、放置建筑，并在入夜时参与自动融合，形成可单人对战的完整 MVP。概念入口见 `concepts.md`；架构归属见 `outline/c05ProjectArchitecture.md`。
-
----
-
-## 目标与范围
-
-**M6 交付：** 玩家 vs AI 的完整对局——敌方拥有独立金币与手牌逻辑，夜晚能扩建城堡，白天/夜晚产兵与战斗与玩家对称（受昼夜与夜战规则约束）。
-
-**首版不做：**
-
-- 敌方建筑修复、禁止融合工具、商店 UI
-- 复杂战术（集火、绕后、兵种克制）
-- 寻路、BattleSystem 抽离
-- 存档、难度档位、AI 性格
-
-**可延后（M6.1）：** 敌方修复受损建筑、更智能的放置评分、多难度。
+敌方**不自主决策**（不购卡、不选位、不融合）。每局从永久战报库中**选取一条战报**，在每次**夜晚开始**时，按当前夜晚序号取出对应快照，将建筑**镜像复刻**到敌方城堡。概念见 `concepts.md` §战报；录制见 `battleReportDesign.md`。
 
 ---
 
-## 现状与缺口
+## 核心规则
 
-| 能力 | 玩家 | 敌方（当前） |
-|------|------|--------------|
-| 初始兵营 | 1 座（可配置第二座） | 2 座（场景配置） |
-| 金币 | `ShopSystem.Gold` | 无 |
-| 手牌 | `CardSystem` | 无 |
-| 购卡 / 放置 | 商店 + 手牌 UI | 无 |
-| 入夜融合 | `FusionSystem`（仅 `IsPlayerCastle`） | 无 |
-| 产兵 / 战斗 | 已有 | 已有（初始兵营） |
+| 项目 | 说明 |
+|------|------|
+| 决策方式 | **无**自主 AI；仅战报回放 |
+| 战报来源 | 局前或开局选定一条已保存战报 |
+| 触发时机 | 第 N 夜**开始**（`PhaseChanged → Night`，在玩家融合之前或之后需固定顺序，见下） |
+| 取用条目 | 战报中 `NightIndex == N` 的快照（该条为历史对局**第 N 夜结束**时录制的玩家城堡） |
+| 复刻方式 | 快照建筑**水平镜像**映射到敌方城堡同格位（左右对称；实现时以双方 8×8 网格镜像 `gridX`） |
+| 跳过条件 | 目标格（或建筑占格任一格）被**玩家士兵**占据 → 该建筑不复制 |
+| 生命与状态 | 与快照一致（含受损、暂停、禁止融合标记） |
 
-**需改造：**
-
-- `BuildingSystem.TryPlace` 现限制 `castle.IsPlayerCastle`，需开放 AI 放置入口
-- `ShopSystem` / `CardSystem` 现绑定玩家 UI 流程，需抽出敌方经济或平行的 `EnemyAiState`
-- `FusionSystem.ResolveNightFusions` 现仅玩家城堡，需对敌方城堡调用
-- `GameManager.BeginPhase(Night)` 现只融合玩家侧
+若无 `NightIndex == N` 的条目：敌方保持上一夜布局，本夜不追加复刻。
 
 ---
 
-## 时机与触发
+## 入夜顺序（建议）
 
 ```text
-PhaseChanged → Night
-  → FusionSystem.ResolveNightFusions(playerCastle)
-  → FusionSystem.ResolveNightFusions(enemyCastle)    // M6 新增
-  → AISystem.OnNightBegin()                          // 购卡 + 放置
-  → （玩家侧）ShopSystem 开商店 UI
-
-PhaseChanged → Day
-  → （可选）AISystem.OnDayBegin()  // M6 首版可不在白天购卡，仅夜晚行动
+PhaseChanged → Night（NightIndex 已更新为 N）
+  → FusionSystem.ResolveNightFusions(playerCastle)   // 玩家先融合
+  → ReplayAiSystem.ApplyNightSnapshot(enemyCastle, report, N)  // 再复刻敌方
+  → ShopSystem 开商店…
 ```
 
-**与玩家对齐：** M6 首版敌方仅在**夜晚**执行经济回合（购卡并立即放置），与玩家「夜晚打开商店」节奏一致。白天仅依赖已有建筑产兵。
+夜晚结束切白天时：`NightIndex` 不变；下一夜开始再 +1 或由「结束夜晚」计数，与战报录制序号对齐（实现时与 `BattleReportSystem` 共用同一计数器）。
 
 ---
 
-## 敌方经济
+## 敌方城堡同步逻辑
 
-### 金币
+1. 读取战报第 N 条快照的建筑列表
+2. 对每座建筑，将玩家锚点 `(x, y)` 镜像为敌方 `(mirrorX, y)`（如 `mirrorX = GridColumns - 1 - x - footprintWidth + 1`，多格建筑按锚点与 footprint 计算）
+3. 若占格任一格上有玩家 `Soldier` 存活且 `IsPlayerUnit == true` → **跳过**该建筑
+4. 移除敌方城堡上需替换的旧建筑（非核心、与快照冲突格位）
+5. 在空位创建 `BuildingSystem.CreateBuilding(type)`，`BindToGrid`，写入快照生命与状态
 
-- 敌方独立金币池，初始值 `GameConfig.InitialGold`（与玩家相同，可配置项 `EnemyInitialGold` 预留）
-- 不显示在 HUD；调试可用 `GD.Print` 或开发面板
-
-### 购卡
-
-- 复用 `ShopSystem.Catalog` 商品表与费用
-- 从目录随机或按权重抽取可负担卡牌，加入敌方虚拟手牌（列表即可，无需 UI）
-- 敌方手牌上限与玩家相同（`CardSystem.MaxHandSize`）
-
-### 放置
-
-- 购得卡牌后**同回合内**尝试放置到敌方城堡合法空地
-- 放置成功则从敌方手牌移除；失败则保留至下一夜再试（或丢弃最弱卡——实现时择一，文档默认**保留**）
+**不做：** 敌方 `FusionSystem` 独立融合；快照里已是融合结果则直接放置对应 `TypeId`（如 `BarracksT2`）。
 
 ---
 
-## 放置决策（首版）
+## 战报选择
 
-扫描敌方城堡所有可放置 `(anchorX, anchorY)` × 卡牌 `BuildingType` 组合，按简单评分选最优：
-
-| 优先级 | 规则 |
-|--------|------|
-| 1 | 能放置且花费后金币仍 ≥ 预留值（如 0） |
-| 2 | 单格建筑优先贴邻已有同类型建筑（便于入夜融合） |
-| 3 | 兵营优先放在已有兵营四向邻格 |
-| 4 | 否则选距己方城堡之心最近的可通行边格（朝玩家方向扩建） |
-| 5 | 同分取 `(AnchorGridY, AnchorGridX)` 字典序最小 |
-
-多格建筑（靶场、马厩）：M6 首版**可购买但低优先级**；若无合法占地则跳过该卡。
-
----
-
-## 入夜融合（敌方）
-
-- 规则与玩家完全相同（`fusionSystemDesign.md`）：免费、主体邻接、满血结果
-- 敌方**无**禁止融合标记
-- 在 `GameManager` 入夜流程中，玩家融合完成后对 `EnemyCastle` 调用 `ResolveNightFusions`
+- M6 首版：开局或标题页选**一条**已保存战报作为本局 AI 参考
+- 无战报时：敌方仅保留场景初始兵营（或空城，实现时二选一并在验收写明）
 
 ---
 
@@ -104,36 +56,24 @@ PhaseChanged → Day
 
 | 模块 | 职责 |
 |------|------|
-| `AISystem` | 敌方金币、手牌、夜晚购卡与放置决策；入夜/入昼钩子 |
-| `FusionSystem` | 扩展为可对任意 `Castle` 调用（已具备，仅需 GameManager 双侧调用） |
-| `BuildingSystem` | 提供 `TryPlaceForCastle(castle, ...)` 或放宽 `TryPlace` 供 AI 使用 |
-| `GameManager` | 入夜顺序：双侧融合 → `AISystem.OnNightBegin` |
-| `ShopSystem` | 提供目录与单价查询；玩家扣费逻辑不变 |
-
-信号建议：`AiActionPerformed(Castle, string actionType)`（调试/日志用，非必须）。
+| `ReplayAiSystem` | 选定战报、入夜镜像复刻、占格与玩家士兵冲突检测 |
+| `BattleReportSystem` | 提供已保存战报与按 `NightIndex` 查询快照 |
+| `BuildingSystem` | 敌方城堡创建/移除建筑 |
+| `Castle` | 占格查询、士兵与格位重叠检测（或委托 `Battlefield`） |
 
 ---
 
-## 验收标准（M6）
+## 验收标准（AI / 复刻部分）
 
-- [ ] 开局后敌方除初始兵营外，随夜晚推进会新增建筑
-- [ ] 敌方金币不足时不购卡；购卡后放置到合法地块
-- [ ] 敌方邻接双兵营/双狼穴入夜可融合为强化版
-- [ ] 玩家与敌方士兵、建筑均受昼夜 / 夜战规则约束
-- [ ] 可打满一局并正常结算胜负
-- [ ] 玩家侧商店、手牌、融合禁止等现有功能不受影响
+- [ ] 选定战报后，第 1 夜开始敌方布局与战报第 1 条快照镜像一致（未被士兵挡住的格）
+- [ ] 玩家士兵站在某格上时，该格对应建筑不复刻
+- [ ] 后续夜晚按序号继续复刻；无条目则不变
+- [ ] 敌方仍正常产兵、战斗；玩家侧功能无回归
 
 ---
 
-## 实现任务拆分
+## 不做事项（M6）
 
-见 `currentTasks.md` M6 章节。
-
----
-
-## 后续扩展（M6.1+）
-
-- 白天微操（补放置、紧急购卡）
-- 敌方修复、保留金币策略
-- 难度：初始金、购卡频率、放置评分权重
-- AI 融合禁止（模拟玩家策略）
+- 购卡、金币、放置评分、自主融合
+- 多条战报混合、按回合动态换战报
+- 敌方修复、禁止融合工具
