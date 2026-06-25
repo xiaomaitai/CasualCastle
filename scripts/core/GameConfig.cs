@@ -4,12 +4,6 @@ public static class GameConfig
 {
 	public const int DesignWidth = 1920;
 	public const int DesignHeight = 1080;
-	public const int LegacyLayoutWidth = 1280;
-	public const int LegacyLayoutHeight = 720;
-
-	public static readonly Vector2 LayoutScale = new(
-		(float)DesignWidth / LegacyLayoutWidth,
-		(float)DesignHeight / LegacyLayoutHeight);
 
 	public static readonly Vector2I[] OutputResolutions =
 	{

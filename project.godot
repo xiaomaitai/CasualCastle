@@ -24,7 +24,6 @@ DisplaySettingsManager="*res://scripts/autoload/DisplaySettingsManager.cs"
 
 window/size/viewport_width=1920
 window/size/viewport_height=1080
-window/size/mode=0
 window/size/resizable=false
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"

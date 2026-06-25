@@ -41,6 +41,7 @@ script = ExtResource("12")
 script = ExtResource("4")
 
 [node name="Battlefield" type="Node2D" parent="." unique_id=2]
+scale = Vector2(1.5, 1.5)
 
 [node name="Background" type="ColorRect" parent="Battlefield" unique_id=13]
 color = Color(0.15, 0.3, 0.12, 1)
@@ -70,46 +71,46 @@ SecondBarracksGridY = 4
 [node name="UI" type="CanvasLayer" parent="." unique_id=5]
 
 [node name="PlayerHealthBar" type="ProgressBar" parent="UI" unique_id=6]
-offset_left = 50.0
-offset_top = 20.0
-offset_right = 250.0
-offset_bottom = 47.0
+offset_left = 75
+offset_top = 30
+offset_right = 375
+offset_bottom = 70.5
 max_value = 500.0
 value = 500.0
 
 [node name="EnemyHealthBar" type="ProgressBar" parent="UI" unique_id=7]
-offset_left = 1030.0
-offset_top = 20.0
-offset_right = 1230.0
-offset_bottom = 47.0
+offset_left = 1545
+offset_top = 30
+offset_right = 1845
+offset_bottom = 70.5
 max_value = 500.0
 value = 500.0
 
 [node name="GoldLabel" type="Label" parent="UI"]
-offset_left = 280.0
-offset_top = 20.0
-offset_right = 420.0
-offset_bottom = 47.0
-theme_override_font_sizes/font_size = 22
+offset_left = 420
+offset_top = 30
+offset_right = 630
+offset_bottom = 70.5
+theme_override_font_sizes/font_size = 33
 text = "金币：30"
 
 [node name="PhasePanel" type="VBoxContainer" parent="UI"]
-offset_left = 540.0
-offset_top = 12.0
-offset_right = 740.0
-offset_bottom = 92.0
-theme_override_constants/separation = 4
+offset_left = 810
+offset_top = 18
+offset_right = 1110
+offset_bottom = 138
+theme_override_constants/separation = 6
 alignment = 1
 
 [node name="PhaseLabel" type="Label" parent="UI/PhasePanel"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 33
 text = "白天"
 horizontal_alignment = 1
 
 [node name="PhaseTimerLabel" type="Label" parent="UI/PhasePanel"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 24
 text = "1:00"
 horizontal_alignment = 1
 
@@ -118,279 +119,279 @@ layout_mode = 2
 text = "切换昼夜"
 
 [node name="MenuButton" type="Button" parent="UI"]
-offset_left = 1216.0
-offset_top = 14.0
-offset_right = 1268.0
-offset_bottom = 58.0
+offset_left = 1824
+offset_top = 21
+offset_right = 1902
+offset_bottom = 87
 text = "☰"
 
 [node name="ShopButton" type="Button" parent="UI"]
-offset_left = 1101.0
-offset_top = 620.0
-offset_right = 1221.0
-offset_bottom = 676.0
+offset_left = 1651.5
+offset_top = 930
+offset_right = 1831.5
+offset_bottom = 1014
 text = "商店"
 
 [node name="BuildingPauseToolButton" type="Button" parent="UI"]
-custom_minimum_size = Vector2(48, 36)
-offset_left = 989.0
-offset_top = 628.0
-offset_right = 1037.0
-offset_bottom = 664.0
+custom_minimum_size = Vector2(72, 54)
+offset_left = 1483.5
+offset_top = 942
+offset_right = 1555.5
+offset_bottom = 996
 toggle_mode = true
 expand_icon = true
 tooltip_text = "暂停建筑"
 
 [node name="BuildingRepairToolButton" type="Button" parent="UI"]
-custom_minimum_size = Vector2(48, 36)
-offset_left = 1045.0
-offset_top = 628.0
-offset_right = 1093.0
-offset_bottom = 664.0
+custom_minimum_size = Vector2(72, 54)
+offset_left = 1567.5
+offset_top = 942
+offset_right = 1639.5
+offset_bottom = 996
 toggle_mode = true
 expand_icon = true
 tooltip_text = "修复建筑（仅夜晚）"
 
 [node name="HandPanel" type="HBoxContainer" parent="UI"]
-offset_left = 307.0
-offset_top = 605.0
-offset_right = 973.0
-offset_bottom = 695.0
-theme_override_constants/separation = 12
+offset_left = 460.5
+offset_top = 907.5
+offset_right = 1459.5
+offset_bottom = 1042.5
+theme_override_constants/separation = 18
 alignment = 1
 
 [node name="HandSlot1" type="Button" parent="UI/HandPanel"]
-custom_minimum_size = Vector2(84, 80)
+custom_minimum_size = Vector2(126, 120)
 layout_mode = 2
 disabled = true
 text = "空"
 
 [node name="HandSlot2" type="Button" parent="UI/HandPanel"]
-custom_minimum_size = Vector2(84, 80)
+custom_minimum_size = Vector2(126, 120)
 layout_mode = 2
 disabled = true
 text = "空"
 
 [node name="HandSlot3" type="Button" parent="UI/HandPanel"]
-custom_minimum_size = Vector2(84, 80)
+custom_minimum_size = Vector2(126, 120)
 layout_mode = 2
 disabled = true
 text = "空"
 
 [node name="HandSlot4" type="Button" parent="UI/HandPanel"]
-custom_minimum_size = Vector2(84, 80)
+custom_minimum_size = Vector2(126, 120)
 layout_mode = 2
 disabled = true
 text = "空"
 
 [node name="HandSlot5" type="Button" parent="UI/HandPanel"]
-custom_minimum_size = Vector2(84, 80)
+custom_minimum_size = Vector2(126, 120)
 layout_mode = 2
 disabled = true
 text = "空"
 
 [node name="HandSlot6" type="Button" parent="UI/HandPanel"]
-custom_minimum_size = Vector2(84, 80)
+custom_minimum_size = Vector2(126, 120)
 layout_mode = 2
 disabled = true
 text = "空"
 
 [node name="HandSlot7" type="Button" parent="UI/HandPanel"]
-custom_minimum_size = Vector2(84, 80)
+custom_minimum_size = Vector2(126, 120)
 layout_mode = 2
 disabled = true
 text = "空"
 
 [node name="PlacementHintLabel" type="Label" parent="UI"]
 visible = false
-offset_left = 460.0
-offset_top = 575.0
-offset_right = 820.0
-offset_bottom = 600.0
-theme_override_font_sizes/font_size = 16
+offset_left = 690
+offset_top = 862.5
+offset_right = 1230
+offset_bottom = 900
+theme_override_font_sizes/font_size = 24
 text = "左键放置，右键或 Esc 取消"
 horizontal_alignment = 1
 
 [node name="BuildingInfoPanel" type="Panel" parent="UI"]
 visible = false
-offset_left = 922.0
-offset_top = 130.0
-offset_right = 1229.0
-offset_bottom = 332.0
+offset_left = 1383
+offset_top = 195
+offset_right = 1843.5
+offset_bottom = 498
 
 [node name="PanelBackground" type="ColorRect" parent="UI/BuildingInfoPanel"]
 layout_mode = 0
-offset_right = 307.0
-offset_bottom = 202.0
+offset_right = 460.5
+offset_bottom = 303
 color = Color(0.1, 0.14, 0.2, 0.92)
 
 [node name="NameLabel" type="Label" parent="UI/BuildingInfoPanel"]
 layout_mode = 0
-offset_left = 16.0
-offset_top = 16.0
-offset_right = 291.0
-offset_bottom = 52.0
-theme_override_font_sizes/font_size = 22
+offset_left = 24
+offset_top = 24
+offset_right = 436.5
+offset_bottom = 78
+theme_override_font_sizes/font_size = 33
 text = "兵营"
 
 [node name="HealthLabel" type="Label" parent="UI/BuildingInfoPanel"]
 layout_mode = 0
-offset_left = 16.0
-offset_top = 60.0
-offset_right = 291.0
-offset_bottom = 92.0
-theme_override_font_sizes/font_size = 18
+offset_left = 24
+offset_top = 90
+offset_right = 436.5
+offset_bottom = 138
+theme_override_font_sizes/font_size = 27
 text = "生命：100/100"
 
 [node name="StatusLabel" type="Label" parent="UI/BuildingInfoPanel"]
 layout_mode = 0
-offset_left = 16.0
-offset_top = 100.0
-offset_right = 291.0
-offset_bottom = 132.0
-theme_override_font_sizes/font_size = 18
+offset_left = 24
+offset_top = 150
+offset_right = 436.5
+offset_bottom = 198
+theme_override_font_sizes/font_size = 27
 text = "工作中"
 
 [node name="ShopPanel" type="Panel" parent="UI"]
 visible = false
-offset_left = 819.0
-offset_top = 72.0
-offset_right = 1254.0
-offset_bottom = 548.0
+offset_left = 1228.5
+offset_top = 108
+offset_right = 1881
+offset_bottom = 822
 
 [node name="ShopPanelBackground" type="ColorRect" parent="UI/ShopPanel"]
 layout_mode = 0
-offset_right = 435.0
-offset_bottom = 476.0
+offset_right = 652.5
+offset_bottom = 714
 color = Color(0.12, 0.16, 0.22, 0.96)
 
 [node name="ShopTitleLabel" type="Label" parent="UI/ShopPanel"]
 layout_mode = 0
-offset_left = 24.0
-offset_top = 16.0
-offset_right = 220.0
-offset_bottom = 48.0
-theme_override_font_sizes/font_size = 24
+offset_left = 36
+offset_top = 24
+offset_right = 330
+offset_bottom = 72
+theme_override_font_sizes/font_size = 36
 text = "商店"
 
 [node name="ShopCloseButton" type="Button" parent="UI/ShopPanel"]
 layout_mode = 0
-offset_left = 388.0
-offset_top = 12.0
-offset_right = 420.0
-offset_bottom = 44.0
+offset_left = 582
+offset_top = 18
+offset_right = 630
+offset_bottom = 66
 text = "X"
 
 [node name="ShopGoldLabel" type="Label" parent="UI/ShopPanel"]
 layout_mode = 0
-offset_left = 24.0
-offset_top = 56.0
-offset_right = 260.0
-offset_bottom = 84.0
-theme_override_font_sizes/font_size = 18
+offset_left = 36
+offset_top = 84
+offset_right = 390
+offset_bottom = 126
+theme_override_font_sizes/font_size = 27
 text = "当前金币：30"
 
 [node name="OfferSlot1" type="HBoxContainer" parent="UI/ShopPanel"]
 layout_mode = 0
-offset_left = 24.0
-offset_top = 104.0
-offset_right = 411.0
-offset_bottom = 152.0
-theme_override_constants/separation = 12
+offset_left = 36
+offset_top = 156
+offset_right = 616.5
+offset_bottom = 228
+theme_override_constants/separation = 18
 
 [node name="OfferLabel" type="Label" parent="UI/ShopPanel/OfferSlot1"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 27
 text = "兵营  费用：10"
 
 [node name="BuyButton" type="Button" parent="UI/ShopPanel/OfferSlot1"]
-custom_minimum_size = Vector2(96, 40)
+custom_minimum_size = Vector2(144, 60)
 layout_mode = 2
 text = "购买"
 
 [node name="OfferSlot2" type="HBoxContainer" parent="UI/ShopPanel"]
 layout_mode = 0
-offset_left = 24.0
-offset_top = 176.0
-offset_right = 411.0
-offset_bottom = 224.0
-theme_override_constants/separation = 12
+offset_left = 36
+offset_top = 264
+offset_right = 616.5
+offset_bottom = 336
+theme_override_constants/separation = 18
 
 [node name="OfferLabel" type="Label" parent="UI/ShopPanel/OfferSlot2"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 27
 text = "强化兵营  费用：15"
 
 [node name="BuyButton" type="Button" parent="UI/ShopPanel/OfferSlot2"]
-custom_minimum_size = Vector2(96, 40)
+custom_minimum_size = Vector2(144, 60)
 layout_mode = 2
 text = "购买"
 
 [node name="OfferSlot3" type="HBoxContainer" parent="UI/ShopPanel"]
 layout_mode = 0
-offset_left = 24.0
-offset_top = 248.0
-offset_right = 411.0
-offset_bottom = 296.0
-theme_override_constants/separation = 12
+offset_left = 36
+offset_top = 372
+offset_right = 616.5
+offset_bottom = 444
+theme_override_constants/separation = 18
 
 [node name="OfferLabel" type="Label" parent="UI/ShopPanel/OfferSlot3"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 27
 text = "精英兵营  费用：20"
 
 [node name="BuyButton" type="Button" parent="UI/ShopPanel/OfferSlot3"]
-custom_minimum_size = Vector2(96, 40)
+custom_minimum_size = Vector2(144, 60)
 layout_mode = 2
 text = "购买"
 
 [node name="OfferSlot4" type="HBoxContainer" parent="UI/ShopPanel"]
 layout_mode = 0
-offset_left = 24.0
-offset_top = 320.0
-offset_right = 411.0
-offset_bottom = 368.0
-theme_override_constants/separation = 12
+offset_left = 36
+offset_top = 480
+offset_right = 616.5
+offset_bottom = 552
+theme_override_constants/separation = 18
 
 [node name="OfferLabel" type="Label" parent="UI/ShopPanel/OfferSlot4"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 27
 text = "马厩  费用：18"
 
 [node name="BuyButton" type="Button" parent="UI/ShopPanel/OfferSlot4"]
-custom_minimum_size = Vector2(96, 40)
+custom_minimum_size = Vector2(144, 60)
 layout_mode = 2
 text = "购买"
 
 [node name="OfferSlot5" type="HBoxContainer" parent="UI/ShopPanel"]
 layout_mode = 0
-offset_left = 24.0
-offset_top = 392.0
-offset_right = 411.0
-offset_bottom = 440.0
-theme_override_constants/separation = 12
+offset_left = 36
+offset_top = 588
+offset_right = 616.5
+offset_bottom = 660
+theme_override_constants/separation = 18
 
 [node name="OfferLabel" type="Label" parent="UI/ShopPanel/OfferSlot5"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 27
 text = "兵营  费用：10"
 
 [node name="BuyButton" type="Button" parent="UI/ShopPanel/OfferSlot5"]
-custom_minimum_size = Vector2(96, 40)
+custom_minimum_size = Vector2(144, 60)
 layout_mode = 2
 text = "购买"
 
 [node name="ShopRefreshButton" type="Button" parent="UI/ShopPanel"]
 layout_mode = 0
-offset_left = 140.0
-offset_top = 464.0
-offset_right = 295.0
-offset_bottom = 508.0
+offset_left = 210
+offset_top = 696
+offset_right = 442.5
+offset_bottom = 762
 text = "刷新商品"
 
 [node name="PauseOverlay" type="ColorRect" parent="UI"]
@@ -405,49 +406,49 @@ color = Color(0, 0, 0, 0.55)
 
 [node name="PausePanel" type="Panel" parent="UI"]
 visible = false
-offset_left = 448.0
-offset_top = 173.0
-offset_right = 832.0
-offset_bottom = 505.0
+offset_left = 672
+offset_top = 259.5
+offset_right = 1248
+offset_bottom = 757.5
 
 [node name="PanelBackground" type="ColorRect" parent="UI/PausePanel"]
 layout_mode = 0
-offset_right = 384.0
-offset_bottom = 332.0
+offset_right = 576
+offset_bottom = 498
 color = Color(0.12, 0.16, 0.22, 0.96)
 
 [node name="TitleLabel" type="Label" parent="UI/PausePanel"]
 layout_mode = 0
-offset_left = 92.0
-offset_top = 24.0
-offset_right = 292.0
-offset_bottom = 64.0
-theme_override_font_sizes/font_size = 28
+offset_left = 138
+offset_top = 36
+offset_right = 438
+offset_bottom = 96
+theme_override_font_sizes/font_size = 42
 text = "菜单"
 horizontal_alignment = 1
 
 [node name="ContinueButton" type="Button" parent="UI/PausePanel"]
 layout_mode = 0
-offset_left = 92.0
-offset_top = 88.0
-offset_right = 292.0
-offset_bottom = 136.0
+offset_left = 138
+offset_top = 132
+offset_right = 438
+offset_bottom = 204
 text = "继续游戏"
 
 [node name="BackToTitleButton" type="Button" parent="UI/PausePanel"]
 layout_mode = 0
-offset_left = 92.0
-offset_top = 156.0
-offset_right = 292.0
-offset_bottom = 204.0
+offset_left = 138
+offset_top = 234
+offset_right = 438
+offset_bottom = 306
 text = "返回标题"
 
 [node name="SettingsButton" type="Button" parent="UI/PausePanel"]
 layout_mode = 0
-offset_left = 92.0
-offset_top = 224.0
-offset_right = 292.0
-offset_bottom = 272.0
+offset_left = 138
+offset_top = 336
+offset_right = 438
+offset_bottom = 408
 text = "设置"
 
 [node name="GameOverOverlay" type="ColorRect" parent="UI"]
@@ -462,34 +463,34 @@ color = Color(0, 0, 0, 0.55)
 
 [node name="GameOverPanel" type="Panel" parent="UI" unique_id=8]
 visible = false
-offset_left = 440.0
-offset_top = 240.0
-offset_right = 840.0
-offset_bottom = 420.0
+offset_left = 660
+offset_top = 360
+offset_right = 1260
+offset_bottom = 630
 
 [node name="PanelBackground" type="ColorRect" parent="UI/GameOverPanel"]
 layout_mode = 0
-offset_right = 400.0
-offset_bottom = 180.0
+offset_right = 600
+offset_bottom = 270
 color = Color(0.18, 0.22, 0.28, 0.95)
 
 [node name="GameOverLabel" type="Label" parent="UI/GameOverPanel" unique_id=9]
 layout_mode = 0
-offset_left = 50.0
-offset_top = 36.0
-offset_right = 350.0
-offset_bottom = 86.0
-theme_override_font_sizes/font_size = 32
+offset_left = 75
+offset_top = 54
+offset_right = 525
+offset_bottom = 129
+theme_override_font_sizes/font_size = 48
 text = "游戏结束"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="BackToTitleButton" type="Button" parent="UI/GameOverPanel" unique_id=10]
 layout_mode = 0
-offset_left = 100.0
-offset_top = 110.0
-offset_right = 300.0
-offset_bottom = 155.0
+offset_left = 150
+offset_top = 165
+offset_right = 450
+offset_bottom = 232.5
 text = "返回标题"
 
 [node name="SettingsPanel" parent="UI" instance=ExtResource("13")]
