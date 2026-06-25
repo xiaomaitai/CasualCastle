@@ -66,7 +66,7 @@ resources/
 | NightSystem | 夜晚休眠门控、夜战词条判定 | 已实现 |
 | AdjacentSystem | 邻接检测与加成、放置光圈 | 已实现（兵营规则） |
 | BattleSystem | 部队生成、战斗 AI | 逻辑在 Soldier.cs |
-| FusionSystem | 融合条件与升级 | 未建 |
+| FusionSystem | 入夜自动融合、禁止融合标记 | 待建（M5） |
 
 ## 5.4 系统模块设计
 
@@ -82,7 +82,7 @@ resources/
 | CardSystem | 手牌、卡牌打出、卡牌到建筑的转换 | `CardData`, `BuildingSystem`, `UIManager` |
 | BuildingSystem | 建筑放置、占格验证、建筑工作调度 | `Castle`, `BuildingData`, `NightSystem` |
 | AdjacentSystem | 建筑邻接检测、加成刷新 | `BuildingSystem`, `Castle` |
-| FusionSystem | 建筑融合条件、升级结果生成 | `BuildingSystem`, `BuildingData`, `UIManager` |
+| FusionSystem | 入夜自动融合、配方与主体邻接判定、升级结果生成 | `BuildingSystem`, `GameManager`, `UIManager` |
 | BattleSystem | 士兵生成、行动、索敌、攻击与死亡 | `UnitData`, `NightSystem`, `Castle` |
 | AISystem | 敌方购卡、放置、战术决策 | `GameManager`, `ShopSystem`, `CardSystem`, `BuildingSystem` |
 | DataResources | 卡牌、建筑、单位、全局配置数据 | `CardData`, `BuildingData`, `UnitData`, `GameConfig` |

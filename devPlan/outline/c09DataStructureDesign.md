@@ -5,8 +5,9 @@
 当前数据层状态：
 
 - `GameConfig`：已落地白天/夜晚时长、初始金币等常量
-- `BuildingData`：M2 建议落地，包含名称、花费、产出间隔、产出单位预制体、`HasNightCombat`
-- `CardData`：M2 建议落地，关联 `BuildingData`、卡牌图标和购买费用
-- `UnitData`：M4 前落地，包含 `HasNightCombat` 等单位词条
+- `BuildingDefinition`（`BuildingSystem`）：已落地名称、生命、产兵、占地、`HasNightCombat`；M5 扩展强化建筑与融合阶
+- `CardData`：已落地运行时结构；**一次性放置卡**，打出后消耗，不与场上建筑绑定
+- `FusionRecipe`：M5 落地，见 `../fusionSystemDesign.md` 与 `../dataStructures.md`
+- `UnitData`：产兵属性暂由 `BuildingDefinition` 承载；独立 `UnitData` 资源可后续拆分
 
 ---
