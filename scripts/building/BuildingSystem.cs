@@ -72,6 +72,27 @@ public partial class BuildingSystem : Node
             soldierHealth: 35,
             hasNightCombat: true,
             soldierSpriteModulate: new Color(0.75f, 0.55f, 0.95f)),
+        ["BarracksT2"] = BuildingDefinition.Create(
+            Single, new(0, 0), "强化兵营", 130,
+            PlaceholderTexturePath,
+            new Vector2(0.0625f, 0.0625f),
+            new Color(0.85f, 0.9f, 1f),
+            new Vector2(56f, 56f),
+            spawnInterval: 4f,
+            fusionTier: 1),
+        ["WolfDenT2"] = BuildingDefinition.Create(
+            Single, new(0, 0), "强化狼穴", 120,
+            PlaceholderTexturePath,
+            new Vector2(0.0625f, 0.0625f),
+            new Color(0.65f, 0.45f, 0.85f),
+            new Vector2(56f, 56f),
+            spawnInterval: 5f,
+            soldierDamage: 16,
+            soldierSpeed: 95f,
+            soldierHealth: 35,
+            hasNightCombat: true,
+            soldierSpriteModulate: new Color(0.8f, 0.6f, 1f),
+            fusionTier: 1),
     };
 
     private readonly struct BuildingDefinition
@@ -93,6 +114,7 @@ public partial class BuildingSystem : Node
         public int? SoldierHealth { get; init; }
         public bool HasNightCombat { get; init; }
         public Color? SoldierSpriteModulate { get; init; }
+        public int FusionTier { get; init; }
 
         public static BuildingDefinition Create(
             Vector2I[] footprint,
@@ -111,6 +133,7 @@ public partial class BuildingSystem : Node
             int? soldierHealth = null,
             bool hasNightCombat = false,
             Color? soldierSpriteModulate = null,
+            int fusionTier = 0,
             string materialPath = null)
         {
             return new BuildingDefinition
@@ -132,6 +155,7 @@ public partial class BuildingSystem : Node
                 SoldierHealth = soldierHealth,
                 HasNightCombat = hasNightCombat,
                 SoldierSpriteModulate = soldierSpriteModulate,
+                FusionTier = fusionTier,
             };
         }
     }
@@ -170,6 +194,16 @@ public partial class BuildingSystem : Node
     public static Vector2I GetSpawnCellOffset(string buildingType) => GetDefinition(buildingType).SpawnCellOffset;
 
     public static bool GetHasNightCombat(string buildingType) => GetDefinition(buildingType).HasNightCombat;
+
+    public static int GetFusionTier(string buildingType) => GetDefinition(buildingType).FusionTier;
+
+    public static bool IsFusibleMaterial(string buildingType)
+    {
+        BuildingDefinition definition = GetDefinition(buildingType);
+        return definition.FusionTier == 0
+            && definition.Footprint.Length == 1
+            && !IsCoreBuilding(buildingType);
+    }
 
     public static void ApplySoldierSpawnStats(string buildingType, Soldier soldier)
     {

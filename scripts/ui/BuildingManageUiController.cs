@@ -22,7 +22,7 @@ public sealed class BuildingManageUiController
 
 	public bool IsToolActive => _mode != ToolMode.None;
 
-	public BuildingManageUiController(Node owner, CanvasLayer uiRoot)
+	public BuildingManageUiController(Node owner, CanvasLayer uiRoot, ButtonGroup toolGroup = null)
 	{
 		_owner = owner;
 		_pauseButton = uiRoot.GetNode<Button>("BuildingPauseToolButton");
@@ -31,7 +31,7 @@ public sealed class BuildingManageUiController
 		Node mainGame = owner.GetParent();
 		_playerCastle = mainGame.GetNode<Castle>("Battlefield/PlayerSide/PlayerCastle");
 
-		_toolGroup = new ButtonGroup();
+		_toolGroup = toolGroup ?? new ButtonGroup();
 		_pauseButton.ButtonGroup = _toolGroup;
 		_repairButton.ButtonGroup = _toolGroup;
 		_pauseButton.ToggleMode = true;

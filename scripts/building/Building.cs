@@ -35,6 +35,7 @@ public partial class Building : Area2D
 	public int MaxHealth { get; private set; }
 	public int Health { get; private set; }
 	public bool IsManuallyPaused { get; private set; }
+	public bool IsFusionProhibited { get; private set; }
 	public bool IsDestroyed => Health <= 0;
 	public bool IsOperational => Health > 0 && !IsManuallyPaused;
 	public bool ContributesToAdjacency => !IsDestroyed;
@@ -88,6 +89,15 @@ public partial class Building : Area2D
 
 		IsManuallyPaused = paused;
 		RefreshOperationalState();
+	}
+
+	public void SetFusionProhibited(bool prohibited)
+	{
+		if (BuildingSystem.IsCoreBuilding(TypeId) || IsFusionProhibited == prohibited)
+			return;
+
+		IsFusionProhibited = prohibited;
+		UpdateStateIcon();
 	}
 
 	public void InitFromType(string buildingType)
@@ -478,13 +488,16 @@ public partial class Building : Area2D
 	{
 		if (_stateIcon == null || BuildingSystem.IsCoreBuilding(TypeId))
 		{
-			_stateIcon?.SetIcon(BuildingStateIcon.IconType.None);
+			_stateIcon?.SetPaused(false);
+			_stateIcon?.SetFusionProhibited(false);
 			return;
 		}
 
 		if (IsManuallyPaused)
-			_stateIcon.SetIcon(BuildingStateIcon.IconType.Paused);
+			_stateIcon.SetPaused(true);
 		else
-			_stateIcon.SetIcon(BuildingStateIcon.IconType.None);
+			_stateIcon.SetPaused(false);
+
+		_stateIcon.SetFusionProhibited(IsFusionProhibited);
 	}
 }

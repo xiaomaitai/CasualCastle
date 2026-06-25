@@ -2,43 +2,79 @@ using Godot;
 
 public partial class BuildingStateIcon : Node2D
 {
-	public enum IconType
-	{
-		None,
-		Paused,
-	}
-
 	private static readonly Vector2 DisplayScale = new(0.5f, 0.5f);
+	private static readonly Vector2 OverlayOffset = new(14f, -8f);
 
-	private Sprite2D _sprite;
-	private IconType _iconType = IconType.None;
+	private Sprite2D _pauseSprite;
+	private Sprite2D _fusionProhibitSprite;
+	private bool _paused;
+	private bool _fusionProhibited;
 
 	public override void _Ready()
 	{
 		ZIndex = 16;
-		_sprite = new Sprite2D
+		_pauseSprite = new Sprite2D
 		{
 			Centered = true,
 			Scale = DisplayScale,
 		};
-		AddChild(_sprite);
-		Visible = false;
+		_fusionProhibitSprite = new Sprite2D
+		{
+			Centered = true,
+			Scale = DisplayScale,
+			Position = OverlayOffset,
+		};
+		AddChild(_pauseSprite);
+		AddChild(_fusionProhibitSprite);
+		RefreshVisual();
 	}
 
-	public void SetIcon(IconType type)
+	public void SetPaused(bool paused)
 	{
-		if (_iconType == type)
+		if (_paused == paused)
 			return;
 
-		_iconType = type;
-		if (type == IconType.None)
-		{
-			_sprite.Texture = null;
-			Visible = false;
+		_paused = paused;
+		RefreshVisual();
+	}
+
+	public void SetFusionProhibited(bool prohibited)
+	{
+		if (_fusionProhibited == prohibited)
 			return;
+
+		_fusionProhibited = prohibited;
+		RefreshVisual();
+	}
+
+	private void RefreshVisual()
+	{
+		if (_pauseSprite == null || _fusionProhibitSprite == null)
+			return;
+
+		if (_paused)
+		{
+			_pauseSprite.Texture = BuildingIcons.Pause;
+			_pauseSprite.Visible = true;
+		}
+		else
+		{
+			_pauseSprite.Texture = null;
+			_pauseSprite.Visible = false;
 		}
 
-		_sprite.Texture = BuildingIcons.Pause;
-		Visible = true;
+		if (_fusionProhibited)
+		{
+			_fusionProhibitSprite.Texture = BuildingIcons.FusionProhibit;
+			_fusionProhibitSprite.Visible = true;
+			_fusionProhibitSprite.Position = _paused ? OverlayOffset : Vector2.Zero;
+		}
+		else
+		{
+			_fusionProhibitSprite.Texture = null;
+			_fusionProhibitSprite.Visible = false;
+		}
+
+		Visible = _paused || _fusionProhibited;
 	}
 }

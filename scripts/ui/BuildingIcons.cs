@@ -8,6 +8,7 @@ public static class BuildingIcons
 	private static Texture2D _pause;
 	private static Texture2D _repair;
 	private static Texture2D _repairBlocked;
+	private static Texture2D _fusionProhibit;
 
 	public static Vector2I IconSize => new(Width, Height);
 	public static Vector2 CursorHotspot => new(Width * 0.5f, Height * 0.5f);
@@ -15,6 +16,7 @@ public static class BuildingIcons
 	public static Texture2D Pause => _pause ??= CreatePauseIcon();
 	public static Texture2D Repair => _repair ??= CreateRepairIcon();
 	public static Texture2D RepairBlocked => _repairBlocked ??= CreateRepairBlockedIcon();
+	public static Texture2D FusionProhibit => _fusionProhibit ??= CreateFusionProhibitIcon();
 
 	private static Texture2D CreatePauseIcon()
 	{
@@ -36,6 +38,13 @@ public static class BuildingIcons
 	{
 		Image image = CreateCanvas();
 		DrawRepair(image);
+		DrawProhibitOverlay(image);
+		return ToTexture(image);
+	}
+
+	private static Texture2D CreateFusionProhibitIcon()
+	{
+		Image image = CreateCanvas();
 		DrawProhibitOverlay(image);
 		return ToTexture(image);
 	}

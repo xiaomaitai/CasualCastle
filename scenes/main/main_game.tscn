@@ -10,6 +10,7 @@
 [ext_resource type="Script" path="res://scripts/flow/MainGameController.cs" id="10"]
 [ext_resource type="Script" path="res://scripts/building/BuildingSystem.cs" id="11"]
 [ext_resource type="Script" path="res://scripts/building/AdjacentSystem.cs" id="12"]
+[ext_resource type="Script" path="res://scripts/fusion/FusionSystem.cs" id="14"]
 [ext_resource type="PackedScene" uid="uid://d4settingspanel01" path="res://scenes/ui/settings_panel.tscn" id="13"]
 
 [node name="MainGame" type="Node2D" unique_id=1]
@@ -36,6 +37,9 @@ script = ExtResource("11")
 
 [node name="AdjacentSystem" type="Node" parent="."]
 script = ExtResource("12")
+
+[node name="FusionSystem" type="Node" parent="."]
+script = ExtResource("14")
 
 [node name="UIManager" type="Node2D" parent="." unique_id=17]
 script = ExtResource("4")
@@ -126,9 +130,9 @@ offset_bottom = 87
 text = "☰"
 
 [node name="ShopButton" type="Button" parent="UI"]
-offset_left = 1651.5
+offset_left = 1735.5
 offset_top = 930
-offset_right = 1831.5
+offset_right = 1915.5
 offset_bottom = 1014
 text = "商店"
 
@@ -151,6 +155,16 @@ offset_bottom = 996
 toggle_mode = true
 expand_icon = true
 tooltip_text = "修复建筑（仅夜晚）"
+
+[node name="FusionProhibitToolButton" type="Button" parent="UI"]
+custom_minimum_size = Vector2(72, 54)
+offset_left = 1651.5
+offset_top = 942
+offset_right = 1723.5
+offset_bottom = 996
+toggle_mode = true
+expand_icon = true
+tooltip_text = "禁止融合"
 
 [node name="HandPanel" type="HBoxContainer" parent="UI"]
 offset_left = 460.5

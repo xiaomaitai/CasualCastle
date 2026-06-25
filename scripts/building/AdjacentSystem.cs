@@ -40,6 +40,14 @@ public partial class AdjacentSystem : Node
             ApplyBonuses(building, buildings);
     }
 
+    public HashSet<Building> GetAdjacentBuildings(Building source)
+    {
+        if (source?.GetCastle() == null)
+            return new HashSet<Building>();
+
+        return GetAdjacentBuildings(source, source.GetCastle().GetBuildings());
+    }
+
     private void PlayAdjacencyPulses(Castle castle, Building placedBuilding)
     {
         List<Building> buildings = castle.GetBuildings();
@@ -70,11 +78,11 @@ public partial class AdjacentSystem : Node
     {
         List<Building> targets = new();
 
-        if (source.TypeId == "Barracks" && source.ContributesToAdjacency)
+        if (IsBarracksType(source.TypeId) && source.ContributesToAdjacency)
         {
             foreach (Building neighbor in GetAdjacentBuildings(source, buildings))
             {
-                if (neighbor.TypeId == "Barracks" && neighbor.ContributesToAdjacency)
+                if (IsBarracksType(neighbor.TypeId) && neighbor.ContributesToAdjacency)
                     targets.Add(neighbor);
             }
         }
@@ -85,9 +93,9 @@ public partial class AdjacentSystem : Node
     private static void ApplyBonuses(Building building, List<Building> buildings)
     {
         float multiplier = 1f;
-        if (building.ContributesToAdjacency && building.TypeId == "Barracks")
+        if (building.ContributesToAdjacency && IsBarracksType(building.TypeId))
         {
-            int adjacentBarracks = CountAdjacentBuildings(building, buildings, "Barracks");
+            int adjacentBarracks = CountAdjacentBuildings(building, buildings, IsBarracksType);
             if (adjacentBarracks > 0)
                 multiplier = 1f + 0.2f * adjacentBarracks;
         }
@@ -115,6 +123,21 @@ public partial class AdjacentSystem : Node
         }
 
         return neighbors;
+    }
+
+    private static bool IsBarracksType(string typeId) =>
+        typeId == "Barracks" || typeId == "BarracksT2";
+
+    private static int CountAdjacentBuildings(Building source, List<Building> buildings, System.Func<string, bool> matchesType)
+    {
+        int count = 0;
+        foreach (Building neighbor in GetAdjacentBuildings(source, buildings))
+        {
+            if (matchesType(neighbor.TypeId) && neighbor.ContributesToAdjacency)
+                count++;
+        }
+
+        return count;
     }
 
     private static int CountAdjacentBuildings(Building source, List<Building> buildings, string targetTypeId)

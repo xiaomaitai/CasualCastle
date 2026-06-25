@@ -194,6 +194,10 @@ public partial class GameManager : Node2D
         PhaseTimeRemaining = phase == GamePhase.Day
             ? GameConfig.DayDurationSeconds
             : GameConfig.NightDurationSeconds;
+
+        if (phase == GamePhase.Night && _playerCastle != null)
+            FusionSystem.Instance?.ResolveNightFusions(_playerCastle);
+
         EmitSignal(SignalName.PhaseChanged, (int)phase);
         GD.Print(phase == GamePhase.Day ? "Phase: Day" : "Phase: Night");
     }
