@@ -6,36 +6,27 @@ public sealed class GameOverUiController
     private readonly ColorRect _overlay;
     private readonly Panel _panel;
     private readonly Label _label;
-    private readonly Button _backToTitleButton;
+    private readonly Button _saveReportButton;
+    private readonly Button _discardAndBackButton;
     private readonly Action _goToTitle;
-    private readonly ConfirmationDialog _saveReportDialog;
 
     public GameOverUiController(CanvasLayer uiRoot, Action goToTitle)
     {
         _overlay = uiRoot.GetNode<ColorRect>("GameOverOverlay");
         _panel = uiRoot.GetNode<Panel>("GameOverPanel");
         _label = uiRoot.GetNode<Label>("GameOverPanel/GameOverLabel");
-        _backToTitleButton = uiRoot.GetNode<Button>("GameOverPanel/BackToTitleButton");
+        _saveReportButton = uiRoot.GetNode<Button>("GameOverPanel/SaveReportButton");
+        _discardAndBackButton = uiRoot.GetNode<Button>("GameOverPanel/DiscardAndBackButton");
         _goToTitle = goToTitle;
-        _saveReportDialog = new ConfirmationDialog
-        {
-            Title = "记录战报",
-            DialogText = "是否将本局战报保存为永久记录？",
-            OkButtonText = "保存并返回标题",
-        };
-        _saveReportDialog.GetCancelButton().Text = "不保存并返回标题";
-        uiRoot.AddChild(_saveReportDialog);
 
-        _backToTitleButton.Pressed += OnBackToTitlePressed;
-        _saveReportDialog.Confirmed += OnSaveReportConfirmed;
-        _saveReportDialog.Canceled += OnDiscardReportConfirmed;
+        _saveReportButton.Pressed += OnSaveReportConfirmed;
+        _discardAndBackButton.Pressed += OnDiscardReportConfirmed;
     }
 
     public void Dispose()
     {
-        _backToTitleButton.Pressed -= OnBackToTitlePressed;
-        _saveReportDialog.Confirmed -= OnSaveReportConfirmed;
-        _saveReportDialog.Canceled -= OnDiscardReportConfirmed;
+        _saveReportButton.Pressed -= OnSaveReportConfirmed;
+        _discardAndBackButton.Pressed -= OnDiscardReportConfirmed;
     }
 
     public void SetState(GameManager.GameState state)
@@ -45,18 +36,12 @@ public sealed class GameOverUiController
         _panel.Visible = show;
 
         if (show)
-            _label.Text = GameManager.Instance.PlayerHealth > 0 ? "胜利！" : "失败！";
-    }
-
-    private void OnBackToTitlePressed()
-    {
-        if (BattleReportSystem.Instance?.HasCurrentSnapshots == true)
         {
-            _saveReportDialog.PopupCentered();
-            return;
+            _label.Text = GameManager.Instance.PlayerHealth > 0 ? "胜利！" : "失败！";
+            bool hasSnapshots = BattleReportSystem.Instance?.HasCurrentSnapshots == true;
+            _saveReportButton.Visible = hasSnapshots;
+            _discardAndBackButton.Text = hasSnapshots ? "不保存并返回标题" : "返回标题";
         }
-
-        _goToTitle();
     }
 
     private void OnSaveReportConfirmed()

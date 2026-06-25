@@ -1,5 +1,6 @@
 using Godot;
 using System.Collections.Generic;
+using System;
 
 public partial class TitleScreen : Control
 {
@@ -7,13 +8,20 @@ public partial class TitleScreen : Control
 	private const int NoReportItemId = 0;
 
 	private SettingsUiController _settingsUi;
+	private Button _startButton;
+	private Button _settingsButton;
+	private Button _exitButton;
 	private OptionButton _reportOption;
+	private bool _isStartingGame;
 
 	public override void _Ready()
 	{
-		GetNode<Button>("UI/StartButton").Pressed += OnStartPressed;
-		GetNode<Button>("UI/ExitButton").Pressed += OnExitPressed;
-		GetNode<Button>("UI/SettingsButton").Pressed += OnSettingsPressed;
+		_startButton = GetNode<Button>("UI/StartButton");
+		_settingsButton = GetNode<Button>("UI/SettingsButton");
+		_exitButton = GetNode<Button>("UI/ExitButton");
+		_startButton.Pressed += OnStartPressed;
+		_exitButton.Pressed += OnExitPressed;
+		_settingsButton.Pressed += OnSettingsPressed;
 		_reportOption = GetNode<OptionButton>("UI/ReportOption");
 
 		_settingsUi = new SettingsUiController(GetNode<Control>("SettingsPanel"));
@@ -37,9 +45,19 @@ public partial class TitleScreen : Control
 			GetViewport().SetInputAsHandled();
 	}
 
-	private void OnStartPressed()
+	private async void OnStartPressed()
 	{
+		if (_isStartingGame)
+			return;
+
+		_isStartingGame = true;
+		_startButton.Disabled = true;
+		_settingsButton.Disabled = true;
+		_exitButton.Disabled = true;
+		_reportOption.Disabled = true;
+		_startButton.Text = "加载中...";
 		ApplySelectedReportToGameManager();
+		await ForceClearMainGameResidue();
 		GetTree().ChangeSceneToFile(MainGameScene);
 	}
 
@@ -85,5 +103,24 @@ public partial class TitleScreen : Control
 		Variant metadata = _reportOption.GetItemMetadata(selectedIndex);
 		string reportId = metadata.VariantType == Variant.Type.Nil ? "" : metadata.AsString();
 		GameManager.Instance.SetPendingReplayReportId(reportId);
+	}
+
+	private async System.Threading.Tasks.Task ForceClearMainGameResidue()
+	{
+		SceneTree tree = GetTree();
+		Window root = tree.Root;
+
+		foreach (Node child in root.GetChildren())
+		{
+			if (child.Name != "MainGame")
+				continue;
+
+			root.RemoveChild(child);
+			child.QueueFree();
+		}
+
+		await ToSignal(tree, SceneTree.SignalName.ProcessFrame);
+		await ToSignal(tree, SceneTree.SignalName.ProcessFrame);
+		GC.Collect();
 	}
 }

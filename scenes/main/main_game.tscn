@@ -507,12 +507,20 @@ text = "游戏结束"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="BackToTitleButton" type="Button" parent="UI/GameOverPanel" unique_id=10]
+[node name="SaveReportButton" type="Button" parent="UI/GameOverPanel" unique_id=10]
 layout_mode = 0
-offset_left = 150
+offset_left = 75
 offset_top = 165
-offset_right = 450
+offset_right = 285
 offset_bottom = 232.5
-text = "返回标题"
+text = "保存战报并返回"
+
+[node name="DiscardAndBackButton" type="Button" parent="UI/GameOverPanel"]
+layout_mode = 0
+offset_left = 315
+offset_top = 165
+offset_right = 525
+offset_bottom = 232.5
+text = "不保存并返回标题"
 
 [node name="SettingsPanel" parent="UI" instance=ExtResource("13")]

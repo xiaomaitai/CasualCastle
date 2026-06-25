@@ -16,6 +16,7 @@ public partial class UIManager : Node2D
     private GameOverUiController _gameOverUi;
     private SettingsUiController _settingsUi;
     private bool _gameOver;
+    private bool _isChangingScene;
 
     public override void _Ready()
     {
@@ -234,6 +235,11 @@ public partial class UIManager : Node2D
 
     public void GoToTitle()
     {
+        if (_isChangingScene)
+            return;
+
+        _isChangingScene = true;
+        SetProcessInput(false);
         GameManager.Instance?.SetPaused(false);
         CardSystem.Instance?.ResetHand();
         BattleReportSystem.Instance?.DiscardCurrentReport();
