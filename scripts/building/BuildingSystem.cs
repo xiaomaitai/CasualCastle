@@ -280,6 +280,14 @@ public partial class BuildingSystem : Node
         if (castle == null || !castle.IsPlayerCastle)
             return false;
 
+        return TryPlaceForCastle(castle, buildingType, anchorX, anchorY);
+    }
+
+    public bool TryPlaceForCastle(Castle castle, string buildingType, int anchorX, int anchorY)
+    {
+        if (castle == null)
+            return false;
+
         if (!CanPlace(castle, buildingType, anchorX, anchorY))
             return false;
 

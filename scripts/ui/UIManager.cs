@@ -236,6 +236,7 @@ public partial class UIManager : Node2D
     {
         GameManager.Instance?.SetPaused(false);
         CardSystem.Instance?.ResetHand();
+        BattleReportSystem.Instance?.DiscardCurrentReport();
         GetTree().ChangeSceneToFile(TitleScene);
     }
 }

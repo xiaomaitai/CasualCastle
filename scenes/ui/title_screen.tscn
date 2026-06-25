@@ -48,6 +48,15 @@ theme_override_font_sizes/font_size = 48
 text = "CasualCastle"
 horizontal_alignment = 1
 
+[node name="ReportLabel" type="Label" parent="UI"]
+layout_mode = 2
+text = "敌方参考战报"
+horizontal_alignment = 1
+
+[node name="ReportOption" type="OptionButton" parent="UI"]
+custom_minimum_size = Vector2(240, 48)
+layout_mode = 2
+
 [node name="StartButton" type="Button" parent="UI"]
 custom_minimum_size = Vector2(240, 48)
 layout_mode = 2

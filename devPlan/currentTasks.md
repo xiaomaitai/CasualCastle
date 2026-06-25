@@ -23,56 +23,56 @@ M0–M5 已完成。**当前焦点：M6 战报与回放式敌方。**
 
 ### 1. 数据与 `BattleReportSystem`
 
-- [ ] 落地 `BuildingSnapshot`、`CastleSnapshot`、`BattleReport`（见 `dataStructures.md`）
-- [ ] `scripts/battle_report/BattleReportSystem.cs` 挂 `main_game.tscn`
-- [ ] 局内 `NightIndex` 计数（与录制 / 复刻共用）
-- [ ] `CaptureNightSnapshot(Castle)`：遍历玩家城堡建筑，跳过 `CastleHeart`，写入类型 / 锚点 / 生命 / 暂停 / 禁止融合
-- [ ] 局内战报缓存：`StartMatch` 清空；每夜结束 `AppendSnapshot`
-- [ ] 持久化：`user://battle_reports/` 读写；`ReportId`、`DisplayName`、`SavedAtUnix`
-- [ ] API：`GetSavedReports()`、`LoadReport(id)`、`SaveCurrentReport(name)`、`DiscardCurrentReport()`
+- [x] 落地 `BuildingSnapshot`、`CastleSnapshot`、`BattleReport`（见 `dataStructures.md`）
+- [x] `scripts/battle_report/BattleReportSystem.cs` 挂 `main_game.tscn`
+- [x] 局内 `NightIndex` 计数（与录制 / 复刻共用）
+- [x] `CaptureNightSnapshot(Castle)`：遍历玩家城堡建筑，跳过 `CastleHeart`，写入类型 / 锚点 / 生命 / 暂停 / 禁止融合
+- [x] 局内战报缓存：`StartMatch` 清空；每夜结束 `AppendSnapshot`
+- [x] 持久化：`user://battle_reports/` 读写；`ReportId`、`DisplayName`、`SavedAtUnix`
+- [x] API：`GetSavedReports()`、`LoadReport(id)`、`SaveCurrentReport(name)`、`DiscardCurrentReport()`
 
 ### 2. 录制钩子
 
-- [ ] `GameManager.BeginPhase(Day)`（夜晚→白天）时调用 `CaptureNightSnapshot`，**在**阶段切换完成后、`NightIndex++` 之前或之后固定一种顺序并写清
-- [ ] 首局：第一夜结束前缓存为空；第一夜结束产生 `NightIndex == 1` 的首条快照
+- [x] `GameManager.BeginPhase(Day)`（夜晚→白天）时调用 `CaptureNightSnapshot`，固定顺序：夜晚开始时 `NightIndex++`，夜晚结束录制同序号快照
+- [x] 首局：第一夜结束前缓存为空；第一夜结束产生 `NightIndex == 1` 的首条快照
 - [ ] 验证：多格建筑（靶场、马厩）快照含正确锚点与 `TypeId`
 
 ### 3. 结算保存 UI
 
-- [ ] `GameOverUiController`：胜负展示后增加「是否记录战报？」（保存 / 不保存）
-- [ ] 保存 → `BattleReportSystem.SaveCurrentReport`；不保存 → `DiscardCurrentReport`
-- [ ] 返回标题后局内缓存已清理；已保存战报重启游戏仍可 `LoadReport`
+- [x] `GameOverUiController`：胜负展示后增加「是否记录战报？」（保存 / 不保存）
+- [x] 保存 → `BattleReportSystem.SaveCurrentReport`；不保存 → `DiscardCurrentReport`
+- [x] 返回标题后局内缓存已清理；已保存战报重启游戏仍可 `LoadReport`
 
 ### 4. 战报选择（开局）
 
-- [ ] 标题页或开局流程：列出已保存战报（名称 + 夜数），选一条作为本局敌方参考
-- [ ] 无战报时：敌方保持场景初始布局（当前双兵营），不阻断开局
-- [ ] 选定战报 ID 传入 `ReplayAiSystem` / `GameManager.StartGameSession`
+- [x] 标题页或开局流程：列出已保存战报（名称 + 夜数），选一条作为本局敌方参考
+- [x] 无战报时：敌方保持场景初始布局（当前双兵营），不阻断开局
+- [x] 选定战报 ID 传入 `ReplayAiSystem` / `GameManager.StartGameSession`
 
 ### 5. `ReplayAiSystem` 镜像复刻
 
-- [ ] `scripts/replay/ReplayAiSystem.cs` 挂 `main_game.tscn`
-- [ ] `ApplyNightSnapshot(enemyCastle, nightIndex)`：读取战报 `NightIndex == nightIndex` 的条目
-- [ ] 格位**水平镜像**：玩家 `(anchorX, anchorY)` → 敌方镜像坐标（8×8 网格，多格按 footprint 计算）
-- [ ] 占格检测：任一格有存活**玩家** `Soldier` → 跳过该建筑
-- [ ] 同步：移除非核心冲突建筑 → `CreateBuilding` → `BindToGrid` → 恢复快照生命与状态
-- [ ] 不复制 `CastleHeart`；快照中已是 `BarracksT2` 等则直接放置，**不**对敌方再跑 `FusionSystem`
-- [ ] 无对应 `NightIndex` 条目：敌方布局不变
+- [x] `scripts/replay/ReplayAiSystem.cs` 挂 `main_game.tscn`
+- [x] `ApplyNightSnapshot(enemyCastle, nightIndex)`：读取战报 `NightIndex == nightIndex` 的条目
+- [x] 格位**水平镜像**：玩家 `(anchorX, anchorY)` → 敌方镜像坐标（8×8 网格，多格按 footprint 计算）
+- [x] 占格检测：任一格有存活**玩家** `Soldier` → 跳过该建筑
+- [x] 同步：移除非核心冲突建筑 → `CreateBuilding` → `BindToGrid` → 恢复快照生命与状态
+- [x] 不复制 `CastleHeart`；快照中已是 `BarracksT2` 等则直接放置，**不**对敌方再跑 `FusionSystem`
+- [x] 无对应 `NightIndex` 条目：敌方布局不变
 
 ### 6. 入夜流程串联
 
-- [ ] `GameManager.BeginPhase(Night)` 顺序固定为：
+- [x] `GameManager.BeginPhase(Night)` 顺序固定为：
   1. 更新本局「当前夜序号」`N`（第 N 夜开始）
   2. `FusionSystem.ResolveNightFusions(playerCastle)`
   3. `ReplayAiSystem.ApplyNightSnapshot(enemyCastle, N)`
   4. `PhaseChanged` → 商店等玩家夜晚流程
-- [ ] 玩家融合、商店、修复、禁止融合行为不受影响
+- [ ] 玩家融合、商店、修复、禁止融合行为不受影响（待完整回归验证）
 
 ### 7. 建筑与战场辅助
 
-- [ ] `BuildingSystem` / `Castle`：支持在**敌方城堡**按快照批量放置（或复用放置逻辑，去掉 `IsPlayerCastle` 限制的内部 API）
-- [ ] `Castle` 或战场工具：`IsCellOccupiedByPlayerSoldier(gridX, gridY)`（或等价检测）
-- [ ] 敌方建筑移除：`ReleaseBuildingFootprint` + `QueueFree`，不破坏城堡之心
+- [x] `BuildingSystem` / `Castle`：支持在**敌方城堡**按快照批量放置（或复用放置逻辑，去掉 `IsPlayerCastle` 限制的内部 API）
+- [x] `Castle` 或战场工具：`IsCellOccupiedByPlayerSoldier(gridX, gridY)`（或等价检测）
+- [x] 敌方建筑移除：`ReleaseBuildingFootprint` + `QueueFree`，不破坏城堡之心
 
 ### 8. 联调与验收
 

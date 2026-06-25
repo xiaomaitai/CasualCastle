@@ -35,6 +35,8 @@ public partial class GameManager : Node2D
     public bool IsNight => CurrentPhase == GamePhase.Night;
     public bool IsPaused { get; private set; }
     public float PhaseTimeRemaining { get; private set; }
+    public int CurrentNightIndex { get; private set; }
+    public string PendingReplayReportId { get; private set; } = "";
 
     [Export]
     public int PlayerMaxHealth = 100;
@@ -123,10 +125,12 @@ public partial class GameManager : Node2D
         _playerCastle = playerCastle;
         _enemyCastle = enemyCastle;
         _cheatSpawnCount = 0;
+        CurrentNightIndex = 0;
 
         CurrentState = GameState.Playing;
         IsPaused = false;
         SyncHeartHealthFromCastles();
+        BattleReportSystem.Instance?.StartMatch(PendingReplayReportId);
 
         BeginPhase(GamePhase.Day);
         SetProcess(true);
@@ -164,6 +168,12 @@ public partial class GameManager : Node2D
         _battlefield = null;
         _playerCastle = null;
         _enemyCastle = null;
+        CurrentNightIndex = 0;
+    }
+
+    public void SetPendingReplayReportId(string reportId)
+    {
+        PendingReplayReportId = reportId ?? "";
     }
 
     public bool CanUnitWork(bool hasNightCombat)
@@ -190,6 +200,12 @@ public partial class GameManager : Node2D
 
     private void BeginPhase(GamePhase phase)
     {
+        if (phase == GamePhase.Day && CurrentPhase == GamePhase.Night)
+            BattleReportSystem.Instance?.CaptureNightSnapshot(_playerCastle, CurrentNightIndex);
+
+        if (phase == GamePhase.Night)
+            CurrentNightIndex++;
+
         CurrentPhase = phase;
         PhaseTimeRemaining = phase == GamePhase.Day
             ? GameConfig.DayDurationSeconds
@@ -197,6 +213,8 @@ public partial class GameManager : Node2D
 
         if (phase == GamePhase.Night && _playerCastle != null)
             FusionSystem.Instance?.ResolveNightFusions(_playerCastle);
+        if (phase == GamePhase.Night && _enemyCastle != null)
+            ReplayAiSystem.Instance?.ApplyNightSnapshot(_enemyCastle, CurrentNightIndex);
 
         EmitSignal(SignalName.PhaseChanged, (int)phase);
         GD.Print(phase == GamePhase.Day ? "Phase: Day" : "Phase: Night");

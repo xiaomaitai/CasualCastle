@@ -12,6 +12,8 @@
 [ext_resource type="Script" path="res://scripts/building/AdjacentSystem.cs" id="12"]
 [ext_resource type="Script" path="res://scripts/fusion/FusionSystem.cs" id="14"]
 [ext_resource type="PackedScene" uid="uid://d4settingspanel01" path="res://scenes/ui/settings_panel.tscn" id="13"]
+[ext_resource type="Script" path="res://scripts/battle_report/BattleReportSystem.cs" id="15"]
+[ext_resource type="Script" path="res://scripts/replay/ReplayAiSystem.cs" id="16"]
 
 [node name="MainGame" type="Node2D" unique_id=1]
 script = ExtResource("10")
@@ -40,6 +42,12 @@ script = ExtResource("12")
 
 [node name="FusionSystem" type="Node" parent="."]
 script = ExtResource("14")
+
+[node name="BattleReportSystem" type="Node" parent="."]
+script = ExtResource("15")
+
+[node name="ReplayAiSystem" type="Node" parent="."]
+script = ExtResource("16")
 
 [node name="UIManager" type="Node2D" parent="." unique_id=17]
 script = ExtResource("4")

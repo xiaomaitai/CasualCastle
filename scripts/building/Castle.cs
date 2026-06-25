@@ -220,6 +220,34 @@ public partial class Castle : Node2D
 		);
 	}
 
+	public bool IsAnyCellOccupiedByPlayerSoldier(IReadOnlyList<Vector2I> cells)
+	{
+		if (cells == null || cells.Count == 0)
+			return false;
+
+		Node2D battlefield = GetNodeOrNull<Node2D>("/root/MainGame/Battlefield")
+			?? GetTree().Root.GetNodeOrNull<Node2D>("MainGame/Battlefield");
+		if (battlefield == null)
+			return false;
+
+		foreach (Node child in battlefield.GetChildren())
+		{
+			if (child is not Soldier soldier || !soldier.IsAlive || !soldier.IsPlayerUnit)
+				continue;
+
+			if (!TryGetGridFromGlobalPoint(soldier.GlobalPosition, out int gridX, out int gridY))
+				continue;
+
+			foreach (Vector2I cell in cells)
+			{
+				if (cell.X == gridX && cell.Y == gridY)
+					return true;
+			}
+		}
+
+		return false;
+	}
+
 	private void SetupCastleHeart()
 	{
 		Building heart = BuildingSystem.CreateBuilding("CastleHeart");

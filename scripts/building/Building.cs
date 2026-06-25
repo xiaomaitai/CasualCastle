@@ -100,6 +100,20 @@ public partial class Building : Area2D
 		UpdateStateIcon();
 	}
 
+	public void ApplySnapshotState(int health, bool manuallyPaused, bool fusionProhibited)
+	{
+		if (BuildingSystem.IsCoreBuilding(TypeId))
+			return;
+
+		Health = Mathf.Clamp(health, 1, MaxHealth);
+		EmitSignal(SignalName.HealthChanged, Health, MaxHealth);
+		UpdateDamageVisual();
+
+		IsManuallyPaused = manuallyPaused;
+		IsFusionProhibited = fusionProhibited;
+		RefreshOperationalState();
+	}
+
 	public void InitFromType(string buildingType)
 	{
 		TypeId = buildingType;
