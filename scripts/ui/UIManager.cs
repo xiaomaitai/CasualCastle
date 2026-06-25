@@ -19,6 +19,7 @@ public partial class UIManager : Node2D
     {
         Instance = this;
         SetProcess(true);
+        SetProcessInput(true);
         InitializeUI();
     }
 
@@ -49,6 +50,7 @@ public partial class UIManager : Node2D
     {
         _hudUi?.Process();
         _shopUi?.Process();
+        _buildingManageUi?.Process();
         if (_shopUi?.IsDragging != true)
             _handUi?.Process();
 

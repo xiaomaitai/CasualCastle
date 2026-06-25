@@ -6,33 +6,22 @@ public partial class BuildingStateIcon : Node2D
 	{
 		None,
 		Paused,
-		Destroyed,
-		RepairBlocked,
 	}
 
-	private const float DisplayScale = 0.5f;
+	private static readonly Vector2 DisplayScale = new(0.5f, 0.5f);
 
-	private Sprite2D _baseSprite;
-	private Sprite2D _overlaySprite;
+	private Sprite2D _sprite;
 	private IconType _iconType = IconType.None;
 
 	public override void _Ready()
 	{
 		ZIndex = 16;
-		_baseSprite = new Sprite2D
+		_sprite = new Sprite2D
 		{
 			Centered = true,
-			Scale = new Vector2(DisplayScale, DisplayScale),
+			Scale = DisplayScale,
 		};
-		_overlaySprite = new Sprite2D
-		{
-			Centered = true,
-			Scale = new Vector2(DisplayScale, DisplayScale),
-			Texture = BuildingIcons.Prohibit,
-			Visible = false,
-		};
-		AddChild(_baseSprite);
-		AddChild(_overlaySprite);
+		AddChild(_sprite);
 		Visible = false;
 	}
 
@@ -44,20 +33,12 @@ public partial class BuildingStateIcon : Node2D
 		_iconType = type;
 		if (type == IconType.None)
 		{
-			_baseSprite.Texture = null;
-			_overlaySprite.Visible = false;
+			_sprite.Texture = null;
 			Visible = false;
 			return;
 		}
 
-		_baseSprite.Texture = type switch
-		{
-			IconType.Paused => BuildingIcons.Pause,
-			IconType.Destroyed => BuildingIcons.Repair,
-			IconType.RepairBlocked => BuildingIcons.Repair,
-			_ => null,
-		};
-		_overlaySprite.Visible = type == IconType.RepairBlocked;
+		_sprite.Texture = BuildingIcons.Pause;
 		Visible = true;
 	}
 }

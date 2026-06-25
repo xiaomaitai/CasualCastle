@@ -13,10 +13,12 @@ public sealed class BuildingManageUiController
 	private readonly Button _pauseButton;
 	private readonly Button _repairButton;
 	private readonly Castle _playerCastle;
+	private readonly ButtonGroup _toolGroup;
 
 	private ToolMode _mode = ToolMode.None;
 	private bool _gameOver;
 	private bool _inputBlocked;
+	private bool _repairBlockedHover;
 
 	public bool IsToolActive => _mode != ToolMode.None;
 
@@ -29,11 +31,14 @@ public sealed class BuildingManageUiController
 		Node mainGame = owner.GetParent();
 		_playerCastle = mainGame.GetNode<Castle>("Battlefield/PlayerSide/PlayerCastle");
 
-		_pauseButton.Pressed += OnPauseToolPressed;
-		_repairButton.Pressed += OnRepairToolPressed;
-
+		_toolGroup = new ButtonGroup();
+		_pauseButton.ButtonGroup = _toolGroup;
+		_repairButton.ButtonGroup = _toolGroup;
 		_pauseButton.ToggleMode = true;
 		_repairButton.ToggleMode = true;
+		_pauseButton.Toggled += OnPauseToggled;
+		_repairButton.Toggled += OnRepairToggled;
+
 		_pauseButton.Icon = BuildingIcons.Pause;
 		_repairButton.Icon = BuildingIcons.Repair;
 		_pauseButton.ExpandIcon = true;
@@ -48,8 +53,17 @@ public sealed class BuildingManageUiController
 
 	public void Dispose()
 	{
-		_pauseButton.Pressed -= OnPauseToolPressed;
-		_repairButton.Pressed -= OnRepairToolPressed;
+		_pauseButton.Toggled -= OnPauseToggled;
+		_repairButton.Toggled -= OnRepairToggled;
+		ResetCursor();
+	}
+
+	public void Process()
+	{
+		if (_mode != ToolMode.Repair || _gameOver || _inputBlocked)
+			return;
+
+		UpdateRepairCursor();
 	}
 
 	public void SetGameOver(bool gameOver)
@@ -80,9 +94,16 @@ public sealed class BuildingManageUiController
 		if (_mode == ToolMode.None || _gameOver || _inputBlocked)
 			return false;
 
-		if (@event is not InputEventMouseButton mouseButton
-			|| !mouseButton.Pressed
-			|| mouseButton.ButtonIndex != MouseButton.Left)
+		if (@event is not InputEventMouseButton mouseButton || !mouseButton.Pressed)
+			return false;
+
+		if (mouseButton.ButtonIndex == MouseButton.Right)
+		{
+			SetMode(ToolMode.None);
+			return true;
+		}
+
+		if (mouseButton.ButtonIndex != MouseButton.Left)
 			return false;
 
 		if (!_playerCastle.TryGetBuildingAtGlobalPoint(mouseButton.GlobalPosition, out Building building))
@@ -99,26 +120,74 @@ public sealed class BuildingManageUiController
 		return true;
 	}
 
-	private void OnPauseToolPressed()
+	private void OnPauseToggled(bool pressed)
 	{
-		SetMode(_mode == ToolMode.Pause ? ToolMode.None : ToolMode.Pause);
+		if (pressed)
+			SetMode(ToolMode.Pause);
+		else if (_mode == ToolMode.Pause)
+			SetMode(ToolMode.None);
 	}
 
-	private void OnRepairToolPressed()
+	private void OnRepairToggled(bool pressed)
 	{
-		SetMode(_mode == ToolMode.Repair ? ToolMode.None : ToolMode.Repair);
+		if (pressed)
+			SetMode(ToolMode.Repair);
+		else if (_mode == ToolMode.Repair)
+			SetMode(ToolMode.None);
 	}
 
 	private void SetMode(ToolMode mode)
 	{
 		_mode = mode;
+		_repairBlockedHover = false;
 		UpdateButtonVisuals();
+		UpdateCursor();
 	}
 
 	private void UpdateButtonVisuals()
 	{
-		_pauseButton.ButtonPressed = _mode == ToolMode.Pause;
-		_repairButton.ButtonPressed = _mode == ToolMode.Repair;
+		_pauseButton.SetPressedNoSignal(_mode == ToolMode.Pause);
+		_repairButton.SetPressedNoSignal(_mode == ToolMode.Repair);
+	}
+
+	private void UpdateCursor()
+	{
+		Texture2D cursor = _mode switch
+		{
+			ToolMode.Pause => BuildingIcons.Pause,
+			ToolMode.Repair => BuildingIcons.Repair,
+			_ => null,
+		};
+
+		if (cursor != null)
+			Input.SetCustomMouseCursor(cursor, Input.CursorShape.Arrow, BuildingIcons.CursorHotspot);
+		else
+			Input.SetCustomMouseCursor(null);
+	}
+
+	private void UpdateRepairCursor()
+	{
+		bool blocked = false;
+		Vector2 mouse = _owner.GetViewport().GetMousePosition();
+		if (_playerCastle.TryGetBuildingAtGlobalPoint(mouse, out Building building)
+			&& CanManage(building)
+			&& building.IsDamaged
+			&& !building.CanRepair())
+		{
+			blocked = true;
+		}
+
+		if (blocked == _repairBlockedHover)
+			return;
+
+		_repairBlockedHover = blocked;
+		Texture2D cursor = blocked ? BuildingIcons.RepairBlocked : BuildingIcons.Repair;
+		Input.SetCustomMouseCursor(cursor, Input.CursorShape.Arrow, BuildingIcons.CursorHotspot);
+	}
+
+	private static void ResetCursor()
+	{
+		Input.SetCustomMouseCursor(null);
 	}
 
 	private static bool CanManage(Building building)

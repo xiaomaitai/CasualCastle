@@ -229,9 +229,6 @@ public partial class Building : Area2D
 
 	public override void _Process(double delta)
 	{
-		if (NeedsRepairStateTracking())
-			UpdateStateIcon();
-
 		if (!_workActive || _workPaused || !CanWork)
 			return;
 
@@ -405,16 +402,9 @@ public partial class Building : Area2D
 		_workPaused = false;
 		_workDone = 0f;
 		_jumpTweenAwaitingResume = false;
-		SetProcess(NeedsRepairStateTracking());
+		SetProcess(false);
 		CancelJumpTween();
 		ResetWorkVisual();
-	}
-
-	private bool NeedsRepairStateTracking()
-	{
-		return IsDestroyed
-			&& CastleRef?.IsPlayerCastle == true
-			&& !BuildingSystem.IsCoreBuilding(TypeId);
 	}
 
 	private void CancelJumpTween()
@@ -452,12 +442,21 @@ public partial class Building : Area2D
 		UpdateStateIcon();
 
 		if (!IsOperational)
-			StopWork();
+		{
+			if (IsManuallyPaused)
+			{
+				if (_workActive && !_workPaused)
+					PauseWork();
+			}
+			else
+			{
+				StopWork();
+			}
+		}
 		else
+		{
 			UpdateWorkCycle();
-
-		if (!_workActive)
-			SetProcess(NeedsRepairStateTracking());
+		}
 
 		Castle castle = CastleRef;
 		if (castle != null)
@@ -482,11 +481,7 @@ public partial class Building : Area2D
 			return;
 		}
 
-		if (IsDestroyed && HasEnemyOnTop)
-			_stateIcon.SetIcon(BuildingStateIcon.IconType.RepairBlocked);
-		else if (IsDestroyed)
-			_stateIcon.SetIcon(BuildingStateIcon.IconType.Destroyed);
-		else if (IsManuallyPaused)
+		if (IsManuallyPaused)
 			_stateIcon.SetIcon(BuildingStateIcon.IconType.Paused);
 		else
 			_stateIcon.SetIcon(BuildingStateIcon.IconType.None);

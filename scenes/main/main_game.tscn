@@ -131,21 +131,21 @@ offset_bottom = 676.0
 text = "商店"
 
 [node name="BuildingPauseToolButton" type="Button" parent="UI"]
-custom_minimum_size = Vector2(52, 52)
+custom_minimum_size = Vector2(48, 36)
 offset_left = 918.0
-offset_top = 620.0
-offset_right = 970.0
-offset_bottom = 672.0
+offset_top = 628.0
+offset_right = 966.0
+offset_bottom = 664.0
 toggle_mode = true
 expand_icon = true
 tooltip_text = "暂停建筑"
 
 [node name="BuildingRepairToolButton" type="Button" parent="UI"]
-custom_minimum_size = Vector2(52, 52)
-offset_left = 984.0
-offset_top = 620.0
-offset_right = 1036.0
-offset_bottom = 672.0
+custom_minimum_size = Vector2(48, 36)
+offset_left = 974.0
+offset_top = 628.0
+offset_right = 1022.0
+offset_bottom = 664.0
 toggle_mode = true
 expand_icon = true
 tooltip_text = "修复建筑（仅夜晚）"
