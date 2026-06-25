@@ -32,6 +32,7 @@ public partial class Soldier : Area2D
 	private Sprite2D _sprite;
 	private CollisionShape2D _collisionShape;
 	private SoldierSleepZEffect _sleepZEffect;
+	private Color _baseSpriteModulate = Colors.White;
 
 	public override void _Ready()
 	{
@@ -73,9 +74,19 @@ public partial class Soldier : Area2D
 	private void UpdateSleepVisual()
 	{
 		if (_sprite != null)
-			_sprite.Modulate = IsActive ? Colors.White : new Color(0.75f, 0.8f, 1f, 0.85f);
+		{
+			_sprite.Modulate = IsActive
+				? _baseSpriteModulate
+				: new Color(_baseSpriteModulate.R * 0.75f, _baseSpriteModulate.G * 0.8f, _baseSpriteModulate.B, 0.85f);
+		}
 
 		_sleepZEffect?.SetSleeping(IsSleeping);
+	}
+
+	public void SetBaseSpriteModulate(Color color)
+	{
+		_baseSpriteModulate = color;
+		UpdateSleepVisual();
 	}
 
 	public override void _Process(double delta)

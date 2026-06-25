@@ -25,7 +25,7 @@ public partial class ShopSystem : Node
         new() { Id = "barracks", Name = "兵营", Cost = 10, BuildingType = "Barracks" },
         new() { Id = "archery_range", Name = "靶场", Cost = 14, BuildingType = "ArcheryRange" },
         new() { Id = "stable", Name = "马厩", Cost = 18, BuildingType = "Stable" },
-        new() { Id = "barracks_plus", Name = "强化兵营", Cost = 15, BuildingType = "Barracks" },
+        new() { Id = "wolf_den", Name = "狼穴", Cost = 16, BuildingType = "WolfDen" },
     };
 
     private readonly CardData[] _offers = new CardData[OfferCount];

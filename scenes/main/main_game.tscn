@@ -242,6 +242,15 @@ offset_bottom = 92.0
 theme_override_font_sizes/font_size = 18
 text = "生命：100/100"
 
+[node name="StatusLabel" type="Label" parent="UI/BuildingInfoPanel"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 100.0
+offset_right = 291.0
+offset_bottom = 132.0
+theme_override_font_sizes/font_size = 18
+text = "工作中"
+
 [node name="ShopPanel" type="Panel" parent="UI"]
 visible = false
 offset_left = 819.0

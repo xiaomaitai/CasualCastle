@@ -95,6 +95,7 @@ public partial class Building : Area2D
 		TypeId = buildingType;
 		MaxHealth = BuildingSystem.GetMaxHealth(buildingType);
 		Health = MaxHealth;
+		HasNightCombat = BuildingSystem.GetHasNightCombat(buildingType);
 		_baseModulate = BuildingSystem.GetSpriteModulate(buildingType);
 		TryApplyVisual();
 		UpdateDamageVisual();

@@ -7,6 +7,7 @@ public sealed class BuildingInfoUiController
     private readonly Panel _panel;
     private readonly Label _nameLabel;
     private readonly Label _healthLabel;
+    private readonly Label _statusLabel;
     private readonly Castle _playerCastle;
     private readonly Castle _enemyCastle;
     private Building _hoveredBuilding;
@@ -20,6 +21,7 @@ public sealed class BuildingInfoUiController
         _panel = uiRoot.GetNode<Panel>("BuildingInfoPanel");
         _nameLabel = uiRoot.GetNode<Label>("BuildingInfoPanel/NameLabel");
         _healthLabel = uiRoot.GetNode<Label>("BuildingInfoPanel/HealthLabel");
+        _statusLabel = uiRoot.GetNode<Label>("BuildingInfoPanel/StatusLabel");
 
         Node mainGame = owner.GetParent();
         _playerCastle = mainGame.GetNode<Castle>("Battlefield/PlayerSide/PlayerCastle");
@@ -89,6 +91,18 @@ public sealed class BuildingInfoUiController
         _panel.Visible = true;
         _nameLabel.Text = building.DisplayName;
         _healthLabel.Text = $"生命：{building.Health}/{building.MaxHealth}";
+        _statusLabel.Text = GetStatusText(building);
+    }
+
+    private static string GetStatusText(Building building)
+    {
+        if (building.IsDestroyed)
+            return "已摧毁";
+        if (building.IsManuallyPaused)
+            return "手动暂停";
+        if (GameManager.Instance?.IsNight == true)
+            return building.HasNightCombat ? "夜晚可行动" : "夜晚休眠";
+        return building.CanWork ? "工作中" : "停止工作";
     }
 
     private void UpdateHighlights(Building hovered)
