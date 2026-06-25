@@ -198,7 +198,7 @@ public partial class Building : Area2D
 	public override void _Ready()
 	{
 		CollisionLayer = 4;
-		CollisionMask = 0;
+		CollisionMask = 2;
 
 		_sprite = GetNodeOrNull<Sprite2D>("Sprite");
 		TryApplyVisual();
@@ -229,6 +229,9 @@ public partial class Building : Area2D
 
 	public override void _Process(double delta)
 	{
+		if (NeedsRepairStateTracking())
+			UpdateStateIcon();
+
 		if (!_workActive || _workPaused || !CanWork)
 			return;
 
@@ -402,9 +405,16 @@ public partial class Building : Area2D
 		_workPaused = false;
 		_workDone = 0f;
 		_jumpTweenAwaitingResume = false;
-		SetProcess(false);
+		SetProcess(NeedsRepairStateTracking());
 		CancelJumpTween();
 		ResetWorkVisual();
+	}
+
+	private bool NeedsRepairStateTracking()
+	{
+		return IsDestroyed
+			&& CastleRef?.IsPlayerCastle == true
+			&& !BuildingSystem.IsCoreBuilding(TypeId);
 	}
 
 	private void CancelJumpTween()
@@ -446,6 +456,9 @@ public partial class Building : Area2D
 		else
 			UpdateWorkCycle();
 
+		if (!_workActive)
+			SetProcess(NeedsRepairStateTracking());
+
 		Castle castle = CastleRef;
 		if (castle != null)
 			AdjacentSystem.Instance?.RefreshCastle(castle);
@@ -469,7 +482,9 @@ public partial class Building : Area2D
 			return;
 		}
 
-		if (IsDestroyed)
+		if (IsDestroyed && HasEnemyOnTop)
+			_stateIcon.SetIcon(BuildingStateIcon.IconType.RepairBlocked);
+		else if (IsDestroyed)
 			_stateIcon.SetIcon(BuildingStateIcon.IconType.Destroyed);
 		else if (IsManuallyPaused)
 			_stateIcon.SetIcon(BuildingStateIcon.IconType.Paused);

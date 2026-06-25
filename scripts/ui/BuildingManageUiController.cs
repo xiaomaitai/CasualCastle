@@ -34,8 +34,8 @@ public sealed class BuildingManageUiController
 
 		_pauseButton.ToggleMode = true;
 		_repairButton.ToggleMode = true;
-		_pauseButton.Icon = BuildingToolIcons.Pause;
-		_repairButton.Icon = BuildingToolIcons.Hammer;
+		_pauseButton.Icon = BuildingIcons.Pause;
+		_repairButton.Icon = BuildingIcons.Repair;
 		_pauseButton.ExpandIcon = true;
 		_repairButton.ExpandIcon = true;
 		_pauseButton.Text = "";

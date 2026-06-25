@@ -7,48 +7,57 @@ public partial class BuildingStateIcon : Node2D
 		None,
 		Paused,
 		Destroyed,
+		RepairBlocked,
 	}
 
+	private const float DisplayScale = 0.5f;
+
+	private Sprite2D _baseSprite;
+	private Sprite2D _overlaySprite;
 	private IconType _iconType = IconType.None;
 
 	public override void _Ready()
 	{
 		ZIndex = 16;
+		_baseSprite = new Sprite2D
+		{
+			Centered = true,
+			Scale = new Vector2(DisplayScale, DisplayScale),
+		};
+		_overlaySprite = new Sprite2D
+		{
+			Centered = true,
+			Scale = new Vector2(DisplayScale, DisplayScale),
+			Texture = BuildingIcons.Prohibit,
+			Visible = false,
+		};
+		AddChild(_baseSprite);
+		AddChild(_overlaySprite);
 		Visible = false;
 	}
 
 	public void SetIcon(IconType type)
 	{
+		if (_iconType == type)
+			return;
+
 		_iconType = type;
-		Visible = type != IconType.None;
-		QueueRedraw();
-	}
-
-	public override void _Draw()
-	{
-		switch (_iconType)
+		if (type == IconType.None)
 		{
-			case IconType.Paused:
-				DrawPauseIcon();
-				break;
-			case IconType.Destroyed:
-				DrawHammerIcon();
-				break;
+			_baseSprite.Texture = null;
+			_overlaySprite.Visible = false;
+			Visible = false;
+			return;
 		}
-	}
 
-	private void DrawPauseIcon()
-	{
-		Color color = new Color(0.88f, 0.94f, 1f, 0.95f);
-		DrawRect(new Rect2(-10, -12, 5, 16), color);
-		DrawRect(new Rect2(3, -12, 5, 16), color);
-	}
-
-	private void DrawHammerIcon()
-	{
-		Color head = new Color(0.95f, 0.78f, 0.35f, 0.95f);
-		Color handle = new Color(0.72f, 0.52f, 0.28f, 0.95f);
-		DrawRect(new Rect2(-12, -14, 16, 7), head);
-		DrawRect(new Rect2(2, -6, 4, 16), handle);
+		_baseSprite.Texture = type switch
+		{
+			IconType.Paused => BuildingIcons.Pause,
+			IconType.Destroyed => BuildingIcons.Repair,
+			IconType.RepairBlocked => BuildingIcons.Repair,
+			_ => null,
+		};
+		_overlaySprite.Visible = type == IconType.RepairBlocked;
+		Visible = true;
 	}
 }
