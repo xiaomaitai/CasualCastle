@@ -1,88 +1,150 @@
 # 当前任务
 
-**当前焦点：六边形架构分层（`todo.md` §1）。**
+**当前焦点：真模块化与模块内防腐（`todo.md` §2）。**
 
-目标：把游戏规则从 Godot 节点与静态单例中剥离，建立**游戏核心域 / 防腐层 / 外部依赖**三层边界，为后续真模块化（`todo.md` §2）与显示缩放重构（`todo.md` §3）打基础。
+目标：在六边形分层（§1 已完成）基础上，各业务模块定义对外接口，消除跨模块的静态 `Instance` 直调，使每个模块可独立理解与替换。
 
-参考：`todo.md`、`codeStructure.md`、`outline/c05ProjectArchitecture.md`；已有试点代码 `scripts/core/GameCoordinates.cs`、`scripts/battle/UnitSpawn.cs`（仍混在引擎目录，待迁入新结构）。
-
----
-
-## 1. 边界与目录规划
-
-- [x] 在 `devPlan/codeStructure.md` 与 `outline/c05ProjectArchitecture.md` 落地目标目录（domain 为独立项目 `CasualCastle.Domain/`，adapters 在 `scripts/adapters/`）
-- [x] 约定依赖方向：`domain` 不引用 `adapters`；`adapters` 实现 `ports` 并调用 `domain`；现有 `scripts/building/` 等逐步变为适配层或拆为 domain + adapter。
-- [x] 列出**首批迁入核心域**的类型清单（坐标规则、产兵点、BattleReportModels），其余模块暂留原位、经防腐层调用。
+参考：`todo.md`、`codeStructure.md`、`outline/c05ProjectArchitecture.md`。
 
 ---
 
-## 2. 核心域试点：坐标与产兵
+## 背景：§1 已完成
 
-以已验收的产兵坐标为第一个垂直切片，验证「核心域可单测、适配层只翻译」。
+`scripts/` 已整理为三层结构：
 
-- [x] 将 `GameCoordinates` 中**整数游戏坐标**与**产兵点计算**迁入 `domain/coordinates/`（无 `Godot.Vector2`）。
-- [x] 核心域 API（命名实施时可调整）：
-  - `GameVector2`（int X, Y）、`UnitsPerCell`
-  - `GetBuildingFootprintSpawnPoint(footprint, anchor, spawnIndex)` — 占地框左下角、连续产兵错开
-- [x] `adapters/godot/GameCoordinatesAdapter` 负责 `ToLocalPixels` / `FromLocalPixels` / `FloorGridFromLocalPixels`。
-- [x] `UnitSpawn` 保留在适配层：先入树再设 `GlobalPosition`；核心域只输出游戏坐标。
-- [x] 为 `GetBuildingFootprintSpawnPoint` 编写**不启动 Godot** 的单元测试（6 个测试，通过）。
+```
+scripts/
+├── domain/     # 核心域：coordinates、card、fusion、core、night、battle
+├── ports/      # 端口：IBattleReportRepository、BattleReportModels
+└── adapters/   # 适配层：godot/（全部 Godot 节点和场景脚本）、persistence/
+```
 
----
-
-## 3. 防腐层模式与现有代码迁移
-
-- [x] 定义防腐层职责：类型翻译（`GameCoordinatesAdapter`）、坐标换算、生命周期（`Node` 创建/销毁）、信号 ↔ 领域事件。
-- [x] `Castle` / `Building`：绘制与预览暂留 Godot 侧（`_Draw` 保留 shim）；产兵、占地判定、格占用等**规则调用**改走 `domain` + 适配器（`UnitSpawn`、`Castle` 关键方法已完成）。
-- [ ] `BuildingSystem` 定义表：区分**领域数据**（间隔、占地、生命）与**表现数据**（纹理、缩放）；表现留在适配层或 `ports` 的 `IBuildingVisuals` 之后实现。（待 Phase 2+）
-- [x] 禁止新增：业务模块直接 `GD.Load`、直接读 `GameManager.Instance` 完成领域判定（迁移期旧代码可保留，新代码走端口）。
+依赖方向：`domain` → `ports` ← `adapters`（适配器实现端口，调用领域）。
 
 ---
 
-## 4. 外部依赖归类
+## §2 真模块化与模块内防腐
 
-| 依赖 | 归属 | 当前示例 |
-| --- | --- | --- |
-| Godot 场景树、节点、绘制 | `adapters/godot` | `Castle._Draw`（暂经 shim）、`Building` 工作特效 |
-| 输入与 UI | `adapters/godot` | `HandUiController`、设置面板 |
-| 文件持久化 | `adapters/persistence` | `BattleReportStorage`（已实现 `IBattleReportRepository`）、`display_settings.cfg` |
-| 未来数据库 | `adapters/persistence` | 暂未实现 |
+### 2.1 当前问题
 
-- [x] `BattleReportSystem` 录制/加载：抽出 `IBattleReportRepository` 端口，`BattleReportStorage` 实现接口。
-- [x] `DisplaySettingsManager` 标为 Godot 窗口适配，不进入 `domain`。
+`scripts/adapters/godot/` 中各个模块通过静态 `Instance` 互相耦合：
+
+| 调用方 | 被调方 | 耦合方式 |
+|--------|--------|----------|
+| `Building.cs` | `GameManager.Instance` | 静态单例 |
+| `Building.cs` | `ShopSystem.Instance` | 静态单例 |
+| `Soldier.cs` | `GameManager.Instance` | 静态单例 |
+| `Soldier.cs` | `NightSystem.Instance` | 静态单例 |
+| `ShopSystem.cs` | `CardSystem.Instance` | 静态单例 |
+| `ShopSystem.cs` | `GameManager.Instance` | 静态单例 |
+| `CardSystem.cs` | `BuildingSystem.Instance` | 静态单例 |
+| `FusionSystem.cs` | `AdjacentSystem.Instance` | 静态单例 |
+| `ReplayAiSystem.cs` | `BattleReportSystem.Instance` | 静态单例 |
+| `ReplayAiSystem.cs` | `AdjacentSystem.Instance` | 静态单例 |
+| `NightSystem.cs` | `GameManager.Instance` | 静态单例 |
+| `TitleScreen.cs` | `BattleReportStorage.Instance` | 静态单例 |
+| UI 控制器 | `ShopSystem.Instance`、`CardSystem.Instance` 等 | 静态单例 |
+
+**结果：** 任何模块改动可能波及所有模块，无法独立测试任一模块。
+
+### 2.2 目标
+
+- [ ] 每个业务模块定义自己的**对外端口**（接口），放在 `scripts/ports/`
+- [ ] 模块内部通过**注入的端口**调用其他模块，不再直调静态 `Instance`
+- [ ] 禁止跨模块直接访问 Godot 节点、静态 `Instance` 或对方内部类
+- [ ] 依赖方向：`domain` → `ports` ← `adapters`，模块间仅经端口通信
 
 ---
 
-## 5. 文档与 AGENTS 同步
+## 首批模块接口化（按影响面从小到大）
 
-- [x] 更新 `codeStructure.md`：新目录、依赖规则、试点说明。
-- [x] 更新 `outline/c05ProjectArchitecture.md` 为「当前 + 迁移目标」一致表述。
-- [x] `AGENTS.md` 目录表增加 `CasualCastle.Domain/`、`adapters/` 说明，编码约定增加 domain 禁止引用 Godot。
+### Module A: NightSystem
 
----
+当前：`NightSystem.CanUnitWork(hasNightCombat)` 是静态方法，委托给 `GameManager.Instance`。
 
-## 6. 验收标准
+- [ ] 提取 `IGamePhase` 端口 → `scripts/ports/IGamePhase.cs`
+  - `bool IsDay { get; }` / `bool CanUnitWork(bool hasNightCombat)`
+- [ ] `GameManager` 实现 `IGamePhase`
+- [ ] `NightSystem` 改为接收 `IGamePhase`，消除对 `GameManager.Instance` 的直接依赖
+- [ ] `Building` 和 `Soldier` 改用注入的 `IGamePhase` 而非 `NightSystem.Instance`
 
-- [x] `domain/coordinates` 产兵点与占地左下角规则有单元测试（6 个），测试不引用 Godot。
-- [x] 运行时产兵位置与已验收行为一致（shim 1:1 委托，`GetBuildingFootprintSpawnPoint` 逻辑未变）。
-- [x] 依赖检查：`domain` 内无 `using Godot`（`grep -r "using Godot" CasualCastle.Domain/` 无结果）。
-- [x] 文档与目录一致，后续可基于本分层推进 `todo.md` §2、§3。
+### Module B: ShopSystem
+
+当前：`ShopSystem` 管理金币和商品，通过 `Instance` 被 UI 和 `Building` 访问。
+
+- [ ] 提取 `IShopService` 端口 → `scripts/ports/IShopService.cs`
+  - `int Gold { get; }` / `bool CanAfford(int)` / `bool TryPurchase(int)` / `event GoldChanged`
+- [ ] `ShopSystem` 实现 `IShopService`
+- [ ] `ShopUiController`、`Building` 改用注入的 `IShopService`
+- [ ] 提取 `IShopRepository` 端口（商品目录查询），消除对 `CardData` 数组的直接依赖
+
+### Module C: CardSystem
+
+当前：`CardSystem` 管理手牌，通过 `Instance` 被 `ShopSystem` 和 UI 访问。
+
+- [ ] 提取 `ICardHand` 端口 → `scripts/ports/ICardHand.cs`
+  - `IReadOnlyList<CardData> Hand { get; }` / `bool TryAddCard(CardData)` / `bool TryPlaceCard(...)` / `event HandChanged`
+- [ ] `CardSystem` 实现 `ICardHand`
+- [ ] `ShopSystem`、`HandUiController` 改用注入的 `ICardHand`
+
+### Module D: BuildingSystem
+
+当前：`BuildingSystem` 管理建筑类型注册表和创建工厂，通过 `Instance` 被几乎所有模块访问。
+
+- [ ] 提取 `IBuildingRegistry` 端口 → `scripts/ports/IBuildingRegistry.cs`
+  - `IReadOnlyList<Vector2I> GetFootprint(string)` / `string GetDisplayName(string)` / `int GetMaxHealth(string)` / `float GetSpawnInterval(string)` / `bool IsCoreBuilding(string)` / 等
+- [ ] 提取 `IBuildingFactory` 端口 → `scripts/ports/IBuildingFactory.cs`
+  - `Building CreateBuilding(string typeId)` / `void ApplyVisual(Building)`
+- [ ] `BuildingSystem` 实现两个端口
+- [ ] 消除 `BuildingSystem.Instance` 静态引用
+
+### Module E: GameManager
+
+当前：`GameManager` 是 Godot Autoload，承担了过多职责（状态、阶段、血量、作弊键）。
+
+- [ ] 提取 `IGameState` 端口（已在 ports/ 目录规划中）
+  - `GameState CurrentState { get; }` / `GamePhase CurrentPhase { get; }` / `int PlayerHealth { get; }` / `int EnemyHealth { get; }`
+  - `event PhaseChanged` / `event HealthChanged` / `event GameOver`
+- [ ] 提取 `IGameController` 端口
+  - `void AdvancePhase()` / `void TakeDamage(bool isPlayer, int amount)` / `void EndGame(bool playerWon)`
+- [ ] `GameManager` 实现两个端口，保留 Godot 信号发射（桥接到端口事件）
+
+### Module F: AdjacentSystem
+
+当前：邻接计算和视觉特效混在一起。
+
+- [ ] 将邻接算法提取到 `scripts/domain/building/AdjacentRules.cs`（已在 §1 规划）
+- [ ] `AdjacentSystem` 改为 adapter，委托到 `AdjacentRules`
+- [ ] 定义 `IAdjacencyService` 端口
+
+### Module G: FusionSystem / BattleReportSystem / ReplayAiSystem
+
+这些模块已在 §1 中部分提取（模型已在 domain/ports/，存储已接口化）。
+
+- [ ] `FusionSystem` 配方匹配逻辑 → `domain/fusion/FusionRules.cs`
+- [ ] `FusionSystem` adapter 改为委托到 `FusionRules`
+- [ ] `BattleReportSystem` 快照构建 → `domain/battle_report/ReportBuilder.cs`
+- [ ] `ReplayAiSystem` 镜像坐标 → `domain/replay/MirrorRules.cs`
 
 ---
 
 ## 暂不进入范围（本任务）
 
-- 全量模块接口化（`todo.md` §2）
 - 显示与业务缩放拆分（`todo.md` §3）
 - 开发者模式开关（`todo.md` §4）
-- 删除或大规模重写现有 `scripts/building/`、`GameManager`（仅试点迁移 + 模式确立）
+- `Castle._Draw`、`Building` 视觉特效等纯渲染代码从 shim 迁移（低优先级）
+- DI 容器引入（当前用 Godot 场景树手动注入即可）
 
 ---
 
 ## 建议实施顺序
 
-1. 目录骨架 + `ports` 空接口 + 文档  
-2. 迁入 `GameCoordinates` 领域部分 + 适配器 + 单测  
-3. `UnitSpawn` / `Building` 产兵改调新 API  
-4. `BattleReportStorage` 端口化（可选第二批）  
-5. 验收 + 更新架构文档
+1. **NightSystem + IGamePhase** — 最小改动，验证端口模式
+2. **ShopSystem + IShopService** — 纯数据端口，无 Godot 依赖
+3. **CardSystem + ICardHand** — 同上
+4. **BuildingSystem 拆分** — 最大改动，分两次：先 IBuildingRegistry，再 IBuildingFactory
+5. **GameManager 拆分** — 核心改动，影响全局
+6. **Fusion / BattleReport / Replay** — 算法提取到 domain
+7. **AdjacentSystem** — 收尾
+
+每次改动后验证：`dotnet build` + `dotnet test`。

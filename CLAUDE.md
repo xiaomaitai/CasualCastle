@@ -15,9 +15,10 @@
 
 - **引擎**: Godot 4.6 + C# / .NET + Jolt 物理
 - **类型**: 2D RTS（类皇室战争）
-- **架构方向**: 六边形架构 Phase 1 — 剥离核心域 / 防腐层 / 外部依赖
-- **入口场景**: `main_game.tscn`（由 `scripts/flow/MainGameController.cs` 驱动）
-- **Autoload**: `GameManager`（`scripts/autoload/`）
+- **架构方向**: 六边形架构 Phase 2 — 模块接口化与防腐（Phase 1 分层已完成）
+- **代码层级**: `scripts/domain/`（核心域）、`scripts/ports/`（接口）、`scripts/adapters/`（基础设施）
+- **入口场景**: `main_game.tscn`（由 `scripts/adapters/godot/flow/MainGameController.cs` 驱动）
+- **Autoload**: `GameManager`、`DisplaySettingsManager`（`scripts/adapters/godot/autoload/`）
 
 ## 常用命令
 

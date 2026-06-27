@@ -8,24 +8,18 @@ Godot **4.6** + **C# / .NET** 的 2D RTS 项目（类皇室战争）。物理：
 
 ## 目录与归属
 
-代码按业务模块放在 `scripts/`：
+代码按六边形三层放在 `scripts/`：
 
-
-| 目录                                             | 用途                                       |
-| ---------------------------------------------- | ---------------------------------------- |
-| `autoload/`                                    | Godot Autoload（`GameManager`）            |
-| `core/`                                        | 全局配置（`GameConfig`；`GameCoordinates` 为弃用 shim） |
-| `flow/`                                        | 场景流转（`TitleScreen`、`MainGameController`） |
-| `ui/`                                          | `UIManager` 及子控制器                        |
-| `shop/` `card/` `night/` `building/` `battle/` | 对应玩法系统                                   |
-| `audio/` `dev/`                                | 音频与开发工具                                  |
-| `adapters/godot/`                              | Godot 适配层（坐标换算）                         |
-| `adapters/persistence/`                        | 持久化适配（战报文件 IO）                         |
-
+| 目录 | 层级 | 用途 |
+| --- | --- | --- |
+| `domain/` | 核心域 | 纯 C# 业务规则（coordinates、card、fusion、core、night、battle），零 Godot |
+| `ports/` | 端口 | 接口契约（IBattleReportRepository、BattleReportModels） |
+| `adapters/godot/` | Godot 适配 | 所有 Godot 节点和场景脚本（autoload、building、battle、ui、flow 等） |
+| `adapters/persistence/` | 持久化 | 文件 IO（BattleReportStorage） |
 
 场景：`scenes/`；预制体：`prefabs/`；资源：`resources/`、`assets/`。
 
-新功能放进**拥有该业务的模块目录**，不要堆到无关文件。`GameManager` 是 Autoload；`UIManager`、`ShopSystem` 等挂在 `main_game.tscn`，用静态 `Instance`。
+新代码按三层归属放入对应目录；`GameManager` 是 Autoload；系统挂在 `main_game.tscn`，通过端口接口通信。
 
 ## 编码约定
 
@@ -34,7 +28,7 @@ Godot **4.6** + **C# / .NET** 的 2D RTS 项目（类皇室战争）。物理：
 - 系统间用 **Godot 信号** 通信；脚本保持单一职责
 - 共享常量放 `scripts/core/`
 - 核心域项目 `CasualCastle.Domain/` 禁止引用 Godot 类型（使用端口与适配器模式）
-- UI 场景在 `scenes/ui/`，逻辑在 `scripts/ui/` 或 `scripts/flow/`
+- UI 场景在 `scenes/ui/`，逻辑在 `scripts/adapters/godot/ui/` 或 `scripts/adapters/godot/flow/`
 - 不写 XML 文档注释；避免过度防御性编程
 
 ## 文档规范
