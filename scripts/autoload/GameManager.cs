@@ -48,6 +48,7 @@ public partial class GameManager : Node2D
     public int EnemyHealth { get; private set; }
     public Castle PlayerCastle => _playerCastle;
     public Castle EnemyCastle => _enemyCastle;
+    public Node2D Battlefield => _battlefield;
 
     private Node2D _battlefield;
     private Castle _playerCastle;
@@ -100,14 +101,12 @@ public partial class GameManager : Node2D
 
         for (int i = 0; i < count; i++)
         {
-            Vector2 spawnLocal = _playerCastle.GetBuildingSpawnPosition(
-                spawnGridX, spawnGridY, Vector2I.Right, _cheatSpawnCount);
-            _cheatSpawnCount++;
-
             Soldier soldier = soldierScene.Instantiate<Soldier>();
-            soldier.GlobalPosition = _playerCastle.ToGlobal(spawnLocal);
             soldier.IsPlayerUnit = true;
-            _battlefield.AddChild(soldier);
+            UnitSpawn.PlaceSoldier(
+                _battlefield, _playerCastle, soldier,
+                BuildingSystem.GetFootprint("Barracks"), spawnGridX, spawnGridY, _cheatSpawnCount);
+            _cheatSpawnCount++;
         }
 
         GD.Print($"[Cheat] Spawned {count} soldiers");

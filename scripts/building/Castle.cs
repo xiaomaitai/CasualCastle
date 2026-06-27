@@ -13,11 +13,7 @@ public partial class Castle : Node2D
 	[Export]
 	public int GridRows = 8;
 
-	[Export]
-	public int CellSize = 64;
-
-	[Export]
-	public int BlockSize = 60;
+	public int CellSize => GameCoordinates.PixelsPerCell;
 
 	[Export]
 	public Color BlockColor = new Color(1, 1, 1, 0.06f);
@@ -42,9 +38,6 @@ public partial class Castle : Node2D
 
 	[Export]
 	public int SecondBarracksGridY = -1;
-
-	[Export]
-	public float SpawnInset = 8f;
 
 	public Building Heart { get; private set; }
 	public bool IsAlive => Heart != null && Heart.Health > 0;
@@ -78,10 +71,8 @@ public partial class Castle : Node2D
 		AddChild(_highlightOverlay);
 	}
 
-	public Vector2 GetCellCenter(int gridX, int gridY)
-	{
-		return new Vector2((gridX + 0.5f) * CellSize, (gridY + 0.5f) * CellSize);
-	}
+	public Vector2 GetCellCenter(int gridX, int gridY) =>
+		GameCoordinates.ToLocalPixels(GameCoordinates.CellCenter(gridX, gridY));
 
 	public bool IsInBounds(int gridX, int gridY)
 	{
@@ -95,9 +86,9 @@ public partial class Castle : Node2D
 
 	public bool TryGetGridFromGlobalPoint(Vector2 globalPoint, out int gridX, out int gridY)
 	{
-		Vector2 localPoint = ToLocal(globalPoint);
-		gridX = (int)(localPoint.X / CellSize);
-		gridY = (int)(localPoint.Y / CellSize);
+		Vector2I grid = GameCoordinates.FloorGridFromLocalPixels(ToLocal(globalPoint));
+		gridX = grid.X;
+		gridY = grid.Y;
 		return IsInBounds(gridX, gridY);
 	}
 
@@ -207,18 +198,12 @@ public partial class Castle : Node2D
 		return sum / footprint.Count;
 	}
 
-	public Vector2 GetBuildingSpawnPosition(int gridX, int gridY, Vector2I outwardDir, int spawnIndex = 0)
-	{
-		int spawnGridX = gridX + outwardDir.X;
-		int spawnGridY = gridY + outwardDir.Y;
-		float spreadX = (spawnIndex % 3) * 10f;
-		float spreadY = (spawnIndex % 3) * 8f;
+	public Vector2 GetBuildingSpawnGlobalPosition(
+		IReadOnlyList<Vector2I> footprint, int anchorX, int anchorY, int spawnIndex = 0) =>
+		UnitSpawn.GetSpawnGlobalPosition(this, footprint, anchorX, anchorY, spawnIndex);
 
-		return new Vector2(
-			spawnGridX * CellSize + SpawnInset + spreadX,
-			(spawnGridY + 1) * CellSize - SpawnInset - spreadY
-		);
-	}
+	public Vector2 GetBuildingSpawnPosition(IReadOnlyList<Vector2I> footprint, int anchorX, int anchorY, int spawnIndex = 0) =>
+		ToLocal(GetBuildingSpawnGlobalPosition(footprint, anchorX, anchorY, spawnIndex));
 
 	public bool IsAnyCellOccupiedByPlayerSoldier(IReadOnlyList<Vector2I> cells)
 	{
@@ -293,19 +278,21 @@ public partial class Castle : Node2D
 
 	public override void _Draw()
 	{
-		int totalWidth = GridColumns * CellSize;
-		int totalHeight = GridRows * CellSize;
+		Vector2 gridPixelSize = GameCoordinates.ToLocalPixels(
+			GridColumns * GameCoordinates.UnitsPerCell,
+			GridRows * GameCoordinates.UnitsPerCell);
+		DrawRect(new Rect2(Vector2.Zero, gridPixelSize), AreaBgColor);
 
-		DrawRect(new Rect2(0, 0, totalWidth, totalHeight), AreaBgColor);
-
-		int blockInset = (CellSize - BlockSize) / 2;
+		Vector2 blockPixelSize = GameCoordinates.ToLocalPixels(
+			GameCoordinates.CellBlockSize,
+			GameCoordinates.CellBlockSize);
 
 		for (int row = 0; row < GridRows; row++)
 		{
 			for (int col = 0; col < GridColumns; col++)
 			{
-				Vector2 position = new Vector2(col * CellSize + blockInset, row * CellSize + blockInset);
-				DrawRect(new Rect2(position, new Vector2(BlockSize, BlockSize)), BlockColor);
+				Vector2 position = GameCoordinates.ToLocalPixels(GameCoordinates.CellBlockOrigin(col, row));
+				DrawRect(new Rect2(position, blockPixelSize), BlockColor);
 			}
 		}
 
@@ -315,6 +302,10 @@ public partial class Castle : Node2D
 				? new Color(0.2f, 0.85f, 0.35f, 0.35f)
 				: new Color(0.9f, 0.2f, 0.2f, 0.35f);
 
+			Vector2 cellPixelSize = GameCoordinates.ToLocalPixels(
+				GameCoordinates.UnitsPerCell,
+				GameCoordinates.UnitsPerCell);
+
 			foreach (Vector2I offset in _previewFootprint)
 			{
 				int col = _previewGridX + offset.X;
@@ -322,8 +313,8 @@ public partial class Castle : Node2D
 				if (!IsInBounds(col, row))
 					continue;
 
-				Vector2 previewPos = new Vector2(col * CellSize, row * CellSize);
-				DrawRect(new Rect2(previewPos, new Vector2(CellSize, CellSize)), previewColor);
+				Vector2 previewPos = GameCoordinates.ToLocalPixels(GameCoordinates.CellCorner(col, row));
+				DrawRect(new Rect2(previewPos, cellPixelSize), previewColor);
 			}
 		}
 	}

@@ -238,7 +238,9 @@ public partial class Building : Area2D
 
 		if (BuildingSystem.GetSpawnInterval(TypeId) > 0f)
 		{
-			_battlefield = GetNodeOrNull<Node2D>("/root/MainGame/Battlefield");
+			_battlefield = GameManager.Instance?.Battlefield;
+			if (_battlefield == null)
+				_battlefield = GetNodeOrNull<Node2D>("/root/MainGame/Battlefield");
 			if (_battlefield == null)
 				_battlefield = GetTree().Root.GetNodeOrNull<Node2D>("MainGame/Battlefield");
 			UpdateWorkCycle();
@@ -320,21 +322,15 @@ public partial class Building : Area2D
 		if (soldierScene == null)
 			return;
 
-		Vector2I marchDir = _isPlayerBuilding ? Vector2I.Right : Vector2I.Left;
-		Vector2I spawnOffset = BuildingSystem.GetSpawnCellOffset(TypeId);
-		int spawnGridX = GridX + spawnOffset.X;
-		int spawnGridY = GridY + spawnOffset.Y;
-
 		for (int i = 0; i < count; i++)
 		{
-			Vector2 spawnLocal = CastleRef.GetBuildingSpawnPosition(spawnGridX, spawnGridY, marchDir, _spawnCount);
-			_spawnCount++;
-
 			Soldier soldier = soldierScene.Instantiate<Soldier>();
-			soldier.GlobalPosition = CastleRef.ToGlobal(spawnLocal);
 			soldier.IsPlayerUnit = _isPlayerBuilding;
 			BuildingSystem.ApplySoldierSpawnStats(TypeId, soldier);
-			_battlefield.AddChild(soldier);
+			UnitSpawn.PlaceSoldier(
+				_battlefield, CastleRef, soldier,
+				BuildingSystem.GetFootprint(TypeId), GridX, GridY, _spawnCount);
+			_spawnCount++;
 		}
 	}
 

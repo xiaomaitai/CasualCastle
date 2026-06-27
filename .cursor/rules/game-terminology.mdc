@@ -1,0 +1,18 @@
+---
+description: CasualCastle 游戏术语约定（用户用语）
+alwaysApply: true
+---
+
+# 游戏术语
+
+## 「兵营」
+
+用户说「兵营」时，默认指**所有产兵建筑**（有 `SpawnInterval`、会生成士兵的建筑），包括但不限于：
+
+- `Barracks`（兵营）
+- `BarracksT2`（强化兵营）
+- `ArcheryRange`（靶场）
+- `Stable`（马厩）
+- `WolfDen` / `WolfDenT2`（狼穴）
+
+仅当用户**明确**说「兵营建筑」「Barracks 类型」或点名 `Barracks` / `BarracksT2` 时，才限定为兵营这一类建筑。
