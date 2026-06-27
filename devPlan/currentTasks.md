@@ -1,114 +1,101 @@
 # 当前任务
 
-M0–M5 已完成。**当前焦点：M6 战报与回放式敌方。**
+**当前焦点：六边形架构分层（`todo.md` §1）。**
 
-设计文档：`battleReportDesign.md`（录制与存储）、`aiSystemDesign.md`（镜像复刻）、`concepts.md` §战报。
+目标：把游戏规则从 Godot 节点与静态单例中剥离，建立**游戏核心域 / 防腐层 / 外部依赖**三层边界，为后续真模块化（`todo.md` §2）与显示缩放重构（`todo.md` §3）打基础。
 
-**M6 核心：** 战报 = 每夜**结束**时玩家城堡快照的集合；结算可永久保存；敌方**不自主决策**，每局选一条战报，在每晚**开始**时按序号镜像复刻。
-
----
-
-## 已完成（M5 融合）
-
-- [x] 入夜自动免费融合；`BarracksT2` / `WolfDenT2`
-- [x] 「禁止融合」工具与 `IsFusionProhibited`
-
-## 已完成（M4 夜战）
-
-- [x] `HasNightCombat`；狼穴 / 狼人；夜晚豁免休眠
+参考：`todo.md`、`codeStructure.md`、`outline/c05ProjectArchitecture.md`；已有试点代码 `scripts/core/GameCoordinates.cs`、`scripts/battle/UnitSpawn.cs`（仍混在引擎目录，待迁入新结构）。
 
 ---
 
-## 下一步（M6）
+## 1. 边界与目录规划
 
-### 1. 数据与 `BattleReportSystem`
+- [ ] 在 `devPlan/codeStructure.md` 与 `outline/c05ProjectArchitecture.md` 落地目标目录：
 
-- [x] 落地 `BuildingSnapshot`、`CastleSnapshot`、`BattleReport`（见 `dataStructures.md`）
-- [x] `scripts/battle_report/BattleReportSystem.cs` 挂 `main_game.tscn`
-- [x] 局内 `NightIndex` 计数（与录制 / 复刻共用）
-- [x] `CaptureNightSnapshot(Castle)`：遍历玩家城堡建筑，跳过 `CastleHeart`，写入类型 / 锚点 / 生命 / 暂停 / 禁止融合
-- [x] 局内战报缓存：`StartMatch` 清空；每夜结束 `AppendSnapshot`
-- [x] 持久化：`user://battle_reports/` 读写；`ReportId`、`DisplayName`、`SavedAtUnix`
-- [x] API：`GetSavedReports()`、`LoadReport(id)`、`SaveCurrentReport(name)`、`DiscardCurrentReport()`
+```
+scripts/
+├── domain/                 # 游戏核心域：纯 C#，无 Godot、无 Node
+│   ├── coordinates/        # 游戏坐标、占地、产兵点等
+│   ├── building/           # 占地、放置规则、产兵间隔等领域模型
+│   └── …                   # 按业务逐步迁入
+├── ports/                  # 端口（接口）：核心域对外契约、外部依赖抽象
+└── adapters/               # 防腐层 + 外部依赖实现
+    ├── godot/              # Godot 节点、场景、输入、渲染适配
+    └── persistence/        # 文件 / 未来数据库（如 battle_reports）
+```
 
-### 2. 录制钩子
-
-- [x] `GameManager.BeginPhase(Day)`（夜晚→白天）时调用 `CaptureNightSnapshot`，固定顺序：夜晚开始时 `NightIndex++`，夜晚结束录制同序号快照
-- [x] 首局：第一夜结束前缓存为空；第一夜结束产生 `NightIndex == 1` 的首条快照
-- [ ] 验证：多格建筑（靶场、马厩）快照含正确锚点与 `TypeId`
-
-### 3. 结算保存 UI
-
-- [x] `GameOverUiController`：胜负展示后增加「是否记录战报？」（保存 / 不保存）
-- [x] 保存 → `BattleReportSystem.SaveCurrentReport`；不保存 → `DiscardCurrentReport`
-- [x] 返回标题后局内缓存已清理；已保存战报重启游戏仍可 `LoadReport`
-
-### 4. 战报选择（开局）
-
-- [x] 标题页或开局流程：列出已保存战报（名称 + 夜数），选一条作为本局敌方参考
-- [x] 无战报时：敌方保持场景初始布局（当前双兵营），不阻断开局
-- [x] 选定战报 ID 传入 `ReplayAiSystem` / `GameManager.StartGameSession`
-
-### 5. `ReplayAiSystem` 镜像复刻
-
-- [x] `scripts/replay/ReplayAiSystem.cs` 挂 `main_game.tscn`
-- [x] `ApplyNightSnapshot(enemyCastle, nightIndex)`：读取战报 `NightIndex == nightIndex` 的条目
-- [x] 格位**水平镜像**：玩家 `(anchorX, anchorY)` → 敌方镜像坐标（8×8 网格，多格按 footprint 计算）
-- [x] 占格检测：任一格有存活**玩家** `Soldier` → 跳过该建筑
-- [x] 同步：移除非核心冲突建筑 → `CreateBuilding` → `BindToGrid` → 恢复快照生命与状态
-- [x] 不复制 `CastleHeart`；快照中已是 `BarracksT2` 等则直接放置，**不**对敌方再跑 `FusionSystem`
-- [x] 无对应 `NightIndex` 条目：敌方布局不变
-
-### 6. 入夜流程串联
-
-- [x] `GameManager.BeginPhase(Night)` 顺序固定为：
-  1. 更新本局「当前夜序号」`N`（第 N 夜开始）
-  2. `FusionSystem.ResolveNightFusions(playerCastle)`
-  3. `ReplayAiSystem.ApplyNightSnapshot(enemyCastle, N)`
-  4. `PhaseChanged` → 商店等玩家夜晚流程
-- [ ] 玩家融合、商店、修复、禁止融合行为不受影响（待完整回归验证）
-
-### 7. 建筑与战场辅助
-
-- [x] `BuildingSystem` / `Castle`：支持在**敌方城堡**按快照批量放置（或复用放置逻辑，去掉 `IsPlayerCastle` 限制的内部 API）
-- [x] `Castle` 或战场工具：`IsCellOccupiedByPlayerSoldier(gridX, gridY)`（或等价检测）
-- [x] 敌方建筑移除：`ReleaseBuildingFootprint` + `QueueFree`，不破坏城堡之心
-
-### 8. 联调与验收
-
-- [ ] **录制链**：打一局 → 至少经历 2 个夜晚结束 → 结算保存战报 → 重启后列表可见
-- [ ] **复刻链**：选该战报新开一局 → 第 1 夜开始敌方与战报第 1 条快照镜像一致
-- [ ] **挡格**：玩家士兵站在某格 → 该建筑本夜不复刻
-- [ ] **序号**：第 2 夜开始应用第 2 条快照；战报无后续条目时敌方保持现状
-- [ ] **回归**：手牌、商店、融合、夜战、暂停、修复正常；可打满至结算
+- [ ] 约定依赖方向：`domain` 不引用 `adapters`；`adapters` 实现 `ports` 并调用 `domain`；现有 `scripts/building/` 等逐步变为适配层或拆为 domain + adapter。
+- [ ] 列出**首批迁入核心域**的类型清单（见 §2），其余模块暂留原位、经防腐层调用。
 
 ---
 
-## 暂不进入范围（M6）
+## 2. 核心域试点：坐标与产兵
 
-- 敌方自主购卡、放置、融合、修复
-- 战报逐夜动画回放、详情浏览 UI（超列表+选取即可）
-- 云端同步、战报分享、删除以外的编辑
-- M5.1 多格融合扩展
-- `BattleSystem` 抽离、寻路
-- 完整设置界面、通用存档
+以已验收的产兵坐标为第一个垂直切片，验证「核心域可单测、适配层只翻译」。
 
----
-
-## 验收标准（M6）
-
-- [ ] 每夜结束自动追加玩家城堡快照；字段与场上建筑一致
-- [ ] 结算弹窗可永久保存或丢弃本局战报
-- [ ] 开局可选一条已保存战报；入夜按 `NightIndex` 镜像复刻到敌方
-- [ ] 玩家士兵占据的格不复刻对应建筑
-- [ ] 完整单局可对战至胜负，玩家侧现有功能无回归
+- [ ] 将 `GameCoordinates` 中**整数游戏坐标**与**产兵点计算**迁入 `domain/coordinates/`（无 `Godot.Vector2`）。
+- [ ] 核心域 API（命名实施时可调整）：
+  - `GameVector2`（int X, Y）、`UnitsPerCell`
+  - `GetBuildingFootprintSpawnPoint(footprint, anchor, spawnIndex)` — 占地框左下角、连续产兵错开
+- [ ] `adapters/godot/GameCoordinatesAdapter` 负责 `ToLocalPixels` / `FromLocalPixels` / `FloorGridFromLocalPixels`。
+- [ ] `UnitSpawn` 保留在适配层：先入树再设 `GlobalPosition`；核心域只输出游戏坐标。
+- [ ] 为 `GetBuildingFootprintSpawnPoint` 编写**不启动 Godot** 的单元测试。
 
 ---
 
-## 实现顺序建议
+## 3. 防腐层模式与现有代码迁移
 
-1. 数据结构 + `BattleReportSystem` 录制与持久化  
-2. `GameManager` 夜末钩子 + 结算保存 UI  
-3. 开局战报选择  
-4. `ReplayAiSystem` + 入夜串联 + 敌方放置 API  
-5. 端到端联调
+- [ ] 定义防腐层职责：类型翻译、坐标换算、生命周期（`Node` 创建/销毁）、信号 ↔ 领域事件。
+- [ ] `Castle` / `Building`：绘制与预览可暂留 Godot 侧；产兵、占地判定、格占用等**规则调用**改走 `domain` + 适配器。
+- [ ] `BuildingSystem` 定义表：区分**领域数据**（间隔、占地、生命）与**表现数据**（纹理、缩放）；表现留在适配层或 `ports` 的 `IBuildingVisuals` 之后实现。
+- [ ] 禁止新增：业务模块直接 `GD.Load`、直接读 `GameManager.Instance` 完成领域判定（迁移期旧代码可保留，新代码走端口）。
+
+---
+
+## 4. 外部依赖归类
+
+| 依赖 | 归属 | 当前示例 |
+| --- | --- | --- |
+| Godot 场景树、节点、绘制 | `adapters/godot` | `Castle._Draw`、`Building` 工作特效 |
+| 输入与 UI | `adapters/godot` | `HandUiController`、设置面板 |
+| 文件持久化 | `adapters/persistence` | `BattleReportStorage`、`display_settings.cfg` |
+| 未来数据库 | `adapters/persistence` | 暂未实现 |
+
+- [ ] `BattleReportSystem` 录制/加载：抽出 `IBattleReportRepository` 端口，文件实现放 `persistence`（可与坐标试点并行或作第二批）。
+- [ ] `DisplaySettingsManager` 标为 Godot 窗口适配，不进入 `domain`。
+
+---
+
+## 5. 文档与 AGENTS 同步
+
+- [ ] 更新 `codeStructure.md`：新目录、依赖规则、试点说明。
+- [ ] 更新 `outline/c05ProjectArchitecture.md` 为「当前 + 迁移目标」一致表述。
+- [ ] `AGENTS.md` 目录表增加 `domain/`、`ports/`、`adapters/` 说明。
+
+---
+
+## 6. 验收标准
+
+- [ ] `domain/coordinates` 产兵点与占地左下角规则有单元测试，测试不引用 Godot。
+- [ ] 运行时产兵位置与已验收行为一致（建筑占地框左下角、多格建筑正确）。
+- [ ] 依赖检查：`domain` 内无 `using Godot`。
+- [ ] 文档与目录一致，后续可基于本分层推进 `todo.md` §2、§3。
+
+---
+
+## 暂不进入范围（本任务）
+
+- 全量模块接口化（`todo.md` §2）
+- 显示与业务缩放拆分（`todo.md` §3）
+- 开发者模式开关（`todo.md` §4）
+- 删除或大规模重写现有 `scripts/building/`、`GameManager`（仅试点迁移 + 模式确立）
+
+---
+
+## 建议实施顺序
+
+1. 目录骨架 + `ports` 空接口 + 文档  
+2. 迁入 `GameCoordinates` 领域部分 + 适配器 + 单测  
+3. `UnitSpawn` / `Building` 产兵改调新 API  
+4. `BattleReportStorage` 端口化（可选第二批）  
+5. 验收 + 更新架构文档

@@ -6,17 +6,17 @@
 CasualCastle/
 ├── scripts/
 │   ├── autoload/              # GameManager（Godot Autoload）
-│   ├── core/                  # GameConfig 等全局配置
+│   ├── core/                  # GameConfig、GameCoordinates（待迁入 domain）
 │   ├── flow/                  # TitleScreen、MainGameController
 │   ├── ui/                    # UIManager 与子 UI 控制器
 │   ├── shop/                  # ShopSystem
 │   ├── card/                  # CardSystem、CardData
 │   ├── night/                 # NightSystem
 │   ├── building/              # Castle、Building、BuildingSystem、AdjacentSystem
-│   ├── battle/                # Soldier
+│   ├── battle/                # Soldier、UnitSpawn
 │   ├── fusion/                # FusionSystem、FusionRecipe
-│   ├── battle_report/         # BattleReportSystem（M6 规划）
-│   ├── replay/                # ReplayAiSystem（M6 规划）
+│   ├── battle_report/         # BattleReportSystem、BattleReportStorage
+│   ├── replay/                # ReplayAiSystem
 │   ├── audio/                 # BgmPlayer
 │   └── dev/                   # DevInputLogger
 ├── scenes/
@@ -31,6 +31,7 @@ CasualCastle/
 │   ├── outline/               # 开发大纲，按章节拆分
 │   ├── concepts.md
 │   ├── currentTasks.md
+│   ├── todo.md
 │   ├── fusionSystemDesign.md
 │   ├── battleReportDesign.md
 │   ├── aiSystemDesign.md
@@ -39,26 +40,22 @@ CasualCastle/
 └── resources/                 # 空，待放 .tres 数据资源
 ```
 
-## 5.2 规划目录结构（完整版目标）
+## 5.2 迁移目标（架构 Phase 1，进行中）
+
+在现有 `scripts/` 业务目录之上，逐步引入六边形分层（详见 `currentTasks.md`、`todo.md`）：
 
 ```
 scripts/
-├── autoload/GameManager.cs
-├── core/GameConfig.cs
-├── flow/TitleScreen.cs, MainGameController.cs
-├── ui/UIManager.cs + UI 子控制器
-├── shop/ShopSystem.cs
-├── card/CardSystem.cs, CardData.cs
-├── night/NightSystem.cs
-├── building/Castle.cs, Building.cs, Barracks.cs, BuildingSystem.cs（待建）
-├── battle/Soldier.cs, BattleSystem.cs（待建）
-├── audio/BgmPlayer.cs
-└── dev/DevInputLogger.cs
-resources/
-├── cards/                     # CardData .tres
-├── buildings/                 # BuildingData .tres
-└── units/                     # UnitData .tres
+├── domain/          # 游戏核心域（无 Godot）
+├── ports/           # 接口契约
+└── adapters/        # 防腐层与外部依赖（godot、persistence）
 ```
+
+试点：`GameCoordinates` 领域逻辑与产兵点规则迁入 `domain/coordinates/`。
+
+长期数据资源仍以 `resources/` 下 `.tres` 为目标；完整版目录见 `codeStructure.md`。
+
+---
 
 ## 5.3 核心系统说明
 
@@ -73,8 +70,8 @@ resources/
 | AdjacentSystem | 邻接检测与加成、放置光圈 | 已实现（兵营规则） |
 | BattleSystem | 部队生成、战斗 AI | 逻辑在 Soldier.cs |
 | FusionSystem | 入夜自动融合、禁止融合标记 | 已实现 |
-| BattleReportSystem | 夜末快照、战报缓存与持久化 | 待建（M6） |
-| ReplayAiSystem | 选定战报、入夜镜像复刻敌方 | 待建（M6） |
+| BattleReportSystem | 夜末快照、战报缓存与持久化 | 已实现（M6） |
+| ReplayAiSystem | 选定战报、入夜镜像复刻敌方 | 已实现（M6） |
 
 ## 5.4 系统模块设计
 
@@ -91,8 +88,9 @@ resources/
 | BuildingSystem | 建筑放置、占格验证、建筑工作调度 | `Castle`, `BuildingData`, `NightSystem` |
 | AdjacentSystem | 建筑邻接检测、加成刷新 | `BuildingSystem`, `Castle` |
 | FusionSystem | 入夜自动融合、配方与主体邻接判定、升级结果生成 | `BuildingSystem`, `GameManager`, `UIManager` |
-| BattleSystem | 士兵生成、行动、索敌、攻击与死亡 | `UnitData`, `NightSystem`, `Castle` |
-| ReplayAiSystem | 战报选取、入夜镜像同步敌方城堡、士兵挡格跳过 | `BattleReportSystem`, `BuildingSystem`, `GameManager` |
+| BattleSystem | 士兵生成、行动、索敌、攻击与死亡 | `UnitSpawn`, `Soldier`, `NightSystem`, `Castle` |
+| BattleReportSystem | 夜末快照、局内缓存、战报持久化 | `BattleReportModels`, `BattleReportStorage`, `GameManager` |
+| ReplayAiSystem | 战报选取、入夜镜像同步敌方城堡 | `BattleReportSystem`, `BuildingSystem`, `GameManager` |
 | DataResources | 卡牌、建筑、单位、全局配置数据 | `CardData`, `BuildingData`, `UnitData`, `GameConfig` |
 
 模块依赖关系如下：

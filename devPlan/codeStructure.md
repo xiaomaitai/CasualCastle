@@ -18,14 +18,17 @@ CasualCastle 是 Godot 4.6 C# 项目，主入口配置在 `project.godot`：
 | 模块目录 | 业务模块 | 主要文件 |
 | --- | --- | --- |
 | `autoload/` | GameManager | `GameManager.cs` |
-| `core/` | DataResources | `GameConfig.cs` |
+| `core/` | DataResources | `GameConfig.cs`, `GameCoordinates.cs` |
 | `flow/` | SceneFlow | `TitleScreen.cs`, `MainGameController.cs` |
 | `ui/` | UIManager | `UIManager.cs` 及 UI 子控制器 |
 | `shop/` | ShopSystem | `ShopSystem.cs` |
 | `card/` | CardSystem | `CardSystem.cs`, `CardData.cs` |
 | `night/` | NightSystem | `NightSystem.cs` |
 | `building/` | BuildingSystem | `Castle.cs`, `Building.cs`, `Barracks.cs`, `ArcheryRange.cs`, `Stable.cs`, `BuildingSystem.cs`, `AdjacentSystem.cs` |
-| `battle/` | BattleSystem | `Soldier.cs` |
+| `battle/` | BattleSystem | `Soldier.cs`, `UnitSpawn.cs` |
+| `fusion/` | FusionSystem | `FusionSystem.cs`, `FusionRecipe.cs` |
+| `battle_report/` | BattleReportSystem | `BattleReportSystem.cs`, `BattleReportStorage.cs` |
+| `replay/` | ReplayAiSystem | `ReplayAiSystem.cs` |
 | `audio/` | 音频 | `BgmPlayer.cs` |
 | `dev/` | 开发辅助 | `DevInputLogger.cs` |
 
@@ -40,6 +43,9 @@ CasualCastle 是 Godot 4.6 C# 项目，主入口配置在 `project.godot`：
 - `CardSystem`
 - `BuildingSystem`
 - `AdjacentSystem`
+- `FusionSystem`
+- `BattleReportSystem`
+- `ReplayAiSystem`
 - `Battlefield`
   - `PlayerSide/PlayerCastle`
   - `EnemySide/EnemyCastle`

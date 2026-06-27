@@ -20,7 +20,7 @@
 | 城堡与胜负 | 城堡预制体、扣血、结算 | `prefabs/Castle.tscn`, `scripts/building/Castle.cs` |
 | 场景配置 | 格子放置兵营、碰撞层、战场布局 | `scripts/building/Building.cs`, `scripts/building/Castle.cs` |
 
-**场景约定：** 玩家兵营 (7,4)、敌方 (0,4)；建筑碰撞 56×56；产兵于相邻格左下角。
+**场景约定：** 玩家兵营 (7,4)、敌方 (0,4)；建筑碰撞 56×56；产兵于建筑占地框**左下角**附近（`GameCoordinates` + `UnitSpawn`）。
 
 概念与实现细节见 `../concepts.md`。
 
@@ -107,5 +107,27 @@
 | 禁止融合 | 工具按钮 + `IsFusionProhibited` | `FusionProhibitUiController`, `BuildingStateIcon` |
 
 设计文档：`../fusionSystemDesign.md`。
+
+## 3.8 战报与回放式敌方（M6）
+
+| 模块 | 交付内容 | 关键文件 |
+|------|----------|----------|
+| 战报录制 | 每夜结束玩家城堡快照、局内缓存 | `BattleReportSystem`, `BattleReportModels` |
+| 持久化 | `user://battle_reports/` 保存 / 加载 / 列表 | `BattleReportStorage` |
+| 结算 UI | 胜负后询问是否保存战报 | `GameOverUiController` |
+| 开局选报 | 标题页选已保存战报作为敌方参考 | `TitleScreen` |
+| 镜像复刻 | 第 N 夜开始按快照镜像敌方布局；士兵占格跳过 | `ReplayAiSystem` |
+| 入夜串联 | 融合 → 敌方复刻 → 夜晚流程 | `GameManager.BeginPhase` |
+
+设计文档：`../battleReportDesign.md`、`../aiSystemDesign.md`。
+
+## 3.9 游戏坐标与产兵（架构试点前奏）
+
+| 模块 | 交付内容 | 关键文件 |
+|------|----------|----------|
+| 游戏坐标 | 整数坐标（每格 100 单位）、像素防腐换算 | `scripts/core/GameCoordinates.cs` |
+| 产兵放置 | 建筑占地框左下角产兵；先入树再设 `GlobalPosition` | `scripts/battle/UnitSpawn.cs`, `Building.cs` |
+
+待迁入六边形核心域，见 `currentTasks.md`。
 
 ---

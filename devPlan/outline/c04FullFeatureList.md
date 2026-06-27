@@ -13,8 +13,8 @@
 | 邻接系统 | 建筑邻接加成 | 🟡 部分 | 兵营邻接加速 + 光圈 |
 | 融合系统 | 入夜自动融合、禁止融合工具 | ✅ 已完成 | 免费；见 `fusionSystemDesign.md` |
 | UI 界面 | 商店、手牌、金币、信息面板、暂停 | ✅ 已完成 | |
-| AI 对手 | 战报镜像复刻（无自主决策） | ❌ 待开发 | M6，见 `aiSystemDesign.md` |
-| 战报系统 | 夜末快照、结算永久保存 | ❌ 待开发 | M6，见 `battleReportDesign.md` |
+| AI 对手 | 战报镜像复刻（无自主决策） | ✅ 已完成 | M6，见 `aiSystemDesign.md` |
+| 战报系统 | 夜末快照、结算永久保存 | ✅ 已完成 | M6，见 `battleReportDesign.md` |
 | 数据层 | CardData / BuildingDefinition | 🟡 部分 | 运行时字典；`.tres` 待补 |
 | 存档 | 保存/读取 | ❌ 待开发 | 不在 MVP 范围 |
 

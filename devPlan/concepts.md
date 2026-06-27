@@ -107,7 +107,7 @@
 
 出兵建筑，极简 MVP 中双方各有一座，占城堡内单格。
 
-- 每隔固定间隔在城堡外侧相邻格**左下角**产兵（`GetBuildingSpawnPosition`）
+- 每隔固定间隔在**建筑占地框左下角**附近产兵（`GameCoordinates.GetBuildingFootprintSpawnPoint` → `UnitSpawn`）
 - 多次产兵在左下角附近轻微错开，避免重叠
 - 阵营由所属城堡的 `IsPlayerCastle` 决定
 - **夜晚**：无夜战词条时停止产兵；有夜战词条时继续产兵
