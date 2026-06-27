@@ -17,8 +17,8 @@ config/icon="res://textures/icon.svg"
 
 [autoload]
 
-GameManager="*res://scripts/autoload/GameManager.cs"
-DisplaySettingsManager="*res://scripts/autoload/DisplaySettingsManager.cs"
+GameManager="*res://scripts/adapters/godot/autoload/GameManager.cs"
+DisplaySettingsManager="*res://scripts/adapters/godot/autoload/DisplaySettingsManager.cs"
 
 [display]
 
