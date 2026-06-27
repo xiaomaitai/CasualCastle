@@ -6,28 +6,33 @@
 
 ## 1. 六边形架构分层 ✅ 已完成
 
-`scripts/` 已重组为三层：`domain/`（核心域，零 Godot）、`ports/`（接口契约）、`adapters/`（godot/ + persistence/）。验收见 `currentTasks.md` §1-§6。
+`scripts/` 已重组为三层：`domain/`（核心域）、`ports/`（接口契约）、`adapters/`（godot/ + persistence/）。验收见 `currentTasks.md` §1-§6。
 
 ---
 
 ## 2. 真模块化与 DI ← 当前任务
 
-每个模块是独立的 C# 项目，项目引用链 = 架构依赖图：
+保留三层结构，domain 层内部拆为 9 个 C# 项目，DI 替代静态 Instance：
 
 ```
-Shared ← Data ← Shop
-   ↑       ↑       ↑
-   ├─ Night ├─ Building ←─ Fusion
-   ├─ Report           ←─ Replay
-   └─ Battle
+scripts/
+├── domain/
+│   ├── Domain.Shared    → 坐标、常量、枚举（零依赖）
+│   ├── Domain.Data      → 卡牌、配方、建筑定义（→ Shared）
+│   ├── Domain.Night     → 昼夜规则 + IGamePhase 端口（→ Shared）
+│   ├── Domain.Shop      → 商店/手牌（→ Shared, Data）
+│   ├── Domain.Building  → 占地/邻接（→ Shared, Data, Night）
+│   ├── Domain.Fusion    → 融合配方匹配（→ Shared, Data, Building）
+│   ├── Domain.Battle    → 战斗规则（→ Shared, Data, Night, Building）
+│   ├── Domain.Report    → 战报构建（→ Shared, Data）
+│   └── Domain.Replay    → 镜像坐标（→ Shared, Data, Building, Report）
+├── ports/              → 接口（分散在各 domain 项目中）
+└── adapters/           → Godot 实现 + 持久化
+```
 
-Godot → 所有 domain 项目
-Game  → Godot（composition root）
-``` 
+adapters 和主项目编译在一起，实现 domain 端口。`GameManager.Services` 作为 DI 入口。
 
-12 个项目，每个用 `IServiceCollection` 扩展方法注册服务，`GameManager.Services` 作为 DI 容器入口。domain 项目零 Godot 引用。
-
-**细化步骤见 `currentTasks.md` Phase 2A-2C。**
+**细化步骤见 `currentTasks.md`。**
 
 ---
 
@@ -39,24 +44,8 @@ Game  → Godot（composition root）
 2. **防腐层（引擎适配）**：将源美术资源缩放/裁切到满足逻辑尺寸后再呈现。
 3. **游戏内业务缩放**：相邻加成、融合 tier、Buff 等规则驱动的缩放。
 
-目标：换图、换分辨率、换 UI 缩放策略时，不改核心域规则。
-
 ---
 
 ## 4. 开发者模式
 
-在**设置界面**增加「开发者模式」开关（持久化至 `user://` 配置）：
-
-| 状态 | 行为 |
-| --- | --- |
-| **关闭（默认）** | 隐藏开发向 UI；禁用开发向快捷键 |
-| **开启** | 显示调试 UI、阶段跳过入口、P 键作弊产兵等 |
-
-统一经「是否开发者模式」门控，避免散落 `#if DEBUG`。
-
----
-
-## 参考
-
-- `scripts/adapters/godot/core/GameCoordinates.cs`：坐标换算 shim（最终将删除）
-- `scripts/adapters/godot/battle/UnitSpawn.cs`：产兵放置，已委托到 domain + adapter
+在**设置界面**增加「开发者模式」开关（持久化至 `user://` 配置），统一经门控控制开发 UI 和快捷键。
