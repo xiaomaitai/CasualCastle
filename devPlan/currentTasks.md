@@ -2,105 +2,95 @@
 
 **当前焦点：C# 项目级模块拆分 + DI 依赖注入（`todo.md` §2）。**
 
-目标：保留现有 `scripts/domain/`、`scripts/ports/`、`scripts/adapters/` 三层，在 `domain/` 内部按模块拆分为多个 C# 项目，用 `Microsoft.Extensions.DependencyInjection` 替代静态 `Instance`。
+目标：保留 `scripts/domain/`、`scripts/ports/`、`scripts/adapters/` 三层。domain 拆为 4 个项目，用 `Microsoft.Extensions.DependencyInjection` 替代静态 `Instance`。
 
 ---
 
 ## 目标项目结构
 
 ```
-CasualCastle/
-├── scripts/
-│   ├── domain/                                     # ← 核心域层（拆为多个项目）
-│   │   ├── CasualCastle.Domain.Shared/            # 共享内核（零依赖）
-│   │   │   └── GameVector2, GridCellOffset, GameCoordinateRules,
-│   │   │     GameRules, GamePhase
-│   │   │
-│   │   ├── CasualCastle.Domain.Data/              # 数据资源（→ Shared）
-│   │   │   └── CardData, FusionRecipe, BuildingDefinitions,
-│   │   │     SoldierData, BattleReportModels
-│   │   │
-│   │   ├── CasualCastle.Domain.Night/             # 昼夜（→ Shared）
-│   │   │   └── NightRules + IGamePhase 端口
-│   │   │
-│   │   ├── CasualCastle.Domain.Shop/              # 商店手牌（→ Shared, Data）
-│   │   │   └── ShopRules, CardRules + 输出端口
-│   │   │
-│   │   ├── CasualCastle.Domain.Building/          # 建筑（→ Shared, Data, Night）
-│   │   │   └── OccupancyGrid, AdjacentRules + 端口
-│   │   │
-│   │   ├── CasualCastle.Domain.Fusion/            # 融合（→ Shared, Data, Building）
-│   │   │   └── FusionRules + 输出端口
-│   │   │
-│   │   ├── CasualCastle.Domain.Battle/            # 战斗（→ Shared, Data, Night, Building）
-│   │   │   └── CombatRules + 输出端口
-│   │   │
-│   │   ├── CasualCastle.Domain.Report/            # 战报（→ Shared, Data）
-│   │   │   └── ReportBuilder + 输出端口
-│   │   │
-│   │   └── CasualCastle.Domain.Replay/            # 回放（→ Shared, Data, Building, Report）
-│   │       └── MirrorRules + 输出端口
+scripts/
+├── domain/
+│   ├── CasualCastle.Domain.Shared/       # 共享内核（零依赖）
+│   │   └── GameVector2, GridCellOffset, GameCoordinateRules,
+│   │     GameRules, GamePhase
 │   │
-│   ├── ports/                                     # ← 端口层（接口分散在各 domain 项目中）
-│   │   # 端口接口和被依赖方放在同一个 domain 项目中
-│   │   # 此处仅保留不归属特定模块的跨域接口
+│   ├── CasualCastle.Domain.Building/     # 建筑（→ Shared）
+│   │   └── OccupancyGrid, AdjacentRules, BuildingDefinitions,
+│   │     ShopRules, CardRules, FusionRules
 │   │
-│   ├── adapters/godot/                            # ← Godot 适配层（→ 所有 domain 项目）
-│   │   ├── autoload/     GameManager（实现 IGamePhase 等端口）
-│   │   ├── building/     Castle, Building, BuildingSystem, AdjacentSystem
-│   │   ├── battle/       Soldier, UnitSpawn
-│   │   ├── shop/         ShopSystem（实现 IShopOutput）
-│   │   ├── card/         CardSystem（实现 ICardOutput）
-│   │   ├── night/        NightSystem
-│   │   ├── fusion/       FusionSystem
-│   │   ├── battle_report/BattleReportSystem
-│   │   ├── replay/       ReplayAiSystem
-│   │   ├── ui/           UIManager + 子控制器
-│   │   ├── flow/         TitleScreen, MainGameController
-│   │   └── core/         GameConfig, GameCoordinates（shim）
+│   ├── CasualCastle.Domain.Battle/       # 战斗（→ Shared, Building）
+│   │   └── CombatRules, NightRules, SoldierData
 │   │
-│   ├── adapters/persistence/                      # ← 持久化适配（→ Domain.Data）
-│   │   └── BattleReportStorage（实现 IBattleReportRepository）
-│   │
-│   └── CompositionRoot.cs                         # DI 容器配置（→ 所有项目）
+│   └── CasualCastle.Domain.History/      # 战报回放（→ Shared, Building）
+│       └── ReportBuilder, MirrorRules, BattleReportModels
 │
-├── scenes/  prefabs/  project.godot               # 原 Godot 主项目在根目录
-├── CasualCastle.sln
-└── tests/CasualCastle.Tests/
+├── ports/                                # 端口（接口分散在各 domain 项目中）
+│   ├── IGamePhase.cs               # 在 Domain.Battle
+│   ├── IShopOutput.cs              # 在 Domain.Building
+│   ├── IBuildingRegistry.cs        # 在 Domain.Building
+│   ├── IBuildingPlacement.cs       # 在 Domain.Building
+│   ├── IFusionOutput.cs            # 在 Domain.Building
+│   ├── ISoldierSpawner.cs          # 在 Domain.Battle
+│   ├── IBattleReportRepository.cs  # 在 Domain.History
+│   └── ISnapshotQuery.cs           # 在 Domain.History
+│
+├── adapters/godot/                       # Godot 适配层（→ 4 个 domain 项目）
+│   ├── autoload/     GameManager（实现 IGamePhase 等端口）
+│   ├── building/     Castle, Building, BuildingSystem, AdjacentSystem
+│   ├── battle/       Soldier, UnitSpawn
+│   ├── shop/         ShopSystem（实现 IShopOutput）
+│   ├── card/         CardSystem（实现 ICardOutput）
+│   ├── night/        NightSystem
+│   ├── fusion/       FusionSystem
+│   ├── battle_report/BattleReportSystem
+│   ├── replay/       ReplayAiSystem
+│   ├── ui/           UIManager + 子控制器
+│   ├── flow/         TitleScreen, MainGameController
+│   └── core/         GameConfig, GameCoordinates（shim）
+│
+└── adapters/persistence/                 # 持久化（→ Domain.History）
+    └── BattleReportStorage（实现 IBattleReportRepository）
 ```
 
-**依赖方向（项目引用链）：**
+**主 Godot 项目在根目录**（`CasualCastle.csproj`），引用 4 个 domain 项目。adapters 和主项目编译在一起。
+
+### 依赖方向
 
 ```
-Domain.Shared ← Domain.Data
-     ↑              ↑
-     ├── Domain.Night ────┤
-     ├── Domain.Shop      ├── Domain.Building ← Domain.Fusion
-     ├── Domain.Report    │        ↑          ← Domain.Replay
-     └── Domain.Battle ───┘   Domain.Battle
+         Domain.Shared
+              ↑
+    ┌─────────┼─────────┐
+    │         │         │
+Domain.Building  Domain.Battle  Domain.History
+    ↑              ↑              ↑
+    └──────────────┴──────────────┘
+                   │
+          adapters (Godot + persistence)
 ```
-
-**所有 domain 项目零 Godot 引用。** 端口接口和被依赖方在同一个项目中定义。
 
 ---
 
-## Phase 2A: 项目骨架搭建
+## Phase 2A: 项目骨架
 
-- [ ] 在 `scripts/domain/` 下创建 9 个 `.csproj` 项目
-- [ ] 每个 domain 项目只引用 `Microsoft.Extensions.DependencyInjection.Abstractions` + 依赖的其他 domain 项目
-- [ ] `CasualCastle.Game`（主项目）的 `.csproj` 中添加 9 个 domain 项目的 `ProjectReference`
-- [ ] 更新 `CasualCastle.sln`，添加所有项目
+- [ ] 在 `scripts/domain/` 下创建 4 个 `.csproj`
+- [ ] 每个 domain 项目引用 `Microsoft.Extensions.DependencyInjection.Abstractions`
+- [ ] 主项目 `.csproj` 添加 4 个 `ProjectReference`
+- [ ] 更新 `.sln`
 
-### DI 注册模板（每个 domain 项目）
+### DI 注册模板
 
 ```csharp
-// CasualCastle.Domain.Shop/ShopModule.cs
-public static class ShopModule
+// scripts/domain/CasualCastle.Domain.Building/BuildingModule.cs
+public static class BuildingModule
 {
-    public static IServiceCollection AddDomainShop(this IServiceCollection services)
+    public static IServiceCollection AddDomainBuilding(this IServiceCollection services)
     {
+        services.AddSingleton<OccupancyGrid>();
+        services.AddSingleton<AdjacentRules>();
         services.AddSingleton<ShopRules>();
         services.AddSingleton<CardRules>();
+        services.AddSingleton<FusionRules>();
         return services;
     }
 }
@@ -108,53 +98,49 @@ public static class ShopModule
 
 ---
 
-## Phase 2B: 迁移现有代码
+## Phase 2B: 代码迁移
 
 ### Step 1: `Domain.Shared`
-- [ ] 从 `scripts/domain/coordinates/` 迁入坐标类型
-- [ ] 从 `scripts/domain/core/GameRules.cs` 迁入常量
-- [ ] 创建 `GamePhase` 枚举
+- [ ] `scripts/domain/coordinates/` → 坐标类型
+- [ ] `scripts/domain/core/GameRules.cs` → 常量
+- [ ] `scripts/domain/night/NightRules.cs` → 已有，移入 Shared
 
-### Step 2: `Domain.Data`
-- [ ] 迁入 `CardData`、`FusionRecipe`、`SoldierData`
-- [ ] 从 `BuildingSystem.cs` 提取 `BuildingDefinitions`（去除 Godot 类型）
-- [ ] 迁入 `BattleReportModels`、定义 `IBattleReportRepository`
+### Step 2: `Domain.Building`
+- [ ] 从 `adapters/godot/building/Castle.cs` 提取 `OccupancyGrid`
+- [ ] 从 `adapters/godot/building/AdjacentSystem.cs` 提取 `AdjacentRules`
+- [ ] 从 `adapters/godot/building/BuildingSystem.cs` 提取 `BuildingDefinitions`（去除 Godot 类型）
+- [ ] 从 `adapters/godot/shop/ShopSystem.cs` 提取 `ShopRules`
+- [ ] 从 `adapters/godot/card/CardSystem.cs` 提取 `CardRules`
+- [ ] 从 `adapters/godot/fusion/FusionSystem.cs` 提取 `FusionRules`
+- [ ] `scripts/domain/card/CardData.cs` → 建筑模块的项目
+- [ ] `scripts/domain/fusion/FusionRecipe.cs` → 建筑模块的项目
+- [ ] 定义 `IBuildingRegistry`、`IBuildingPlacement`、`IShopOutput`、`ICardOutput`、`IFusionOutput` 端口
 
-### Step 3-9: 其余 domain 项目
-按依赖顺序（Night → Shop → Building → Fusion → Battle → Report → Replay）逐个迁入和提取。
+### Step 3: `Domain.Battle`
+- [ ] `scripts/domain/battle/SoldierData.cs` → 已有
+- [ ] `scripts/domain/night/NightRules.cs` → 已有
+- [ ] 从 `adapters/godot/battle/Soldier.cs` 提取 `CombatRules`
+- [ ] 定义 `IGamePhase`、`ISoldierSpawner` 端口
 
-### Step 10: adapters
-- [ ] 现有 `scripts/adapters/` 保持不变
-- [ ] Godot 节点改为实现端口接口
-- [ ] `GameManager` 持有 `ServiceProvider`，暴露 `Services` 静态属性
+### Step 4: `Domain.History`
+- [ ] `scripts/ports/BattleReportModels.cs` → 已有
+- [ ] `scripts/ports/IBattleReportRepository.cs` → 已有
+- [ ] 从 `adapters/godot/battle_report/BattleReportSystem.cs` 提取 `ReportBuilder`
+- [ ] 从 `adapters/godot/replay/ReplayAiSystem.cs` 提取 `MirrorRules`
+- [ ] 定义 `ISnapshotQuery` 端口
 
-### Step 11: CompositionRoot
-```csharp
-// scripts/CompositionRoot.cs
-public static class CompositionRoot
-{
-    public static ServiceProvider Build(GameManager gameManager, ...)
-    {
-        return new ServiceCollection()
-            .AddDomainShop()
-            .AddDomainBuilding()
-            .AddDomainFusion()
-            // ...
-            .AddSingleton<IGamePhase>(gameManager)
-            .AddSingleton<IBuildingRegistry>(BuildingSystem.Instance)
-            // ...
-            .BuildServiceProvider();
-    }
-}
-```
+### Step 5: adapters
+- [ ] 现有 `scripts/adapters/` 中的 Godot 节点改为实现端口
+- [ ] `CompositionRoot.cs` 放在 `scripts/` 下
+- [ ] `GameManager._Ready()` 调用 `CompositionRoot.Build()`
 
 ---
 
 ## 验收标准
 
-- [ ] `dotnet build` 全部项目编译通过
+- [ ] `dotnet build` 全部编译通过
 - [ ] `dotnet test` 领域测试通过
-- [ ] domain 项目零 `using Godot`
-- [ ] 项目引用链无循环
+- [ ] 4 个 domain 项目零 `using Godot`
+- [ ] 项目引用无循环
 - [ ] 模块间无 `static Instance` 直调
-- [ ] 三层结构保留：`scripts/domain/`（多项目）、`scripts/ports/`（接口）、`scripts/adapters/`（实现）
+- [ ] 三层保留：`scripts/domain/`（4 项目）、`scripts/ports/`、`scripts/adapters/`

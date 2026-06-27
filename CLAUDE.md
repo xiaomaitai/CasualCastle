@@ -15,9 +15,9 @@
 
 - **引擎**: Godot 4.6 + C# / .NET + Jolt 物理
 - **类型**: 2D RTS（类皇室战争）
-- **架构方向**: Phase 2 — 保留三层，domain 拆为 9 个项目 + DI 注入
-- **项目结构**: `scripts/domain/CasualCastle.Domain.{Shared,Data,Night,Shop,Building,Fusion,Battle,Report,Replay}/`
-- **依赖规则**: domain 项目零 Godot，adapters 与主项目编译在一起实现端口
+- **架构方向**: Phase 2 — domain 拆为 4 项目 + DI 注入
+- **项目结构**: `scripts/domain/CasualCastle.Domain.{Shared,Building,Battle,History}/`
+- **依赖规则**: domain 零 Godot，adapters 与主项目编译在一起实现端口
 - **入口场景**: `scenes/main/main_game.tscn`
 - **DI**: `Microsoft.Extensions.DependencyInjection`，`CompositionRoot.Build()` 注册，`GameManager.Services` 获取
 
