@@ -10,7 +10,7 @@
 
 ```
 CasualCastle/
-├── src/
+├── scripts/
 │   ├── CasualCastle.Shared/            # 共享内核（零依赖）
 │   │   └── Shared/
 │   │       ├── GameVector2.cs
@@ -115,7 +115,7 @@ Tests → 所有 domain 项目
 
 ## Phase 2A: 项目骨架搭建
 
-- [ ] 在 `src/` 下创建 11 个 `.csproj` 项目（上表中除 `Game` 已有的项目）
+- [ ] 在 `scripts/` 下创建 11 个 `.csproj` 项目（上表中除 `Game` 已有的项目）
 - [ ] 每个 domain 项目只引用 `Microsoft.Extensions.DependencyInjection.Abstractions`（用于 `IServiceCollection` 扩展方法）
 - [ ] `CasualCastle.Godot` 引用所有 domain 项目 + `Godot.NET.Sdk`
 - [ ] `CasualCastle.Game` 引用 `CasualCastle.Godot`（composition root）
