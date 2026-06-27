@@ -13,13 +13,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{C4AD
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "domain", "domain", "{ABC4BFF1-93E9-7F87-72C8-33C1A5C0EBE1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CasualCastle.Domain.Shared", "scripts\domain\CasualCastle.Domain.Shared\CasualCastle.Domain.Shared.csproj", "{496AE727-662A-4A98-99D8-00EDCF3FB708}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "scripts\domain\Shared\Shared.csproj", "{496AE727-662A-4A98-99D8-00EDCF3FB708}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CasualCastle.Domain.Building", "scripts\domain\CasualCastle.Domain.Building\CasualCastle.Domain.Building.csproj", "{AD76C4CF-F0AC-45D8-8EDD-16D1E76D9990}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Building", "scripts\domain\Building\Building.csproj", "{AD76C4CF-F0AC-45D8-8EDD-16D1E76D9990}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CasualCastle.Domain.Battle", "scripts\domain\CasualCastle.Domain.Battle\CasualCastle.Domain.Battle.csproj", "{C957EA26-C536-4A31-86E5-8E6C2A61CF6D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Battle", "scripts\domain\Battle\Battle.csproj", "{C957EA26-C536-4A31-86E5-8E6C2A61CF6D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CasualCastle.Domain.History", "scripts\domain\CasualCastle.Domain.History\CasualCastle.Domain.History.csproj", "{BF0F79C7-79B7-4AD9-8F2D-85EDA8DEC0A0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "History", "scripts\domain\History\History.csproj", "{BF0F79C7-79B7-4AD9-8F2D-85EDA8DEC0A0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

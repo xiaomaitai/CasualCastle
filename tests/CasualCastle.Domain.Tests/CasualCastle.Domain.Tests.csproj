@@ -13,9 +13,9 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\scripts\domain\CasualCastle.Domain.Shared\CasualCastle.Domain.Shared.csproj" />
-    <ProjectReference Include="..\..\scripts\domain\CasualCastle.Domain.Building\CasualCastle.Domain.Building.csproj" />
-    <ProjectReference Include="..\..\scripts\domain\CasualCastle.Domain.Battle\CasualCastle.Domain.Battle.csproj" />
-    <ProjectReference Include="..\..\scripts\domain\CasualCastle.Domain.History\CasualCastle.Domain.History.csproj" />
+    <ProjectReference Include="..\..\scripts\domain\Shared\Shared.csproj" />
+    <ProjectReference Include="..\..\scripts\domain\Building\Building.csproj" />
+    <ProjectReference Include="..\..\scripts\domain\Battle\Battle.csproj" />
+    <ProjectReference Include="..\..\scripts\domain\History\History.csproj" />
   </ItemGroup>
 </Project>
