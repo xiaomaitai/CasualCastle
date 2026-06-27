@@ -1,3 +1,4 @@
+using CasualCastle.Domain.Ports;
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -79,7 +80,7 @@ public partial class BattleReportSystem : Node
         {
             ReportId = Guid.NewGuid().ToString("N"),
             DisplayName = string.IsNullOrWhiteSpace(displayName)
-                ? BattleReportStorage.BuildDefaultName(now)
+                ? BattleReportStorage.Instance.BuildDefaultName(now)
                 : displayName,
             SavedAtUnix = now.ToUnixTimeSeconds(),
             Nights = _currentReport.Nights
@@ -89,7 +90,7 @@ public partial class BattleReportSystem : Node
 
         _savedReports.Add(toSave);
         _savedReports.Sort((a, b) => b.SavedAtUnix.CompareTo(a.SavedAtUnix));
-        BattleReportStorage.SaveAll(_savedReports);
+        BattleReportStorage.Instance.SaveAll(_savedReports);
 
         _selectedReportId = toSave.ReportId;
         _currentReport = new BattleReport();
@@ -116,7 +117,7 @@ public partial class BattleReportSystem : Node
     public void ReloadSavedReports()
     {
         _savedReports.Clear();
-        _savedReports.AddRange(BattleReportStorage.LoadAll());
+        _savedReports.AddRange(BattleReportStorage.Instance.LoadAll());
         _savedReports.Sort((a, b) => b.SavedAtUnix.CompareTo(a.SavedAtUnix));
     }
 

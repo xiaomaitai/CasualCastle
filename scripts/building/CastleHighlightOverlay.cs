@@ -1,3 +1,5 @@
+using CasualCastle.Domain.Coordinates;
+using CasualCastle.Adapters.Godot;
 using Godot;
 using System.Collections.Generic;
 
@@ -37,9 +39,9 @@ public partial class CastleHighlightOverlay : Node2D
         if (_castle == null || _buildings.Count == 0)
             return;
 
-        Vector2 cellPixelSize = GameCoordinates.ToLocalPixels(
-            GameCoordinates.UnitsPerCell,
-            GameCoordinates.UnitsPerCell);
+        Vector2 cellPixelSize = GameCoordinatesAdapter.ToLocalPixels(
+            GameCoordinateRules.UnitsPerCell,
+            GameCoordinateRules.UnitsPerCell);
         Color highlightColor = new Color(0.45f, 0.78f, 1f, 0.95f);
         const float borderWidth = 2.5f;
 
@@ -52,7 +54,7 @@ public partial class CastleHighlightOverlay : Node2D
                 if (!_castle.IsInBounds(col, row))
                     continue;
 
-                Vector2 cellPos = GameCoordinates.ToLocalPixels(GameCoordinates.CellCorner(col, row));
+                Vector2 cellPos = GameCoordinatesAdapter.ToLocalPixels(GameCoordinateRules.CellCorner(col, row));
                 DrawRect(new Rect2(cellPos, cellPixelSize), highlightColor, false, borderWidth);
             }
         }

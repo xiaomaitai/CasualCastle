@@ -1,3 +1,4 @@
+using CasualCastle.Domain.Ports;
 using Godot;
 using System.Collections.Generic;
 using System;
@@ -78,7 +79,7 @@ public partial class TitleScreen : Control
 		_reportOption.SetItemMetadata(0, "");
 		_reportOption.Selected = 0;
 
-		List<BattleReport> reports = BattleReportStorage.LoadAll();
+		List<BattleReport> reports = BattleReportStorage.Instance.LoadAll();
 		for (int i = 0; i < reports.Count; i++)
 		{
 			BattleReport report = reports[i];

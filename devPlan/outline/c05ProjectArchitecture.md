@@ -4,21 +4,29 @@
 
 ```
 CasualCastle/
+├── CasualCastle.Domain/       # 游戏核心域（纯 C#，无 Godot）
+│   ├── Coordinates/           # GameVector2、GridCellOffset、GameCoordinateRules
+│   └── Ports/                 # IBattleReportRepository、BattleReportModels
 ├── scripts/
 │   ├── autoload/              # GameManager（Godot Autoload）
-│   ├── core/                  # GameConfig、GameCoordinates（待迁入 domain）
+│   ├── core/                  # GameConfig；GameCoordinates.cs（弃用 shim）
 │   ├── flow/                  # TitleScreen、MainGameController
 │   ├── ui/                    # UIManager 与子 UI 控制器
 │   ├── shop/                  # ShopSystem
 │   ├── card/                  # CardSystem、CardData
 │   ├── night/                 # NightSystem
 │   ├── building/              # Castle、Building、BuildingSystem、AdjacentSystem
-│   ├── battle/                # Soldier、UnitSpawn
+│   ├── battle/                # Soldier、UnitSpawn（已迁移到 domain + adapter）
 │   ├── fusion/                # FusionSystem、FusionRecipe
 │   ├── battle_report/         # BattleReportSystem、BattleReportStorage
 │   ├── replay/                # ReplayAiSystem
 │   ├── audio/                 # BgmPlayer
-│   └── dev/                   # DevInputLogger
+│   ├── dev/                   # DevInputLogger
+│   └── adapters/
+│       ├── godot/             # GameCoordinatesAdapter（坐标换算）
+│       └── persistence/       # 持久化适配占位
+├── tests/
+│   └── CasualCastle.Domain.Tests/  # 核心域单元测试（xunit，无需 Godot）
 ├── scenes/
 │   ├── main/main_game.tscn
 │   └── ui/title_screen.tscn
@@ -40,18 +48,24 @@ CasualCastle/
 └── resources/                 # 空，待放 .tres 数据资源
 ```
 
-## 5.2 迁移目标（架构 Phase 1，进行中）
+## 5.2 迁移目标（架构 Phase 1，已完成试点）
 
-在现有 `scripts/` 业务目录之上，逐步引入六边形分层（详见 `currentTasks.md`、`todo.md`）：
+六边形分层已建立，核心域、端口、适配层三层边界到位（详见 `currentTasks.md`、`todo.md`）：
 
-```
-scripts/
-├── domain/          # 游戏核心域（无 Godot）
-├── ports/           # 接口契约
-└── adapters/        # 防腐层与外部依赖（godot、persistence）
-```
+已完成：
+- `CasualCastle.Domain/` 项目（Coordinates 规则 + Ports 接口）
+- `scripts/adapters/godot/` — GameCoordinatesAdapter 坐标适配器
+- `scripts/adapters/persistence/` — 持久化适配占位
+- `UnitSpawn`、`Castle` 关键方法已迁移到 domain + adapter 调用链
+- 旧 `GameCoordinates.cs` 降级为兼容 shim
+- Domain 单元测试 6 个，无 Godot 依赖
+- `BattleReportModels` 迁入 domain Ports；`IBattleReportRepository` 端口已定义
+- `BattleReportStorage` 实现 `IBattleReportRepository`
 
-试点：`GameCoordinates` 领域逻辑与产兵点规则迁入 `domain/coordinates/`。
+待推进（Phase 2+）：
+- 全量模块接口化（`todo.md` §2）
+- 显示与业务缩放拆分（`todo.md` §3）
+- Castle._Draw 等视觉方法从 shim 迁移
 
 长期数据资源仍以 `resources/` 下 `.tres` 为目标；完整版目录见 `codeStructure.md`。
 

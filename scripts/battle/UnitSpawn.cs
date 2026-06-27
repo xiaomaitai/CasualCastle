@@ -1,3 +1,5 @@
+using CasualCastle.Domain.Coordinates;
+using CasualCastle.Adapters.Godot;
 using Godot;
 using System.Collections.Generic;
 
@@ -6,9 +8,10 @@ public static class UnitSpawn
 	public static Vector2 GetSpawnGlobalPosition(
 		Castle castle, IReadOnlyList<Vector2I> footprint, int anchorX, int anchorY, int spawnIndex = 0)
 	{
-		GameVector2 spawnPoint = GameCoordinates.GetBuildingFootprintSpawnPoint(
-			footprint, anchorX, anchorY, spawnIndex);
-		return castle.ToGlobal(GameCoordinates.ToLocalPixels(spawnPoint));
+		GridCellOffset[] offsets = GameCoordinatesAdapter.ToGridOffsets(footprint);
+		GameVector2 spawnPoint = GameCoordinateRules.GetBuildingFootprintSpawnPoint(
+			offsets, anchorX, anchorY, spawnIndex);
+		return castle.ToGlobal(GameCoordinatesAdapter.ToLocalPixels(spawnPoint));
 	}
 
 	public static void PlaceSoldier(

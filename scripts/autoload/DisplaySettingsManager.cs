@@ -1,3 +1,7 @@
+// === Godot Window Adapter ===
+// Belongs to adapters/godot layer. Directly manipulates Godot DisplayServer/Window APIs.
+// No domain rules involved — purely engine-level configuration.
+
 using Godot;
 using System;
 

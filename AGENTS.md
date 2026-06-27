@@ -14,11 +14,13 @@ Godot **4.6** + **C# / .NET** 的 2D RTS 项目（类皇室战争）。物理：
 | 目录                                             | 用途                                       |
 | ---------------------------------------------- | ---------------------------------------- |
 | `autoload/`                                    | Godot Autoload（`GameManager`）            |
-| `core/`                                        | 全局配置（`GameConfig`）                       |
+| `core/`                                        | 全局配置（`GameConfig`；`GameCoordinates` 为弃用 shim） |
 | `flow/`                                        | 场景流转（`TitleScreen`、`MainGameController`） |
 | `ui/`                                          | `UIManager` 及子控制器                        |
 | `shop/` `card/` `night/` `building/` `battle/` | 对应玩法系统                                   |
 | `audio/` `dev/`                                | 音频与开发工具                                  |
+| `adapters/godot/`                              | Godot 适配层（坐标换算）                         |
+| `adapters/persistence/`                        | 持久化适配（战报文件 IO）                         |
 
 
 场景：`scenes/`；预制体：`prefabs/`；资源：`resources/`、`assets/`。
@@ -31,6 +33,7 @@ Godot **4.6** + **C# / .NET** 的 2D RTS 项目（类皇室战争）。物理：
 - 脚本 `PascalCase.cs`，场景 `snake_case.tscn`，预制体 `[ComponentName].tscn`
 - 系统间用 **Godot 信号** 通信；脚本保持单一职责
 - 共享常量放 `scripts/core/`
+- 核心域项目 `CasualCastle.Domain/` 禁止引用 Godot 类型（使用端口与适配器模式）
 - UI 场景在 `scenes/ui/`，逻辑在 `scripts/ui/` 或 `scripts/flow/`
 - 不写 XML 文档注释；避免过度防御性编程
 

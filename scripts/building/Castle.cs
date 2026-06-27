@@ -1,3 +1,5 @@
+using CasualCastle.Domain.Coordinates;
+using CasualCastle.Adapters.Godot;
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -13,7 +15,7 @@ public partial class Castle : Node2D
 	[Export]
 	public int GridRows = 8;
 
-	public int CellSize => GameCoordinates.PixelsPerCell;
+	public int CellSize => GameCoordinatesAdapter.PixelsPerCell;
 
 	[Export]
 	public Color BlockColor = new Color(1, 1, 1, 0.06f);
@@ -72,7 +74,7 @@ public partial class Castle : Node2D
 	}
 
 	public Vector2 GetCellCenter(int gridX, int gridY) =>
-		GameCoordinates.ToLocalPixels(GameCoordinates.CellCenter(gridX, gridY));
+		GameCoordinatesAdapter.ToLocalPixels(GameCoordinateRules.CellCenter(gridX, gridY));
 
 	public bool IsInBounds(int gridX, int gridY)
 	{
@@ -86,7 +88,7 @@ public partial class Castle : Node2D
 
 	public bool TryGetGridFromGlobalPoint(Vector2 globalPoint, out int gridX, out int gridY)
 	{
-		Vector2I grid = GameCoordinates.FloorGridFromLocalPixels(ToLocal(globalPoint));
+		Vector2I grid = GameCoordinatesAdapter.FloorGridFromLocalPixels(ToLocal(globalPoint));
 		gridX = grid.X;
 		gridY = grid.Y;
 		return IsInBounds(gridX, gridY);

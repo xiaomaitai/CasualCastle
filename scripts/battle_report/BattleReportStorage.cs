@@ -1,51 +1,54 @@
+using CasualCastle.Domain.Ports;
 using Godot;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
 
-public static class BattleReportStorage
+public class BattleReportStorage : IBattleReportRepository
 {
-    private const string ReportDir = "user://battle_reports";
-    private const string ReportFile = "user://battle_reports/reports.json";
+	private const string ReportDir = "user://battle_reports";
+	private const string ReportFile = "user://battle_reports/reports.json";
 
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true,
-    };
+	public static BattleReportStorage Instance { get; } = new();
 
-    public static List<BattleReport> LoadAll()
-    {
-        EnsureDirectory();
-        if (!FileAccess.FileExists(ReportFile))
-            return new List<BattleReport>();
+	private static readonly JsonSerializerOptions JsonOptions = new()
+	{
+		WriteIndented = true,
+	};
 
-        using FileAccess file = FileAccess.Open(ReportFile, FileAccess.ModeFlags.Read);
-        if (file == null)
-            return new List<BattleReport>();
+	public List<BattleReport> LoadAll()
+	{
+		EnsureDirectory();
+		if (!FileAccess.FileExists(ReportFile))
+			return new List<BattleReport>();
 
-        string json = file.GetAsText();
-        if (string.IsNullOrWhiteSpace(json))
-            return new List<BattleReport>();
+		using FileAccess file = FileAccess.Open(ReportFile, FileAccess.ModeFlags.Read);
+		if (file == null)
+			return new List<BattleReport>();
 
-        return JsonSerializer.Deserialize<List<BattleReport>>(json, JsonOptions) ?? new List<BattleReport>();
-    }
+		string json = file.GetAsText();
+		if (string.IsNullOrWhiteSpace(json))
+			return new List<BattleReport>();
 
-    public static void SaveAll(IReadOnlyList<BattleReport> reports)
-    {
-        EnsureDirectory();
-        string json = JsonSerializer.Serialize(reports, JsonOptions);
+		return JsonSerializer.Deserialize<List<BattleReport>>(json, JsonOptions) ?? new List<BattleReport>();
+	}
 
-        using FileAccess file = FileAccess.Open(ReportFile, FileAccess.ModeFlags.Write);
-        file.StoreString(json);
-    }
+	public void SaveAll(IReadOnlyList<BattleReport> reports)
+	{
+		EnsureDirectory();
+		string json = JsonSerializer.Serialize(reports, JsonOptions);
 
-    public static string BuildDefaultName(DateTimeOffset now)
-    {
-        return $"战报 {now:yyyy-MM-dd HH:mm:ss}";
-    }
+		using FileAccess file = FileAccess.Open(ReportFile, FileAccess.ModeFlags.Write);
+		file.StoreString(json);
+	}
 
-    private static void EnsureDirectory()
-    {
-        DirAccess.MakeDirRecursiveAbsolute(ReportDir);
-    }
+	public string BuildDefaultName(DateTimeOffset now)
+	{
+		return $"战报 {now:yyyy-MM-dd HH:mm:ss}";
+	}
+
+	private static void EnsureDirectory()
+	{
+		DirAccess.MakeDirRecursiveAbsolute(ReportDir);
+	}
 }

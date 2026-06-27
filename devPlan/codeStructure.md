@@ -13,24 +13,39 @@ CasualCastle 是 Godot 4.6 C# 项目，主入口配置在 `project.godot`：
 - C# 脚本根目录：`scripts/`
 - 可复用预制体：`prefabs/`
 
-当前 `scripts/` 按业务模块划分：
+当前 `scripts/` 按业务模块划分，并引入六边形分层（Phase 1）：
 
 | 模块目录 | 业务模块 | 主要文件 |
 | --- | --- | --- |
-| `autoload/` | GameManager | `GameManager.cs` |
-| `core/` | DataResources | `GameConfig.cs`, `GameCoordinates.cs` |
+| `autoload/` | GameManager | `GameManager.cs`, `DisplaySettingsManager.cs` |
+| `core/` | DataResources | `GameConfig.cs`；`GameCoordinates.cs`（已弃用，shim 委托到 domain + adapter） |
 | `flow/` | SceneFlow | `TitleScreen.cs`, `MainGameController.cs` |
 | `ui/` | UIManager | `UIManager.cs` 及 UI 子控制器 |
 | `shop/` | ShopSystem | `ShopSystem.cs` |
 | `card/` | CardSystem | `CardSystem.cs`, `CardData.cs` |
 | `night/` | NightSystem | `NightSystem.cs` |
-| `building/` | BuildingSystem | `Castle.cs`, `Building.cs`, `Barracks.cs`, `ArcheryRange.cs`, `Stable.cs`, `BuildingSystem.cs`, `AdjacentSystem.cs` |
+| `building/` | BuildingSystem | `Castle.cs`, `Building.cs`, `Barracks.cs`, `ArcheryRange.cs`, `Stable.cs`, `BuildingSystem.cs`, `AdjacentSystem.cs`, `CastleHighlightOverlay.cs` |
 | `battle/` | BattleSystem | `Soldier.cs`, `UnitSpawn.cs` |
 | `fusion/` | FusionSystem | `FusionSystem.cs`, `FusionRecipe.cs` |
 | `battle_report/` | BattleReportSystem | `BattleReportSystem.cs`, `BattleReportStorage.cs` |
 | `replay/` | ReplayAiSystem | `ReplayAiSystem.cs` |
 | `audio/` | 音频 | `BgmPlayer.cs` |
 | `dev/` | 开发辅助 | `DevInputLogger.cs` |
+
+### 六边形分层（Phase 1）
+
+| 目录 | 层 | 职责 |
+| --- | --- | --- |
+| `CasualCastle.Domain/` | 游戏核心域 | 纯 C# 类库，无 Godot 依赖；坐标规则、产兵点、领域模型与 Port 接口 |
+| `scripts/adapters/godot/` | Godot 适配层 | 坐标换算、节点生命周期、信号翻译 |
+| `scripts/adapters/persistence/` | 持久化适配层 | 战报文件 IO（`BattleReportStorage`） |
+
+**依赖方向：**
+- 核心域 (`CasualCastle.Domain`) → 不引用 Godot，不引用 adapters
+- 适配层 (`scripts/adapters/`) → 引用核心域，可引用 Godot
+- 业务模块 (`scripts/building/` 等) → 经 shim 或 adapter 调用 domain
+
+验证：`grep -r "using Godot" CasualCastle.Domain/` 应返回空。
 
 当前 `main_game.tscn` 的核心节点结构：
 
