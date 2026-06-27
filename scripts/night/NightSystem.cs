@@ -1,5 +1,7 @@
+using CasualCastle.Domain.Night;
 using Godot;
 
+// Thin adapter: delegates night combat check to domain NightRules.
 public partial class NightSystem : Node
 {
 	public static NightSystem Instance { get; private set; }
@@ -17,6 +19,9 @@ public partial class NightSystem : Node
 
 	public static bool CanUnitWork(bool hasNightCombat)
 	{
-		return GameManager.Instance == null || GameManager.Instance.CanUnitWork(hasNightCombat);
+		if (GameManager.Instance == null)
+			return true;
+		bool isDay = GameManager.Instance.CurrentPhase == GameManager.GamePhase.Day;
+		return NightRules.CanUnitWork(hasNightCombat, isDay);
 	}
 }

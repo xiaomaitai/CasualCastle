@@ -1,10 +1,9 @@
+using CasualCastle.Domain.Core;
 using Godot;
 
 public static class GameConfig
 {
-	public const int DesignWidth = 1920;
-	public const int DesignHeight = 1080;
-
+	// Display resolutions — Godot adapter concern, stays here
 	public static readonly Vector2I[] OutputResolutions =
 	{
 		new(1920, 1080),
@@ -13,9 +12,12 @@ public static class GameConfig
 		new(1280, 720),
 	};
 
-	public const float DayDurationSeconds = 60f;
-	public const float NightDurationSeconds = 30f;
-	public const int InitialGold = 3000;
-	public const int RepairGoldPerHealth = 1;
-	public const int CastleHeartMaxHealth = 500;
+	// Domain constants — delegate to GameRules
+	public const int DesignWidth = GameRules.DesignWidth;
+	public const int DesignHeight = GameRules.DesignHeight;
+	public const float DayDurationSeconds = GameRules.DayDurationSeconds;
+	public const float NightDurationSeconds = GameRules.NightDurationSeconds;
+	public const int InitialGold = GameRules.InitialGold;
+	public const int RepairGoldPerHealth = GameRules.RepairGoldPerHealth;
+	public const int CastleHeartMaxHealth = GameRules.CastleHeartMaxHealth;
 }

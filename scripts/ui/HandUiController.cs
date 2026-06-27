@@ -1,3 +1,4 @@
+using CasualCastle.Domain.Card;
 using Godot;
 
 public sealed class HandUiController
