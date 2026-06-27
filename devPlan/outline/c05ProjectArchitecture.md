@@ -4,173 +4,121 @@
 
 ```
 CasualCastle/
-├── CasualCastle.Domain/       # 游戏核心域（纯 C#，无 Godot）
-│   ├── Coordinates/           # GameVector2、GridCellOffset、GameCoordinateRules
-│   └── Ports/                 # IBattleReportRepository、BattleReportModels
 ├── scripts/
-│   ├── autoload/              # GameManager（Godot Autoload）
-│   ├── core/                  # GameConfig；GameCoordinates.cs（弃用 shim）
-│   ├── flow/                  # TitleScreen、MainGameController
-│   ├── ui/                    # UIManager 与子 UI 控制器
-│   ├── shop/                  # ShopSystem
-│   ├── card/                  # CardSystem、CardData
-│   ├── night/                 # NightSystem
-│   ├── building/              # Castle、Building、BuildingSystem、AdjacentSystem
-│   ├── battle/                # Soldier、UnitSpawn（已迁移到 domain + adapter）
-│   ├── fusion/                # FusionSystem、FusionRecipe
-│   ├── battle_report/         # BattleReportSystem、BattleReportStorage
-│   ├── replay/                # ReplayAiSystem
-│   ├── audio/                 # BgmPlayer
-│   ├── dev/                   # DevInputLogger
-│   └── adapters/
-│       ├── godot/             # GameCoordinatesAdapter（坐标换算）
-│       └── persistence/       # 持久化适配占位
-├── tests/
-│   └── CasualCastle.Domain.Tests/  # 核心域单元测试（xunit，无需 Godot）
-├── scenes/
-│   ├── main/main_game.tscn
-│   └── ui/title_screen.tscn
-├── prefabs/
-│   ├── Castle.tscn
-│   ├── Barracks.tscn
-│   └── Soldier.tscn
-├── assets/                    # 占位图、士兵图、BGM、卡牌边框
-├── devPlan/                  # 开发文档
-│   ├── outline/               # 开发大纲，按章节拆分
-│   ├── concepts.md
-│   ├── currentTasks.md
-│   ├── todo.md
-│   ├── fusionSystemDesign.md
-│   ├── battleReportDesign.md
-│   ├── aiSystemDesign.md
-│   ├── codeStructure.md
-│   └── dataStructures.md
-└── resources/                 # 空，待放 .tres 数据资源
+│   ├── domain/                                     # 核心域层（零 Godot）
+│   │   ├── CasualCastle.Domain.Shared/            # 坐标、常量、枚举（零依赖）
+│   │   │   └── GameVector2, GridCellOffset, GameCoordinateRules, GameRules
+│   │   ├── CasualCastle.Domain.Building/          # 建筑、邻接、商店、手牌、融合（→ Shared）
+│   │   │   └── CardData, FusionRecipe
+│   │   ├── CasualCastle.Domain.Battle/            # 战斗、昼夜（→ Shared, Building）
+│   │   │   └── SoldierData, NightRules
+│   │   └── CasualCastle.Domain.History/           # 战报、回放（→ Shared, Building）
+│   │       └── BattleReportModels, IBattleReportRepository
+│   │
+│   ├── ports/                                      # 端口层（接口分散在各 domain 项目中）
+│   │   # IGamePhase       → Domain.Battle
+│   │   # IBuildingRegistry → Domain.Building
+│   │   # ISnapshotQuery   → Domain.History
+│   │
+│   └── adapters/                                   # 基础设施层（实现端口）
+│       ├── godot/                                  # Godot 节点和场景脚本
+│       │   ├── autoload/     GameManager, DisplaySettingsManager
+│       │   ├── building/     Castle, Building, BuildingSystem, AdjacentSystem
+│       │   ├── battle/       Soldier, UnitSpawn
+│       │   ├── shop/         ShopSystem
+│       │   ├── card/         CardSystem
+│       │   ├── night/        NightSystem
+│       │   ├── fusion/       FusionSystem
+│       │   ├── battle_report/BattleReportSystem
+│       │   ├── replay/       ReplayAiSystem
+│       │   ├── ui/           UIManager + 子控制器
+│       │   ├── flow/         TitleScreen, MainGameController
+│       │   ├── core/         GameConfig, GameCoordinates（shim）
+│       │   ├── dev/          DevInputLogger
+│       │   └── audio/        BgmPlayer
+│       └── persistence/     BattleReportStorage
+│
+├── scenes/  prefabs/  assets/  project.godot     # Godot 资源
+├── tests/CasualCastle.Domain.Tests/               # 单元测试
+├── devPlan/                                       # 文档
+└── CasualCastle.sln                               # 6 个项目
 ```
 
-## 5.2 迁移目标（架构 Phase 1，已完成试点）
+## 5.2 迁移状态
 
-六边形分层已建立，核心域、端口、适配层三层边界到位（详见 `currentTasks.md`、`todo.md`）：
+Phase 1 分层已完成。Phase 2 domain 已拆为 4 个 C# 项目，三层次保留：
 
-已完成：
-- `CasualCastle.Domain/` 项目（Coordinates 规则 + Ports 接口）
-- `scripts/adapters/godot/` — GameCoordinatesAdapter 坐标适配器
-- `scripts/adapters/persistence/` — 持久化适配占位
-- `UnitSpawn`、`Castle` 关键方法已迁移到 domain + adapter 调用链
-- 旧 `GameCoordinates.cs` 降级为兼容 shim
-- Domain 单元测试 6 个，无 Godot 依赖
-- `BattleReportModels` 迁入 domain Ports；`IBattleReportRepository` 端口已定义
-- `BattleReportStorage` 实现 `IBattleReportRepository`
+```
+domain/     → 4 个 .NET 类库（零 Godot，互有项目引用）
+ports/      → 接口分散在各 domain 项目中
+adapters/   → Godot + 持久化（与主项目编译在一起，实现端口）
+```
 
-待推进（Phase 2+）：
-- 全量模块接口化（`todo.md` §2）
-- 显示与业务缩放拆分（`todo.md` §3）
-- Castle._Draw 等视觉方法从 shim 迁移
-
-长期数据资源仍以 `resources/` 下 `.tres` 为目标；完整版目录见 `codeStructure.md`。
+待推进：
+- [ ] 领域规则提取到 domain 项目（OccupancyGrid, AdjacentRules, ShopRules, CombatRules 等）
+- [ ] DI 容器替代静态 Instance
+- [ ] todo.md §3（显示缩放拆分）、§4（开发者模式）
 
 ---
 
 ## 5.3 核心系统说明
 
-| 系统 | 职责 | 当前状态 |
-|------|------|----------|
-| GameManager | 游戏状态、阶段切换、胜负 | Godot Autoload，支持 Playing / GameOver |
-| UIManager | HUD、结算、商店、手牌与场景跳转 | 已拆分为 UI 入口和多个子控制器 |
-| ShopSystem | 商店刷新、购买、金币、拖拽直放 | 已实现 |
-| CardSystem | 手牌管理、点击/拖拽打出 | 已实现，经 `BuildingSystem` 放置 |
-| BuildingSystem | 放置验证、占地配置、统一落子 | 已实现 |
-| NightSystem | 夜晚休眠门控、夜战词条判定 | 已实现 |
-| AdjacentSystem | 邻接检测与加成、放置光圈 | 已实现（兵营规则） |
-| BattleSystem | 部队生成、战斗 AI | 逻辑在 Soldier.cs |
-| FusionSystem | 入夜自动融合、禁止融合标记 | 已实现 |
-| BattleReportSystem | 夜末快照、战报缓存与持久化 | 已实现（M6） |
-| ReplayAiSystem | 选定战报、入夜镜像复刻敌方 | 已实现（M6） |
+| 系统 | 归属项目 | 当前状态 |
+|------|----------|----------|
+| GameManager | adapters/godot/autoload/ | Godot Autoload |
+| DisplaySettingsManager | adapters/godot/autoload/ | Godot Autoload |
+| UIManager + 子控制器 | adapters/godot/ui/ | 已拆分 |
+| ShopSystem | adapters/godot/shop/ | 待提取领域规则到 Domain.Building |
+| CardSystem | adapters/godot/card/ | 待提取领域规则到 Domain.Building |
+| BuildingSystem | adapters/godot/building/ | 待提取到 Domain.Building |
+| AdjacentSystem | adapters/godot/building/ | 待提取规则 |
+| BattleSystem | adapters/godot/battle/ | 待提取规则到 Domain.Battle |
+| NightSystem | adapters/godot/night/ | 规则已提取到 Domain.Battle |
+| FusionSystem | adapters/godot/fusion/ | 待提取规则到 Domain.Building |
+| BattleReportSystem | adapters/godot/battle_report/ | 待提取到 Domain.History |
+| ReplayAiSystem | adapters/godot/replay/ | 待提取规则 |
+| BattleReportStorage | adapters/persistence/ | 已实现 IBattleReportRepository |
+| TitleScreen / MainGame | adapters/godot/flow/ | 场景流转 |
+| GameCoordinates | adapters/godot/core/ | shim（委托到 Domain.Shared） |
 
-## 5.4 系统模块设计
+## 5.4 模块依赖关系
 
-系统模块按“流程控制 → 玩家操作 → 场上执行 → 数据配置”的方向组织。`GameManager` 只负责全局状态、阶段和胜负；具体玩法逻辑尽量放到对应系统中，避免继续堆到单个节点脚本里。
-
-| 模块 | 职责 | 主要依赖 |
-|------|------|----------|
-| SceneFlow | 标题页、进入主游戏、返回标题 | `TitleScreen`, `MainGameController`, `GameManager` |
-| GameManager | 游戏状态、昼夜阶段、胜负、全局信号 | `GameConfig`, `MainGameController`, `Castle`, `UIManager` |
-| UIManager | HUD、结算、阶段显示、商店/手牌入口 | `HudUiController`, `ShopUiController`, `HandUiController`, `GameOverUiController` |
-| NightSystem | 昼夜行动门控、夜战词条判定 | `GameManager`, `BuildingSystem`, `BattleSystem` |
-| ShopSystem | 商店、刷新、购买、金币消费、夜晚自动弹出 | `GameManager`, `CardSystem`, `CardData` |
-| CardSystem | 手牌、卡牌打出、卡牌到建筑的转换 | `CardData`, `BuildingSystem`, `UIManager` |
-| BuildingSystem | 建筑放置、占格验证、建筑工作调度 | `Castle`, `BuildingData`, `NightSystem` |
-| AdjacentSystem | 建筑邻接检测、加成刷新 | `BuildingSystem`, `Castle` |
-| FusionSystem | 入夜自动融合、配方与主体邻接判定、升级结果生成 | `BuildingSystem`, `GameManager`, `UIManager` |
-| BattleSystem | 士兵生成、行动、索敌、攻击与死亡 | `UnitSpawn`, `Soldier`, `NightSystem`, `Castle` |
-| BattleReportSystem | 夜末快照、局内缓存、战报持久化 | `BattleReportModels`, `BattleReportStorage`, `GameManager` |
-| ReplayAiSystem | 战报选取、入夜镜像同步敌方城堡 | `BattleReportSystem`, `BuildingSystem`, `GameManager` |
-| DataResources | 卡牌、建筑、单位、全局配置数据 | `CardData`, `BuildingData`, `UnitData`, `GameConfig` |
-
-模块依赖关系如下：
-
-```mermaid
-flowchart LR
-    SceneFlow[SceneFlow<br/>标题/场景切换]
-    GameManager[GameManager<br/>状态/阶段/胜负]
-    UIManager[UIManager<br/>HUD/商店/手牌 UI]
-    NightSystem[NightSystem<br/>昼夜门控]
-    ShopSystem[ShopSystem<br/>商店]
-    CardSystem[CardSystem<br/>手牌/打出]
-    BuildingSystem[BuildingSystem<br/>放置/建筑调度]
-    AdjacentSystem[AdjacentSystem<br/>邻接加成]
-    FusionSystem[FusionSystem<br/>融合升级]
-    BattleSystem[BattleSystem<br/>单位/战斗]
-    BattleReportSystem[BattleReportSystem<br/>战报快照]
-    ReplayAiSystem[ReplayAiSystem<br/>战报复刻敌方]
-    DataResources[DataResources<br/>Card/Building/Unit/GameConfig]
-    RuntimeNodes[RuntimeNodes<br/>Castle/Building/Soldier]
-
-    SceneFlow --> GameManager
-    SceneFlow --> UIManager
-
-    GameManager --> UIManager
-    GameManager --> NightSystem
-    GameManager --> RuntimeNodes
-    GameManager --> DataResources
-
-    UIManager --> GameManager
-    UIManager --> ShopSystem
-    UIManager --> CardSystem
-    UIManager --> FusionSystem
-
-    NightSystem --> GameManager
-    BuildingSystem --> NightSystem
-    BattleSystem --> NightSystem
-
-    ShopSystem --> GameManager
-    ShopSystem --> CardSystem
-    ShopSystem --> DataResources
-
-    CardSystem --> UIManager
-    CardSystem --> BuildingSystem
-    CardSystem --> DataResources
-
-    BuildingSystem --> RuntimeNodes
-    BuildingSystem --> DataResources
-    AdjacentSystem --> BuildingSystem
-    AdjacentSystem --> RuntimeNodes
-    FusionSystem --> BuildingSystem
-    FusionSystem --> DataResources
-
-    BattleSystem --> RuntimeNodes
-    BattleSystem --> DataResources
-    BattleSystem --> GameManager
-
-    GameManager --> BattleReportSystem
-    GameManager --> ReplayAiSystem
-
-    BattleReportSystem --> DataResources
-    ReplayAiSystem --> BattleReportSystem
-    ReplayAiSystem --> BuildingSystem
-    ReplayAiSystem --> GameManager
-
-    RuntimeNodes --> GameManager
+```
+                         Domain.Shared
+                     (坐标、常量、枚举)
+                              ^
+              +---------------+---------------+
+              |               |               |
+              v               v               v
+      Domain.Building   Domain.Battle   Domain.History
+      (建筑/商店/融合)   (战斗/昼夜)    (战报/回放)
+              ^               ^               ^
+              |               |               |
+              +-------+-------+-------+-------+
+                      |       |       |
+              +-------+--+ +--+---+ +-+-------+
+              | autoload | |battle| |persist. |
+              |  ui flow | |night | |b_report |
+              |building  | |replay| |         |
+              |shop card | |fusion| +---------+
+              +----------+ +------+
+                  adapters/godot
 ```
 
+依赖方向：从上到下。domain 项目只依赖下方的项目。adapters 实现 domain 定义的端口。无循环。
+
 ---
+
+## 5.5 端口接口归属
+
+| 端口 | 定义位置 | 实现方（adapter） |
+|------|----------|-------------------|
+| `IGamePhase` | Domain.Battle | GameManager |
+| `IBuildingRegistry` | Domain.Building | BuildingSystem |
+| `IBuildingPlacement` | Domain.Building | Castle |
+| `IShopOutput` | Domain.Building | ShopSystem |
+| `ICardOutput` | Domain.Building | CardSystem |
+| `IFusionOutput` | Domain.Building | FusionSystem |
+| `ISoldierSpawner` | Domain.Battle | UnitSpawn |
+| `IBattleReportRepository` | Domain.History | BattleReportStorage |
+| `ISnapshotQuery` | Domain.History | BattleReportSystem |
