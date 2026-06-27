@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://b8t7l3e5s0c1n"]
 
-[ext_resource type="Script" path="res://scripts/flow/TitleScreen.cs" id="1"]
-[ext_resource type="Script" path="res://scripts/audio/BgmPlayer.cs" id="2"]
+[ext_resource type="Script" path="res://scripts/adapters/godot/flow/TitleScreen.cs" id="1"]
+[ext_resource type="Script" path="res://scripts/adapters/godot/audio/BgmPlayer.cs" id="2"]
 [ext_resource type="PackedScene" uid="uid://d4settingspanel01" path="res://scenes/ui/settings_panel.tscn" id="3"]
 
 [node name="TitleScreen" type="Control"]

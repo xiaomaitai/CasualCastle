@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cbl1dngpr3fab"]
 
-[ext_resource type="Script" path="res://scripts/building/Building.cs" id="1"]
+[ext_resource type="Script" path="res://scripts/adapters/godot/building/Building.cs" id="1"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(56, 56)

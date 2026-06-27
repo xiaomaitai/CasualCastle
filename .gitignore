@@ -21,3 +21,9 @@ desktop.ini
 
 # Export templates / builds
 export_presets.cfg
+
+# .NET build artifacts
+obj/
+bin/
+tests/CasualCastle.Domain.Tests/bin/
+tests/CasualCastle.Domain.Tests/obj/
