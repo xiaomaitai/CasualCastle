@@ -15,12 +15,11 @@
 
 - **引擎**: Godot 4.6 + C# / .NET + Jolt 物理
 - **类型**: 2D RTS（类皇室战争）
-- **架构方向**: Phase 2 — C# 项目拆分 + DI 容器替代静态 Instance
-- **项目结构**: `CasualCastle.Domain`（纯 C# 类库）、`CasualCastle.Game`（Godot 主项目）
-- **代码层级**: `src/CasualCastle.Domain/`（领域 + 端口）、`src/CasualCastle.Game/scripts/adapters/`（适配器）
-- **入口场景**: `main_game.tscn`（由 `scripts/adapters/Flow/MainGameController.cs` 驱动）
-- **Autoload**: `GameManager`、`DisplaySettingsManager`（`scripts/adapters/Autoload/`）
-- **DI**: `Microsoft.Extensions.DependencyInjection`，容器在 `CompositionRoot.cs` 中配置
+- **架构方向**: Phase 2 — 12 个 C# 项目按架构依赖图拆分 + DI 注入
+- **项目结构**: `src/CasualCastle.{Shared,Data,Night,Shop,Building,Fusion,Battle,Report,Replay,Godot,Game,Tests}/`
+- **依赖规则**: 项目引用链 = 架构文档中的模块依赖方向，domain 项目零 Godot
+- **入口场景**: `src/CasualCastle.Game/scenes/main/main_game.tscn`
+- **DI**: `Microsoft.Extensions.DependencyInjection`，`CompositionRoot.Build()` 注册，`GameManager.Services` 获取
 
 ## 常用命令
 

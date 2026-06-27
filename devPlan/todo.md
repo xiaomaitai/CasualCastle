@@ -12,16 +12,22 @@
 
 ## 2. 真模块化与 DI ← 当前任务
 
-用 **C# 项目拆分 + `Microsoft.Extensions.DependencyInjection`** 替代静态 `Instance` 单例：
+每个模块是独立的 C# 项目，项目引用链 = 架构依赖图：
 
-- `CasualCastle.Domain` — 独立类库项目（纯 C#，无 Godot），含所有领域规则和端口接口
-- `CasualCastle.Game` — Godot 主项目，引用 Domain，含所有适配器实现
-- DI 容器在 `CompositionRoot` 中注册所有服务
-- Godot 节点在 `_Ready()` 中从容器获取依赖
+```
+Shared ← Data ← Shop
+   ↑       ↑       ↑
+   ├─ Night ├─ Building ←─ Fusion
+   ├─ Report           ←─ Replay
+   └─ Battle
 
-模块间经端口通信，依赖方向：`Game` → `Domain`，`Domain` 不引用任何外部项目。
+Godot → 所有 domain 项目
+Game  → Godot（composition root）
+``` 
 
-**细化步骤见 `currentTasks.md` Phase 2A-2E。**
+12 个项目，每个用 `IServiceCollection` 扩展方法注册服务，`GameManager.Services` 作为 DI 容器入口。domain 项目零 Godot 引用。
+
+**细化步骤见 `currentTasks.md` Phase 2A-2C。**
 
 ---
 

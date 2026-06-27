@@ -1,18 +1,8 @@
 # 当前任务
 
-**当前焦点：C# 原生模块化 + 依赖注入（`todo.md` §2）。**
+**当前焦点：C# 项目级模块拆分 + DI 依赖注入（`todo.md` §2）。**
 
-目标：用 C# 项目拆分和 `Microsoft.Extensions.DependencyInjection` 替代静态 `Instance` 单例，让每个模块成为可独立编译、可替换的单元。
-
-参考：`todo.md`、`codeStructure.md`、`outline/c05ProjectArchitecture.md`。
-
----
-
-## 背景
-
-§1 已把 `scripts/` 整理为 domain/ports/adapters 三层，但所有模块仍编译在同一个 Godot 项目中，通过静态 `Instance` 互相耦合。
-
-§2 要做的：**用 C# 项目边界 + DI 容器**真正切开这些模块。
+目标：每个模块是一个 C# 项目，项目引用链反映架构文档（`c05ProjectArchitecture.md` §5.4）中的依赖关系，用 `Microsoft.Extensions.DependencyInjection` 替代静态 `Instance`。
 
 ---
 
@@ -21,229 +11,254 @@
 ```
 CasualCastle/
 ├── src/
-│   ├── CasualCastle.Domain/           # 核心域类库（纯 C#，无 Godot）
-│   │   ├── Coordinates/               # GameVector2、GameCoordinateRules
-│   │   ├── Building/                  # BuildingRules、AdjacentRules、OccupancyGrid
-│   │   ├── Battle/                    # SoldierData、CombatRules
-│   │   ├── Fusion/                    # FusionRecipe、FusionRules
-│   │   ├── Shop/                      # ShopRules、CardRules
-│   │   ├── Night/                     # NightRules
-│   │   ├── Report/                    # ReportBuilder
-│   │   ├── Replay/                    # MirrorRules
-│   │   └── Core/                      # GameRules（常量）
+│   ├── CasualCastle.Shared/            # 共享内核（零依赖）
+│   │   └── Shared/
+│   │       ├── GameVector2.cs
+│   │       ├── GridCellOffset.cs
+│   │       ├── GameCoordinateRules.cs
+│   │       ├── GameRules.cs            # 游戏常量
+│   │       └── GamePhase.cs            # Day / Night 枚举
 │   │
-│   ├── CasualCastle.Game/             # Godot 主项目（场景、预制体、适配器）
-│   │   ├── scripts/
-│   │   │   ├── adapters/
-│   │   │   │   ├── Building/          # Castle、Building、BuildingSystem（Godot 节点）
-│   │   │   │   ├── Battle/            # Soldier、UnitSpawn
-│   │   │   │   ├── Fusion/            # FusionSystem（Node）
-│   │   │   │   ├── Shop/              # ShopSystem（Node）
-│   │   │   │   ├── Card/              # CardSystem（Node）
-│   │   │   │   ├── Night/             # NightSystem（Node）
-│   │   │   │   ├── BattleReport/      # BattleReportSystem（Node）
-│   │   │   │   ├── Replay/            # ReplayAiSystem（Node）
-│   │   │   │   ├── UI/                # UIManager + 子控制器
-│   │   │   │   ├── Flow/              # TitleScreen、MainGameController
-│   │   │   │   ├── Autoload/          # GameManager（DI 容器宿主）
-│   │   │   │   └── Persistence/       # BattleReportStorage
-│   │   │   └── CompositionRoot.cs     # DI 注册入口
+│   ├── CasualCastle.Data/              # 数据资源（→ Shared）
+│   │   └── Data/
+│   │       ├── CardData.cs
+│   │       ├── FusionRecipe.cs
+│   │       ├── BuildingDefinitions.cs  # 建筑类型定义表
+│   │       ├── SoldierData.cs
+│   │       ├── BattleReportModels.cs
+│   │       └── IBattleReportRepository.cs  # 端口
+│   │
+│   ├── CasualCastle.Night/             # 昼夜模块（→ Shared）
+│   │   └── Night/
+│   │       ├── NightRules.cs
+│   │       └── IGamePhase.cs           # 端口：查当前阶段
+│   │
+│   ├── CasualCastle.Shop/              # 商店手牌模块（→ Shared, Data）
+│   │   └── Shop/
+│   │       ├── ShopRules.cs            # 购买、金币、刷新
+│   │       ├── CardRules.cs            # 手牌容量、选中/打出
+│   │       ├── IShopOutput.cs          # 端口：购买结果通知
+│   │       └── ICardOutput.cs          # 端口：卡牌打出通知
+│   │
+│   ├── CasualCastle.Building/          # 建筑模块（→ Shared, Data, Night）
+│   │   └── Building/
+│   │       ├── OccupancyGrid.cs        # 占地网格（纯领域）
+│   │       ├── AdjacentRules.cs        # 邻接判定与加成
+│   │       ├── IBuildingRegistry.cs    # 端口：查建筑定义
+│   │       ├── IBuildingPlacement.cs   # 端口：放置/释放占地
+│   │       └── IAdjacencyOutput.cs     # 端口：邻接刷新通知
+│   │
+│   ├── CasualCastle.Fusion/            # 融合模块（→ Shared, Data, Building）
+│   │   └── Fusion/
+│   │       ├── FusionRules.cs          # 配方匹配、可行性验证
+│   │       └── IFusionOutput.cs        # 端口：融合完成通知
+│   │
+│   ├── CasualCastle.Battle/            # 战斗模块（→ Shared, Data, Night, Building）
+│   │   └── Battle/
+│   │       ├── CombatRules.cs          # 攻击判定、伤害、死亡
+│   │       └── ISoldierSpawner.cs      # 端口：生成士兵
+│   │
+│   ├── CasualCastle.Report/            # 战报模块（→ Shared, Data）
+│   │   └── Report/
+│   │       └── ReportBuilder.cs        # 快照构建、克隆
+│   │
+│   ├── CasualCastle.Replay/            # 回放模块（→ Shared, Data, Building, Report）
+│   │   └── Replay/
+│   │       ├── MirrorRules.cs          # 坐标镜像
+│   │       ├── IReplayOutput.cs        # 端口：回放结果通知
+│   │       └── ISnapshotQuery.cs       # 端口：查快照
+│   │
+│   ├── CasualCastle.Godot/             # Godot 适配器（→ 所有 domain 项目 + Godot）
+│   │   └── Adapters/
+│   │       ├── Autoload/               # GameManager（实现 IGamePhase 等）
+│   │       ├── Building/               # Castle, Building, BuildingSystem, AdjacentSystem
+│   │       ├── Battle/                 # Soldier, UnitSpawn
+│   │       ├── Shop/                   # ShopSystem
+│   │       ├── Card/                   # CardSystem
+│   │       ├── Night/                  # NightSystem
+│   │       ├── Fusion/                 # FusionSystem
+│   │       ├── BattleReport/           # BattleReportSystem
+│   │       ├── Replay/                 # ReplayAiSystem
+│   │       ├── UI/                     # UIManager + 子控制器
+│   │       ├── Flow/                   # TitleScreen, MainGameController
+│   │       └── Persistence/            # BattleReportStorage
+│   │
+│   ├── CasualCastle.Game/              # 主 Godot 项目（→ Godot, 所有 domain）
+│   │   ├── CompositionRoot.cs          # DI 容器配置
 │   │   ├── scenes/
 │   │   ├── prefabs/
-│   │   ├── project.godot
-│   │   └── CasualCastle.Game.csproj
+│   │   └── project.godot
 │   │
-│   └── CasualCastle.Tests/            # 单元测试（xunit）
-│       └── CasualCastle.Tests.csproj
+│   └── CasualCastle.Tests/             # 单元测试（→ 所有 domain 项目）
 │
 └── CasualCastle.sln
 ```
 
-**依赖方向：** `Game` → `Domain`，`Tests` → `Domain`。`Domain` 不引用任何项目。
+**依赖方向（项目引用链）：**
+
+```
+Shared ← Data ← Shop
+   ↑        ↑       ↑
+   ├─ Night ├─ Building ←─ Fusion
+   ├─ Report           ←─ Replay
+   ├─ Replay
+   └─ Battle
+
+Godot → 所有 domain 项目 + Godot NuGet
+Game  → Godot（composition root）
+Tests → 所有 domain 项目
+```
+
+**所有 domain 项目零 Godot 引用。** 端口（接口）和被依赖方在同一个项目中定义。
 
 ---
 
-## Phase 2A: 项目拆分与 DI 基础设施
+## Phase 2A: 项目骨架搭建
 
-### Step 1: 建立项目结构
+- [ ] 在 `src/` 下创建 11 个 `.csproj` 项目（上表中除 `Game` 已有的项目）
+- [ ] 每个 domain 项目只引用 `Microsoft.Extensions.DependencyInjection.Abstractions`（用于 `IServiceCollection` 扩展方法）
+- [ ] `CasualCastle.Godot` 引用所有 domain 项目 + `Godot.NET.Sdk`
+- [ ] `CasualCastle.Game` 引用 `CasualCastle.Godot`（composition root）
+- [ ] 更新 `CasualCastle.sln`，添加所有项目
 
-- [ ] 在 `src/` 下创建 `CasualCastle.Domain/` 类库项目（`<TargetFramework>net8.0</TargetFramework>`，不含 Godot SDK）
-- [ ] 将现有 `scripts/domain/` 下所有文件移至 `src/CasualCastle.Domain/`，保持目录结构
-- [ ] 将现有 `scripts/ports/` 下所有文件移至 `src/CasualCastle.Domain/Ports/`
-- [ ] 创建 `src/CasualCastle.Game/`，将原 `CasualCastle.csproj` + `scripts/` + `scenes/` + `prefabs/` 迁入
-- [ ] 更新 `CasualCastle.Game.csproj`：添加 `ProjectReference` 到 `CasualCastle.Domain`
-- [ ] 更新 `CasualCastle.sln`：三个项目（Domain、Game、Tests）
-- [ ] 删除根目录的旧 `scripts/`、`scenes/`、`prefabs/`（已迁入 `src/CasualCastle.Game/`）
+### 每个项目的 `.csproj` 模板（domain 项目）
 
-### Step 2: 引入 DI 容器
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>CasualCastle.Xxx</RootNamespace>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.*" />
+  </ItemGroup>
+  <!-- ProjectReferences here -->
+</Project>
+```
 
-- [ ] `CasualCastle.Game.csproj` 添加 NuGet 包 `Microsoft.Extensions.DependencyInjection`
-- [ ] 创建 `src/CasualCastle.Game/CompositionRoot.cs`：
-  ```csharp
-  public static class CompositionRoot
-  {
-      public static ServiceProvider Build(GameManager gameManager)
-      {
-          var services = new ServiceCollection();
-          
-          // Domain services
-          services.AddSingleton<ShopRules>();
-          services.AddSingleton<CardRules>();
-          services.AddSingleton<FusionRules>();
-          services.AddSingleton<NightRules>();
-          services.AddSingleton<BuildingRules>();
-          services.AddSingleton<AdjacentRules>();
-          services.AddSingleton<CombatRules>();
-          
-          // Adapter services (implement domain ports)
-          services.AddSingleton<IShopService>(sp => ShopSystem.Instance);
-          services.AddSingleton<ICardHand>(sp => CardSystem.Instance);
-          services.AddSingleton<IBuildingRegistry>(sp => BuildingSystem.Instance);
-          services.AddSingleton<IGameState>(sp => gameManager);
-          services.AddSingleton<IPhaseController>(sp => gameManager);
-          services.AddSingleton<IBattleReportRepository>(sp => BattleReportStorage.Instance);
-          
-          // UI controllers
-          services.AddSingleton<UIManager>();
-          // ... etc
-          
-          return services.BuildServiceProvider();
-      }
-  }
-  ```
-- [ ] `GameManager._Ready()` 中调用 `CompositionRoot.Build(this)`，将 `ServiceProvider` 存入静态属性供 Godot 节点获取
-
-### Step 3: Godot 节点获取依赖的约定
-
-由于 Godot 节点由引擎创建（场景/预制体实例化），不能用构造函数注入。约定：在 `_Ready()` 中通过 `GameManager.Services.GetRequiredService<T>()` 获取依赖，缓存到私有字段。
+### 每个项目的 DI 注册模板
 
 ```csharp
-public partial class Building : Area2D
+// CasualCastle.Shop/Shop/ShopModule.cs
+public static class ShopModule
 {
-    private IGameState _gameState;
-    private IShopService _shopService;
-    
-    public override void _Ready()
+    public static IServiceCollection AddShop(this IServiceCollection services)
     {
-        _gameState = GameManager.Services.GetRequiredService<IGameState>();
-        _shopService = GameManager.Services.GetRequiredService<IShopService>();
+        services.AddSingleton<ShopRules>();
+        services.AddSingleton<CardRules>();
+        return services;
     }
 }
 ```
 
 ---
 
-## Phase 2B: 提取领域规则到 Domain 项目
+## Phase 2B: 迁移现有代码到对应项目
 
-### Module 1: 坐标与占地（已有，仅迁移位置）
+按照从叶子到根的依赖顺序迁移，确保每个项目迁移后即可编译：
 
-- [ ] 将 `domain/coordinates/` 完整移至 `CasualCastle.Domain/Coordinates/`
+### Step 1: `CasualCastle.Shared`
+- [ ] 从 `scripts/domain/coordinates/` 迁入 `GameVector2`、`GridCellOffset`、`GameCoordinateRules`
+- [ ] 从 `scripts/domain/core/` 迁入 `GameRules` 常量
+- [ ] 创建 `GamePhase` 枚举（Day / Night）
 
-### Module 2: 建筑规则 → `CasualCastle.Domain/Building/`
+### Step 2: `CasualCastle.Data`
+- [ ] 从 `scripts/domain/card/` 迁入 `CardData`
+- [ ] 从 `scripts/domain/fusion/` 迁入 `FusionRecipe`
+- [ ] 从 `scripts/domain/battle/` 迁入 `SoldierData`
+- [ ] 从 `scripts/adapters/godot/building/BuildingSystem.cs` 提取 `BuildingDefinition`（去除 Godot 类型）
+- [ ] 从 `scripts/ports/` 迁入 `BattleReportModels`、`IBattleReportRepository`
 
-- [ ] 从 `BuildingSystem.cs` 提取 `BuildingDefinition` 为纯 C# 类型（去掉 Godot 类型字段：`Vector2I` → `GridCellOffset`，`Color` → `string hex`）
-- [ ] 定义 `IBuildingRegistry` 端口：
-  - `IReadOnlyList<GridCellOffset> GetFootprint(string typeId)`
-  - `int GetMaxHealth(string typeId)`
-  - `float GetSpawnInterval(string typeId)`
-  - `bool IsCoreBuilding(string typeId)`
-  - `bool HasNightCombat(string typeId)`
-  - `int GetFusionTier(string typeId)`
-- [ ] 从 `Castle.cs` 提取占地网格逻辑 → `OccupancyGrid` 领域类
-- [ ] 定义 `IOccupancyGrid` 端口
+### Step 3: `CasualCastle.Night`
+- [ ] 从 `scripts/domain/night/` 迁入 `NightRules`
+- [ ] 定义 `IGamePhase` 端口
 
-### Module 3: 邻接规则 → `CasualCastle.Domain/Building/`
+### Step 4: `CasualCastle.Shop`
+- [ ] 从 `scripts/adapters/godot/shop/ShopSystem.cs` 提取 `ShopRules`
+- [ ] 从 `scripts/adapters/godot/card/CardSystem.cs` 提取 `CardRules`
+- [ ] 定义 `IShopOutput`、`ICardOutput` 端口
 
-- [ ] 从 `AdjacentSystem.cs` 提取纯算法到 `AdjacentRules`：
-  - 建筑邻接判定
-  - 同类型计数
-  - 工作速度加成计算
-- [ ] 定义 `IAdjacencyService` 端口
+### Step 5: `CasualCastle.Building`
+- [ ] 从 `scripts/adapters/godot/building/Castle.cs` 提取 `OccupancyGrid`
+- [ ] 从 `scripts/adapters/godot/building/AdjacentSystem.cs` 提取 `AdjacentRules`
+- [ ] 定义 `IBuildingRegistry`、`IBuildingPlacement`、`IAdjacencyOutput` 端口
 
-### Module 4: 战斗规则 → `CasualCastle.Domain/Battle/`
+### Step 6: `CasualCastle.Fusion`
+- [ ] 从 `scripts/adapters/godot/fusion/FusionSystem.cs` 提取 `FusionRules`
+- [ ] 定义 `IFusionOutput` 端口
 
-- [ ] `SoldierData` 已在 domain/battle/
-- [ ] 提取 `CombatRules`：攻击判定、伤害计算、死亡判定
+### Step 7: `CasualCastle.Battle`
+- [ ] 新建 `CombatRules`（攻击判定、伤害计算）
+- [ ] 定义 `ISoldierSpawner` 端口
 
-### Module 5: 融合规则 → `CasualCastle.Domain/Fusion/`
+### Step 8: `CasualCastle.Report`
+- [ ] 从 `scripts/adapters/godot/battle_report/BattleReportSystem.cs` 提取 `ReportBuilder`
+- [ ] 定义 `IReportOutput` 端口
 
-- [ ] `FusionRecipe` 已在 domain/fusion/
-- [ ] 从 `FusionSystem.cs` 提取 `FusionRules`：
-  - 配方匹配
-  - 材料筛选
-  - 融合可行性验证
+### Step 9: `CasualCastle.Replay`
+- [ ] 从 `scripts/adapters/godot/replay/ReplayAiSystem.cs` 提取 `MirrorRules`
+- [ ] 定义 `IReplayOutput`、`ISnapshotQuery` 端口
 
-### Module 6: 商店与手牌 → `CasualCastle.Domain/Shop/`
+### Step 10: `CasualCastle.Godot`
+- [ ] 迁入所有 Godot 节点脚本（完整 `scripts/adapters/` 目录）
+- [ ] 每个 Godot 节点实现对应的 domain 端口
+- [ ] `GameManager` 持有 `ServiceProvider`，提供 `Services` 静态属性
 
-- [ ] `CardData` 已在 domain/card/ → 移至 `Domain/Shop/`
-- [ ] 从 `ShopSystem.cs` 提取 `ShopRules`：购买、金币管理、商品刷新
-- [ ] 从 `CardSystem.cs` 提取 `CardRules`：手牌容量、选中/取消、打出
-- [ ] 定义 `IShopService`、`ICardHand` 端口
-
-### Module 7: 昼夜 → `CasualCastle.Domain/Night/`
-
-- [ ] `NightRules` 已在 domain/night/
-
-### Module 8: 战报与回放 → `CasualCastle.Domain/Report/` + `CasualCastle.Domain/Replay/`
-
-- [ ] `BattleReportModels` → `Domain/Report/Models.cs`
-- [ ] `IBattleReportRepository` → `Domain/Report/IBattleReportRepository.cs`
-- [ ] 从 `ReplayAiSystem.cs` 提取 `MirrorRules`：坐标镜像计算
+### Step 11: `CasualCastle.Game`
+- [ ] 实现 `CompositionRoot.Build()`，调用各模块的 `AddXxx()` 扩展方法
+- [ ] `GameManager._Ready()` 调用 `CompositionRoot.Build()`
 
 ---
 
-## Phase 2C: 端口接口定义（放在 Domain 项目）
+## Phase 2C: Godot 节点获取依赖的模式
 
-`CasualCastle.Domain/Ports/` 下集中定义所有跨模块契约：
+Godot 节点由引擎创建，不能用构造函数注入。约定：
 
-| 接口 | 所属模块 | 方法摘要 |
-|------|----------|----------|
-| `IBuildingRegistry` | Building | 查询建筑类型定义 |
-| `IBuildingFactory` | Building | 创建建筑实例、应用外观 |
-| `IOccupancyGrid` | Building | 占地查询、放置/释放 |
-| `IAdjacencyService` | Building | 邻接检测、加成计算 |
-| `IShopService` | Shop | 购买、金币、商品槽 |
-| `ICardHand` | Shop | 手牌管理、打出 |
-| `IGameState` | Core | 阶段、血量、胜负状态查询 |
-| `IPhaseController` | Core | 阶段推进、暂停 |
-| `IBattleReportRepository` | Report | 战报存取 |
-| `ISoldierSpawner` | Battle | 创建并放置士兵 |
+```csharp
+public partial class Building : Area2D
+{
+    private IBuildingRegistry _registry;
+    private IBuildingPlacement _placement;
 
----
+    public override void _Ready()
+    {
+        var sp = GameManager.Services;
+        _registry    = sp.GetRequiredService<IBuildingRegistry>();
+        _placement   = sp.GetRequiredService<IBuildingPlacement>();
+    }
+}
+```
 
-## Phase 2D: Godot 适配器实现端口
-
-在 `CasualCastle.Game` 中，每个现有 Godot 节点类改为实现对应端口：
-
-| 类 | 实现的端口 |
-|----|-----------|
-| `BuildingSystem` | `IBuildingRegistry`、`IBuildingFactory` |
-| `Castle` | `IOccupancyGrid` |
-| `AdjacentSystem` | `IAdjacencyService` |
-| `ShopSystem` | `IShopService` |
-| `CardSystem` | `ICardHand` |
-| `GameManager` | `IGameState`、`IPhaseController` |
-| `BattleReportStorage` | `IBattleReportRepository` |
-| `UnitSpawn` | `ISoldierSpawner` |
+逐步消除 `public static Xxx Instance`：
+1. 在 `CompositionRoot` 中注册服务
+2. 调用方改为从 DI 容器获取
+3. 确认无外部引用后删除 `Instance`
 
 ---
 
-## Phase 2E: 消除静态 Instance
+## 端口接口归属
 
-每个模块逐步消除 `public static Xxx Instance`：
-
-1. 在 `CompositionRoot` 中注册实现类
-2. 调用方通过 `GameManager.Services.GetRequiredService<T>()` 获取
-3. 确认无外部引用后删除静态 `Instance`
+| 端口 | 定义在 | 实现于 |
+|------|--------|--------|
+| `IGamePhase` | `CasualCastle.Night` | `GameManager`（Godot） |
+| `IShopOutput` / `ICardOutput` | `CasualCastle.Shop` | `ShopSystem` / `CardSystem`（Godot） |
+| `IBuildingRegistry` / `IBuildingPlacement` / `IAdjacencyOutput` | `CasualCastle.Building` | `BuildingSystem` / `Castle`（Godot） |
+| `IFusionOutput` | `CasualCastle.Fusion` | `FusionSystem`（Godot） |
+| `ISoldierSpawner` | `CasualCastle.Battle` | `UnitSpawn`（Godot） |
+| `IReportOutput` | `CasualCastle.Report` | `BattleReportSystem`（Godot） |
+| `IReplayOutput` / `ISnapshotQuery` | `CasualCastle.Replay` | `ReplayAiSystem` / `BattleReportSystem`（Godot） |
+| `IBattleReportRepository` | `CasualCastle.Data` | `BattleReportStorage`（Godot） |
 
 ---
 
 ## 验收标准
 
-- [ ] `dotnet build` 所有项目通过
-- [ ] `dotnet test` 领域测试通过
-- [ ] 依赖方向正确：`Domain` 无 `using Godot`，`Game` 引用 `Domain`
-- [ ] 无模块通过 `static Instance` 跨模块直接调用（通过端口 + DI）
+- [ ] `dotnet build CasualCastle.sln` 全部 12 个项目编译通过
+- [ ] `dotnet test` 领域测试通过（无需 Godot）
+- [ ] 无 domain 项目引用 Godot SDK
+- [ ] 项目引用链与架构文档依赖方向一致（无循环引用）
+- [ ] 模块间无 `static Instance` 直调（全部经 DI 端口）
 - [ ] 游戏运行时行为不变
 
 ---
@@ -252,4 +267,4 @@ public partial class Building : Area2D
 
 - 显示与业务缩放拆分（`todo.md` §3）
 - 开发者模式（`todo.md` §4）
-- UI 层的 DI 化（UI 控制器之间仍可用简单引用）
+- 多个项目进一步拆分为 Abstractions + Implementation（当前每个模块一个项目足够）
