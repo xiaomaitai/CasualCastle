@@ -1,4 +1,4 @@
-namespace CasualCastle.Domain.Coordinates;
+namespace CasualCastle.Domain.Shared;
 
 public readonly struct GridCellOffset
 {

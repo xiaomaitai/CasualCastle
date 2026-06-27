@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace CasualCastle.Domain.Coordinates;
+namespace CasualCastle.Domain.Shared;
 
 public static class GameCoordinateRules
 {

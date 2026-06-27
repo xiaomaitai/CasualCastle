@@ -1,4 +1,4 @@
-using CasualCastle.Domain.Core;
+using CasualCastle.Domain.Shared;
 using Godot;
 
 public static class GameConfig

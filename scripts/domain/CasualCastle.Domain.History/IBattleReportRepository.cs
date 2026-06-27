@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace CasualCastle.Domain.Ports;
+namespace CasualCastle.Domain.History;
 
 public interface IBattleReportRepository
 {

@@ -1,4 +1,4 @@
-using CasualCastle.Domain.Night;
+using CasualCastle.Domain.Battle;
 using Godot;
 
 // Thin adapter: delegates night combat check to domain NightRules.

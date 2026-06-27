@@ -1,4 +1,4 @@
-using CasualCastle.Domain.Coordinates;
+using CasualCastle.Domain.Shared;
 using Xunit;
 
 namespace CasualCastle.Domain.Tests;

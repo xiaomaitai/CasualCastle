@@ -1,4 +1,4 @@
-namespace CasualCastle.Domain.Card;
+namespace CasualCastle.Domain.Building;
 
 public class CardData
 {

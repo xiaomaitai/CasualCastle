@@ -9,5 +9,19 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="tests/**/*.cs" />
+    <Compile Remove="scripts/domain/CasualCastle.Domain.*/**/*.cs" />
+    <Compile Remove="scripts/ports/**/*.cs" />
+    <Compile Remove="scripts/domain/coordinates/**/*.cs" />
+    <Compile Remove="scripts/domain/core/**/*.cs" />
+    <Compile Remove="scripts/domain/card/**/*.cs" />
+    <Compile Remove="scripts/domain/fusion/**/*.cs" />
+    <Compile Remove="scripts/domain/battle/**/*.cs" />
+    <Compile Remove="scripts/domain/night/**/*.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="scripts\domain\CasualCastle.Domain.Shared\CasualCastle.Domain.Shared.csproj" />
+    <ProjectReference Include="scripts\domain\CasualCastle.Domain.Building\CasualCastle.Domain.Building.csproj" />
+    <ProjectReference Include="scripts\domain\CasualCastle.Domain.Battle\CasualCastle.Domain.Battle.csproj" />
+    <ProjectReference Include="scripts\domain\CasualCastle.Domain.History\CasualCastle.Domain.History.csproj" />
   </ItemGroup>
 </Project>

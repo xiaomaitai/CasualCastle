@@ -1,4 +1,4 @@
-namespace CasualCastle.Domain.Night;
+namespace CasualCastle.Domain.Battle;
 
 public static class NightRules
 {

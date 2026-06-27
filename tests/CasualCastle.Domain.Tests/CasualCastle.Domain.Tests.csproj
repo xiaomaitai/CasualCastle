@@ -13,7 +13,9 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\scripts\domain\**\*.cs" Link="domain\%(RecursiveDir)%(Filename)%(Extension)" />
-    <Compile Include="..\..\scripts\ports\**\*.cs" Link="ports\%(RecursiveDir)%(Filename)%(Extension)" />
+    <ProjectReference Include="..\..\scripts\domain\CasualCastle.Domain.Shared\CasualCastle.Domain.Shared.csproj" />
+    <ProjectReference Include="..\..\scripts\domain\CasualCastle.Domain.Building\CasualCastle.Domain.Building.csproj" />
+    <ProjectReference Include="..\..\scripts\domain\CasualCastle.Domain.Battle\CasualCastle.Domain.Battle.csproj" />
+    <ProjectReference Include="..\..\scripts\domain\CasualCastle.Domain.History\CasualCastle.Domain.History.csproj" />
   </ItemGroup>
 </Project>

@@ -2,7 +2,7 @@
 // New code should use GameCoordinateRules (domain) and GameCoordinatesAdapter (adapter) directly.
 // This file will be deleted once all callers (Castle._Draw, CastleHighlightOverlay._Draw) are migrated.
 
-using CasualCastle.Domain.Coordinates;
+using CasualCastle.Domain.Shared;
 using CasualCastle.Adapters.Godot;
 using Godot;
 using System.Collections.Generic;

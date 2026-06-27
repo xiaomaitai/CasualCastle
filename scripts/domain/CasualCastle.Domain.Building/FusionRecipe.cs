@@ -1,4 +1,4 @@
-namespace CasualCastle.Domain.Fusion;
+namespace CasualCastle.Domain.Building;
 
 public class FusionRecipe
 {

@@ -1,4 +1,4 @@
-namespace CasualCastle.Domain.Core;
+namespace CasualCastle.Domain.Shared;
 
 public static class GameRules
 {

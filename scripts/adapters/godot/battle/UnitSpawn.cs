@@ -1,4 +1,4 @@
-using CasualCastle.Domain.Coordinates;
+using CasualCastle.Domain.Shared;
 using CasualCastle.Adapters.Godot;
 using Godot;
 using System.Collections.Generic;
