@@ -8,6 +8,7 @@ public partial class GameManager : Node2D, IGameState
 {
     public static GameManager Instance { get; private set; }
     public static ServiceProvider Services { get; private set; }
+    public static T Get<T>() where T : class => Services.GetService<T>();
 
     bool IGameState.IsPlaying => CurrentState == GameState.Playing;
     bool IGameState.IsDay => IsDay;

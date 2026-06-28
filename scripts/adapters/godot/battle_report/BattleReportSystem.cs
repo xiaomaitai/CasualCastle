@@ -24,7 +24,7 @@ public partial class BattleReportSystem : Node
     {
         Instance = this;
         AdapterRegistry.Register<BattleReportSystem>(this);
-        _repository = (IBattleReportRepository)GameManager.Services?.GetService(typeof(IBattleReportRepository));
+        _repository = GameManager.Get<IBattleReportRepository>();
         ReloadSavedReports();
     }
 
