@@ -40,7 +40,7 @@
 
 标题界面线框图：
 
-![标题界面示意图](titleSceneWireframe.png)
+![标题界面示意图](../devPlan/outline/titleSceneWireframe.png)
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────────┐
@@ -113,7 +113,7 @@
 
 战场区线框图：
 
-![战场区 UI 线框图](battlefieldUiWireframe.png)
+![战场区 UI 线框图](../devPlan/outline/battlefieldUiWireframe.png)
 
 源码可直接查看的简化布局图：
 
@@ -565,7 +565,7 @@
 
 场景流转示意图：
 
-![主要场景流转示意图](sceneFlowWireframe.png)
+![主要场景流转示意图](../devPlan/outline/sceneFlowWireframe.png)
 
 ```text
 ┌──────────────┐
@@ -614,7 +614,7 @@
 
 ### 标题场景
 
-![标题场景示意图](titleSceneWireframe.png)
+![标题场景示意图](../devPlan/outline/titleSceneWireframe.png)
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────────┐
@@ -637,7 +637,7 @@
 
 ### 游戏战场常态
 
-![游戏战场常态示意图](mainBattleSceneWireframe.png)
+![游戏战场常态示意图](../devPlan/outline/mainBattleSceneWireframe.png)
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────────┐
@@ -657,7 +657,7 @@
 
 ### 商店场景
 
-![夜晚商店场景示意图](nightShopSceneWireframe.png)
+![夜晚商店场景示意图](../devPlan/outline/nightShopSceneWireframe.png)
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────────┐
@@ -686,7 +686,7 @@
 
 ### 建筑放置场景
 
-![建筑放置场景示意图](placementSceneWireframe.png)
+![建筑放置场景示意图](../devPlan/outline/placementSceneWireframe.png)
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────────┐
@@ -707,7 +707,7 @@
 
 ### 暂停菜单场景
 
-![暂停菜单场景示意图](pauseMenuSceneWireframe.png)
+![暂停菜单场景示意图](../devPlan/outline/pauseMenuSceneWireframe.png)
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────────┐
@@ -731,7 +731,7 @@
 
 ### 结算场景
 
-![结算场景示意图](gameOverSceneWireframe.png)
+![结算场景示意图](../devPlan/outline/gameOverSceneWireframe.png)
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────────┐
