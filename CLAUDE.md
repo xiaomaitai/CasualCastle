@@ -48,4 +48,4 @@ dotnet build
 | 融合规则 | `design/fusionSystem.md` |
 | AI 规则 | `design/replayAi.md` |
 | 战报规则 | `design/battleReport.md` |
-| 战斗系统 | `devPlan/outline/c02BattleSystemOverview.md` |
+| 战斗系统 | `devPlan/outline/c02BattleSystemOverview.md` `c03BattleSystemRoadmap.md` `c06BattleSystemImplementation.md` |
