@@ -127,8 +127,8 @@
 
 | 功能 | 文件 |
 |------|------|
-| 建筑摧毁处理 | `scripts/building/Building.cs` |
-| 格子占用管理 | `scripts/building/Castle.cs` |
-| 敌方检测 | `scripts/building/Building.cs` |
-| 士兵目标更新 | `scripts/battle/Soldier.cs` |
-| 修复逻辑 | `scripts/building/Building.cs` |
+| 建筑摧毁处理 | `scripts/adapters/godot/building/Building.cs` |
+| 格子占用管理 | `scripts/adapters/godot/building/Castle.cs` |
+| 敌方检测 | `scripts/adapters/godot/building/Building.cs` |
+| 士兵目标更新 | `scripts/adapters/godot/battle/Soldier.cs` |
+| 修复逻辑 | `scripts/adapters/godot/building/Building.cs` |

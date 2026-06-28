@@ -50,7 +50,7 @@ Godot **4.6** + **C# / .NET** 的 2D RTS 项目（类皇室战争）。物理：
 | 架构 backlog   | `devPlan/todo.md`                           |
 | 里程碑与路线图  | `devPlan/outline/`                          |
 | 模块设计与依赖  | `devPlan/outline/c05ProjectArchitecture.md` |
-| 融合 / AI 规则 | `devPlan/fusionSystemDesign.md`、`devPlan/battleReportDesign.md`、`devPlan/aiSystemDesign.md` |
+| 融合 / AI 规则 | `design/fusion-system.md`、`design/battle-report.md`、`design/replay-ai.md` |
 | 运行时代码结构  | `devPlan/codeStructure.md`                  |
 | 数据结构     | `devPlan/dataStructures.md`                 |
 

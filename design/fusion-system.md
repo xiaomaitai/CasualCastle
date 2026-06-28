@@ -1,6 +1,6 @@
 # 融合系统设计 — M5
 
-夜晚将满足配方、且与**主体建筑**四向邻接的材料建筑，自动合并为一座强化建筑（类似背包乱斗的同类合成升级）。概念入口见 `concepts.md`；架构归属见 `outline/c05ProjectArchitecture.md`。
+夜晚将满足配方、且与**主体建筑**四向邻接的材料建筑，自动合并为一座强化建筑（类似背包乱斗的同类合成升级）。概念入口见 `devPlan/concepts.md`；架构归属见 `devPlan/outline/c05ProjectArchitecture.md`。
 
 ---
 

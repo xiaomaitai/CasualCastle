@@ -1,31 +1,15 @@
 # 五、项目架构
 
-## 5.1 实际目录结构（当前）
+## 5.1 目录结构
 
 ```
 CasualCastle/
 ├── scripts/
 │   ├── domain/                                     # 核心域层（4 个 C# 项目，零 Godot）
-│   │   ├── Shared/                                # Shared.csproj — 坐标、常量
-│   │   │   ├── GameVector2.cs, GridCellOffset.cs
-│   │   │   ├── GameCoordinateRules.cs, GameRules.cs
-│   │   │   └── SharedModule.cs
-│   │   ├── Building/                              # Building.csproj — 建筑、邻接、商店、手牌、融合（→ Shared）
-│   │   │   ├── CardData.cs, FusionRecipe.cs
-│   │   │   ├── BuildingDefinitions.cs, OccupancyGrid.cs
-│   │   │   ├── AdjacentRules.cs, FusionRules.cs
-│   │   │   ├── ShopRules.cs, CardRules.cs
-│   │   │   ├── IBuildingState.cs, IBuildingRegistry.cs, IBuildingPlacement.cs
-│   │   │   └── BuildingModule.cs
-│   │   ├── Battle/                                # Battle.csproj — 战斗、昼夜（→ Shared, Building）
-│   │   │   ├── SoldierData.cs, NightRules.cs
-│   │   │   ├── CombatRules.cs, IGameState.cs
-│   │   │   └── BattleModule.cs
-│   │   └── History/                               # History.csproj — 战报、回放（→ Shared, Building）
-│   │       ├── BattleReportModels.cs, IBattleReportRepository.cs
-│   │       ├── ReportBuilder.cs, MirrorRules.cs
-│   │       ├── ISnapshotQuery.cs
-│   │       └── HistoryModule.cs
+│   │   ├── Shared/       Shared.csproj             # 坐标、常量
+│   │   ├── Building/     Building.csproj → Shared  # 建筑、邻接、商店、手牌、融合
+│   │   ├── Battle/       Battle.csproj → Shared, Building  # 战斗、昼夜
+│   │   └── History/      History.csproj → Shared, Building # 战报、回放
 │   │
 │   ├── CompositionRoot.cs                          # MS DI 容器构建入口
 │   │
@@ -33,23 +17,27 @@ CasualCastle/
 │       ├── godot/
 │       │   ├── autoload/
 │       │   │   ├── GameManager.cs                 # Godot Autoload，DI 根，实现 IGameState
-│       │   │   ├── DisplaySettingsManager.cs      # 分辨率/窗口管理
+│       │   │   ├── DisplaySettingsManager.cs      # 分辨率/窗口管理 + DevModeEnabled
 │       │   │   └── AdapterRegistry.cs             # Godot 节点服务定位器
-│       │   ├── building/                          # Castle, Building, BuildingSystem, AdjacentSystem, AdjacentLinkPulse, CastleHighlightOverlay
-│       │   ├── battle/                            # Soldier, UnitSpawn
-│       │   ├── shop/        ShopSystem.cs
-│       │   ├── card/        CardSystem.cs
-│       │   ├── night/       NightSystem.cs
-│       │   ├── fusion/      FusionSystem.cs
-│       │   ├── battle_report/ BattleReportSystem.cs
-│       │   ├── replay/      ReplayAiSystem.cs
-│       │   ├── ui/          UIManager + 子控制器
-│       │   ├── flow/        TitleScreen, MainGameController
-│       │   ├── core/        GameConfig, GameCoordinates（deprecated shim）
-│       │   ├── dev/         DevInputLogger
-│       │   └── audio/       BgmPlayer
-│       └── persistence/     BattleReportStorage（实现 IBattleReportRepository）
+│       │   ├── building/  Castle, Building, BuildingSystem, AdjacentSystem, AdjacentLinkPulse, CastleHighlightOverlay
+│       │   ├── battle/    Soldier, UnitSpawn
+│       │   ├── shop/      ShopSystem
+│       │   ├── card/      CardSystem
+│       │   ├── night/     NightSystem
+│       │   ├── fusion/    FusionSystem
+│       │   ├── battle_report/ BattleReportSystem
+│       │   ├── replay/    ReplayAiSystem
+│       │   ├── ui/        UIManager + 子控制器（纯 C# 类）
+│       │   ├── flow/      TitleScreen, MainGameController
+│       │   ├── core/      GameConfig, GameCoordinatesAdapter
+│       │   ├── dev/       DevInputLogger（需 DevMode 才生效）
+│       │   └── audio/     BgmPlayer
+│       └── persistence/   BattleReportStorage（实现 IBattleReportRepository）
 │
+├── design/                                         # 系统设计文档
+│   ├── fusion-system.md
+│   ├── battle-report.md
+│   └── replay-ai.md
 ├── scenes/  prefabs/  assets/  project.godot
 ├── tests/CasualCastle.Domain.Tests/
 ├── devPlan/
@@ -69,6 +57,7 @@ Godot 管理节点生命周期（场景树实例化、`_Ready`/`_ExitTree`），
 
 第二层：AdapterRegistry（轻量服务定位器）
   ├── GameManager（同时注册 IGameState）
+  ├── DisplaySettingsManager
   ├── NightSystem, BuildingSystem, AdjacentSystem
   ├── CardSystem, ShopSystem, FusionSystem
   ├── BattleReportSystem, ReplayAiSystem
@@ -79,25 +68,27 @@ Godot 管理节点生命周期（场景树实例化、`_Ready`/`_ExitTree`），
 
 ```
 GameManager._Ready()
-  └── CompositionRoot.Build()           # 构建 MS DI 容器，注册 Domain 模块 + IGameState + IBattleReportRepository
-  └── AdapterRegistry.Register(this)    # 注册自身为 GameManager + IGameState
+  └── CompositionRoot.Build()           # 构建 MS DI 容器
+  └── AdapterRegistry.Register(this)    # 注册自身
 
 场景树中后续节点 ._Ready():
   └── AdapterRegistry.Register(this)    # 注册自身
-  └── _dep = AdapterRegistry.Resolve<T>()  # 解析依赖
-
-动态实例（Building）._Ready():
-  └── AdapterRegistry.Resolve<GameManager>()   # 按需解析
-  └── AdapterRegistry.Resolve<ShopSystem>()
-  └── AdapterRegistry.Resolve<AdjacentSystem>()
-  └── AdapterRegistry.Resolve<NightSystem>()
+  └── AdapterRegistry.Resolve<T>()      # 解析依赖
 ```
+
+### 解析方式
+
+| 场景 | 方法 |
+|------|------|
+| MS DI 注册的纯 C# 服务 | `GameManager.Get<T>()` |
+| Godot 节点（AdapterRegistry） | `AdapterRegistry.Resolve<T>()` |
 
 ### 注册表
 
 | 系统 | 注册方式 | 解析的依赖 |
 |------|---------|-----------|
 | `GameManager` | AdapterRegistry | — |
+| `DisplaySettingsManager` | AdapterRegistry | — |
 | `NightSystem` | AdapterRegistry | `IGameState` |
 | `BuildingSystem` | AdapterRegistry | `AdjacentSystem` |
 | `AdjacentSystem` | AdapterRegistry | — |
@@ -130,7 +121,7 @@ GameManager._Ready()
 | `BattleReportModels` | Domain.History | 新建 | 战报/快照数据模型 |
 | `IBattleReportRepository` | Domain.History | 新建 | 持久化端口 |
 
-Adapter 类（Godot 节点）现在委托给上述领域类，自身只保留 Godot 特定逻辑（信号、节点操作、渲染）。
+Adapter 类（Godot 节点）委托给上述领域类，自身只保留 Godot 特定逻辑（信号、节点操作、渲染）。
 
 ## 5.4 模块依赖关系
 
@@ -176,6 +167,7 @@ Adapter 类（Godot 节点）现在委托给上述领域类，自身只保留 Go
 | GameManager | autoload/GameManager.cs | Godot Autoload，DI 根 | 实现 IGameState ✅ |
 | AdapterRegistry | autoload/AdapterRegistry.cs | 静态服务定位器 | ✅ |
 | CompositionRoot | scripts/CompositionRoot.cs | MS DI 容器构建 | ✅ |
+| DisplaySettingsManager | autoload/DisplaySettingsManager.cs | Godot Autoload | 含 DevModeEnabled ✅ |
 | BuildingSystem | building/BuildingSystem.cs | Godot Node | 游戏数据委托给 BuildingDefinitions ✅ |
 | AdjacentSystem | building/AdjacentSystem.cs | Godot Node | 邻接计算委托给 AdjacentRules ✅ |
 | Castle | building/Castle.cs | Godot Node | 网格占用委托给 OccupancyGrid ✅ |
@@ -184,6 +176,13 @@ Adapter 类（Godot 节点）现在委托给上述领域类，自身只保留 Go
 | NightSystem | night/NightSystem.cs | Godot Node | 昼夜判断委托给 NightRules ✅ |
 | ReplayAiSystem | replay/ReplayAiSystem.cs | Godot Node | 镜像计算委托给 MirrorRules ✅ |
 | BattleReportSystem | battle_report/BattleReportSystem.cs | Godot Node | 战报构建委托给 ReportBuilder ✅ |
-| BattleReportStorage | persistence/BattleReportStorage.cs | Node | 实现 IBattleReportRepository ✅ |
-| DisplaySettingsManager | autoload/DisplaySettingsManager.cs | Godot Autoload | 分辨率/窗口管理 |
+| BattleReportStorage | persistence/BattleReportStorage.cs | 纯 C# | 实现 IBattleReportRepository ✅ |
+| DevInputLogger | dev/DevInputLogger.cs | Godot Node | DevMode 门控 ✅ |
 
+## 5.7 开发者模式
+
+- 开关：`DisplaySettingsManager.DevModeEnabled`（默认 false）
+- 入口：设置面板 → CheckBox
+- 门控：
+  - `GameManager`：P 键作弊产兵
+  - `DevInputLogger`：按键日志打印
