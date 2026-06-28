@@ -7,7 +7,7 @@ namespace CasualCastle.Adapters.Godot;
 
 public static class GameCoordinatesAdapter
 {
-	public const int PixelsPerCell = 64;
+	public const int PixelsPerCell = 48;
 
 	public static Vector2 ToLocalPixels(GameVector2 gamePosition) =>
 		new(
@@ -29,7 +29,7 @@ public static class GameCoordinatesAdapter
 
 	public static GridCellOffset[] ToGridOffsets(IReadOnlyList<Vector2I> footprint)
 	{
-		var offsets = new GridCellOffset[footprint.Count];
+		GridCellOffset[] offsets = new GridCellOffset[footprint.Count];
 		for (int i = 0; i < footprint.Count; i++)
 			offsets[i] = new GridCellOffset(footprint[i].X, footprint[i].Y);
 		return offsets;

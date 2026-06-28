@@ -1,4 +1,7 @@
+using CasualCastle.Domain.Building;
 using CasualCastle.Domain.History;
+using CasualCastle.Domain.Shared;
+using CasualCastle.Adapters.Godot;
 using Godot;
 using System.Collections.Generic;
 
@@ -6,15 +9,24 @@ public partial class ReplayAiSystem : Node
 {
     public static ReplayAiSystem Instance { get; private set; }
 
+    private BattleReportSystem _battleReport;
+    private AdjacentSystem _adjacentSystem;
+
     public override void _Ready()
     {
         Instance = this;
+        AdapterRegistry.Register<ReplayAiSystem>(this);
+        _battleReport = AdapterRegistry.Resolve<BattleReportSystem>();
+        _adjacentSystem = AdapterRegistry.Resolve<AdjacentSystem>();
     }
 
     public override void _ExitTree()
     {
         if (Instance == this)
+        {
+            AdapterRegistry.Unregister<ReplayAiSystem>(this);
             Instance = null;
+        }
     }
 
     public void ApplyNightSnapshot(Castle enemyCastle, int nightIndex)
@@ -22,7 +34,7 @@ public partial class ReplayAiSystem : Node
         if (enemyCastle == null || enemyCastle.IsPlayerCastle)
             return;
 
-        CastleSnapshot snapshot = BattleReportSystem.Instance?.GetSelectedNightSnapshot(nightIndex);
+        CastleSnapshot snapshot = _battleReport?.GetSelectedNightSnapshot(nightIndex);
         if (snapshot == null)
             return;
 
@@ -30,7 +42,7 @@ public partial class ReplayAiSystem : Node
 
         foreach (BuildingSnapshot buildingSnapshot in snapshot.Buildings)
         {
-            if (BuildingSystem.IsCoreBuilding(buildingSnapshot.TypeId))
+            if (BuildingDefinitions.IsCoreBuilding(buildingSnapshot.TypeId))
                 continue;
 
             Vector2I anchor = MirrorAnchor(enemyCastle, buildingSnapshot);
@@ -55,14 +67,14 @@ public partial class ReplayAiSystem : Node
                 buildingSnapshot.IsFusionProhibited);
         }
 
-        AdjacentSystem.Instance?.RefreshCastle(enemyCastle);
+        _adjacentSystem?.RefreshCastle(enemyCastle);
     }
 
     private static void ClearEnemyBuildings(Castle enemyCastle)
     {
         foreach (Building building in enemyCastle.GetBuildings())
         {
-            if (BuildingSystem.IsCoreBuilding(building.TypeId))
+            if (BuildingDefinitions.IsCoreBuilding(building.TypeId))
                 continue;
 
             enemyCastle.ReleaseBuildingFootprint(building);
@@ -73,13 +85,11 @@ public partial class ReplayAiSystem : Node
 
     private static Vector2I MirrorAnchor(Castle enemyCastle, BuildingSnapshot snapshot)
     {
-        IReadOnlyList<Vector2I> footprint = BuildingSystem.GetFootprint(snapshot.TypeId);
-        int maxOffsetX = 0;
-        foreach (Vector2I offset in footprint)
-            maxOffsetX = Mathf.Max(maxOffsetX, offset.X);
-
-        int mirrorX = enemyCastle.GridColumns - 1 - snapshot.AnchorGridX - maxOffsetX;
-        return new Vector2I(mirrorX, snapshot.AnchorGridY);
+        IReadOnlyList<GridCellOffset> domainFootprint = BuildingDefinitions.GetFootprint(snapshot.TypeId);
+        (int mirrorX, int mirrorY) = MirrorRules.MirrorAnchor(
+            snapshot.AnchorGridX, snapshot.AnchorGridY,
+            domainFootprint, enemyCastle.GridColumns);
+        return new Vector2I(mirrorX, mirrorY);
     }
 
     private static bool IsBlockedByPlayerSoldier(Castle enemyCastle, Vector2I anchor, IReadOnlyList<Vector2I> footprint)

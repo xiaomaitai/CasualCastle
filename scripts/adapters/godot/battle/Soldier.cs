@@ -62,7 +62,7 @@ public partial class Soldier : Area2D
 		UpdateSleepVisual();
 	}
 
-	private bool IsActive => NightSystem.CanUnitWork(HasNightCombat);
+	private bool IsActive => NightSystem.Instance?.CanUnitWork(HasNightCombat) ?? true;
 
 	private bool IsSleeping =>
 		IsAlive
@@ -171,7 +171,7 @@ public partial class Soldier : Area2D
 			_collisionShape.Disabled = true;
 
 		Modulate = new Color(1, 1, 1, 0.3f);
-		var timer = GetTree().CreateTimer(0.5f);
+		SceneTreeTimer timer = GetTree().CreateTimer(0.5f);
 		timer.Timeout += () => QueueFree();
 	}
 

@@ -1,9 +1,19 @@
+using CasualCastle.Adapters.Godot;
+using CasualCastle.Domain.Battle;
 using Godot;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 
-public partial class GameManager : Node2D
+public partial class GameManager : Node2D, IGameState
 {
     public static GameManager Instance { get; private set; }
+    public static ServiceProvider Services { get; private set; }
+
+    bool IGameState.IsPlaying => CurrentState == GameState.Playing;
+    bool IGameState.IsDay => IsDay;
+    bool IGameState.IsNight => IsNight;
+    bool IGameState.IsPaused => IsPaused;
+    int IGameState.CurrentNightIndex => CurrentNightIndex;
 
     [Signal]
     public delegate void GameStateChangedEventHandler(GameState newState);
@@ -55,9 +65,19 @@ public partial class GameManager : Node2D
     private Castle _enemyCastle;
     private int _cheatSpawnCount;
 
+    private FusionSystem FusionSystem => _fusionSystem ??= AdapterRegistry.Resolve<FusionSystem>();
+    private BattleReportSystem BattleReportSystem => _battleReportSystem ??= AdapterRegistry.Resolve<BattleReportSystem>();
+    private ReplayAiSystem ReplayAiSystem => _replayAiSystem ??= AdapterRegistry.Resolve<ReplayAiSystem>();
+    private FusionSystem _fusionSystem;
+    private BattleReportSystem _battleReportSystem;
+    private ReplayAiSystem _replayAiSystem;
+
     public override void _Ready()
     {
         Instance = this;
+        Services = CasualCastle.CompositionRoot.Build();
+        AdapterRegistry.Register<GameManager>(this);
+        AdapterRegistry.Register<IGameState>(this);
         SetProcess(false);
         SetProcessInput(true);
     }
@@ -115,7 +135,12 @@ public partial class GameManager : Node2D
     public override void _ExitTree()
     {
         if (Instance == this)
+        {
+            AdapterRegistry.Unregister<IGameState>(this);
+            AdapterRegistry.Unregister<GameManager>(this);
+            Services?.Dispose();
             Instance = null;
+        }
     }
 
     public void StartGameSession(Node2D battlefield, Castle playerCastle, Castle enemyCastle)
@@ -129,7 +154,7 @@ public partial class GameManager : Node2D
         CurrentState = GameState.Playing;
         IsPaused = false;
         SyncHeartHealthFromCastles();
-        BattleReportSystem.Instance?.StartMatch(PendingReplayReportId);
+        BattleReportSystem?.StartMatch(PendingReplayReportId);
 
         BeginPhase(GamePhase.Day);
         SetProcess(true);
@@ -200,7 +225,7 @@ public partial class GameManager : Node2D
     private void BeginPhase(GamePhase phase)
     {
         if (phase == GamePhase.Day && CurrentPhase == GamePhase.Night)
-            BattleReportSystem.Instance?.CaptureNightSnapshot(_playerCastle, CurrentNightIndex);
+            BattleReportSystem?.CaptureNightSnapshot(_playerCastle, CurrentNightIndex);
 
         if (phase == GamePhase.Night)
             CurrentNightIndex++;
@@ -211,9 +236,9 @@ public partial class GameManager : Node2D
             : GameConfig.NightDurationSeconds;
 
         if (phase == GamePhase.Night && _playerCastle != null)
-            FusionSystem.Instance?.ResolveNightFusions(_playerCastle);
+            FusionSystem?.ResolveNightFusions(_playerCastle);
         if (phase == GamePhase.Night && _enemyCastle != null)
-            ReplayAiSystem.Instance?.ApplyNightSnapshot(_enemyCastle, CurrentNightIndex);
+            ReplayAiSystem?.ApplyNightSnapshot(_enemyCastle, CurrentNightIndex);
 
         EmitSignal(SignalName.PhaseChanged, (int)phase);
         GD.Print(phase == GamePhase.Day ? "Phase: Day" : "Phase: Night");

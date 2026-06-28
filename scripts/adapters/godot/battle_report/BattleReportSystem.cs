@@ -1,4 +1,6 @@
+using CasualCastle.Domain.Building;
 using CasualCastle.Domain.History;
+using CasualCastle.Adapters.Godot;
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -12,6 +14,8 @@ public partial class BattleReportSystem : Node
     private BattleReport _currentReport = new();
     private string _selectedReportId = "";
 
+    private IBattleReportRepository _repository;
+
     public IReadOnlyList<BattleReport> GetSavedReports() => _savedReports;
     public bool HasCurrentSnapshots => _currentReport.Nights.Count > 0;
     public string SelectedReportId => _selectedReportId;
@@ -19,13 +23,18 @@ public partial class BattleReportSystem : Node
     public override void _Ready()
     {
         Instance = this;
+        AdapterRegistry.Register<BattleReportSystem>(this);
+        _repository = (IBattleReportRepository)GameManager.Services?.GetService(typeof(IBattleReportRepository));
         ReloadSavedReports();
     }
 
     public override void _ExitTree()
     {
         if (Instance == this)
+        {
+            AdapterRegistry.Unregister<BattleReportSystem>(this);
             Instance = null;
+        }
     }
 
     public void StartMatch(string selectedReportId)
@@ -39,26 +48,20 @@ public partial class BattleReportSystem : Node
         if (castle == null || nightIndex <= 0)
             return;
 
-        CastleSnapshot snapshot = new()
-        {
-            NightIndex = nightIndex,
-        };
-
-        foreach (Building building in castle.GetBuildings())
-        {
-            if (BuildingSystem.IsCoreBuilding(building.TypeId) || building.IsDestroyed)
-                continue;
-
-            snapshot.Buildings.Add(new BuildingSnapshot
+        IEnumerable<BuildingSnapshot> sourceSnapshots = castle.GetBuildings()
+            .Where(b => !BuildingDefinitions.IsCoreBuilding(b.TypeId) && !b.IsDestroyed)
+            .Select(b => new BuildingSnapshot
             {
-                TypeId = building.TypeId,
-                AnchorGridX = building.AnchorGridX,
-                AnchorGridY = building.AnchorGridY,
-                Health = building.Health,
-                IsManuallyPaused = building.IsManuallyPaused,
-                IsFusionProhibited = building.IsFusionProhibited,
+                TypeId = b.TypeId,
+                AnchorGridX = b.AnchorGridX,
+                AnchorGridY = b.AnchorGridY,
+                Health = b.Health,
+                IsManuallyPaused = b.IsManuallyPaused,
+                IsFusionProhibited = b.IsFusionProhibited,
             });
-        }
+
+        CastleSnapshot snapshot = ReportBuilder.CaptureSnapshot(
+            sourceSnapshots, nightIndex, BuildingDefinitions.IsCoreBuilding);
 
         _currentReport.Nights.RemoveAll(s => s.NightIndex == nightIndex);
         _currentReport.Nights.Add(snapshot);
@@ -76,21 +79,15 @@ public partial class BattleReportSystem : Node
             return null;
 
         DateTimeOffset now = DateTimeOffset.Now;
-        BattleReport toSave = new()
-        {
-            ReportId = Guid.NewGuid().ToString("N"),
-            DisplayName = string.IsNullOrWhiteSpace(displayName)
-                ? BattleReportStorage.Instance.BuildDefaultName(now)
-                : displayName,
-            SavedAtUnix = now.ToUnixTimeSeconds(),
-            Nights = _currentReport.Nights
-                .Select(CloneSnapshot)
-                .ToList(),
-        };
+        string name = string.IsNullOrWhiteSpace(displayName)
+            ? BattleReportStorage.Instance?.BuildDefaultName(now) ?? now.ToString("yyyy-MM-dd HH:mm")
+            : displayName;
+
+        BattleReport toSave = ReportBuilder.CreateReport(_currentReport.Nights, name);
 
         _savedReports.Add(toSave);
         _savedReports.Sort((a, b) => b.SavedAtUnix.CompareTo(a.SavedAtUnix));
-        BattleReportStorage.Instance.SaveAll(_savedReports);
+        _repository?.SaveAll(_savedReports);
 
         _selectedReportId = toSave.ReportId;
         _currentReport = new BattleReport();
@@ -101,7 +98,6 @@ public partial class BattleReportSystem : Node
     {
         if (string.IsNullOrWhiteSpace(reportId))
             return null;
-
         return _savedReports.FirstOrDefault(r => r.ReportId == reportId);
     }
 
@@ -109,7 +105,6 @@ public partial class BattleReportSystem : Node
     {
         if (nightIndex <= 0 || string.IsNullOrWhiteSpace(_selectedReportId))
             return null;
-
         BattleReport report = LoadReport(_selectedReportId);
         return report?.Nights.FirstOrDefault(s => s.NightIndex == nightIndex);
     }
@@ -117,26 +112,8 @@ public partial class BattleReportSystem : Node
     public void ReloadSavedReports()
     {
         _savedReports.Clear();
-        _savedReports.AddRange(BattleReportStorage.Instance.LoadAll());
+        if (_repository != null)
+            _savedReports.AddRange(_repository.LoadAll());
         _savedReports.Sort((a, b) => b.SavedAtUnix.CompareTo(a.SavedAtUnix));
-    }
-
-    private static CastleSnapshot CloneSnapshot(CastleSnapshot source)
-    {
-        return new CastleSnapshot
-        {
-            NightIndex = source.NightIndex,
-            Buildings = source.Buildings
-                .Select(b => new BuildingSnapshot
-                {
-                    TypeId = b.TypeId,
-                    AnchorGridX = b.AnchorGridX,
-                    AnchorGridY = b.AnchorGridY,
-                    Health = b.Health,
-                    IsManuallyPaused = b.IsManuallyPaused,
-                    IsFusionProhibited = b.IsFusionProhibited,
-                })
-                .ToList(),
-        };
     }
 }

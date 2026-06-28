@@ -1,7 +1,5 @@
 namespace CasualCastle.Domain.Battle;
 
-// Domain combat stats — no Godot dependency.
-// Can be constructed from BuildingDefinition overrides or default values.
 public class SoldierData
 {
 	public int Health { get; set; } = 30;

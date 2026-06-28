@@ -4,9 +4,9 @@ public partial class MainGameController : Node2D
 {
     public override void _Ready()
     {
-        var battlefield = GetNode<Node2D>("Battlefield");
-        var playerCastle = GetNode<Castle>("Battlefield/PlayerSide/PlayerCastle");
-        var enemyCastle = GetNode<Castle>("Battlefield/EnemySide/EnemyCastle");
+        Node2D battlefield = GetNode<Node2D>("Battlefield");
+        Castle playerCastle = GetNode<Castle>("Battlefield/PlayerSide/PlayerCastle");
+        Castle enemyCastle = GetNode<Castle>("Battlefield/EnemySide/EnemyCastle");
 
         GameManager.Instance.StartGameSession(battlefield, playerCastle, enemyCastle);
         AdjacentSystem.Instance?.RefreshCastle(playerCastle);

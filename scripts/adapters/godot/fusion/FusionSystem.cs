@@ -1,4 +1,6 @@
+using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
+using CasualCastle.Adapters.Godot;
 using Godot;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,46 +12,34 @@ public partial class FusionSystem : Node
     [Signal]
     public delegate void FusionCompletedEventHandler(Castle castle, Building result);
 
-    private static readonly FusionRecipe[] Recipes =
-    {
-        new()
-        {
-            MainTypeId = "Barracks",
-            MaterialTypeId = "Barracks",
-            MaterialCount = 1,
-            ResultTypeId = "BarracksT2",
-        },
-        new()
-        {
-            MainTypeId = "WolfDen",
-            MaterialTypeId = "WolfDen",
-            MaterialCount = 1,
-            ResultTypeId = "WolfDenT2",
-        },
-    };
+    private IGameState _gameState;
+    private AdjacentSystem _adjacentSystem;
 
     public override void _Ready()
     {
         Instance = this;
+        AdapterRegistry.Register<FusionSystem>(this);
+        _gameState = AdapterRegistry.Resolve<IGameState>();
+        _adjacentSystem = AdapterRegistry.Resolve<AdjacentSystem>();
     }
 
     public override void _ExitTree()
     {
         if (Instance == this)
+        {
+            AdapterRegistry.Unregister<FusionSystem>(this);
             Instance = null;
+        }
     }
 
-    public static IReadOnlyList<FusionRecipe> GetRecipes() => Recipes;
+    public static IReadOnlyList<FusionRecipe> GetRecipes() => FusionRules.GetRecipes();
 
     public void ResolveNightFusions(Castle castle)
     {
         if (castle == null || !castle.IsPlayerCastle)
             return;
 
-        if (GameManager.Instance?.CurrentState != GameManager.GameState.Playing)
-            return;
-
-        if (!GameManager.Instance.IsNight)
+        if (_gameState != null && (!_gameState.IsPlaying || !_gameState.IsNight))
             return;
 
         HashSet<Building> used = new();
@@ -65,7 +55,6 @@ public partial class FusionSystem : Node
                 used.Add(group.Main);
                 foreach (Building material in group.Materials)
                     used.Add(material);
-                continue;
             }
         }
     }
@@ -78,36 +67,8 @@ public partial class FusionSystem : Node
         if (!castle.IsPlayerCastle)
             return false;
 
-        if (main.TypeId != recipe.MainTypeId)
-            return false;
-
-        if (!CanParticipate(main))
-            return false;
-
-        if (materials.Count != recipe.MaterialCount)
-            return false;
-
-        HashSet<Building> seen = new() { main };
-
-        foreach (Building material in materials)
-        {
-            if (material == null || material == main)
-                return false;
-
-            if (!seen.Add(material))
-                return false;
-
-            if (material.TypeId != recipe.MaterialTypeId)
-                return false;
-
-            if (!CanParticipate(material))
-                return false;
-
-            if (!IsAdjacentToMain(main, material))
-                return false;
-        }
-
-        return true;
+        List<IBuildingState> domainMaterials = materials.OfType<IBuildingState>().ToList();
+        return FusionRules.CanFuseGroup(main, domainMaterials, recipe);
     }
 
     public bool TryFuseGroup(Castle castle, FusionGroup group)
@@ -135,89 +96,24 @@ public partial class FusionSystem : Node
             return false;
         }
 
-        AdjacentSystem.Instance?.RefreshCastle(castle);
+        _adjacentSystem?.RefreshCastle(castle);
         EmitSignal(SignalName.FusionCompleted, castle, result);
         return true;
     }
 
     private FusionGroup FindBestFusibleGroup(Castle castle, HashSet<Building> used)
     {
-        List<Building> buildings = castle.GetBuildings()
-            .Where(b => !used.Contains(b))
-            .OrderBy(b => b.AnchorGridY)
-            .ThenBy(b => b.AnchorGridX)
-            .ToList();
+        List<IBuildingState> domainBuildings = castle.GetBuildings().OfType<IBuildingState>().ToList();
+        HashSet<IBuildingState> usedDomain = new HashSet<IBuildingState>(used.OfType<IBuildingState>());
 
-        foreach (Building main in buildings)
-        {
-            if (!CanParticipate(main))
-                continue;
-
-            foreach (FusionRecipe recipe in Recipes)
-            {
-                if (main.TypeId != recipe.MainTypeId)
-                    continue;
-
-                List<Building> materials = PickMaterials(main, recipe, used);
-                if (materials == null)
-                    continue;
-
-                if (!CanFuseGroup(castle, main, materials, recipe))
-                    continue;
-
-                return new FusionGroup(main, materials, recipe);
-            }
-        }
-
-        return null;
-    }
-
-    private static List<Building> PickMaterials(Building main, FusionRecipe recipe, HashSet<Building> used)
-    {
-        if (AdjacentSystem.Instance == null)
+        CasualCastle.Domain.Building.FusionGroup result = FusionRules.FindBestFusibleGroup(domainBuildings, usedDomain);
+        if (result == null)
             return null;
 
-        List<Building> candidates = AdjacentSystem.Instance
-            .GetAdjacentBuildings(main)
-            .Where(b => b != main
-                && !used.Contains(b)
-                && b.TypeId == recipe.MaterialTypeId
-                && CanParticipate(b))
-            .OrderBy(b => b.AnchorGridY)
-            .ThenBy(b => b.AnchorGridX)
-            .Take(recipe.MaterialCount)
-            .ToList();
-
-        return candidates.Count == recipe.MaterialCount ? candidates : null;
-    }
-
-    private static bool CanParticipate(Building building)
-    {
-        if (building == null || building.IsDestroyed || building.IsManuallyPaused)
-            return false;
-
-        if (building.IsFusionProhibited)
-            return false;
-
-        if (BuildingSystem.IsCoreBuilding(building.TypeId))
-            return false;
-
-        if (!BuildingSystem.IsFusibleMaterial(building.TypeId))
-            return false;
-
-        Castle castle = building.GetCastle();
-        if (castle == null || !castle.IsPlayerCastle)
-            return false;
-
-        if (building.HasEnemyOnTop)
-            return false;
-
-        return true;
-    }
-
-    private static bool IsAdjacentToMain(Building main, Building other)
-    {
-        return AdjacentSystem.Instance?.GetAdjacentBuildings(main).Contains(other) == true;
+        return new FusionGroup(
+            (Building)result.Main,
+            result.Materials.Select(m => (Building)m).ToList(),
+            result.Recipe);
     }
 
     private static void RemoveBuilding(Castle castle, Building building)

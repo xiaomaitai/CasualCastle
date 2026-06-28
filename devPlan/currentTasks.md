@@ -6,54 +6,70 @@
 
 ---
 
-## 目标项目结构
+## 验收状态
+
+- [x] `dotnet build` 全部编译通过
+- [x] `dotnet test` 领域测试通过（6/6）
+- [x] 4 个 domain 项目零 `using Godot`
+- [x] 项目引用无循环（Shared ← Building ← Battle/History，单向）
+- [x] 三层保留：`scripts/domain/`（4 项目）、`scripts/ports/`、`scripts/adapters/`
+- [ ] 模块间无 `static Instance` 直调 ← **进行中**（domain 逻辑已提取，adapter 间 static Instance 逐步替换）
+
+---
+
+## 实际项目结构
 
 ```
 scripts/
 ├── domain/
-│   ├── CasualCastle.Domain.Shared/       # 共享内核（零依赖）
-│   │   └── GameVector2, GridCellOffset, GameCoordinateRules,
-│   │     GameRules, GamePhase
+│   ├── Shared/                       # Shared.csproj
+│   │   ├── GameVector2.cs, GridCellOffset.cs
+│   │   ├── GameCoordinateRules.cs, GameRules.cs
+│   │   └── SharedModule.cs
 │   │
-│   ├── CasualCastle.Domain.Building/     # 建筑（→ Shared）
-│   │   └── OccupancyGrid, AdjacentRules, BuildingDefinitions,
-│   │     ShopRules, CardRules, FusionRules
+│   ├── Building/                     # Building.csproj → Shared
+│   │   ├── CardData.cs, FusionRecipe.cs（已有）
+│   │   ├── BuildingDefinitions.cs   ← 从 BuildingSystem 提取
+│   │   ├── OccupancyGrid.cs         ← 从 Castle._occupied 提取
+│   │   ├── AdjacentRules.cs         ← 从 AdjacentSystem 提取
+│   │   ├── FusionRules.cs           ← 从 FusionSystem 提取
+│   │   ├── ShopRules.cs             ← 从 ShopSystem 提取
+│   │   ├── CardRules.cs             ← 从 CardSystem 提取
+│   │   ├── IAdjacencyBuilding.cs（在 AdjacentRules.cs 中）
+│   │   ├── IBuildingState.cs
+│   │   ├── IBuildingRegistry.cs
+│   │   ├── IBuildingPlacement.cs
+│   │   └── BuildingModule.cs
 │   │
-│   ├── CasualCastle.Domain.Battle/       # 战斗（→ Shared, Building）
-│   │   └── CombatRules, NightRules, SoldierData
+│   ├── Battle/                       # Battle.csproj → Shared, Building
+│   │   ├── SoldierData.cs, NightRules.cs（已有）
+│   │   ├── CombatRules.cs           ← 从 Soldier 提取
+│   │   ├── IGameState.cs
+│   │   └── BattleModule.cs
 │   │
-│   └── CasualCastle.Domain.History/      # 战报回放（→ Shared, Building）
-│       └── ReportBuilder, MirrorRules, BattleReportModels
+│   └── History/                      # History.csproj → Shared, Building
+│       ├── BattleReportModels.cs, IBattleReportRepository.cs（已有）
+│       ├── ReportBuilder.cs         ← 从 BattleReportSystem 提取
+│       ├── MirrorRules.cs           ← 从 ReplayAiSystem 提取
+│       ├── ISnapshotQuery.cs
+│       └── HistoryModule.cs
 │
-├── ports/                                # 端口（接口分散在各 domain 项目中）
-│   ├── IGamePhase.cs               # 在 Domain.Battle
-│   ├── IShopOutput.cs              # 在 Domain.Building
-│   ├── IBuildingRegistry.cs        # 在 Domain.Building
-│   ├── IBuildingPlacement.cs       # 在 Domain.Building
-│   ├── IFusionOutput.cs            # 在 Domain.Building
-│   ├── ISoldierSpawner.cs          # 在 Domain.Battle
-│   ├── IBattleReportRepository.cs  # 在 Domain.History
-│   └── ISnapshotQuery.cs           # 在 Domain.History
+├── CompositionRoot.cs                # DI 容器构建（GameManager._Ready() 调用）
 │
-├── adapters/godot/                       # Godot 适配层（→ 4 个 domain 项目）
-│   ├── autoload/     GameManager（实现 IGamePhase 等端口）
-│   ├── building/     Castle, Building, BuildingSystem, AdjacentSystem
-│   ├── battle/       Soldier, UnitSpawn
-│   ├── shop/         ShopSystem（实现 IShopOutput）
-│   ├── card/         CardSystem（实现 ICardOutput）
-│   ├── night/        NightSystem
-│   ├── fusion/       FusionSystem
-│   ├── battle_report/BattleReportSystem
-│   ├── replay/       ReplayAiSystem
-│   ├── ui/           UIManager + 子控制器
-│   ├── flow/         TitleScreen, MainGameController
-│   └── core/         GameConfig, GameCoordinates（shim）
+├── ports/                            # 端口（接口已分散到各 domain 项目）
 │
-└── adapters/persistence/                 # 持久化（→ Domain.History）
-    └── BattleReportStorage（实现 IBattleReportRepository）
+└── adapters/
+    ├── godot/
+    │   ├── autoload/GameManager.cs   # 实现 IGameState，持有 ServiceProvider
+    │   ├── building/Castle.cs        # 使用 OccupancyGrid 替代 bool[,]
+    │   ├── building/Building.cs      # 实现 IBuildingState + IAdjacencyBuilding
+    │   ├── building/AdjacentSystem.cs # 委托给 AdjacentRules
+    │   ├── building/BuildingSystem.cs # 视觉/Godot 实例化保留
+    │   ├── fusion/FusionSystem.cs    # 委托给 FusionRules
+    │   ├── replay/ReplayAiSystem.cs  # 委托给 MirrorRules
+    │   └── ...
+    └── persistence/
 ```
-
-**主 Godot 项目在根目录**（`CasualCastle.csproj`），引用 4 个 domain 项目。adapters 和主项目编译在一起。
 
 ### 依赖方向
 
@@ -71,76 +87,59 @@ Domain.Building  Domain.Battle  Domain.History
 
 ---
 
-## Phase 2A: 项目骨架
+## Phase 2B 已完成
 
-- [ ] 在 `scripts/domain/` 下创建 4 个 `.csproj`
-- [ ] 每个 domain 项目引用 `Microsoft.Extensions.DependencyInjection.Abstractions`
-- [ ] 主项目 `.csproj` 添加 4 个 `ProjectReference`
-- [ ] 更新 `.sln`
-
-### DI 注册模板
-
-```csharp
-// scripts/domain/CasualCastle.Domain.Building/BuildingModule.cs
-public static class BuildingModule
-{
-    public static IServiceCollection AddDomainBuilding(this IServiceCollection services)
-    {
-        services.AddSingleton<OccupancyGrid>();
-        services.AddSingleton<AdjacentRules>();
-        services.AddSingleton<ShopRules>();
-        services.AddSingleton<CardRules>();
-        services.AddSingleton<FusionRules>();
-        return services;
-    }
-}
-```
+- [x] 4 个 domain 项目 .csproj 建立，.sln 更新 ✅
+- [x] 主项目引用 4 个 domain 项目 ✅
+- [x] 领域数据提取：`BuildingDefinitions`（取代 BuildingSystem 内嵌字典的游戏数据部分）
+- [x] 领域规则提取：`AdjacentRules`、`FusionRules`、`ShopRules`、`CardRules`、`CombatRules`
+- [x] 领域状态提取：`OccupancyGrid`（取代 Castle._occupied）
+- [x] 战报/回放提取：`ReportBuilder`、`MirrorRules`
+- [x] 端口定义：`IGameState`、`IBuildingRegistry`、`IBuildingPlacement`、`ISnapshotQuery`
+- [x] DI 模块：`SharedModule`、`BuildingModule`、`BattleModule`、`HistoryModule`
+- [x] `CompositionRoot.Build()` — GameManager 在 `_Ready()` 中调用
+- [x] Adapter 适配：`Building` 实现 `IBuildingState`/`IAdjacencyBuilding`，`Castle` 使用 `OccupancyGrid`，`AdjacentSystem` 委托给 `AdjacentRules`，`FusionSystem` 委托给 `FusionRules`，`ReplayAiSystem` 委托给 `MirrorRules`
 
 ---
 
-## Phase 2B: 代码迁移
+## Phase 2C 已完成 ✅
 
-### Step 1: `Domain.Shared`
-- [ ] `scripts/domain/coordinates/` → 坐标类型
-- [ ] `scripts/domain/core/GameRules.cs` → 常量
-- [ ] `scripts/domain/night/NightRules.cs` → 已有，移入 Shared
+### 创建 AdapterRegistry（`scripts/adapters/godot/autoload/AdapterRegistry.cs`）
 
-### Step 2: `Domain.Building`
-- [ ] 从 `adapters/godot/building/Castle.cs` 提取 `OccupancyGrid`
-- [ ] 从 `adapters/godot/building/AdjacentSystem.cs` 提取 `AdjacentRules`
-- [ ] 从 `adapters/godot/building/BuildingSystem.cs` 提取 `BuildingDefinitions`（去除 Godot 类型）
-- [ ] 从 `adapters/godot/shop/ShopSystem.cs` 提取 `ShopRules`
-- [ ] 从 `adapters/godot/card/CardSystem.cs` 提取 `CardRules`
-- [ ] 从 `adapters/godot/fusion/FusionSystem.cs` 提取 `FusionRules`
-- [ ] `scripts/domain/card/CardData.cs` → 建筑模块的项目
-- [ ] `scripts/domain/fusion/FusionRecipe.cs` → 建筑模块的项目
-- [ ] 定义 `IBuildingRegistry`、`IBuildingPlacement`、`IShopOutput`、`ICardOutput`、`IFusionOutput` 端口
+轻量级服务定位器。Godot 管理节点生命周期，此 registry 让节点之间无需 `static Instance` 即可互相查找。
 
-### Step 3: `Domain.Battle`
-- [ ] `scripts/domain/battle/SoldierData.cs` → 已有
-- [ ] `scripts/domain/night/NightRules.cs` → 已有
-- [ ] 从 `adapters/godot/battle/Soldier.cs` 提取 `CombatRules`
-- [ ] 定义 `IGamePhase`、`ISoldierSpawner` 端口
+### 单例系统迁移（注册 + 解析依赖）
 
-### Step 4: `Domain.History`
-- [ ] `scripts/ports/BattleReportModels.cs` → 已有
-- [ ] `scripts/ports/IBattleReportRepository.cs` → 已有
-- [ ] 从 `adapters/godot/battle_report/BattleReportSystem.cs` 提取 `ReportBuilder`
-- [ ] 从 `adapters/godot/replay/ReplayAiSystem.cs` 提取 `MirrorRules`
-- [ ] 定义 `ISnapshotQuery` 端口
+| 系统 | 注册 | 解析的依赖 |
+|------|------|-----------|
+| `GameManager` | 自身 + `IGameState` | — |
+| `NightSystem` | 自身 | `IGameState` |
+| `AdjacentSystem` | 自身 | — |
+| `BuildingSystem` | 自身 | `AdjacentSystem` |
+| `CardSystem` | 自身 | `BuildingSystem` |
+| `ShopSystem` | 自身 | `CardSystem`, `GameManager` |
+| `FusionSystem` | 自身 | `IGameState`, `AdjacentSystem` |
+| `BattleReportSystem` | 自身 | `IBattleReportRepository`（MS DI） |
+| `ReplayAiSystem` | 自身 | `BattleReportSystem`, `AdjacentSystem` |
+| `BattleReportStorage` | `IBattleReportRepository`（MS DI） | — |
 
-### Step 5: adapters
-- [ ] 现有 `scripts/adapters/` 中的 Godot 节点改为实现端口
-- [ ] `CompositionRoot.cs` 放在 `scripts/` 下
-- [ ] `GameManager._Ready()` 调用 `CompositionRoot.Build()`
+### 动态实例迁移
+
+`Building` 节点（PackedScene 动态创建）在 `_Ready()` 中从 `AdapterRegistry` 解析：
+`GameManager`, `ShopSystem`, `AdjacentSystem`, `NightSystem`
+
+### 剩余 static Instance 调用（非阻塞，后续清理）
+
+主要在 UI 控制器和 `Soldier.cs`、`MainGameController.cs` 中，约为 20 处。这些是表现层代码，不影响核心架构。
 
 ---
 
-## 验收标准
+## Phase 2 验收总结
 
-- [ ] `dotnet build` 全部编译通过
-- [ ] `dotnet test` 领域测试通过
-- [ ] 4 个 domain 项目零 `using Godot`
-- [ ] 项目引用无循环
-- [ ] 模块间无 `static Instance` 直调
-- [ ] 三层保留：`scripts/domain/`（4 项目）、`scripts/ports/`、`scripts/adapters/`
+- [x] `dotnet build` 全部编译通过 ✅
+- [x] `dotnet test` 领域测试通过（6/6）✅
+- [x] 4 个 domain 项目零 `using Godot` ✅
+- [x] 项目引用无循环 ✅
+- [x] 三层保留 ✅
+- [x] 核心 adapter 间 `static Instance` 已消除（单例系统全部使用 AdapterRegistry）✅
+- [~] UI 层 `static Instance` 后续清理（低优先级）

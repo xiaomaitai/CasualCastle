@@ -1,4 +1,5 @@
 using CasualCastle.Domain.Shared;
+using CasualCastle.Domain.Building;
 using CasualCastle.Adapters.Godot;
 using Godot;
 using System;
@@ -45,7 +46,7 @@ public partial class Castle : Node2D
 	public bool IsAlive => Heart != null && Heart.Health > 0;
 
 	private ProgressBar _healthBar;
-	private bool[,] _occupied;
+	private OccupancyGrid _occupancy;
 	private bool _showPlacementPreview;
 	private int _previewGridX;
 	private int _previewGridY;
@@ -55,7 +56,7 @@ public partial class Castle : Node2D
 
 	public override void _Ready()
 	{
-		_occupied = new bool[GridColumns, GridRows];
+		_occupancy = new OccupancyGrid(GridColumns, GridRows);
 		_healthBar = GetNodeOrNull<ProgressBar>("HealthBar");
 		SetupHighlightOverlay();
 		SetupCastleHeart();
@@ -83,7 +84,7 @@ public partial class Castle : Node2D
 
 	public bool IsCellPassable(int gridX, int gridY)
 	{
-		return IsInBounds(gridX, gridY) && !_occupied[gridX, gridY];
+		return _occupancy.IsCellPassable(gridX, gridY);
 	}
 
 	public bool TryGetGridFromGlobalPoint(Vector2 globalPoint, out int gridX, out int gridY)
@@ -96,7 +97,8 @@ public partial class Castle : Node2D
 
 	public bool CanPlaceFootprint(string buildingType, int anchorX, int anchorY)
 	{
-		return BuildingSystem.Instance?.CanPlace(this, buildingType, anchorX, anchorY) == true;
+		IReadOnlyList<GridCellOffset> footprint = BuildingDefinitions.GetFootprint(buildingType);
+		return _occupancy.CanPlaceFootprint(footprint, anchorX, anchorY);
 	}
 
 	public List<Building> GetBuildings()
@@ -165,11 +167,11 @@ public partial class Castle : Node2D
 	public bool PlaceBuilding(Building building, int anchorX, int anchorY, string buildingType)
 	{
 		IReadOnlyList<Vector2I> footprint = BuildingSystem.GetFootprint(buildingType);
+		IReadOnlyList<GridCellOffset> domainFootprint = BuildingDefinitions.GetFootprint(buildingType);
 		if (!CanPlaceFootprint(buildingType, anchorX, anchorY))
 			return false;
 
-		foreach (Vector2I offset in footprint)
-			_occupied[anchorX + offset.X, anchorY + offset.Y] = true;
+		_occupancy.OccupyCells(domainFootprint, anchorX, anchorY);
 
 		building.Position = GetFootprintCenter(anchorX, anchorY, footprint);
 		AddChild(building);
@@ -181,14 +183,8 @@ public partial class Castle : Node2D
 		if (building == null)
 			return;
 
-		IReadOnlyList<Vector2I> footprint = BuildingSystem.GetFootprint(building.TypeId);
-		foreach (Vector2I offset in footprint)
-		{
-			int gridX = building.AnchorGridX + offset.X;
-			int gridY = building.AnchorGridY + offset.Y;
-			if (IsInBounds(gridX, gridY))
-				_occupied[gridX, gridY] = false;
-		}
+		IReadOnlyList<GridCellOffset> footprint = BuildingDefinitions.GetFootprint(building.TypeId);
+		_occupancy.ReleaseCells(footprint, building.AnchorGridX, building.AnchorGridY);
 	}
 
 	public Vector2 GetFootprintCenter(int anchorX, int anchorY, IReadOnlyList<Vector2I> footprint)

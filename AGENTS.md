@@ -29,7 +29,9 @@ Godot **4.6** + **C# / .NET** 的 2D RTS 项目（类皇室战争）。物理：
 - 共享常量放 `scripts/core/`
 - 核心域项目 `CasualCastle.Domain/` 禁止引用 Godot 类型（使用端口与适配器模式）
 - UI 场景在 `scenes/ui/`，逻辑在 `scripts/adapters/godot/ui/` 或 `scripts/adapters/godot/flow/`
-- 不写 XML 文档注释；避免过度防御性编程
+- 不写任何注释（包括 XML 文档注释、行注释、块注释）
+- 变量声明使用显式类型，禁止 `var` 关键字
+- 避免过度防御性编程
 
 ## 文档规范
 

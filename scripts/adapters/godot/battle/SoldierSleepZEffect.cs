@@ -44,7 +44,7 @@ public partial class SoldierSleepZEffect : Node2D
 
 	private Label CreateZLabel(string text, int fontSize, Vector2 position)
 	{
-		var label = new Label
+		Label label = new Label
 		{
 			Text = text,
 			Position = position,

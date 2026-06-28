@@ -1,6 +1,5 @@
 namespace CasualCastle.Domain.Shared;
 
-// 游戏坐标：整数，每格 100 单位；(0,0) 为城堡网格左上角。
 public readonly struct GameVector2
 {
 	public int X { get; }

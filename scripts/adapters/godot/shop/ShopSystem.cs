@@ -1,7 +1,7 @@
 using CasualCastle.Domain.Building;
+using CasualCastle.Adapters.Godot;
 using Godot;
 using System;
-using System.Collections.Generic;
 
 public partial class ShopSystem : Node
 {
@@ -21,16 +21,11 @@ public partial class ShopSystem : Node
     [Signal]
     public delegate void ShopOffersChangedEventHandler();
 
-    private static readonly CardData[] Catalog =
-    {
-        new() { Id = "barracks", Name = "兵营", Cost = 10, BuildingType = "Barracks" },
-        new() { Id = "archery_range", Name = "靶场", Cost = 14, BuildingType = "ArcheryRange" },
-        new() { Id = "stable", Name = "马厩", Cost = 18, BuildingType = "Stable" },
-        new() { Id = "wolf_den", Name = "狼穴", Cost = 16, BuildingType = "WolfDen" },
-    };
-
     private readonly CardData[] _offers = new CardData[OfferCount];
     private readonly Random _random = new();
+
+    private CardSystem _cardSystem;
+    private GameManager _gameManager;
 
     public int Gold { get; private set; }
     public bool IsShopAvailable { get; private set; }
@@ -38,11 +33,18 @@ public partial class ShopSystem : Node
     public override void _Ready()
     {
         Instance = this;
+        AdapterRegistry.Register<ShopSystem>(this);
+        _cardSystem = AdapterRegistry.Resolve<CardSystem>();
+        _gameManager = AdapterRegistry.Resolve<GameManager>();
+
         Gold = GameConfig.InitialGold;
         RefreshOffers();
 
-        GameManager.Instance.PhaseChanged += OnPhaseChanged;
-        GameManager.Instance.GameStateChanged += OnGameStateChanged;
+        if (_gameManager != null)
+        {
+            _gameManager.PhaseChanged += OnPhaseChanged;
+            _gameManager.GameStateChanged += OnGameStateChanged;
+        }
 
         EmitSignal(SignalName.GoldChanged, Gold);
         UpdateShopAvailability();
@@ -50,18 +52,23 @@ public partial class ShopSystem : Node
 
     public override void _ExitTree()
     {
-        GameManager.Instance.PhaseChanged -= OnPhaseChanged;
-        GameManager.Instance.GameStateChanged -= OnGameStateChanged;
+        if (_gameManager != null)
+        {
+            _gameManager.PhaseChanged -= OnPhaseChanged;
+            _gameManager.GameStateChanged -= OnGameStateChanged;
+        }
 
         if (Instance == this)
+        {
+            AdapterRegistry.Unregister<ShopSystem>(this);
             Instance = null;
+        }
     }
 
     public CardData GetOffer(int slotIndex)
     {
         if (slotIndex < 0 || slotIndex >= OfferCount)
             return null;
-
         return _offers[slotIndex];
     }
 
@@ -71,7 +78,6 @@ public partial class ShopSystem : Node
     {
         if (Gold < cost)
             return false;
-
         Gold -= cost;
         EmitSignal(SignalName.GoldChanged, Gold);
         return true;
@@ -85,9 +91,9 @@ public partial class ShopSystem : Node
 
     public void RefreshOffers()
     {
+        CardData[] generated = ShopRules.GenerateOffers(_random);
         for (int i = 0; i < OfferCount; i++)
-            _offers[i] = Catalog[_random.Next(Catalog.Length)];
-
+            _offers[i] = generated[i];
         EmitSignal(SignalName.ShopOffersChanged);
     }
 
@@ -97,13 +103,10 @@ public partial class ShopSystem : Node
             return false;
 
         CardData offer = GetOffer(slotIndex);
-        if (offer == null)
+        if (offer == null || !CanAfford(offer.Cost))
             return false;
 
-        if (!CanAfford(offer.Cost))
-            return false;
-
-        if (CardSystem.Instance == null || !CardSystem.Instance.TryAddCard(offer))
+        if (_cardSystem == null || !_cardSystem.TryAddCard(offer))
             return false;
 
         TrySpendGold(offer.Cost);
@@ -120,7 +123,7 @@ public partial class ShopSystem : Node
         if (offer == null || !CanAfford(offer.Cost))
             return false;
 
-        if (CardSystem.Instance == null || !CardSystem.Instance.TryPlaceCard(offer, castle, gridX, gridY))
+        if (_cardSystem == null || !_cardSystem.TryPlaceCard(offer, castle, gridX, gridY))
             return false;
 
         TrySpendGold(offer.Cost);
@@ -129,8 +132,8 @@ public partial class ShopSystem : Node
     }
 
     public bool IsRepairAvailable =>
-        GameManager.Instance?.CurrentState == GameManager.GameState.Playing
-        && GameManager.Instance.IsNight;
+        _gameManager?.CurrentState == GameManager.GameState.Playing
+        && _gameManager.IsNight;
 
     public bool TryRepairBuilding(Building building)
     {
@@ -139,7 +142,7 @@ public partial class ShopSystem : Node
 
     private void RefreshOfferSlot(int slotIndex)
     {
-        _offers[slotIndex] = Catalog[_random.Next(Catalog.Length)];
+        _offers[slotIndex] = ShopRules.RefreshOfferSlot(_random);
         EmitSignal(SignalName.ShopOffersChanged);
     }
 
@@ -147,14 +150,12 @@ public partial class ShopSystem : Node
     {
         if (!IsShopAvailable)
             return;
-
         EmitSignal(SignalName.ShopOpenRequested);
     }
 
     private void OnPhaseChanged(GameManager.GamePhase phase)
     {
         UpdateShopAvailability();
-
         if (phase == GameManager.GamePhase.Night)
             RequestOpenShop();
     }
@@ -166,11 +167,10 @@ public partial class ShopSystem : Node
 
     private void UpdateShopAvailability()
     {
-        bool available = GameManager.Instance.CurrentState == GameManager.GameState.Playing;
-
+        if (_gameManager == null) return;
+        bool available = _gameManager.CurrentState == GameManager.GameState.Playing;
         if (IsShopAvailable == available)
             return;
-
         IsShopAvailable = available;
         EmitSignal(SignalName.ShopAvailabilityChanged, IsShopAvailable);
     }

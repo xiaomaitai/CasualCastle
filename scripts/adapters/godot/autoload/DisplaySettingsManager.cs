@@ -1,7 +1,3 @@
-// === Godot Window Adapter ===
-// Belongs to adapters/godot layer. Directly manipulates Godot DisplayServer/Window APIs.
-// No domain rules involved — purely engine-level configuration.
-
 using Godot;
 using System;
 
@@ -55,7 +51,7 @@ public partial class DisplaySettingsManager : Node
 
 	private void Load()
 	{
-		var config = new ConfigFile();
+		ConfigFile config = new ConfigFile();
 		if (config.Load(SettingsPath) != Error.Ok)
 			return;
 
@@ -67,7 +63,7 @@ public partial class DisplaySettingsManager : Node
 
 	private void Save()
 	{
-		var config = new ConfigFile();
+		ConfigFile config = new ConfigFile();
 		config.SetValue(Section, "window_mode", (int)WindowMode);
 		config.SetValue(Section, "width", OutputResolution.X);
 		config.SetValue(Section, "height", OutputResolution.Y);
@@ -76,7 +72,7 @@ public partial class DisplaySettingsManager : Node
 
 	private void Apply()
 	{
-		var window = GetTree().Root;
+		Window window = GetTree().Root;
 		window.ContentScaleSize = new Vector2I(GameConfig.DesignWidth, GameConfig.DesignHeight);
 		window.ContentScaleMode = Window.ContentScaleModeEnum.CanvasItems;
 		window.ContentScaleAspect = Window.ContentScaleAspectEnum.Expand;

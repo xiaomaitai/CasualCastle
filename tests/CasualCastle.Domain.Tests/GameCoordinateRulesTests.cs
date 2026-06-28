@@ -8,7 +8,7 @@ public class GameCoordinateRulesTests
 	[Fact]
 	public void GetBuildingFootprintSpawnPoint_SingleCell_UsesBottomLeftOfBlock()
 	{
-		var footprint = new[] { new GridCellOffset(0, 0) };
+		GridCellOffset[] footprint = new[] { new GridCellOffset(0, 0) };
 		GameVector2 spawn = GameCoordinateRules.GetBuildingFootprintSpawnPoint(footprint, 7, 4, 0);
 
 		Assert.Equal(706, spawn.X);
@@ -18,7 +18,7 @@ public class GameCoordinateRulesTests
 	[Fact]
 	public void GetBuildingFootprintSpawnPoint_MultiCell_UsesFootprintBottomLeft()
 	{
-		var footprint = new[]
+		GridCellOffset[] footprint = new[]
 		{
 			new GridCellOffset(0, 0),
 			new GridCellOffset(1, 0),
@@ -34,7 +34,7 @@ public class GameCoordinateRulesTests
 	[Fact]
 	public void GetBuildingFootprintSpawnPoint_SpreadsSubsequentSpawns()
 	{
-		var footprint = new[] { new GridCellOffset(0, 0) };
+		GridCellOffset[] footprint = new[] { new GridCellOffset(0, 0) };
 		GameVector2 first = GameCoordinateRules.GetBuildingFootprintSpawnPoint(footprint, 0, 0, 0);
 		GameVector2 second = GameCoordinateRules.GetBuildingFootprintSpawnPoint(footprint, 0, 0, 1);
 
@@ -62,7 +62,6 @@ public class GameCoordinateRulesTests
 	public void CellBlockOrigin_IsCellCornerPlusInset()
 	{
 		GameVector2 origin = GameCoordinateRules.CellBlockOrigin(2, 3);
-		// CellCorner(2,3) = (200, 300), inset = (100-94)/2 = 3
 		Assert.Equal(203, origin.X);
 		Assert.Equal(303, origin.Y);
 	}

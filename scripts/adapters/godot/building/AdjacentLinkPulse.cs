@@ -19,7 +19,7 @@ public partial class AdjacentLinkPulse : Node2D
         ZIndex = 20;
 
         float size = _cellSize * DisplayScale;
-        var sprite = new Sprite2D
+        Sprite2D sprite = new Sprite2D
         {
             Centered = true,
             Texture = CreateWhiteTexture(),

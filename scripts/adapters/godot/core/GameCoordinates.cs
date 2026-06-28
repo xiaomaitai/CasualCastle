@@ -1,7 +1,3 @@
-// DEPRECATED: Compatibility shim for Hexagonal Architecture migration.
-// New code should use GameCoordinateRules (domain) and GameCoordinatesAdapter (adapter) directly.
-// This file will be deleted once all callers (Castle._Draw, CastleHighlightOverlay._Draw) are migrated.
-
 using CasualCastle.Domain.Shared;
 using CasualCastle.Adapters.Godot;
 using Godot;
@@ -9,7 +5,6 @@ using System.Collections.Generic;
 
 public static class GameCoordinates
 {
-	// PixelsPerCell is an adapter concern (screen pixels), not domain — stays here.
 	public const int PixelsPerCell = GameCoordinatesAdapter.PixelsPerCell;
 
 	public const int UnitsPerCell = GameCoordinateRules.UnitsPerCell;

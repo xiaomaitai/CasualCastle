@@ -1,27 +1,26 @@
+using CasualCastle.Domain.Building;
+using CasualCastle.Adapters.Godot;
 using Godot;
 using System.Collections.Generic;
+using System.Linq;
 
 public partial class AdjacentSystem : Node
 {
     public static AdjacentSystem Instance { get; private set; }
 
-    private static readonly Vector2I[] Directions =
-    {
-        Vector2I.Up,
-        Vector2I.Down,
-        Vector2I.Left,
-        Vector2I.Right,
-    };
-
     public override void _Ready()
     {
         Instance = this;
+        AdapterRegistry.Register<AdjacentSystem>(this);
     }
 
     public override void _ExitTree()
     {
         if (Instance == this)
+        {
+            AdapterRegistry.Unregister<AdjacentSystem>(this);
             Instance = null;
+        }
     }
 
     public void OnBuildingPlaced(Castle castle, Building placedBuilding)
@@ -48,6 +47,14 @@ public partial class AdjacentSystem : Node
         return GetAdjacentBuildings(source, source.GetCastle().GetBuildings());
     }
 
+    public IReadOnlyList<Building> GetAdjacencyEffectTargets(Building source)
+    {
+        if (source?.GetCastle() == null)
+            return System.Array.Empty<Building>();
+
+        return GetAdjacencyEffectTargets(source, source.GetCastle().GetBuildings());
+    }
+
     private void PlayAdjacencyPulses(Castle castle, Building placedBuilding)
     {
         List<Building> buildings = castle.GetBuildings();
@@ -60,114 +67,37 @@ public partial class AdjacentSystem : Node
         Vector2I mainGrid = building.GetMainGridPosition();
         Vector2 localPos = castle.GetCellCenter(mainGrid.X, mainGrid.Y);
 
-        var pulse = new AdjacentLinkPulse();
+        AdjacentLinkPulse pulse = new AdjacentLinkPulse();
         pulse.Configure(castle.CellSize);
         pulse.Position = localPos;
         castle.AddChild(pulse);
     }
 
-    public IReadOnlyList<Building> GetAdjacencyEffectTargets(Building source)
+    private static HashSet<Building> GetAdjacentBuildings(Building source, List<Building> buildings)
     {
-        if (source?.GetCastle() == null)
-            return System.Array.Empty<Building>();
-
-        return GetAdjacencyEffectTargets(source, source.GetCastle().GetBuildings());
+        List<IAdjacencyBuilding> domainBuildings = buildings.OfType<IAdjacencyBuilding>().ToList();
+        HashSet<IAdjacencyBuilding> domainNeighbors = AdjacentRules.GetAdjacentBuildings(source, domainBuildings);
+        return new HashSet<Building>(domainNeighbors.OfType<Building>());
     }
 
     private static List<Building> GetAdjacencyEffectTargets(Building source, List<Building> buildings)
     {
         List<Building> targets = new();
+        if (!AdjacentRules.IsBarracksType(source.TypeId) || !source.ContributesToAdjacency)
+            return targets;
 
-        if (IsBarracksType(source.TypeId) && source.ContributesToAdjacency)
+        foreach (Building neighbor in GetAdjacentBuildings(source, buildings))
         {
-            foreach (Building neighbor in GetAdjacentBuildings(source, buildings))
-            {
-                if (IsBarracksType(neighbor.TypeId) && neighbor.ContributesToAdjacency)
-                    targets.Add(neighbor);
-            }
+            if (AdjacentRules.IsBarracksType(neighbor.TypeId) && neighbor.ContributesToAdjacency)
+                targets.Add(neighbor);
         }
-
         return targets;
     }
 
     private static void ApplyBonuses(Building building, List<Building> buildings)
     {
-        float multiplier = 1f;
-        if (building.ContributesToAdjacency && IsBarracksType(building.TypeId))
-        {
-            int adjacentBarracks = CountAdjacentBuildings(building, buildings, IsBarracksType);
-            if (adjacentBarracks > 0)
-                multiplier = 1f + 0.2f * adjacentBarracks;
-        }
-
+        List<IAdjacencyBuilding> domainBuildings = buildings.OfType<IAdjacencyBuilding>().ToList();
+        float multiplier = AdjacentRules.CalculateWorkSpeedMultiplier(building, domainBuildings);
         building.SetWorkSpeedMultiplier(multiplier);
-    }
-
-    private static HashSet<Building> GetAdjacentBuildings(Building source, List<Building> buildings)
-    {
-        HashSet<Building> neighbors = new();
-        Dictionary<Vector2I, Building> cellOwners = BuildCellOwnerMap(buildings);
-
-        foreach (Vector2I cell in GetOccupiedCells(source))
-        {
-            foreach (Vector2I direction in Directions)
-            {
-                if (!cellOwners.TryGetValue(cell + direction, out Building neighbor))
-                    continue;
-
-                if (neighbor == source)
-                    continue;
-
-                neighbors.Add(neighbor);
-            }
-        }
-
-        return neighbors;
-    }
-
-    private static bool IsBarracksType(string typeId) =>
-        typeId == "Barracks" || typeId == "BarracksT2";
-
-    private static int CountAdjacentBuildings(Building source, List<Building> buildings, System.Func<string, bool> matchesType)
-    {
-        int count = 0;
-        foreach (Building neighbor in GetAdjacentBuildings(source, buildings))
-        {
-            if (matchesType(neighbor.TypeId) && neighbor.ContributesToAdjacency)
-                count++;
-        }
-
-        return count;
-    }
-
-    private static int CountAdjacentBuildings(Building source, List<Building> buildings, string targetTypeId)
-    {
-        int count = 0;
-        foreach (Building neighbor in GetAdjacentBuildings(source, buildings))
-        {
-            if (neighbor.TypeId == targetTypeId && neighbor.ContributesToAdjacency)
-                count++;
-        }
-
-        return count;
-    }
-
-    private static Dictionary<Vector2I, Building> BuildCellOwnerMap(List<Building> buildings)
-    {
-        Dictionary<Vector2I, Building> cellOwners = new();
-
-        foreach (Building building in buildings)
-        {
-            foreach (Vector2I cell in GetOccupiedCells(building))
-                cellOwners[cell] = building;
-        }
-
-        return cellOwners;
-    }
-
-    private static IEnumerable<Vector2I> GetOccupiedCells(Building building)
-    {
-        foreach (Vector2I offset in BuildingSystem.GetFootprint(building.TypeId))
-            yield return new Vector2I(building.AnchorGridX + offset.X, building.AnchorGridY + offset.Y);
     }
 }

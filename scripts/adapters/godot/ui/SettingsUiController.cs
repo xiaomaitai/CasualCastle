@@ -66,7 +66,7 @@ public sealed class SettingsUiController
 
 	private void SyncFromSaved()
 	{
-		var settings = DisplaySettingsManager.Instance;
+		DisplaySettingsManager settings = DisplaySettingsManager.Instance;
 		_windowModeOption.Select(_windowModeOption.GetItemIndex((int)settings.WindowMode));
 		_resolutionOption.Select(settings.FindResolutionIndex(settings.OutputResolution));
 		UpdateResolutionEnabled();
@@ -85,7 +85,7 @@ public sealed class SettingsUiController
 
 	private void OnApplyPressed()
 	{
-		var mode = (DisplayWindowMode)_windowModeOption.GetSelectedId();
+		DisplayWindowMode mode = (DisplayWindowMode)_windowModeOption.GetSelectedId();
 		Vector2I resolution = GameConfig.OutputResolutions[_resolutionOption.Selected];
 		DisplaySettingsManager.Instance.SaveAndApply(mode, resolution);
 	}

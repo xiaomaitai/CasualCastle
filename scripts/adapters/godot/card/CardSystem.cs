@@ -1,4 +1,5 @@
 using CasualCastle.Domain.Building;
+using CasualCastle.Adapters.Godot;
 using Godot;
 using System.Collections.Generic;
 
@@ -17,6 +18,8 @@ public partial class CardSystem : Node
     private readonly List<CardData> _hand = new();
     private int _selectedIndex = -1;
 
+    private BuildingSystem _buildingSystem;
+
     public IReadOnlyList<CardData> Hand => _hand;
     public bool HasSelection => _selectedIndex >= 0 && _selectedIndex < _hand.Count;
     public CardData SelectedCard => HasSelection ? _hand[_selectedIndex] : null;
@@ -24,12 +27,17 @@ public partial class CardSystem : Node
     public override void _Ready()
     {
         Instance = this;
+        AdapterRegistry.Register<CardSystem>(this);
+        _buildingSystem = AdapterRegistry.Resolve<BuildingSystem>();
     }
 
     public override void _ExitTree()
     {
         if (Instance == this)
+        {
+            AdapterRegistry.Unregister<CardSystem>(this);
             Instance = null;
+        }
     }
 
     public bool TryAddCard(CardData card)
@@ -102,7 +110,7 @@ public partial class CardSystem : Node
         if (card == null || castle == null || !castle.IsPlayerCastle)
             return false;
 
-        return BuildingSystem.Instance?.TryPlace(castle, card.BuildingType, gridX, gridY) == true;
+        return _buildingSystem?.TryPlace(castle, card.BuildingType, gridX, gridY) == true;
     }
 
     public void ResetHand()

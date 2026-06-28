@@ -153,14 +153,14 @@ public partial class UIManager : Node2D
 
     private void InitializeUI()
     {
-        var uiRoot = GetParent()?.GetNodeOrNull<CanvasLayer>("UI");
+        CanvasLayer uiRoot = GetParent()?.GetNodeOrNull<CanvasLayer>("UI");
         if (uiRoot == null) return;
 
         _hudUi = new HudUiController(uiRoot);
         _shopUi = new ShopUiController(this, uiRoot);
         _handUi = new HandUiController(this, uiRoot);
         _buildingInfoUi = new BuildingInfoUiController(this, uiRoot);
-        var toolGroup = new ButtonGroup();
+        ButtonGroup toolGroup = new ButtonGroup();
         _buildingManageUi = new BuildingManageUiController(this, uiRoot, toolGroup);
         _fusionProhibitUi = new FusionProhibitUiController(this, uiRoot, toolGroup);
         _settingsUi = new SettingsUiController(uiRoot.GetNode<Control>("SettingsPanel"));

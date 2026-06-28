@@ -1,6 +1,8 @@
+using CasualCastle.Adapters.Godot;
+using CasualCastle.Domain.Building;
 using Godot;
 
-public partial class Building : Area2D
+public partial class Building : Area2D, IBuildingState
 {
 	[Export]
 	public bool HasNightCombat = false;
@@ -28,6 +30,11 @@ public partial class Building : Area2D
 	private int _spawnCount;
 	private bool _isPlayerBuilding;
 
+	private GameManager _gameManager;
+	private ShopSystem _shopSystem;
+	private AdjacentSystem _adjacentSystem;
+	private NightSystem _nightSystem;
+
 	[Signal]
 	public delegate void HealthChangedEventHandler(int health, int maxHealth);
 
@@ -43,6 +50,7 @@ public partial class Building : Area2D
 	public string DisplayName => BuildingSystem.GetDisplayName(TypeId);
 	public int AnchorGridX => GridX;
 	public int AnchorGridY => GridY;
+	public bool IsPlayerOwned => _isPlayerBuilding;
 
 	public bool HasEnemyOnTop
 	{
@@ -155,7 +163,7 @@ public partial class Building : Area2D
 		UpdateDamageVisual();
 
 		if (TypeId == "CastleHeart" && CastleRef != null)
-			GameManager.Instance?.OnCastleHeartHealthChanged(CastleRef.IsPlayerCastle, Health, MaxHealth);
+			_gameManager?.OnCastleHeartHealthChanged(CastleRef.IsPlayerCastle, Health, MaxHealth);
 
 		if (Health <= 0)
 			OnDestroyed();
@@ -167,7 +175,7 @@ public partial class Building : Area2D
 	{
 		if (TypeId != "CastleHeart" && CastleRef != null)
 			CastleRef.ReleaseBuildingFootprint(this);
-		
+
 		if (TypeId != "CastleHeart")
 			RefreshOperationalState();
 	}
@@ -178,7 +186,7 @@ public partial class Building : Area2D
 			return false;
 
 		int cost = GetRepairCost();
-		if (!ShopSystem.Instance?.TrySpendGold(cost) ?? false)
+		if (_shopSystem?.TrySpendGold(cost) != true)
 			return false;
 
 		Repair();
@@ -199,10 +207,10 @@ public partial class Building : Area2D
 		if (HasEnemyOnTop)
 			return false;
 
-		if (GameManager.Instance?.CurrentState != GameManager.GameState.Playing)
+		if (_gameManager?.CurrentState != GameManager.GameState.Playing)
 			return false;
 
-		if (!GameManager.Instance.IsNight)
+		if (!_gameManager.IsNight)
 			return false;
 
 		return true;
@@ -218,18 +226,23 @@ public partial class Building : Area2D
 
 	public int GetRepairCost() => (MaxHealth - Health) * GameConfig.RepairGoldPerHealth;
 
-	public bool CanWork => IsOperational && NightSystem.CanUnitWork(HasNightCombat);
+	public bool CanWork => IsOperational && (_nightSystem?.CanUnitWork(HasNightCombat) ?? true);
 
 	public override void _Ready()
 	{
 		CollisionLayer = 4;
 		CollisionMask = 2;
 
+		_gameManager = AdapterRegistry.Resolve<GameManager>();
+		_shopSystem = AdapterRegistry.Resolve<ShopSystem>();
+		_adjacentSystem = AdapterRegistry.Resolve<AdjacentSystem>();
+		_nightSystem = AdapterRegistry.Resolve<NightSystem>();
+
 		_sprite = GetNodeOrNull<Sprite2D>("Sprite");
 		TryApplyVisual();
 
-		if (GameManager.Instance != null)
-			GameManager.Instance.PhaseChanged += OnPhaseChanged;
+		if (_gameManager != null)
+			_gameManager.PhaseChanged += OnPhaseChanged;
 
 		_stateIcon = new BuildingStateIcon();
 		AddChild(_stateIcon);
@@ -238,7 +251,7 @@ public partial class Building : Area2D
 
 		if (BuildingSystem.GetSpawnInterval(TypeId) > 0f)
 		{
-			_battlefield = GameManager.Instance?.Battlefield;
+			_battlefield = _gameManager?.Battlefield;
 			if (_battlefield == null)
 				_battlefield = GetNodeOrNull<Node2D>("/root/MainGame/Battlefield");
 			if (_battlefield == null)
@@ -249,8 +262,8 @@ public partial class Building : Area2D
 
 	public override void _ExitTree()
 	{
-		if (GameManager.Instance != null)
-			GameManager.Instance.PhaseChanged -= OnPhaseChanged;
+		if (_gameManager != null)
+			_gameManager.PhaseChanged -= OnPhaseChanged;
 		StopWork();
 	}
 
@@ -315,7 +328,7 @@ public partial class Building : Area2D
 	{
 		if (!CanWork || _battlefield == null || CastleRef == null || count <= 0)
 			return;
-		if (GameManager.Instance?.CurrentState == GameManager.GameState.GameOver)
+		if (_gameManager?.CurrentState == GameManager.GameState.GameOver)
 			return;
 
 		PackedScene soldierScene = GD.Load<PackedScene>("res://prefabs/Soldier.tscn");
@@ -481,7 +494,7 @@ public partial class Building : Area2D
 
 		Castle castle = CastleRef;
 		if (castle != null)
-			AdjacentSystem.Instance?.RefreshCastle(castle);
+			_adjacentSystem?.RefreshCastle(castle);
 	}
 
 	private void SyncStateIconPosition()
