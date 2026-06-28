@@ -143,3 +143,57 @@ Domain.Building  Domain.Battle  Domain.History
 - [x] 三层保留 ✅
 - [x] 核心 adapter 间 `static Instance` 已消除（单例系统全部使用 AdapterRegistry）✅
 - [~] UI 层 `static Instance` 后续清理（低优先级）
+
+---
+
+## Phase 3: 显示与缩放二次重构 ← 当前任务
+
+**目标**：游戏坐标已落地（每格 100 unit），进一步拆分显示职责，确保核心域零像素。
+
+### 背景
+
+GameCoordinateRules（domain）定义游戏坐标系（整数，100 unit/格）。GameCoordinatesAdapter（adapter）负责 unit ↔ pixel 转换（48 px/格）。但部分代码仍使用 deprecated shim `GameCoordinates.cs`，它混合了两层职责。
+
+### Step 3A: 迁移 Castle._Draw() 脱离 deprecated shim
+
+**文件**：`scripts/adapters/godot/building/Castle.cs`
+
+**当前**：`Castle._Draw()` 使用 deprecated `GameCoordinates` shim（10 处引用）：
+- `GameCoordinates.UnitsPerCell` → `GameCoordinateRules.UnitsPerCell`
+- `GameCoordinates.CellBlockSize` → `GameCoordinateRules.CellBlockSize`
+- `GameCoordinates.CellBlockOrigin(col, row)` → `GameCoordinateRules.CellBlockOrigin(col, row)`
+- `GameCoordinates.CellCorner(col, row)` → `GameCoordinateRules.CellCorner(col, row)`
+- `GameCoordinates.ToLocalPixels(...)` → `GameCoordinatesAdapter.ToLocalPixels(...)`
+
+**参考**：`CastleHighlightOverlay._Draw()` 已直接使用 `GameCoordinateRules` + `GameCoordinatesAdapter` ✅
+
+- [ ] 替换所有 10 处引用
+- [ ] 移除 `using` 对 deprecated shim 的依赖（如有）
+
+### Step 3B: 删除 deprecated GameCoordinates.cs
+
+**文件**：`scripts/adapters/godot/core/GameCoordinates.cs`
+
+确认无其他调用方后删除（`grep` 确认仅 `Castle.cs` 引用）。
+
+- [ ] 删除 `scripts/adapters/godot/core/GameCoordinates.cs`
+- [ ] 同步删除 `.uid` 文件
+
+### Step 3C: 拆分 GameConfig.cs
+
+**文件**：`scripts/adapters/godot/core/GameConfig.cs`
+
+`OutputResolutions` 数组是显示配置，应归属 `DisplaySettingsManager`（唯一消费者）。
+
+- [ ] 将 `OutputResolutions` 数组移入 `DisplaySettingsManager.cs`
+- [ ] `DisplaySettingsManager` 直接引用 `GameRules.DesignWidth/DesignHeight`
+- [ ] `GameConfig` 保留其余常量委托（向后兼容）
+
+### 验收标准
+
+- [ ] `dotnet build` 0 错误
+- [ ] `dotnet test` 全部通过
+- [ ] `grep -r "GameCoordinates" scripts/` 仅匹配到 `GameCoordinatesAdapter`（旧 shim 已删）
+- [ ] `grep -r "using Godot" scripts/domain/` 返回空
+- [ ] domain 项目中无像素值（PixelsPerCell、px 常量等）
+- [ ] DisplaySettingsManager 自包含显示配置（resolution 列表）
