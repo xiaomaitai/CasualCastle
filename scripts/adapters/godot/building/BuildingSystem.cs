@@ -1,3 +1,4 @@
+using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
 using CasualCastle.Domain.Shared;
 using CasualCastle.Adapters.Godot;
@@ -154,14 +155,9 @@ public partial class BuildingSystem : Node
 
     public static void ApplySoldierSpawnStats(string buildingType, Soldier soldier)
     {
-        BuildingData data = BuildingDefinitions.Get(buildingType);
-        soldier.HasNightCombat = data.HasNightCombat;
-        if (data.SoldierDamage.HasValue) soldier.Damage = data.SoldierDamage.Value;
-        if (data.SoldierAttackRange.HasValue) soldier.AttackRange = data.SoldierAttackRange.Value;
-        if (data.SoldierSpeed.HasValue) soldier.Speed = data.SoldierSpeed.Value;
-        if (data.SoldierHealth.HasValue) soldier.Health = data.SoldierHealth.Value;
-
-        VisualDef visual = GetVisual(buildingType);
+        string unitTypeId = BuildingDefinitions.GetUnitTypeId(buildingType);
+        UnitStats stats = UnitRegistry.Get(unitTypeId);
+        soldier.InitializeFromStats(stats);
     }
 
     public static void ApplyVisual(Building building)

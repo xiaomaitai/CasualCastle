@@ -1,32 +1,23 @@
 using CasualCastle.Adapters.Godot;
+using CasualCastle.Domain.Battle;
 using Godot;
 using System;
 
 public partial class Soldier : Area2D
 {
-	[Export]
-	public int Health = 30;
-
-	[Export]
-	public int Damage = 10;
-
-	[Export]
-	public float Speed = 80.0f;
-
-	[Export]
-	public float AttackRange = 30.0f;
-
-	[Export]
-	public float AttackCooldown = 1.0f;
-
-	[Export]
-	public bool HasNightCombat = false;
-
+	public SoldierData Data { get; private set; } = new();
 	public bool IsPlayerUnit { get; set; }
 	public bool IsAlive { get; private set; } = true;
 
+	public int Health { get; private set; } = 30;
+	public int Damage { get; private set; } = 10;
+	public float Speed { get; private set; } = 170f;
+	public float AttackRange { get; private set; } = 60f;
+	public float AttackCooldown { get; private set; } = 1f;
+	public bool HasNightCombat { get; set; }
+
 	private Vector2 _moveDirection;
-	private float _attackTimer = 0f;
+	private float _attackTimer;
 	private Soldier _targetEnemy;
 	private Castle _targetCastle;
 	private Building _targetBuilding;
@@ -34,6 +25,31 @@ public partial class Soldier : Area2D
 	private CollisionShape2D _collisionShape;
 	private SoldierSleepZEffect _sleepZEffect;
 	private Color _baseSpriteModulate = Colors.White;
+
+	public void InitializeFromStats(UnitStats stats)
+	{
+		Data = SoldierData.FromStats(stats);
+		Health = Data.Health;
+		Damage = Data.Damage;
+		Speed = Data.Speed;
+		AttackRange = Data.AttackRange;
+		AttackCooldown = Data.AttackCooldown;
+		HasNightCombat = Data.HasNightCombat;
+
+		float displaySize = Data.DisplaySize();
+		if (_sprite != null)
+		{
+			Texture2D texture = _sprite.Texture;
+			if (texture != null)
+			{
+				float scale = displaySize / System.Math.Max(texture.GetWidth(), texture.GetHeight());
+				_sprite.Scale = new Vector2(scale, scale);
+			}
+		}
+
+		if (_collisionShape?.Shape is CircleShape2D circle)
+			circle.Radius = Data.CollisionRadius();
+	}
 
 	public override void _Ready()
 	{
@@ -56,6 +72,17 @@ public partial class Soldier : Area2D
 	{
 		if (AdapterRegistry.Resolve<GameManager>() != null)
 			AdapterRegistry.Resolve<GameManager>().PhaseChanged -= OnPhaseChanged;
+	}
+
+	public override void _Draw()
+	{
+		if (Data == null)
+			return;
+		float radius = Data.CollisionRadius();
+		Color color = IsPlayerUnit
+			? new Color(0, 1, 0, 0.3f)
+			: new Color(1, 0, 0, 0.3f);
+		DrawCircle(Vector2.Zero, radius, color);
 	}
 
 	private void OnPhaseChanged(GameManager.GamePhase phase)
@@ -122,7 +149,7 @@ public partial class Soldier : Area2D
 		else if (_targetCastle != null && _targetCastle.IsAlive)
 		{
 			_targetEnemy = null;
-			
+
 			if (_targetBuilding != null && _targetBuilding.IsDestroyed)
 			{
 				_targetCastle = null;
@@ -139,7 +166,7 @@ public partial class Soldier : Area2D
 		else
 		{
 			_targetEnemy = null;
-			MoveToward(dt, GlobalPosition + _moveDirection * 1000);
+			MoveToward(dt, GlobalPosition + _moveDirection * 2000);
 		}
 	}
 
@@ -151,14 +178,15 @@ public partial class Soldier : Area2D
 
 	private void Attack(Soldier enemy)
 	{
-		enemy.TakeDamage(Damage);
+		int finalDamage = CombatRules.CalculateDamage(Damage, Data.DamageType, enemy.Data.ArmorType);
+		enemy.TakeDamage(finalDamage);
 	}
 
 	public void TakeDamage(int amount)
 	{
 		if (!IsAlive) return;
 
-		Health -= amount;
+		Health = CombatRules.ApplyDamage(Health, amount);
 		if (Health <= 0)
 			Die();
 	}

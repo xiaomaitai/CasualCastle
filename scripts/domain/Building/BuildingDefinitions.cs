@@ -14,10 +14,7 @@ public class BuildingData
 	public float SpawnInterval { get; init; }
 	public GridCellOffset SpawnCellOffset { get; init; }
 
-	public int? SoldierDamage { get; init; }
-	public float? SoldierAttackRange { get; init; }
-	public float? SoldierSpeed { get; init; }
-	public int? SoldierHealth { get; init; }
+	public string UnitTypeId { get; init; }
 	public bool HasNightCombat { get; init; }
 
 	public int FusionTier { get; init; }
@@ -54,6 +51,7 @@ public static class BuildingDefinitions
 			DisplayName = "兵营",
 			MaxHealth = 100,
 			SpawnInterval = 5f,
+			UnitTypeId = "Swordsman",
 		},
 		["ArcheryRange"] = new()
 		{
@@ -64,8 +62,7 @@ public static class BuildingDefinitions
 			MaxHealth = 120,
 			SpawnInterval = 6f,
 			SpawnCellOffset = new(1, 0),
-			SoldierDamage = 8,
-			SoldierAttackRange = 50f,
+			UnitTypeId = "Archer",
 		},
 		["Stable"] = new()
 		{
@@ -76,7 +73,7 @@ public static class BuildingDefinitions
 			MaxHealth = 150,
 			SpawnInterval = 5f,
 			SpawnCellOffset = new(1, 2),
-			SoldierSpeed = 120f,
+			UnitTypeId = "Cavalry",
 		},
 		["WolfDen"] = new()
 		{
@@ -86,9 +83,7 @@ public static class BuildingDefinitions
 			DisplayName = "狼穴",
 			MaxHealth = 90,
 			SpawnInterval = 6f,
-			SoldierDamage = 12,
-			SoldierSpeed = 95f,
-			SoldierHealth = 35,
+			UnitTypeId = "Werewolf",
 			HasNightCombat = true,
 		},
 		["BarracksT2"] = new()
@@ -99,6 +94,7 @@ public static class BuildingDefinitions
 			DisplayName = "强化兵营",
 			MaxHealth = 130,
 			SpawnInterval = 4f,
+			UnitTypeId = "HeavySwordsman",
 			FusionTier = 1,
 		},
 		["WolfDenT2"] = new()
@@ -109,9 +105,7 @@ public static class BuildingDefinitions
 			DisplayName = "强化狼穴",
 			MaxHealth = 120,
 			SpawnInterval = 5f,
-			SoldierDamage = 16,
-			SoldierSpeed = 95f,
-			SoldierHealth = 35,
+			UnitTypeId = "WerewolfLord",
 			HasNightCombat = true,
 			FusionTier = 1,
 		},
@@ -135,6 +129,8 @@ public static class BuildingDefinitions
 	public static float GetSpawnInterval(string typeId) => Get(typeId).SpawnInterval;
 
 	public static GridCellOffset GetSpawnCellOffset(string typeId) => Get(typeId).SpawnCellOffset;
+
+	public static string GetUnitTypeId(string typeId) => Get(typeId).UnitTypeId;
 
 	public static bool GetHasNightCombat(string typeId) => Get(typeId).HasNightCombat;
 

@@ -2,6 +2,14 @@ namespace CasualCastle.Domain.Battle;
 
 public static class CombatRules
 {
+	public static int CalculateDamage(int baseDamage, DamageType damageType, ArmorType armorType)
+	{
+		if (baseDamage <= 0)
+			return 0;
+		float multiplier = DamageMatrix.GetMultiplier(damageType, armorType);
+		return (int)(baseDamage * multiplier);
+	}
+
 	public static int ApplyDamage(int currentHealth, int damage)
 	{
 		if (damage <= 0 || currentHealth <= 0)
@@ -9,7 +17,10 @@ public static class CombatRules
 		return System.Math.Max(0, currentHealth - damage);
 	}
 
-	public static bool CanAttack(float attackTimer) => attackTimer <= 0f;
+	public static bool CanAttack(float attackTimer)
+	{
+		return attackTimer <= 0f;
+	}
 
 	public static float TickCooldown(float currentTimer, float delta)
 	{
@@ -18,5 +29,8 @@ public static class CombatRules
 		return currentTimer - delta;
 	}
 
-	public static float ResetCooldown(float cooldownDuration) => cooldownDuration;
+	public static float ResetCooldown(float cooldownDuration)
+	{
+		return cooldownDuration;
+	}
 }
