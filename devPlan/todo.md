@@ -1,6 +1,7 @@
 # 架构待办（TODO）
 
-长期架构与技术债 backlog。**当前进行中：** §2（详见 `currentTasks.md`）。
+当前任务详见 `currentTasks.md`
+这里是长期架构与技术债 backlog，只在用户明确要求的时候才做。
 
 ---
 
