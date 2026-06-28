@@ -1,3 +1,4 @@
+using CasualCastle.Adapters.Persistence;
 using CasualCastle.Domain.Shared;
 using CasualCastle.Domain.Building;
 using CasualCastle.Domain.Battle;
@@ -10,6 +11,8 @@ public static class CompositionRoot
 {
     public static ServiceProvider Build()
     {
+        GameDataLoader.Load();
+
         ServiceCollection services = new ServiceCollection();
 
         services.AddDomainShared();

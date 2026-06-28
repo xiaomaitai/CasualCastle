@@ -19,23 +19,12 @@ public sealed class FusionGroup
 
 public static class FusionRules
 {
-    private static FusionRecipe[] _recipes =
+    private static FusionRecipe[] _recipes = System.Array.Empty<FusionRecipe>();
+
+    public static void LoadRecipes(List<FusionRecipe> recipes)
     {
-        new()
-        {
-            MainTypeId = "Barracks",
-            MaterialTypeId = "Barracks",
-            MaterialCount = 1,
-            ResultTypeId = "BarracksT2",
-        },
-        new()
-        {
-            MainTypeId = "WolfDen",
-            MaterialTypeId = "WolfDen",
-            MaterialCount = 1,
-            ResultTypeId = "WolfDenT2",
-        },
-    };
+        _recipes = recipes.ToArray();
+    }
 
     public static IReadOnlyList<FusionRecipe> GetRecipes() => _recipes;
 
