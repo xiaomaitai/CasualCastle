@@ -17,6 +17,7 @@ public partial class Soldier : Area2D
 	public bool HasNightCombat { get; set; }
 
 	private AttackBehavior _attackBehavior;
+	private bool _statsPending;
 	private Vector2 _moveDirection;
 	private float _attackTimer;
 	private Soldier _targetEnemy;
@@ -41,6 +42,15 @@ public partial class Soldier : Area2D
 			? new RangedAttack(this)
 			: new MeleeAttack(this);
 
+		_statsPending = true;
+	}
+
+	private void ApplyPendingStats()
+	{
+		if (!_statsPending)
+			return;
+		_statsPending = false;
+
 		float displaySize = Data.DisplaySize();
 		if (_sprite != null)
 		{
@@ -63,6 +73,8 @@ public partial class Soldier : Area2D
 		_sprite = GetNodeOrNull<Sprite2D>("Sprite");
 		_collisionShape = GetNodeOrNull<CollisionShape2D>("CollisionShape");
 		_sleepZEffect = GetNodeOrNull<SoldierSleepZEffect>("SleepZEffect");
+
+		ApplyPendingStats();
 
 		AreaEntered += OnAreaEntered;
 		AreaExited += OnAreaExited;
