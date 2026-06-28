@@ -1,3 +1,4 @@
+using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Building;
 using Godot;
 
@@ -18,7 +19,7 @@ public sealed class HandUiController
     private int _selectedIndex = -1;
 
     public bool IsDragging => _dragging;
-    public bool IsPlacementActive => _dragging || CardSystem.Instance?.HasSelection == true;
+    public bool IsPlacementActive => _dragging || AdapterRegistry.Resolve<CardSystem>()?.HasSelection == true;
 
     public HandUiController(Node owner, CanvasLayer uiRoot)
     {
@@ -34,10 +35,10 @@ public sealed class HandUiController
             _handButtons[i].GuiInput += _handGuiInputHandlers[i];
         }
 
-        if (CardSystem.Instance != null)
+        if (AdapterRegistry.Resolve<CardSystem>() != null)
         {
-            CardSystem.Instance.HandChanged += RefreshDisplay;
-            CardSystem.Instance.SelectionChanged += OnSelectionChanged;
+            AdapterRegistry.Resolve<CardSystem>().HandChanged += RefreshDisplay;
+            AdapterRegistry.Resolve<CardSystem>().SelectionChanged += OnSelectionChanged;
             RefreshDisplay();
         }
     }
@@ -47,10 +48,10 @@ public sealed class HandUiController
         for (int i = 0; i < CardSystem.MaxHandSize; i++)
             _handButtons[i].GuiInput -= _handGuiInputHandlers[i];
 
-        if (CardSystem.Instance != null)
+        if (AdapterRegistry.Resolve<CardSystem>() != null)
         {
-            CardSystem.Instance.HandChanged -= RefreshDisplay;
-            CardSystem.Instance.SelectionChanged -= OnSelectionChanged;
+            AdapterRegistry.Resolve<CardSystem>().HandChanged -= RefreshDisplay;
+            AdapterRegistry.Resolve<CardSystem>().SelectionChanged -= OnSelectionChanged;
         }
     }
 
@@ -62,8 +63,8 @@ public sealed class HandUiController
         if (_inputBlocked)
         {
             CancelDrag();
-            CardSystem.Instance?.ClearSelection();
-            GameManager.Instance.PlayerCastle?.ClearPlacementPreview();
+            AdapterRegistry.Resolve<CardSystem>()?.ClearSelection();
+            AdapterRegistry.Resolve<GameManager>().PlayerCastle?.ClearPlacementPreview();
         }
     }
 
@@ -122,7 +123,7 @@ public sealed class HandUiController
         _dragging = false;
         _dragHandIndex = -1;
         _pendingHandIndex = -1;
-        GameManager.Instance.PlayerCastle?.ClearPlacementPreview();
+        AdapterRegistry.Resolve<GameManager>().PlayerCastle?.ClearPlacementPreview();
         RefreshHighlight();
         UpdatePlacementHint();
         return true;
@@ -136,10 +137,10 @@ public sealed class HandUiController
         if (mouseButton.ButtonIndex != MouseButton.Left)
             return false;
 
-        if (_inputBlocked || _dragging || GameManager.Instance.CurrentState == GameManager.GameState.GameOver)
+        if (_inputBlocked || _dragging || AdapterRegistry.Resolve<GameManager>().CurrentState == GameManager.GameState.GameOver)
             return false;
 
-        if (CardSystem.Instance?.HasSelection != true)
+        if (AdapterRegistry.Resolve<CardSystem>()?.HasSelection != true)
             return false;
 
         TryPlaceAtMouse(mouseButton.GlobalPosition);
@@ -148,10 +149,10 @@ public sealed class HandUiController
 
     private bool ClearSelection()
     {
-        if (CardSystem.Instance?.HasSelection != true)
+        if (AdapterRegistry.Resolve<CardSystem>()?.HasSelection != true)
             return false;
 
-        CardSystem.Instance.ClearSelection();
+        AdapterRegistry.Resolve<CardSystem>().ClearSelection();
         return true;
     }
 
@@ -160,7 +161,7 @@ public sealed class HandUiController
         if (_inputBlocked)
             return;
 
-        CardSystem.Instance?.SelectCard(handIndex);
+        AdapterRegistry.Resolve<CardSystem>()?.SelectCard(handIndex);
     }
 
     private void OnHandGuiInput(int handIndex, InputEvent @event)
@@ -170,10 +171,10 @@ public sealed class HandUiController
             || mouseButton.ButtonIndex != MouseButton.Left)
             return;
 
-        if (_inputBlocked || GameManager.Instance.CurrentState == GameManager.GameState.GameOver)
+        if (_inputBlocked || AdapterRegistry.Resolve<GameManager>().CurrentState == GameManager.GameState.GameOver)
             return;
 
-        if (CardSystem.Instance == null || handIndex >= CardSystem.Instance.Hand.Count)
+        if (AdapterRegistry.Resolve<CardSystem>() == null || handIndex >= AdapterRegistry.Resolve<CardSystem>().Hand.Count)
             return;
 
         _pendingHandIndex = handIndex;
@@ -201,28 +202,28 @@ public sealed class HandUiController
 
     private void TryCompleteDrag(Vector2 globalPosition)
     {
-        Castle playerCastle = GameManager.Instance.PlayerCastle;
-        if (playerCastle == null || CardSystem.Instance == null || _dragHandIndex < 0)
+        Castle playerCastle = AdapterRegistry.Resolve<GameManager>().PlayerCastle;
+        if (playerCastle == null || AdapterRegistry.Resolve<CardSystem>() == null || _dragHandIndex < 0)
             return;
 
         if (!playerCastle.TryGetGridFromGlobalPoint(globalPosition, out int gridX, out int gridY))
             return;
 
-        CardSystem.Instance.TryPlaceAtIndex(_dragHandIndex, playerCastle, gridX, gridY);
+        AdapterRegistry.Resolve<CardSystem>().TryPlaceAtIndex(_dragHandIndex, playerCastle, gridX, gridY);
     }
 
     private void RefreshDisplay()
     {
-        if (CardSystem.Instance == null)
+        if (AdapterRegistry.Resolve<CardSystem>() == null)
             return;
 
         for (int i = 0; i < CardSystem.MaxHandSize; i++)
         {
             Button button = _handButtons[i];
 
-            if (i < CardSystem.Instance.Hand.Count)
+            if (i < AdapterRegistry.Resolve<CardSystem>().Hand.Count)
             {
-                CardData card = CardSystem.Instance.Hand[i];
+                CardData card = AdapterRegistry.Resolve<CardSystem>().Hand[i];
                 button.Visible = true;
                 button.Text = card.Name;
                 button.Disabled = _inputBlocked;
@@ -263,12 +264,12 @@ public sealed class HandUiController
 
     private void UpdatePlacementPreview()
     {
-        Castle playerCastle = GameManager.Instance.PlayerCastle;
+        Castle playerCastle = AdapterRegistry.Resolve<GameManager>().PlayerCastle;
         if (playerCastle == null)
             return;
 
         bool showPreview = !_inputBlocked
-            && (_dragging || CardSystem.Instance?.HasSelection == true);
+            && (_dragging || AdapterRegistry.Resolve<CardSystem>()?.HasSelection == true);
         if (!showPreview)
         {
             playerCastle.ClearPlacementPreview();
@@ -283,33 +284,33 @@ public sealed class HandUiController
         }
 
         string buildingType = GetPreviewBuildingType();
-        bool valid = BuildingSystem.Instance?.CanPlace(playerCastle, buildingType, gridX, gridY) == true;
+        bool valid = AdapterRegistry.Resolve<BuildingSystem>()?.CanPlace(playerCastle, buildingType, gridX, gridY) == true;
         playerCastle.SetPlacementPreview(true, gridX, gridY, valid, buildingType);
     }
 
     private string GetPreviewBuildingType()
     {
-        if (CardSystem.Instance == null)
+        if (AdapterRegistry.Resolve<CardSystem>() == null)
             return "Barracks";
 
-        if (_dragging && _dragHandIndex >= 0 && _dragHandIndex < CardSystem.Instance.Hand.Count)
-            return CardSystem.Instance.Hand[_dragHandIndex].BuildingType;
+        if (_dragging && _dragHandIndex >= 0 && _dragHandIndex < AdapterRegistry.Resolve<CardSystem>().Hand.Count)
+            return AdapterRegistry.Resolve<CardSystem>().Hand[_dragHandIndex].BuildingType;
 
-        if (CardSystem.Instance.HasSelection)
-            return CardSystem.Instance.SelectedCard.BuildingType;
+        if (AdapterRegistry.Resolve<CardSystem>().HasSelection)
+            return AdapterRegistry.Resolve<CardSystem>().SelectedCard.BuildingType;
 
         return "Barracks";
     }
 
     private static void TryPlaceAtMouse(Vector2 globalPosition)
     {
-        Castle playerCastle = GameManager.Instance.PlayerCastle;
-        if (playerCastle == null || CardSystem.Instance == null)
+        Castle playerCastle = AdapterRegistry.Resolve<GameManager>().PlayerCastle;
+        if (playerCastle == null || AdapterRegistry.Resolve<CardSystem>() == null)
             return;
 
         if (!playerCastle.TryGetGridFromGlobalPoint(globalPosition, out int gridX, out int gridY))
             return;
 
-        CardSystem.Instance.TryPlaceSelected(playerCastle, gridX, gridY);
+        AdapterRegistry.Resolve<CardSystem>().TryPlaceSelected(playerCastle, gridX, gridY);
     }
 }

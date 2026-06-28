@@ -1,3 +1,4 @@
+using CasualCastle.Adapters.Godot;
 using Godot;
 using System;
 
@@ -68,7 +69,7 @@ public sealed class SettingsUiController
 
 	private void SyncFromSaved()
 	{
-		DisplaySettingsManager settings = DisplaySettingsManager.Instance;
+		DisplaySettingsManager settings = AdapterRegistry.Resolve<DisplaySettingsManager>();
 		_windowModeOption.Select(_windowModeOption.GetItemIndex((int)settings.WindowMode));
 		_resolutionOption.Select(settings.FindResolutionIndex(settings.OutputResolution));
 		_devModeCheck.ButtonPressed = DisplaySettingsManager.DevModeEnabled;
@@ -90,7 +91,7 @@ public sealed class SettingsUiController
 	{
 		DisplayWindowMode mode = (DisplayWindowMode)_windowModeOption.GetSelectedId();
 		Vector2I resolution = DisplaySettingsManager.OutputResolutions[_resolutionOption.Selected];
-		DisplaySettingsManager.Instance.SaveAndApply(mode, resolution);
+		AdapterRegistry.Resolve<DisplaySettingsManager>().SaveAndApply(mode, resolution);
 		DisplaySettingsManager.DevModeEnabled = _devModeCheck.ButtonPressed;
 	}
 

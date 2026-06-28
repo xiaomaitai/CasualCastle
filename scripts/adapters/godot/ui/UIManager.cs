@@ -1,3 +1,4 @@
+using CasualCastle.Adapters.Godot;
 using Godot;
 
 public partial class UIManager : Node2D
@@ -28,8 +29,8 @@ public partial class UIManager : Node2D
 
     public override void _ExitTree()
     {
-        if (GameManager.Instance != null)
-            GameManager.Instance.GameStateChanged -= OnGameStateChanged;
+        if (AdapterRegistry.Resolve<GameManager>() != null)
+            AdapterRegistry.Resolve<GameManager>().GameStateChanged -= OnGameStateChanged;
 
         _hudUi?.Dispose();
         if (_shopUi != null)
@@ -170,10 +171,10 @@ public partial class UIManager : Node2D
         _pauseMenuUi.OpenChanged += OnPauseMenuOpenChanged;
         _settingsUi.OpenChanged += OnSettingsOpenChanged;
 
-        if (GameManager.Instance != null)
-            GameManager.Instance.GameStateChanged += OnGameStateChanged;
+        if (AdapterRegistry.Resolve<GameManager>() != null)
+            AdapterRegistry.Resolve<GameManager>().GameStateChanged += OnGameStateChanged;
 
-        OnGameStateChanged(GameManager.Instance.CurrentState);
+        OnGameStateChanged(AdapterRegistry.Resolve<GameManager>().CurrentState);
     }
 
     public void OnGameStateChanged(GameManager.GameState state)
@@ -240,9 +241,9 @@ public partial class UIManager : Node2D
 
         _isChangingScene = true;
         SetProcessInput(false);
-        GameManager.Instance?.SetPaused(false);
-        CardSystem.Instance?.ResetHand();
-        BattleReportSystem.Instance?.DiscardCurrentReport();
+        AdapterRegistry.Resolve<GameManager>()?.SetPaused(false);
+        AdapterRegistry.Resolve<CardSystem>()?.ResetHand();
+        AdapterRegistry.Resolve<BattleReportSystem>()?.DiscardCurrentReport();
         GetTree().ChangeSceneToFile(TitleScene);
     }
 }

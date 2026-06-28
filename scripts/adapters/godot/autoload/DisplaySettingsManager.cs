@@ -1,3 +1,4 @@
+using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Shared;
 using Godot;
 using System;
@@ -30,6 +31,7 @@ public partial class DisplaySettingsManager : Node
 	public override void _Ready()
 	{
 		Instance = this;
+		AdapterRegistry.Register<DisplaySettingsManager>(this);
 		Load();
 		Apply();
 	}
@@ -37,7 +39,10 @@ public partial class DisplaySettingsManager : Node
 	public override void _ExitTree()
 	{
 		if (Instance == this)
+		{
+			AdapterRegistry.Unregister<DisplaySettingsManager>(this);
 			Instance = null;
+		}
 	}
 
 	public void SaveAndApply(DisplayWindowMode mode, Vector2I resolution)

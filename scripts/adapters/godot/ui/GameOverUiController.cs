@@ -1,3 +1,4 @@
+using CasualCastle.Adapters.Godot;
 using Godot;
 using System;
 
@@ -37,8 +38,8 @@ public sealed class GameOverUiController
 
         if (show)
         {
-            _label.Text = GameManager.Instance.PlayerHealth > 0 ? "胜利！" : "失败！";
-            bool hasSnapshots = BattleReportSystem.Instance?.HasCurrentSnapshots == true;
+            _label.Text = AdapterRegistry.Resolve<GameManager>().PlayerHealth > 0 ? "胜利！" : "失败！";
+            bool hasSnapshots = AdapterRegistry.Resolve<BattleReportSystem>()?.HasCurrentSnapshots == true;
             _saveReportButton.Visible = hasSnapshots;
             _discardAndBackButton.Text = hasSnapshots ? "不保存并返回标题" : "返回标题";
         }
@@ -46,13 +47,13 @@ public sealed class GameOverUiController
 
     private void OnSaveReportConfirmed()
     {
-        BattleReportSystem.Instance?.SaveCurrentReport();
+        AdapterRegistry.Resolve<BattleReportSystem>()?.SaveCurrentReport();
         _goToTitle();
     }
 
     private void OnDiscardReportConfirmed()
     {
-        BattleReportSystem.Instance?.DiscardCurrentReport();
+        AdapterRegistry.Resolve<BattleReportSystem>()?.DiscardCurrentReport();
         _goToTitle();
     }
 }

@@ -1,3 +1,4 @@
+using CasualCastle.Adapters.Godot;
 using Godot;
 using System;
 
@@ -21,18 +22,18 @@ public sealed class HudUiController
 
         _skipPhaseButton.Pressed += OnSkipPhasePressed;
 
-        GameManager.Instance.PlayerHealthChanged += UpdatePlayerHealth;
-        GameManager.Instance.EnemyHealthChanged += UpdateEnemyHealth;
-        GameManager.Instance.PhaseChanged += OnPhaseChanged;
+        AdapterRegistry.Resolve<GameManager>().PlayerHealthChanged += UpdatePlayerHealth;
+        AdapterRegistry.Resolve<GameManager>().EnemyHealthChanged += UpdateEnemyHealth;
+        AdapterRegistry.Resolve<GameManager>().PhaseChanged += OnPhaseChanged;
 
-        UpdatePlayerHealth(GameManager.Instance.PlayerHealth);
-        UpdateEnemyHealth(GameManager.Instance.EnemyHealth);
+        UpdatePlayerHealth(AdapterRegistry.Resolve<GameManager>().PlayerHealth);
+        UpdateEnemyHealth(AdapterRegistry.Resolve<GameManager>().EnemyHealth);
         UpdatePhaseDisplay();
 
-        if (ShopSystem.Instance != null)
+        if (AdapterRegistry.Resolve<ShopSystem>() != null)
         {
-            ShopSystem.Instance.GoldChanged += UpdateGoldDisplay;
-            UpdateGoldDisplay(ShopSystem.Instance.Gold);
+            AdapterRegistry.Resolve<ShopSystem>().GoldChanged += UpdateGoldDisplay;
+            UpdateGoldDisplay(AdapterRegistry.Resolve<ShopSystem>().Gold);
         }
     }
 
@@ -40,12 +41,12 @@ public sealed class HudUiController
     {
         _skipPhaseButton.Pressed -= OnSkipPhasePressed;
 
-        GameManager.Instance.PlayerHealthChanged -= UpdatePlayerHealth;
-        GameManager.Instance.EnemyHealthChanged -= UpdateEnemyHealth;
-        GameManager.Instance.PhaseChanged -= OnPhaseChanged;
+        AdapterRegistry.Resolve<GameManager>().PlayerHealthChanged -= UpdatePlayerHealth;
+        AdapterRegistry.Resolve<GameManager>().EnemyHealthChanged -= UpdateEnemyHealth;
+        AdapterRegistry.Resolve<GameManager>().PhaseChanged -= OnPhaseChanged;
 
-        if (ShopSystem.Instance != null)
-            ShopSystem.Instance.GoldChanged -= UpdateGoldDisplay;
+        if (AdapterRegistry.Resolve<ShopSystem>() != null)
+            AdapterRegistry.Resolve<ShopSystem>().GoldChanged -= UpdateGoldDisplay;
     }
 
     public void Process()
@@ -60,7 +61,7 @@ public sealed class HudUiController
 
     private void OnSkipPhasePressed()
     {
-        GameManager.Instance.AdvancePhase();
+        AdapterRegistry.Resolve<GameManager>().AdvancePhase();
     }
 
     private void OnPhaseChanged(GameManager.GamePhase phase)
@@ -70,13 +71,13 @@ public sealed class HudUiController
 
     private void UpdatePlayerHealth(int health)
     {
-        _playerHealthBar.MaxValue = GameManager.Instance.PlayerMaxHealth;
+        _playerHealthBar.MaxValue = AdapterRegistry.Resolve<GameManager>().PlayerMaxHealth;
         _playerHealthBar.SetValue(health);
     }
 
     private void UpdateEnemyHealth(int health)
     {
-        _enemyHealthBar.MaxValue = GameManager.Instance.EnemyMaxHealth;
+        _enemyHealthBar.MaxValue = AdapterRegistry.Resolve<GameManager>().EnemyMaxHealth;
         _enemyHealthBar.SetValue(health);
     }
 
@@ -87,8 +88,8 @@ public sealed class HudUiController
 
     private void UpdatePhaseDisplay()
     {
-        _phaseLabel.Text = GameManager.Instance.IsDay ? "白天" : "夜晚";
-        _phaseTimerLabel.Text = FormatTime(GameManager.Instance.PhaseTimeRemaining);
+        _phaseLabel.Text = AdapterRegistry.Resolve<GameManager>().IsDay ? "白天" : "夜晚";
+        _phaseTimerLabel.Text = FormatTime(AdapterRegistry.Resolve<GameManager>().PhaseTimeRemaining);
     }
 
     private static string FormatTime(float seconds)

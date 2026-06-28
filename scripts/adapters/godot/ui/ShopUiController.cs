@@ -1,3 +1,4 @@
+using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Building;
 using Godot;
 using System;
@@ -47,15 +48,15 @@ public sealed class ShopUiController
         _closeButton.Pressed += OnClosePressed;
         _refreshButton.Pressed += OnRefreshPressed;
 
-        if (ShopSystem.Instance != null)
+        if (AdapterRegistry.Resolve<ShopSystem>() != null)
         {
-            ShopSystem.Instance.GoldChanged += UpdateGoldDisplay;
-            ShopSystem.Instance.ShopAvailabilityChanged += UpdateShopButtonAvailability;
-            ShopSystem.Instance.ShopOpenRequested += Open;
-            ShopSystem.Instance.ShopOffersChanged += RefreshOffers;
+            AdapterRegistry.Resolve<ShopSystem>().GoldChanged += UpdateGoldDisplay;
+            AdapterRegistry.Resolve<ShopSystem>().ShopAvailabilityChanged += UpdateShopButtonAvailability;
+            AdapterRegistry.Resolve<ShopSystem>().ShopOpenRequested += Open;
+            AdapterRegistry.Resolve<ShopSystem>().ShopOffersChanged += RefreshOffers;
 
-            UpdateGoldDisplay(ShopSystem.Instance.Gold);
-            UpdateShopButtonAvailability(ShopSystem.Instance.IsShopAvailable);
+            UpdateGoldDisplay(AdapterRegistry.Resolve<ShopSystem>().Gold);
+            UpdateShopButtonAvailability(AdapterRegistry.Resolve<ShopSystem>().IsShopAvailable);
             RefreshOffers();
         }
     }
@@ -69,12 +70,12 @@ public sealed class ShopUiController
         for (int i = 0; i < ShopSystem.OfferCount; i++)
             _offerLabels[i].GuiInput -= _offerGuiInputHandlers[i];
 
-        if (ShopSystem.Instance != null)
+        if (AdapterRegistry.Resolve<ShopSystem>() != null)
         {
-            ShopSystem.Instance.GoldChanged -= UpdateGoldDisplay;
-            ShopSystem.Instance.ShopAvailabilityChanged -= UpdateShopButtonAvailability;
-            ShopSystem.Instance.ShopOpenRequested -= Open;
-            ShopSystem.Instance.ShopOffersChanged -= RefreshOffers;
+            AdapterRegistry.Resolve<ShopSystem>().GoldChanged -= UpdateGoldDisplay;
+            AdapterRegistry.Resolve<ShopSystem>().ShopAvailabilityChanged -= UpdateShopButtonAvailability;
+            AdapterRegistry.Resolve<ShopSystem>().ShopOpenRequested -= Open;
+            AdapterRegistry.Resolve<ShopSystem>().ShopOffersChanged -= RefreshOffers;
         }
     }
 
@@ -86,7 +87,7 @@ public sealed class ShopUiController
             Close();
 
         CancelDrag();
-        UpdateShopButtonAvailability(ShopSystem.Instance?.IsShopAvailable == true);
+        UpdateShopButtonAvailability(AdapterRegistry.Resolve<ShopSystem>()?.IsShopAvailable == true);
     }
 
     public void Process()
@@ -128,7 +129,7 @@ public sealed class ShopUiController
 
         _dragging = false;
         _dragSlotIndex = -1;
-        GameManager.Instance.PlayerCastle?.ClearPlacementPreview();
+        AdapterRegistry.Resolve<GameManager>().PlayerCastle?.ClearPlacementPreview();
         return true;
     }
 
@@ -140,31 +141,31 @@ public sealed class ShopUiController
         IsOpen = false;
         _panel.Visible = false;
         CancelDrag();
-        UpdateShopButtonAvailability(ShopSystem.Instance?.IsShopAvailable == true);
+        UpdateShopButtonAvailability(AdapterRegistry.Resolve<ShopSystem>()?.IsShopAvailable == true);
         OpenChanged?.Invoke(IsOpen);
         return true;
     }
 
     private void Open()
     {
-        if (IsOpen || _gameOver || ShopSystem.Instance?.IsShopAvailable != true)
+        if (IsOpen || _gameOver || AdapterRegistry.Resolve<ShopSystem>()?.IsShopAvailable != true)
             return;
 
         IsOpen = true;
         _panel.Visible = true;
-        UpdateShopButtonAvailability(ShopSystem.Instance.IsShopAvailable);
+        UpdateShopButtonAvailability(AdapterRegistry.Resolve<ShopSystem>().IsShopAvailable);
         RefreshOffers();
         OpenChanged?.Invoke(IsOpen);
     }
 
     private void OnShopButtonPressed()
     {
-        ShopSystem.Instance?.RequestOpenShop();
+        AdapterRegistry.Resolve<ShopSystem>()?.RequestOpenShop();
     }
 
     private void OnRefreshPressed()
     {
-        ShopSystem.Instance?.RefreshOffers();
+        AdapterRegistry.Resolve<ShopSystem>()?.RefreshOffers();
     }
 
     private void OnClosePressed()
@@ -174,7 +175,7 @@ public sealed class ShopUiController
 
     private void OnBuyButtonPressed(int slotIndex)
     {
-        ShopSystem.Instance?.TryPurchase(slotIndex);
+        AdapterRegistry.Resolve<ShopSystem>()?.TryPurchase(slotIndex);
     }
 
     private void OnOfferGuiInput(int slotIndex, InputEvent @event)
@@ -184,11 +185,11 @@ public sealed class ShopUiController
             || mouseButton.ButtonIndex != MouseButton.Left)
             return;
 
-        if (_gameOver || ShopSystem.Instance?.IsShopAvailable != true)
+        if (_gameOver || AdapterRegistry.Resolve<ShopSystem>()?.IsShopAvailable != true)
             return;
 
-        CardData offer = ShopSystem.Instance.GetOffer(slotIndex);
-        if (offer == null || !ShopSystem.Instance.CanAfford(offer.Cost))
+        CardData offer = AdapterRegistry.Resolve<ShopSystem>().GetOffer(slotIndex);
+        if (offer == null || !AdapterRegistry.Resolve<ShopSystem>().CanAfford(offer.Cost))
             return;
 
         _dragging = true;
@@ -197,19 +198,19 @@ public sealed class ShopUiController
 
     private void TryCompleteDrag(Vector2 globalPosition)
     {
-        Castle playerCastle = GameManager.Instance.PlayerCastle;
-        if (playerCastle == null || ShopSystem.Instance == null || _dragSlotIndex < 0)
+        Castle playerCastle = AdapterRegistry.Resolve<GameManager>().PlayerCastle;
+        if (playerCastle == null || AdapterRegistry.Resolve<ShopSystem>() == null || _dragSlotIndex < 0)
             return;
 
         if (!playerCastle.TryGetGridFromGlobalPoint(globalPosition, out int gridX, out int gridY))
             return;
 
-        ShopSystem.Instance.TryPlaceOfferDirect(_dragSlotIndex, playerCastle, gridX, gridY);
+        AdapterRegistry.Resolve<ShopSystem>().TryPlaceOfferDirect(_dragSlotIndex, playerCastle, gridX, gridY);
     }
 
     private void UpdateDragPreview()
     {
-        Castle playerCastle = GameManager.Instance.PlayerCastle;
+        Castle playerCastle = AdapterRegistry.Resolve<GameManager>().PlayerCastle;
         if (playerCastle == null)
             return;
 
@@ -220,9 +221,9 @@ public sealed class ShopUiController
             return;
         }
 
-        CardData offer = ShopSystem.Instance.GetOffer(_dragSlotIndex);
+        CardData offer = AdapterRegistry.Resolve<ShopSystem>().GetOffer(_dragSlotIndex);
         string buildingType = offer?.BuildingType ?? "Barracks";
-        bool valid = BuildingSystem.Instance?.CanPlace(playerCastle, buildingType, gridX, gridY) == true;
+        bool valid = AdapterRegistry.Resolve<BuildingSystem>()?.CanPlace(playerCastle, buildingType, gridX, gridY) == true;
         playerCastle.SetPlacementPreview(true, gridX, gridY, valid, buildingType);
     }
 
@@ -240,17 +241,17 @@ public sealed class ShopUiController
 
     private void RefreshOffers()
     {
-        if (ShopSystem.Instance == null)
+        if (AdapterRegistry.Resolve<ShopSystem>() == null)
             return;
 
         for (int i = 0; i < ShopSystem.OfferCount; i++)
         {
-            CardData offer = ShopSystem.Instance.GetOffer(i);
+            CardData offer = AdapterRegistry.Resolve<ShopSystem>().GetOffer(i);
             _offerLabels[i].Text = offer == null
                 ? "暂无商品"
                 : $"{offer.Name}  费用：{offer.Cost}";
 
-            bool canBuy = offer != null && ShopSystem.Instance.CanAfford(offer.Cost);
+            bool canBuy = offer != null && AdapterRegistry.Resolve<ShopSystem>().CanAfford(offer.Cost);
             _buyButtons[i].Disabled = offer == null || !canBuy;
             _buyButtons[i].Text = canBuy ? "购买" : "金币不足";
         }

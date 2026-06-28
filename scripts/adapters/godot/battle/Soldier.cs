@@ -1,3 +1,4 @@
+using CasualCastle.Adapters.Godot;
 using Godot;
 using System;
 
@@ -45,16 +46,16 @@ public partial class Soldier : Area2D
 		AreaEntered += OnAreaEntered;
 		AreaExited += OnAreaExited;
 
-		if (GameManager.Instance != null)
-			GameManager.Instance.PhaseChanged += OnPhaseChanged;
+		if (AdapterRegistry.Resolve<GameManager>() != null)
+			AdapterRegistry.Resolve<GameManager>().PhaseChanged += OnPhaseChanged;
 
 		UpdateSleepVisual();
 	}
 
 	public override void _ExitTree()
 	{
-		if (GameManager.Instance != null)
-			GameManager.Instance.PhaseChanged -= OnPhaseChanged;
+		if (AdapterRegistry.Resolve<GameManager>() != null)
+			AdapterRegistry.Resolve<GameManager>().PhaseChanged -= OnPhaseChanged;
 	}
 
 	private void OnPhaseChanged(GameManager.GamePhase phase)
@@ -62,13 +63,13 @@ public partial class Soldier : Area2D
 		UpdateSleepVisual();
 	}
 
-	private bool IsActive => NightSystem.Instance?.CanUnitWork(HasNightCombat) ?? true;
+	private bool IsActive => AdapterRegistry.Resolve<NightSystem>()?.CanUnitWork(HasNightCombat) ?? true;
 
 	private bool IsSleeping =>
 		IsAlive
-		&& GameManager.Instance?.CurrentState == GameManager.GameState.Playing
-		&& GameManager.Instance.IsNight
-		&& !GameManager.Instance.IsPaused
+		&& AdapterRegistry.Resolve<GameManager>()?.CurrentState == GameManager.GameState.Playing
+		&& AdapterRegistry.Resolve<GameManager>().IsNight
+		&& !AdapterRegistry.Resolve<GameManager>().IsPaused
 		&& !HasNightCombat;
 
 	private void UpdateSleepVisual()
@@ -92,7 +93,7 @@ public partial class Soldier : Area2D
 	public override void _Process(double delta)
 	{
 		if (!IsAlive) return;
-		if (GameManager.Instance?.CurrentState == GameManager.GameState.GameOver) return;
+		if (AdapterRegistry.Resolve<GameManager>()?.CurrentState == GameManager.GameState.GameOver) return;
 
 		UpdateSleepVisual();
 		if (!IsActive) return;

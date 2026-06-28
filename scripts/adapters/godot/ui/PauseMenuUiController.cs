@@ -1,3 +1,4 @@
+using CasualCastle.Adapters.Godot;
 using Godot;
 using System;
 
@@ -55,13 +56,13 @@ public sealed class PauseMenuUiController
 
     public bool Open()
     {
-        if (IsOpen || _gameOver || GameManager.Instance?.CurrentState != GameManager.GameState.Playing)
+        if (IsOpen || _gameOver || AdapterRegistry.Resolve<GameManager>()?.CurrentState != GameManager.GameState.Playing)
             return false;
 
         IsOpen = true;
         _overlay.Visible = true;
         _panel.Visible = true;
-        GameManager.Instance.SetPaused(true);
+        AdapterRegistry.Resolve<GameManager>().SetPaused(true);
         OpenChanged?.Invoke(true);
         return true;
     }
@@ -73,7 +74,7 @@ public sealed class PauseMenuUiController
 
         IsOpen = false;
         Hide();
-        GameManager.Instance?.SetPaused(false);
+        AdapterRegistry.Resolve<GameManager>()?.SetPaused(false);
         OpenChanged?.Invoke(false);
         return true;
     }

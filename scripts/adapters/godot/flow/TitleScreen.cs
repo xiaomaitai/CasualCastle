@@ -1,3 +1,4 @@
+using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.History;
 using Godot;
 using System.Collections.Generic;
@@ -79,7 +80,7 @@ public partial class TitleScreen : Control
 		_reportOption.SetItemMetadata(0, "");
 		_reportOption.Selected = 0;
 
-		List<BattleReport> reports = BattleReportStorage.Instance.LoadAll();
+		List<BattleReport> reports = GameManager.Get<IBattleReportRepository>()?.LoadAll() ?? new();
 		for (int i = 0; i < reports.Count; i++)
 		{
 			BattleReport report = reports[i];
@@ -91,19 +92,19 @@ public partial class TitleScreen : Control
 
 	private void ApplySelectedReportToGameManager()
 	{
-		if (_reportOption == null || GameManager.Instance == null)
+		if (_reportOption == null || AdapterRegistry.Resolve<GameManager>() == null)
 			return;
 
 		int selectedIndex = _reportOption.Selected;
 		if (selectedIndex <= 0)
 		{
-			GameManager.Instance.SetPendingReplayReportId("");
+			AdapterRegistry.Resolve<GameManager>().SetPendingReplayReportId("");
 			return;
 		}
 
 		Variant metadata = _reportOption.GetItemMetadata(selectedIndex);
 		string reportId = metadata.VariantType == Variant.Type.Nil ? "" : metadata.AsString();
-		GameManager.Instance.SetPendingReplayReportId(reportId);
+		AdapterRegistry.Resolve<GameManager>().SetPendingReplayReportId(reportId);
 	}
 
 	private async System.Threading.Tasks.Task ForceClearMainGameResidue()

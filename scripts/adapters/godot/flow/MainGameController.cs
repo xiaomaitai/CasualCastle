@@ -1,3 +1,4 @@
+using CasualCastle.Adapters.Godot;
 using Godot;
 
 public partial class MainGameController : Node2D
@@ -8,13 +9,13 @@ public partial class MainGameController : Node2D
         Castle playerCastle = GetNode<Castle>("Battlefield/PlayerSide/PlayerCastle");
         Castle enemyCastle = GetNode<Castle>("Battlefield/EnemySide/EnemyCastle");
 
-        GameManager.Instance.StartGameSession(battlefield, playerCastle, enemyCastle);
-        AdjacentSystem.Instance?.RefreshCastle(playerCastle);
-        AdjacentSystem.Instance?.RefreshCastle(enemyCastle);
+        AdapterRegistry.Resolve<GameManager>().StartGameSession(battlefield, playerCastle, enemyCastle);
+        AdapterRegistry.Resolve<AdjacentSystem>()?.RefreshCastle(playerCastle);
+        AdapterRegistry.Resolve<AdjacentSystem>()?.RefreshCastle(enemyCastle);
     }
 
     public override void _ExitTree()
     {
-        GameManager.Instance.ClearGameSession();
+        AdapterRegistry.Resolve<GameManager>().ClearGameSession();
     }
 }

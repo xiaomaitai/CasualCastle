@@ -12,7 +12,7 @@
 - [x] 项目引用无循环（Shared ← Building ← Battle/History，单向）
 - [x] 三层保留：`scripts/domain/`（4 项目）、`scripts/ports/`、`scripts/adapters/`
 - [x] 核心 adapter 间 `static Instance` 已消除（单例系统全部使用 AdapterRegistry）
-- [~] UI 层 `static Instance` 逐步清理（低优先级，~20 处，不影响核心架构）
+- [x] UI 层 `static Instance` 全部替换为 AdapterRegistry（72 处 → 0）
 
 ---
 
@@ -102,6 +102,14 @@ Domain 拆为 4 个 C# 项目，MS DI + AdapterRegistry 双层注入：
 - 设置面板增加 CheckBox
 - `GameManager` P 键作弊产兵 → DevModeEnabled 门控
 - `DevInputLogger` 按键日志 → DevModeEnabled 门控
+
+---
+
+## Phase 5: UI static Instance 全面清理 ✅
+
+- `scripts/` 下所有 `.Instance` 直调（72 处）替换为 `AdapterRegistry.Resolve<T>()` 或 `GameManager.Get<T>()`
+- `DisplaySettingsManager` 注册到 AdapterRegistry
+- `grep -r "\.Instance" scripts/` 返回空
 
 ---
 
