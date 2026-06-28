@@ -10,6 +10,7 @@ public partial class DevInputLogger : Node
 
 	public override void _Input(InputEvent @event)
 	{
+		if (!DisplaySettingsManager.DevModeEnabled) return;
 		if (@event is not InputEventKey keyEvent || !keyEvent.Pressed || keyEvent.Echo)
 			return;
 

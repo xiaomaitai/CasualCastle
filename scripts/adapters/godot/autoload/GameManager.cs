@@ -95,6 +95,7 @@ public partial class GameManager : Node2D, IGameState
     public override void _Input(InputEvent @event)
     {
         if (CurrentState != GameState.Playing) return;
+        if (!DisplaySettingsManager.DevModeEnabled) return;
         if (@event is not InputEventKey keyEvent || !keyEvent.Pressed || keyEvent.Echo) return;
         if (!IsCheatKey(keyEvent)) return;
 

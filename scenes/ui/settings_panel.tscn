@@ -82,6 +82,22 @@ offset_top = 152.0
 offset_right = 552.0
 offset_bottom = 196.0
 
+[node name="DevModeLabel" type="Label" parent="Panel"]
+layout_mode = 0
+offset_left = 48.0
+offset_top = 228.0
+offset_right = 200.0
+offset_bottom = 264.0
+theme_override_font_sizes/font_size = 20
+text = "开发者模式"
+
+[node name="DevModeCheck" type="CheckBox" parent="Panel"]
+layout_mode = 0
+offset_left = 220.0
+offset_top = 224.0
+offset_right = 300.0
+offset_bottom = 268.0
+
 [node name="ApplyButton" type="Button" parent="Panel"]
 layout_mode = 0
 offset_left = 96.0

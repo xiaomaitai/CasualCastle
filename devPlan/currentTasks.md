@@ -1,5 +1,6 @@
 # 当前任务
 
+每次更换当前任务时，清理掉之前任务残留。
 **当前焦点：C# 项目级模块拆分 + DI 依赖注入（`todo.md` §2）。**
 
 目标：保留 `scripts/domain/`、`scripts/ports/`、`scripts/adapters/` 三层。domain 拆为 4 个项目，用 `Microsoft.Extensions.DependencyInjection` 替代静态 `Instance`。

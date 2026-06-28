@@ -6,6 +6,7 @@ public sealed class SettingsUiController
 	private readonly Control _root;
 	private readonly OptionButton _windowModeOption;
 	private readonly OptionButton _resolutionOption;
+	private readonly CheckBox _devModeCheck;
 	private readonly Button _applyButton;
 	private readonly Button _backButton;
 
@@ -17,6 +18,7 @@ public sealed class SettingsUiController
 		_root = root;
 		_windowModeOption = root.GetNode<OptionButton>("Panel/WindowModeOption");
 		_resolutionOption = root.GetNode<OptionButton>("Panel/ResolutionOption");
+		_devModeCheck = root.GetNode<CheckBox>("Panel/DevModeCheck");
 		_applyButton = root.GetNode<Button>("Panel/ApplyButton");
 		_backButton = root.GetNode<Button>("Panel/BackButton");
 
@@ -69,6 +71,7 @@ public sealed class SettingsUiController
 		DisplaySettingsManager settings = DisplaySettingsManager.Instance;
 		_windowModeOption.Select(_windowModeOption.GetItemIndex((int)settings.WindowMode));
 		_resolutionOption.Select(settings.FindResolutionIndex(settings.OutputResolution));
+		_devModeCheck.ButtonPressed = DisplaySettingsManager.DevModeEnabled;
 		UpdateResolutionEnabled();
 	}
 
@@ -88,6 +91,7 @@ public sealed class SettingsUiController
 		DisplayWindowMode mode = (DisplayWindowMode)_windowModeOption.GetSelectedId();
 		Vector2I resolution = DisplaySettingsManager.OutputResolutions[_resolutionOption.Selected];
 		DisplaySettingsManager.Instance.SaveAndApply(mode, resolution);
+		DisplaySettingsManager.DevModeEnabled = _devModeCheck.ButtonPressed;
 	}
 
 	private void OnBackPressed() => Close();

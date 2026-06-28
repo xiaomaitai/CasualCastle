@@ -11,6 +11,7 @@ public enum DisplayWindowMode
 public partial class DisplaySettingsManager : Node
 {
 	public static DisplaySettingsManager Instance { get; private set; }
+	public static bool DevModeEnabled { get; set; }
 
 	public static readonly Vector2I[] OutputResolutions =
 	{
