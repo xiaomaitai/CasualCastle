@@ -11,30 +11,29 @@ public partial class InitManager : Node
     {
         GameManager gm = AdapterRegistry.Resolve<GameManager>();
 
+        BuildingFactory buildingFactory = new BuildingFactory();
+
+        BattleReportService reportService = new BattleReportService(GameManager.Get<IBattleReportRepository>());
+        AdapterRegistry.Register<BattleReportService>(reportService);
+
+        ReplayService replayService = new ReplayService(reportService);
+        AdapterRegistry.Register<ReplayService>(replayService);
+
+        AdjacencyService adjacencyService = new AdjacencyService();
+        AdapterRegistry.Register<AdjacencyService>(adjacencyService);
+
         AddChild(new BuildingSystem());
         BuildingSystem buildingSystem = AdapterRegistry.Resolve<BuildingSystem>();
 
         AddChild(new BattleReportSystem());
-        BattleReportSystem battleReport = AdapterRegistry.Resolve<BattleReportSystem>();
-
-        BuildingFactory buildingFactory = new BuildingFactory();
 
         HandService handService = new HandService(
-            new CastlePlacementAdapter(gm.PlayerCastle, buildingSystem));
+            new CastlePlacementAdapter(buildingSystem));
+        AdapterRegistry.Register<HandService>(handService);
 
         ShopService shopService = new ShopService(handService);
-
-        BattleReportService reportService = new BattleReportService(GameManager.Get<IBattleReportRepository>());
-
-        ReplayService replayService = new ReplayService(reportService);
-
-        AdjacencyService adjacencyService = new AdjacencyService();
-
-        AdapterRegistry.Register<HandService>(handService);
         AdapterRegistry.Register<ShopService>(shopService);
-        AdapterRegistry.Register<BattleReportService>(reportService);
-        AdapterRegistry.Register<ReplayService>(replayService);
-        AdapterRegistry.Register<AdjacencyService>(adjacencyService);
+
         AdapterRegistry.Register<IBuildingFactory>(buildingFactory);
 
         gm.PhaseChanged += phase =>
