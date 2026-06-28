@@ -17,6 +17,8 @@
 | 架构 P3 | 显示/缩放重构，删除 deprecated shim | ✅ |
 | 架构 P4 | 开发者模式开关 | ✅ |
 | 架构 P5 | static Instance 全部替换为 AdapterRegistry | ✅ |
+| 架构 P6 | 领域服务层迁移（6 个 System → Service） | ✅ |
+| 架构 P7 | 战斗系统 B1-B6（多兵种/远程/克制/表现/SQLite） | ✅ |
 
 ## 后续方向
 

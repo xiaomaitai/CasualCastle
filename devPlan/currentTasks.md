@@ -1,6 +1,6 @@
 # 当前任务
 
-**当前焦点：B6 — SQLite 数据层（`devPlan/outline/c03BattleSystemRoadmap.md`）。**
+**战斗系统开发全部完成。当前无进行中任务。**
 
 ---
 
@@ -111,4 +111,4 @@ CompositionRoot.Build()
 - [x] `dotnet test` 6/6 通过
 - [x] 4 个 domain 项目零 `using Godot`
 - [x] 战斗系统 B1-B5 + 碰撞 + 移动 完成
-- [ ] B6 SQLite 数据层
+- [x] B6 SQLite 数据层 ✅
