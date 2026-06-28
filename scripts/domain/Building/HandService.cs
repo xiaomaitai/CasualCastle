@@ -1,36 +1,26 @@
-using CasualCastle.Domain.Building;
-using CasualCastle.Adapters.Godot;
-using Godot;
+using System;
 using System.Collections.Generic;
 
-public partial class CardSystem : Node
+namespace CasualCastle.Domain.Building;
+
+public class HandService
 {
     public const int MaxHandSize = 7;
 
-    [Signal]
-    public delegate void HandChangedEventHandler();
-
-    [Signal]
-    public delegate void SelectionChangedEventHandler(int selectedIndex);
+    public event Action HandChanged;
+    public event Action<int> SelectionChanged;
 
     private readonly List<CardData> _hand = new();
+    private readonly IBuildingPlacement _placement;
     private int _selectedIndex = -1;
-
-    private BuildingSystem _buildingSystem;
 
     public IReadOnlyList<CardData> Hand => _hand;
     public bool HasSelection => _selectedIndex >= 0 && _selectedIndex < _hand.Count;
     public CardData SelectedCard => HasSelection ? _hand[_selectedIndex] : null;
 
-    public override void _Ready()
+    public HandService(IBuildingPlacement placement)
     {
-        AdapterRegistry.Register<CardSystem>(this);
-        _buildingSystem = AdapterRegistry.Resolve<BuildingSystem>();
-    }
-
-    public override void _ExitTree()
-    {
-        AdapterRegistry.Unregister<CardSystem>(this);
+        _placement = placement;
     }
 
     public bool TryAddCard(CardData card)
@@ -39,7 +29,7 @@ public partial class CardSystem : Node
             return false;
 
         _hand.Add(CloneCard(card));
-        EmitSignal(SignalName.HandChanged);
+        HandChanged?.Invoke();
         return true;
     }
 
@@ -58,7 +48,7 @@ public partial class CardSystem : Node
         }
 
         _selectedIndex = index;
-        EmitSignal(SignalName.SelectionChanged, _selectedIndex);
+        SelectionChanged?.Invoke(_selectedIndex);
     }
 
     public void ClearSelection()
@@ -67,24 +57,24 @@ public partial class CardSystem : Node
             return;
 
         _selectedIndex = -1;
-        EmitSignal(SignalName.SelectionChanged, _selectedIndex);
+        SelectionChanged?.Invoke(_selectedIndex);
     }
 
-    public bool TryPlaceSelected(Castle castle, int gridX, int gridY)
+    public bool TryPlaceSelected(int gridX, int gridY)
     {
         if (!HasSelection)
             return false;
 
-        return TryPlaceAtIndex(_selectedIndex, castle, gridX, gridY);
+        return TryPlaceAtIndex(_selectedIndex, gridX, gridY);
     }
 
-    public bool TryPlaceAtIndex(int index, Castle castle, int gridX, int gridY)
+    public bool TryPlaceAtIndex(int index, int gridX, int gridY)
     {
         if (index < 0 || index >= _hand.Count)
             return false;
 
         CardData card = _hand[index];
-        if (!TryPlaceCard(card, castle, gridX, gridY))
+        if (!TryPlaceCard(card, gridX, gridY))
             return false;
 
         _hand.RemoveAt(index);
@@ -93,25 +83,25 @@ public partial class CardSystem : Node
         else if (_selectedIndex > index)
             _selectedIndex--;
 
-        EmitSignal(SignalName.HandChanged);
-        EmitSignal(SignalName.SelectionChanged, _selectedIndex);
+        HandChanged?.Invoke();
+        SelectionChanged?.Invoke(_selectedIndex);
         return true;
     }
 
-    public bool TryPlaceCard(CardData card, Castle castle, int gridX, int gridY)
+    public bool TryPlaceCard(CardData card, int gridX, int gridY)
     {
-        if (card == null || castle == null || !castle.IsPlayerCastle)
+        if (card == null)
             return false;
 
-        return _buildingSystem.TryPlace(castle, card.BuildingType, gridX, gridY);
+        return _placement.TryPlace(card.BuildingType, gridX, gridY);
     }
 
     public void ResetHand()
     {
         _hand.Clear();
         _selectedIndex = -1;
-        EmitSignal(SignalName.HandChanged);
-        EmitSignal(SignalName.SelectionChanged, _selectedIndex);
+        HandChanged?.Invoke();
+        SelectionChanged?.Invoke(_selectedIndex);
     }
 
     private static CardData CloneCard(CardData source)

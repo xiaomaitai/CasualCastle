@@ -9,6 +9,7 @@ public interface IAdjacencyBuilding
     int AnchorGridX { get; }
     int AnchorGridY { get; }
     bool ContributesToAdjacency { get; }
+    void SetWorkSpeedMultiplier(float multiplier);
 }
 
 public static class AdjacentRules

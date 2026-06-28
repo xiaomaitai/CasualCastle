@@ -7,9 +7,14 @@ public sealed class HandUiController
     private const float DragThreshold = 8f;
 
     private readonly Node _owner;
-    private readonly Button[] _handButtons = new Button[CardSystem.MaxHandSize];
-    private readonly Control.GuiInputEventHandler[] _handGuiInputHandlers = new Control.GuiInputEventHandler[CardSystem.MaxHandSize];
+    private readonly Button[] _handButtons = new Button[MaxHandSize];
+    private readonly Control.GuiInputEventHandler[] _handGuiInputHandlers = new Control.GuiInputEventHandler[MaxHandSize];
     private readonly Label _placementHintLabel;
+
+    private readonly HandService _handService;
+    private readonly ShopService _shopService;
+    private readonly GameManager _gameManager;
+    private readonly BuildingSystem _buildingSystem;
 
     private bool _inputBlocked;
     private bool _dragging;
@@ -17,16 +22,21 @@ public sealed class HandUiController
     private int _pendingHandIndex = -1;
     private Vector2 _dragStartPosition;
     private int _selectedIndex = -1;
+    private const int MaxHandSize = 7;
 
     public bool IsDragging => _dragging;
-    public bool IsPlacementActive => _dragging || AdapterRegistry.Resolve<CardSystem>()?.HasSelection == true;
+    public bool IsPlacementActive => _dragging || _handService.HasSelection;
 
-    public HandUiController(Node owner, CanvasLayer uiRoot)
+    public HandUiController(Node owner, CanvasLayer uiRoot, HandService handService)
     {
         _owner = owner;
+        _handService = handService;
+        _shopService = AdapterRegistry.Resolve<ShopService>();
+        _gameManager = AdapterRegistry.Resolve<GameManager>();
+        _buildingSystem = AdapterRegistry.Resolve<BuildingSystem>();
         _placementHintLabel = uiRoot.GetNode<Label>("PlacementHintLabel");
 
-        for (int i = 0; i < CardSystem.MaxHandSize; i++)
+        for (int i = 0; i < MaxHandSize; i++)
         {
             _handButtons[i] = uiRoot.GetNode<Button>($"HandPanel/HandSlot{i + 1}");
             int handIndex = i;
@@ -35,24 +45,18 @@ public sealed class HandUiController
             _handButtons[i].GuiInput += _handGuiInputHandlers[i];
         }
 
-        if (AdapterRegistry.Resolve<CardSystem>() != null)
-        {
-            AdapterRegistry.Resolve<CardSystem>().HandChanged += RefreshDisplay;
-            AdapterRegistry.Resolve<CardSystem>().SelectionChanged += OnSelectionChanged;
-            RefreshDisplay();
-        }
+        _handService.HandChanged += RefreshDisplay;
+        _handService.SelectionChanged += OnSelectionChanged;
+        RefreshDisplay();
     }
 
     public void Dispose()
     {
-        for (int i = 0; i < CardSystem.MaxHandSize; i++)
+        for (int i = 0; i < MaxHandSize; i++)
             _handButtons[i].GuiInput -= _handGuiInputHandlers[i];
 
-        if (AdapterRegistry.Resolve<CardSystem>() != null)
-        {
-            AdapterRegistry.Resolve<CardSystem>().HandChanged -= RefreshDisplay;
-            AdapterRegistry.Resolve<CardSystem>().SelectionChanged -= OnSelectionChanged;
-        }
+        _handService.HandChanged -= RefreshDisplay;
+        _handService.SelectionChanged -= OnSelectionChanged;
     }
 
     public void SetInputBlocked(bool blocked)
@@ -63,8 +67,8 @@ public sealed class HandUiController
         if (_inputBlocked)
         {
             CancelDrag();
-            AdapterRegistry.Resolve<CardSystem>()?.ClearSelection();
-            AdapterRegistry.Resolve<GameManager>().PlayerCastle?.ClearPlacementPreview();
+            _handService.ClearSelection();
+            _gameManager.PlayerCastle.ClearPlacementPreview();
         }
     }
 
@@ -123,7 +127,7 @@ public sealed class HandUiController
         _dragging = false;
         _dragHandIndex = -1;
         _pendingHandIndex = -1;
-        AdapterRegistry.Resolve<GameManager>().PlayerCastle?.ClearPlacementPreview();
+        _gameManager.PlayerCastle.ClearPlacementPreview();
         RefreshHighlight();
         UpdatePlacementHint();
         return true;
@@ -137,10 +141,10 @@ public sealed class HandUiController
         if (mouseButton.ButtonIndex != MouseButton.Left)
             return false;
 
-        if (_inputBlocked || _dragging || AdapterRegistry.Resolve<GameManager>().CurrentState == GameManager.GameState.GameOver)
+        if (_inputBlocked || _dragging || _gameManager.CurrentState == GameManager.GameState.GameOver)
             return false;
 
-        if (AdapterRegistry.Resolve<CardSystem>()?.HasSelection != true)
+        if (!_handService.HasSelection)
             return false;
 
         TryPlaceAtMouse(mouseButton.GlobalPosition);
@@ -149,10 +153,10 @@ public sealed class HandUiController
 
     private bool ClearSelection()
     {
-        if (AdapterRegistry.Resolve<CardSystem>()?.HasSelection != true)
+        if (!_handService.HasSelection)
             return false;
 
-        AdapterRegistry.Resolve<CardSystem>().ClearSelection();
+        _handService.ClearSelection();
         return true;
     }
 
@@ -161,7 +165,7 @@ public sealed class HandUiController
         if (_inputBlocked)
             return;
 
-        AdapterRegistry.Resolve<CardSystem>()?.SelectCard(handIndex);
+        _handService.SelectCard(handIndex);
     }
 
     private void OnHandGuiInput(int handIndex, InputEvent @event)
@@ -171,10 +175,10 @@ public sealed class HandUiController
             || mouseButton.ButtonIndex != MouseButton.Left)
             return;
 
-        if (_inputBlocked || AdapterRegistry.Resolve<GameManager>().CurrentState == GameManager.GameState.GameOver)
+        if (_inputBlocked || _gameManager.CurrentState == GameManager.GameState.GameOver)
             return;
 
-        if (AdapterRegistry.Resolve<CardSystem>() == null || handIndex >= AdapterRegistry.Resolve<CardSystem>().Hand.Count)
+        if (handIndex >= _handService.Hand.Count)
             return;
 
         _pendingHandIndex = handIndex;
@@ -202,28 +206,25 @@ public sealed class HandUiController
 
     private void TryCompleteDrag(Vector2 globalPosition)
     {
-        Castle playerCastle = AdapterRegistry.Resolve<GameManager>().PlayerCastle;
-        if (playerCastle == null || AdapterRegistry.Resolve<CardSystem>() == null || _dragHandIndex < 0)
+        Castle playerCastle = _gameManager.PlayerCastle;
+        if (playerCastle == null || _dragHandIndex < 0)
             return;
 
         if (!playerCastle.TryGetGridFromGlobalPoint(globalPosition, out int gridX, out int gridY))
             return;
 
-        AdapterRegistry.Resolve<CardSystem>().TryPlaceAtIndex(_dragHandIndex, playerCastle, gridX, gridY);
+        _handService.TryPlaceAtIndex(_dragHandIndex, gridX, gridY);
     }
 
     private void RefreshDisplay()
     {
-        if (AdapterRegistry.Resolve<CardSystem>() == null)
-            return;
-
-        for (int i = 0; i < CardSystem.MaxHandSize; i++)
+        for (int i = 0; i < MaxHandSize; i++)
         {
             Button button = _handButtons[i];
 
-            if (i < AdapterRegistry.Resolve<CardSystem>().Hand.Count)
+            if (i < _handService.Hand.Count)
             {
-                CardData card = AdapterRegistry.Resolve<CardSystem>().Hand[i];
+                CardData card = _handService.Hand[i];
                 button.Visible = true;
                 button.Text = card.Name;
                 button.Disabled = _inputBlocked;
@@ -253,7 +254,7 @@ public sealed class HandUiController
 
     private void RefreshHighlight()
     {
-        for (int i = 0; i < CardSystem.MaxHandSize; i++)
+        for (int i = 0; i < MaxHandSize; i++)
         {
             bool highlighted = i == _selectedIndex || (_dragging && i == _dragHandIndex);
             _handButtons[i].Modulate = highlighted
@@ -264,12 +265,12 @@ public sealed class HandUiController
 
     private void UpdatePlacementPreview()
     {
-        Castle playerCastle = AdapterRegistry.Resolve<GameManager>().PlayerCastle;
+        Castle playerCastle = _gameManager.PlayerCastle;
         if (playerCastle == null)
             return;
 
         bool showPreview = !_inputBlocked
-            && (_dragging || AdapterRegistry.Resolve<CardSystem>()?.HasSelection == true);
+            && (_dragging || _handService.HasSelection);
         if (!showPreview)
         {
             playerCastle.ClearPlacementPreview();
@@ -284,33 +285,30 @@ public sealed class HandUiController
         }
 
         string buildingType = GetPreviewBuildingType();
-        bool valid = AdapterRegistry.Resolve<BuildingSystem>()?.CanPlace(playerCastle, buildingType, gridX, gridY) == true;
+        bool valid = _buildingSystem.CanPlace(playerCastle, buildingType, gridX, gridY);
         playerCastle.SetPlacementPreview(true, gridX, gridY, valid, buildingType);
     }
 
     private string GetPreviewBuildingType()
     {
-        if (AdapterRegistry.Resolve<CardSystem>() == null)
-            return "Barracks";
+        if (_dragging && _dragHandIndex >= 0 && _dragHandIndex < _handService.Hand.Count)
+            return _handService.Hand[_dragHandIndex].BuildingType;
 
-        if (_dragging && _dragHandIndex >= 0 && _dragHandIndex < AdapterRegistry.Resolve<CardSystem>().Hand.Count)
-            return AdapterRegistry.Resolve<CardSystem>().Hand[_dragHandIndex].BuildingType;
-
-        if (AdapterRegistry.Resolve<CardSystem>().HasSelection)
-            return AdapterRegistry.Resolve<CardSystem>().SelectedCard.BuildingType;
+        if (_handService.HasSelection)
+            return _handService.SelectedCard.BuildingType;
 
         return "Barracks";
     }
 
-    private static void TryPlaceAtMouse(Vector2 globalPosition)
+    private void TryPlaceAtMouse(Vector2 globalPosition)
     {
-        Castle playerCastle = AdapterRegistry.Resolve<GameManager>().PlayerCastle;
-        if (playerCastle == null || AdapterRegistry.Resolve<CardSystem>() == null)
+        Castle playerCastle = _gameManager.PlayerCastle;
+        if (playerCastle == null)
             return;
 
         if (!playerCastle.TryGetGridFromGlobalPoint(globalPosition, out int gridX, out int gridY))
             return;
 
-        AdapterRegistry.Resolve<CardSystem>().TryPlaceSelected(playerCastle, gridX, gridY);
+        _handService.TryPlaceSelected(gridX, gridY);
     }
 }

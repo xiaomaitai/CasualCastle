@@ -1,4 +1,5 @@
 using CasualCastle.Adapters.Godot;
+using CasualCastle.Domain.Building;
 using Godot;
 
 public partial class UIManager : Node2D
@@ -158,8 +159,10 @@ public partial class UIManager : Node2D
         if (uiRoot == null) return;
 
         _hudUi = new HudUiController(uiRoot);
-        _shopUi = new ShopUiController(this, uiRoot);
-        _handUi = new HandUiController(this, uiRoot);
+        ShopService shopService = AdapterRegistry.Resolve<ShopService>();
+        _shopUi = new ShopUiController(this, uiRoot, shopService);
+        HandService handService = AdapterRegistry.Resolve<HandService>();
+        _handUi = new HandUiController(this, uiRoot, handService);
         _buildingInfoUi = new BuildingInfoUiController(this, uiRoot);
         ButtonGroup toolGroup = new ButtonGroup();
         _buildingManageUi = new BuildingManageUiController(this, uiRoot, toolGroup);
@@ -242,7 +245,7 @@ public partial class UIManager : Node2D
         _isChangingScene = true;
         SetProcessInput(false);
         AdapterRegistry.Resolve<GameManager>()?.SetPaused(false);
-        AdapterRegistry.Resolve<CardSystem>()?.ResetHand();
+        AdapterRegistry.Resolve<HandService>().ResetHand();
         AdapterRegistry.Resolve<BattleReportSystem>()?.DiscardCurrentReport();
         GetTree().ChangeSceneToFile(TitleScene);
     }

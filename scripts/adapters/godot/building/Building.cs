@@ -1,4 +1,5 @@
 using CasualCastle.Adapters.Godot;
+using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
 using Godot;
 
@@ -31,9 +32,8 @@ public partial class Building : Area2D, IBuildingState
 	private bool _isPlayerBuilding;
 
 	private GameManager _gameManager;
-	private ShopSystem _shopSystem;
-	private AdjacentSystem _adjacentSystem;
-	private NightSystem _nightSystem;
+	private ShopService _shopService;
+	private AdjacencyService _adjacencyService;
 
 	[Signal]
 	public delegate void HealthChangedEventHandler(int health, int maxHealth);
@@ -186,7 +186,7 @@ public partial class Building : Area2D, IBuildingState
 			return false;
 
 		int cost = GetRepairCost();
-		if (_shopSystem?.TrySpendGold(cost) != true)
+		if (_shopService?.TrySpendGold(cost) != true)
 			return false;
 
 		Repair();
@@ -226,7 +226,7 @@ public partial class Building : Area2D, IBuildingState
 
 	public int GetRepairCost() => (MaxHealth - Health) * GameConfig.RepairGoldPerHealth;
 
-	public bool CanWork => IsOperational && (_nightSystem?.CanUnitWork(HasNightCombat) ?? true);
+	public bool CanWork => IsOperational && NightRules.CanUnitWork(HasNightCombat, AdapterRegistry.Resolve<IGameState>().IsDay);
 
 	public override void _Ready()
 	{
@@ -234,9 +234,9 @@ public partial class Building : Area2D, IBuildingState
 		CollisionMask = 2;
 
 		_gameManager = AdapterRegistry.Resolve<GameManager>();
-		_shopSystem = AdapterRegistry.Resolve<ShopSystem>();
-		_adjacentSystem = AdapterRegistry.Resolve<AdjacentSystem>();
-		_nightSystem = AdapterRegistry.Resolve<NightSystem>();
+		_shopService = AdapterRegistry.Resolve<ShopService>();
+		_adjacencyService = AdapterRegistry.Resolve<AdjacencyService>();
+		
 
 		_sprite = GetNodeOrNull<Sprite2D>("Sprite");
 		TryApplyVisual();
@@ -494,7 +494,7 @@ public partial class Building : Area2D, IBuildingState
 
 		Castle castle = CastleRef;
 		if (castle != null)
-			_adjacentSystem?.RefreshCastle(castle);
+			_adjacencyService.RefreshCastle(castle.GetBuildingStates());
 	}
 
 	private void SyncStateIconPosition()

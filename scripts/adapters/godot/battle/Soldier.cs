@@ -107,7 +107,7 @@ public partial class Soldier : Area2D
 		UpdateSleepVisual();
 	}
 
-	private bool IsActive => AdapterRegistry.Resolve<NightSystem>()?.CanUnitWork(HasNightCombat) ?? true;
+	private bool IsActive => NightRules.CanUnitWork(HasNightCombat, AdapterRegistry.Resolve<IGameState>().IsDay);
 
 	private bool IsSleeping =>
 		IsAlive

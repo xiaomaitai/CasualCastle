@@ -4,6 +4,7 @@ using CasualCastle.Domain.Shared;
 using CasualCastle.Adapters.Godot;
 using Godot;
 using System.Collections.Generic;
+using System.Linq;
 
 public partial class BuildingSystem : Node
 {
@@ -96,13 +97,13 @@ public partial class BuildingSystem : Node
         },
     };
 
-    private AdjacentSystem _adjacentSystem;
+    private AdjacencyService _adjacencyService;
 
     public override void _Ready()
     {
         Instance = this;
         AdapterRegistry.Register<BuildingSystem>(this);
-        _adjacentSystem = AdapterRegistry.Resolve<AdjacentSystem>();
+        _adjacencyService = AdapterRegistry.Resolve<AdjacencyService>();
     }
 
     public override void _ExitTree()
@@ -111,6 +112,33 @@ public partial class BuildingSystem : Node
         {
             AdapterRegistry.Unregister<BuildingSystem>(this);
             Instance = null;
+        }
+    }
+
+    private void OnBuildingPlaced(Castle castle, Building placedBuilding)
+    {
+        List<IBuildingState> buildingStates = castle.GetBuildingStates();
+        _adjacencyService.RefreshCastle(buildingStates);
+        PlayAdjacencyPulses(castle, placedBuilding, buildingStates);
+    }
+
+    private static void PlayAdjacencyPulses(Castle castle, Building placedBuilding, List<IBuildingState> allBuildings)
+    {
+        AdjacencyService adjacencyService = AdapterRegistry.Resolve<AdjacencyService>();
+        if (!(placedBuilding is IAdjacencyBuilding adjBuilding))
+            return;
+
+        HashSet<IBuildingState> neighbors = adjacencyService.GetAdjacentBuildings(adjBuilding, allBuildings);
+        foreach (IBuildingState neighbor in neighbors)
+        {
+            if (neighbor is not Building b)
+                continue;
+            Vector2I mainGrid = b.GetMainGridPosition();
+            Vector2 localPos = castle.GetCellCenter(mainGrid.X, mainGrid.Y);
+            AdjacentLinkPulse pulse = new AdjacentLinkPulse();
+            pulse.Configure(castle.CellSize);
+            pulse.Position = localPos;
+            castle.AddChild(pulse);
         }
     }
 
@@ -211,7 +239,7 @@ public partial class BuildingSystem : Node
         }
 
         EmitSignal(SignalName.BuildingPlaced, castle, building, buildingType);
-        _adjacentSystem.OnBuildingPlaced(castle, building);
+        OnBuildingPlaced(castle, building);
         return true;
     }
 

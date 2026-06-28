@@ -113,6 +113,18 @@ public partial class Castle : Node2D
 		return buildings;
 	}
 
+	public List<IBuildingState> GetBuildingStates()
+	{
+		List<IBuildingState> states = new();
+		foreach (Node child in GetChildren())
+		{
+			if (child is IBuildingState state)
+				states.Add(state);
+		}
+
+		return states;
+	}
+
 	public void SetPlacementPreview(bool show, int gridX, int gridY, bool valid, string buildingType = "Barracks")
 	{
 		_showPlacementPreview = show;

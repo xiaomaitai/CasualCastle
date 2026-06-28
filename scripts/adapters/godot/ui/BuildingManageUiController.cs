@@ -1,4 +1,5 @@
 using CasualCastle.Adapters.Godot;
+using CasualCastle.Domain.Building;
 using Godot;
 
 public sealed class BuildingManageUiController
@@ -212,9 +213,9 @@ public sealed class BuildingManageUiController
 
 	private void TryRepair(Building building)
 	{
-		if (!building.IsDamaged || AdapterRegistry.Resolve<ShopSystem>() == null)
+		if (!building.IsDamaged)
 			return;
 
-		AdapterRegistry.Resolve<ShopSystem>().TryRepairBuilding(building);
+		building.TryRepair();
 	}
 }

@@ -1,4 +1,5 @@
 using CasualCastle.Adapters.Godot;
+using CasualCastle.Domain.Building;
 using Godot;
 using System;
 
@@ -30,10 +31,10 @@ public sealed class HudUiController
         UpdateEnemyHealth(AdapterRegistry.Resolve<GameManager>().EnemyHealth);
         UpdatePhaseDisplay();
 
-        if (AdapterRegistry.Resolve<ShopSystem>() != null)
+        if (AdapterRegistry.Resolve<ShopService>() != null)
         {
-            AdapterRegistry.Resolve<ShopSystem>().GoldChanged += UpdateGoldDisplay;
-            UpdateGoldDisplay(AdapterRegistry.Resolve<ShopSystem>().Gold);
+            AdapterRegistry.Resolve<ShopService>().GoldChanged += UpdateGoldDisplay;
+            UpdateGoldDisplay(AdapterRegistry.Resolve<ShopService>().Gold);
         }
     }
 
@@ -45,8 +46,8 @@ public sealed class HudUiController
         AdapterRegistry.Resolve<GameManager>().EnemyHealthChanged -= UpdateEnemyHealth;
         AdapterRegistry.Resolve<GameManager>().PhaseChanged -= OnPhaseChanged;
 
-        if (AdapterRegistry.Resolve<ShopSystem>() != null)
-            AdapterRegistry.Resolve<ShopSystem>().GoldChanged -= UpdateGoldDisplay;
+        if (AdapterRegistry.Resolve<ShopService>() != null)
+            AdapterRegistry.Resolve<ShopService>().GoldChanged -= UpdateGoldDisplay;
     }
 
     public void Process()

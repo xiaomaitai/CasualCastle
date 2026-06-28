@@ -66,12 +66,8 @@ public partial class GameManager : Node2D, IGameState
     private Castle _enemyCastle;
     private int _cheatSpawnCount;
 
-    private FusionSystem FusionSystem => _fusionSystem ??= AdapterRegistry.Resolve<FusionSystem>();
     private BattleReportSystem BattleReportSystem => _battleReportSystem ??= AdapterRegistry.Resolve<BattleReportSystem>();
-    private ReplayAiSystem ReplayAiSystem => _replayAiSystem ??= AdapterRegistry.Resolve<ReplayAiSystem>();
-    private FusionSystem _fusionSystem;
     private BattleReportSystem _battleReportSystem;
-    private ReplayAiSystem _replayAiSystem;
 
     public override void _Ready()
     {
@@ -236,11 +232,6 @@ public partial class GameManager : Node2D, IGameState
         PhaseTimeRemaining = phase == GamePhase.Day
             ? GameConfig.DayDurationSeconds
             : GameConfig.NightDurationSeconds;
-
-        if (phase == GamePhase.Night && _playerCastle != null)
-            FusionSystem?.ResolveNightFusions(_playerCastle);
-        if (phase == GamePhase.Night && _enemyCastle != null)
-            ReplayAiSystem?.ApplyNightSnapshot(_enemyCastle, CurrentNightIndex);
 
         EmitSignal(SignalName.PhaseChanged, (int)phase);
         GD.Print(phase == GamePhase.Day ? "Phase: Day" : "Phase: Night");

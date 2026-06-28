@@ -1,3 +1,5 @@
+using CasualCastle.Adapters.Godot;
+using CasualCastle.Domain.Building;
 using Godot;
 using System.Collections.Generic;
 
@@ -116,8 +118,14 @@ public sealed class BuildingInfoUiController
         if (castle == null)
             return;
 
-        IReadOnlyList<Building> targets = AdjacentSystem.Instance?.GetAdjacencyEffectTargets(hovered)
-            ?? System.Array.Empty<Building>();
+        AdjacencyService adjacencyService = AdapterRegistry.Resolve<AdjacencyService>();
+        IReadOnlyList<IAdjacencyBuilding> domainTargets = adjacencyService.GetBarracksTargets(hovered, castle.GetBuildingStates());
+        List<Building> targets = new();
+        foreach (IAdjacencyBuilding t in domainTargets)
+        {
+            if (t is Building b)
+                targets.Add(b);
+        }
         castle.SetAdjacencyHighlightBuildings(targets);
     }
 
