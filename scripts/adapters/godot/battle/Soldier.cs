@@ -10,6 +10,7 @@ public partial class Soldier : Area2D
 	public bool IsAlive { get; private set; } = true;
 
 	public int Health { get; private set; } = 30;
+	public int MaxHealth { get; private set; } = 30;
 	public int Damage { get; private set; } = 10;
 	public float Speed { get; private set; } = 170f;
 	public float AttackRange { get; private set; } = 60f;
@@ -20,6 +21,7 @@ public partial class Soldier : Area2D
 	private bool _statsPending;
 	private Vector2 _moveDirection;
 	private float _attackTimer;
+	private float _hitFlashTimer;
 	private Soldier _targetEnemy;
 	private Castle _targetCastle;
 	private Building _targetBuilding;
@@ -31,6 +33,7 @@ public partial class Soldier : Area2D
 	public void InitializeFromStats(UnitStats stats)
 	{
 		Data = SoldierData.FromStats(stats);
+		MaxHealth = Data.Health;
 		Health = Data.Health;
 		Damage = Data.Damage;
 		Speed = Data.Speed;
@@ -101,11 +104,20 @@ public partial class Soldier : Area2D
 	{
 		if (Data == null)
 			return;
+
 		float radius = Data.CollisionRadius();
-		Color color = IsPlayerUnit
+		Color circleColor = IsPlayerUnit
 			? new Color(0, 1, 0, 0.3f)
 			: new Color(1, 0, 0, 0.3f);
-		DrawCircle(Vector2.Zero, radius, color);
+		DrawCircle(Vector2.Zero, radius, circleColor);
+
+		float barWidth = radius * 2f;
+		float barHeight = 4f;
+		float barY = -radius - 8f;
+		float healthPercent = (float)Health / MaxHealth;
+
+		DrawRect(new Rect2(-barWidth / 2f, barY, barWidth, barHeight), new Color(0.2f, 0.2f, 0.2f, 0.8f));
+		DrawRect(new Rect2(-barWidth / 2f, barY, barWidth * healthPercent, barHeight), new Color(0.2f, 0.8f, 0.2f, 0.9f));
 	}
 
 	private void OnPhaseChanged(GameManager.GamePhase phase)
@@ -124,7 +136,7 @@ public partial class Soldier : Area2D
 
 	private void UpdateSleepVisual()
 	{
-		if (_sprite != null)
+		if (_sprite != null && _hitFlashTimer <= 0f)
 		{
 			_sprite.Modulate = IsActive
 				? _baseSpriteModulate
@@ -145,10 +157,17 @@ public partial class Soldier : Area2D
 		if (!IsAlive) return;
 		if (AdapterRegistry.Resolve<GameManager>()?.CurrentState == GameManager.GameState.GameOver) return;
 
+		float dt = (float)delta;
+
+		if (_hitFlashTimer > 0f)
+		{
+			_hitFlashTimer -= dt;
+			if (_hitFlashTimer <= 0f && _sprite != null)
+				_sprite.Modulate = _baseSpriteModulate;
+		}
+
 		UpdateSleepVisual();
 		if (!IsActive) return;
-
-		float dt = (float)delta;
 
 		if (_attackTimer > 0)
 			_attackTimer -= dt;
@@ -188,6 +207,8 @@ public partial class Soldier : Area2D
 			_targetEnemy = null;
 			MoveToward(dt, GlobalPosition + _moveDirection * 2000);
 		}
+
+		QueueRedraw();
 	}
 
 	private void MoveToward(float dt, Vector2 target)
@@ -201,6 +222,10 @@ public partial class Soldier : Area2D
 		if (!IsAlive) return;
 
 		Health = CombatRules.ApplyDamage(Health, amount);
+		_hitFlashTimer = 0.1f;
+		if (_sprite != null)
+			_sprite.Modulate = Colors.White;
+
 		if (Health <= 0)
 			Die();
 	}
@@ -213,9 +238,10 @@ public partial class Soldier : Area2D
 		if (_collisionShape != null)
 			_collisionShape.Disabled = true;
 
-		Modulate = new Color(1, 1, 1, 0.3f);
-		SceneTreeTimer timer = GetTree().CreateTimer(0.5f);
-		timer.Timeout += () => QueueFree();
+		Tween tween = CreateTween();
+		tween.TweenProperty(this, "scale", Vector2.Zero, 0.25f);
+		tween.Parallel().TweenProperty(this, "modulate:a", 0f, 0.25f);
+		tween.TweenCallback(Callable.From(() => QueueFree()));
 	}
 
 	private void OnAreaEntered(Area2D area)
