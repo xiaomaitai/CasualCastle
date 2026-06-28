@@ -77,8 +77,8 @@ _Process(delta):
 由 `BattleManager` 为每个士兵计算：
 
 ```
-玩家单位：目的地 = 敌方城堡战线（enemyCastle 左边缘 - 80px 附近，Y 取士兵当前 Y）
-敌方单位：目的地 = 玩家城堡战线（playerCastle 右边缘 + 80px 附近，Y 取士兵当前 Y）
+玩家单位：目的地 = 敌方城堡战线（enemyCastle 左边缘 - 160 unit，Y 取士兵当前 Y）
+敌方单位：目的地 = 玩家城堡战线（playerCastle 右边缘 + 160 unit，Y 取士兵当前 Y）
 有攻击目标：目的地 = 目标位置（追击）
 ```
 
@@ -101,7 +101,7 @@ _Process(delta):
 ### 单位推挤
 
 ```
-同方士兵间距 < 12px →
+同方士兵间距 < 25 unit →
     施加垂直于连线方向的微小排斥力
     力度随距离减小而增大
 ```
@@ -124,7 +124,7 @@ BattleManager（Node，挂在 main_game.tscn）
   └── 每 0.2s：UpdateTargeting()
 ```
 
-**空间哈希网格：** 桶大小 = 2×2 格（96×96 px）。每个桶记录其中的士兵。
+**空间哈希网格：** 桶大小 = 2×2 格（200×200 unit）。每个桶记录其中的士兵。
 
 **索敌流程（每 0.2s 对每个士兵）：**
 ```
@@ -164,8 +164,8 @@ Vector2 CalculateDestination(Soldier soldier):
 ```
 
 **战线位置：**
-- 玩家方：`playerCastle.RightEdge + 100px`，Y 取士兵当前 Y
-- 敌方方：`enemyCastle.LeftEdge - 100px`，Y 取士兵当前 Y
+- 玩家方：`playerCastle.RightEdge + 200 unit`，Y 取士兵当前 Y
+- 敌方方：`enemyCastle.LeftEdge - 200 unit`，Y 取士兵当前 Y
 
 ### 目标切换
 
@@ -210,12 +210,12 @@ void ExecuteAttack(Soldier soldier, float delta):
 
 ```
 Projectile（Area2D）
-  ├── Speed: 300 px/s
+  ├── Speed: 600 unit/s
   ├── Damage: 继承发射者
   ├── Target: 发射时锁定
   └── _Process:
         MoveToward(target)
-        if Distance < 5px:
+        if Distance < 10 unit:
             target.TakeDamage(damage)
             QueueFree()
 ```

@@ -8,15 +8,15 @@
 
 单一 `Soldier` 类（`Area2D`），所有属性通过 `[Export]` 硬编码：
 
-| 属性 | 默认值 | 说明 |
-|------|--------|------|
-| Health | 30 | 归零死亡 |
-| Damage | 10 | 每次攻击伤害 |
-| Speed | 80 | 像素/秒 |
-| AttackRange | 30 | 像素，近战范围 |
-| AttackCooldown | 1.0s | 攻击间隔 |
+| 属性 | 当前值（px） | 重构后（game unit） | 说明 |
+|------|------------|-------------------|------|
+| Health | 30 | — | 归零死亡，不变 |
+| Damage | 10 | — | 每次攻击伤害，不变 |
+| Speed | 80 px/s | 170 unit/s | ≈ 80 px/s 等效 |
+| AttackRange | 30 px | 60 unit | 近战范围 |
+| AttackCooldown | 1.0s | 1.0s | 不变 |
 
-建筑数据（`BuildingDefinitions`）可通过 `SoldierDamage` / `SoldierSpeed` / `SoldierHealth` / `SoldierAttackRange` 覆写产出士兵的属性。但所有士兵行为完全相同——只有数值差异，没有行为差异。
+当前所有距离/速度在 Godot 像素空间计算。重构后改为 game unit，渲染时经 `GameCoordinatesAdapter` 换算。建筑数据中的 `SoldierDamage` / `SoldierSpeed` 等覆写字段一并迁移。
 
 ### 移动方式
 
@@ -131,9 +131,9 @@ AreaExited
 | 2 | 敌方城堡正前方战线位置 | 无目标的默认目的地 |
 | 3 | 向敌方侧推进 | 无目标时的默认行军方向 |
 
-**战线位置计算：**
-- 玩家方战线：`playerCastle 右边缘 + 100px`
-- 敌方战线：`enemyCastle 左边缘 - 100px`
+**战线位置计算（game unit）：**
+- 玩家方战线：`playerCastle 右边缘 + 200 unit`
+- 敌方战线：`enemyCastle 左边缘 - 200 unit`
 - 双方士兵在战线相遇形成交战带
 
 #### 目标选择
@@ -160,7 +160,7 @@ AreaExited
 1. 当前目标死亡/摧毁 → 立即切换到下一个最优目标
 2. `BattleManager` 索敌周期（0.2s）→ 比较当前目标和新候选，切换条件：
    - 新目标优先级更高
-   - 当前目标距离超过追击放弃距离（如 300px）
+   - 当前目标距离超过追击放弃距离（600 unit）
 3. 建筑被摧毁 → 攻击该建筑的士兵立即重选目标
 
 #### 攻击决策
