@@ -52,6 +52,12 @@ public partial class Soldier : Area2D
 		_statsPending = false;
 
 		float displaySize = Data.DisplaySize();
+		uint color = Data.UnitColor;
+		_baseSpriteModulate = new Color(
+			((color >> 16) & 0xFF) / 255f,
+			((color >> 8) & 0xFF) / 255f,
+			(color & 0xFF) / 255f);
+
 		if (_sprite != null)
 		{
 			Texture2D texture = _sprite.Texture;

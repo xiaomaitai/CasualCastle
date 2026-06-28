@@ -31,4 +31,6 @@ public class UnitStats
 		UnitSize.Huge => 48f,
 		_ => 24f
 	};
+
+	public uint UnitColor { get; init; }
 }

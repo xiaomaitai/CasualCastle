@@ -13,6 +13,7 @@ public class SoldierData
 	public float AttackRange { get; set; } = 60f;
 	public float AttackCooldown { get; set; } = 1f;
 	public bool HasNightCombat { get; set; }
+	public uint UnitColor { get; set; } = 0xFF888888u;
 
 	public float DisplaySize()
 	{
@@ -53,6 +54,7 @@ public class SoldierData
 			AttackRange = stats.AttackRange,
 			AttackCooldown = stats.AttackCooldown,
 			HasNightCombat = stats.HasNightCombat,
+			UnitColor = stats.UnitColor,
 		};
 	}
 }
