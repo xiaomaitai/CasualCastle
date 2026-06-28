@@ -1,6 +1,6 @@
 # 当前任务
 
-**当前焦点：战斗系统开发（`devPlan/battleSystemPlan.md`）。**
+**当前焦点：战斗系统开发（`devPlan/outline/c02BattleSystemOverview.md`）。**
 
 ---
 
