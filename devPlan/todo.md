@@ -1,7 +1,6 @@
 # 架构待办（TODO）
 
-当前任务详见 `currentTasks.md`
-这里是长期架构与技术债 backlog，只在用户明确要求的时候才做。
+当前任务详见 `currentTasks.md`。这里是长期架构与技术债 backlog。
 
 ---
 
@@ -11,7 +10,7 @@
 
 ---
 
-## 2. 真模块化与 DI ← 当前任务
+## 2. 真模块化与 DI ✅ 已完成
 
 保留三层，domain 拆为 4 个 C# 项目，DI 替代静态 Instance：
 
