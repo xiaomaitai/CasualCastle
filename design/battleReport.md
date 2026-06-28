@@ -1,6 +1,6 @@
 # 战报系统设计 — M6
 
-战报是 M6 的**核心产出**：记录玩家每一夜结束时的城堡快照，永久保存后供敌方「回放式 AI」复刻。概念定义见 `devPlan/concepts.md`；敌方复刻规则见 `design/replay-ai.md`。
+战报是 M6 的**核心产出**：记录玩家每一夜结束时的城堡快照，永久保存后供敌方「回放式 AI」复刻。概念定义见 `devPlan/concepts.md`；敌方复刻规则见 `design/replayAi.md`。
 
 ---
 
@@ -65,7 +65,7 @@
 | `BattleReportSystem` | 局内缓存、夜晚结束快照、结算保存/丢弃、持久化读写、战报列表 |
 | `GameManager` | 夜晚结束钩子触发快照；维护 `NightIndex` |
 | `GameOverUiController` | 结算弹窗「是否保存战报」 |
-| `ReplayAiSystem` | 开局选战报、入夜复刻（见 `design/replay-ai.md`） |
+| `ReplayAiSystem` | 开局选战报、入夜复刻（见 `design/replayAi.md`） |
 
 ---
 

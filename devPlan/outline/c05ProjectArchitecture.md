@@ -35,9 +35,12 @@ CasualCastle/
 │       └── persistence/   BattleReportStorage（实现 IBattleReportRepository）
 │
 ├── design/                                         # 系统设计文档
-│   ├── fusion-system.md
-│   ├── battle-report.md
-│   └── replay-ai.md
+│   ├── fusionSystem.md
+│   ├── battleReport.md
+│   ├── replayAi.md
+│   ├── battleSystem.md
+│   ├── uiDesign.md
+│   └── assetSpecs.md
 ├── scenes/  prefabs/  assets/  project.godot
 ├── tests/CasualCastle.Domain.Tests/
 ├── devPlan/
