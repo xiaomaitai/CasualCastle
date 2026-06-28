@@ -16,6 +16,7 @@ public partial class Soldier : Area2D
 	public float AttackCooldown { get; private set; } = 1f;
 	public bool HasNightCombat { get; set; }
 
+	private AttackBehavior _attackBehavior;
 	private Vector2 _moveDirection;
 	private float _attackTimer;
 	private Soldier _targetEnemy;
@@ -35,6 +36,10 @@ public partial class Soldier : Area2D
 		AttackRange = Data.AttackRange;
 		AttackCooldown = Data.AttackCooldown;
 		HasNightCombat = Data.HasNightCombat;
+
+		_attackBehavior = Data.AttackType == AttackType.Ranged
+			? new RangedAttack(this)
+			: new MeleeAttack(this);
 
 		float displaySize = Data.DisplaySize();
 		if (_sprite != null)
@@ -135,11 +140,8 @@ public partial class Soldier : Area2D
 			float dist = GlobalPosition.DistanceTo(_targetEnemy.GlobalPosition);
 			if (dist <= AttackRange)
 			{
-				if (_attackTimer <= 0)
-				{
-					Attack(_targetEnemy);
+				if (_attackTimer <= 0 && _attackBehavior.TryExecute(_targetEnemy, dt))
 					_attackTimer = AttackCooldown;
-				}
 			}
 			else
 			{
@@ -174,12 +176,6 @@ public partial class Soldier : Area2D
 	{
 		Vector2 direction = (target - GlobalPosition).Normalized();
 		GlobalPosition += direction * Speed * dt;
-	}
-
-	private void Attack(Soldier enemy)
-	{
-		int finalDamage = CombatRules.CalculateDamage(Damage, Data.DamageType, enemy.Data.ArmorType);
-		enemy.TakeDamage(finalDamage);
 	}
 
 	public void TakeDamage(int amount)
