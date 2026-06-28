@@ -219,16 +219,62 @@ public partial class Soldier : Area2D
 		else
 		{
 			_targetEnemy = null;
-			MoveToward(dt, GlobalPosition + _moveDirection * 2000);
+			Vector2 destination = GetDestination();
+			MoveToward(dt, destination);
 		}
 
 		QueueRedraw();
 	}
 
+	private Vector2 GetDestination()
+	{
+		GameManager gm = AdapterRegistry.Resolve<GameManager>();
+		if (gm == null)
+			return GlobalPosition + _moveDirection * 2000;
+
+		Castle targetCastle = IsPlayerUnit ? gm.EnemyCastle : gm.PlayerCastle;
+		if (targetCastle == null)
+			return GlobalPosition + _moveDirection * 2000;
+
+		float frontX = IsPlayerUnit
+			? targetCastle.GlobalPosition.X - 80f
+			: targetCastle.GlobalPosition.X + targetCastle.GridColumns * targetCastle.CellSize + 80f;
+
+		return new Vector2(frontX, GlobalPosition.Y);
+	}
+
 	private void MoveToward(float dt, Vector2 target)
 	{
 		Vector2 direction = (target - GlobalPosition).Normalized();
-		GlobalPosition += direction * Speed * dt;
+		Vector2 desiredPosition = GlobalPosition + direction * Speed * dt;
+
+		PhysicsDirectSpaceState2D spaceState = GetWorld2D().DirectSpaceState;
+		PhysicsRayQueryParameters2D rayQuery = new PhysicsRayQueryParameters2D();
+		rayQuery.From = GlobalPosition;
+		rayQuery.To = desiredPosition;
+		rayQuery.CollisionMask = 4;
+		rayQuery.Exclude = new Godot.Collections.Array<Rid> { GetRid() };
+
+		Godot.Collections.Dictionary result = spaceState.IntersectRay(rayQuery);
+		if (result.Count > 0)
+		{
+			Vector2 slideDirection = new Vector2(-direction.Y, direction.X);
+			Vector2 slidePosition = GlobalPosition + slideDirection * Speed * dt * 0.5f;
+
+			rayQuery.To = slidePosition;
+			Godot.Collections.Dictionary slideResult = spaceState.IntersectRay(rayQuery);
+			if (slideResult.Count > 0)
+			{
+				slideDirection = new Vector2(direction.Y, -direction.X);
+				slidePosition = GlobalPosition + slideDirection * Speed * dt * 0.5f;
+			}
+
+			GlobalPosition = slidePosition;
+		}
+		else
+		{
+			GlobalPosition = desiredPosition;
+		}
 	}
 
 	public void TakeDamage(int amount)
