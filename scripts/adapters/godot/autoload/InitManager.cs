@@ -22,6 +22,8 @@ public partial class InitManager : Node
         AdjacencyService adjacencyService = new AdjacencyService();
         AdapterRegistry.Register<AdjacencyService>(adjacencyService);
 
+        AddChild(new BattleManager());
+
         AddChild(new BuildingSystem());
         BuildingSystem buildingSystem = AdapterRegistry.Resolve<BuildingSystem>();
 

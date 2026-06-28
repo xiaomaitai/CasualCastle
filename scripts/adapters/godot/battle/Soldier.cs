@@ -75,6 +75,12 @@ public partial class Soldier : Area2D
 			circle.Radius = Data.CollisionRadius();
 	}
 
+	public void SetTarget(Soldier target)
+	{
+		if (target != null && target.IsAlive && target.IsPlayerUnit != IsPlayerUnit)
+			_targetEnemy = target;
+	}
+
 	public override void _Ready()
 	{
 		_moveDirection = IsPlayerUnit ? Vector2.Right : Vector2.Left;
@@ -88,6 +94,10 @@ public partial class Soldier : Area2D
 		AreaEntered += OnAreaEntered;
 		AreaExited += OnAreaExited;
 
+		BattleManager battleManager = AdapterRegistry.Resolve<BattleManager>();
+		if (battleManager != null)
+			battleManager.Register(this);
+
 		if (AdapterRegistry.Resolve<GameManager>() != null)
 			AdapterRegistry.Resolve<GameManager>().PhaseChanged += OnPhaseChanged;
 
@@ -96,6 +106,10 @@ public partial class Soldier : Area2D
 
 	public override void _ExitTree()
 	{
+		BattleManager battleManager = AdapterRegistry.Resolve<BattleManager>();
+		if (battleManager != null)
+			battleManager.Unregister(this);
+
 		if (AdapterRegistry.Resolve<GameManager>() != null)
 			AdapterRegistry.Resolve<GameManager>().PhaseChanged -= OnPhaseChanged;
 	}
@@ -235,6 +249,10 @@ public partial class Soldier : Area2D
 		IsAlive = false;
 		_sleepZEffect?.SetSleeping(false);
 
+		BattleManager battleManager = AdapterRegistry.Resolve<BattleManager>();
+		if (battleManager != null)
+			battleManager.Unregister(this);
+
 		if (_collisionShape != null)
 			_collisionShape.Disabled = true;
 
@@ -247,13 +265,6 @@ public partial class Soldier : Area2D
 	private void OnAreaEntered(Area2D area)
 	{
 		if (!IsAlive) return;
-
-		Soldier other = area as Soldier;
-		if (other != null && other.IsAlive && other.IsPlayerUnit != IsPlayerUnit)
-		{
-			_targetEnemy = other;
-			return;
-		}
 
 		Building building = area as Building;
 		if (building != null && !building.IsDestroyed)
@@ -269,10 +280,6 @@ public partial class Soldier : Area2D
 
 	private void OnAreaExited(Area2D area)
 	{
-		Soldier other = area as Soldier;
-		if (other == _targetEnemy)
-			_targetEnemy = null;
-
 		Building building = area as Building;
 		if (building != null && building.GetCastle() == _targetCastle)
 		{

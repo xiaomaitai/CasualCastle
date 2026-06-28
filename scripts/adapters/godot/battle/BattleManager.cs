@@ -1,0 +1,165 @@
+using CasualCastle.Adapters.Godot;
+using Godot;
+using System.Collections.Generic;
+
+public partial class BattleManager : Node
+{
+    private const float TargetingInterval = 0.2f;
+    private const float PushDistance = 24f;
+    private const float PushForce = 40f;
+    private const float CellSize = 200f;
+
+    private readonly List<Soldier> _playerUnits = new();
+    private readonly List<Soldier> _enemyUnits = new();
+    private readonly Dictionary<Vector2I, List<Soldier>> _grid = new();
+    private float _targetingTimer;
+
+    public override void _Ready()
+    {
+        AdapterRegistry.Register<BattleManager>(this);
+    }
+
+    public override void _ExitTree()
+    {
+        AdapterRegistry.Unregister<BattleManager>(this);
+    }
+
+    public void Register(Soldier soldier)
+    {
+        if (soldier.IsPlayerUnit)
+            _playerUnits.Add(soldier);
+        else
+            _enemyUnits.Add(soldier);
+    }
+
+    public void Unregister(Soldier soldier)
+    {
+        if (soldier.IsPlayerUnit)
+            _playerUnits.Remove(soldier);
+        else
+            _enemyUnits.Remove(soldier);
+    }
+
+    public override void _Process(double delta)
+    {
+        float dt = (float)delta;
+
+        _targetingTimer -= dt;
+        if (_targetingTimer <= 0f)
+        {
+            _targetingTimer = TargetingInterval;
+            RebuildGrid();
+            UpdateTargeting();
+        }
+
+        ApplyUnitPushing(dt);
+    }
+
+    private void RebuildGrid()
+    {
+        _grid.Clear();
+        AddToGrid(_playerUnits);
+        AddToGrid(_enemyUnits);
+    }
+
+    private void AddToGrid(List<Soldier> units)
+    {
+        foreach (Soldier s in units)
+        {
+            if (!s.IsAlive)
+                continue;
+            Vector2I cell = WorldToCell(s.GlobalPosition);
+            if (!_grid.TryGetValue(cell, out List<Soldier> list))
+            {
+                list = new List<Soldier>();
+                _grid[cell] = list;
+            }
+            list.Add(s);
+        }
+    }
+
+    private void UpdateTargeting()
+    {
+        List<Soldier> enemies = _enemyUnits;
+        foreach (Soldier s in _playerUnits)
+            FindBestTarget(s, enemies);
+        enemies = _playerUnits;
+        foreach (Soldier s in _enemyUnits)
+            FindBestTarget(s, enemies);
+    }
+
+    private void FindBestTarget(Soldier soldier, List<Soldier> enemies)
+    {
+        if (!soldier.IsAlive)
+            return;
+
+        Soldier best = null;
+        float bestScore = float.MaxValue;
+
+        Vector2I cell = WorldToCell(soldier.GlobalPosition);
+        for (int dx = -1; dx <= 1; dx++)
+        {
+            for (int dy = -1; dy <= 1; dy++)
+            {
+                Vector2I neighborCell = new(cell.X + dx, cell.Y + dy);
+                if (!_grid.TryGetValue(neighborCell, out List<Soldier> cellUnits))
+                    continue;
+
+                foreach (Soldier enemy in cellUnits)
+                {
+                    if (!enemy.IsAlive)
+                        continue;
+                    float dist = soldier.GlobalPosition.DistanceSquaredTo(enemy.GlobalPosition);
+                    if (dist < bestScore)
+                    {
+                        bestScore = dist;
+                        best = enemy;
+                    }
+                }
+            }
+        }
+
+        soldier.SetTarget(best);
+    }
+
+    private void ApplyUnitPushing(float dt)
+    {
+        PushInList(_playerUnits, dt);
+        PushInList(_enemyUnits, dt);
+    }
+
+    private static void PushInList(List<Soldier> units, float dt)
+    {
+        for (int i = 0; i < units.Count; i++)
+        {
+            Soldier a = units[i];
+            if (!a.IsAlive)
+                continue;
+
+            for (int j = i + 1; j < units.Count; j++)
+            {
+                Soldier b = units[j];
+                if (!b.IsAlive)
+                    continue;
+
+                float dist = a.GlobalPosition.DistanceTo(b.GlobalPosition);
+                float minDist = a.Data.CollisionRadius() + b.Data.CollisionRadius() + 4f;
+                if (dist < minDist && dist > 0.001f)
+                {
+                    Vector2 pushDir = (a.GlobalPosition - b.GlobalPosition).Normalized();
+                    float pushAmount = (minDist - dist) * PushForce * dt;
+                    Vector2 push = pushDir * pushAmount;
+                    a.GlobalPosition += push;
+                    b.GlobalPosition -= push;
+                }
+            }
+        }
+    }
+
+    private static Vector2I WorldToCell(Vector2 position)
+    {
+        return new Vector2I(
+            Mathf.FloorToInt(position.X / CellSize),
+            Mathf.FloorToInt(position.Y / CellSize));
+    }
+}
