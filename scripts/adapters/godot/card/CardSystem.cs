@@ -20,6 +20,8 @@ public partial class CardSystem : Node
 
     private BuildingSystem _buildingSystem;
 
+    private BuildingSystem BuildingSystemRef => _buildingSystem ??= AdapterRegistry.Resolve<BuildingSystem>();
+
     public IReadOnlyList<CardData> Hand => _hand;
     public bool HasSelection => _selectedIndex >= 0 && _selectedIndex < _hand.Count;
     public CardData SelectedCard => HasSelection ? _hand[_selectedIndex] : null;
@@ -28,7 +30,6 @@ public partial class CardSystem : Node
     {
         Instance = this;
         AdapterRegistry.Register<CardSystem>(this);
-        _buildingSystem = AdapterRegistry.Resolve<BuildingSystem>();
     }
 
     public override void _ExitTree()
@@ -110,7 +111,7 @@ public partial class CardSystem : Node
         if (card == null || castle == null || !castle.IsPlayerCastle)
             return false;
 
-        return _buildingSystem?.TryPlace(castle, card.BuildingType, gridX, gridY) == true;
+        return BuildingSystemRef?.TryPlace(castle, card.BuildingType, gridX, gridY) == true;
     }
 
     public void ResetHand()

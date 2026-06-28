@@ -15,12 +15,13 @@ public partial class FusionSystem : Node
     private IGameState _gameState;
     private AdjacentSystem _adjacentSystem;
 
+    private IGameState GameStateRef => _gameState ??= AdapterRegistry.Resolve<IGameState>();
+    private AdjacentSystem AdjacentRef => _adjacentSystem ??= AdapterRegistry.Resolve<AdjacentSystem>();
+
     public override void _Ready()
     {
         Instance = this;
         AdapterRegistry.Register<FusionSystem>(this);
-        _gameState = AdapterRegistry.Resolve<IGameState>();
-        _adjacentSystem = AdapterRegistry.Resolve<AdjacentSystem>();
     }
 
     public override void _ExitTree()
@@ -39,7 +40,7 @@ public partial class FusionSystem : Node
         if (castle == null || !castle.IsPlayerCastle)
             return;
 
-        if (_gameState != null && (!_gameState.IsPlaying || !_gameState.IsNight))
+        if (GameStateRef != null && (!GameStateRef.IsPlaying || !GameStateRef.IsNight))
             return;
 
         HashSet<Building> used = new();
@@ -96,7 +97,7 @@ public partial class FusionSystem : Node
             return false;
         }
 
-        _adjacentSystem?.RefreshCastle(castle);
+        AdjacentRef?.RefreshCastle(castle);
         EmitSignal(SignalName.FusionCompleted, castle, result);
         return true;
     }

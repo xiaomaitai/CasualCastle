@@ -98,11 +98,12 @@ public partial class BuildingSystem : Node
 
     private AdjacentSystem _adjacentSystem;
 
+    private AdjacentSystem AdjacentRef => _adjacentSystem ??= AdapterRegistry.Resolve<AdjacentSystem>();
+
     public override void _Ready()
     {
         Instance = this;
         AdapterRegistry.Register<BuildingSystem>(this);
-        _adjacentSystem = AdapterRegistry.Resolve<AdjacentSystem>();
     }
 
     public override void _ExitTree()
@@ -211,7 +212,7 @@ public partial class BuildingSystem : Node
         }
 
         EmitSignal(SignalName.BuildingPlaced, castle, building, buildingType);
-        _adjacentSystem?.OnBuildingPlaced(castle, building);
+        AdjacentRef?.OnBuildingPlaced(castle, building);
         return true;
     }
 

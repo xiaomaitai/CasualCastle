@@ -27,6 +27,9 @@ public partial class ShopSystem : Node
     private CardSystem _cardSystem;
     private GameManager _gameManager;
 
+    private CardSystem CardSystemRef => _cardSystem ??= AdapterRegistry.Resolve<CardSystem>();
+    private GameManager GameManagerRef => _gameManager ??= AdapterRegistry.Resolve<GameManager>();
+
     public int Gold { get; private set; }
     public bool IsShopAvailable { get; private set; }
 
@@ -34,16 +37,14 @@ public partial class ShopSystem : Node
     {
         Instance = this;
         AdapterRegistry.Register<ShopSystem>(this);
-        _cardSystem = AdapterRegistry.Resolve<CardSystem>();
-        _gameManager = AdapterRegistry.Resolve<GameManager>();
 
         Gold = GameConfig.InitialGold;
         RefreshOffers();
 
-        if (_gameManager != null)
+        if (GameManagerRef != null)
         {
-            _gameManager.PhaseChanged += OnPhaseChanged;
-            _gameManager.GameStateChanged += OnGameStateChanged;
+            GameManagerRef.PhaseChanged += OnPhaseChanged;
+            GameManagerRef.GameStateChanged += OnGameStateChanged;
         }
 
         EmitSignal(SignalName.GoldChanged, Gold);
@@ -106,7 +107,7 @@ public partial class ShopSystem : Node
         if (offer == null || !CanAfford(offer.Cost))
             return false;
 
-        if (_cardSystem == null || !_cardSystem.TryAddCard(offer))
+        if (CardSystemRef == null || !CardSystemRef.TryAddCard(offer))
             return false;
 
         TrySpendGold(offer.Cost);
@@ -123,7 +124,7 @@ public partial class ShopSystem : Node
         if (offer == null || !CanAfford(offer.Cost))
             return false;
 
-        if (_cardSystem == null || !_cardSystem.TryPlaceCard(offer, castle, gridX, gridY))
+        if (CardSystemRef == null || !CardSystemRef.TryPlaceCard(offer, castle, gridX, gridY))
             return false;
 
         TrySpendGold(offer.Cost);
@@ -132,8 +133,8 @@ public partial class ShopSystem : Node
     }
 
     public bool IsRepairAvailable =>
-        _gameManager?.CurrentState == GameManager.GameState.Playing
-        && _gameManager.IsNight;
+        GameManagerRef?.CurrentState == GameManager.GameState.Playing
+        && GameManagerRef.IsNight;
 
     public bool TryRepairBuilding(Building building)
     {
@@ -167,8 +168,8 @@ public partial class ShopSystem : Node
 
     private void UpdateShopAvailability()
     {
-        if (_gameManager == null) return;
-        bool available = _gameManager.CurrentState == GameManager.GameState.Playing;
+        if (GameManagerRef == null) return;
+        bool available = GameManagerRef.CurrentState == GameManager.GameState.Playing;
         if (IsShopAvailable == available)
             return;
         IsShopAvailable = available;
