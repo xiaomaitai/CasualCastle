@@ -25,7 +25,7 @@ public sealed class SettingsUiController
 		_windowModeOption.AddItem("无边框全屏", (int)DisplayWindowMode.BorderlessFullscreen);
 
 		_resolutionOption.Clear();
-		foreach (Vector2I resolution in GameConfig.OutputResolutions)
+		foreach (Vector2I resolution in DisplaySettingsManager.OutputResolutions)
 			_resolutionOption.AddItem($"{resolution.X} × {resolution.Y}", _resolutionOption.ItemCount);
 
 		_windowModeOption.ItemSelected += OnWindowModeSelected;
@@ -86,7 +86,7 @@ public sealed class SettingsUiController
 	private void OnApplyPressed()
 	{
 		DisplayWindowMode mode = (DisplayWindowMode)_windowModeOption.GetSelectedId();
-		Vector2I resolution = GameConfig.OutputResolutions[_resolutionOption.Selected];
+		Vector2I resolution = DisplaySettingsManager.OutputResolutions[_resolutionOption.Selected];
 		DisplaySettingsManager.Instance.SaveAndApply(mode, resolution);
 	}
 

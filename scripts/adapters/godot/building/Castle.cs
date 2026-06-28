@@ -276,20 +276,21 @@ public partial class Castle : Node2D
 
 	public override void _Draw()
 	{
-		Vector2 gridPixelSize = GameCoordinates.ToLocalPixels(
-			GridColumns * GameCoordinates.UnitsPerCell,
-			GridRows * GameCoordinates.UnitsPerCell);
+		int unitsPerCell = GameCoordinateRules.UnitsPerCell;
+		Vector2 gridPixelSize = GameCoordinatesAdapter.ToLocalPixels(
+			GridColumns * unitsPerCell,
+			GridRows * unitsPerCell);
 		DrawRect(new Rect2(Vector2.Zero, gridPixelSize), AreaBgColor);
 
-		Vector2 blockPixelSize = GameCoordinates.ToLocalPixels(
-			GameCoordinates.CellBlockSize,
-			GameCoordinates.CellBlockSize);
+		Vector2 blockPixelSize = GameCoordinatesAdapter.ToLocalPixels(
+			GameCoordinateRules.CellBlockSize,
+			GameCoordinateRules.CellBlockSize);
 
 		for (int row = 0; row < GridRows; row++)
 		{
 			for (int col = 0; col < GridColumns; col++)
 			{
-				Vector2 position = GameCoordinates.ToLocalPixels(GameCoordinates.CellBlockOrigin(col, row));
+				Vector2 position = GameCoordinatesAdapter.ToLocalPixels(GameCoordinateRules.CellBlockOrigin(col, row));
 				DrawRect(new Rect2(position, blockPixelSize), BlockColor);
 			}
 		}
@@ -300,9 +301,9 @@ public partial class Castle : Node2D
 				? new Color(0.2f, 0.85f, 0.35f, 0.35f)
 				: new Color(0.9f, 0.2f, 0.2f, 0.35f);
 
-			Vector2 cellPixelSize = GameCoordinates.ToLocalPixels(
-				GameCoordinates.UnitsPerCell,
-				GameCoordinates.UnitsPerCell);
+			Vector2 cellPixelSize = GameCoordinatesAdapter.ToLocalPixels(
+				unitsPerCell,
+				unitsPerCell);
 
 			foreach (Vector2I offset in _previewFootprint)
 			{
@@ -311,7 +312,7 @@ public partial class Castle : Node2D
 				if (!IsInBounds(col, row))
 					continue;
 
-				Vector2 previewPos = GameCoordinates.ToLocalPixels(GameCoordinates.CellCorner(col, row));
+				Vector2 previewPos = GameCoordinatesAdapter.ToLocalPixels(GameCoordinateRules.CellCorner(col, row));
 				DrawRect(new Rect2(previewPos, cellPixelSize), previewColor);
 			}
 		}

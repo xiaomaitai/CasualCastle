@@ -1,3 +1,4 @@
+using CasualCastle.Domain.Shared;
 using Godot;
 using System;
 
@@ -11,11 +12,19 @@ public partial class DisplaySettingsManager : Node
 {
 	public static DisplaySettingsManager Instance { get; private set; }
 
+	public static readonly Vector2I[] OutputResolutions =
+	{
+		new(1920, 1080),
+		new(1600, 900),
+		new(1366, 768),
+		new(1280, 720),
+	};
+
 	private const string SettingsPath = "user://display_settings.cfg";
 	private const string Section = "display";
 
 	public DisplayWindowMode WindowMode { get; private set; } = DisplayWindowMode.BorderlessFullscreen;
-	public Vector2I OutputResolution { get; private set; } = new(GameConfig.DesignWidth, GameConfig.DesignHeight);
+	public Vector2I OutputResolution { get; private set; } = new(GameRules.DesignWidth, GameRules.DesignHeight);
 
 	public override void _Ready()
 	{
@@ -40,9 +49,9 @@ public partial class DisplaySettingsManager : Node
 
 	public int FindResolutionIndex(Vector2I resolution)
 	{
-		for (int i = 0; i < GameConfig.OutputResolutions.Length; i++)
+		for (int i = 0; i < OutputResolutions.Length; i++)
 		{
-			if (GameConfig.OutputResolutions[i] == resolution)
+			if (OutputResolutions[i] == resolution)
 				return i;
 		}
 
@@ -73,7 +82,7 @@ public partial class DisplaySettingsManager : Node
 	private void Apply()
 	{
 		Window window = GetTree().Root;
-		window.ContentScaleSize = new Vector2I(GameConfig.DesignWidth, GameConfig.DesignHeight);
+		window.ContentScaleSize = new Vector2I(GameRules.DesignWidth, GameRules.DesignHeight);
 		window.ContentScaleMode = Window.ContentScaleModeEnum.CanvasItems;
 		window.ContentScaleAspect = Window.ContentScaleAspectEnum.Expand;
 

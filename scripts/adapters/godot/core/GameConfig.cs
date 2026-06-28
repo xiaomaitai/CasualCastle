@@ -1,16 +1,9 @@
 using CasualCastle.Domain.Shared;
-using Godot;
 
+// Thin facade over domain GameRules for backward compatibility.
+// Display-specific config (OutputResolutions) moved to DisplaySettingsManager.
 public static class GameConfig
 {
-	public static readonly Vector2I[] OutputResolutions =
-	{
-		new(1920, 1080),
-		new(1600, 900),
-		new(1366, 768),
-		new(1280, 720),
-	};
-
 	public const int DesignWidth = GameRules.DesignWidth;
 	public const int DesignHeight = GameRules.DesignHeight;
 	public const float DayDurationSeconds = GameRules.DayDurationSeconds;
