@@ -12,13 +12,12 @@ public partial class ReplayAiSystem : Node
     private BattleReportSystem _battleReport;
     private AdjacentSystem _adjacentSystem;
 
-    private BattleReportSystem ReportRef => _battleReport ??= AdapterRegistry.Resolve<BattleReportSystem>();
-    private AdjacentSystem AdjacentRef => _adjacentSystem ??= AdapterRegistry.Resolve<AdjacentSystem>();
-
     public override void _Ready()
     {
         Instance = this;
         AdapterRegistry.Register<ReplayAiSystem>(this);
+        _battleReport = AdapterRegistry.Resolve<BattleReportSystem>();
+        _adjacentSystem = AdapterRegistry.Resolve<AdjacentSystem>();
     }
 
     public override void _ExitTree()
@@ -35,7 +34,7 @@ public partial class ReplayAiSystem : Node
         if (enemyCastle == null || enemyCastle.IsPlayerCastle)
             return;
 
-        CastleSnapshot snapshot = ReportRef?.GetSelectedNightSnapshot(nightIndex);
+        CastleSnapshot snapshot = _battleReport.GetSelectedNightSnapshot(nightIndex);
         if (snapshot == null)
             return;
 
@@ -68,7 +67,7 @@ public partial class ReplayAiSystem : Node
                 buildingSnapshot.IsFusionProhibited);
         }
 
-        AdjacentRef?.RefreshCastle(enemyCastle);
+        _adjacentSystem.RefreshCastle(enemyCastle);
     }
 
     private static void ClearEnemyBuildings(Castle enemyCastle)

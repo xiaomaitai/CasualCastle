@@ -4,16 +4,9 @@
 [ext_resource type="Script" path="res://scripts/adapters/godot/ui/UIManager.cs" id="4"]
 [ext_resource type="Script" path="res://scripts/adapters/godot/audio/BgmPlayer.cs" id="5"]
 [ext_resource type="Script" path="res://scripts/adapters/godot/dev/DevInputLogger.cs" id="6"]
-[ext_resource type="Script" path="res://scripts/adapters/godot/night/NightSystem.cs" id="7"]
-[ext_resource type="Script" path="res://scripts/adapters/godot/shop/ShopSystem.cs" id="8"]
-[ext_resource type="Script" path="res://scripts/adapters/godot/card/CardSystem.cs" id="9"]
 [ext_resource type="Script" path="res://scripts/adapters/godot/flow/MainGameController.cs" id="10"]
-[ext_resource type="Script" path="res://scripts/adapters/godot/building/BuildingSystem.cs" id="11"]
-[ext_resource type="Script" path="res://scripts/adapters/godot/building/AdjacentSystem.cs" id="12"]
-[ext_resource type="Script" path="res://scripts/adapters/godot/fusion/FusionSystem.cs" id="14"]
 [ext_resource type="PackedScene" uid="uid://d4settingspanel01" path="res://scenes/ui/settings_panel.tscn" id="13"]
-[ext_resource type="Script" path="res://scripts/adapters/godot/battle_report/BattleReportSystem.cs" id="15"]
-[ext_resource type="Script" path="res://scripts/adapters/godot/replay/ReplayAiSystem.cs" id="16"]
+[ext_resource type="Script" path="res://scripts/adapters/godot/autoload/InitManager.cs" id="17"]
 
 [node name="MainGame" type="Node2D" unique_id=1]
 script = ExtResource("10")
@@ -25,29 +18,8 @@ script = ExtResource("6")
 volume_db = -8.0
 script = ExtResource("5")
 
-[node name="NightSystem" type="Node" parent="."]
-script = ExtResource("7")
-
-[node name="ShopSystem" type="Node" parent="."]
-script = ExtResource("8")
-
-[node name="CardSystem" type="Node" parent="."]
-script = ExtResource("9")
-
-[node name="BuildingSystem" type="Node" parent="."]
-script = ExtResource("11")
-
-[node name="AdjacentSystem" type="Node" parent="."]
-script = ExtResource("12")
-
-[node name="FusionSystem" type="Node" parent="."]
-script = ExtResource("14")
-
-[node name="BattleReportSystem" type="Node" parent="."]
-script = ExtResource("15")
-
-[node name="ReplayAiSystem" type="Node" parent="."]
-script = ExtResource("16")
+[node name="InitManager" type="Node" parent="."]
+script = ExtResource("17")
 
 [node name="UIManager" type="Node2D" parent="." unique_id=17]
 script = ExtResource("4")

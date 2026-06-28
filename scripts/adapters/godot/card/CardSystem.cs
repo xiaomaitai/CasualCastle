@@ -5,8 +5,6 @@ using System.Collections.Generic;
 
 public partial class CardSystem : Node
 {
-    public static CardSystem Instance { get; private set; }
-
     public const int MaxHandSize = 7;
 
     [Signal]
@@ -20,25 +18,19 @@ public partial class CardSystem : Node
 
     private BuildingSystem _buildingSystem;
 
-    private BuildingSystem BuildingSystemRef => _buildingSystem ??= AdapterRegistry.Resolve<BuildingSystem>();
-
     public IReadOnlyList<CardData> Hand => _hand;
     public bool HasSelection => _selectedIndex >= 0 && _selectedIndex < _hand.Count;
     public CardData SelectedCard => HasSelection ? _hand[_selectedIndex] : null;
 
     public override void _Ready()
     {
-        Instance = this;
         AdapterRegistry.Register<CardSystem>(this);
+        _buildingSystem = AdapterRegistry.Resolve<BuildingSystem>();
     }
 
     public override void _ExitTree()
     {
-        if (Instance == this)
-        {
-            AdapterRegistry.Unregister<CardSystem>(this);
-            Instance = null;
-        }
+        AdapterRegistry.Unregister<CardSystem>(this);
     }
 
     public bool TryAddCard(CardData card)
@@ -111,7 +103,7 @@ public partial class CardSystem : Node
         if (card == null || castle == null || !castle.IsPlayerCastle)
             return false;
 
-        return BuildingSystemRef?.TryPlace(castle, card.BuildingType, gridX, gridY) == true;
+        return _buildingSystem.TryPlace(castle, card.BuildingType, gridX, gridY);
     }
 
     public void ResetHand()

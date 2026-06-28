@@ -27,9 +27,6 @@ public partial class ShopSystem : Node
     private CardSystem _cardSystem;
     private GameManager _gameManager;
 
-    private CardSystem CardSystemRef => _cardSystem ??= AdapterRegistry.Resolve<CardSystem>();
-    private GameManager GameManagerRef => _gameManager ??= AdapterRegistry.Resolve<GameManager>();
-
     public int Gold { get; private set; }
     public bool IsShopAvailable { get; private set; }
 
@@ -37,15 +34,14 @@ public partial class ShopSystem : Node
     {
         Instance = this;
         AdapterRegistry.Register<ShopSystem>(this);
+        _cardSystem = AdapterRegistry.Resolve<CardSystem>();
+        _gameManager = AdapterRegistry.Resolve<GameManager>();
 
         Gold = GameConfig.InitialGold;
         RefreshOffers();
 
-        if (GameManagerRef != null)
-        {
-            GameManagerRef.PhaseChanged += OnPhaseChanged;
-            GameManagerRef.GameStateChanged += OnGameStateChanged;
-        }
+        _gameManager.PhaseChanged += OnPhaseChanged;
+        _gameManager.GameStateChanged += OnGameStateChanged;
 
         EmitSignal(SignalName.GoldChanged, Gold);
         UpdateShopAvailability();
@@ -53,11 +49,8 @@ public partial class ShopSystem : Node
 
     public override void _ExitTree()
     {
-        if (_gameManager != null)
-        {
-            _gameManager.PhaseChanged -= OnPhaseChanged;
-            _gameManager.GameStateChanged -= OnGameStateChanged;
-        }
+        _gameManager.PhaseChanged -= OnPhaseChanged;
+        _gameManager.GameStateChanged -= OnGameStateChanged;
 
         if (Instance == this)
         {
@@ -107,7 +100,7 @@ public partial class ShopSystem : Node
         if (offer == null || !CanAfford(offer.Cost))
             return false;
 
-        if (CardSystemRef == null || !CardSystemRef.TryAddCard(offer))
+        if (!_cardSystem.TryAddCard(offer))
             return false;
 
         TrySpendGold(offer.Cost);
@@ -124,7 +117,7 @@ public partial class ShopSystem : Node
         if (offer == null || !CanAfford(offer.Cost))
             return false;
 
-        if (CardSystemRef == null || !CardSystemRef.TryPlaceCard(offer, castle, gridX, gridY))
+        if (!_cardSystem.TryPlaceCard(offer, castle, gridX, gridY))
             return false;
 
         TrySpendGold(offer.Cost);
@@ -133,12 +126,12 @@ public partial class ShopSystem : Node
     }
 
     public bool IsRepairAvailable =>
-        GameManagerRef?.CurrentState == GameManager.GameState.Playing
-        && GameManagerRef.IsNight;
+        _gameManager.CurrentState == GameManager.GameState.Playing
+        && _gameManager.IsNight;
 
     public bool TryRepairBuilding(Building building)
     {
-        return building?.TryRepair() ?? false;
+        return building.TryRepair();
     }
 
     private void RefreshOfferSlot(int slotIndex)
@@ -168,8 +161,7 @@ public partial class ShopSystem : Node
 
     private void UpdateShopAvailability()
     {
-        if (GameManagerRef == null) return;
-        bool available = GameManagerRef.CurrentState == GameManager.GameState.Playing;
+        bool available = _gameManager.CurrentState == GameManager.GameState.Playing;
         if (IsShopAvailable == available)
             return;
         IsShopAvailable = available;
