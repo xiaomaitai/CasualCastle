@@ -105,15 +105,17 @@ public partial class BattleManager : Node
                 if (!_grid.TryGetValue(neighborCell, out List<Soldier> cellUnits))
                     continue;
 
-                foreach (Soldier enemy in cellUnits)
+                foreach (Soldier candidate in cellUnits)
                 {
-                    if (!enemy.IsAlive)
+                    if (!candidate.IsAlive)
                         continue;
-                    float dist = soldier.GlobalPosition.DistanceSquaredTo(enemy.GlobalPosition);
+                    if (candidate.IsPlayerUnit == soldier.IsPlayerUnit)
+                        continue;
+                    float dist = soldier.GlobalPosition.DistanceSquaredTo(candidate.GlobalPosition);
                     if (dist < bestScore)
                     {
                         bestScore = dist;
-                        best = enemy;
+                        best = candidate;
                     }
                 }
             }

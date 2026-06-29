@@ -55,7 +55,7 @@ CasualCastle/
 │       └── persistence/       BattleReportStorage
 │
 ├── scenes/    prefabs/    assets/    project.godot
-├── design/                  # 系统设计文档
+├── devPlan/design/          # 系统设计文档
 ├── tests/                   # CasualCastle.Domain.Tests
 └── CasualCastle.sln         # 6 个项目
 ```

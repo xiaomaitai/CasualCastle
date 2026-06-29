@@ -79,6 +79,8 @@ public partial class Soldier : Area2D
 	{
 		if (target != null && target.IsAlive && target.IsPlayerUnit != IsPlayerUnit)
 			_targetEnemy = target;
+		else
+			_targetEnemy = null;
 	}
 
 	public override void _Ready()
@@ -201,8 +203,6 @@ public partial class Soldier : Area2D
 		}
 		else if (_targetCastle != null && _targetCastle.IsAlive)
 		{
-			_targetEnemy = null;
-
 			if (_targetBuilding != null && _targetBuilding.IsDestroyed)
 			{
 				_targetCastle = null;
