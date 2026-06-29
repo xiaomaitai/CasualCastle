@@ -12,14 +12,14 @@ public partial class Soldier : Area2D
 	public int Health { get; private set; } = 30;
 	public int MaxHealth { get; private set; } = 30;
 	public int Damage { get; private set; } = 10;
-	public float Speed { get; private set; } = 170f;
-	public float AttackRange { get; private set; } = 60f;
+	public float Speed { get; private set; } = 252f;
+	public float AttackRange { get; private set; } = 90f;
 	public float AttackCooldown { get; private set; } = 1f;
 	public bool HasNightCombat { get; set; }
 
 	private AttackBehavior _attackBehavior;
 	private bool _statsPending;
-	private Vector2 _moveDirection;
+	private NavigationAgent2D _navigationAgent;
 	private float _attackTimer;
 	private float _hitFlashTimer;
 	private Soldier _targetEnemy;
@@ -36,8 +36,8 @@ public partial class Soldier : Area2D
 		MaxHealth = Data.Health;
 		Health = Data.Health;
 		Damage = Data.Damage;
-		Speed = Data.Speed;
-		AttackRange = Data.AttackRange;
+		Speed = GameCoordinatesAdapter.GameUnitsToPixels(Data.Speed);
+		AttackRange = GameCoordinatesAdapter.GameUnitsToPixels(Data.AttackRange);
 		AttackCooldown = Data.AttackCooldown;
 		HasNightCombat = Data.HasNightCombat;
 
@@ -54,7 +54,7 @@ public partial class Soldier : Area2D
 			return;
 		_statsPending = false;
 
-		float displaySize = Data.DisplaySize();
+		float displaySize = GameCoordinatesAdapter.GameUnitsToPixels(Data.DisplaySize());
 		uint color = Data.UnitColor;
 		_baseSpriteModulate = new Color(
 			((color >> 16) & 0xFF) / 255f,
@@ -72,7 +72,7 @@ public partial class Soldier : Area2D
 		}
 
 		if (_collisionShape?.Shape is CircleShape2D circle)
-			circle.Radius = Data.CollisionRadius();
+			circle.Radius = GameCoordinatesAdapter.GameUnitsToPixels(Data.CollisionRadius());
 	}
 
 	public void SetTarget(Soldier target)
@@ -85,7 +85,7 @@ public partial class Soldier : Area2D
 
 	public override void _Ready()
 	{
-		_moveDirection = IsPlayerUnit ? Vector2.Right : Vector2.Left;
+		_navigationAgent = GetNode<NavigationAgent2D>("NavigationAgent");
 
 		_sprite = GetNodeOrNull<Sprite2D>("Sprite");
 		_collisionShape = GetNodeOrNull<CollisionShape2D>("CollisionShape");
@@ -121,7 +121,7 @@ public partial class Soldier : Area2D
 		if (Data == null)
 			return;
 
-		float radius = Data.CollisionRadius();
+		float radius = GameCoordinatesAdapter.GameUnitsToPixels(Data.CollisionRadius());
 		Color circleColor = IsPlayerUnit
 			? new Color(0, 1, 0, 0.3f)
 			: new Color(1, 0, 0, 0.3f);
@@ -191,14 +191,16 @@ public partial class Soldier : Area2D
 		if (_targetEnemy != null && _targetEnemy.IsAlive)
 		{
 			float dist = GlobalPosition.DistanceTo(_targetEnemy.GlobalPosition);
-			if (dist <= AttackRange)
+			float myRadius = GameCoordinatesAdapter.GameUnitsToPixels(Data.CollisionRadius());
+			float targetRadius = GameCoordinatesAdapter.GameUnitsToPixels(_targetEnemy.Data.CollisionRadius());
+			if ((dist - myRadius - targetRadius) <= AttackRange)
 			{
 				if (_attackTimer <= 0 && _attackBehavior.TryExecute(_targetEnemy, dt))
 					_attackTimer = AttackCooldown;
 			}
 			else
 			{
-				MoveToward(dt, _targetEnemy.GlobalPosition);
+				_navigationAgent.TargetPosition = _targetEnemy.GlobalPosition;
 			}
 		}
 		else if (_targetCastle != null && _targetCastle.IsAlive)
@@ -219,8 +221,15 @@ public partial class Soldier : Area2D
 		else
 		{
 			_targetEnemy = null;
-			Vector2 destination = GetDestination();
-			MoveToward(dt, destination);
+			_navigationAgent.TargetPosition = GetDestination();
+		}
+
+		// NavigationAgent2D-driven movement
+		if (!_navigationAgent.IsNavigationFinished())
+		{
+			Vector2 next = _navigationAgent.GetNextPathPosition();
+			Vector2 dir = (next - GlobalPosition).Normalized();
+			GlobalPosition += dir * Speed * dt;
 		}
 
 		QueueRedraw();
@@ -230,51 +239,23 @@ public partial class Soldier : Area2D
 	{
 		GameManager gm = AdapterRegistry.Resolve<GameManager>();
 		if (gm == null)
-			return GlobalPosition + _moveDirection * 2000;
+		{
+			Vector2 fallbackDir = IsPlayerUnit ? Vector2.Right : Vector2.Left;
+			return GlobalPosition + fallbackDir * 2000;
+		}
 
 		Castle targetCastle = IsPlayerUnit ? gm.EnemyCastle : gm.PlayerCastle;
 		if (targetCastle == null)
-			return GlobalPosition + _moveDirection * 2000;
+		{
+			Vector2 fallbackDir = IsPlayerUnit ? Vector2.Right : Vector2.Left;
+			return GlobalPosition + fallbackDir * 2000;
+		}
 
 		float frontX = IsPlayerUnit
-			? targetCastle.GlobalPosition.X - 80f
-			: targetCastle.GlobalPosition.X + targetCastle.GridColumns * targetCastle.CellSize + 80f;
+			? targetCastle.GlobalPosition.X - 120f
+			: targetCastle.GlobalPosition.X + targetCastle.GridColumns * targetCastle.CellSize + 120f;
 
 		return new Vector2(frontX, GlobalPosition.Y);
-	}
-
-	private void MoveToward(float dt, Vector2 target)
-	{
-		Vector2 direction = (target - GlobalPosition).Normalized();
-		Vector2 desiredPosition = GlobalPosition + direction * Speed * dt;
-
-		PhysicsDirectSpaceState2D spaceState = GetWorld2D().DirectSpaceState;
-		PhysicsRayQueryParameters2D rayQuery = new PhysicsRayQueryParameters2D();
-		rayQuery.From = GlobalPosition;
-		rayQuery.To = desiredPosition;
-		rayQuery.CollisionMask = 4;
-		rayQuery.Exclude = new Godot.Collections.Array<Rid> { GetRid() };
-
-		Godot.Collections.Dictionary result = spaceState.IntersectRay(rayQuery);
-		if (result.Count > 0)
-		{
-			Vector2 slideDirection = new Vector2(-direction.Y, direction.X);
-			Vector2 slidePosition = GlobalPosition + slideDirection * Speed * dt * 0.5f;
-
-			rayQuery.To = slidePosition;
-			Godot.Collections.Dictionary slideResult = spaceState.IntersectRay(rayQuery);
-			if (slideResult.Count > 0)
-			{
-				slideDirection = new Vector2(direction.Y, -direction.X);
-				slidePosition = GlobalPosition + slideDirection * Speed * dt * 0.5f;
-			}
-
-			GlobalPosition = slidePosition;
-		}
-		else
-		{
-			GlobalPosition = desiredPosition;
-		}
 	}
 
 	public void TakeDamage(int amount)

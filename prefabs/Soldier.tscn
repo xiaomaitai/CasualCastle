@@ -20,5 +20,11 @@ centered = true
 [node name="CollisionShape" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_1")
 
+[node name="NavigationAgent" type="NavigationAgent2D" parent="."]
+path_desired_distance = 4.0
+target_desired_distance = 4.0
+path_max_distance = 2000.0
+avoidance_enabled = true
+
 [node name="SleepZEffect" type="Node2D" parent="."]
 script = ExtResource("3")

@@ -16,20 +16,20 @@ public class UnitStats
 
 	public float DisplaySize => Size switch
 	{
-		UnitSize.Small => 40f,
-		UnitSize.Medium => 60f,
-		UnitSize.Large => 80f,
-		UnitSize.Huge => 120f,
-		_ => 60f
+		UnitSize.Small => 80f,
+		UnitSize.Medium => 125f,
+		UnitSize.Large => 170f,
+		UnitSize.Huge => 250f,
+		_ => 125f
 	};
 
 	public float CollisionRadius => Size switch
 	{
-		UnitSize.Small => 16f,
-		UnitSize.Medium => 24f,
-		UnitSize.Large => 32f,
-		UnitSize.Huge => 48f,
-		_ => 24f
+		UnitSize.Small => 35f,
+		UnitSize.Medium => 50f,
+		UnitSize.Large => 65f,
+		UnitSize.Huge => 100f,
+		_ => 50f
 	};
 
 	public uint UnitColor { get; init; }

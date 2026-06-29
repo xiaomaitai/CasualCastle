@@ -1,3 +1,4 @@
+using CasualCastle.Adapters.Godot;
 using Godot;
 
 public abstract class AttackBehavior
@@ -14,6 +15,8 @@ public abstract class AttackBehavior
 	protected bool TargetInRange(Soldier target)
 	{
 		float dist = Soldier.GlobalPosition.DistanceTo(target.GlobalPosition);
-		return dist <= Soldier.AttackRange;
+		float myRadius = GameCoordinatesAdapter.GameUnitsToPixels(Soldier.Data.CollisionRadius());
+		float targetRadius = GameCoordinatesAdapter.GameUnitsToPixels(target.Data.CollisionRadius());
+		return (dist - myRadius - targetRadius) <= Soldier.AttackRange;
 	}
 }
