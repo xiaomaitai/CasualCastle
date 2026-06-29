@@ -20,6 +20,7 @@ public partial class MainGameController : Node2D
             new Vector2(0, 1080)
         });
         navRegion.NavigationPolygon = navPoly;
+        navRegion.BakeNavigationPolygon();
 
         AdapterRegistry.Resolve<GameManager>().StartGameSession(battlefield, playerCastle, enemyCastle);
         AdapterRegistry.Resolve<AdjacencyService>().RefreshCastle(playerCastle.GetBuildingStates());
