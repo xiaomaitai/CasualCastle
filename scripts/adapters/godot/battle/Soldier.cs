@@ -225,12 +225,9 @@ public partial class Soldier : Area2D
 		}
 
 		// NavigationAgent2D-driven movement
-		if (!_navigationAgent.IsNavigationFinished())
-		{
-			Vector2 next = _navigationAgent.GetNextPathPosition();
-			Vector2 dir = (next - GlobalPosition).Normalized();
-			GlobalPosition += dir * Speed * dt;
-		}
+		Vector2 next = _navigationAgent.GetNextPathPosition();
+		Vector2 dir = (next - GlobalPosition).Normalized();
+		GlobalPosition += dir * Speed * dt;
 
 		QueueRedraw();
 	}
