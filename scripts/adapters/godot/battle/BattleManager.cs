@@ -6,7 +6,7 @@ public partial class BattleManager : Node
 {
     private const float TargetingInterval = 0.2f;
     private const float PushDistance = 24f;
-    private const float PushForce = 40f;
+    private const float PushForce = 20f;
     private const float CellSize = 200f;
 
     private readonly List<Soldier> _playerUnits = new();
@@ -126,8 +126,10 @@ public partial class BattleManager : Node
 
     private void ApplyUnitPushing(float dt)
     {
-        PushInList(_playerUnits, dt);
-        PushInList(_enemyUnits, dt);
+        var allUnits = new List<Soldier>(_playerUnits.Count + _enemyUnits.Count);
+        allUnits.AddRange(_playerUnits);
+        allUnits.AddRange(_enemyUnits);
+        PushInList(allUnits, dt);
     }
 
     private static void PushInList(List<Soldier> units, float dt)
@@ -145,7 +147,8 @@ public partial class BattleManager : Node
                     continue;
 
                 float dist = a.GlobalPosition.DistanceTo(b.GlobalPosition);
-                float minDist = a.Data.CollisionRadius() + b.Data.CollisionRadius() + 4f;
+                float minDist = GameCoordinatesAdapter.GameUnitsToPixels(a.Data.CollisionRadius())
+                    + GameCoordinatesAdapter.GameUnitsToPixels(b.Data.CollisionRadius()) + 4f;
                 if (dist < minDist && dist > 0.001f)
                 {
                     Vector2 pushDir = (a.GlobalPosition - b.GlobalPosition).Normalized();

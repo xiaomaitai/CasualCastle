@@ -15,3 +15,6 @@ centered = true
 
 [node name="CollisionShape" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_1")
+
+[node name="NavigationObstacle" type="NavigationObstacle2D" parent="."]
+avoidance_enabled = true

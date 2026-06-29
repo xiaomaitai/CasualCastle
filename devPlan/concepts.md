@@ -227,6 +227,26 @@
 
 ---
 
+## 坐标系统
+
+项目有两套坐标，严格分层：
+
+| 坐标系统 | 所在层 | 单位 | 定义 |
+|----------|--------|------|------|
+| **游戏坐标** | domain 层 | 游戏单位（1 格 = 100 单位） | `GameCoordinateRules.UnitsPerCell = 100` |
+| **像素坐标** | adapter 层 | Godot 像素 | `GameCoordinatesAdapter.PixelsPerCell = 72` |
+
+**转换**（仅在 adapter 层）：
+
+```
+像素 = 游戏单位 × PixelsPerCell / UnitsPerCell = 游戏单位 × 72 / 100
+游戏单位 = 像素 × UnitsPerCell / PixelsPerCell = 像素 × 100 / 72
+```
+
+**规则**：
+- domain 层所有数值（速度、射程、尺寸、碰撞半径等）一律使用**游戏单位**，禁止出现像素
+- adapter 层从 domain 获取游戏单位后，通过 `GameCoordinatesAdapter.GameUnitsToPixels()` 转换为像素再用于渲染 / 物理
+
 ## 游戏状态（极简 MVP）
 
 - `GameManager`：管理 `Playing` / `GameOver`、双方血量、胜负

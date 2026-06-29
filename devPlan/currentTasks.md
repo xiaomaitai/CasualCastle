@@ -18,54 +18,54 @@
 
 ```sql
 CREATE TABLE unit_stats (
-    type_id       TEXT PRIMARY KEY,
-    size          INTEGER NOT NULL,  -- 0=Small 1=Medium 2=Large 3=Huge
-    attack_type   INTEGER NOT NULL,  -- 0=Melee 1=Ranged
-    damage_type   INTEGER NOT NULL,  -- 0=Normal 1=Pierce 2=Siege 3=Magic
-    armor_type    INTEGER NOT NULL,  -- 0=Light 1=Heavy 2=Fortified 3=Beast
-    health        INTEGER NOT NULL,
-    damage        INTEGER NOT NULL,
-    speed         REAL    NOT NULL,
-    attack_range  REAL    NOT NULL,
-    attack_cooldown REAL  NOT NULL,
-    has_night_combat INTEGER NOT NULL DEFAULT 0,
-    unit_color    INTEGER NOT NULL
+	type_id       TEXT PRIMARY KEY,
+	size          INTEGER NOT NULL,  -- 0=Small 1=Medium 2=Large 3=Huge
+	attack_type   INTEGER NOT NULL,  -- 0=Melee 1=Ranged
+	damage_type   INTEGER NOT NULL,  -- 0=Normal 1=Pierce 2=Siege 3=Magic
+	armor_type    INTEGER NOT NULL,  -- 0=Light 1=Heavy 2=Fortified 3=Beast
+	health        INTEGER NOT NULL,
+	damage        INTEGER NOT NULL,
+	speed         REAL    NOT NULL,
+	attack_range  REAL    NOT NULL,
+	attack_cooldown REAL  NOT NULL,
+	has_night_combat INTEGER NOT NULL DEFAULT 0,
+	unit_color    INTEGER NOT NULL
 );
 
 CREATE TABLE building_defs (
-    type_id           TEXT PRIMARY KEY,
-    display_name      TEXT    NOT NULL,
-    max_health        INTEGER NOT NULL,
-    spawn_interval    REAL,
-    spawn_cell_x      INTEGER DEFAULT 0,
-    spawn_cell_y      INTEGER DEFAULT 0,
-    unit_type_id      TEXT,
-    has_night_combat  INTEGER DEFAULT 0,
-    fusion_tier       INTEGER DEFAULT 0,
-    is_core           INTEGER DEFAULT 0,
-    footprint_json    TEXT    NOT NULL  -- JSON: [[0,0],[1,0]]
+	type_id           TEXT PRIMARY KEY,
+	display_name      TEXT    NOT NULL,
+	max_health        INTEGER NOT NULL,
+	spawn_interval    REAL,
+	spawn_cell_x      INTEGER DEFAULT 0,
+	spawn_cell_y      INTEGER DEFAULT 0,
+	unit_type_id      TEXT,
+	has_night_combat  INTEGER DEFAULT 0,
+	fusion_tier       INTEGER DEFAULT 0,
+	is_core           INTEGER DEFAULT 0,
+	footprint_json    TEXT    NOT NULL  -- JSON: [[0,0],[1,0]]
 );
 
 CREATE TABLE damage_matrix (
-    damage_type INTEGER NOT NULL,
-    armor_type  INTEGER NOT NULL,
-    multiplier  REAL    NOT NULL,
-    PRIMARY KEY (damage_type, armor_type)
+	damage_type INTEGER NOT NULL,
+	armor_type  INTEGER NOT NULL,
+	multiplier  REAL    NOT NULL,
+	PRIMARY KEY (damage_type, armor_type)
 );
 
 CREATE TABLE shop_catalog (
-    id            TEXT PRIMARY KEY,
-    name          TEXT    NOT NULL,
-    cost          INTEGER NOT NULL,
-    building_type TEXT    NOT NULL
+	id            TEXT PRIMARY KEY,
+	name          TEXT    NOT NULL,
+	cost          INTEGER NOT NULL,
+	building_type TEXT    NOT NULL
 );
 
 CREATE TABLE fusion_recipes (
-    main_type_id     TEXT NOT NULL,
-    material_type_id TEXT NOT NULL,
-    material_count   INTEGER NOT NULL,
-    result_type_id   TEXT NOT NULL,
-    PRIMARY KEY (main_type_id, material_type_id)
+	main_type_id     TEXT NOT NULL,
+	material_type_id TEXT NOT NULL,
+	material_count   INTEGER NOT NULL,
+	result_type_id   TEXT NOT NULL,
+	PRIMARY KEY (main_type_id, material_type_id)
 );
 ```
 
@@ -74,12 +74,12 @@ CREATE TABLE fusion_recipes (
 ```
 CompositionRoot.Build()
   └── GameDataLoader.Load("res://assets/data/game_data.db")
-        ├── 打开 SQLite 连接（只读）
-        ├── 读取 unit_stats → UnitRegistry 内存缓存
-        ├── 读取 building_defs → BuildingDefinitions 内存缓存
-        ├── 读取 damage_matrix → DamageMatrix 内存缓存
-        ├── 读取 shop_catalog → ShopRules 内存缓存
-        └── 读取 fusion_recipes → FusionRules 内存缓存
+		├── 打开 SQLite 连接（只读）
+		├── 读取 unit_stats → UnitRegistry 内存缓存
+		├── 读取 building_defs → BuildingDefinitions 内存缓存
+		├── 读取 damage_matrix → DamageMatrix 内存缓存
+		├── 读取 shop_catalog → ShopRules 内存缓存
+		└── 读取 fusion_recipes → FusionRules 内存缓存
 ```
 
 ### 施工步骤

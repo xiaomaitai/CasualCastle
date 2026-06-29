@@ -45,7 +45,7 @@ public partial class BuildingSystem : Node
             TexturePath = PlaceholderTexturePath,
             SpriteScale = new(0.125f, 0.125f),
             SpriteModulate = new Color(1f, 0.82f, 0.35f),
-            CollisionSize = new(120f, 120f),
+            CollisionSize = new(180f, 180f),
         },
         ["Barracks"] = new()
         {
@@ -53,7 +53,7 @@ public partial class BuildingSystem : Node
             TexturePath = PlaceholderTexturePath,
             SpriteScale = new(0.0625f, 0.0625f),
             SpriteModulate = Colors.White,
-            CollisionSize = new(56f, 56f),
+            CollisionSize = new(84f, 84f),
         },
         ["ArcheryRange"] = new()
         {
@@ -61,7 +61,7 @@ public partial class BuildingSystem : Node
             TexturePath = PlaceholderTexturePath,
             SpriteScale = new(0.125f, 0.0625f),
             SpriteModulate = new Color(0.55f, 0.85f, 0.45f),
-            CollisionSize = new(124f, 56f),
+            CollisionSize = new(186f, 84f),
         },
         ["Stable"] = new()
         {
@@ -69,7 +69,7 @@ public partial class BuildingSystem : Node
             TexturePath = PlaceholderTexturePath,
             SpriteScale = new(0.125f, 0.1875f),
             SpriteModulate = new Color(0.75f, 0.55f, 0.3f),
-            CollisionSize = new(124f, 188f),
+            CollisionSize = new(186f, 282f),
         },
         ["WolfDen"] = new()
         {
@@ -77,7 +77,7 @@ public partial class BuildingSystem : Node
             TexturePath = PlaceholderTexturePath,
             SpriteScale = new(0.0625f, 0.0625f),
             SpriteModulate = new Color(0.55f, 0.35f, 0.75f),
-            CollisionSize = new(56f, 56f),
+            CollisionSize = new(84f, 84f),
         },
         ["BarracksT2"] = new()
         {
@@ -85,7 +85,7 @@ public partial class BuildingSystem : Node
             TexturePath = PlaceholderTexturePath,
             SpriteScale = new(0.0625f, 0.0625f),
             SpriteModulate = new Color(0.85f, 0.9f, 1f),
-            CollisionSize = new(56f, 56f),
+            CollisionSize = new(84f, 84f),
         },
         ["WolfDenT2"] = new()
         {
@@ -93,7 +93,7 @@ public partial class BuildingSystem : Node
             TexturePath = PlaceholderTexturePath,
             SpriteScale = new(0.0625f, 0.0625f),
             SpriteModulate = new Color(0.65f, 0.45f, 0.85f),
-            CollisionSize = new(56f, 56f),
+            CollisionSize = new(84f, 84f),
         },
     };
 
@@ -207,7 +207,17 @@ public partial class BuildingSystem : Node
 
         CollisionShape2D shapeNode = building.GetNodeOrNull<CollisionShape2D>("CollisionShape");
         if (shapeNode?.Shape is RectangleShape2D rect)
+        {
             rect.Size = visual.CollisionSize;
+
+            // Sync NavigationObstacle2D radius with collision shape
+            NavigationObstacle2D navObstacle = building.GetNodeOrNull<NavigationObstacle2D>("NavigationObstacle");
+            if (navObstacle != null)
+            {
+                float maxHalf = Mathf.Max(rect.Size.X, rect.Size.Y) * 0.5f;
+                navObstacle.Radius = maxHalf;
+            }
+        }
     }
 
     public bool CanPlace(Castle castle, string buildingType, int anchorX, int anchorY)
