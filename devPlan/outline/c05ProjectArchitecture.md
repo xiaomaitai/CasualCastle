@@ -34,7 +34,7 @@ CasualCastle/
 │       │   └── audio/     BgmPlayer
 │       └── persistence/   BattleReportStorage（实现 IBattleReportRepository）
 │
-├── design/                                         # 系统设计文档
+├── devPlan/design/                                  # 系统设计文档
 │   ├── fusionSystem.md
 │   ├── battleReport.md
 │   ├── replayAi.md

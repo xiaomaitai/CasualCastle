@@ -45,7 +45,8 @@ dotnet build
 | 代码结构 | `devPlan/codeStructure.md` |
 | 数据结构 | `devPlan/dataStructures.md` |
 | 模块架构 | `devPlan/outline/c05ProjectArchitecture.md` |
-| 融合规则 | `design/fusionSystem.md` |
-| AI 规则 | `design/replayAi.md` |
-| 战报规则 | `design/battleReport.md` |
+| 融合规则 | `devPlan/design/fusionSystem.md` |
+| AI 规则 | `devPlan/design/replayAi.md` |
+| 战报规则 | `devPlan/design/battleReport.md` |
 | 战斗系统 | `devPlan/outline/c02BattleSystemOverview.md` `c03BattleSystemRoadmap.md` `c06BattleSystemImplementation.md` |
+| 依赖注入 | `devPlan/design/dependencyInjection.md` |
