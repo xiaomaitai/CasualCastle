@@ -251,17 +251,20 @@ public partial class Soldier : Area2D
 			case SoldierState.Retaliating:
 				if (edgeDist <= AttackRange)
 				{
+					_navigationAgent.AvoidanceEnabled = false;
 					if (_attackTimer <= 0 && _attackBehavior.TryExecute(_targetEnemy, dt))
 						_attackTimer = AttackCooldown;
 				}
 				else
 				{
+					_navigationAgent.AvoidanceEnabled = true;
 					_navigationAgent.TargetPosition = _targetEnemy.GlobalPosition;
 					shouldMove = true;
 				}
 				break;
 
 			case SoldierState.Sieging:
+				_navigationAgent.AvoidanceEnabled = false;
 				if (_attackTimer <= 0)
 				{
 					if (_targetBuilding.Health > 0)
@@ -271,6 +274,7 @@ public partial class Soldier : Area2D
 				break;
 
 			case SoldierState.Marching:
+				_navigationAgent.AvoidanceEnabled = true;
 				_targetEnemy = null;
 				_navigationAgent.TargetPosition = SelectTarget();
 				shouldMove = true;
