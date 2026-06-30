@@ -1,5 +1,6 @@
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
+using CasualCastle.Domain.Building;
 using Godot;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -76,6 +77,8 @@ public partial class GameManager : Node2D, IGameState
         AdapterRegistry.Register<GameManager>(this);
         AdapterRegistry.Register<IGameState>(this);
         AdapterRegistry.Register(Services.GetRequiredService<UnitSpatialService>());
+        AdapterRegistry.Register(Services.GetRequiredService<IUnitRepository>());
+        AdapterRegistry.Register(Services.GetRequiredService<IBuildingRepository>());
         SetProcess(false);
         SetProcessInput(true);
     }
@@ -120,7 +123,8 @@ public partial class GameManager : Node2D, IGameState
 
         for (int i = 0; i < count; i++)
         {
-            Soldier soldier = soldierScene.Instantiate<Soldier>();
+           Soldier shell = soldierScene.Instantiate<Soldier>();
+			SoldierLogic soldier = shell.GetNode<SoldierLogic>("Logic");
             soldier.IsPlayerUnit = true;
             UnitSpawn.PlaceSoldier(
                 _battlefield, _playerCastle, soldier,

@@ -25,6 +25,8 @@ public static class CompositionRoot
             ?? throw new System.InvalidOperationException("IGameState not registered"));
 
         services.AddSingleton<IBattleReportRepository, BattleReportStorage>();
+        services.AddSingleton<IUnitRepository, SqliteUnitRepository>();
+        services.AddSingleton<IBuildingRepository, SqliteBuildingRepository>();
 
         return services.BuildServiceProvider();
     }

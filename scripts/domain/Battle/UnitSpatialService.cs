@@ -9,15 +9,15 @@ public class UnitSpatialService
 	private const float PushForce = 20f;
 	private const float BuildingPushForce = 15f;
 
-	private readonly List<Soldier> _playerUnits = new();
-	private readonly List<Soldier> _enemyUnits = new();
+	private readonly List<ISoldierService> _playerUnits = new();
+	private readonly List<ISoldierService> _enemyUnits = new();
 	private readonly List<IBuildingRef> _buildings = new();
-	private readonly Dictionary<(int, int), List<Soldier>> _grid = new();
+	private readonly Dictionary<(int, int), List<ISoldierService>> _grid = new();
 
 	public interface IBuildingRef
 	{
 		bool IsDestroyed { get; }
-		bool IsEnemyOf(Soldier soldier);
+		bool IsEnemyOf(ISoldierService soldier);
 		float MinX { get; }
 		float MinY { get; }
 		float MaxX { get; }
@@ -26,7 +26,7 @@ public class UnitSpatialService
 		object CastleObject { get; }
 	}
 
-	public void Register(Soldier soldier)
+	public void Register(ISoldierService soldier)
 	{
 		if (soldier.IsPlayerUnit)
 			_playerUnits.Add(soldier);
@@ -34,7 +34,7 @@ public class UnitSpatialService
 			_enemyUnits.Add(soldier);
 	}
 
-	public void Unregister(Soldier soldier)
+	public void Unregister(ISoldierService soldier)
 	{
 		if (soldier.IsPlayerUnit)
 			_playerUnits.Remove(soldier);
@@ -59,16 +59,16 @@ public class UnitSpatialService
 		PushSoldiersFromBuildings(dt);
 	}
 
-	public (Soldier nearest, float edgeDist) FindNearestEnemy(Soldier soldier)
+	public (ISoldierService nearest, float edgeDist) FindNearestEnemy(ISoldierService soldier)
 	{
 		if (!soldier.IsAlive)
 			return (null, float.MaxValue);
 
-		List<Soldier> enemies = soldier.IsPlayerUnit ? _enemyUnits : _playerUnits;
-		Soldier best = null;
+		List<ISoldierService> enemies = soldier.IsPlayerUnit ? _enemyUnits : _playerUnits;
+		ISoldierService best = null;
 		float bestScore = float.MaxValue;
 
-		foreach (Soldier candidate in enemies)
+		foreach (ISoldierService candidate in enemies)
 		{
 			if (!candidate.IsAlive)
 				continue;
@@ -90,7 +90,7 @@ public class UnitSpatialService
 		return (best, edgeDist);
 	}
 
-	public (object building, object castle) FindOverlappingBuilding(Soldier soldier)
+	public (object building, object castle) FindOverlappingBuilding(ISoldierService soldier)
 	{
 		foreach (IBuildingRef b in _buildings)
 		{
@@ -107,15 +107,14 @@ public class UnitSpatialService
 
 	public bool HasEnemyOnBuilding(IBuildingRef building)
 	{
-		List<Soldier> enemies = building.IsEnemyOf(_playerUnits.Count > 0 ? _playerUnits[0] : null)
+		List<ISoldierService> enemies = _playerUnits.Count > 0 && building.IsEnemyOf(_playerUnits[0])
 			? _playerUnits : _enemyUnits;
-		foreach (Soldier s in enemies)
+		foreach (ISoldierService s in enemies)
 		{
 			if (!s.IsAlive)
 				continue;
-			float x = s.GameX;
-			float y = s.GameY;
-			if (x >= building.MinX && x <= building.MaxX && y >= building.MinY && y <= building.MaxY)
+			if (s.GameX >= building.MinX && s.GameX <= building.MaxX
+				&& s.GameY >= building.MinY && s.GameY <= building.MaxY)
 				return true;
 		}
 		return false;
@@ -128,16 +127,16 @@ public class UnitSpatialService
 		AddToGrid(_enemyUnits);
 	}
 
-	private void AddToGrid(List<Soldier> units)
+	private void AddToGrid(List<ISoldierService> units)
 	{
-		foreach (Soldier s in units)
+		foreach (ISoldierService s in units)
 		{
 			if (!s.IsAlive)
 				continue;
 			(int x, int y) cell = (WorldToCell(s.GameX), WorldToCell(s.GameY));
-			if (!_grid.TryGetValue(cell, out List<Soldier> list))
+			if (!_grid.TryGetValue(cell, out List<ISoldierService> list))
 			{
-				list = new List<Soldier>();
+				list = new List<ISoldierService>();
 				_grid[cell] = list;
 			}
 			list.Add(s);
@@ -146,19 +145,19 @@ public class UnitSpatialService
 
 	private void PushSoldiers(float dt)
 	{
-		var all = new List<Soldier>(_playerUnits.Count + _enemyUnits.Count);
+		var all = new List<ISoldierService>(_playerUnits.Count + _enemyUnits.Count);
 		all.AddRange(_playerUnits);
 		all.AddRange(_enemyUnits);
 
 		for (int i = 0; i < all.Count; i++)
 		{
-			Soldier a = all[i];
+			ISoldierService a = all[i];
 			if (!a.IsAlive || a.State == SoldierState.Sieging)
 				continue;
 
 			for (int j = i + 1; j < all.Count; j++)
 			{
-				Soldier b = all[j];
+				ISoldierService b = all[j];
 				if (!b.IsAlive || b.State == SoldierState.Sieging)
 					continue;
 
@@ -180,11 +179,11 @@ public class UnitSpatialService
 
 	private void PushSoldiersFromBuildings(float dt)
 	{
-		var all = new List<Soldier>(_playerUnits.Count + _enemyUnits.Count);
+		var all = new List<ISoldierService>(_playerUnits.Count + _enemyUnits.Count);
 		all.AddRange(_playerUnits);
 		all.AddRange(_enemyUnits);
 
-		foreach (Soldier s in all)
+		foreach (ISoldierService s in all)
 		{
 			if (!s.IsAlive || s.State == SoldierState.Sieging)
 				continue;
@@ -211,31 +210,29 @@ public class UnitSpatialService
 		}
 	}
 
-	private static float DistSq(Soldier a, Soldier b)
+	public void PropagateRetaliation(ISoldierService center, ISoldierService attacker)
 	{
-		float dx = a.GameX - b.GameX;
-		float dy = a.GameY - b.GameY;
-		return dx * dx + dy * dy;
-	}
-
-	public void PropagateRetaliation(Soldier center, Soldier attacker)
-	{
-		List<Soldier> allies = center.IsPlayerUnit ? _playerUnits : _enemyUnits;
+		List<ISoldierService> allies = center.IsPlayerUnit ? _playerUnits : _enemyUnits;
 		float radius = center.VisionRange;
-		foreach (Soldier ally in allies)
+		foreach (ISoldierService ally in allies)
 		{
 			if (ally == center)
 				continue;
 			if (!ally.IsAlive)
 				continue;
-			if (ally.TargetEnemy != null && ally.TargetEnemy.IsAlive)
-				continue;
 			float dx = ally.GameX - center.GameX;
 			float dy = ally.GameY - center.GameY;
 			if (MathF.Sqrt(dx * dx + dy * dy) > radius)
 				continue;
-			ally.TargetEnemy = attacker;
+			ally.SetEnemyTarget(attacker);
 		}
+	}
+
+	private static float DistSq(ISoldierService a, ISoldierService b)
+	{
+		float dx = a.GameX - b.GameX;
+		float dy = a.GameY - b.GameY;
+		return dx * dx + dy * dy;
 	}
 
 	private static int WorldToCell(float coord) => (int)MathF.Floor(coord / CellSize);

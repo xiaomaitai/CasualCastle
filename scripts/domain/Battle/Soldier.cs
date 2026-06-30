@@ -22,7 +22,9 @@ public class Soldier
 	public DamageType DamageType { get; set; }
 	public ArmorType ArmorType { get; set; }
 
-	public Soldier TargetEnemy { get; set; }
+	internal ISoldierService Self { get; set; }
+
+	public ISoldierService TargetEnemy { get; set; }
 	public object TargetBuilding { get; set; }
 	public object TargetCastle { get; set; }
 	public SoldierState State { get; set; }
@@ -46,7 +48,7 @@ public class Soldier
 		ArmorType = stats.ArmorType;
 	}
 
-	public void TakeDamage(int amount, Soldier attacker, float attackerGameX, float attackerGameY)
+	public void TakeDamage(int amount, ISoldierService attacker, float attackerGameX, float attackerGameY)
 	{
 		if (!IsAlive)
 			return;
@@ -68,7 +70,7 @@ public class Soldier
 		}
 	}
 
-	public void UpdateTargeting(Soldier nearestEnemy, float enemyEdgeDist)
+	public void UpdateTargeting(ISoldierService nearestEnemy, float enemyEdgeDist)
 	{
 		if (!IsAlive)
 			return;
@@ -100,7 +102,7 @@ public class Soldier
 					if (_attackTimer <= 0)
 					{
 						int finalDamage = CombatRules.CalculateDamage(Damage, DamageType, TargetEnemy.ArmorType);
-						TargetEnemy.TakeDamage(finalDamage, this, GameX, GameY);
+						TargetEnemy.TakeDamage(finalDamage, Self, GameX, GameY);
 						_attackTimer = AttackCooldown;
 					}
 				}

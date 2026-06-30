@@ -8,10 +8,10 @@ public partial class BattleManager : Node
     private const float TargetingInterval = 0.2f;
     private const float CellSize = 200f;
 
-    private readonly List<Soldier> _playerUnits = new();
-    private readonly List<Soldier> _enemyUnits = new();
+    private readonly List<SoldierLogic> _playerUnits = new();
+    private readonly List<SoldierLogic> _enemyUnits = new();
     private readonly List<Building> _buildings = new();
-    private readonly Dictionary<Vector2I, List<Soldier>> _grid = new();
+    private readonly Dictionary<Vector2I, List<SoldierLogic>> _grid = new();
     private float _targetingTimer;
 
     public override void _Ready()
@@ -24,7 +24,7 @@ public partial class BattleManager : Node
         AdapterRegistry.Unregister<BattleManager>(this);
     }
 
-    public void Register(Soldier soldier)
+    public void Register(SoldierLogic soldier)
     {
         if (soldier.IsPlayerUnit)
             _playerUnits.Add(soldier);
@@ -32,7 +32,7 @@ public partial class BattleManager : Node
             _enemyUnits.Add(soldier);
     }
 
-    public void Unregister(Soldier soldier)
+    public void Unregister(SoldierLogic soldier)
     {
         if (soldier.IsPlayerUnit)
             _playerUnits.Remove(soldier);
@@ -73,16 +73,16 @@ public partial class BattleManager : Node
         AddToGrid(_enemyUnits);
     }
 
-    private void AddToGrid(List<Soldier> units)
+    private void AddToGrid(List<SoldierLogic> units)
     {
-        foreach (Soldier s in units)
+        foreach (SoldierLogic s in units)
         {
             if (!s.IsAlive)
                 continue;
             Vector2I cell = WorldToCell(s.GlobalPosition);
-            if (!_grid.TryGetValue(cell, out List<Soldier> list))
+            if (!_grid.TryGetValue(cell, out List<SoldierLogic> list))
             {
-                list = new List<Soldier>();
+                list = new List<SoldierLogic>();
                 _grid[cell] = list;
             }
             list.Add(s);
@@ -91,20 +91,20 @@ public partial class BattleManager : Node
 
     private void UpdateTargeting()
     {
-        List<Soldier> enemies = _enemyUnits;
-        foreach (Soldier s in _playerUnits)
+        List<SoldierLogic> enemies = _enemyUnits;
+        foreach (SoldierLogic s in _playerUnits)
             FindBestTarget(s, enemies);
         enemies = _playerUnits;
-        foreach (Soldier s in _enemyUnits)
+        foreach (SoldierLogic s in _enemyUnits)
             FindBestTarget(s, enemies);
     }
 
-    private void FindBestTarget(Soldier soldier, List<Soldier> enemies)
+    private void FindBestTarget(SoldierLogic soldier, List<SoldierLogic> enemies)
     {
         if (!soldier.IsAlive)
             return;
 
-        Soldier best = null;
+       SoldierLogic best = null;
         float bestScore = float.MaxValue;
 
         Vector2I cell = WorldToCell(soldier.GlobalPosition);
@@ -113,10 +113,10 @@ public partial class BattleManager : Node
             for (int dy = -1; dy <= 1; dy++)
             {
                 Vector2I neighborCell = new(cell.X + dx, cell.Y + dy);
-                if (!_grid.TryGetValue(neighborCell, out List<Soldier> cellUnits))
+                if (!_grid.TryGetValue(neighborCell, out List<SoldierLogic> cellUnits))
                     continue;
 
-                foreach (Soldier candidate in cellUnits)
+                foreach (SoldierLogic candidate in cellUnits)
                 {
                     if (!candidate.IsAlive)
                         continue;
@@ -152,8 +152,8 @@ public partial class BattleManager : Node
         if (castle == null)
             return false;
         Rect2 rect = GetBuildingRectStatic(building);
-        List<Soldier> enemies = castle.IsPlayerCastle ? _enemyUnits : _playerUnits;
-        foreach (Soldier s in enemies)
+        List<SoldierLogic> enemies = castle.IsPlayerCastle ? _enemyUnits : _playerUnits;
+        foreach (SoldierLogic s in enemies)
         {
             if (s.IsAlive && rect.HasPoint(s.GlobalPosition))
                 return true;

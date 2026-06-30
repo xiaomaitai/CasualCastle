@@ -175,7 +175,7 @@ public partial class BuildingSystem : Node
 
     public static Color GetSpriteModulate(string buildingType) => GetVisual(buildingType).SpriteModulate;
 
-    public static void ApplySoldierSpawnStats(string buildingType, Soldier soldier)
+    public static void ApplySoldierSpawnStats(string buildingType,SoldierLogic soldier)
     {
         string unitTypeId = BuildingDefinitions.GetUnitTypeId(buildingType);
         UnitStats stats = UnitRegistry.Get(unitTypeId);

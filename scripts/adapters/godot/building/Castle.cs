@@ -227,7 +227,7 @@ public partial class Castle : Node2D
 
 		foreach (Node child in battlefield.GetChildren())
 		{
-			if (child is not Soldier soldier || !soldier.IsAlive || !soldier.IsPlayerUnit)
+			if (child is not SoldierLogic soldier || !soldier.IsAlive || !soldier.IsPlayerUnit)
 				continue;
 
 			if (!TryGetGridFromGlobalPoint(soldier.GlobalPosition, out int gridX, out int gridY))

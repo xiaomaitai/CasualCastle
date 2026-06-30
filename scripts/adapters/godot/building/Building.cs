@@ -343,7 +343,8 @@ public partial class Building : Area2D, IBuildingState
 
 		for (int i = 0; i < count; i++)
 		{
-			Soldier soldier = soldierScene.Instantiate<Soldier>();
+			Soldier shell = soldierScene.Instantiate<Soldier>();
+			SoldierLogic soldier = shell.GetNode<SoldierLogic>("Logic");
 			soldier.IsPlayerUnit = _isPlayerBuilding;
 			BuildingSystem.ApplySoldierSpawnStats(TypeId, soldier);
 			UnitSpawn.PlaceSoldier(
