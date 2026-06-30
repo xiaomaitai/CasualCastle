@@ -2,14 +2,7 @@ using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
 using Godot;
 using System;
-
-public enum SoldierState
-{
-	Marching,
-	Fighting,
-	Retaliating,
-	Sieging
-}
+using DomainSoldier = CasualCastle.Domain.Battle.Soldier;
 
 public partial class Soldier : Area2D
 {
