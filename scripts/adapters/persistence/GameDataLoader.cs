@@ -19,6 +19,7 @@ public static class GameDataLoader
         connection.Open();
 
         using SqliteCommand cmd = connection.CreateCommand();
+        Migrate(cmd);
         LoadUnitStats(cmd);
         LoadBuildingDefs(cmd);
         LoadDamageMatrix(cmd);
@@ -26,9 +27,19 @@ public static class GameDataLoader
         LoadFusionRecipes(cmd);
     }
 
+
+    private static void Migrate(SqliteCommand cmd)
+    {
+        try
+        {
+            cmd.CommandText = "ALTER TABLE unit_stats ADD COLUMN vision_range REAL NOT NULL DEFAULT 170.0";
+            cmd.ExecuteNonQuery();
+        }
+        catch { }
+    }
     private static void LoadUnitStats(SqliteCommand cmd)
     {
-        cmd.CommandText = "SELECT type_id, size, attack_type, damage_type, armor_type, health, damage, speed, attack_range, attack_cooldown, has_night_combat, unit_color FROM unit_stats";
+        cmd.CommandText = "SELECT type_id, size, attack_type, damage_type, armor_type, health, damage, speed, attack_range, attack_cooldown, vision_range, has_night_combat, unit_color FROM unit_stats";
         using SqliteDataReader reader = cmd.ExecuteReader();
         Dictionary<string, UnitStats> stats = new();
         while (reader.Read())
@@ -45,8 +56,9 @@ public static class GameDataLoader
                 Speed = reader.GetFloat(7),
                 AttackRange = reader.GetFloat(8),
                 AttackCooldown = reader.GetFloat(9),
-                HasNightCombat = reader.GetInt32(10) != 0,
-                UnitColor = (uint)reader.GetInt64(11),
+                VisionRange = reader.GetFloat(10),
+                HasNightCombat = reader.GetInt32(11) != 0,
+                UnitColor = (uint)reader.GetInt64(12),
             };
         }
         UnitRegistry.LoadFrom(stats);

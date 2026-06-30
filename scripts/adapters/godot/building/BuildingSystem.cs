@@ -210,11 +210,10 @@ public partial class BuildingSystem : Node
         {
             rect.Size = visual.CollisionSize;
 
-            // Sync NavigationObstacle2D radius with collision shape
             NavigationObstacle2D navObstacle = building.GetNodeOrNull<NavigationObstacle2D>("NavigationObstacle");
             if (navObstacle != null)
             {
-                float maxHalf = Mathf.Max(rect.Size.X, rect.Size.Y) * 0.5f;
+                float maxHalf = Mathf.Min(rect.Size.X, rect.Size.Y) * 0.4f;
                 navObstacle.Radius = maxHalf;
             }
         }

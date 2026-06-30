@@ -3,6 +3,14 @@ using CasualCastle.Domain.Battle;
 using Godot;
 using System;
 
+public enum SoldierState
+{
+	Marching,
+	Fighting,
+	Retaliating,
+	Sieging
+}
+
 public partial class Soldier : Area2D
 {
 	public SoldierData Data { get; private set; } = new();
@@ -15,6 +23,7 @@ public partial class Soldier : Area2D
 	public float Speed { get; private set; } = 252f;
 	public float AttackRange { get; private set; } = 90f;
 	public float AttackCooldown { get; private set; } = 1f;
+	public float VisionRange { get; private set; } = 250f;
 	public bool HasNightCombat { get; set; }
 
 	private AttackBehavior _attackBehavior;
@@ -22,9 +31,10 @@ public partial class Soldier : Area2D
 	private NavigationAgent2D _navigationAgent;
 	private float _attackTimer;
 	private float _hitFlashTimer;
-	private Soldier _targetEnemy;
+	internal Soldier _targetEnemy;
 	private Castle _targetCastle;
 	private Building _targetBuilding;
+	private SoldierState _state;
 	private Sprite2D _sprite;
 	private CollisionShape2D _collisionShape;
 	private SoldierSleepZEffect _sleepZEffect;
@@ -39,6 +49,7 @@ public partial class Soldier : Area2D
 		Speed = GameCoordinatesAdapter.GameUnitsToPixels(Data.Speed);
 		AttackRange = GameCoordinatesAdapter.GameUnitsToPixels(Data.AttackRange);
 		AttackCooldown = Data.AttackCooldown;
+		VisionRange = GameCoordinatesAdapter.GameUnitsToPixels(Data.VisionRange);
 		HasNightCombat = Data.HasNightCombat;
 
 		_attackBehavior = Data.AttackType == AttackType.Ranged
@@ -188,40 +199,54 @@ public partial class Soldier : Area2D
 		if (_attackTimer > 0)
 			_attackTimer -= dt;
 
+		float myRadius = GameCoordinatesAdapter.GameUnitsToPixels(Data.CollisionRadius());
+		float edgeDist = float.MaxValue;
+
 		if (_targetEnemy != null && _targetEnemy.IsAlive)
 		{
-			float dist = GlobalPosition.DistanceTo(_targetEnemy.GlobalPosition);
-			float myRadius = GameCoordinatesAdapter.GameUnitsToPixels(Data.CollisionRadius());
 			float targetRadius = GameCoordinatesAdapter.GameUnitsToPixels(_targetEnemy.Data.CollisionRadius());
-			if ((dist - myRadius - targetRadius) <= AttackRange)
-			{
-				if (_attackTimer <= 0 && _attackBehavior.TryExecute(_targetEnemy, dt))
-					_attackTimer = AttackCooldown;
-			}
-			else
-			{
-				_navigationAgent.TargetPosition = _targetEnemy.GlobalPosition;
-			}
+			edgeDist = GlobalPosition.DistanceTo(_targetEnemy.GlobalPosition) - myRadius - targetRadius;
+			_state = edgeDist <= VisionRange ? SoldierState.Fighting : SoldierState.Retaliating;
 		}
-		else if (_targetCastle != null && _targetCastle.IsAlive)
+		else if (_targetBuilding != null && !_targetBuilding.IsDestroyed
+			&& _targetCastle != null && _targetCastle.IsAlive)
 		{
-			if (_targetBuilding != null && _targetBuilding.IsDestroyed)
-			{
-				_targetCastle = null;
-				_targetBuilding = null;
-			}
-			else if (_attackTimer <= 0)
-			{
-				if (_targetBuilding != null && _targetBuilding.Health > 0)
-					_targetBuilding.TakeDamage(Damage);
-
-				_attackTimer = AttackCooldown;
-			}
+			_state = SoldierState.Sieging;
 		}
 		else
 		{
-			_targetEnemy = null;
-			_navigationAgent.TargetPosition = GetDestination();
+			_state = SoldierState.Marching;
+		}
+
+		switch (_state)
+		{
+			case SoldierState.Fighting:
+			case SoldierState.Retaliating:
+				if (edgeDist <= AttackRange)
+				{
+					if (_attackTimer <= 0 && _attackBehavior.TryExecute(_targetEnemy, dt))
+						_attackTimer = AttackCooldown;
+				}
+				else
+				{
+					_navigationAgent.TargetPosition = _targetEnemy.GlobalPosition;
+				}
+				break;
+
+			case SoldierState.Sieging:
+				_navigationAgent.TargetPosition = GlobalPosition;
+				if (_attackTimer <= 0)
+				{
+					if (_targetBuilding.Health > 0)
+						_targetBuilding.TakeDamage(Damage);
+					_attackTimer = AttackCooldown;
+				}
+				break;
+
+			case SoldierState.Marching:
+				_targetEnemy = null;
+				_navigationAgent.TargetPosition = SelectTarget();
+				break;
 		}
 
 		// NavigationAgent2D-driven movement
@@ -232,30 +257,24 @@ public partial class Soldier : Area2D
 		QueueRedraw();
 	}
 
-	private Vector2 GetDestination()
+	private Vector2 SelectTarget()
 	{
 		GameManager gm = AdapterRegistry.Resolve<GameManager>();
-		if (gm == null)
-		{
-			Vector2 fallbackDir = IsPlayerUnit ? Vector2.Right : Vector2.Left;
-			return GlobalPosition + fallbackDir * 2000;
-		}
+		Castle targetCastle = IsPlayerUnit ? gm?.EnemyCastle : gm?.PlayerCastle;
 
-		Castle targetCastle = IsPlayerUnit ? gm.EnemyCastle : gm.PlayerCastle;
-		if (targetCastle == null)
-		{
-			Vector2 fallbackDir = IsPlayerUnit ? Vector2.Right : Vector2.Left;
-			return GlobalPosition + fallbackDir * 2000;
-		}
+		if (targetCastle != null && targetCastle.IsAlive)
+			return targetCastle.Heart.GlobalPosition;
 
-		float frontX = IsPlayerUnit
-			? targetCastle.GlobalPosition.X - 120f
-			: targetCastle.GlobalPosition.X + targetCastle.GridColumns * targetCastle.CellSize + 120f;
+		if (targetCastle != null)
+			return targetCastle.GlobalPosition + new Vector2(
+				targetCastle.GridColumns * targetCastle.CellSize / 2f,
+				targetCastle.GridRows * targetCastle.CellSize / 2f);
 
-		return new Vector2(frontX, GlobalPosition.Y);
+		float dir = IsPlayerUnit ? GameCoordinatesAdapter.PixelsPerCell : -GameCoordinatesAdapter.PixelsPerCell;
+		return new Vector2(GlobalPosition.X + dir, GlobalPosition.Y);
 	}
 
-	public void TakeDamage(int amount)
+	public void TakeDamage(int amount, Soldier attacker = null)
 	{
 		if (!IsAlive) return;
 
@@ -263,6 +282,19 @@ public partial class Soldier : Area2D
 		_hitFlashTimer = 0.1f;
 		if (_sprite != null)
 			_sprite.Modulate = Colors.White;
+
+		if (attacker != null && attacker.IsAlive && attacker.IsPlayerUnit != IsPlayerUnit)
+		{
+			float dist = GlobalPosition.DistanceTo(attacker.GlobalPosition);
+			if (dist > VisionRange)
+			{
+				_targetEnemy = attacker;
+
+				BattleManager bm = AdapterRegistry.Resolve<BattleManager>();
+				if (bm != null)
+					bm.PropagateRetaliation(this, VisionRange, attacker);
+			}
+		}
 
 		if (Health <= 0)
 			Die();

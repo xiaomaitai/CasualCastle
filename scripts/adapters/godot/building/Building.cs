@@ -248,7 +248,7 @@ public partial class Building : Area2D, IBuildingState
 			CollisionShape2D shapeNode = GetNodeOrNull<CollisionShape2D>("CollisionShape");
 			if (shapeNode?.Shape is RectangleShape2D rect)
 			{
-				float maxHalf = Mathf.Max(rect.Size.X, rect.Size.Y) * 0.5f;
+				float maxHalf = Mathf.Min(rect.Size.X, rect.Size.Y) * 0.4f;
 				navObstacle.Radius = maxHalf;
 			}
 		}

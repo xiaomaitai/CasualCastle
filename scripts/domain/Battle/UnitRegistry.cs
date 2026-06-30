@@ -11,7 +11,7 @@ public static class UnitRegistry
             TypeId = "Swordsman", Size = UnitSize.Medium, AttackType = AttackType.Melee,
             DamageType = DamageType.Normal, ArmorType = ArmorType.Light,
             Health = 30, Damage = 10, Speed = 350f, AttackRange = 125f,
-            AttackCooldown = 1f, UnitColor = 0xFF4488FFu,
+            AttackCooldown = 1f, VisionRange = 170f, UnitColor = 0xFF4488FFu,
         },
     };
 

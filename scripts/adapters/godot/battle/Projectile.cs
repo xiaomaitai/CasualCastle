@@ -9,6 +9,7 @@ public partial class Projectile : Area2D
 	private Soldier _target;
 	private int _damage;
 	private DamageType _damageType;
+	private Soldier _attacker;
 
 	public Projectile()
 	{
@@ -24,12 +25,13 @@ public partial class Projectile : Area2D
 		AddChild(sprite);
 	}
 
-	public void Launch(Vector2 origin, Soldier target, int damage, DamageType damageType)
+	public void Launch(Vector2 origin, Soldier target, int damage, DamageType damageType, Soldier attacker)
 	{
 		GlobalPosition = origin;
 		_target = target;
 		_damage = damage;
 		_damageType = damageType;
+		_attacker = attacker;
 
 		AreaEntered += OnAreaEntered;
 	}
@@ -63,7 +65,7 @@ public partial class Projectile : Area2D
 			return;
 
 		int finalDamage = CombatRules.CalculateDamage(_damage, _damageType, _target.Data.ArmorType);
-		_target.TakeDamage(finalDamage);
+		_target.TakeDamage(finalDamage, _attacker);
 		QueueFree();
 	}
 }

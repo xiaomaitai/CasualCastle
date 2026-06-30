@@ -26,7 +26,7 @@ public partial class DisplaySettingsManager : Node
 	private const string Section = "display";
 
 	public DisplayWindowMode WindowMode { get; private set; } = DisplayWindowMode.BorderlessFullscreen;
-	public Vector2I OutputResolution { get; private set; } = new(GameRules.DesignWidth, GameRules.DesignHeight);
+	public Vector2I OutputResolution { get; private set; } = new(GameConfig.DesignWidth, GameConfig.DesignHeight);
 
 	public override void _Ready()
 	{
@@ -88,7 +88,7 @@ public partial class DisplaySettingsManager : Node
 	private void Apply()
 	{
 		Window window = GetTree().Root;
-		window.ContentScaleSize = new Vector2I(GameRules.DesignWidth, GameRules.DesignHeight);
+		window.ContentScaleSize = new Vector2I(GameConfig.DesignWidth, GameConfig.DesignHeight);
 		window.ContentScaleMode = Window.ContentScaleModeEnum.CanvasItems;
 		window.ContentScaleAspect = Window.ContentScaleAspectEnum.Expand;
 

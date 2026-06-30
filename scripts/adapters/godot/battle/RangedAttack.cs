@@ -12,7 +12,7 @@ public class RangedAttack : AttackBehavior
 
 		Projectile projectile = new Projectile();
 		Soldier.GetParent().AddChild(projectile);
-		projectile.Launch(Soldier.GlobalPosition, target, Soldier.Damage, Soldier.Data.DamageType);
+		projectile.Launch(Soldier.GlobalPosition, target, Soldier.Damage, Soldier.Data.DamageType, Soldier);
 		return true;
 	}
 }

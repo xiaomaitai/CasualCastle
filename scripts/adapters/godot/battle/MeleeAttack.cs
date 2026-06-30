@@ -11,7 +11,7 @@ public class MeleeAttack : AttackBehavior
 
 		int finalDamage = CombatRules.CalculateDamage(
 			Soldier.Damage, Soldier.Data.DamageType, target.Data.ArmorType);
-		target.TakeDamage(finalDamage);
+		target.TakeDamage(finalDamage, Soldier);
 		return true;
 	}
 }

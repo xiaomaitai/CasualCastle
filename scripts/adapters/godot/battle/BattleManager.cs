@@ -121,7 +121,11 @@ public partial class BattleManager : Node
             }
         }
 
-        soldier.SetTarget(best);
+        if (best != null && Mathf.Sqrt(bestScore) > soldier.VisionRange)
+            return;
+
+        if (best != null)
+            soldier.SetTarget(best);
     }
 
     private void ApplyUnitPushing(float dt)
@@ -161,6 +165,24 @@ public partial class BattleManager : Node
         }
     }
 
+
+    public void PropagateRetaliation(Soldier center, float radius, Soldier target)
+    {
+        List<Soldier> allies = center.IsPlayerUnit ? _playerUnits : _enemyUnits;
+        foreach (Soldier ally in allies)
+        {
+            if (ally == center)
+                continue;
+            if (!ally.IsAlive)
+                continue;
+            if (ally._targetEnemy != null && ally._targetEnemy.IsAlive)
+                continue;
+            if (ally.GlobalPosition.DistanceTo(center.GlobalPosition) > radius)
+                continue;
+
+            ally._targetEnemy = target;
+        }
+    }
     private static Vector2I WorldToCell(Vector2 position)
     {
         return new Vector2I(

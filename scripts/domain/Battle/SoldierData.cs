@@ -12,6 +12,7 @@ public class SoldierData
 	public float Speed { get; set; } = 350f;
 	public float AttackRange { get; set; } = 125f;
 	public float AttackCooldown { get; set; } = 1f;
+	public float VisionRange { get; set; } = 170f;
 	public bool HasNightCombat { get; set; }
 	public uint UnitColor { get; set; } = 0xFF888888u;
 
@@ -53,6 +54,7 @@ public class SoldierData
 			Speed = stats.Speed,
 			AttackRange = stats.AttackRange,
 			AttackCooldown = stats.AttackCooldown,
+			VisionRange = stats.VisionRange,
 			HasNightCombat = stats.HasNightCombat,
 			UnitColor = stats.UnitColor,
 		};
