@@ -37,6 +37,13 @@ public partial class Soldier : Area2D
 
 	public void InitializeFromStats(UnitStats stats)
 	{
+		if (_domain == null)
+		{
+			_navigationAgent = GetNode<NavigationAgent2D>("Logic/NavigationAgent");
+			_domain = new DomainSoldier(new GodotPositionAccessor(this), new GodotPathAccessor(_navigationAgent));
+			_spatial = AdapterRegistry.Resolve<UnitSpatialService>();
+			_spatial?.Register(_domain);
+		}
 		_domain.Initialize(stats, IsPlayerUnit);
 
 		MaxHealth = stats.Health;
@@ -88,20 +95,14 @@ public partial class Soldier : Area2D
 
 	public override void _Ready()
 	{
-		_navigationAgent = GetNode<NavigationAgent2D>("Logic/NavigationAgent");
-
 		_sprite = GetNodeOrNull<Sprite2D>("View/Sprite");
 		_sleepZEffect = GetNodeOrNull<SoldierSleepZEffect>("Effects/SleepZEffect");
-
-		_domain = new DomainSoldier(new GodotPositionAccessor(this), new GodotPathAccessor(_navigationAgent));
-		_spatial = AdapterRegistry.Resolve<UnitSpatialService>();
 
 		ApplyPendingStats();
 
 		BattleManager battleManager = AdapterRegistry.Resolve<BattleManager>();
 		if (battleManager != null)
 			battleManager.Register(this);
-		_spatial?.Register(_domain);
 
 		if (AdapterRegistry.Resolve<GameManager>() != null)
 			AdapterRegistry.Resolve<GameManager>().PhaseChanged += OnPhaseChanged;
@@ -185,6 +186,7 @@ public partial class Soldier : Area2D
 
 		UpdateSleepVisual();
 		if (!IsActive) return;
+		if (_spatial == null) return;
 
 		(DomainSoldier nearest, float edgeDist) = _spatial.FindNearestEnemy(_domain);
 		(object bld, object cstl) = _spatial.FindOverlappingBuilding(_domain);
