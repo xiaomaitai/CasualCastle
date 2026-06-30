@@ -45,6 +45,7 @@ public partial class SoldierLogic : Node2D
 			_eventRelay = new SoldierEventRelay();
 			AddChild(_eventRelay);
 			svc.EventPort = _eventRelay;
+			svc.NavPort = new NavigationPortAdapter(_navigationAgent);
 			_service = svc;
 			_spatial = AdapterRegistry.Resolve<UnitSpatialService>();
 		}
@@ -220,50 +221,22 @@ public partial class SoldierLogic : Node2D
 		}
 
 		_service.UpdateTargeting(nearest, edgeDist);
-		_service.UpdateBehavior(dt, edgeDist);
 
-		SoldierState state = _service.State;
-		float mySpeed = GameCoordinatesAdapter.GameUnitsToPixels(_service.Speed);
+		float marchX, marchY;
+		Vector2 marchDest = SelectTarget();
+		marchX = GameCoordinatesAdapter.PixelsToGameUnits(marchDest.X);
+		marchY = GameCoordinatesAdapter.PixelsToGameUnits(marchDest.Y);
 
-		switch (state)
-		{
-			case SoldierState.Fighting:
-			case SoldierState.Retaliating:
-				if (edgeDist <= AttackRange)
-				{
-					if (_navigationAgent != null)
-						_navigationAgent.AvoidanceEnabled = false;
-				}
-				else if (nearest != null)
-				{
-					if (_navigationAgent != null)
-					{
-						_navigationAgent.AvoidanceEnabled = true;
-						_navigationAgent.TargetPosition = new Vector2(
-							GameCoordinatesAdapter.GameUnitsToPixels(nearest.GameX),
-							GameCoordinatesAdapter.GameUnitsToPixels(nearest.GameY));
-					}
-					MoveTowardTarget(dt, mySpeed);
-				}
-				break;
+		_service.UpdateBehavior(dt, edgeDist, marchX, marchY);
 
-			case SoldierState.Sieging:
-				if (_navigationAgent != null)
-					_navigationAgent.AvoidanceEnabled = false;
-				break;
+		_body.GlobalPosition = new Vector2(
+			GameCoordinatesAdapter.GameUnitsToPixels(_service.GameX),
+			GameCoordinatesAdapter.GameUnitsToPixels(_service.GameY));
 
-			case SoldierState.Marching:
-				if (_navigationAgent != null)
-				{
-					_navigationAgent.AvoidanceEnabled = true;
-					_navigationAgent.TargetPosition = SelectTarget();
-				}
-				MoveTowardTarget(dt, mySpeed);
-				break;
-		}
-
-		_service.GameX = GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.X);
-		_service.GameY = GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.Y);
+		if (_navigationAgent != null)
+			_navigationAgent.AvoidanceEnabled = _service.State != SoldierState.Sieging
+				&& !(_service.State == SoldierState.Fighting && edgeDist <= _service.AttackRange)
+				&& !(_service.State == SoldierState.Retaliating && edgeDist <= _service.AttackRange);
 
 		_body.QueueRedraw();
 	}
@@ -279,13 +252,6 @@ public partial class SoldierLogic : Node2D
 			atkY = GameCoordinatesAdapter.PixelsToGameUnits(attacker._body.GlobalPosition.Y);
 		}
 		_service.TakeDamage(amount, attacker?._service, atkX, atkY);
-	}
-
-	private void MoveTowardTarget(float dt, float speed)
-	{
-		Vector2 next = _navigationAgent.GetNextPathPosition();
-		Vector2 dir = (next - _body.GlobalPosition).Normalized();
-		_body.GlobalPosition += dir * speed * dt;
 	}
 
 	private Vector2 SelectTarget()

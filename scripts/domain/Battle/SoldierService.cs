@@ -5,6 +5,12 @@ public class SoldierService : ISoldierService
 	internal Soldier Aggregate { get; }
 	public ISoldierEventPort EventPort { get; set; }
 
+	public INavigationPort NavPort
+	{
+		get => Aggregate.NavPort;
+		set => Aggregate.NavPort = value;
+	}
+
 	public SoldierService()
 	{
 		Aggregate = new Soldier();
@@ -44,9 +50,9 @@ public class SoldierService : ISoldierService
 		Aggregate.UpdateTargeting(nearestEnemy, enemyEdgeDist);
 	}
 
-	public void UpdateBehavior(float dt, float enemyEdgeDist)
+	public void UpdateBehavior(float dt, float enemyEdgeDist, float marchGameX, float marchGameY)
 	{
-		Aggregate.UpdateBehavior(dt, enemyEdgeDist);
+		Aggregate.UpdateBehavior(dt, enemyEdgeDist, marchGameX, marchGameY);
 	}
 
 	public void TakeDamage(int amount, ISoldierService attacker, float attackerGameX, float attackerGameY)

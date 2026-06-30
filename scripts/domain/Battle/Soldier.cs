@@ -23,6 +23,7 @@ public class Soldier
 	public ArmorType ArmorType { get; set; }
 
 	internal ISoldierService Self { get; set; }
+	internal INavigationPort NavPort { get; set; }
 
 	public ISoldierService TargetEnemy { get; set; }
 	public IBuildingTarget TargetBuilding { get; set; }
@@ -96,7 +97,7 @@ public class Soldier
 		}
 	}
 
-	public void UpdateBehavior(float dt, float enemyEdgeDist)
+	public void UpdateBehavior(float dt, float enemyEdgeDist, float marchTargetGameX, float marchTargetGameY)
 	{
 		if (!IsAlive)
 			return;
@@ -119,6 +120,12 @@ public class Soldier
 						_attackTimer = AttackCooldown;
 					}
 				}
+				else
+				{
+					NavPort.SetTarget(TargetEnemy.GameX, TargetEnemy.GameY);
+					(float nx, float ny) = NavPort.GetNextPosition(GameX, GameY);
+					MoveToward(dt, nx, ny);
+				}
 				break;
 
 			case SoldierState.Sieging:
@@ -131,7 +138,24 @@ public class Soldier
 
 			case SoldierState.Marching:
 				TargetEnemy = null;
+				NavPort.SetTarget(marchTargetGameX, marchTargetGameY);
+				(float mx, float my) = NavPort.GetNextPosition(GameX, GameY);
+				MoveToward(dt, mx, my);
 				break;
 		}
+	}
+
+	private void MoveToward(float dt, float targetGameX, float targetGameY)
+	{
+		float dx = targetGameX - GameX;
+		float dy = targetGameY - GameY;
+		float dist = MathF.Sqrt(dx * dx + dy * dy);
+		if (dist < 0.001f)
+			return;
+
+		float moveAmount = Speed * dt;
+		float ratio = moveAmount / dist;
+		GameX += dx * ratio;
+		GameY += dy * ratio;
 	}
 }
