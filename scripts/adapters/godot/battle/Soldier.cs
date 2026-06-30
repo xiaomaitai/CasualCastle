@@ -313,40 +313,25 @@ public partial class Soldier : Area2D
 	{
 		if (!IsAlive) return;
 
-		Health = CombatRules.ApplyDamage(Health, amount);
+		_domain.TakeDamage(amount, attacker?._domain);
+		Health = _domain.Health;
+
 		_hitFlashTimer = 0.1f;
 		if (_sprite != null)
 			_sprite.Modulate = Colors.White;
 
-		if (attacker != null && attacker.IsAlive && attacker.IsPlayerUnit != IsPlayerUnit)
+		if (!IsAlive)
 		{
-			float dist = GlobalPosition.DistanceTo(attacker.GlobalPosition);
-			if (dist > VisionRange)
-			{
-				_targetEnemy = attacker;
+			_sleepZEffect?.SetSleeping(false);
 
-				BattleManager bm = AdapterRegistry.Resolve<BattleManager>();
-				if (bm != null)
-					bm.PropagateRetaliation(this, VisionRange, attacker);
-			}
+			BattleManager battleManager = AdapterRegistry.Resolve<BattleManager>();
+			if (battleManager != null)
+				battleManager.Unregister(this);
+
+			Tween tween = CreateTween();
+			tween.TweenProperty(this, "scale", Vector2.Zero, 0.25f);
+			tween.Parallel().TweenProperty(this, "modulate:a", 0f, 0.25f);
+			tween.TweenCallback(Callable.From(() => QueueFree()));
 		}
-
-		if (Health <= 0)
-			Die();
-	}
-
-	private void Die()
-	{
-		IsAlive = false;
-		_sleepZEffect?.SetSleeping(false);
-
-		BattleManager battleManager = AdapterRegistry.Resolve<BattleManager>();
-		if (battleManager != null)
-			battleManager.Unregister(this);
-
-		Tween tween = CreateTween();
-		tween.TweenProperty(this, "scale", Vector2.Zero, 0.25f);
-		tween.Parallel().TweenProperty(this, "modulate:a", 0f, 0.25f);
-		tween.TweenCallback(Callable.From(() => QueueFree()));
 	}
 }
