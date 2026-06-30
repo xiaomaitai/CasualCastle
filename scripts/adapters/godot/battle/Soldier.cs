@@ -40,7 +40,7 @@ public partial class Soldier : Area2D
 		if (_domain == null)
 		{
 			_navigationAgent = GetNode<NavigationAgent2D>("Logic/NavigationAgent");
-			_domain = new DomainSoldier(new GodotPositionAccessor(this), new GodotPathAccessor(_navigationAgent));
+			_domain = new DomainSoldier();
 			_spatial = AdapterRegistry.Resolve<UnitSpatialService>();
 			_spatial?.Register(_domain);
 		}
@@ -188,6 +188,9 @@ public partial class Soldier : Area2D
 		if (!IsActive) return;
 		if (_spatial == null) return;
 
+		_domain.GameX = GameCoordinatesAdapter.PixelsToGameUnits(GlobalPosition.X);
+		_domain.GameY = GameCoordinatesAdapter.PixelsToGameUnits(GlobalPosition.Y);
+
 		(DomainSoldier nearest, float edgeDist) = _spatial.FindNearestEnemy(_domain);
 		(object bld, object cstl) = _spatial.FindOverlappingBuilding(_domain);
 		_domain.TargetBuilding = bld;
@@ -195,7 +198,14 @@ public partial class Soldier : Area2D
 
 		_domain.TargetEnemy = nearest;
 		_domain.UpdateTargeting(nearest, edgeDist);
-		_domain.UpdateBehavior(dt, edgeDist);
+
+		float marchX = IsPlayerUnit ? float.MaxValue : 0;
+		float marchY = _domain.GameY;
+		(float newX, float newY) = _domain.UpdateBehavior(dt, edgeDist, marchX, marchY);
+
+		GlobalPosition = new Vector2(
+			GameCoordinatesAdapter.GameUnitsToPixels(newX),
+			GameCoordinatesAdapter.GameUnitsToPixels(newY));
 
 		_navigationAgent.AvoidanceEnabled = _domain.State != SoldierState.Sieging
 			&& !(_domain.State == SoldierState.Fighting && edgeDist <= _domain.AttackRange)
@@ -204,12 +214,13 @@ public partial class Soldier : Area2D
 		QueueRedraw();
 	}
 
-
 	public void TakeDamage(int amount, Soldier attacker = null)
 	{
 		if (!IsAlive) return;
 
-		_domain.TakeDamage(amount, attacker?._domain);
+		float atkX = attacker != null ? GameCoordinatesAdapter.PixelsToGameUnits(attacker.GlobalPosition.X) : 0;
+		float atkY = attacker != null ? GameCoordinatesAdapter.PixelsToGameUnits(attacker.GlobalPosition.Y) : 0;
+		_domain.TakeDamage(amount, attacker?._domain, atkX, atkY);
 		Health = _domain.Health;
 
 		if (attacker != null && attacker.IsAlive && _domain.TargetEnemy == attacker._domain)

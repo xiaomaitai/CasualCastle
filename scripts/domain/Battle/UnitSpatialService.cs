@@ -98,8 +98,8 @@ public class UnitSpatialService
 				continue;
 			if (!b.IsEnemyOf(soldier))
 				continue;
-			if (soldier.PositionAccessor.GameX >= b.MinX && soldier.PositionAccessor.GameX <= b.MaxX
-				&& soldier.PositionAccessor.GameY >= b.MinY && soldier.PositionAccessor.GameY <= b.MaxY)
+			if (soldier.GameX >= b.MinX && soldier.GameX <= b.MaxX
+				&& soldier.GameY >= b.MinY && soldier.GameY <= b.MaxY)
 				return (b.NativeObject, b.CastleObject);
 		}
 		return (null, null);
@@ -113,8 +113,8 @@ public class UnitSpatialService
 		{
 			if (!s.IsAlive)
 				continue;
-			float x = s.PositionAccessor.GameX;
-			float y = s.PositionAccessor.GameY;
+			float x = s.GameX;
+			float y = s.GameY;
 			if (x >= building.MinX && x <= building.MaxX && y >= building.MinY && y <= building.MaxY)
 				return true;
 		}
@@ -134,7 +134,7 @@ public class UnitSpatialService
 		{
 			if (!s.IsAlive)
 				continue;
-			(int x, int y) cell = (WorldToCell(s.PositionAccessor.GameX), WorldToCell(s.PositionAccessor.GameY));
+			(int x, int y) cell = (WorldToCell(s.GameX), WorldToCell(s.GameY));
 			if (!_grid.TryGetValue(cell, out List<Soldier> list))
 			{
 				list = new List<Soldier>();
@@ -162,17 +162,17 @@ public class UnitSpatialService
 				if (!b.IsAlive || b.State == SoldierState.Sieging)
 					continue;
 
-				float dx = a.PositionAccessor.GameX - b.PositionAccessor.GameX;
-				float dy = a.PositionAccessor.GameY - b.PositionAccessor.GameY;
+				float dx = a.GameX - b.GameX;
+				float dy = a.GameY - b.GameY;
 				float dist = MathF.Sqrt(dx * dx + dy * dy);
 				float minDist = a.CollisionRadius + b.CollisionRadius + 4f;
 				if (dist < minDist && dist > 0.001f)
 				{
 					float pushAmount = (minDist - dist) * PushForce * dt / minDist;
-					a.PositionAccessor.GameX += dx * pushAmount;
-					a.PositionAccessor.GameY += dy * pushAmount;
-					b.PositionAccessor.GameX -= dx * pushAmount;
-					b.PositionAccessor.GameY -= dy * pushAmount;
+					a.GameX += dx * pushAmount;
+					a.GameY += dy * pushAmount;
+					b.GameX -= dx * pushAmount;
+					b.GameY -= dy * pushAmount;
 				}
 			}
 		}
@@ -194,8 +194,8 @@ public class UnitSpatialService
 				if (b.IsDestroyed)
 					continue;
 
-				float sx = s.PositionAccessor.GameX;
-				float sy = s.PositionAccessor.GameY;
+				float sx = s.GameX;
+				float sy = s.GameY;
 				float cx = Math.Clamp(sx, b.MinX, b.MaxX);
 				float cy = Math.Clamp(sy, b.MinY, b.MaxY);
 				float dx = sx - cx;
@@ -204,8 +204,8 @@ public class UnitSpatialService
 				if (dist < s.CollisionRadius && dist > 0.001f)
 				{
 					float pushAmount = (s.CollisionRadius - dist) * BuildingPushForce * dt / dist;
-					s.PositionAccessor.GameX += dx * pushAmount;
-					s.PositionAccessor.GameY += dy * pushAmount;
+					s.GameX += dx * pushAmount;
+					s.GameY += dy * pushAmount;
 				}
 			}
 		}
@@ -213,8 +213,8 @@ public class UnitSpatialService
 
 	private static float DistSq(Soldier a, Soldier b)
 	{
-		float dx = a.PositionAccessor.GameX - b.PositionAccessor.GameX;
-		float dy = a.PositionAccessor.GameY - b.PositionAccessor.GameY;
+		float dx = a.GameX - b.GameX;
+		float dy = a.GameY - b.GameY;
 		return dx * dx + dy * dy;
 	}
 
@@ -230,8 +230,8 @@ public class UnitSpatialService
 				continue;
 			if (ally.TargetEnemy != null && ally.TargetEnemy.IsAlive)
 				continue;
-			float dx = ally.PositionAccessor.GameX - center.PositionAccessor.GameX;
-			float dy = ally.PositionAccessor.GameY - center.PositionAccessor.GameY;
+			float dx = ally.GameX - center.GameX;
+			float dy = ally.GameY - center.GameY;
 			if (MathF.Sqrt(dx * dx + dy * dy) > radius)
 				continue;
 			ally.TargetEnemy = attacker;

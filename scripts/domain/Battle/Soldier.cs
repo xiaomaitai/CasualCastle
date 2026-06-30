@@ -4,15 +4,11 @@ namespace CasualCastle.Domain.Battle;
 
 public class Soldier
 {
-	private readonly IPositionAccessor _position;
-	private readonly IPathAccessor _path;
-
-	internal IPositionAccessor PositionAccessor => _position;
-	internal IPathAccessor PathAccessor => _path;
-
 	public string TypeId { get; set; }
 	public bool IsPlayerUnit { get; set; }
 	public bool IsAlive { get; set; } = true;
+	public float GameX { get; set; }
+	public float GameY { get; set; }
 
 	public int Health { get; set; }
 	public int MaxHealth { get; set; }
@@ -29,15 +25,9 @@ public class Soldier
 	public Soldier TargetEnemy { get; set; }
 	public object TargetBuilding { get; set; }
 	public object TargetCastle { get; set; }
-	public SoldierState State { get; private set; }
+	public SoldierState State { get; set; }
 
 	private float _attackTimer;
-
-	public Soldier(IPositionAccessor position, IPathAccessor path)
-	{
-		_position = position;
-		_path = path;
-	}
 
 	public void Initialize(UnitStats stats, bool isPlayerUnit)
 	{
@@ -56,7 +46,7 @@ public class Soldier
 		ArmorType = stats.ArmorType;
 	}
 
-	public void TakeDamage(int amount, Soldier attacker)
+	public void TakeDamage(int amount, Soldier attacker, float attackerGameX, float attackerGameY)
 	{
 		if (!IsAlive)
 			return;
@@ -71,10 +61,9 @@ public class Soldier
 
 		if (attacker != null && attacker.IsAlive && attacker.IsPlayerUnit != IsPlayerUnit)
 		{
-			float dx = _position.GameX - attacker._position.GameX;
-			float dy = _position.GameY - attacker._position.GameY;
-			float dist = MathF.Sqrt(dx * dx + dy * dy);
-			if (dist > VisionRange)
+			float dx = GameX - attackerGameX;
+			float dy = GameY - attackerGameY;
+			if (MathF.Sqrt(dx * dx + dy * dy) > VisionRange)
 				TargetEnemy = attacker;
 		}
 	}
@@ -92,10 +81,10 @@ public class Soldier
 			State = SoldierState.Marching;
 	}
 
-	public void UpdateBehavior(float dt, float enemyEdgeDist)
+	public (float gameX, float gameY) UpdateBehavior(float dt, float enemyEdgeDist, float marchTargetGameX, float marchTargetGameY)
 	{
 		if (!IsAlive)
-			return;
+			return (GameX, GameY);
 
 		if (_attackTimer > 0)
 			_attackTimer -= dt;
@@ -111,14 +100,13 @@ public class Soldier
 					if (_attackTimer <= 0)
 					{
 						int finalDamage = CombatRules.CalculateDamage(Damage, DamageType, TargetEnemy.ArmorType);
-						TargetEnemy.TakeDamage(finalDamage, this);
+						TargetEnemy.TakeDamage(finalDamage, this, GameX, GameY);
 						_attackTimer = AttackCooldown;
 					}
 				}
 				else
 				{
-					_path.SetTarget(TargetEnemy._position.GameX, TargetEnemy._position.GameY);
-					MoveTowardPath(dt);
+					return MoveToward(dt, TargetEnemy.GameX, TargetEnemy.GameY);
 				}
 				break;
 
@@ -129,25 +117,22 @@ public class Soldier
 
 			case SoldierState.Marching:
 				TargetEnemy = null;
-				MoveTowardPath(dt);
-				break;
+				return MoveToward(dt, marchTargetGameX, marchTargetGameY);
 		}
+
+		return (GameX, GameY);
 	}
 
-	private void MoveTowardPath(float dt)
+	private (float, float) MoveToward(float dt, float targetGameX, float targetGameY)
 	{
-		if (!_path.HasPath)
-			return;
-
-		float dx = _path.NextGameX - _position.GameX;
-		float dy = _path.NextGameY - _position.GameY;
+		float dx = targetGameX - GameX;
+		float dy = targetGameY - GameY;
 		float dist = MathF.Sqrt(dx * dx + dy * dy);
 		if (dist < 0.001f)
-			return;
+			return (GameX, GameY);
 
 		float moveAmount = Speed * dt;
 		float ratio = moveAmount / dist;
-		_position.GameX += dx * ratio;
-		_position.GameY += dy * ratio;
+		return (GameX + dx * ratio, GameY + dy * ratio);
 	}
 }
