@@ -3,7 +3,7 @@ using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
 using Godot;
 
-public partial class Building : Area2D, IBuildingState
+public partial class Building : Area2D, IBuildingState, IBuildingTarget
 {
 	[Export]
 	public bool HasNightCombat = false;

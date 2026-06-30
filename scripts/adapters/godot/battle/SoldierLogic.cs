@@ -204,11 +204,10 @@ public partial class SoldierLogic : Node2D
 		if (_spatial == null || _body == null) return;
 
 		(ISoldierService nearest, float edgeDist) = _spatial.FindNearestEnemy(_service);
-		(object bld, object cstl) = _spatial.FindOverlappingBuilding(_service);
+		(IBuildingTarget bld, object cstl) = _spatial.FindOverlappingBuilding(_service);
 		_service.TargetBuilding = bld;
 		_service.TargetCastle = cstl;
 
-		_service.SetEnemyTarget(nearest);
 		_service.UpdateTargeting(nearest, edgeDist);
 
 		float marchX = IsPlayerUnit ? float.MaxValue : 0;

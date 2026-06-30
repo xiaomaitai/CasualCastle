@@ -25,7 +25,7 @@ public class Soldier
 	internal ISoldierService Self { get; set; }
 
 	public ISoldierService TargetEnemy { get; set; }
-	public object TargetBuilding { get; set; }
+	public IBuildingTarget TargetBuilding { get; set; }
 	public object TargetCastle { get; set; }
 	public SoldierState State { get; set; }
 
@@ -76,11 +76,24 @@ public class Soldier
 			return;
 
 		if (nearestEnemy != null && nearestEnemy.IsAlive)
-			State = enemyEdgeDist <= VisionRange ? SoldierState.Fighting : SoldierState.Retaliating;
+		{
+			TargetEnemy = nearestEnemy;
+			State = SoldierState.Fighting;
+		}
+		else if (TargetEnemy != null && TargetEnemy.IsAlive)
+		{
+			State = SoldierState.Retaliating;
+		}
 		else if (TargetBuilding != null)
+		{
+			TargetEnemy = null;
 			State = SoldierState.Sieging;
+		}
 		else
+		{
+			TargetEnemy = null;
 			State = SoldierState.Marching;
+		}
 	}
 
 	public (float gameX, float gameY) UpdateBehavior(float dt, float enemyEdgeDist, float marchTargetGameX, float marchTargetGameY)
@@ -113,8 +126,11 @@ public class Soldier
 				break;
 
 			case SoldierState.Sieging:
-				if (_attackTimer <= 0 && TargetBuilding != null)
+				if (_attackTimer <= 0 && TargetBuilding != null && !TargetBuilding.IsDestroyed)
+				{
+					TargetBuilding.TakeDamage(Damage);
 					_attackTimer = AttackCooldown;
+				}
 				break;
 
 			case SoldierState.Marching:

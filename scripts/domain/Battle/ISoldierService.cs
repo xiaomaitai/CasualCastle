@@ -16,7 +16,7 @@ public interface ISoldierService
 	float GameY { get; set; }
 	SoldierState State { get; }
 	ArmorType ArmorType { get; }
-	object TargetBuilding { get; set; }
+	IBuildingTarget TargetBuilding { get; set; }
 	object TargetCastle { get; set; }
 
 	void Initialize(UnitStats stats, bool isPlayerUnit);

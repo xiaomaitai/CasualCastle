@@ -26,7 +26,7 @@ public class SoldierService : ISoldierService
 	public float GameY { get => Aggregate.GameY; set => Aggregate.GameY = value; }
 	public SoldierState State => Aggregate.State;
 	public ArmorType ArmorType => Aggregate.ArmorType;
-	public object TargetBuilding { get => Aggregate.TargetBuilding; set => Aggregate.TargetBuilding = value; }
+	public IBuildingTarget TargetBuilding { get => Aggregate.TargetBuilding; set => Aggregate.TargetBuilding = value; }
 	public object TargetCastle { get => Aggregate.TargetCastle; set => Aggregate.TargetCastle = value; }
 
 	public void Initialize(UnitStats stats, bool isPlayerUnit)

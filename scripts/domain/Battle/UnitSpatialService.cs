@@ -90,7 +90,7 @@ public class UnitSpatialService
 		return (best, edgeDist);
 	}
 
-	public (object building, object castle) FindOverlappingBuilding(ISoldierService soldier)
+	public (IBuildingTarget building, object castle) FindOverlappingBuilding(ISoldierService soldier)
 	{
 		foreach (IBuildingRef b in _buildings)
 		{
@@ -100,7 +100,7 @@ public class UnitSpatialService
 				continue;
 			if (soldier.GameX >= b.MinX && soldier.GameX <= b.MaxX
 				&& soldier.GameY >= b.MinY && soldier.GameY <= b.MaxY)
-				return (b.NativeObject, b.CastleObject);
+				return (b.NativeObject as IBuildingTarget, b.CastleObject);
 		}
 		return (null, null);
 	}
@@ -219,6 +219,8 @@ public class UnitSpatialService
 			if (ally == center)
 				continue;
 			if (!ally.IsAlive)
+				continue;
+			if (ally.State == SoldierState.Fighting)
 				continue;
 			float dx = ally.GameX - center.GameX;
 			float dy = ally.GameY - center.GameY;
