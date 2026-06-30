@@ -1,12 +1,11 @@
 using CasualCastle.Adapters.Godot;
+using CasualCastle.Domain.Battle;
 using Godot;
 using System.Collections.Generic;
 
 public partial class BattleManager : Node
 {
     private const float TargetingInterval = 0.2f;
-    private const float PushDistance = 24f;
-    private const float PushForce = 20f;
     private const float CellSize = 200f;
 
     private readonly List<Soldier> _playerUnits = new();
@@ -63,7 +62,8 @@ public partial class BattleManager : Node
             UpdateTargeting();
         }
 
-        ApplyUnitPushing(dt);
+        UnitSpatialService spatial = AdapterRegistry.Resolve<UnitSpatialService>();
+        spatial?.Update(dt);
     }
 
     private void RebuildGrid()
@@ -139,103 +139,11 @@ public partial class BattleManager : Node
             soldier.SetTarget(best);
     }
 
-    private void ApplyUnitPushing(float dt)
-    {
-        var allUnits = new List<Soldier>(_playerUnits.Count + _enemyUnits.Count);
-        allUnits.AddRange(_playerUnits);
-        allUnits.AddRange(_enemyUnits);
-        PushSoldiers(allUnits, dt);
-        PushSoldiersFromBuildings(allUnits, dt);
-    }
-
-    private static void PushSoldiers(List<Soldier> units, float dt)
-    {
-        for (int i = 0; i < units.Count; i++)
-        {
-            Soldier a = units[i];
-            if (!a.IsAlive)
-                continue;
-            if (a._targetBuilding != null)
-                continue;
-
-            for (int j = i + 1; j < units.Count; j++)
-            {
-                Soldier b = units[j];
-                if (!b.IsAlive)
-                    continue;
-                if (b._targetBuilding != null)
-                    continue;
-
-                float dist = a.GlobalPosition.DistanceTo(b.GlobalPosition);
-                float minDist = GameCoordinatesAdapter.GameUnitsToPixels(a.CollisionRadius)
-                    + GameCoordinatesAdapter.GameUnitsToPixels(b.CollisionRadius) + 4f;
-                if (dist < minDist && dist > 0.001f)
-                {
-                    Vector2 pushDir = (a.GlobalPosition - b.GlobalPosition).Normalized();
-                    float pushAmount = (minDist - dist) * PushForce * dt;
-                    Vector2 push = pushDir * pushAmount;
-                    a.GlobalPosition += push;
-                    b.GlobalPosition -= push;
-                }
-            }
-        }
-    }
-
-
-    private void PushSoldiersFromBuildings(List<Soldier> units, float dt)
-    {
-        const float buildingPushForce = 15f;
-        foreach (Soldier s in units)
-        {
-            if (!s.IsAlive)
-                continue;
-            if (s._targetBuilding != null)
-                continue;
-            Vector2 pos = s.GlobalPosition;
-            float sRadius = GameCoordinatesAdapter.GameUnitsToPixels(s.CollisionRadius);
-            foreach (Building b in _buildings)
-            {
-                if (b.IsDestroyed)
-                    continue;
-                if (s._targetBuilding == b)
-                    continue;
-                Rect2 rect = GetBuildingRectStatic(b);
-                Vector2 closest = new Vector2(
-                    Mathf.Clamp(pos.X, rect.Position.X, rect.Position.X + rect.Size.X),
-                    Mathf.Clamp(pos.Y, rect.Position.Y, rect.Position.Y + rect.Size.Y));
-                float dist = pos.DistanceTo(closest);
-                if (dist < sRadius && dist > 0.001f)
-                {
-                    Vector2 pushDir = (pos - closest).Normalized();
-                    float pushAmount = (sRadius - dist) * buildingPushForce * dt;
-                    s.GlobalPosition += pushDir * pushAmount;
-                }
-            }
-        }
-    }
-
     public static Rect2 GetBuildingRectStatic(Building building)
     {
         Vector2 size = building.GetBuildingSize();
         Vector2 pos = building.GlobalPosition - size * 0.5f;
         return new Rect2(pos, size);
-    }
-
-    public Building FindOverlappingBuilding(Soldier soldier)
-    {
-        Vector2 pos = soldier.GlobalPosition;
-        foreach (Building b in _buildings)
-        {
-            if (b.IsDestroyed)
-                continue;
-            Castle castle = b.GetCastle();
-            if (castle == null || !castle.IsAlive || castle.IsPlayerCastle == soldier.IsPlayerUnit)
-                continue;
-            Rect2 rect = GetBuildingRectStatic(b);
-            if (rect.HasPoint(pos))
-                return b;
-        }
-        return null;
     }
 
     public bool HasEnemyOnBuilding(Building building)
