@@ -218,5 +218,25 @@ public class UnitSpatialService
 		return dx * dx + dy * dy;
 	}
 
+	public void PropagateRetaliation(Soldier center, Soldier attacker)
+	{
+		List<Soldier> allies = center.IsPlayerUnit ? _playerUnits : _enemyUnits;
+		float radius = center.VisionRange;
+		foreach (Soldier ally in allies)
+		{
+			if (ally == center)
+				continue;
+			if (!ally.IsAlive)
+				continue;
+			if (ally.TargetEnemy != null && ally.TargetEnemy.IsAlive)
+				continue;
+			float dx = ally.PositionAccessor.GameX - center.PositionAccessor.GameX;
+			float dy = ally.PositionAccessor.GameY - center.PositionAccessor.GameY;
+			if (MathF.Sqrt(dx * dx + dy * dy) > radius)
+				continue;
+			ally.TargetEnemy = attacker;
+		}
+	}
+
 	private static int WorldToCell(float coord) => (int)MathF.Floor(coord / CellSize);
 }

@@ -210,6 +210,9 @@ public partial class Soldier : Area2D
 		_domain.TakeDamage(amount, attacker?._domain);
 		Health = _domain.Health;
 
+		if (attacker != null && attacker.IsAlive && _domain.TargetEnemy == attacker._domain)
+			_spatial.PropagateRetaliation(_domain, attacker._domain);
+
 		_hitFlashTimer = 0.1f;
 		if (_sprite != null)
 			_sprite.Modulate = Colors.White;
