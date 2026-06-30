@@ -24,11 +24,11 @@ public class UnitStats
 	};
 	public float CollisionRadius => Size switch
 	{
-		UnitSize.Small => 16f,
-		UnitSize.Medium => 24f,
-		UnitSize.Large => 32f,
-		UnitSize.Huge => 48f,
-		_ => 24f
+		UnitSize.Small => 8f,
+		UnitSize.Medium => 12f,
+		UnitSize.Large => 16f,
+		UnitSize.Huge => 24f,
+		_ => 12f
 	};
 
 	public uint UnitColor { get; init; }
