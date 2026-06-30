@@ -47,9 +47,10 @@ public partial class SoldierLogic : Node2D
 			svc.EventPort = _eventRelay;
 			_service = svc;
 			_spatial = AdapterRegistry.Resolve<UnitSpatialService>();
-			_spatial?.Register(svc);
 		}
 		_service.Initialize(stats, IsPlayerUnit);
+		if (_spatial != null)
+			_spatial.Register(_service);
 
 		MaxHealth = stats.Health;
 		Speed = GameCoordinatesAdapter.GameUnitsToPixels(stats.Speed);
@@ -204,38 +205,65 @@ public partial class SoldierLogic : Node2D
 		if (_spatial == null || _body == null) return;
 
 		(ISoldierService nearest, float edgeDist) = _spatial.FindNearestEnemy(_service);
-		(IBuildingTarget bld, object cstl) = _spatial.FindOverlappingBuilding(_service);
-		_service.TargetBuilding = bld;
-		_service.TargetCastle = cstl;
 
-		_service.UpdateTargeting(nearest, edgeDist);
-
-		float marchX, marchY;
-		if (_service.State == SoldierState.Marching && _navigationAgent != null)
+		BattleManager bm = AdapterRegistry.Resolve<BattleManager>();
+		Building overlappingBuilding = bm?.FindOverlappingBuilding(this);
+		if (overlappingBuilding != null)
 		{
-			Vector2 destGlobal = GetMarchDestination();
-			_navigationAgent.TargetPosition = destGlobal;
-			Vector2 nextGlobal = _navigationAgent.GetNextPathPosition();
-			if ((nextGlobal - _body.GlobalPosition).LengthSquared() < 0.1f)
-				nextGlobal = destGlobal;
-			marchX = GameCoordinatesAdapter.PixelsToGameUnits(nextGlobal.X);
-			marchY = GameCoordinatesAdapter.PixelsToGameUnits(nextGlobal.Y);
+			_service.TargetBuilding = overlappingBuilding;
+			_service.TargetCastle = overlappingBuilding.GetCastle();
 		}
 		else
 		{
-			marchX = IsPlayerUnit ? float.MaxValue : 0;
-			marchY = _service.GameY;
+			_service.TargetBuilding = null;
+			_service.TargetCastle = null;
 		}
-		(float newX, float newY) = _service.UpdateBehavior(dt, edgeDist, marchX, marchY);
 
-		_body.GlobalPosition = new Vector2(
-			GameCoordinatesAdapter.GameUnitsToPixels(newX),
-			GameCoordinatesAdapter.GameUnitsToPixels(newY));
+		_service.UpdateTargeting(nearest, edgeDist);
+		_service.UpdateBehavior(dt, edgeDist);
 
-		if (_navigationAgent != null)
-			_navigationAgent.AvoidanceEnabled = _service.State != SoldierState.Sieging
-				&& !(_service.State == SoldierState.Fighting && edgeDist <= _service.AttackRange)
-				&& !(_service.State == SoldierState.Retaliating && edgeDist <= _service.AttackRange);
+		SoldierState state = _service.State;
+		float mySpeed = GameCoordinatesAdapter.GameUnitsToPixels(_service.Speed);
+
+		switch (state)
+		{
+			case SoldierState.Fighting:
+			case SoldierState.Retaliating:
+				if (edgeDist <= AttackRange)
+				{
+					if (_navigationAgent != null)
+						_navigationAgent.AvoidanceEnabled = false;
+				}
+				else if (nearest != null)
+				{
+					if (_navigationAgent != null)
+					{
+						_navigationAgent.AvoidanceEnabled = true;
+						_navigationAgent.TargetPosition = new Vector2(
+							GameCoordinatesAdapter.GameUnitsToPixels(nearest.GameX),
+							GameCoordinatesAdapter.GameUnitsToPixels(nearest.GameY));
+					}
+					MoveTowardTarget(dt, mySpeed);
+				}
+				break;
+
+			case SoldierState.Sieging:
+				if (_navigationAgent != null)
+					_navigationAgent.AvoidanceEnabled = false;
+				break;
+
+			case SoldierState.Marching:
+				if (_navigationAgent != null)
+				{
+					_navigationAgent.AvoidanceEnabled = true;
+					_navigationAgent.TargetPosition = SelectTarget();
+				}
+				MoveTowardTarget(dt, mySpeed);
+				break;
+		}
+
+		_service.GameX = GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.X);
+		_service.GameY = GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.Y);
 
 		_body.QueueRedraw();
 	}
@@ -253,13 +281,28 @@ public partial class SoldierLogic : Node2D
 		_service.TakeDamage(amount, attacker?._service, atkX, atkY);
 	}
 
-	private Vector2 GetMarchDestination()
+	private void MoveTowardTarget(float dt, float speed)
+	{
+		Vector2 next = _navigationAgent.GetNextPathPosition();
+		Vector2 dir = (next - _body.GlobalPosition).Normalized();
+		_body.GlobalPosition += dir * speed * dt;
+	}
+
+	private Vector2 SelectTarget()
 	{
 		GameManager gm = AdapterRegistry.Resolve<GameManager>();
 		Castle targetCastle = IsPlayerUnit ? gm?.EnemyCastle : gm?.PlayerCastle;
+
+		if (targetCastle != null && targetCastle.IsAlive)
+			return targetCastle.Heart.GlobalPosition;
+
 		if (targetCastle != null)
-			return targetCastle.GlobalPosition;
-		return _body.GlobalPosition;
+			return targetCastle.GlobalPosition + new Vector2(
+				targetCastle.GridColumns * targetCastle.CellSize / 2f,
+				targetCastle.GridRows * targetCastle.CellSize / 2f);
+
+		float dir = IsPlayerUnit ? GameCoordinatesAdapter.PixelsPerCell : -GameCoordinatesAdapter.PixelsPerCell;
+		return new Vector2(_body.GlobalPosition.X + dir, _body.GlobalPosition.Y);
 	}
 
 	private void OnDamaged()

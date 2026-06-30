@@ -139,6 +139,23 @@ public partial class BattleManager : Node
             soldier.SetTarget(best);
     }
 
+    public Building FindOverlappingBuilding(SoldierLogic soldier)
+    {
+        Vector2 pos = soldier.GlobalPosition;
+        foreach (Building b in _buildings)
+        {
+            if (b.IsDestroyed)
+                continue;
+            Castle castle = b.GetCastle();
+            if (castle == null || !castle.IsAlive || castle.IsPlayerCastle == soldier.IsPlayerUnit)
+                continue;
+            Rect2 rect = GetBuildingRectStatic(b);
+            if (rect.HasPoint(pos))
+                return b;
+        }
+        return null;
+    }
+
     public static Rect2 GetBuildingRectStatic(Building building)
     {
         Vector2 size = building.GetBuildingSize();

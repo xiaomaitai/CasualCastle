@@ -96,10 +96,10 @@ public class Soldier
 		}
 	}
 
-	public (float gameX, float gameY) UpdateBehavior(float dt, float enemyEdgeDist, float marchTargetGameX, float marchTargetGameY)
+	public void UpdateBehavior(float dt, float enemyEdgeDist)
 	{
 		if (!IsAlive)
-			return (GameX, GameY);
+			return;
 
 		if (_attackTimer > 0)
 			_attackTimer -= dt;
@@ -119,10 +119,6 @@ public class Soldier
 						_attackTimer = AttackCooldown;
 					}
 				}
-				else
-				{
-					return MoveToward(dt, TargetEnemy.GameX, TargetEnemy.GameY);
-				}
 				break;
 
 			case SoldierState.Sieging:
@@ -135,24 +131,7 @@ public class Soldier
 
 			case SoldierState.Marching:
 				TargetEnemy = null;
-				return MoveToward(dt, marchTargetGameX, marchTargetGameY);
+				break;
 		}
-
-		return (GameX, GameY);
-	}
-
-	private (float, float) MoveToward(float dt, float targetGameX, float targetGameY)
-	{
-		float dx = targetGameX - GameX;
-		float dy = targetGameY - GameY;
-		float dist = MathF.Sqrt(dx * dx + dy * dy);
-		if (dist < 0.001f)
-			return (GameX, GameY);
-
-		float moveAmount = Speed * dt;
-		float ratio = moveAmount / dist;
-		GameX += dx * ratio;
-		GameY += dy * ratio;
-		return (GameX, GameY);
 	}
 }

@@ -44,9 +44,9 @@ public class SoldierService : ISoldierService
 		Aggregate.UpdateTargeting(nearestEnemy, enemyEdgeDist);
 	}
 
-	public (float gameX, float gameY) UpdateBehavior(float dt, float enemyEdgeDist, float marchGameX, float marchGameY)
+	public void UpdateBehavior(float dt, float enemyEdgeDist)
 	{
-		return Aggregate.UpdateBehavior(dt, enemyEdgeDist, marchGameX, marchGameY);
+		Aggregate.UpdateBehavior(dt, enemyEdgeDist);
 	}
 
 	public void TakeDamage(int amount, ISoldierService attacker, float attackerGameX, float attackerGameY)

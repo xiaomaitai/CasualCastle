@@ -22,6 +22,6 @@ public interface ISoldierService
 	void Initialize(UnitStats stats, bool isPlayerUnit);
 	void SetEnemyTarget(ISoldierService target);
 	void UpdateTargeting(ISoldierService nearestEnemy, float enemyEdgeDist);
-	(float gameX, float gameY) UpdateBehavior(float dt, float enemyEdgeDist, float marchGameX, float marchGameY);
+	void UpdateBehavior(float dt, float enemyEdgeDist);
 	void TakeDamage(int amount, ISoldierService attacker, float attackerGameX, float attackerGameY);
 }

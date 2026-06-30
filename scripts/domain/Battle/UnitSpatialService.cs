@@ -72,6 +72,8 @@ public class UnitSpatialService
 		{
 			if (!candidate.IsAlive)
 				continue;
+			if (candidate == soldier)
+				continue;
 			float dist = DistSq(soldier, candidate);
 			if (dist < bestScore)
 			{
