@@ -10,17 +10,15 @@
 
 - 士兵碰撞体在脚下（CircleShape2D），精灵 Y 偏移让脚部落到圆上
 - 建筑碰撞体从 domain 取值、`GameUnitsToPixels()` 转换
+- `Battlefield` 启用 `y_sort_enabled`，士兵/建筑按 Y 轴排序
+- `Camera2D` 节点已添加，绑定 Battlefield，`current = true`
 
 ## 待办
 
 ### 摄像机
 
-当前场景没有 `Camera2D`，缩放靠引擎 `CanvasItems` stretch mode。后续战场扩大时需要：
-
-- [ ] `main_game.tscn` 添加 `Camera2D`，绑定战场区域
 - [ ] 滚轮缩放 + 拖拽平移
 - [ ] 摄像机边界限制
-- [ ] UI 层（CanvasLayer）不受摄像机影响（已满足，CanvasLayer 默认独立于世界摄像机）
 
 ### 美术资源
 
@@ -30,7 +28,3 @@
 - [ ] 士兵 sprite
 - [ ] 建筑 sprite
 - [ ] 地面阴影贴图（可选，椭圆 decal 挂在脚下）
-
-### 精灵排序
-
-Godot 内置 `Node2D.y_sort_enabled`，勾上即按 Y 轴排序。等 sprite 资源就位后启用，不需要额外代码。

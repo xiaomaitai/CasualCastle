@@ -25,6 +25,11 @@ script = ExtResource("17")
 script = ExtResource("4")
 
 [node name="Battlefield" type="Node2D" parent="." unique_id=2]
+y_sort_enabled = true
+
+[node name="Camera2D" type="Camera2D" parent="Battlefield"]
+position = Vector2(960, 540)
+current = true
 
 [node name="Background" type="ColorRect" parent="Battlefield" unique_id=13]
 color = Color(0.15, 0.3, 0.12, 1)
