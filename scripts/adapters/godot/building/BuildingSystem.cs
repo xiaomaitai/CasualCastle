@@ -205,13 +205,6 @@ public partial class BuildingSystem : Node
             float pixelW = GameCoordinatesAdapter.GameUnitsToPixels(BuildingDefinitions.GetCollisionWidth(building.TypeId));
             float pixelH = GameCoordinatesAdapter.GameUnitsToPixels(BuildingDefinitions.GetCollisionHeight(building.TypeId));
             rect.Size = new Vector2(pixelW, pixelH);
-
-            NavigationObstacle2D navObstacle = building.GetNodeOrNull<NavigationObstacle2D>("Logic/NavigationObstacle");
-            if (navObstacle != null)
-            {
-                float maxHalf = Mathf.Min(rect.Size.X, rect.Size.Y) * 0.4f;
-                navObstacle.Radius = maxHalf;
-            }
         }
     }
 

@@ -11,6 +11,7 @@ public partial class BattleManager : Node
 
     private readonly List<Soldier> _playerUnits = new();
     private readonly List<Soldier> _enemyUnits = new();
+    private readonly List<Building> _buildings = new();
     private readonly Dictionary<Vector2I, List<Soldier>> _grid = new();
     private float _targetingTimer;
 
@@ -38,6 +39,16 @@ public partial class BattleManager : Node
             _playerUnits.Remove(soldier);
         else
             _enemyUnits.Remove(soldier);
+    }
+
+    public void RegisterBuilding(Building building)
+    {
+        _buildings.Add(building);
+    }
+
+    public void UnregisterBuilding(Building building)
+    {
+        _buildings.Remove(building);
     }
 
     public override void _Process(double delta)
@@ -133,10 +144,11 @@ public partial class BattleManager : Node
         var allUnits = new List<Soldier>(_playerUnits.Count + _enemyUnits.Count);
         allUnits.AddRange(_playerUnits);
         allUnits.AddRange(_enemyUnits);
-        PushInList(allUnits, dt);
+        PushSoldiers(allUnits, dt);
+        PushSoldiersFromBuildings(allUnits, dt);
     }
 
-    private static void PushInList(List<Soldier> units, float dt)
+    private static void PushSoldiers(List<Soldier> units, float dt)
     {
         for (int i = 0; i < units.Count; i++)
         {
@@ -165,6 +177,75 @@ public partial class BattleManager : Node
         }
     }
 
+
+    private void PushSoldiersFromBuildings(List<Soldier> units, float dt)
+    {
+        const float buildingPushForce = 15f;
+        foreach (Soldier s in units)
+        {
+            if (!s.IsAlive)
+                continue;
+            Vector2 pos = s.GlobalPosition;
+            float sRadius = GameCoordinatesAdapter.GameUnitsToPixels(s.CollisionRadius);
+            foreach (Building b in _buildings)
+            {
+                if (b.IsDestroyed)
+                    continue;
+                if (s._targetBuilding == b)
+                    continue;
+                Rect2 rect = GetBuildingRectStatic(b);
+                Vector2 closest = new Vector2(
+                    Mathf.Clamp(pos.X, rect.Position.X, rect.Position.X + rect.Size.X),
+                    Mathf.Clamp(pos.Y, rect.Position.Y, rect.Position.Y + rect.Size.Y));
+                float dist = pos.DistanceTo(closest);
+                if (dist < sRadius && dist > 0.001f)
+                {
+                    Vector2 pushDir = (pos - closest).Normalized();
+                    float pushAmount = (sRadius - dist) * buildingPushForce * dt;
+                    s.GlobalPosition += pushDir * pushAmount;
+                }
+            }
+        }
+    }
+
+    public static Rect2 GetBuildingRectStatic(Building building)
+    {
+        Vector2 size = building.GetBuildingSize();
+        Vector2 pos = building.GlobalPosition - size * 0.5f;
+        return new Rect2(pos, size);
+    }
+
+    public Building FindOverlappingBuilding(Soldier soldier)
+    {
+        Vector2 pos = soldier.GlobalPosition;
+        foreach (Building b in _buildings)
+        {
+            if (b.IsDestroyed)
+                continue;
+            Castle castle = b.GetCastle();
+            if (castle == null || !castle.IsAlive || castle.IsPlayerCastle == soldier.IsPlayerUnit)
+                continue;
+            Rect2 rect = GetBuildingRectStatic(b);
+            if (rect.HasPoint(pos))
+                return b;
+        }
+        return null;
+    }
+
+    public bool HasEnemyOnBuilding(Building building)
+    {
+        Castle castle = building.GetCastle();
+        if (castle == null)
+            return false;
+        Rect2 rect = GetBuildingRectStatic(building);
+        List<Soldier> enemies = castle.IsPlayerCastle ? _enemyUnits : _playerUnits;
+        foreach (Soldier s in enemies)
+        {
+            if (s.IsAlive && rect.HasPoint(s.GlobalPosition))
+                return true;
+        }
+        return false;
+    }
 
     public void PropagateRetaliation(Soldier center, float radius, Soldier target)
     {

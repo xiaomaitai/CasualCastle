@@ -1,35 +1,33 @@
 # 当前任务
 
-**B8: 节点结构重构 — Logic/View/Effects 三层分离 — 未开始**
+**B9: 移除物理碰撞，RTS 推开 — 进行中**
 
 ---
 
-## B8: 节点结构重构 — Logic/View/Effects 三层分离
+## B9: 移除物理碰撞，RTS 推开
 
-> 设计依据：`devPlan/design/nodeStructure.md`
+> 设计依据：`devPlan/design/rtsPushApart.md`
 
 ### 目标
 
-将 Soldier 和 Building 的平铺子节点拆为 Logic / View / Effects 三层。逻辑不碰渲染，特效不改碰撞。
+物理碰撞响应全关。碰撞体保留作为传感器（只发 AreaEntered/Exited 信号）。推开全部用代码温柔实现。
 
-### Soldier
-
-| 步骤 | 文件 | 内容 |
-|------|------|------|
-| 1 | `prefabs/Soldier.tscn` | 新增 Logic(Node) / View(Node2D) / Effects(Node2D)；NavigationAgent + CollisionShape 移入 Logic；Sprite 移入 View；SleepZEffect 移入 Effects |
-| 2 | `Soldier.cs` | 路径更新：`"NavigationAgent"`→`"Logic/NavigationAgent"`，`"Sprite"`→`"View/Sprite"`，`"CollisionShape"`→`"Logic/CollisionShape"`，`"SleepZEffect"`→`"Effects/SleepZEffect"` |
-
-### Building
+### 施工步骤
 
 | 步骤 | 文件 | 内容 |
 |------|------|------|
-| 3 | `prefabs/Building.tscn` | 新增 Logic / View / Effects；CollisionShape + NavigationObstacle 移入 Logic；Sprite 移入 View |
-| 4 | `Building.cs` | 路径更新：`"Sprite"`→`"View/Sprite"`，`"CollisionShape"`→`"Logic/CollisionShape"`，`"NavigationObstacle"`→`"Logic/NavigationObstacle"`；`_stateIcon` AddChild 到 Effects 下 |
-| 5 | `BuildingSystem.cs` | `ApplyVisual` 中路径更新同上 |
+| 1 | `prefabs/Soldier.tscn` | collision_mask 去掉 unit 层，只留 building 层（建筑检测） |
+| 2 | `prefabs/Building.tscn` | 移除 NavigationObstacle2D |
+| 3 | `Soldier.cs` | `ApplyPendingStats` 删除碰撞形状设置；`OnAreaEntered`/`OnAreaExited` 保留 |
+| 4 | `Building.cs` | 删除 NavigationObstacle2D 代码 |
+| 5 | `BuildingSystem.cs` | `ApplyVisual` 删除 NavigationObstacle2D 代码 |
+| 6 | `BattleManager.cs` | 温和推开：同方士兵推开 + 士兵-建筑推开 |
 
 ### 验收
 
 - [ ] `dotnet build` 0 错误
-- [ ] Godot 运行：士兵生成、移动、战斗正常
-- [ ] Godot 运行：建筑放置、产兵、碰撞检测正常
-- [ ] 碰撞调试可视化（_Draw 圈）位置正确
+- [ ] 士兵之间推开正常（距离判定）
+- [ ] 士兵-建筑推开正常
+- [ ] 士兵走到建筑旁触发攻城（AreaEntered 保留）
+- [ ] 建筑摧毁后 AreaExited 触发，士兵继续行军
+- [ ] NavigationObstacle 已移除，导航仍正常工作

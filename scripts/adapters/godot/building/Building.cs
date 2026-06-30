@@ -56,16 +56,10 @@ public partial class Building : Area2D, IBuildingState
 	{
 		get
 		{
-			if (CastleRef == null)
+			BattleManager bm = AdapterRegistry.Resolve<BattleManager>();
+			if (bm == null || CastleRef == null)
 				return false;
-
-			bool isPlayerCastle = CastleRef.IsPlayerCastle;
-			foreach (Area2D area in GetOverlappingAreas())
-			{
-				if (area is Soldier soldier && soldier.IsAlive && soldier.IsPlayerUnit != isPlayerCastle)
-					return true;
-			}
-			return false;
+			return bm.HasEnemyOnBuilding(this);
 		}
 	}
 
@@ -230,8 +224,8 @@ public partial class Building : Area2D, IBuildingState
 
 	public override void _Ready()
 	{
-		CollisionLayer = 4;
-		CollisionMask = 2;
+		BattleManager battleManager = AdapterRegistry.Resolve<BattleManager>();
+		battleManager?.RegisterBuilding(this);
 
 		_gameManager = AdapterRegistry.Resolve<GameManager>();
 		_shopService = AdapterRegistry.Resolve<ShopService>();
@@ -263,9 +257,20 @@ public partial class Building : Area2D, IBuildingState
 
 	public override void _ExitTree()
 	{
+		BattleManager bm = AdapterRegistry.Resolve<BattleManager>();
+		bm?.UnregisterBuilding(this);
+
 		if (_gameManager != null)
 			_gameManager.PhaseChanged -= OnPhaseChanged;
 		StopWork();
+	}
+
+	public Vector2 GetBuildingSize()
+	{
+		CollisionShape2D shape = GetNodeOrNull<CollisionShape2D>("Logic/CollisionShape");
+		if (shape?.Shape is RectangleShape2D rect)
+			return rect.Size;
+		return Vector2.Zero;
 	}
 
 	public override void _Process(double delta)

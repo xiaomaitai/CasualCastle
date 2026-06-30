@@ -38,10 +38,9 @@ public partial class Soldier : Area2D
 	private float _hitFlashTimer;
 	internal Soldier _targetEnemy;
 	private Castle _targetCastle;
-	private Building _targetBuilding;
+	internal Building _targetBuilding;
 	private SoldierState _state;
 	private Sprite2D _sprite;
-	private CollisionShape2D _collisionShape;
 	private SoldierSleepZEffect _sleepZEffect;
 	private Color _baseSpriteModulate = Colors.White;
 
@@ -91,9 +90,6 @@ public partial class Soldier : Area2D
 			}
 			_sprite.Position = new Vector2(0, -displaySize * 0.5f);
 		}
-
-		if (_collisionShape?.Shape is CircleShape2D circle)
-			circle.Radius = GameCoordinatesAdapter.GameUnitsToPixels(CollisionRadius);
 	}
 
 	public void SetTarget(Soldier target)
@@ -109,13 +105,9 @@ public partial class Soldier : Area2D
 		_navigationAgent = GetNode<NavigationAgent2D>("Logic/NavigationAgent");
 
 		_sprite = GetNodeOrNull<Sprite2D>("View/Sprite");
-		_collisionShape = GetNodeOrNull<CollisionShape2D>("Logic/CollisionShape");
 		_sleepZEffect = GetNodeOrNull<SoldierSleepZEffect>("Effects/SleepZEffect");
 
 		ApplyPendingStats();
-
-		AreaEntered += OnAreaEntered;
-		AreaExited += OnAreaExited;
 
 		BattleManager battleManager = AdapterRegistry.Resolve<BattleManager>();
 		if (battleManager != null)
@@ -208,6 +200,32 @@ public partial class Soldier : Area2D
 
 		float myRadius = GameCoordinatesAdapter.GameUnitsToPixels(CollisionRadius);
 		float edgeDist = float.MaxValue;
+
+		BattleManager bm = AdapterRegistry.Resolve<BattleManager>();
+		Building overlappingBuilding = bm?.FindOverlappingBuilding(this);
+
+		if (overlappingBuilding != null)
+		{
+			_targetBuilding = overlappingBuilding;
+			_targetCastle = overlappingBuilding.GetCastle();
+		}
+		else if (_targetBuilding != null && _targetCastle != null)
+		{
+			if (!_targetBuilding.IsDestroyed && _targetCastle.IsAlive)
+			{
+				Rect2 rect = BattleManager.GetBuildingRectStatic(_targetBuilding);
+				if (!rect.HasPoint(GlobalPosition))
+				{
+					_targetBuilding = null;
+					_targetCastle = null;
+				}
+			}
+			else
+			{
+				_targetBuilding = null;
+				_targetCastle = null;
+			}
+		}
 
 		if (_targetEnemy != null && _targetEnemy.IsAlive)
 		{
@@ -321,38 +339,9 @@ public partial class Soldier : Area2D
 		if (battleManager != null)
 			battleManager.Unregister(this);
 
-		if (_collisionShape != null)
-			_collisionShape.Disabled = true;
-
 		Tween tween = CreateTween();
 		tween.TweenProperty(this, "scale", Vector2.Zero, 0.25f);
 		tween.Parallel().TweenProperty(this, "modulate:a", 0f, 0.25f);
 		tween.TweenCallback(Callable.From(() => QueueFree()));
-	}
-
-	private void OnAreaEntered(Area2D area)
-	{
-		if (!IsAlive) return;
-
-		Building building = area as Building;
-		if (building != null && !building.IsDestroyed)
-		{
-			Castle castle = building.GetCastle();
-			if (castle != null && castle.IsAlive && castle.IsPlayerCastle != IsPlayerUnit)
-			{
-				_targetCastle = castle;
-				_targetBuilding = building;
-			}
-		}
-	}
-
-	private void OnAreaExited(Area2D area)
-	{
-		Building building = area as Building;
-		if (building != null && building.GetCastle() == _targetCastle)
-		{
-			_targetCastle = null;
-			_targetBuilding = null;
-		}
 	}
 }
