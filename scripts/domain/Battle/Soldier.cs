@@ -135,6 +135,8 @@ public class Soldier
 
 		float moveAmount = Speed * dt;
 		float ratio = moveAmount / dist;
-		return (GameX + dx * ratio, GameY + dy * ratio);
+		GameX += dx * ratio;
+		GameY += dy * ratio;
+		return (GameX, GameY);
 	}
 }
