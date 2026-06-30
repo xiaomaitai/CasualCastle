@@ -210,8 +210,20 @@ public partial class SoldierLogic : Node2D
 
 		_service.UpdateTargeting(nearest, edgeDist);
 
-		float marchX = IsPlayerUnit ? float.MaxValue : 0;
-		float marchY = _service.GameY;
+		float marchX, marchY;
+		if (_service.State == SoldierState.Marching && _navigationAgent != null)
+		{
+			Vector2 destGlobal = GetMarchDestination();
+			_navigationAgent.TargetPosition = ToLocal(destGlobal);
+			Vector2 nextGlobal = ToGlobal(_navigationAgent.GetNextPathPosition());
+			marchX = GameCoordinatesAdapter.PixelsToGameUnits(nextGlobal.X);
+			marchY = GameCoordinatesAdapter.PixelsToGameUnits(nextGlobal.Y);
+		}
+		else
+		{
+			marchX = IsPlayerUnit ? float.MaxValue : 0;
+			marchY = _service.GameY;
+		}
 		(float newX, float newY) = _service.UpdateBehavior(dt, edgeDist, marchX, marchY);
 
 		_body.GlobalPosition = new Vector2(
@@ -237,6 +249,15 @@ public partial class SoldierLogic : Node2D
 			atkY = GameCoordinatesAdapter.PixelsToGameUnits(attacker._body.GlobalPosition.Y);
 		}
 		_service.TakeDamage(amount, attacker?._service, atkX, atkY);
+	}
+
+	private Vector2 GetMarchDestination()
+	{
+		GameManager gm = AdapterRegistry.Resolve<GameManager>();
+		Castle targetCastle = IsPlayerUnit ? gm?.EnemyCastle : gm?.PlayerCastle;
+		if (targetCastle != null)
+			return targetCastle.GlobalPosition;
+		return _body.GlobalPosition;
 	}
 
 	private void OnDamaged()
