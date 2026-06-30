@@ -243,8 +243,6 @@ public partial class Soldier : Area2D
 			_state = SoldierState.Marching;
 		}
 
-		bool shouldMove = false;
-
 		switch (_state)
 		{
 			case SoldierState.Fighting:
@@ -259,7 +257,7 @@ public partial class Soldier : Area2D
 				{
 					_navigationAgent.AvoidanceEnabled = true;
 					_navigationAgent.TargetPosition = _targetEnemy.GlobalPosition;
-					shouldMove = true;
+					MoveTowardTarget(dt);
 				}
 				break;
 
@@ -277,18 +275,18 @@ public partial class Soldier : Area2D
 				_navigationAgent.AvoidanceEnabled = true;
 				_targetEnemy = null;
 				_navigationAgent.TargetPosition = SelectTarget();
-				shouldMove = true;
+				MoveTowardTarget(dt);
 				break;
 		}
 
-		if (shouldMove)
-		{
-			Vector2 next = _navigationAgent.GetNextPathPosition();
-			Vector2 dir = (next - GlobalPosition).Normalized();
-			GlobalPosition += dir * Speed * dt;
-		}
-
 		QueueRedraw();
+	}
+
+	private void MoveTowardTarget(float dt)
+	{
+		Vector2 next = _navigationAgent.GetNextPathPosition();
+		Vector2 dir = (next - GlobalPosition).Normalized();
+		GlobalPosition += dir * Speed * dt;
 	}
 
 	private Vector2 SelectTarget()
