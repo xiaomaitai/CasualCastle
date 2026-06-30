@@ -27,15 +27,10 @@ public partial class Soldier : Area2D
 	public ArmorType ArmorType { get; private set; } = ArmorType.Light;
 
 	private uint _unitColor;
-	private AttackBehavior _attackBehavior;
 	private bool _statsPending;
 	private NavigationAgent2D _navigationAgent;
-	private float _attackTimer;
 	private float _hitFlashTimer;
 	internal Soldier _targetEnemy;
-	private Castle _targetCastle;
-	internal Building _targetBuilding;
-	private SoldierState _state;
 	private Sprite2D _sprite;
 	private SoldierSleepZEffect _sleepZEffect;
 	private Color _baseSpriteModulate = Colors.White;
@@ -58,10 +53,6 @@ public partial class Soldier : Area2D
 		AttackType = stats.AttackType;
 		DamageType = stats.DamageType;
 		ArmorType = stats.ArmorType;
-
-		_attackBehavior = stats.AttackType == AttackType.Ranged
-			? new RangedAttack(this)
-			: new MeleeAttack(this);
 
 		_statsPending = true;
 	}
@@ -211,29 +202,6 @@ public partial class Soldier : Area2D
 		QueueRedraw();
 	}
 
-	private void MoveTowardTarget(float dt)
-	{
-		Vector2 next = _navigationAgent.GetNextPathPosition();
-		Vector2 dir = (next - GlobalPosition).Normalized();
-		GlobalPosition += dir * Speed * dt;
-	}
-
-	private Vector2 SelectTarget()
-	{
-		GameManager gm = AdapterRegistry.Resolve<GameManager>();
-		Castle targetCastle = IsPlayerUnit ? gm?.EnemyCastle : gm?.PlayerCastle;
-
-		if (targetCastle != null && targetCastle.IsAlive)
-			return targetCastle.Heart.GlobalPosition;
-
-		if (targetCastle != null)
-			return targetCastle.GlobalPosition + new Vector2(
-				targetCastle.GridColumns * targetCastle.CellSize / 2f,
-				targetCastle.GridRows * targetCastle.CellSize / 2f);
-
-		float dir = IsPlayerUnit ? GameCoordinatesAdapter.PixelsPerCell : -GameCoordinatesAdapter.PixelsPerCell;
-		return new Vector2(GlobalPosition.X + dir, GlobalPosition.Y);
-	}
 
 	public void TakeDamage(int amount, Soldier attacker = null)
 	{
