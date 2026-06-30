@@ -155,11 +155,15 @@ public partial class BattleManager : Node
             Soldier a = units[i];
             if (!a.IsAlive)
                 continue;
+            if (a._targetBuilding != null)
+                continue;
 
             for (int j = i + 1; j < units.Count; j++)
             {
                 Soldier b = units[j];
                 if (!b.IsAlive)
+                    continue;
+                if (b._targetBuilding != null)
                     continue;
 
                 float dist = a.GlobalPosition.DistanceTo(b.GlobalPosition);
@@ -184,6 +188,8 @@ public partial class BattleManager : Node
         foreach (Soldier s in units)
         {
             if (!s.IsAlive)
+                continue;
+            if (s._targetBuilding != null)
                 continue;
             Vector2 pos = s.GlobalPosition;
             float sRadius = GameCoordinatesAdapter.GameUnitsToPixels(s.CollisionRadius);
