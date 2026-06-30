@@ -92,10 +92,7 @@ public partial class Soldier : Area2D
 
 	public void SetTarget(Soldier target)
 	{
-		if (target != null && target.IsAlive && target.IsPlayerUnit != IsPlayerUnit)
-			_targetEnemy = target;
-		else
-			_targetEnemy = null;
+		_domain.TargetEnemy = target?._domain;
 	}
 
 	public override void _Ready()
@@ -198,89 +195,18 @@ public partial class Soldier : Area2D
 		UpdateSleepVisual();
 		if (!IsActive) return;
 
-		if (_attackTimer > 0)
-			_attackTimer -= dt;
+		(DomainSoldier nearest, float edgeDist) = _spatial.FindNearestEnemy(_domain);
+		(object bld, object cstl) = _spatial.FindOverlappingBuilding(_domain);
+		_domain.TargetBuilding = bld;
+		_domain.TargetCastle = cstl;
 
-		float myRadius = GameCoordinatesAdapter.GameUnitsToPixels(CollisionRadius);
-		float edgeDist = float.MaxValue;
+		_domain.TargetEnemy = nearest;
+		_domain.UpdateTargeting(nearest, edgeDist);
+		_domain.UpdateBehavior(dt, edgeDist);
 
-		BattleManager bm = AdapterRegistry.Resolve<BattleManager>();
-		Building overlappingBuilding = bm?.FindOverlappingBuilding(this);
-
-		if (overlappingBuilding != null)
-		{
-			_targetBuilding = overlappingBuilding;
-			_targetCastle = overlappingBuilding.GetCastle();
-		}
-		else if (_targetBuilding != null && _targetCastle != null)
-		{
-			if (!_targetBuilding.IsDestroyed && _targetCastle.IsAlive)
-			{
-				Rect2 rect = BattleManager.GetBuildingRectStatic(_targetBuilding);
-				if (!rect.HasPoint(GlobalPosition))
-				{
-					_targetBuilding = null;
-					_targetCastle = null;
-				}
-			}
-			else
-			{
-				_targetBuilding = null;
-				_targetCastle = null;
-			}
-		}
-
-		if (_targetEnemy != null && _targetEnemy.IsAlive)
-		{
-			float targetRadius = GameCoordinatesAdapter.GameUnitsToPixels(_targetEnemy.CollisionRadius);
-			edgeDist = GlobalPosition.DistanceTo(_targetEnemy.GlobalPosition) - myRadius - targetRadius;
-			_state = edgeDist <= VisionRange ? SoldierState.Fighting : SoldierState.Retaliating;
-		}
-		else if (_targetBuilding != null && !_targetBuilding.IsDestroyed
-			&& _targetCastle != null && _targetCastle.IsAlive)
-		{
-			_state = SoldierState.Sieging;
-		}
-		else
-		{
-			_state = SoldierState.Marching;
-		}
-
-		switch (_state)
-		{
-			case SoldierState.Fighting:
-			case SoldierState.Retaliating:
-				if (edgeDist <= AttackRange)
-				{
-					_navigationAgent.AvoidanceEnabled = false;
-					if (_attackTimer <= 0 && _attackBehavior.TryExecute(_targetEnemy, dt))
-						_attackTimer = AttackCooldown;
-				}
-				else
-				{
-					_navigationAgent.AvoidanceEnabled = true;
-					_navigationAgent.TargetPosition = _targetEnemy.GlobalPosition;
-					MoveTowardTarget(dt);
-				}
-				break;
-
-			case SoldierState.Sieging:
-				_navigationAgent.AvoidanceEnabled = false;
-				if (_attackTimer <= 0)
-				{
-					if (_targetBuilding.Health > 0)
-						_targetBuilding.TakeDamage(Damage);
-					_attackTimer = AttackCooldown;
-				}
-				break;
-
-			case SoldierState.Marching:
-				_navigationAgent.AvoidanceEnabled = true;
-				_targetEnemy = null;
-				_navigationAgent.TargetPosition = SelectTarget();
-				MoveTowardTarget(dt);
-				break;
-		}
+		_navigationAgent.AvoidanceEnabled = _domain.State != SoldierState.Sieging
+			&& !(_domain.State == SoldierState.Fighting && edgeDist <= _domain.AttackRange)
+			&& !(_domain.State == SoldierState.Retaliating && edgeDist <= _domain.AttackRange);
 
 		QueueRedraw();
 	}
