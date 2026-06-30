@@ -1,16 +1,3 @@
-# Refine Tasks
+When the user says 计划、准备、当前任务、细化, or wants to plan/prepare/refine tasks, use this skill.
 
-细化新任务到 `devPlan/currentTasks.md`。
-
-## 流程
-
-1. 读 `devPlan/currentTasks.md`
-2. 遍历正文中所有 `## Bx: xxx ✅` 的已完成任务，**删除**（不压缩、不汇总、不移到别处）
-3. 把顶部状态行改为新任务：`**Bx: 标题 — 进行中**`
-4. 在正文末尾追加新任务的施工步骤和验收清单
-
-## 禁止
-
-- 不压缩为一行
-- 不创建"历史完成"汇总
-- 不移到其他文件
+Read devPlan/currentTasks.md, delete any completed tasks (✅), then append the new task.
