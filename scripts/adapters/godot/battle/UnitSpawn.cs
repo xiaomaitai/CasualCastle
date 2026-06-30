@@ -18,7 +18,7 @@ public static class UnitSpawn
 		Node2D battlefield, Castle castle, Soldier soldier,
 		IReadOnlyList<Vector2I> footprint, int anchorX, int anchorY, int spawnIndex = 0)
 	{
-		battlefield.AddChild(soldier);
 		soldier.GlobalPosition = GetSpawnGlobalPosition(castle, footprint, anchorX, anchorY, spawnIndex);
+		battlefield.AddChild(soldier);
 	}
 }

@@ -103,6 +103,12 @@ public partial class SoldierLogic : Node2D
 
 		ApplyPendingStats();
 
+		if (_service != null)
+		{
+			_service.GameX = GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.X);
+			_service.GameY = GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.Y);
+		}
+
 		BattleManager battleManager = AdapterRegistry.Resolve<BattleManager>();
 		if (battleManager != null)
 			battleManager.Register(this);
@@ -196,9 +202,6 @@ public partial class SoldierLogic : Node2D
 		UpdateSleepVisual();
 		if (!IsActive) return;
 		if (_spatial == null || _body == null) return;
-
-		_service.GameX = GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.X);
-		_service.GameY = GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.Y);
 
 		(ISoldierService nearest, float edgeDist) = _spatial.FindNearestEnemy(_service);
 		(object bld, object cstl) = _spatial.FindOverlappingBuilding(_service);
