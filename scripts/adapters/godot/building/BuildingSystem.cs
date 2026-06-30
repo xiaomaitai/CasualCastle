@@ -185,7 +185,7 @@ public partial class BuildingSystem : Node
     public static void ApplyVisual(Building building)
     {
         VisualDef visual = GetVisual(building.TypeId);
-        Sprite2D sprite = building.GetNodeOrNull<Sprite2D>("Sprite");
+        Sprite2D sprite = building.GetNodeOrNull<Sprite2D>("View/Sprite");
         if (sprite != null)
         {
             Texture2D texture = GD.Load<Texture2D>(visual.TexturePath);
@@ -199,14 +199,14 @@ public partial class BuildingSystem : Node
             }
         }
 
-        CollisionShape2D shapeNode = building.GetNodeOrNull<CollisionShape2D>("CollisionShape");
+        CollisionShape2D shapeNode = building.GetNodeOrNull<CollisionShape2D>("Logic/CollisionShape");
         if (shapeNode?.Shape is RectangleShape2D rect)
         {
             float pixelW = GameCoordinatesAdapter.GameUnitsToPixels(BuildingDefinitions.GetCollisionWidth(building.TypeId));
             float pixelH = GameCoordinatesAdapter.GameUnitsToPixels(BuildingDefinitions.GetCollisionHeight(building.TypeId));
             rect.Size = new Vector2(pixelW, pixelH);
 
-            NavigationObstacle2D navObstacle = building.GetNodeOrNull<NavigationObstacle2D>("NavigationObstacle");
+            NavigationObstacle2D navObstacle = building.GetNodeOrNull<NavigationObstacle2D>("Logic/NavigationObstacle");
             if (navObstacle != null)
             {
                 float maxHalf = Mathf.Min(rect.Size.X, rect.Size.Y) * 0.4f;

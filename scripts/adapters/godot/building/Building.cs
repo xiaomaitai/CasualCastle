@@ -135,7 +135,7 @@ public partial class Building : Area2D, IBuildingState
 
 	private void TryApplyVisual()
 	{
-		Sprite2D sprite = _sprite ?? GetNodeOrNull<Sprite2D>("Sprite");
+		Sprite2D sprite = _sprite ?? GetNodeOrNull<Sprite2D>("View/Sprite");
 		if (sprite == null)
 			return;
 
@@ -238,14 +238,15 @@ public partial class Building : Area2D, IBuildingState
 		_adjacencyService = AdapterRegistry.Resolve<AdjacencyService>();
 		
 
-		_sprite = GetNodeOrNull<Sprite2D>("Sprite");
+		_sprite = GetNodeOrNull<Sprite2D>("View/Sprite");
 		TryApplyVisual();
 
 		if (_gameManager != null)
 			_gameManager.PhaseChanged += OnPhaseChanged;
 
 		_stateIcon = new BuildingStateIcon();
-		AddChild(_stateIcon);
+		Node2D effects = GetNodeOrNull<Node2D>("Effects");
+		effects?.AddChild(_stateIcon);
 		SyncStateIconPosition();
 		RefreshOperationalState();
 

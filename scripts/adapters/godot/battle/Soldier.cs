@@ -106,11 +106,11 @@ public partial class Soldier : Area2D
 
 	public override void _Ready()
 	{
-		_navigationAgent = GetNode<NavigationAgent2D>("NavigationAgent");
+		_navigationAgent = GetNode<NavigationAgent2D>("Logic/NavigationAgent");
 
-		_sprite = GetNodeOrNull<Sprite2D>("Sprite");
-		_collisionShape = GetNodeOrNull<CollisionShape2D>("CollisionShape");
-		_sleepZEffect = GetNodeOrNull<SoldierSleepZEffect>("SleepZEffect");
+		_sprite = GetNodeOrNull<Sprite2D>("View/Sprite");
+		_collisionShape = GetNodeOrNull<CollisionShape2D>("Logic/CollisionShape");
+		_sleepZEffect = GetNodeOrNull<SoldierSleepZEffect>("Effects/SleepZEffect");
 
 		ApplyPendingStats();
 

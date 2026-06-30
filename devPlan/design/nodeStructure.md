@@ -6,7 +6,7 @@
 
 ```
 Entity (Area2D / Node2D)
-├── Logic (Node)       ← 逻辑层：寻路、碰撞、血量，不上屏
+├── Logic (Node2D)       ← 逻辑层：寻路、碰撞、血量，不上屏
 ├── View (Node2D)      ← 表现层：精灵、动画，仅本地客户端
 └── Effects (Node2D)   ← 特效层：粒子、拖尾、状态图标
 ```
@@ -15,7 +15,7 @@ Entity (Area2D / Node2D)
 
 ```
 Soldier (Area2D)
-├── Logic (Node)
+├── Logic (Node2D)
 │   ├── NavigationAgent
 │   └── CollisionShape
 ├── View (Node2D)          ← 可挂运动动画脚本（伸缩、弹跳等），只改自身 transform
@@ -28,7 +28,7 @@ Soldier (Area2D)
 
 | 节点 | 类型 | 职责 | 修改者 |
 |------|------|------|--------|
-| `Logic` | Node | 容纳逻辑组件，自身无 transform | — |
+| `Logic` | Node2D | 容纳逻辑组件（需 Node2D 以支持 NavigationAgent 等 2D 节点） | — |
 | `Logic/NavigationAgent` | NavigationAgent2D | 寻路 | Soldier._Process 设 TargetPosition |
 | `Logic/CollisionShape` | CollisionShape2D | 碰撞体 | Soldier.ApplyPendingStats 设半径 |
 | `View` | Node2D | 表现容器，承载运动动画 | 运动特效脚本改 Scale / Position |
@@ -48,7 +48,7 @@ Soldier (Area2D)
 
 ```
 Building (Area2D)
-├── Logic (Node)
+├── Logic (Node2D)
 │   ├── CollisionShape
 │   └── NavigationObstacle
 ├── View (Node2D)
