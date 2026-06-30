@@ -216,6 +216,8 @@ public partial class SoldierLogic : Node2D
 			Vector2 destGlobal = GetMarchDestination();
 			_navigationAgent.TargetPosition = destGlobal;
 			Vector2 nextGlobal = _navigationAgent.GetNextPathPosition();
+			if ((nextGlobal - _body.GlobalPosition).LengthSquared() < 0.1f)
+				nextGlobal = destGlobal;
 			marchX = GameCoordinatesAdapter.PixelsToGameUnits(nextGlobal.X);
 			marchY = GameCoordinatesAdapter.PixelsToGameUnits(nextGlobal.Y);
 		}
