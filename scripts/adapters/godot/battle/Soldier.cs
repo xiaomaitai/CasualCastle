@@ -6,6 +6,9 @@ using DomainSoldier = CasualCastle.Domain.Battle.Soldier;
 
 public partial class Soldier : Area2D
 {
+	internal DomainSoldier _domain;
+	private UnitSpatialService _spatial;
+
 	public bool IsPlayerUnit { get; set; }
 	public bool IsAlive { get; private set; } = true;
 
@@ -39,6 +42,8 @@ public partial class Soldier : Area2D
 
 	public void InitializeFromStats(UnitStats stats)
 	{
+		_domain.Initialize(stats, IsPlayerUnit);
+
 		MaxHealth = stats.Health;
 		Health = stats.Health;
 		Damage = stats.Damage;
@@ -100,11 +105,15 @@ public partial class Soldier : Area2D
 		_sprite = GetNodeOrNull<Sprite2D>("View/Sprite");
 		_sleepZEffect = GetNodeOrNull<SoldierSleepZEffect>("Effects/SleepZEffect");
 
+		_domain = new DomainSoldier(new GodotPositionAccessor(this), new GodotPathAccessor(_navigationAgent));
+		_spatial = AdapterRegistry.Resolve<UnitSpatialService>();
+
 		ApplyPendingStats();
 
 		BattleManager battleManager = AdapterRegistry.Resolve<BattleManager>();
 		if (battleManager != null)
 			battleManager.Register(this);
+		_spatial?.Register(_domain);
 
 		if (AdapterRegistry.Resolve<GameManager>() != null)
 			AdapterRegistry.Resolve<GameManager>().PhaseChanged += OnPhaseChanged;
@@ -117,6 +126,7 @@ public partial class Soldier : Area2D
 		BattleManager battleManager = AdapterRegistry.Resolve<BattleManager>();
 		if (battleManager != null)
 			battleManager.Unregister(this);
+		_spatial?.Unregister(_domain);
 
 		if (AdapterRegistry.Resolve<GameManager>() != null)
 			AdapterRegistry.Resolve<GameManager>().PhaseChanged -= OnPhaseChanged;
