@@ -65,7 +65,6 @@ public partial class GameManager : Node2D, IGameState
     private Node2D _battlefield;
     private Castle _playerCastle;
     private Castle _enemyCastle;
-    private int _cheatSpawnCount;
 
     private BattleReportSystem BattleReportSystem => _battleReportSystem ??= AdapterRegistry.Resolve<BattleReportSystem>();
     private BattleReportSystem _battleReportSystem;
@@ -92,49 +91,6 @@ public partial class GameManager : Node2D, IGameState
             AdvancePhase();
     }
 
-    public override void _Input(InputEvent @event)
-    {
-        if (CurrentState != GameState.Playing) return;
-        if (!DisplaySettingsManager.DevModeEnabled) return;
-        if (@event is not InputEventKey keyEvent || !keyEvent.Pressed || keyEvent.Echo) return;
-        if (!IsCheatKey(keyEvent)) return;
-
-        SpawnCheatSoldiers(10);
-        GetViewport().SetInputAsHandled();
-    }
-
-    private static bool IsCheatKey(InputEventKey keyEvent)
-    {
-        return keyEvent.Keycode == Key.P
-            || keyEvent.PhysicalKeycode == Key.P
-            || keyEvent.Unicode == 'p'
-            || keyEvent.Unicode == 'P';
-    }
-
-    private void SpawnCheatSoldiers(int count)
-    {
-        if (_battlefield == null || _playerCastle == null || count <= 0) return;
-
-        PackedScene soldierScene = GD.Load<PackedScene>("res://prefabs/Soldier.tscn");
-        if (soldierScene == null) return;
-
-        const int spawnGridX = 7;
-        const int spawnGridY = 4;
-
-        for (int i = 0; i < count; i++)
-        {
-           Soldier shell = soldierScene.Instantiate<Soldier>();
-			SoldierLogic soldier = shell.GetNode<SoldierLogic>("Logic");
-            soldier.IsPlayerUnit = true;
-            UnitSpawn.PlaceSoldier(
-                _battlefield, _playerCastle, soldier,
-                BuildingSystem.GetFootprint("Barracks"), spawnGridX, spawnGridY, _cheatSpawnCount);
-            _cheatSpawnCount++;
-        }
-
-        GD.Print($"[Cheat] Spawned {count} soldiers");
-    }
-
     public override void _ExitTree()
     {
         if (Instance == this)
@@ -151,7 +107,6 @@ public partial class GameManager : Node2D, IGameState
         _battlefield = battlefield;
         _playerCastle = playerCastle;
         _enemyCastle = enemyCastle;
-        _cheatSpawnCount = 0;
         CurrentNightIndex = 0;
 
         CurrentState = GameState.Playing;

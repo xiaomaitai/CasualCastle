@@ -348,7 +348,7 @@ public partial class Building : Area2D, IBuildingState
 			soldier.IsPlayerUnit = _isPlayerBuilding;
 			BuildingSystem.ApplySoldierSpawnStats(TypeId, soldier);
 			UnitSpawn.PlaceSoldier(
-				_battlefield, CastleRef, soldier,
+				_battlefield, CastleRef, shell,
 				BuildingSystem.GetFootprint(TypeId), GridX, GridY, _spawnCount);
 			_spawnCount++;
 		}

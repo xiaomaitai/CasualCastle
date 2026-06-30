@@ -3,6 +3,7 @@ namespace CasualCastle.Domain.Battle;
 public class SoldierService : ISoldierService
 {
 	internal Soldier Aggregate { get; }
+	public ISoldierEventPort EventPort { get; set; }
 
 	public SoldierService()
 	{
@@ -51,5 +52,8 @@ public class SoldierService : ISoldierService
 	public void TakeDamage(int amount, ISoldierService attacker, float attackerGameX, float attackerGameY)
 	{
 		Aggregate.TakeDamage(amount, attacker, attackerGameX, attackerGameY);
+		EventPort?.OnDamaged(amount, attacker);
+		if (!Aggregate.IsAlive)
+			EventPort?.OnDied();
 	}
 }

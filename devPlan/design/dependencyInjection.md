@@ -133,8 +133,11 @@ GameManager.Services.GetService<IBattleReportRepository>();
 
 | 服务接口 | 实现 | 生命周期 |
 |----------|------|----------|
+| `UnitSpatialService` | `UnitSpatialService` | Singleton |
 | `IGameState` | `GameManager`（通过 AdapterRegistry 桥接） | Singleton（工厂委托） |
 | `IBattleReportRepository` | `BattleReportStorage` | Singleton |
+| `IUnitRepository` | `SqliteUnitRepository` | Singleton |
+| `IBuildingRepository` | `SqliteBuildingRepository` | Singleton |
 
 ---
 
@@ -178,7 +181,8 @@ public static class AdapterRegistry
 
 | 系统 | 注册类型 | 注册时机 | 解析的依赖 |
 |------|---------|---------|-----------|
-| `GameManager` | `GameManager`, `IGameState` | `_Ready()` | — |
+| `GameManager` | `GameManager`, `IGameState`, `UnitSpatialService`, `IUnitRepository`, `IBuildingRepository` | `_Ready()` | MS DI |
+| `BattleManager` | `BattleManager` | `_Ready()` | `UnitSpatialService` |
 | `DisplaySettingsManager` | `DisplaySettingsManager` | `_Ready()` | — |
 | `NightSystem` | `NightSystem` | `_Ready()` | `IGameState` (MS DI) |
 | `BuildingSystem` | `BuildingSystem` | `_Ready()` | `AdjacentSystem` |
@@ -189,6 +193,7 @@ public static class AdapterRegistry
 | `BattleReportSystem` | `BattleReportSystem` | `_Ready()` | `IBattleReportRepository` (MS DI) |
 | `ReplayAiSystem` | `ReplayAiSystem` | `_Ready()` | `BattleReportSystem`, `AdjacentSystem` |
 | `Building`（动态） | 不注册 | 实例化时 | `GameManager`, `ShopSystem`, `AdjacentSystem`, `NightSystem` |
+| `SoldierLogic`（动态） | 不注册 | 实例化时 | `UnitSpatialService` (MS DI), `BattleManager` |
 
 ---
 
@@ -242,12 +247,42 @@ var repo = GameManager.Get<IBattleReportRepository>();
 
 方向始终是 **Adapter → MS DI**，domain 层不感知 AdapterRegistry。
 
+### 7.3 出站端口 + Signal 桥接
+
+当 domain 聚合需要**向外发出事件**（而非查询数据），使用"端口接口 + Signal Relay"模式：
+
+```
+domain 聚合
+  → 调用 ISoldierEventPort.OnDamaged()     [端口接口，domain 定义]
+      ↓
+  SoldierEventRelay : Node, ISoldierEventPort   [adapter 层]
+      → EmitSignal(Damaged)                     [Godot signal]
+          ↓
+  SoldierLogic.OnDamaged()                  [adapter 层 handler]
+```
+
+**规则：**
+
+- **端口接口定义在 domain 项目**，零 Godot 引用，只声明事件方法签名
+- **Relay 类定义在 adapter 项目**，继承 `Node` 实现端口接口，方法体只做两件事：存储数据（供 handler 读取）、发出 `[Signal]`
+- **消费方**（通常是另一个 adapter 节点）在 `_Ready` 连接 relay 的 signal，在 handler 中执行 Godot 逻辑（视觉、音效、注销等）
+- 端口方法参数若含非 GodotObject 类型（如 domain 接口），无法通过 signal 参数传递 → relay 存储引用，handler 从 relay 读取
+
+**与场景 C 的区别：** 场景 C 是全局单例服务（如 `IGameState`），此模式是**每个领域实例独立持有端口**，relay 作为子节点挂在消费方下。
+
+**当前实例：** `ISoldierEventPort` → `SoldierEventRelay` → `SoldierLogic`
+
 ---
 
 ## 8. 依赖方向规则
 
 ```
-┌──────────────────────────────────────────┐
+              ┌─ 入站端口（IGameState 等）
+              │  Adapter 实现，domain 消费
+              │  编译期依赖：Adapter → Domain
+              │  运行时调用：Domain → 端口 → Adapter
+              │
+┌─────────────┴────────────────────────────┐
 │  Domain.Shared                            │
 │  (零依赖，无 Godot)                        │
 ├──────────────────────────────────────────┤
@@ -257,15 +292,25 @@ var repo = GameManager.Get<IBattleReportRepository>();
 │  (零 Godot，只依赖下层 domain)              │
 ├──────────────────────────────────────────┤
 │  Adapters (Godot + persistence)           │
-│  → 实现 domain 端口                        │
+│  → 实现 domain 端口（入站 + 出站）           │
 │  → 消费 MS DI + AdapterRegistry           │
 │  (唯一可用 Godot API 的层)                 │
-└──────────────────────────────────────────┘
+└─────────────┬────────────────────────────┘
+              │  出站端口（ISoldierEventPort 等）
+              │  Domain 定义，Adapter 实现为 Signal Relay
+              │  编译期依赖：Adapter → Domain
+              │  运行时调用：Domain 聚合 → 端口 → Relay → Signal → Handler
 ```
 
+**编译期依赖始终单向**：Domain 定义接口，Adapter 引用并实现它们。Domain 不依赖任何外部项目。
+
+**运行时调用双向**：
+- **入站**（Adapter → Domain）：domain 端口被 adapter 实现后注入 MS DI，domain 通过接口调用（如 `IGameState`）
+- **出站**（Domain → Adapter）：domain 聚合持有出站端口引用，调用后经 Relay 转为 Godot signal
+
 - **Domain 零 Godot**：任何 domain 项目不得 `using Godot`
-- **Adapter 实现端口**：Adapter 实现 domain 定义的接口，依赖方向从外向内
-- **无循环依赖**：六项目依赖 DAG 保证无环
+- **Adapter 实现端口**：入站端口直接实现，出站端口通过 Signal Relay 桥接
+- **无循环依赖**：六项目编译期依赖 DAG 保证无环，运行时通过端口反转实现双向通信
 
 ---
 
@@ -293,12 +338,20 @@ public static IServiceCollection AddDomainShared(this IServiceCollection service
 3. 消费方通过 `AdapterRegistry.Resolve<T>()` 获取
 4. Autoload 节点额外调用 `AdapterRegistry.Register<InterfaceType>(this)` 注册其所实现的端口接口
 
-### 场景 C：节点实现新端口，domain 需要消费
+### 场景 C：节点实现新入站端口，domain 需要消费
 
 参考 `IGameState` 模式：
 1. 在对应 Domain 项目中定义接口
 2. Adapter 节点实现接口
 3. 在 `CompositionRoot.Build()` 中添加工厂委托桥接
+
+### 场景 D：domain 聚合需要发出事件（出站端口 + Signal）
+
+参考 `ISoldierEventPort` 模式（详见 7.3）：
+1. 在对应 Domain 项目中定义出站端口接口
+2. 在 adapter 项目创建 Relay 类：继承 `Node`，实现端口接口，声明 `[Signal]`，方法体内存储数据 + `EmitSignal`
+3. 消费方创建 Relay 实例作为子节点，将 relay 注入 domain 聚合的端口属性
+4. 消费方在 `_Ready` 连接 relay 的 signal，在 handler 中执行 Godot 逻辑
 
 ---
 

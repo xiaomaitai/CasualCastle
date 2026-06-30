@@ -7,6 +7,7 @@ public partial class SoldierLogic : Node2D
 {
 	internal ISoldierService _service;
 	private UnitSpatialService _spatial;
+	private SoldierEventRelay _eventRelay;
 
 	public bool IsPlayerUnit { get; set; }
 	public bool IsAlive => _service?.IsAlive ?? false;
@@ -41,6 +42,9 @@ public partial class SoldierLogic : Node2D
 			_body = GetParent<Node2D>();
 			_navigationAgent = GetNode<NavigationAgent2D>("NavigationAgent");
 			SoldierService svc = new SoldierService();
+			_eventRelay = new SoldierEventRelay();
+			AddChild(_eventRelay);
+			svc.EventPort = _eventRelay;
 			_service = svc;
 			_spatial = AdapterRegistry.Resolve<UnitSpatialService>();
 			_spatial?.Register(svc);
@@ -105,6 +109,12 @@ public partial class SoldierLogic : Node2D
 
 		if (AdapterRegistry.Resolve<GameManager>() != null)
 			AdapterRegistry.Resolve<GameManager>().PhaseChanged += OnPhaseChanged;
+
+		if (_eventRelay != null)
+		{
+			_eventRelay.Damaged += OnDamaged;
+			_eventRelay.Died += OnDied;
+		}
 
 		UpdateSleepVisual();
 	}
@@ -225,26 +235,29 @@ public partial class SoldierLogic : Node2D
 			atkY = GameCoordinatesAdapter.PixelsToGameUnits(attacker._body.GlobalPosition.Y);
 		}
 		_service.TakeDamage(amount, attacker?._service, atkX, atkY);
+	}
 
-		if (attacker != null && attacker.IsAlive)
-			_spatial.PropagateRetaliation(_service, attacker._service);
-
+	private void OnDamaged()
+	{
 		_hitFlashTimer = 0.1f;
 		if (_sprite != null)
 			_sprite.Modulate = Colors.White;
+		ISoldierService attacker = _eventRelay.LastAttacker;
+		if (attacker != null && attacker.IsAlive)
+			_spatial.PropagateRetaliation(_service, attacker);
+	}
 
-		if (!IsAlive)
-		{
-			_sleepZEffect?.SetSleeping(false);
+	private void OnDied()
+	{
+		_sleepZEffect?.SetSleeping(false);
 
-			BattleManager battleManager = AdapterRegistry.Resolve<BattleManager>();
-			if (battleManager != null)
-				battleManager.Unregister(this);
+		BattleManager battleManager = AdapterRegistry.Resolve<BattleManager>();
+		battleManager?.Unregister(this);
+		_spatial?.Unregister(_service);
 
-			Tween tween = CreateTween();
-			tween.TweenProperty(this, "scale", Vector2.Zero, 0.25f);
-			tween.Parallel().TweenProperty(this, "modulate:a", 0f, 0.25f);
-			tween.TweenCallback(Callable.From(() => QueueFree()));
-		}
+		Tween tween = CreateTween();
+		tween.TweenProperty(this, "scale", Vector2.Zero, 0.25f);
+		tween.Parallel().TweenProperty(this, "modulate:a", 0f, 0.25f);
+		tween.TweenCallback(Callable.From(() => QueueFree()));
 	}
 }

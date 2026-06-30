@@ -15,7 +15,7 @@ public static class UnitSpawn
 	}
 
 	public static void PlaceSoldier(
-		Node2D battlefield, Castle castle,SoldierLogic soldier,
+		Node2D battlefield, Castle castle, Soldier soldier,
 		IReadOnlyList<Vector2I> footprint, int anchorX, int anchorY, int spawnIndex = 0)
 	{
 		battlefield.AddChild(soldier);
