@@ -1,6 +1,6 @@
 # AGENTS.md — CasualCastle
 
-Godot **4.6** + **C# / .NET** 的 2D RTS 项目（类皇室战争）。物理：Jolt；UI 用 `CanvasLayer`。
+Godot **4.6** + **C# / .NET** 的 2.5D RTS 项目（斜视角纸片人，类皇室战争）。物理：Jolt；UI 用 `CanvasLayer`。
 
 ## 术语
 

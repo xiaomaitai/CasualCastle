@@ -19,7 +19,6 @@ public static class GameDataLoader
         connection.Open();
 
         using SqliteCommand cmd = connection.CreateCommand();
-        Migrate(cmd);
         LoadUnitStats(cmd);
         LoadBuildingDefs(cmd);
         LoadDamageMatrix(cmd);
@@ -28,15 +27,6 @@ public static class GameDataLoader
     }
 
 
-    private static void Migrate(SqliteCommand cmd)
-    {
-        try
-        {
-            cmd.CommandText = "ALTER TABLE unit_stats ADD COLUMN vision_range REAL NOT NULL DEFAULT 170.0";
-            cmd.ExecuteNonQuery();
-        }
-        catch { }
-    }
     private static void LoadUnitStats(SqliteCommand cmd)
     {
         cmd.CommandText = "SELECT type_id, size, attack_type, damage_type, armor_type, health, damage, speed, attack_range, attack_cooldown, vision_range, has_night_combat, unit_color FROM unit_stats";
@@ -66,7 +56,7 @@ public static class GameDataLoader
 
     private static void LoadBuildingDefs(SqliteCommand cmd)
     {
-        cmd.CommandText = "SELECT type_id, display_name, max_health, spawn_interval, main_cell_x, main_cell_y, spawn_cell_x, spawn_cell_y, unit_type_id, has_night_combat, fusion_tier, is_core, footprint_json FROM building_defs";
+        cmd.CommandText = "SELECT type_id, display_name, max_health, spawn_interval, main_cell_x, main_cell_y, spawn_cell_x, spawn_cell_y, unit_type_id, has_night_combat, fusion_tier, is_core, footprint_json, collision_width, collision_height FROM building_defs";
         using SqliteDataReader reader = cmd.ExecuteReader();
         Dictionary<string, BuildingData> data = new();
         while (reader.Read())
@@ -87,6 +77,8 @@ public static class GameDataLoader
                 FusionTier = reader.GetInt32(10),
                 IsCore = reader.GetInt32(11) != 0,
                 Footprint = offsets.ToArray(),
+                CollisionWidth = reader.GetInt32(13),
+                CollisionHeight = reader.GetInt32(14),
             };
         }
         BuildingDefinitions.LoadFrom(data);

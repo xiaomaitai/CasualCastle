@@ -33,7 +33,6 @@ public partial class BuildingSystem : Node
         public string TexturePath { get; init; }
         public Vector2 SpriteScale { get; init; }
         public Color SpriteModulate { get; init; }
-        public Vector2 CollisionSize { get; init; }
         public string MaterialPath { get; init; }
     }
 
@@ -45,7 +44,6 @@ public partial class BuildingSystem : Node
             TexturePath = PlaceholderTexturePath,
             SpriteScale = new(0.125f, 0.125f),
             SpriteModulate = new Color(1f, 0.82f, 0.35f),
-            CollisionSize = new(180f, 180f),
         },
         ["Barracks"] = new()
         {
@@ -53,7 +51,6 @@ public partial class BuildingSystem : Node
             TexturePath = PlaceholderTexturePath,
             SpriteScale = new(0.0625f, 0.0625f),
             SpriteModulate = Colors.White,
-            CollisionSize = new(84f, 84f),
         },
         ["ArcheryRange"] = new()
         {
@@ -61,7 +58,6 @@ public partial class BuildingSystem : Node
             TexturePath = PlaceholderTexturePath,
             SpriteScale = new(0.125f, 0.0625f),
             SpriteModulate = new Color(0.55f, 0.85f, 0.45f),
-            CollisionSize = new(186f, 84f),
         },
         ["Stable"] = new()
         {
@@ -69,7 +65,6 @@ public partial class BuildingSystem : Node
             TexturePath = PlaceholderTexturePath,
             SpriteScale = new(0.125f, 0.1875f),
             SpriteModulate = new Color(0.75f, 0.55f, 0.3f),
-            CollisionSize = new(186f, 282f),
         },
         ["WolfDen"] = new()
         {
@@ -77,7 +72,6 @@ public partial class BuildingSystem : Node
             TexturePath = PlaceholderTexturePath,
             SpriteScale = new(0.0625f, 0.0625f),
             SpriteModulate = new Color(0.55f, 0.35f, 0.75f),
-            CollisionSize = new(84f, 84f),
         },
         ["BarracksT2"] = new()
         {
@@ -85,7 +79,6 @@ public partial class BuildingSystem : Node
             TexturePath = PlaceholderTexturePath,
             SpriteScale = new(0.0625f, 0.0625f),
             SpriteModulate = new Color(0.85f, 0.9f, 1f),
-            CollisionSize = new(84f, 84f),
         },
         ["WolfDenT2"] = new()
         {
@@ -93,7 +86,6 @@ public partial class BuildingSystem : Node
             TexturePath = PlaceholderTexturePath,
             SpriteScale = new(0.0625f, 0.0625f),
             SpriteModulate = new Color(0.65f, 0.45f, 0.85f),
-            CollisionSize = new(84f, 84f),
         },
     };
 
@@ -171,6 +163,8 @@ public partial class BuildingSystem : Node
     public static int GetFusionTier(string buildingType) => BuildingDefinitions.GetFusionTier(buildingType);
     public static bool IsCoreBuilding(string buildingType) => BuildingDefinitions.IsCoreBuilding(buildingType);
     public static bool IsFusibleMaterial(string buildingType) => BuildingDefinitions.IsFusibleMaterial(buildingType);
+    public static int GetCollisionWidth(string buildingType) => BuildingDefinitions.GetCollisionWidth(buildingType);
+    public static int GetCollisionHeight(string buildingType) => BuildingDefinitions.GetCollisionHeight(buildingType);
 
     private static VisualDef GetVisual(string buildingType)
     {
@@ -208,7 +202,9 @@ public partial class BuildingSystem : Node
         CollisionShape2D shapeNode = building.GetNodeOrNull<CollisionShape2D>("CollisionShape");
         if (shapeNode?.Shape is RectangleShape2D rect)
         {
-            rect.Size = visual.CollisionSize;
+            float pixelW = GameCoordinatesAdapter.GameUnitsToPixels(BuildingDefinitions.GetCollisionWidth(building.TypeId));
+            float pixelH = GameCoordinatesAdapter.GameUnitsToPixels(BuildingDefinitions.GetCollisionHeight(building.TypeId));
+            rect.Size = new Vector2(pixelW, pixelH);
 
             NavigationObstacle2D navObstacle = building.GetNodeOrNull<NavigationObstacle2D>("NavigationObstacle");
             if (navObstacle != null)

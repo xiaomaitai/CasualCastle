@@ -13,7 +13,6 @@ public enum SoldierState
 
 public partial class Soldier : Area2D
 {
-	public SoldierData Data { get; private set; } = new();
 	public bool IsPlayerUnit { get; set; }
 	public bool IsAlive { get; private set; } = true;
 
@@ -25,7 +24,13 @@ public partial class Soldier : Area2D
 	public float AttackCooldown { get; private set; } = 1f;
 	public float VisionRange { get; private set; } = 250f;
 	public bool HasNightCombat { get; set; }
+	public float DisplaySize { get; private set; } = 125f;
+	public float CollisionRadius { get; private set; } = 50f;
+	public AttackType AttackType { get; private set; }
+	public DamageType DamageType { get; private set; }
+	public ArmorType ArmorType { get; private set; } = ArmorType.Light;
 
+	private uint _unitColor;
 	private AttackBehavior _attackBehavior;
 	private bool _statsPending;
 	private NavigationAgent2D _navigationAgent;
@@ -42,17 +47,22 @@ public partial class Soldier : Area2D
 
 	public void InitializeFromStats(UnitStats stats)
 	{
-		Data = SoldierData.FromStats(stats);
-		MaxHealth = Data.Health;
-		Health = Data.Health;
-		Damage = Data.Damage;
-		Speed = GameCoordinatesAdapter.GameUnitsToPixels(Data.Speed);
-		AttackRange = GameCoordinatesAdapter.GameUnitsToPixels(Data.AttackRange);
-		AttackCooldown = Data.AttackCooldown;
-		VisionRange = GameCoordinatesAdapter.GameUnitsToPixels(Data.VisionRange);
-		HasNightCombat = Data.HasNightCombat;
+		MaxHealth = stats.Health;
+		Health = stats.Health;
+		Damage = stats.Damage;
+		Speed = GameCoordinatesAdapter.GameUnitsToPixels(stats.Speed);
+		AttackRange = GameCoordinatesAdapter.GameUnitsToPixels(stats.AttackRange);
+		AttackCooldown = stats.AttackCooldown;
+		VisionRange = GameCoordinatesAdapter.GameUnitsToPixels(stats.VisionRange);
+		HasNightCombat = stats.HasNightCombat;
+		DisplaySize = stats.DisplaySize;
+		CollisionRadius = stats.CollisionRadius;
+		_unitColor = stats.UnitColor;
+		AttackType = stats.AttackType;
+		DamageType = stats.DamageType;
+		ArmorType = stats.ArmorType;
 
-		_attackBehavior = Data.AttackType == AttackType.Ranged
+		_attackBehavior = stats.AttackType == AttackType.Ranged
 			? new RangedAttack(this)
 			: new MeleeAttack(this);
 
@@ -65,12 +75,11 @@ public partial class Soldier : Area2D
 			return;
 		_statsPending = false;
 
-		float displaySize = GameCoordinatesAdapter.GameUnitsToPixels(Data.DisplaySize());
-		uint color = Data.UnitColor;
+		float displaySize = GameCoordinatesAdapter.GameUnitsToPixels(DisplaySize);
 		_baseSpriteModulate = new Color(
-			((color >> 16) & 0xFF) / 255f,
-			((color >> 8) & 0xFF) / 255f,
-			(color & 0xFF) / 255f);
+			((_unitColor >> 16) & 0xFF) / 255f,
+			((_unitColor >> 8) & 0xFF) / 255f,
+			(_unitColor & 0xFF) / 255f);
 
 		if (_sprite != null)
 		{
@@ -80,10 +89,11 @@ public partial class Soldier : Area2D
 				float scale = displaySize / System.Math.Max(texture.GetWidth(), texture.GetHeight());
 				_sprite.Scale = new Vector2(scale, scale);
 			}
+			_sprite.Position = new Vector2(0, -displaySize * 0.5f);
 		}
 
 		if (_collisionShape?.Shape is CircleShape2D circle)
-			circle.Radius = GameCoordinatesAdapter.GameUnitsToPixels(Data.CollisionRadius());
+			circle.Radius = GameCoordinatesAdapter.GameUnitsToPixels(CollisionRadius);
 	}
 
 	public void SetTarget(Soldier target)
@@ -129,10 +139,7 @@ public partial class Soldier : Area2D
 
 	public override void _Draw()
 	{
-		if (Data == null)
-			return;
-
-		float radius = GameCoordinatesAdapter.GameUnitsToPixels(Data.CollisionRadius());
+		float radius = GameCoordinatesAdapter.GameUnitsToPixels(CollisionRadius);
 		Color circleColor = IsPlayerUnit
 			? new Color(0, 1, 0, 0.3f)
 			: new Color(1, 0, 0, 0.3f);
@@ -199,12 +206,12 @@ public partial class Soldier : Area2D
 		if (_attackTimer > 0)
 			_attackTimer -= dt;
 
-		float myRadius = GameCoordinatesAdapter.GameUnitsToPixels(Data.CollisionRadius());
+		float myRadius = GameCoordinatesAdapter.GameUnitsToPixels(CollisionRadius);
 		float edgeDist = float.MaxValue;
 
 		if (_targetEnemy != null && _targetEnemy.IsAlive)
 		{
-			float targetRadius = GameCoordinatesAdapter.GameUnitsToPixels(_targetEnemy.Data.CollisionRadius());
+			float targetRadius = GameCoordinatesAdapter.GameUnitsToPixels(_targetEnemy.CollisionRadius);
 			edgeDist = GlobalPosition.DistanceTo(_targetEnemy.GlobalPosition) - myRadius - targetRadius;
 			_state = edgeDist <= VisionRange ? SoldierState.Fighting : SoldierState.Retaliating;
 		}
@@ -249,7 +256,6 @@ public partial class Soldier : Area2D
 				break;
 		}
 
-		// NavigationAgent2D-driven movement
 		Vector2 next = _navigationAgent.GetNextPathPosition();
 		Vector2 dir = (next - GlobalPosition).Normalized();
 		GlobalPosition += dir * Speed * dt;

@@ -64,7 +64,7 @@ public partial class Projectile : Area2D
 		if (_target == null || !_target.IsAlive)
 			return;
 
-		int finalDamage = CombatRules.CalculateDamage(_damage, _damageType, _target.Data.ArmorType);
+		int finalDamage = CombatRules.CalculateDamage(_damage, _damageType, _target.ArmorType);
 		_target.TakeDamage(finalDamage, _attacker);
 		QueueFree();
 	}

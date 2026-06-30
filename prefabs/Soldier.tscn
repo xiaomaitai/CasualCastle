@@ -4,8 +4,8 @@
 [ext_resource type="Texture2D" uid="uid://b1s6tjn65lbh8" path="res://assets/art/cards/goblin.png" id="2"]
 [ext_resource type="Script" path="res://scripts/adapters/godot/battle/SoldierSleepZEffect.cs" id="3"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
-size = Vector2(32, 32)
+[sub_resource type="CircleShape2D" id="CircleShape2D_1"]
+radius = 1.0
 
 [node name="Soldier" type="Area2D"]
 collision_layer = 2
@@ -18,7 +18,7 @@ scale = Vector2(0.03125, 0.03125)
 centered = true
 
 [node name="CollisionShape" type="CollisionShape2D" parent="."]
-shape = SubResource("RectangleShape2D_1")
+shape = SubResource("CircleShape2D_1")
 
 [node name="NavigationAgent" type="NavigationAgent2D" parent="."]
 path_desired_distance = 4.0

@@ -19,6 +19,8 @@ public class BuildingData
 	public bool IsCore { get; init; }
 
 	public int FusionTier { get; init; }
+	public int CollisionWidth { get; init; } = 80;
+	public int CollisionHeight { get; init; } = 80;
 }
 
 public static class BuildingDefinitions
@@ -56,6 +58,9 @@ public static class BuildingDefinitions
 	public static int GetFusionTier(string typeId) => Get(typeId).FusionTier;
 
 	public static bool IsCoreBuilding(string typeId) => Get(typeId).IsCore;
+
+	public static int GetCollisionWidth(string typeId) => Get(typeId).CollisionWidth;
+	public static int GetCollisionHeight(string typeId) => Get(typeId).CollisionHeight;
 
 	public static bool IsFusibleMaterial(string typeId)
 	{

@@ -151,8 +151,8 @@ public partial class BattleManager : Node
                     continue;
 
                 float dist = a.GlobalPosition.DistanceTo(b.GlobalPosition);
-                float minDist = GameCoordinatesAdapter.GameUnitsToPixels(a.Data.CollisionRadius())
-                    + GameCoordinatesAdapter.GameUnitsToPixels(b.Data.CollisionRadius()) + 4f;
+                float minDist = GameCoordinatesAdapter.GameUnitsToPixels(a.CollisionRadius)
+                    + GameCoordinatesAdapter.GameUnitsToPixels(b.CollisionRadius) + 4f;
                 if (dist < minDist && dist > 0.001f)
                 {
                     Vector2 pushDir = (a.GlobalPosition - b.GlobalPosition).Normalized();

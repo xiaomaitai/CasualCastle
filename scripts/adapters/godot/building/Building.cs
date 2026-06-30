@@ -241,18 +241,6 @@ public partial class Building : Area2D, IBuildingState
 		_sprite = GetNodeOrNull<Sprite2D>("Sprite");
 		TryApplyVisual();
 
-		// Set NavigationObstacle2D radius from collision shape
-		NavigationObstacle2D navObstacle = GetNodeOrNull<NavigationObstacle2D>("NavigationObstacle");
-		if (navObstacle != null)
-		{
-			CollisionShape2D shapeNode = GetNodeOrNull<CollisionShape2D>("CollisionShape");
-			if (shapeNode?.Shape is RectangleShape2D rect)
-			{
-				float maxHalf = Mathf.Min(rect.Size.X, rect.Size.Y) * 0.4f;
-				navObstacle.Radius = maxHalf;
-			}
-		}
-
 		if (_gameManager != null)
 			_gameManager.PhaseChanged += OnPhaseChanged;
 

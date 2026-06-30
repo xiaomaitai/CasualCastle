@@ -14,7 +14,7 @@
 ## 项目速览
 
 - **引擎**: Godot 4.6 + C# / .NET + Jolt 物理
-- **类型**: 2D RTS（类皇室战争）
+- **类型**: 2.5D RTS（斜视角纸片人，类皇室战争）
 - **架构方向**: Phase 2 — domain 拆为 4 项目 + DI 注入
 - **项目结构**: `scripts/domain/CasualCastle.Domain.{Shared,Building,Battle,History}/`
 - **依赖规则**: domain 零 Godot，adapters 与主项目编译在一起实现端口

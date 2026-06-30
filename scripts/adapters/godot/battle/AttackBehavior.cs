@@ -15,8 +15,8 @@ public abstract class AttackBehavior
 	protected bool TargetInRange(Soldier target)
 	{
 		float dist = Soldier.GlobalPosition.DistanceTo(target.GlobalPosition);
-		float myRadius = GameCoordinatesAdapter.GameUnitsToPixels(Soldier.Data.CollisionRadius());
-		float targetRadius = GameCoordinatesAdapter.GameUnitsToPixels(target.Data.CollisionRadius());
+		float myRadius = GameCoordinatesAdapter.GameUnitsToPixels(Soldier.CollisionRadius);
+		float targetRadius = GameCoordinatesAdapter.GameUnitsToPixels(target.CollisionRadius);
 		return (dist - myRadius - targetRadius) <= Soldier.AttackRange;
 	}
 }
