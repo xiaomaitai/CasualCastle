@@ -225,6 +225,8 @@ public partial class Soldier : Area2D
 			_state = SoldierState.Marching;
 		}
 
+		bool shouldMove = false;
+
 		switch (_state)
 		{
 			case SoldierState.Fighting:
@@ -237,11 +239,11 @@ public partial class Soldier : Area2D
 				else
 				{
 					_navigationAgent.TargetPosition = _targetEnemy.GlobalPosition;
+					shouldMove = true;
 				}
 				break;
 
 			case SoldierState.Sieging:
-				_navigationAgent.TargetPosition = GlobalPosition;
 				if (_attackTimer <= 0)
 				{
 					if (_targetBuilding.Health > 0)
@@ -253,12 +255,16 @@ public partial class Soldier : Area2D
 			case SoldierState.Marching:
 				_targetEnemy = null;
 				_navigationAgent.TargetPosition = SelectTarget();
+				shouldMove = true;
 				break;
 		}
 
-		Vector2 next = _navigationAgent.GetNextPathPosition();
-		Vector2 dir = (next - GlobalPosition).Normalized();
-		GlobalPosition += dir * Speed * dt;
+		if (shouldMove)
+		{
+			Vector2 next = _navigationAgent.GetNextPathPosition();
+			Vector2 dir = (next - GlobalPosition).Normalized();
+			GlobalPosition += dir * Speed * dt;
+		}
 
 		QueueRedraw();
 	}
