@@ -22,12 +22,10 @@ public class Soldier
 	public DamageType DamageType { get; set; }
 	public ArmorType ArmorType { get; set; }
 
-	internal ISoldierService Self { get; set; }
 	internal INavigationPort NavPort { get; set; }
 
 	public ISoldierService TargetEnemy { get; set; }
 	public IBuildingTarget TargetBuilding { get; set; }
-	public object TargetCastle { get; set; }
 	public SoldierState State { get; set; }
 
 	private float _attackTimer;
@@ -97,7 +95,7 @@ public class Soldier
 		}
 	}
 
-	public void UpdateBehavior(float dt, float enemyEdgeDist, float marchTargetGameX, float marchTargetGameY)
+	public void UpdateBehavior(float dt, float enemyEdgeDist, float marchTargetGameX, float marchTargetGameY, ISoldierService self)
 	{
 		if (!IsAlive)
 			return;
@@ -116,7 +114,7 @@ public class Soldier
 					if (_attackTimer <= 0)
 					{
 						int finalDamage = CombatRules.CalculateDamage(Damage, DamageType, TargetEnemy.ArmorType);
-						TargetEnemy.TakeDamage(finalDamage, Self, GameX, GameY);
+						TargetEnemy.TakeDamage(finalDamage, self, GameX, GameY);
 						_attackTimer = AttackCooldown;
 					}
 				}

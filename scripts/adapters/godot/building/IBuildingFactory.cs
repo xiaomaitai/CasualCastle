@@ -1,6 +1,6 @@
 using CasualCastle.Domain.Building;
 
-namespace CasualCastle.Ports;
+namespace CasualCastle.Adapters.Godot;
 
 public interface IBuildingFactory
 {

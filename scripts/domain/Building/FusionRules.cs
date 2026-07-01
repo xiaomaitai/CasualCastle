@@ -28,15 +28,15 @@ public static class FusionRules
 
     public static IReadOnlyList<FusionRecipe> GetRecipes() => _recipes;
 
-    public static bool CanParticipate(IBuildingState building)
+    public static bool CanParticipate(IBuildingState building, IBuildingRepository buildingRepo)
     {
         if (building == null || building.IsDestroyed || building.IsManuallyPaused)
             return false;
         if (building.IsFusionProhibited)
             return false;
-        if (BuildingDefinitions.IsCoreBuilding(building.TypeId))
+        if (buildingRepo.IsCoreBuilding(building.TypeId))
             return false;
-        if (!BuildingDefinitions.IsFusibleMaterial(building.TypeId))
+        if (!buildingRepo.IsFusibleMaterial(building.TypeId))
             return false;
         if (!building.IsPlayerOwned)
             return false;
@@ -46,7 +46,8 @@ public static class FusionRules
     }
 
     public static bool CanFuseGroup(
-        IBuildingState main, IReadOnlyList<IBuildingState> materials, FusionRecipe recipe)
+        IBuildingState main, IReadOnlyList<IBuildingState> materials, FusionRecipe recipe,
+        IBuildingRepository buildingRepo)
     {
         if (main == null || recipe == null || materials == null)
             return false;
@@ -54,7 +55,7 @@ public static class FusionRules
             return false;
         if (main.TypeId != recipe.MainTypeId)
             return false;
-        if (!CanParticipate(main))
+        if (!CanParticipate(main, buildingRepo))
             return false;
         if (materials.Count != recipe.MaterialCount)
             return false;
@@ -68,7 +69,7 @@ public static class FusionRules
                 return false;
             if (material.TypeId != recipe.MaterialTypeId)
                 return false;
-            if (!CanParticipate(material))
+            if (!CanParticipate(material, buildingRepo))
                 return false;
         }
 
@@ -76,7 +77,8 @@ public static class FusionRules
     }
 
     public static FusionGroup FindBestFusibleGroup(
-        IReadOnlyList<IBuildingState> buildings, HashSet<IBuildingState> used)
+        IReadOnlyList<IBuildingState> buildings, HashSet<IBuildingState> used,
+        IBuildingRepository buildingRepo)
     {
         List<IBuildingState> ordered = buildings
             .Where(b => !used.Contains(b))
@@ -86,7 +88,7 @@ public static class FusionRules
 
         foreach (IBuildingState main in ordered)
         {
-            if (!CanParticipate(main))
+            if (!CanParticipate(main, buildingRepo))
                 continue;
 
             foreach (FusionRecipe recipe in _recipes)
@@ -94,11 +96,11 @@ public static class FusionRules
                 if (main.TypeId != recipe.MainTypeId)
                     continue;
 
-                List<IBuildingState> materials = PickMaterials(main, recipe, ordered, used);
+                List<IBuildingState> materials = PickMaterials(main, recipe, ordered, used, buildingRepo);
                 if (materials == null)
                     continue;
 
-                if (!CanFuseGroup(main, materials, recipe))
+                if (!CanFuseGroup(main, materials, recipe, buildingRepo))
                     continue;
 
                 return new FusionGroup(main, materials, recipe);
@@ -110,16 +112,17 @@ public static class FusionRules
 
     private static List<IBuildingState> PickMaterials(
         IBuildingState main, FusionRecipe recipe,
-        IReadOnlyList<IBuildingState> allBuildings, HashSet<IBuildingState> used)
+        IReadOnlyList<IBuildingState> allBuildings, HashSet<IBuildingState> used,
+        IBuildingRepository buildingRepo)
     {
-        HashSet<IAdjacencyBuilding> neighbors = AdjacentRules.GetAdjacentBuildings(main, allBuildings);
+        HashSet<IAdjacencyBuilding> neighbors = AdjacentRules.GetAdjacentBuildings(main, allBuildings, buildingRepo);
 
         List<IBuildingState> candidates = neighbors
             .OfType<IBuildingState>()
             .Where(b => b != main
                 && !used.Contains(b)
                 && b.TypeId == recipe.MaterialTypeId
-                && CanParticipate(b))
+                && CanParticipate(b, buildingRepo))
             .OrderBy(b => b.AnchorGridY)
             .ThenBy(b => b.AnchorGridX)
             .Take(recipe.MaterialCount)

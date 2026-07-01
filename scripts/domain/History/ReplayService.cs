@@ -2,13 +2,15 @@ using CasualCastle.Domain.Building;
 
 namespace CasualCastle.Domain.History;
 
-public class ReplayService
+public class ReplayService : IReplayUseCase
 {
     private readonly BattleReportService _reportService;
+    private readonly IBuildingRepository _buildingRepo;
 
-    public ReplayService(BattleReportService reportService)
+    public ReplayService(BattleReportService reportService, IBuildingRepository buildingRepo)
     {
         _reportService = reportService;
+        _buildingRepo = buildingRepo;
     }
 
     public void ApplyNightSnapshot(IReplayTarget target, int nightIndex)
@@ -21,7 +23,7 @@ public class ReplayService
 
         foreach (BuildingSnapshot buildingSnapshot in snapshot.Buildings)
         {
-            if (BuildingDefinitions.IsCoreBuilding(buildingSnapshot.TypeId))
+            if (_buildingRepo.IsCoreBuilding(buildingSnapshot.TypeId))
                 continue;
 
             target.TryPlaceMirrored(buildingSnapshot);

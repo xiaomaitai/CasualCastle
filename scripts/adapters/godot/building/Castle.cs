@@ -97,7 +97,7 @@ public partial class Castle : Node2D
 
 	public bool CanPlaceFootprint(string buildingType, int anchorX, int anchorY)
 	{
-		IReadOnlyList<GridCellOffset> footprint = BuildingDefinitions.GetFootprint(buildingType);
+		IReadOnlyList<GridCellOffset> footprint = GameManager.Get<IBuildingRepository>().GetFootprint(buildingType);
 		return _occupancy.CanPlaceFootprint(footprint, anchorX, anchorY);
 	}
 
@@ -179,7 +179,7 @@ public partial class Castle : Node2D
 	public bool PlaceBuilding(Building building, int anchorX, int anchorY, string buildingType)
 	{
 		IReadOnlyList<Vector2I> footprint = BuildingSystem.GetFootprint(buildingType);
-		IReadOnlyList<GridCellOffset> domainFootprint = BuildingDefinitions.GetFootprint(buildingType);
+		IReadOnlyList<GridCellOffset> domainFootprint = GameManager.Get<IBuildingRepository>().GetFootprint(buildingType);
 		if (!CanPlaceFootprint(buildingType, anchorX, anchorY))
 			return false;
 
@@ -195,7 +195,7 @@ public partial class Castle : Node2D
 		if (building == null)
 			return;
 
-		IReadOnlyList<GridCellOffset> footprint = BuildingDefinitions.GetFootprint(building.TypeId);
+		IReadOnlyList<GridCellOffset> footprint = GameManager.Get<IBuildingRepository>().GetFootprint(building.TypeId);
 		_occupancy.ReleaseCells(footprint, building.AnchorGridX, building.AnchorGridY);
 	}
 

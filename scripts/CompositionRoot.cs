@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CasualCastle.Adapters.Persistence;
 using CasualCastle.Domain.Shared;
 using CasualCastle.Domain.Building;
@@ -15,6 +16,7 @@ public static class CompositionRoot
 
         ServiceCollection services = new ServiceCollection();
 
+        services.AddSingleton<IReadOnlyList<CardData>>(_ => GameDataLoader.ShopCatalog);
         services.AddDomainShared();
         services.AddDomainBuilding();
         services.AddDomainBattle();

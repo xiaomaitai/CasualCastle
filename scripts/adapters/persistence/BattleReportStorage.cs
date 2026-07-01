@@ -9,8 +9,6 @@ public class BattleReportStorage : IBattleReportRepository
 	private const string ReportDir = "user://battle_reports";
 	private const string ReportFile = "user://battle_reports/reports.json";
 
-	public static BattleReportStorage Instance { get; } = new();
-
 	private static readonly JsonSerializerOptions JsonOptions = new()
 	{
 		WriteIndented = true,

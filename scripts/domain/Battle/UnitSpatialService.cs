@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace CasualCastle.Domain.Battle;
 
-public static class UnitSpatialService
+public class UnitSpatialService : ICombatUseCase
 {
     private const float PushForce = 20f;
 
-    public static void PushSoldiers(IReadOnlyList<ISoldierService> allUnits, float dt)
+    public void PushSoldiers(IReadOnlyList<ISoldierService> allUnits, float dt)
     {
         for (int i = 0; i < allUnits.Count; i++)
         {

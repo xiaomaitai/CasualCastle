@@ -3,29 +3,29 @@ using System.Collections.Generic;
 
 namespace CasualCastle.Domain.Building;
 
-public static class ShopRules
+public class ShopRules
 {
-    public const int OfferCount = 5;
+	public const int OfferCount = 5;
 
-    private static CardData[] _catalog = Array.Empty<CardData>();
+	private readonly CardData[] _catalog;
 
-    public static void LoadCatalog(List<CardData> catalog)
-    {
-        _catalog = catalog.ToArray();
-    }
+	public ShopRules(IReadOnlyList<CardData> catalog)
+	{
+		_catalog = new CardData[catalog.Count];
+		for (int i = 0; i < catalog.Count; i++)
+			_catalog[i] = catalog[i];
+	}
 
-    public static CardData[] GetCatalog() => _catalog;
+	public CardData[] GenerateOffers(Random random)
+	{
+		CardData[] offers = new CardData[OfferCount];
+		for (int i = 0; i < OfferCount; i++)
+			offers[i] = _catalog[random.Next(_catalog.Length)];
+		return offers;
+	}
 
-    public static CardData[] GenerateOffers(Random random)
-    {
-        CardData[] offers = new CardData[OfferCount];
-        for (int i = 0; i < OfferCount; i++)
-            offers[i] = _catalog[random.Next(_catalog.Length)];
-        return offers;
-    }
-
-    public static CardData RefreshOfferSlot(Random random)
-    {
-        return _catalog[random.Next(_catalog.Length)];
-    }
+	public CardData RefreshOfferSlot(Random random)
+	{
+		return _catalog[random.Next(_catalog.Length)];
+	}
 }

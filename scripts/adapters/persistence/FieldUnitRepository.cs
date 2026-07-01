@@ -10,7 +10,6 @@ public class FieldUnitRepository : IFieldUnitRepository
 
     private readonly List<ISoldierService> _playerUnits = new();
     private readonly List<ISoldierService> _enemyUnits = new();
-    private readonly Dictionary<(int, int), List<ISoldierService>> _grid = new();
     private readonly List<IBuildingRef> _buildings = new();
 
     public IReadOnlyList<ISoldierService> AllUnits
@@ -101,7 +100,7 @@ public class FieldUnitRepository : IFieldUnitRepository
         _buildings.Remove(building);
     }
 
-    public (IBuildingTarget building, object castle) FindOverlappingBuilding(ISoldierService soldier)
+    public IBuildingTarget FindOverlappingBuilding(ISoldierService soldier)
     {
         foreach (IBuildingRef b in _buildings)
         {
@@ -111,9 +110,9 @@ public class FieldUnitRepository : IFieldUnitRepository
                 continue;
             if (soldier.GameX >= b.MinX && soldier.GameX <= b.MaxX
                 && soldier.GameY >= b.MinY && soldier.GameY <= b.MaxY)
-                return (b.BuildingTarget, b.CastleRef);
+                return b.BuildingTarget;
         }
-        return (null, null);
+        return null;
     }
 
     public bool HasEnemyOnBuilding(IBuildingRef building)

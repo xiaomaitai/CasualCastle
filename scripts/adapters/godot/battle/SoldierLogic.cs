@@ -202,9 +202,9 @@ public partial class SoldierLogic : Node2D
 
 		(ISoldierService nearest, float edgeDist) = _fieldRepo.FindNearestEnemy(_service);
 
-		(IBuildingTarget buildingTarget, object castleRef) = _fieldRepo.FindOverlappingBuilding(_service);
+		IBuildingTarget buildingTarget = _fieldRepo.FindOverlappingBuilding(_service);
 		if (buildingTarget != null)
-			_service.SetBuildingTarget(buildingTarget, castleRef);
+			_service.SetBuildingTarget(buildingTarget);
 		else
 			_service.ClearBuildingTarget();
 

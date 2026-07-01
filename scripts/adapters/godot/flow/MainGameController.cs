@@ -10,7 +10,6 @@ public partial class MainGameController : Node2D
         Castle playerCastle = GetNode<Castle>("Battlefield/PlayerSide/PlayerCastle");
         Castle enemyCastle = GetNode<Castle>("Battlefield/EnemySide/EnemyCastle");
 
-        // Set up navigation mesh covering the battlefield (simple rectangle)
         NavigationRegion2D navRegion = GetNode<NavigationRegion2D>("Battlefield/NavigationRegion");
         NavigationPolygon navPoly = new NavigationPolygon();
         navPoly.AddOutline(new Vector2[] {

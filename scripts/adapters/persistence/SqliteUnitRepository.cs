@@ -42,6 +42,6 @@ public class SqliteUnitRepository : IUnitRepository
 	{
 		if (_cache.TryGetValue(typeId, out UnitStats stats))
 			return stats;
-		return _cache["Swordsman"];
+		throw new System.Collections.Generic.KeyNotFoundException($"Unit type '{typeId}' not found");
 	}
 }

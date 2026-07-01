@@ -5,6 +5,12 @@ namespace CasualCastle.Domain.Building;
 
 public class AdjacencyService
 {
+    private readonly IBuildingRepository _buildingRepo;
+
+    public AdjacencyService(IBuildingRepository buildingRepo)
+    {
+        _buildingRepo = buildingRepo;
+    }
     public void RefreshCastle(List<IBuildingState> buildings)
     {
         foreach (IBuildingState building in buildings)
@@ -14,7 +20,7 @@ public class AdjacencyService
     public HashSet<IBuildingState> GetAdjacentBuildings(IAdjacencyBuilding source, List<IBuildingState> allBuildings)
     {
         List<IAdjacencyBuilding> domainBuildings = allBuildings.OfType<IAdjacencyBuilding>().ToList();
-        HashSet<IAdjacencyBuilding> neighbors = AdjacentRules.GetAdjacentBuildings(source, domainBuildings);
+        HashSet<IAdjacencyBuilding> neighbors = AdjacentRules.GetAdjacentBuildings(source, domainBuildings, _buildingRepo);
         return new HashSet<IBuildingState>(neighbors.OfType<IBuildingState>());
     }
 
@@ -37,13 +43,13 @@ public class AdjacencyService
         return results;
     }
 
-    private static void ApplyBonuses(IBuildingState building, List<IBuildingState> allBuildings)
+    private void ApplyBonuses(IBuildingState building, List<IBuildingState> allBuildings)
     {
         if (building is not IAdjacencyBuilding adjBuilding)
             return;
 
         List<IAdjacencyBuilding> domainBuildings = allBuildings.OfType<IAdjacencyBuilding>().ToList();
-        float multiplier = AdjacentRules.CalculateWorkSpeedMultiplier(adjBuilding, domainBuildings);
+        float multiplier = AdjacentRules.CalculateWorkSpeedMultiplier(adjBuilding, domainBuildings, _buildingRepo);
         adjBuilding.SetWorkSpeedMultiplier(multiplier);
     }
 }

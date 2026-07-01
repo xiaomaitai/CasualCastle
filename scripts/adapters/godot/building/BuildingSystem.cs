@@ -136,7 +136,7 @@ public partial class BuildingSystem : Node
 
     public static IReadOnlyList<Vector2I> GetFootprint(string buildingType)
     {
-        IReadOnlyList<GridCellOffset> domain = BuildingDefinitions.GetFootprint(buildingType);
+        IReadOnlyList<GridCellOffset> domain = GameManager.Get<IBuildingRepository>().GetFootprint(buildingType);
         Vector2I[] result = new Vector2I[domain.Count];
         for (int i = 0; i < domain.Count; i++)
             result[i] = new Vector2I(domain[i].X, domain[i].Y);
@@ -145,26 +145,28 @@ public partial class BuildingSystem : Node
 
     public static Vector2I GetMainCellOffset(string buildingType)
     {
-        GridCellOffset offset = BuildingDefinitions.GetMainCellOffset(buildingType);
+        GridCellOffset offset = GameManager.Get<IBuildingRepository>().GetMainCellOffset(buildingType);
         return new Vector2I(offset.X, offset.Y);
     }
 
-    public static string GetDisplayName(string buildingType) => BuildingDefinitions.GetDisplayName(buildingType);
-    public static int GetMaxHealth(string buildingType) => BuildingDefinitions.GetMaxHealth(buildingType);
-    public static float GetSpawnInterval(string buildingType) => BuildingDefinitions.GetSpawnInterval(buildingType);
+    private static IBuildingRepository BuildingRepo => GameManager.Get<IBuildingRepository>();
+
+    public static string GetDisplayName(string buildingType) => BuildingRepo.GetDisplayName(buildingType);
+    public static int GetMaxHealth(string buildingType) => BuildingRepo.GetMaxHealth(buildingType);
+    public static float GetSpawnInterval(string buildingType) => BuildingRepo.GetSpawnInterval(buildingType);
 
     public static Vector2I GetSpawnCellOffset(string buildingType)
     {
-        GridCellOffset offset = BuildingDefinitions.GetSpawnCellOffset(buildingType);
+        GridCellOffset offset = BuildingRepo.GetSpawnCellOffset(buildingType);
         return new Vector2I(offset.X, offset.Y);
     }
 
-    public static bool GetHasNightCombat(string buildingType) => BuildingDefinitions.GetHasNightCombat(buildingType);
-    public static int GetFusionTier(string buildingType) => BuildingDefinitions.GetFusionTier(buildingType);
-    public static bool IsCoreBuilding(string buildingType) => BuildingDefinitions.IsCoreBuilding(buildingType);
-    public static bool IsFusibleMaterial(string buildingType) => BuildingDefinitions.IsFusibleMaterial(buildingType);
-    public static int GetCollisionWidth(string buildingType) => BuildingDefinitions.GetCollisionWidth(buildingType);
-    public static int GetCollisionHeight(string buildingType) => BuildingDefinitions.GetCollisionHeight(buildingType);
+    public static bool GetHasNightCombat(string buildingType) => BuildingRepo.GetHasNightCombat(buildingType);
+    public static int GetFusionTier(string buildingType) => BuildingRepo.GetFusionTier(buildingType);
+    public static bool IsCoreBuilding(string buildingType) => BuildingRepo.IsCoreBuilding(buildingType);
+    public static bool IsFusibleMaterial(string buildingType) => BuildingRepo.IsFusibleMaterial(buildingType);
+    public static int GetCollisionWidth(string buildingType) => BuildingRepo.GetCollisionWidth(buildingType);
+    public static int GetCollisionHeight(string buildingType) => BuildingRepo.GetCollisionHeight(buildingType);
 
     private static VisualDef GetVisual(string buildingType)
     {
@@ -177,8 +179,8 @@ public partial class BuildingSystem : Node
 
     public static void ApplySoldierSpawnStats(string buildingType,SoldierLogic soldier)
     {
-        string unitTypeId = BuildingDefinitions.GetUnitTypeId(buildingType);
-        UnitStats stats = UnitRegistry.Get(unitTypeId);
+        string unitTypeId = BuildingRepo.GetUnitTypeId(buildingType);
+        UnitStats stats = GameManager.Get<IUnitRepository>().Get(unitTypeId);
         soldier.InitializeFromStats(stats);
     }
 
@@ -202,8 +204,8 @@ public partial class BuildingSystem : Node
         CollisionShape2D shapeNode = building.GetNodeOrNull<CollisionShape2D>("Logic/CollisionShape");
         if (shapeNode?.Shape is RectangleShape2D rect)
         {
-            float pixelW = GameCoordinatesAdapter.GameUnitsToPixels(BuildingDefinitions.GetCollisionWidth(building.TypeId));
-            float pixelH = GameCoordinatesAdapter.GameUnitsToPixels(BuildingDefinitions.GetCollisionHeight(building.TypeId));
+            float pixelW = GameCoordinatesAdapter.GameUnitsToPixels(BuildingRepo.GetCollisionWidth(building.TypeId));
+            float pixelH = GameCoordinatesAdapter.GameUnitsToPixels(BuildingRepo.GetCollisionHeight(building.TypeId));
             rect.Size = new Vector2(pixelW, pixelH);
         }
     }

@@ -14,7 +14,6 @@ public class SoldierService : ISoldierService
     public SoldierService()
     {
         Aggregate = new Soldier();
-        Aggregate.Self = this;
     }
 
     public bool IsAlive => Aggregate.IsAlive;
@@ -50,7 +49,7 @@ public class SoldierService : ISoldierService
 
     public void UpdateBehavior(float dt, float enemyEdgeDist, float marchGameX, float marchGameY)
     {
-        Aggregate.UpdateBehavior(dt, enemyEdgeDist, marchGameX, marchGameY);
+        Aggregate.UpdateBehavior(dt, enemyEdgeDist, marchGameX, marchGameY, this);
     }
 
     public void TakeDamage(int amount, ISoldierService attacker, float attackerGameX, float attackerGameY)
@@ -73,15 +72,13 @@ public class SoldierService : ISoldierService
         Aggregate.GameY += dy;
     }
 
-    public void SetBuildingTarget(IBuildingTarget building, object castle)
+    public void SetBuildingTarget(IBuildingTarget building)
     {
         Aggregate.TargetBuilding = building;
-        Aggregate.TargetCastle = castle;
     }
 
     public void ClearBuildingTarget()
     {
         Aggregate.TargetBuilding = null;
-        Aggregate.TargetCastle = null;
     }
 }

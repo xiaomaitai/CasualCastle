@@ -7,7 +7,7 @@ public static class HistoryModule
     public static IServiceCollection AddDomainHistory(this IServiceCollection services)
     {
         services.AddSingleton<BattleReportService>();
-        services.AddSingleton<ReplayService>();
+        services.AddSingleton<IReplayUseCase, ReplayService>();
         return services;
     }
 }

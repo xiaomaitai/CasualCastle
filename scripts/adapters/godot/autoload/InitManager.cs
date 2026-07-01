@@ -2,7 +2,6 @@ using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
 using CasualCastle.Domain.History;
-using CasualCastle.Ports;
 using Godot;
 
 public partial class InitManager : Node
@@ -17,8 +16,7 @@ public partial class InitManager : Node
         BattleReportService reportService = GameManager.Get<BattleReportService>();
         AdapterRegistry.Register<BattleReportService>(reportService);
 
-        ReplayService replayService = GameManager.Get<ReplayService>();
-        AdapterRegistry.Register<ReplayService>(replayService);
+        IReplayUseCase replayService = GameManager.Get<IReplayUseCase>();
 
         AdjacencyService adjacencyService = GameManager.Get<AdjacencyService>();
         AdapterRegistry.Register<AdjacencyService>(adjacencyService);
@@ -34,7 +32,7 @@ public partial class InitManager : Node
             new CastlePlacementAdapter(buildingSystem));
         AdapterRegistry.Register<Hand>(hand);
 
-        Shop shopService = new Shop(hand);
+        Shop shopService = new Shop(hand, GameManager.Get<ShopRules>());
         AdapterRegistry.Register<Shop>(shopService);
 
         gm.PhaseChanged += phase =>
@@ -61,7 +59,7 @@ public partial class InitManager : Node
             return;
 
         FusionBuildingFactory factory = new FusionBuildingFactory(playerCastle);
-        FusionService fusionService = new FusionService(factory);
+        FusionService fusionService = new FusionService(factory, GameManager.Get<IBuildingRepository>());
         fusionService.FusionCompleted += result =>
         {
             AdjacencyService adj = GameManager.Get<AdjacencyService>();
@@ -81,7 +79,7 @@ public partial class InitManager : Node
         if (enemyCastle == null)
             return;
 
-        ReplayService replayService = GameManager.Get<ReplayService>();
+        IReplayUseCase replayService = GameManager.Get<IReplayUseCase>();
         ReplayTarget target = new ReplayTarget(enemyCastle);
         replayService.ApplyNightSnapshot(target, gm.CurrentNightIndex);
 

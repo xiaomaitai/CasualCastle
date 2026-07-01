@@ -4,15 +4,17 @@ using System.Linq;
 
 namespace CasualCastle.Domain.Building;
 
-public class FusionService
+public class FusionService : IFusionUseCase
 {
     public event Action<IBuildingState> FusionCompleted;
 
     private readonly IFusionBuildingFactory _factory;
+    private readonly IBuildingRepository _buildingRepo;
 
-    public FusionService(IFusionBuildingFactory factory)
+    public FusionService(IFusionBuildingFactory factory, IBuildingRepository buildingRepo)
     {
         _factory = factory;
+        _buildingRepo = buildingRepo;
     }
 
     public void ResolveFusions(List<IBuildingState> buildings, bool isPlayerSide, bool isNight, bool isPlaying)
@@ -24,14 +26,14 @@ public class FusionService
 
         while (true)
         {
-            FusionGroup group = FusionRules.FindBestFusibleGroup(buildings, used);
+            FusionGroup group = FusionRules.FindBestFusibleGroup(buildings, used, _buildingRepo);
             if (group == null)
                 break;
 
             if (!TryFuseGroup(buildings, group))
             {
                 used.Add(group.Main);
-                foreach (var mat in group.Materials)
+                foreach (IBuildingState mat in group.Materials)
                     used.Add(mat);
             }
         }
@@ -39,10 +41,10 @@ public class FusionService
 
     private bool TryFuseGroup(List<IBuildingState> buildings, FusionGroup group)
     {
-        if (!FusionRules.CanFuseGroup(group.Main, group.Materials, group.Recipe))
+        if (!FusionRules.CanFuseGroup(group.Main, group.Materials, group.Recipe, _buildingRepo))
             return false;
 
-        foreach (var mat in group.Materials)
+        foreach (IBuildingState mat in group.Materials)
             _factory.Destroy(mat);
 
         IBuildingState oldMain = group.Main;

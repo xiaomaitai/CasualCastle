@@ -15,13 +15,15 @@ public class Shop
     private readonly CardData[] _offers = new CardData[OfferCount];
     private readonly Random _random = new();
     private readonly Hand _hand;
+    private readonly ShopRules _shopRules;
 
     public int Gold { get; private set; }
     public bool IsShopAvailable { get; private set; }
 
-    public Shop(Hand handService)
+    public Shop(Hand handService, ShopRules shopRules)
     {
         _hand = handService;
+        _shopRules = shopRules;
         Gold = GameRules.InitialGold;
         RefreshOffers();
         GoldChanged?.Invoke(Gold);
@@ -54,7 +56,7 @@ public class Shop
 
     public void RefreshOffers()
     {
-        CardData[] generated = ShopRules.GenerateOffers(_random);
+        CardData[] generated = _shopRules.GenerateOffers(_random);
         for (int i = 0; i < OfferCount; i++)
             _offers[i] = generated[i];
         ShopOffersChanged?.Invoke();
@@ -116,7 +118,7 @@ public class Shop
 
     private void RefreshOfferSlot(int slotIndex)
     {
-        _offers[slotIndex] = ShopRules.RefreshOfferSlot(_random);
+        _offers[slotIndex] = _shopRules.RefreshOfferSlot(_random);
         ShopOffersChanged?.Invoke();
     }
 }

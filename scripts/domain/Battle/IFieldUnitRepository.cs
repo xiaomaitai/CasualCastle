@@ -12,6 +12,6 @@ public interface IFieldUnitRepository
 
     void RegisterBuilding(IBuildingRef building);
     void UnregisterBuilding(IBuildingRef building);
-    (IBuildingTarget building, object castle) FindOverlappingBuilding(ISoldierService soldier);
+    IBuildingTarget FindOverlappingBuilding(ISoldierService soldier);
     bool HasEnemyOnBuilding(IBuildingRef building);
 }

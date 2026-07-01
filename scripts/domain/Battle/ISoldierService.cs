@@ -24,6 +24,6 @@ public interface ISoldierService
     void TakeDamage(int amount, ISoldierService attacker, float attackerGameX, float attackerGameY);
     void MoveTo(float gameX, float gameY);
     void ApplyPush(float dx, float dy);
-    void SetBuildingTarget(IBuildingTarget building, object castle);
+    void SetBuildingTarget(IBuildingTarget building);
     void ClearBuildingTarget();
 }

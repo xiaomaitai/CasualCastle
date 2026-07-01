@@ -36,7 +36,7 @@ public partial class BattleReportSystem : Node
             return;
 
         IEnumerable<BuildingSnapshot> snapshots = castle.GetBuildings()
-            .Where(b => !BuildingDefinitions.IsCoreBuilding(b.TypeId) && !b.IsDestroyed)
+            .Where(b => !GameManager.Get<IBuildingRepository>().IsCoreBuilding(b.TypeId) && !b.IsDestroyed)
             .Select(b => new BuildingSnapshot
             {
                 TypeId = b.TypeId,

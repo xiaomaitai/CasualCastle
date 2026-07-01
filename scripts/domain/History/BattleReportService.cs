@@ -8,6 +8,7 @@ namespace CasualCastle.Domain.History;
 public class BattleReportService
 {
     private readonly IBattleReportRepository _repository;
+    private readonly IBuildingRepository _buildingRepo;
     private readonly List<BattleReport> _savedReports = new();
     private BattleReport _currentReport = new();
     private string _selectedReportId = "";
@@ -16,9 +17,10 @@ public class BattleReportService
     public bool HasCurrentSnapshots => _currentReport.Nights.Count > 0;
     public string SelectedReportId => _selectedReportId;
 
-    public BattleReportService(IBattleReportRepository repository)
+    public BattleReportService(IBattleReportRepository repository, IBuildingRepository buildingRepo)
     {
         _repository = repository;
+        _buildingRepo = buildingRepo;
         ReloadSavedReports();
     }
 
@@ -34,7 +36,7 @@ public class BattleReportService
             return;
 
         CastleSnapshot snapshot = ReportBuilder.CaptureSnapshot(
-            buildingSnapshots, nightIndex, BuildingDefinitions.IsCoreBuilding);
+            buildingSnapshots, nightIndex, _buildingRepo.IsCoreBuilding);
 
         _currentReport.Nights.RemoveAll(s => s.NightIndex == nightIndex);
         _currentReport.Nights.Add(snapshot);

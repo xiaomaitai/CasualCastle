@@ -19,7 +19,7 @@ public class ReplayTarget : IReplayTarget
     {
         foreach (Building building in _castle.GetBuildings())
         {
-            if (BuildingDefinitions.IsCoreBuilding(building.TypeId))
+            if (GameManager.Get<IBuildingRepository>().IsCoreBuilding(building.TypeId))
                 continue;
 
             _castle.ReleaseBuildingFootprint(building);
@@ -30,7 +30,7 @@ public class ReplayTarget : IReplayTarget
 
     public bool TryPlaceMirrored(BuildingSnapshot snapshot)
     {
-        IReadOnlyList<GridCellOffset> domainFootprint = BuildingDefinitions.GetFootprint(snapshot.TypeId);
+        IReadOnlyList<GridCellOffset> domainFootprint = GameManager.Get<IBuildingRepository>().GetFootprint(snapshot.TypeId);
         (int mirrorX, int mirrorY) = MirrorRules.MirrorAnchor(
             snapshot.AnchorGridX, snapshot.AnchorGridY,
             domainFootprint, _castle.GridColumns);
