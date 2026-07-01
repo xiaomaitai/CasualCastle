@@ -6,7 +6,7 @@ using System;
 public partial class SoldierLogic : Node2D
 {
 	internal ISoldierService _service;
-	private UnitSpatialService _spatial;
+	private IFieldUnitRepository _fieldRepo;
 	private SoldierEventRelay _eventRelay;
 
 	public bool IsPlayerUnit { get; set; }
@@ -47,11 +47,11 @@ public partial class SoldierLogic : Node2D
 			svc.EventPort = _eventRelay;
 			svc.NavPort = new NavigationPortAdapter(_navigationAgent);
 			_service = svc;
-			_spatial = AdapterRegistry.Resolve<UnitSpatialService>();
+			_fieldRepo = AdapterRegistry.Resolve<IFieldUnitRepository>();
 		}
 		_service.Initialize(stats, IsPlayerUnit);
-		if (_spatial != null)
-			_spatial.Register(_service);
+		if (_fieldRepo != null)
+			_fieldRepo.Register(_service);
 
 		MaxHealth = stats.Health;
 		Speed = GameCoordinatesAdapter.GameUnitsToPixels(stats.Speed);
@@ -107,13 +107,11 @@ public partial class SoldierLogic : Node2D
 
 		if (_service != null)
 		{
-			_service.GameX = GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.X);
-			_service.GameY = GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.Y);
+			_service.MoveTo(
+				GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.X),
+				GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.Y));
 		}
 
-		BattleManager battleManager = AdapterRegistry.Resolve<BattleManager>();
-		if (battleManager != null)
-			battleManager.Register(this);
 
 		if (AdapterRegistry.Resolve<GameManager>() != null)
 			AdapterRegistry.Resolve<GameManager>().PhaseChanged += OnPhaseChanged;
@@ -129,10 +127,7 @@ public partial class SoldierLogic : Node2D
 
 	public override void _ExitTree()
 	{
-		BattleManager battleManager = AdapterRegistry.Resolve<BattleManager>();
-		if (battleManager != null)
-			battleManager.Unregister(this);
-		_spatial?.Unregister(_service);
+		_fieldRepo?.Unregister(_service);
 
 		if (AdapterRegistry.Resolve<GameManager>() != null)
 			AdapterRegistry.Resolve<GameManager>().PhaseChanged -= OnPhaseChanged;
@@ -203,22 +198,15 @@ public partial class SoldierLogic : Node2D
 
 		UpdateSleepVisual();
 		if (!IsActive) return;
-		if (_spatial == null || _body == null) return;
+		if (_fieldRepo == null || _body == null) return;
 
-		(ISoldierService nearest, float edgeDist) = _spatial.FindNearestEnemy(_service);
+		(ISoldierService nearest, float edgeDist) = _fieldRepo.FindNearestEnemy(_service);
 
-		BattleManager bm = AdapterRegistry.Resolve<BattleManager>();
-		Building overlappingBuilding = bm?.FindOverlappingBuilding(this);
-		if (overlappingBuilding != null)
-		{
-			_service.TargetBuilding = overlappingBuilding;
-			_service.TargetCastle = overlappingBuilding.GetCastle();
-		}
+		(IBuildingTarget buildingTarget, object castleRef) = _fieldRepo.FindOverlappingBuilding(_service);
+		if (buildingTarget != null)
+			_service.SetBuildingTarget(buildingTarget, castleRef);
 		else
-		{
-			_service.TargetBuilding = null;
-			_service.TargetCastle = null;
-		}
+			_service.ClearBuildingTarget();
 
 		_service.UpdateTargeting(nearest, edgeDist);
 
@@ -278,16 +266,14 @@ public partial class SoldierLogic : Node2D
 			_sprite.Modulate = Colors.White;
 		ISoldierService attacker = _eventRelay.LastAttacker;
 		if (attacker != null && attacker.IsAlive)
-			_spatial.PropagateRetaliation(_service, attacker);
+			_fieldRepo.PropagateRetaliation(_service, attacker);
 	}
 
 	private void OnDied()
 	{
 		_sleepZEffect?.SetSleeping(false);
 
-		BattleManager battleManager = AdapterRegistry.Resolve<BattleManager>();
-		battleManager?.Unregister(this);
-		_spatial?.Unregister(_service);
+		_fieldRepo?.Unregister(_service);
 
 		Tween tween = CreateTween();
 		tween.TweenProperty(this, "scale", Vector2.Zero, 0.25f);

@@ -159,9 +159,9 @@ public partial class UIManager : Node2D
         if (uiRoot == null) return;
 
         _hudUi = new HudUiController(uiRoot);
-        ShopService shopService = AdapterRegistry.Resolve<ShopService>();
+        Shop shopService = AdapterRegistry.Resolve<Shop>();
         _shopUi = new ShopUiController(this, uiRoot, shopService);
-        HandService handService = AdapterRegistry.Resolve<HandService>();
+        Hand handService = AdapterRegistry.Resolve<Hand>();
         _handUi = new HandUiController(this, uiRoot, handService);
         _buildingInfoUi = new BuildingInfoUiController(this, uiRoot);
         ButtonGroup toolGroup = new ButtonGroup();
@@ -245,7 +245,7 @@ public partial class UIManager : Node2D
         _isChangingScene = true;
         SetProcessInput(false);
         AdapterRegistry.Resolve<GameManager>()?.SetPaused(false);
-        AdapterRegistry.Resolve<HandService>().ResetHand();
+        AdapterRegistry.Resolve<Hand>().ResetHand();
         AdapterRegistry.Resolve<BattleReportSystem>()?.DiscardCurrentReport();
         GetTree().ChangeSceneToFile(TitleScene);
     }

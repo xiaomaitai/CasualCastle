@@ -12,14 +12,15 @@ public partial class InitManager : Node
         GameManager gm = AdapterRegistry.Resolve<GameManager>();
 
         BuildingFactory buildingFactory = new BuildingFactory();
+        AdapterRegistry.Register<IBuildingFactory>(buildingFactory);
 
-        BattleReportService reportService = new BattleReportService(GameManager.Get<IBattleReportRepository>());
+        BattleReportService reportService = GameManager.Get<BattleReportService>();
         AdapterRegistry.Register<BattleReportService>(reportService);
 
-        ReplayService replayService = new ReplayService(reportService);
+        ReplayService replayService = GameManager.Get<ReplayService>();
         AdapterRegistry.Register<ReplayService>(replayService);
 
-        AdjacencyService adjacencyService = new AdjacencyService();
+        AdjacencyService adjacencyService = GameManager.Get<AdjacencyService>();
         AdapterRegistry.Register<AdjacencyService>(adjacencyService);
 
         AddChild(new BattleManager());
@@ -29,14 +30,12 @@ public partial class InitManager : Node
 
         AddChild(new BattleReportSystem());
 
-        HandService handService = new HandService(
+        Hand hand = new Hand(
             new CastlePlacementAdapter(buildingSystem));
-        AdapterRegistry.Register<HandService>(handService);
+        AdapterRegistry.Register<Hand>(hand);
 
-        ShopService shopService = new ShopService(handService);
-        AdapterRegistry.Register<ShopService>(shopService);
-
-        AdapterRegistry.Register<IBuildingFactory>(buildingFactory);
+        Shop shopService = new Shop(hand);
+        AdapterRegistry.Register<Shop>(shopService);
 
         gm.PhaseChanged += phase =>
         {
@@ -65,7 +64,7 @@ public partial class InitManager : Node
         FusionService fusionService = new FusionService(factory);
         fusionService.FusionCompleted += result =>
         {
-            AdjacencyService adj = AdapterRegistry.Resolve<AdjacencyService>();
+            AdjacencyService adj = GameManager.Get<AdjacencyService>();
             adj.RefreshCastle(playerCastle.GetBuildingStates());
         };
 
@@ -82,11 +81,11 @@ public partial class InitManager : Node
         if (enemyCastle == null)
             return;
 
-        ReplayService replayService = AdapterRegistry.Resolve<ReplayService>();
+        ReplayService replayService = GameManager.Get<ReplayService>();
         ReplayTarget target = new ReplayTarget(enemyCastle);
         replayService.ApplyNightSnapshot(target, gm.CurrentNightIndex);
 
-        AdjacencyService adj = AdapterRegistry.Resolve<AdjacencyService>();
+        AdjacencyService adj = GameManager.Get<AdjacencyService>();
         adj.RefreshCastle(enemyCastle.GetBuildingStates());
     }
 }

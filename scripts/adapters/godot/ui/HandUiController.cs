@@ -11,8 +11,8 @@ public sealed class HandUiController
     private readonly Control.GuiInputEventHandler[] _handGuiInputHandlers = new Control.GuiInputEventHandler[MaxHandSize];
     private readonly Label _placementHintLabel;
 
-    private readonly HandService _handService;
-    private readonly ShopService _shopService;
+    private readonly Hand _hand;
+    private readonly Shop _shop;
     private readonly GameManager _gameManager;
     private readonly BuildingSystem _buildingSystem;
 
@@ -25,13 +25,13 @@ public sealed class HandUiController
     private const int MaxHandSize = 7;
 
     public bool IsDragging => _dragging;
-    public bool IsPlacementActive => _dragging || _handService.HasSelection;
+    public bool IsPlacementActive => _dragging || _hand.HasSelection;
 
-    public HandUiController(Node owner, CanvasLayer uiRoot, HandService handService)
+    public HandUiController(Node owner, CanvasLayer uiRoot, Hand handService)
     {
         _owner = owner;
-        _handService = handService;
-        _shopService = AdapterRegistry.Resolve<ShopService>();
+        _hand = handService;
+        _shop = AdapterRegistry.Resolve<Shop>();
         _gameManager = AdapterRegistry.Resolve<GameManager>();
         _buildingSystem = AdapterRegistry.Resolve<BuildingSystem>();
         _placementHintLabel = uiRoot.GetNode<Label>("PlacementHintLabel");
@@ -45,8 +45,8 @@ public sealed class HandUiController
             _handButtons[i].GuiInput += _handGuiInputHandlers[i];
         }
 
-        _handService.HandChanged += RefreshDisplay;
-        _handService.SelectionChanged += OnSelectionChanged;
+        _hand.HandChanged += RefreshDisplay;
+        _hand.SelectionChanged += OnSelectionChanged;
         RefreshDisplay();
     }
 
@@ -55,8 +55,8 @@ public sealed class HandUiController
         for (int i = 0; i < MaxHandSize; i++)
             _handButtons[i].GuiInput -= _handGuiInputHandlers[i];
 
-        _handService.HandChanged -= RefreshDisplay;
-        _handService.SelectionChanged -= OnSelectionChanged;
+        _hand.HandChanged -= RefreshDisplay;
+        _hand.SelectionChanged -= OnSelectionChanged;
     }
 
     public void SetInputBlocked(bool blocked)
@@ -67,7 +67,7 @@ public sealed class HandUiController
         if (_inputBlocked)
         {
             CancelDrag();
-            _handService.ClearSelection();
+            _hand.ClearSelection();
             _gameManager.PlayerCastle.ClearPlacementPreview();
         }
     }
@@ -144,7 +144,7 @@ public sealed class HandUiController
         if (_inputBlocked || _dragging || _gameManager.CurrentState == GameManager.GameState.GameOver)
             return false;
 
-        if (!_handService.HasSelection)
+        if (!_hand.HasSelection)
             return false;
 
         TryPlaceAtMouse(mouseButton.GlobalPosition);
@@ -153,10 +153,10 @@ public sealed class HandUiController
 
     private bool ClearSelection()
     {
-        if (!_handService.HasSelection)
+        if (!_hand.HasSelection)
             return false;
 
-        _handService.ClearSelection();
+        _hand.ClearSelection();
         return true;
     }
 
@@ -165,7 +165,7 @@ public sealed class HandUiController
         if (_inputBlocked)
             return;
 
-        _handService.SelectCard(handIndex);
+        _hand.SelectCard(handIndex);
     }
 
     private void OnHandGuiInput(int handIndex, InputEvent @event)
@@ -178,7 +178,7 @@ public sealed class HandUiController
         if (_inputBlocked || _gameManager.CurrentState == GameManager.GameState.GameOver)
             return;
 
-        if (handIndex >= _handService.Hand.Count)
+        if (handIndex >= _hand.Cards.Count)
             return;
 
         _pendingHandIndex = handIndex;
@@ -213,7 +213,7 @@ public sealed class HandUiController
         if (!playerCastle.TryGetGridFromGlobalPoint(globalPosition, out int gridX, out int gridY))
             return;
 
-        _handService.TryPlaceAtIndex(_dragHandIndex, gridX, gridY);
+        _hand.TryPlaceAtIndex(_dragHandIndex, gridX, gridY);
     }
 
     private void RefreshDisplay()
@@ -222,9 +222,9 @@ public sealed class HandUiController
         {
             Button button = _handButtons[i];
 
-            if (i < _handService.Hand.Count)
+            if (i < _hand.Cards.Count)
             {
-                CardData card = _handService.Hand[i];
+                CardData card = _hand.Cards[i];
                 button.Visible = true;
                 button.Text = card.Name;
                 button.Disabled = _inputBlocked;
@@ -270,7 +270,7 @@ public sealed class HandUiController
             return;
 
         bool showPreview = !_inputBlocked
-            && (_dragging || _handService.HasSelection);
+            && (_dragging || _hand.HasSelection);
         if (!showPreview)
         {
             playerCastle.ClearPlacementPreview();
@@ -291,11 +291,11 @@ public sealed class HandUiController
 
     private string GetPreviewBuildingType()
     {
-        if (_dragging && _dragHandIndex >= 0 && _dragHandIndex < _handService.Hand.Count)
-            return _handService.Hand[_dragHandIndex].BuildingType;
+        if (_dragging && _dragHandIndex >= 0 && _dragHandIndex < _hand.Cards.Count)
+            return _hand.Cards[_dragHandIndex].BuildingType;
 
-        if (_handService.HasSelection)
-            return _handService.SelectedCard.BuildingType;
+        if (_hand.HasSelection)
+            return _hand.SelectedCard.BuildingType;
 
         return "Barracks";
     }
@@ -309,6 +309,6 @@ public sealed class HandUiController
         if (!playerCastle.TryGetGridFromGlobalPoint(globalPosition, out int gridX, out int gridY))
             return;
 
-        _handService.TryPlaceSelected(gridX, gridY);
+        _hand.TryPlaceSelected(gridX, gridY);
     }
 }

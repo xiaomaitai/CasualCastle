@@ -3,7 +3,7 @@ using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
 using Godot;
 
-public partial class Building : Area2D, IBuildingState, IBuildingTarget
+public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildingRef
 {
 	[Export]
 	public bool HasNightCombat = false;
@@ -32,7 +32,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget
 	private bool _isPlayerBuilding;
 
 	private GameManager _gameManager;
-	private ShopService _shopService;
+	private Shop _shop;
 	private AdjacencyService _adjacencyService;
 
 	[Signal]
@@ -56,12 +56,29 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget
 	{
 		get
 		{
-			BattleManager bm = AdapterRegistry.Resolve<BattleManager>();
-			if (bm == null || CastleRef == null)
+			IFieldUnitRepository fieldRepo = AdapterRegistry.Resolve<IFieldUnitRepository>();
+			if (fieldRepo == null || CastleRef == null)
 				return false;
-			return bm.HasEnemyOnBuilding(this);
+			return fieldRepo.HasEnemyOnBuilding(this);
 		}
 	}
+
+	bool IBuildingRef.IsDestroyed => IsDestroyed;
+
+	bool IBuildingRef.IsEnemyOf(ISoldierService soldier)
+	{
+		if (CastleRef == null)
+			return false;
+		return CastleRef.IsPlayerCastle != soldier.IsPlayerUnit;
+	}
+
+	float IBuildingRef.MinX => GameCoordinatesAdapter.PixelsToGameUnits(GlobalPosition.X - GetBuildingSize().X * 0.5f);
+	float IBuildingRef.MinY => GameCoordinatesAdapter.PixelsToGameUnits(GlobalPosition.Y - GetBuildingSize().Y * 0.5f);
+	float IBuildingRef.MaxX => GameCoordinatesAdapter.PixelsToGameUnits(GlobalPosition.X + GetBuildingSize().X * 0.5f);
+	float IBuildingRef.MaxY => GameCoordinatesAdapter.PixelsToGameUnits(GlobalPosition.Y + GetBuildingSize().Y * 0.5f);
+
+	IBuildingTarget IBuildingRef.BuildingTarget => this;
+	object IBuildingRef.CastleRef => CastleRef;
 
 	public Vector2I GetMainGridPosition()
 	{
@@ -180,7 +197,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget
 			return false;
 
 		int cost = GetRepairCost();
-		if (_shopService?.TrySpendGold(cost) != true)
+		if (_shop?.TrySpendGold(cost) != true)
 			return false;
 
 		Repair();
@@ -224,12 +241,12 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget
 
 	public override void _Ready()
 	{
-		BattleManager battleManager = AdapterRegistry.Resolve<BattleManager>();
-		battleManager?.RegisterBuilding(this);
+		IFieldUnitRepository fieldRepo = AdapterRegistry.Resolve<IFieldUnitRepository>();
+		fieldRepo?.RegisterBuilding(this);
 
 		_gameManager = AdapterRegistry.Resolve<GameManager>();
-		_shopService = AdapterRegistry.Resolve<ShopService>();
-		_adjacencyService = AdapterRegistry.Resolve<AdjacencyService>();
+		_shop = AdapterRegistry.Resolve<Shop>();
+		_adjacencyService = GameManager.Get<AdjacencyService>();
 		
 
 		_sprite = GetNodeOrNull<Sprite2D>("View/Sprite");
@@ -257,8 +274,8 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget
 
 	public override void _ExitTree()
 	{
-		BattleManager bm = AdapterRegistry.Resolve<BattleManager>();
-		bm?.UnregisterBuilding(this);
+		IFieldUnitRepository fieldRepo = AdapterRegistry.Resolve<IFieldUnitRepository>();
+		fieldRepo?.UnregisterBuilding(this);
 
 		if (_gameManager != null)
 			_gameManager.PhaseChanged -= OnPhaseChanged;

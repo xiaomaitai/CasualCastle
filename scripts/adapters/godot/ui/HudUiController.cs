@@ -31,10 +31,10 @@ public sealed class HudUiController
         UpdateEnemyHealth(AdapterRegistry.Resolve<GameManager>().EnemyHealth);
         UpdatePhaseDisplay();
 
-        if (AdapterRegistry.Resolve<ShopService>() != null)
+        if (AdapterRegistry.Resolve<Shop>() != null)
         {
-            AdapterRegistry.Resolve<ShopService>().GoldChanged += UpdateGoldDisplay;
-            UpdateGoldDisplay(AdapterRegistry.Resolve<ShopService>().Gold);
+            AdapterRegistry.Resolve<Shop>().GoldChanged += UpdateGoldDisplay;
+            UpdateGoldDisplay(AdapterRegistry.Resolve<Shop>().Gold);
         }
     }
 
@@ -46,8 +46,8 @@ public sealed class HudUiController
         AdapterRegistry.Resolve<GameManager>().EnemyHealthChanged -= UpdateEnemyHealth;
         AdapterRegistry.Resolve<GameManager>().PhaseChanged -= OnPhaseChanged;
 
-        if (AdapterRegistry.Resolve<ShopService>() != null)
-            AdapterRegistry.Resolve<ShopService>().GoldChanged -= UpdateGoldDisplay;
+        if (AdapterRegistry.Resolve<Shop>() != null)
+            AdapterRegistry.Resolve<Shop>().GoldChanged -= UpdateGoldDisplay;
     }
 
     public void Process()

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace CasualCastle.Domain.Building;
 
-public class HandService
+public class Hand
 {
     public const int MaxHandSize = 7;
 
@@ -14,11 +14,11 @@ public class HandService
     private readonly IBuildingPlacement _placement;
     private int _selectedIndex = -1;
 
-    public IReadOnlyList<CardData> Hand => _hand;
+    public IReadOnlyList<CardData> Cards => _hand;
     public bool HasSelection => _selectedIndex >= 0 && _selectedIndex < _hand.Count;
     public CardData SelectedCard => HasSelection ? _hand[_selectedIndex] : null;
 
-    public HandService(IBuildingPlacement placement)
+    public Hand(IBuildingPlacement placement)
     {
         _placement = placement;
     }

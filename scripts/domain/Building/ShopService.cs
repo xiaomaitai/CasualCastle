@@ -3,7 +3,7 @@ using System;
 
 namespace CasualCastle.Domain.Building;
 
-public class ShopService
+public class Shop
 {
     public const int OfferCount = 5;
 
@@ -14,14 +14,14 @@ public class ShopService
 
     private readonly CardData[] _offers = new CardData[OfferCount];
     private readonly Random _random = new();
-    private readonly HandService _handService;
+    private readonly Hand _hand;
 
     public int Gold { get; private set; }
     public bool IsShopAvailable { get; private set; }
 
-    public ShopService(HandService handService)
+    public Shop(Hand handService)
     {
-        _handService = handService;
+        _hand = handService;
         Gold = GameRules.InitialGold;
         RefreshOffers();
         GoldChanged?.Invoke(Gold);
@@ -69,7 +69,7 @@ public class ShopService
         if (offer == null || !CanAfford(offer.Cost))
             return false;
 
-        if (!_handService.TryAddCard(offer))
+        if (!_hand.TryAddCard(offer))
             return false;
 
         TrySpendGold(offer.Cost);
@@ -86,7 +86,7 @@ public class ShopService
         if (offer == null || !CanAfford(offer.Cost))
             return false;
 
-        if (!_handService.TryPlaceCard(offer, gridX, gridY))
+        if (!_hand.TryPlaceCard(offer, gridX, gridY))
             return false;
 
         TrySpendGold(offer.Cost);

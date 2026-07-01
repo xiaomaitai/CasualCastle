@@ -75,7 +75,7 @@ public partial class GameManager : Node2D, IGameState
         Services = CasualCastle.CompositionRoot.Build();
         AdapterRegistry.Register<GameManager>(this);
         AdapterRegistry.Register<IGameState>(this);
-        AdapterRegistry.Register(Services.GetRequiredService<UnitSpatialService>());
+        AdapterRegistry.Register(Services.GetRequiredService<IFieldUnitRepository>());
         AdapterRegistry.Register(Services.GetRequiredService<IUnitRepository>());
         AdapterRegistry.Register(Services.GetRequiredService<IBuildingRepository>());
         SetProcess(false);
