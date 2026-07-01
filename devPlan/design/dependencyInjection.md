@@ -133,7 +133,10 @@ GameManager.Services.GetService<IBattleReportRepository>();
 
 | 服务接口 | 实现 | 生命周期 |
 |----------|------|----------|
-| `UnitSpatialService` | `UnitSpatialService` | Singleton |
+| `IFieldUnitRepository` | `FieldUnitRepository` | Singleton |
+| `AdjacencyService` | `AdjacencyService` | Singleton |
+| `BattleReportService` | `BattleReportService` | Singleton |
+| `ReplayService` | `ReplayService` | Singleton |
 | `IGameState` | `GameManager`（通过 AdapterRegistry 桥接） | Singleton（工厂委托） |
 | `IBattleReportRepository` | `BattleReportStorage` | Singleton |
 | `IUnitRepository` | `SqliteUnitRepository` | Singleton |
@@ -181,19 +184,19 @@ public static class AdapterRegistry
 
 | 系统 | 注册类型 | 注册时机 | 解析的依赖 |
 |------|---------|---------|-----------|
-| `GameManager` | `GameManager`, `IGameState`, `UnitSpatialService`, `IUnitRepository`, `IBuildingRepository` | `_Ready()` | MS DI |
-| `BattleManager` | `BattleManager` | `_Ready()` | `UnitSpatialService` |
+| `GameManager` | `GameManager`, `IGameState`, `IFieldUnitRepository`, `IUnitRepository`, `IBuildingRepository` | `_Ready()` | MS DI |
+| `BattleManager` | `BattleManager` | `_Ready()` | `IFieldUnitRepository` (MS DI) |
 | `DisplaySettingsManager` | `DisplaySettingsManager` | `_Ready()` | — |
-| `NightSystem` | `NightSystem` | `_Ready()` | `IGameState` (MS DI) |
-| `BuildingSystem` | `BuildingSystem` | `_Ready()` | `AdjacentSystem` |
-| `AdjacentSystem` | `AdjacentSystem` | `_Ready()` | — |
-| `CardSystem` | `CardSystem` | `_Ready()` | `BuildingSystem` |
-| `ShopSystem` | `ShopSystem` | `_Ready()` | `CardSystem`, `GameManager` |
-| `FusionSystem` | `FusionSystem` | `_Ready()` | `IGameState`, `AdjacentSystem` |
+| `BuildingSystem` | `BuildingSystem` | `_Ready()` | — |
 | `BattleReportSystem` | `BattleReportSystem` | `_Ready()` | `IBattleReportRepository` (MS DI) |
-| `ReplayAiSystem` | `ReplayAiSystem` | `_Ready()` | `BattleReportSystem`, `AdjacentSystem` |
-| `Building`（动态） | 不注册 | 实例化时 | `GameManager`, `ShopSystem`, `AdjacentSystem`, `NightSystem` |
-| `SoldierLogic`（动态） | 不注册 | 实例化时 | `UnitSpatialService` (MS DI), `BattleManager` |
+| `Hand` | `Hand` | InitManager | `IBuildingPlacement` |
+| `Shop` | `Shop` | InitManager | `Hand` |
+| `IBuildingFactory` | `BuildingFactory` | InitManager | — |
+| `BattleReportService` | `BattleReportService` | InitManager（从 MS DI 获取后注册） | — |
+| `ReplayService` | `ReplayService` | InitManager（从 MS DI 获取后注册） | — |
+| `AdjacencyService` | `AdjacencyService` | InitManager（从 MS DI 获取后注册） | — |
+| `Building`（动态） | 不注册 | 实例化时 | `GameManager`, `Shop`, `AdjacencyService` |
+| `SoldierLogic`（动态） | 不注册 | 实例化时 | `IFieldUnitRepository` (MS DI), `GameManager` |
 
 ---
 
@@ -211,14 +214,12 @@ public static class BattleModule
 }
 ```
 
-| 模块 | 扩展方法 | 文件 |
-|------|---------|------|
-| Shared | `AddDomainShared()` | `scripts/domain/Shared/SharedModule.cs` |
-| Building | `AddDomainBuilding()` | `scripts/domain/Building/BuildingModule.cs` |
-| Battle | `AddDomainBattle()` | `scripts/domain/Battle/BattleModule.cs` |
-| History | `AddDomainHistory()` | `scripts/domain/History/HistoryModule.cs` |
-
-当前四个模块均为空壳，随着领域逻辑从 Adapter 中持续提取，领域服务将迁入对应模块。
+| 模块 | 扩展方法 | 注册内容 |
+|------|---------|---------|
+| Shared | `AddDomainShared()` | 暂无 |
+| Building | `AddDomainBuilding()` | `AdjacencyService` |
+| Battle | `AddDomainBattle()` | 暂无（UnitSpatialService 为静态类） |
+| History | `AddDomainHistory()` | `BattleReportService`, `ReplayService` |
 
 ---
 
