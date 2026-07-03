@@ -4,14 +4,14 @@ namespace CasualCastle.Domain.Battle;
 
 public interface IFieldUnitRepository
 {
-    void Register(ISoldierService soldier);
-    void Unregister(ISoldierService soldier);
-    IReadOnlyList<ISoldierService> AllUnits { get; }
-    (ISoldierService nearest, float edgeDist) FindNearestEnemy(ISoldierService soldier);
-    void PropagateRetaliation(ISoldierService center, ISoldierService attacker);
+	void Register(ISoldierHandle soldier);
+	void Unregister(ISoldierHandle soldier);
+	IReadOnlyList<ISoldierHandle> AllUnits { get; }
+	(ISoldierHandle nearest, float edgeDist) FindNearestEnemy(ISoldierHandle soldier);
+	void PropagateRetaliation(ISoldierHandle center, ISoldierHandle attacker);
 
-    void RegisterBuilding(IBuildingRef building);
-    void UnregisterBuilding(IBuildingRef building);
-    IBuildingTarget FindOverlappingBuilding(ISoldierService soldier);
-    bool HasEnemyOnBuilding(IBuildingRef building);
+	void RegisterBuilding(IBuildingRef building);
+	void UnregisterBuilding(IBuildingRef building);
+	IBuildingTarget FindOverlappingBuilding(ISoldierHandle soldier);
+	bool HasEnemyOnBuilding(IBuildingRef building);
 }

@@ -65,7 +65,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	bool IBuildingRef.IsDestroyed => IsDestroyed;
 
-	bool IBuildingRef.IsEnemyOf(ISoldierService soldier)
+	bool IBuildingRef.IsEnemyOf(ISoldierState soldier)
 	{
 		if (CastleRef == null)
 			return false;

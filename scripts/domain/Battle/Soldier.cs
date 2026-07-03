@@ -2,13 +2,16 @@ using System;
 
 namespace CasualCastle.Domain.Battle;
 
-public class Soldier
+public class Soldier : ISoldierHandle
 {
+	internal INavigationPort NavPort { get; }
+	public ISoldierEventPort EventPort { get; set; }
+
 	public string TypeId { get; set; }
 	public bool IsPlayerUnit { get; set; }
 	public bool IsAlive { get; set; } = true;
-	public float GameX { get; set; }
-	public float GameY { get; set; }
+	public float GameX { get; internal set; }
+	public float GameY { get; internal set; }
 
 	public int Health { get; set; }
 	public int MaxHealth { get; set; }
@@ -22,13 +25,28 @@ public class Soldier
 	public DamageType DamageType { get; set; }
 	public ArmorType ArmorType { get; set; }
 
-	internal INavigationPort NavPort { get; set; }
-
-	public ISoldierService TargetEnemy { get; set; }
+	public ISoldierHandle TargetEnemy { get; set; }
 	public IBuildingTarget TargetBuilding { get; set; }
 	public SoldierState State { get; set; }
 
 	private float _attackTimer;
+
+	public string TargetDescription
+	{
+		get
+		{
+			if (TargetEnemy != null && TargetEnemy.IsAlive)
+				return $"敌方士兵 ({TargetEnemy.GameX:F0}, {TargetEnemy.GameY:F0})";
+			if (TargetBuilding != null)
+				return "建筑";
+			return "行军目标";
+		}
+	}
+
+	public Soldier(INavigationPort navPort)
+	{
+		NavPort = navPort;
+	}
 
 	public void Initialize(UnitStats stats, bool isPlayerUnit)
 	{
@@ -47,16 +65,40 @@ public class Soldier
 		ArmorType = stats.ArmorType;
 	}
 
-	public void TakeDamage(int amount, ISoldierService attacker, float attackerGameX, float attackerGameY)
+	public void SetPosition(float gameX, float gameY)
+	{
+		GameX = gameX;
+		GameY = gameY;
+	}
+
+	public void SetEnemyTarget(ISoldierHandle target)
+	{
+		TargetEnemy = target;
+	}
+
+	public void SetBuildingTarget(IBuildingTarget building)
+	{
+		TargetBuilding = building;
+	}
+
+	public void ClearBuildingTarget()
+	{
+		TargetBuilding = null;
+	}
+
+	public void TakeDamage(int amount, ISoldierHandle attacker, float attackerGameX, float attackerGameY)
 	{
 		if (!IsAlive)
 			return;
 
 		Health = CombatRules.ApplyDamage(Health, amount);
 
+		EventPort?.OnDamaged(amount, attacker);
+
 		if (Health <= 0)
 		{
 			IsAlive = false;
+			EventPort?.OnDied();
 			return;
 		}
 
@@ -69,7 +111,7 @@ public class Soldier
 		}
 	}
 
-	public void UpdateTargeting(ISoldierService nearestEnemy, float enemyEdgeDist)
+	public void UpdateTargeting(ISoldierHandle nearestEnemy, float enemyEdgeDist)
 	{
 		if (!IsAlive)
 			return;
@@ -95,7 +137,7 @@ public class Soldier
 		}
 	}
 
-	public void UpdateBehavior(float dt, float enemyEdgeDist, float marchTargetGameX, float marchTargetGameY, ISoldierService self)
+	public void UpdateBehavior(float dt, float enemyEdgeDist, float marchTargetGameX, float marchTargetGameY)
 	{
 		if (!IsAlive)
 			return;
@@ -114,7 +156,7 @@ public class Soldier
 					if (_attackTimer <= 0)
 					{
 						int finalDamage = CombatRules.CalculateDamage(Damage, DamageType, TargetEnemy.ArmorType);
-						TargetEnemy.TakeDamage(finalDamage, self, GameX, GameY);
+						TargetEnemy.TakeDamage(finalDamage, this, GameX, GameY);
 						_attackTimer = AttackCooldown;
 					}
 				}
@@ -139,9 +181,9 @@ public class Soldier
 		}
 	}
 
-	public void ApplyRvoPosition(float gameX, float gameY)
+	public void ApplyPush(float dx, float dy)
 	{
-		GameX = gameX;
-		GameY = gameY;
+		GameX += dx;
+		GameY += dy;
 	}
 }

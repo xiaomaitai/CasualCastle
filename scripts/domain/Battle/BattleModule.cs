@@ -7,6 +7,7 @@ public static class BattleModule
 	public static IServiceCollection AddDomainBattle(this IServiceCollection services)
 	{
 		services.AddSingleton<ICombatUseCase, UnitSpatialService>();
+		services.AddSingleton<IRvoService, RvoService>();
 		return services;
 	}
 }

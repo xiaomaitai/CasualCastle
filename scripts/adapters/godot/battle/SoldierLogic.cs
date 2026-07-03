@@ -4,25 +4,27 @@ using Godot;
 
 public partial class SoldierLogic : Node2D
 {
-	internal ISoldierService _service;
-	public ISoldierService SoldierService => _service;
+	internal CasualCastle.Domain.Battle.Soldier _soldier;
+	private NavigationPortAdapter _navPort;
+	public ISoldierHandle Handle => _soldier;
 	private IFieldUnitRepository _fieldRepo;
+	private IRvoService _rvoService;
 	private SoldierEventRelay _eventRelay;
 	private SoldierVisual _visual;
 	private SoldierLifecycle _lifecycle;
 
 	public bool IsPlayerUnit { get; set; }
-	public bool IsAlive => _service?.IsAlive ?? false;
-	public int Health => _service?.Health ?? 0;
+	public bool IsAlive => _soldier?.IsAlive ?? false;
+	public int Health => _soldier?.Health ?? 0;
 	public int MaxHealth { get; private set; } = 30;
-	public int Damage => _service?.Damage ?? 0;
+	public int Damage => _soldier?.Damage ?? 0;
 	public float Speed { get; private set; } = 252f;
 	public float AttackRange { get; private set; } = 90f;
 	public float AttackCooldown { get; private set; } = 1f;
 	public float VisionRange { get; private set; } = 250f;
 	public bool HasNightCombat { get; set; }
 	public float DisplaySize { get; private set; } = 125f;
-	public float CollisionRadius => _service?.CollisionRadius ?? 50f;
+	public float CollisionRadius => _soldier?.CollisionRadius ?? 50f;
 	public AttackType AttackType { get; private set; }
 	public DamageType DamageType { get; private set; }
 	public ArmorType ArmorType { get; private set; } = ArmorType.Light;
@@ -35,26 +37,26 @@ public partial class SoldierLogic : Node2D
 
 	public void InitializeFromStats(UnitStats stats)
 	{
-		if (_service == null)
+		if (_soldier == null)
 		{
 			_body = GetParent<Node2D>();
 			_navigationAgent = GetNode<NavigationAgent2D>("NavigationAgent");
 			_navigationAgent.VelocityComputed += OnVelocityComputed;
-			SoldierService svc = new SoldierService();
+			_navPort = new NavigationPortAdapter(_navigationAgent);
+			_soldier = new CasualCastle.Domain.Battle.Soldier(_navPort);
 			_eventRelay = new SoldierEventRelay();
 			AddChild(_eventRelay);
-			svc.EventPort = _eventRelay;
-			svc.NavPort = new NavigationPortAdapter(_navigationAgent);
-			_service = svc;
+			_soldier.EventPort = _eventRelay;
 			_fieldRepo = GameManager.Get<IFieldUnitRepository>();
+			_rvoService = GameManager.Get<IRvoService>();
 			_visual = new SoldierVisual();
 			_lifecycle = new SoldierLifecycle();
 		}
-		_service.Initialize(stats, IsPlayerUnit);
-		_service.ConfigureRvo();
+		_soldier.Initialize(stats, IsPlayerUnit);
+		_rvoService.ConfigureRvo(_navPort, _soldier.CollisionRadius);
 
 		if (_fieldRepo != null)
-			_fieldRepo.Register(_service);
+			_fieldRepo.Register(_soldier);
 
 		MaxHealth = stats.Health;
 		Speed = GameCoordinatesAdapter.GameUnitsToPixels(stats.Speed);
@@ -82,7 +84,7 @@ public partial class SoldierLogic : Node2D
 
 	public void SetTarget(SoldierLogic target)
 	{
-		_service?.SetEnemyTarget(target?.SoldierService);
+		_soldier?.SetEnemyTarget(target?.Handle);
 	}
 
 	public override void _Ready()
@@ -92,9 +94,9 @@ public partial class SoldierLogic : Node2D
 
 		ApplyPendingStats();
 
-		if (_service != null)
+		if (_soldier != null)
 		{
-			_service.MoveTo(
+			_soldier.SetPosition(
 				GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.X),
 				GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.Y));
 		}
@@ -114,7 +116,7 @@ public partial class SoldierLogic : Node2D
 
 	public override void _ExitTree()
 	{
-		_fieldRepo?.Unregister(_service);
+		_fieldRepo?.Unregister(_soldier);
 
 		if (AdapterRegistry.Resolve<GameManager>() != null)
 			AdapterRegistry.Resolve<GameManager>().PhaseChanged -= OnPhaseChanged;
@@ -175,27 +177,27 @@ public partial class SoldierLogic : Node2D
 		if (!IsActive) return;
 		if (_fieldRepo == null || _body == null) return;
 
-		(ISoldierService nearest, float edgeDist) = _fieldRepo.FindNearestEnemy(_service);
+		(ISoldierHandle nearest, float edgeDist) = _fieldRepo.FindNearestEnemy(_soldier);
 
-		IBuildingTarget buildingTarget = _fieldRepo.FindOverlappingBuilding(_service);
+		IBuildingTarget buildingTarget = _fieldRepo.FindOverlappingBuilding(_soldier);
 		if (buildingTarget != null)
-			_service.SetBuildingTarget(buildingTarget);
+			_soldier.SetBuildingTarget(buildingTarget);
 		else
-			_service.ClearBuildingTarget();
+			_soldier.ClearBuildingTarget();
 
-		_service.UpdateTargeting(nearest, edgeDist);
+		_soldier.UpdateTargeting(nearest, edgeDist);
 
 		float marchX, marchY;
 		Vector2 marchDest = SelectTarget();
 		marchX = GameCoordinatesAdapter.PixelsToGameUnits(marchDest.X);
 		marchY = GameCoordinatesAdapter.PixelsToGameUnits(marchDest.Y);
 
-		_service.UpdateBehavior(dt, edgeDist, marchX, marchY);
+		_soldier.UpdateBehavior(dt, edgeDist, marchX, marchY);
 
 		Vector2 currentPixelPos = _body.GlobalPosition;
 		Vector2 nextPathPos = _navigationAgent.GetNextPathPosition();
 		Vector2 direction = nextPathPos - currentPixelPos;
-		float pixelSpeed = GameCoordinatesAdapter.GameUnitsToPixels(_service.Speed);
+		float pixelSpeed = GameCoordinatesAdapter.GameUnitsToPixels(_soldier.Speed);
 		Vector2 desiredVelocity = direction.Length() > 0.001f
 			? direction.Normalized() * pixelSpeed
 			: Vector2.Zero;
@@ -204,7 +206,7 @@ public partial class SoldierLogic : Node2D
 		Vector2 moveVelocity = _safeVelocity != Vector2.Zero ? _safeVelocity : desiredVelocity;
 		_body.GlobalPosition += moveVelocity * dt;
 
-		_service.ApplyRvoPosition(
+		_soldier.SetPosition(
 			GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.X),
 			GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.Y));
 
@@ -226,7 +228,7 @@ public partial class SoldierLogic : Node2D
 			atkX = GameCoordinatesAdapter.PixelsToGameUnits(attacker._body.GlobalPosition.X);
 			atkY = GameCoordinatesAdapter.PixelsToGameUnits(attacker._body.GlobalPosition.Y);
 		}
-		_service.TakeDamage(amount, attacker?.SoldierService, atkX, atkY);
+		_soldier.TakeDamage(amount, attacker?.Handle, atkX, atkY);
 	}
 
 	private Vector2 SelectTarget()
@@ -249,9 +251,9 @@ public partial class SoldierLogic : Node2D
 	private void OnDamaged()
 	{
 		_visual?.StartHitFlash();
-		ISoldierService attacker = _eventRelay.LastAttacker;
+		ISoldierHandle attacker = _eventRelay.LastAttacker;
 		if (attacker != null && attacker.IsAlive)
-			_fieldRepo.PropagateRetaliation(_service, attacker);
+			_fieldRepo.PropagateRetaliation(_soldier, attacker);
 	}
 
 	private void OnDied()
@@ -260,7 +262,7 @@ public partial class SoldierLogic : Node2D
 
 		_lifecycle?.PlayDeathAnimation(this, () =>
 		{
-			_fieldRepo?.Unregister(_service);
+			_fieldRepo?.Unregister(_soldier);
 		});
 	}
 }
