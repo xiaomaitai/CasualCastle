@@ -56,7 +56,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 	{
 		get
 		{
-			IFieldUnitRepository fieldRepo = AdapterRegistry.Resolve<IFieldUnitRepository>();
+			IFieldUnitRepository fieldRepo = GameManager.Get<IFieldUnitRepository>();
 			if (fieldRepo == null || CastleRef == null)
 				return false;
 			return fieldRepo.HasEnemyOnBuilding(this);
@@ -241,7 +241,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	public override void _Ready()
 	{
-		IFieldUnitRepository fieldRepo = AdapterRegistry.Resolve<IFieldUnitRepository>();
+		IFieldUnitRepository fieldRepo = GameManager.Get<IFieldUnitRepository>();
 		fieldRepo?.RegisterBuilding(this);
 
 		_gameManager = AdapterRegistry.Resolve<GameManager>();
@@ -274,7 +274,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	public override void _ExitTree()
 	{
-		IFieldUnitRepository fieldRepo = AdapterRegistry.Resolve<IFieldUnitRepository>();
+		IFieldUnitRepository fieldRepo = GameManager.Get<IFieldUnitRepository>();
 		fieldRepo?.UnregisterBuilding(this);
 
 		if (_gameManager != null)

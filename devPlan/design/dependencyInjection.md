@@ -33,9 +33,8 @@ Godot 管理节点生命周期（场景树实例化、`_Ready`/`_ExitTree`），
 │  ┌─────────────────────────────────────────────┐ │
 │  │ GameManager        (同时注册为 IGameState)    │ │
 │  │ DisplaySettingsManager                       │ │
-│  │ NightSystem, BuildingSystem, AdjacentSystem  │ │
-│  │ CardSystem, ShopSystem, FusionSystem         │ │
-│  │ BattleReportSystem, ReplayAiSystem           │ │
+│  │ BattleManager, BuildingSystem                │ │
+│  │ BattleReportSystem, Hand, Shop               │ │
 │  │ 动态节点 (Building) 按需 Register/Unregister   │ │
 │  └─────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────┘
@@ -101,7 +100,7 @@ public static ServiceProvider Build()
 
     ServiceCollection services = new ServiceCollection();
 
-    // Domain 模块注册
+    services.AddSingleton<IReadOnlyList<CardData>>(_ => GameDataLoader.ShopCatalog);
     services.AddDomainShared();
     services.AddDomainBuilding();
     services.AddDomainBattle();
@@ -112,8 +111,10 @@ public static ServiceProvider Build()
         AdapterRegistry.Resolve<IGameState>()
         ?? throw new InvalidOperationException("IGameState not registered"));
 
-    // 持久化服务
+    services.AddSingleton<IFieldUnitRepository, FieldUnitRepository>();
     services.AddSingleton<IBattleReportRepository, BattleReportStorage>();
+    services.AddSingleton<IUnitRepository, SqliteUnitRepository>();
+    services.AddSingleton<IBuildingRepository, SqliteBuildingRepository>();
 
     return services.BuildServiceProvider();
 }
@@ -133,10 +134,12 @@ GameManager.Services.GetService<IBattleReportRepository>();
 
 | 服务接口 | 实现 | 生命周期 |
 |----------|------|----------|
-| `IFieldUnitRepository` | `FieldUnitRepository` | Singleton |
+| `IReadOnlyList<CardData>` | `GameDataLoader.ShopCatalog`（工厂委托） | Singleton |
+| `ShopRules` | `ShopRules` | Singleton |
 | `AdjacencyService` | `AdjacencyService` | Singleton |
-| `BattleReportService` | `BattleReportService` | Singleton |
-| `ReplayService` | `ReplayService` | Singleton |
+| `ICombatUseCase` | `UnitSpatialService` | Singleton |
+| `IReplayUseCase` | `ReplayService` | Singleton |
+| `IFieldUnitRepository` | `FieldUnitRepository` | Singleton |
 | `IGameState` | `GameManager`（通过 AdapterRegistry 桥接） | Singleton（工厂委托） |
 | `IBattleReportRepository` | `BattleReportStorage` | Singleton |
 | `IUnitRepository` | `SqliteUnitRepository` | Singleton |
@@ -184,19 +187,15 @@ public static class AdapterRegistry
 
 | 系统 | 注册类型 | 注册时机 | 解析的依赖 |
 |------|---------|---------|-----------|
-| `GameManager` | `GameManager`, `IGameState`, `IFieldUnitRepository`, `IUnitRepository`, `IBuildingRepository` | `_Ready()` | MS DI |
-| `BattleManager` | `BattleManager` | `_Ready()` | `IFieldUnitRepository` (MS DI) |
+| `GameManager` | `GameManager`, `IGameState` | `_Ready()` | MS DI |
+| `BattleManager` | `BattleManager` | `_Ready()` | `IFieldUnitRepository`, `ICombatUseCase` (MS DI) |
 | `DisplaySettingsManager` | `DisplaySettingsManager` | `_Ready()` | — |
-| `BuildingSystem` | `BuildingSystem` | `_Ready()` | — |
-| `BattleReportSystem` | `BattleReportSystem` | `_Ready()` | `IBattleReportRepository` (MS DI) |
+| `BuildingSystem` | `BuildingSystem` | `_Ready()` | `IBuildingRepository` (MS DI) |
+| `BattleReportSystem` | `BattleReportSystem` | `_Ready()` | `BattleReportService` (MS DI) |
 | `Hand` | `Hand` | InitManager | `IBuildingPlacement` |
-| `Shop` | `Shop` | InitManager | `Hand` |
-| `IBuildingFactory` | `BuildingFactory` | InitManager | — |
-| `BattleReportService` | `BattleReportService` | InitManager（从 MS DI 获取后注册） | — |
-| `ReplayService` | `ReplayService` | InitManager（从 MS DI 获取后注册） | — |
-| `AdjacencyService` | `AdjacencyService` | InitManager（从 MS DI 获取后注册） | — |
-| `Building`（动态） | 不注册 | 实例化时 | `GameManager`, `Shop`, `AdjacencyService` |
-| `SoldierLogic`（动态） | 不注册 | 实例化时 | `IFieldUnitRepository` (MS DI), `GameManager` |
+| `Shop` | `Shop` | InitManager | `ShopRules` (MS DI), `Hand` |
+| `Building`（动态） | 不注册 | 实例化时 | `IFieldUnitRepository`, `GameManager`, `Shop`, `AdjacencyService` |
+| `SoldierLogic`（动态） | 不注册 | 实例化时 | `IFieldUnitRepository` (MS DI), `GameManager`, `IGameState` |
 
 ---
 
@@ -209,7 +208,8 @@ public static class BattleModule
 {
     public static IServiceCollection AddDomainBattle(this IServiceCollection services)
     {
-        return services;  // 暂无注册，预留扩展点
+        services.AddSingleton<ICombatUseCase, UnitSpatialService>();
+        return services;
     }
 }
 ```
@@ -217,9 +217,9 @@ public static class BattleModule
 | 模块 | 扩展方法 | 注册内容 |
 |------|---------|---------|
 | Shared | `AddDomainShared()` | 暂无 |
-| Building | `AddDomainBuilding()` | `AdjacencyService` |
-| Battle | `AddDomainBattle()` | 暂无（UnitSpatialService 为静态类） |
-| History | `AddDomainHistory()` | `BattleReportService`, `ReplayService` |
+| Building | `AddDomainBuilding()` | `ShopRules`, `AdjacencyService` |
+| Battle | `AddDomainBattle()` | `ICombatUseCase → UnitSpatialService` |
+| History | `AddDomainHistory()` | `BattleReportService`, `IReplayUseCase → ReplayService` |
 
 ---
 

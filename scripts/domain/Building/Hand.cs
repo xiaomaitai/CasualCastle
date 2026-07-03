@@ -10,54 +10,54 @@ public class Hand
     public event Action HandChanged;
     public event Action<int> SelectionChanged;
 
-    private readonly List<CardData> _hand = new();
+    private readonly Player _player;
     private readonly IBuildingPlacement _placement;
-    private int _selectedIndex = -1;
 
-    public IReadOnlyList<CardData> Cards => _hand;
-    public bool HasSelection => _selectedIndex >= 0 && _selectedIndex < _hand.Count;
-    public CardData SelectedCard => HasSelection ? _hand[_selectedIndex] : null;
+    public IReadOnlyList<CardData> Cards => _player.HandCards;
+    public bool HasSelection => _player.SelectedHandIndex >= 0 && _player.SelectedHandIndex < _player.HandCards.Count;
+    public CardData SelectedCard => HasSelection ? _player.HandCards[_player.SelectedHandIndex] : null;
 
-    public Hand(IBuildingPlacement placement)
+    public Hand(IBuildingPlacement placement, Player player)
     {
         _placement = placement;
+        _player = player;
     }
 
     public bool TryAddCard(CardData card)
     {
-        if (card == null || _hand.Count >= MaxHandSize)
+        if (card == null || _player.HandCards.Count >= MaxHandSize)
             return false;
 
-        _hand.Add(CloneCard(card));
+        _player.AddHandCard(card.Clone());
         HandChanged?.Invoke();
         return true;
     }
 
     public void SelectCard(int index)
     {
-        if (index < 0 || index >= _hand.Count)
+        if (index < 0 || index >= _player.HandCards.Count)
         {
             ClearSelection();
             return;
         }
 
-        if (_selectedIndex == index)
+        if (_player.SelectedHandIndex == index)
         {
             ClearSelection();
             return;
         }
 
-        _selectedIndex = index;
-        SelectionChanged?.Invoke(_selectedIndex);
+        _player.SelectedHandIndex = index;
+        SelectionChanged?.Invoke(_player.SelectedHandIndex);
     }
 
     public void ClearSelection()
     {
-        if (_selectedIndex < 0)
+        if (_player.SelectedHandIndex < 0)
             return;
 
-        _selectedIndex = -1;
-        SelectionChanged?.Invoke(_selectedIndex);
+        _player.SelectedHandIndex = -1;
+        SelectionChanged?.Invoke(_player.SelectedHandIndex);
     }
 
     public bool TryPlaceSelected(int gridX, int gridY)
@@ -65,26 +65,26 @@ public class Hand
         if (!HasSelection)
             return false;
 
-        return TryPlaceAtIndex(_selectedIndex, gridX, gridY);
+        return TryPlaceAtIndex(_player.SelectedHandIndex, gridX, gridY);
     }
 
     public bool TryPlaceAtIndex(int index, int gridX, int gridY)
     {
-        if (index < 0 || index >= _hand.Count)
+        if (index < 0 || index >= _player.HandCards.Count)
             return false;
 
-        CardData card = _hand[index];
+        CardData card = _player.HandCards[index];
         if (!TryPlaceCard(card, gridX, gridY))
             return false;
 
-        _hand.RemoveAt(index);
-        if (_selectedIndex == index)
-            _selectedIndex = -1;
-        else if (_selectedIndex > index)
-            _selectedIndex--;
+        _player.RemoveHandCard(index);
+        if (_player.SelectedHandIndex == index)
+            _player.SelectedHandIndex = -1;
+        else if (_player.SelectedHandIndex > index)
+            _player.SelectedHandIndex--;
 
         HandChanged?.Invoke();
-        SelectionChanged?.Invoke(_selectedIndex);
+        SelectionChanged?.Invoke(_player.SelectedHandIndex);
         return true;
     }
 
@@ -98,20 +98,8 @@ public class Hand
 
     public void ResetHand()
     {
-        _hand.Clear();
-        _selectedIndex = -1;
+        _player.ClearHand();
         HandChanged?.Invoke();
-        SelectionChanged?.Invoke(_selectedIndex);
-    }
-
-    private static CardData CloneCard(CardData source)
-    {
-        return new CardData
-        {
-            Id = source.Id,
-            Name = source.Name,
-            Cost = source.Cost,
-            BuildingType = source.BuildingType,
-        };
+        SelectionChanged?.Invoke(_player.SelectedHandIndex);
     }
 }

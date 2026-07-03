@@ -22,8 +22,8 @@ public partial class MainGameController : Node2D
         navRegion.BakeNavigationPolygon();
 
         AdapterRegistry.Resolve<GameManager>().StartGameSession(battlefield, playerCastle, enemyCastle);
-        AdapterRegistry.Resolve<AdjacencyService>().RefreshCastle(playerCastle.GetBuildingStates());
-        AdapterRegistry.Resolve<AdjacencyService>().RefreshCastle(enemyCastle.GetBuildingStates());
+        GameManager.Get<AdjacencyService>().RefreshCastle(playerCastle.GetBuildingStates());
+        GameManager.Get<AdjacencyService>().RefreshCastle(enemyCastle.GetBuildingStates());
     }
 
     public override void _ExitTree()

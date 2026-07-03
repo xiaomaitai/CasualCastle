@@ -95,7 +95,7 @@ public partial class BuildingSystem : Node
     {
         Instance = this;
         AdapterRegistry.Register<BuildingSystem>(this);
-        _adjacencyService = AdapterRegistry.Resolve<AdjacencyService>();
+        _adjacencyService = GameManager.Get<AdjacencyService>();
     }
 
     public override void _ExitTree()
@@ -116,7 +116,7 @@ public partial class BuildingSystem : Node
 
     private static void PlayAdjacencyPulses(Castle castle, Building placedBuilding, List<IBuildingState> allBuildings)
     {
-        AdjacencyService adjacencyService = AdapterRegistry.Resolve<AdjacencyService>();
+        AdjacencyService adjacencyService = GameManager.Get<AdjacencyService>();
         if (!(placedBuilding is IAdjacencyBuilding adjBuilding))
             return;
 

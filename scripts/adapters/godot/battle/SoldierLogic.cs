@@ -1,13 +1,15 @@
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
 using Godot;
-using System;
 
 public partial class SoldierLogic : Node2D
 {
 	internal ISoldierService _service;
+	public ISoldierService SoldierService => _service;
 	private IFieldUnitRepository _fieldRepo;
 	private SoldierEventRelay _eventRelay;
+	private SoldierVisual _visual;
+	private SoldierLifecycle _lifecycle;
 
 	public bool IsPlayerUnit { get; set; }
 	public bool IsAlive => _service?.IsAlive ?? false;
@@ -28,12 +30,7 @@ public partial class SoldierLogic : Node2D
 	private uint _unitColor;
 	private bool _statsPending;
 	private NavigationAgent2D _navigationAgent;
-	private float _hitFlashTimer;
-	internal SoldierLogic _targetEnemy;
-	private Sprite2D _sprite;
-	private SoldierSleepZEffect _sleepZEffect;
 	private Node2D _body;
-	private Color _baseSpriteModulate = Colors.White;
 
 	public void InitializeFromStats(UnitStats stats)
 	{
@@ -47,7 +44,9 @@ public partial class SoldierLogic : Node2D
 			svc.EventPort = _eventRelay;
 			svc.NavPort = new NavigationPortAdapter(_navigationAgent);
 			_service = svc;
-			_fieldRepo = AdapterRegistry.Resolve<IFieldUnitRepository>();
+			_fieldRepo = GameManager.Get<IFieldUnitRepository>();
+			_visual = new SoldierVisual();
+			_lifecycle = new SoldierLifecycle();
 		}
 		_service.Initialize(stats, IsPlayerUnit);
 		if (_fieldRepo != null)
@@ -74,34 +73,18 @@ public partial class SoldierLogic : Node2D
 			return;
 		_statsPending = false;
 
-		float displaySize = GameCoordinatesAdapter.GameUnitsToPixels(DisplaySize);
-		_baseSpriteModulate = new Color(
-			((_unitColor >> 16) & 0xFF) / 255f,
-			((_unitColor >> 8) & 0xFF) / 255f,
-			(_unitColor & 0xFF) / 255f);
-
-		if (_sprite != null)
-		{
-			Texture2D texture = _sprite.Texture;
-			if (texture != null)
-			{
-				float scale = displaySize / System.Math.Max(texture.GetWidth(), texture.GetHeight());
-				_sprite.Scale = new Vector2(scale, scale);
-			}
-			_sprite.Position = new Vector2(0, -displaySize * 0.5f);
-		}
+		_visual.ApplyStats(_unitColor, GameCoordinatesAdapter.GameUnitsToPixels(DisplaySize));
 	}
 
 	public void SetTarget(SoldierLogic target)
 	{
-		_service?.SetEnemyTarget(target?._service);
+		_service?.SetEnemyTarget(target?.SoldierService);
 	}
 
 	public override void _Ready()
 	{
 		_body = GetParent<Node2D>();
-		_sprite = _body?.GetNodeOrNull<Sprite2D>("View/Sprite");
-		_sleepZEffect = _body?.GetNodeOrNull<SoldierSleepZEffect>("Effects/SleepZEffect");
+		_visual?.Initialize(_body);
 
 		ApplyPendingStats();
 
@@ -166,19 +149,12 @@ public partial class SoldierLogic : Node2D
 
 	private void UpdateSleepVisual()
 	{
-		if (_sprite != null && _hitFlashTimer <= 0f)
-		{
-			_sprite.Modulate = IsActive
-				? _baseSpriteModulate
-				: new Color(_baseSpriteModulate.R * 0.75f, _baseSpriteModulate.G * 0.8f, _baseSpriteModulate.B, 0.85f);
-		}
-
-		_sleepZEffect?.SetSleeping(IsSleeping);
+		_visual?.UpdateSleepVisual(IsActive, IsSleeping);
 	}
 
 	public void SetBaseSpriteModulate(Color color)
 	{
-		_baseSpriteModulate = color;
+		_visual?.SetBaseModulate(color);
 		UpdateSleepVisual();
 	}
 
@@ -189,12 +165,7 @@ public partial class SoldierLogic : Node2D
 
 		float dt = (float)delta;
 
-		if (_hitFlashTimer > 0f)
-		{
-			_hitFlashTimer -= dt;
-			if (_hitFlashTimer <= 0f && _sprite != null)
-				_sprite.Modulate = _baseSpriteModulate;
-		}
+		_visual?.UpdateHitFlash(dt);
 
 		UpdateSleepVisual();
 		if (!IsActive) return;
@@ -222,9 +193,7 @@ public partial class SoldierLogic : Node2D
 			GameCoordinatesAdapter.GameUnitsToPixels(_service.GameY));
 
 		if (_navigationAgent != null)
-			_navigationAgent.AvoidanceEnabled = _service.State != SoldierState.Sieging
-				&& !(_service.State == SoldierState.Fighting && edgeDist <= _service.AttackRange)
-				&& !(_service.State == SoldierState.Retaliating && edgeDist <= _service.AttackRange);
+			_navigationAgent.AvoidanceEnabled = _service.State == SoldierState.Marching;
 
 		_body.QueueRedraw();
 	}
@@ -239,7 +208,7 @@ public partial class SoldierLogic : Node2D
 			atkX = GameCoordinatesAdapter.PixelsToGameUnits(attacker._body.GlobalPosition.X);
 			atkY = GameCoordinatesAdapter.PixelsToGameUnits(attacker._body.GlobalPosition.Y);
 		}
-		_service.TakeDamage(amount, attacker?._service, atkX, atkY);
+		_service.TakeDamage(amount, attacker?.SoldierService, atkX, atkY);
 	}
 
 	private Vector2 SelectTarget()
@@ -261,9 +230,7 @@ public partial class SoldierLogic : Node2D
 
 	private void OnDamaged()
 	{
-		_hitFlashTimer = 0.1f;
-		if (_sprite != null)
-			_sprite.Modulate = Colors.White;
+		_visual?.StartHitFlash();
 		ISoldierService attacker = _eventRelay.LastAttacker;
 		if (attacker != null && attacker.IsAlive)
 			_fieldRepo.PropagateRetaliation(_service, attacker);
@@ -271,13 +238,11 @@ public partial class SoldierLogic : Node2D
 
 	private void OnDied()
 	{
-		_sleepZEffect?.SetSleeping(false);
+		_visual?.UpdateSleepVisual(false, false);
 
-		_fieldRepo?.Unregister(_service);
-
-		Tween tween = CreateTween();
-		tween.TweenProperty(this, "scale", Vector2.Zero, 0.25f);
-		tween.Parallel().TweenProperty(this, "modulate:a", 0f, 0.25f);
-		tween.TweenCallback(Callable.From(() => QueueFree()));
+		_lifecycle?.PlayDeathAnimation(this, () =>
+		{
+			_fieldRepo?.Unregister(_service);
+		});
 	}
 }

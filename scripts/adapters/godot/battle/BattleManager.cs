@@ -16,7 +16,7 @@ public partial class BattleManager : Node
 
     public override void _Process(double delta)
     {
-        IFieldUnitRepository fieldRepo = AdapterRegistry.Resolve<IFieldUnitRepository>();
+        IFieldUnitRepository fieldRepo = GameManager.Get<IFieldUnitRepository>();
         ICombatUseCase combatUseCase = GameManager.Get<ICombatUseCase>();
         if (fieldRepo != null && combatUseCase != null)
             combatUseCase.PushSoldiers(fieldRepo.AllUnits, (float)delta);

@@ -16,10 +16,10 @@ CasualCastle/
 │   │   │   └── SharedModule.cs
 │   │   ├── Building/                               # Building.csproj → Shared
 │   │   │   ├── CardData.cs, FusionRecipe.cs
-│   │   │   ├── BuildingDefinitions.cs, OccupancyGrid.cs
+│   │   │   ├── BuildingDefinitions.cs, OccupancyGrid.cs, Player.cs
 │   │   │   ├── AdjacentRules.cs, FusionRules.cs, ShopRules.cs, CardRules.cs
 │   │   │   ├── Hand.cs, Shop.cs, AdjacencyService.cs, FusionService.cs
-│   │   │   ├── IBuildingState.cs, IBuildingRegistry.cs, IBuildingPlacement.cs
+│   │   │   ├── IBuildingState.cs, IBuildingPlacement.cs
 │   │   │   ├── IBuildingRepository.cs, IFusionBuildingFactory.cs
 │   │   │   └── BuildingModule.cs
 │   │   ├── Battle/                                 # Battle.csproj → Shared, Building
@@ -36,7 +36,7 @@ CasualCastle/
 │   │       ├── BattleReportModels.cs, IBattleReportRepository.cs
 │   │       ├── ReportBuilder.cs, MirrorRules.cs
 │   │       ├── BattleReportService.cs, ReplayService.cs
-│   │       ├── ISnapshotQuery.cs, IReplayTarget.cs
+│   │       ├── IReplayTarget.cs
 │   │       └── HistoryModule.cs
 │   │
 │   ├── CompositionRoot.cs                          # MS DI 容器构建
@@ -50,12 +50,13 @@ CasualCastle/
 │       │   │   └── AdapterRegistry.cs              # Godot 节点服务定位器
 │       │   ├── building/                           # Castle, Building, BuildingSystem, CastlePlacementAdapter
 │       │   ├── battle/                             # Soldier, SoldierLogic, SoldierEventRelay
-│       │   │                                       # NavigationPortAdapter, BattleManager, UnitSpawn
+│   │       │                                       # SoldierLifecycle, SoldierVisual
+│   │       │                                       # NavigationPortAdapter, BattleManager, UnitSpawn
 │       │   ├── battle_report/ BattleReportSystem.cs
 │       │   ├── fusion/        FusionBuildingFactory.cs
 │       │   ├── replay/        ReplayTarget.cs
 │       │   ├── ui/            UIManager + 子控制器
-│       │   ├── flow/          TitleScreen, MainGameController
+│       │   ├── flow/          TitleScreen, MainGameController, NightOrchestrator
 │       │   ├── core/          GameConfig, GameCoordinatesAdapter
 │       │   ├── dev/           DevInputLogger
 │       │   └── audio/         BgmPlayer
@@ -96,7 +97,8 @@ domain 项目零 `using Godot`，单向无循环。
 
 ```
 第一层：MS DI (ServiceProvider)
-  ├── 纯 C# 领域服务：AdjacencyService, BattleReportService, ReplayService
+  ├── 纯 C# 领域服务：ShopRules, AdjacencyService, UnitSpatialService (ICombatUseCase)
+  ├── BattleReportService, ReplayService (IReplayUseCase)
   ├── 出站 Port 实现：IFieldUnitRepository→FieldUnitRepository
   ├── 持久化：IBattleReportRepository, IUnitRepository, IBuildingRepository
   └── IGameState（工厂委托到 AdapterRegistry）
@@ -142,18 +144,24 @@ domain 项目零 `using Godot`，单向无循环。
 | `Castle` | Node2D | 网格占用、建筑放置、血条、放置预览 |
 | `Building` | Area2D | 建筑基类，工作循环，实现 IBuildingState/IBuildingTarget/IBuildingRef |
 | `Soldier` | Area2D | 战斗单位容器（空壳），逻辑在 SoldierLogic 子节点 |
+| `SoldierLifecycle` | — | 士兵死亡动画、队列移除（纯 Godot 视觉） |
+| `SoldierVisual` | — | 士兵外观（颜色、睡眠视觉、受击闪白） |
 
 ### 领域服务
 
 | 类 | 子域 | 注册方式 |
 |----|------|---------|
-| `UnitSpatialService` | Battle | 静态方法，无 DI |
+| `UnitSpatialService` | Battle | MS DI Singleton（通过 ICombatUseCase） |
+| `SoldierService` | Battle | 手动 new（每个士兵实例，通过 SoldierLogic） |
 | `AdjacencyService` | Building | MS DI Singleton |
-| `FusionService` | Building | 手动 new（每次入夜融合） |
+| `ShopRules` | Building | MS DI Singleton |
+| `FusionService` | Building | 手动 new（每次入夜融合，通过 NightOrchestrator） |
 | `Hand` | Building | AdapterRegistry（依赖 Godot 桥接） |
 | `Shop` | Building | AdapterRegistry（依赖 Hand） |
+| `Player` | Building | 手动 new（通过 InitManager） |
 | `BattleReportService` | History | MS DI Singleton |
-| `ReplayService` | History | MS DI Singleton |
+| `ReplayService` | History | MS DI Singleton（通过 IReplayUseCase） |
+| `NightOrchestrator` | flow | 手动 new（通过 InitManager） |
 
 ### 纯 C# 控制器（无 Godot 继承）
 
@@ -189,18 +197,19 @@ domain 项目零 `using Godot`，单向无循环。
 |------|----------|--------|------|
 | `IGameState` | Domain.Battle | GameManager | 入站 |
 | `ISoldierService` | Domain.Battle | SoldierService | 入站 |
+| `ICombatUseCase` | Domain.Battle | UnitSpatialService | 入站 |
 | `IFieldUnitRepository` | Domain.Battle | FieldUnitRepository | 出站 |
 | `IUnitRepository` | Domain.Battle | SqliteUnitRepository | 出站 |
 | `INavigationPort` | Domain.Battle | NavigationPortAdapter | 出站 |
 | `ISoldierEventPort` | Domain.Battle | SoldierEventRelay | 出站 |
 | `IBuildingRef` | Domain.Battle | Building | 出站 |
 | `IBuildingTarget` | Domain.Battle | Building | 出站 |
-| `IBuildingRegistry` | Domain.Building | BuildingDefinitions（静态） | 出站 |
+| `IFusionUseCase` | Domain.Building | FusionService | 入站 |
 | `IBuildingPlacement` | Domain.Building | CastlePlacementAdapter | 入站 |
 | `IBuildingRepository` | Domain.Building | SqliteBuildingRepository | 出站 |
 | `IBuildingState` | Domain.Building | Building | 领域内接口 |
 | `IFusionBuildingFactory` | Domain.Building | FusionBuildingFactory | 出站 |
 | `IBattleReportRepository` | Domain.History | BattleReportStorage | 出站 |
-| `ISnapshotQuery` | Domain.History | （未实现） | 出站 |
+| `IReplayUseCase` | Domain.History | ReplayService | 入站 |
 | `IReplayTarget` | Domain.History | ReplayTarget | 出站 |
-| `IBuildingFactory` | Ports | BuildingFactory | 出站 |
+| `IBuildingFactory` | adapters/godot/building | BuildingFactory | 出站 |

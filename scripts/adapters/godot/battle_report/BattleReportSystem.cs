@@ -17,7 +17,7 @@ public partial class BattleReportSystem : Node
     public override void _Ready()
     {
         AdapterRegistry.Register<BattleReportSystem>(this);
-        _service = AdapterRegistry.Resolve<BattleReportService>();
+        _service = GameManager.Get<BattleReportService>();
     }
 
     public override void _ExitTree()

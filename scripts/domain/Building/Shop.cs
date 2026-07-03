@@ -12,21 +12,22 @@ public class Shop
     public event Action ShopOpenRequested;
     public event Action ShopOffersChanged;
 
-    private readonly CardData[] _offers = new CardData[OfferCount];
+    private readonly Player _player;
     private readonly Random _random = new();
     private readonly Hand _hand;
     private readonly ShopRules _shopRules;
 
-    public int Gold { get; private set; }
-    public bool IsShopAvailable { get; private set; }
+    public int Gold => _player.Gold;
+    public bool IsShopAvailable => _player.IsShopAvailable;
 
-    public Shop(Hand handService, ShopRules shopRules)
+    public Shop(Hand handService, ShopRules shopRules, Player player)
     {
         _hand = handService;
         _shopRules = shopRules;
-        Gold = GameRules.InitialGold;
+        _player = player;
+        _player.Gold = GameRules.InitialGold;
         RefreshOffers();
-        GoldChanged?.Invoke(Gold);
+        GoldChanged?.Invoke(_player.Gold);
         SetShopAvailable(true);
     }
 
@@ -34,37 +35,37 @@ public class Shop
     {
         if (slotIndex < 0 || slotIndex >= OfferCount)
             return null;
-        return _offers[slotIndex];
+        return _player.ShopOffers[slotIndex];
     }
 
-    public bool CanAfford(int cost) => Gold >= cost;
+    public bool CanAfford(int cost) => _player.Gold >= cost;
 
     public bool TrySpendGold(int cost)
     {
-        if (Gold < cost)
+        if (_player.Gold < cost)
             return false;
-        Gold -= cost;
-        GoldChanged?.Invoke(Gold);
+        _player.Gold -= cost;
+        GoldChanged?.Invoke(_player.Gold);
         return true;
     }
 
     public void AddGold(int amount)
     {
-        Gold += amount;
-        GoldChanged?.Invoke(Gold);
+        _player.Gold += amount;
+        GoldChanged?.Invoke(_player.Gold);
     }
 
     public void RefreshOffers()
     {
         CardData[] generated = _shopRules.GenerateOffers(_random);
         for (int i = 0; i < OfferCount; i++)
-            _offers[i] = generated[i];
+            _player.ShopOffers[i] = generated[i];
         ShopOffersChanged?.Invoke();
     }
 
     public bool TryPurchase(int slotIndex)
     {
-        if (!IsShopAvailable)
+        if (!_player.IsShopAvailable)
             return false;
 
         CardData offer = GetOffer(slotIndex);
@@ -81,7 +82,7 @@ public class Shop
 
     public bool TryPlaceOfferDirect(int slotIndex, int gridX, int gridY)
     {
-        if (!IsShopAvailable)
+        if (!_player.IsShopAvailable)
             return false;
 
         CardData offer = GetOffer(slotIndex);
@@ -98,15 +99,15 @@ public class Shop
 
     public void SetShopAvailable(bool available)
     {
-        if (IsShopAvailable == available)
+        if (_player.IsShopAvailable == available)
             return;
-        IsShopAvailable = available;
-        ShopAvailabilityChanged?.Invoke(IsShopAvailable);
+        _player.IsShopAvailable = available;
+        ShopAvailabilityChanged?.Invoke(_player.IsShopAvailable);
     }
 
     public void RequestOpenShop()
     {
-        if (!IsShopAvailable)
+        if (!_player.IsShopAvailable)
             return;
         ShopOpenRequested?.Invoke();
     }
@@ -118,7 +119,7 @@ public class Shop
 
     private void RefreshOfferSlot(int slotIndex)
     {
-        _offers[slotIndex] = _shopRules.RefreshOfferSlot(_random);
+        _player.ShopOffers[slotIndex] = _shopRules.RefreshOfferSlot(_random);
         ShopOffersChanged?.Invoke();
     }
 }
