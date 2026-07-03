@@ -9,7 +9,7 @@
 radius = 1.0
 
 [node name="Soldier" type="Area2D"]
-collision_layer = 0
+collision_layer = 1
 collision_mask = 0
 script = ExtResource("1")
 
@@ -21,8 +21,9 @@ path_desired_distance = 4.0
 target_desired_distance = 4.0
 path_max_distance = 2000.0
 avoidance_enabled = true
+radius = 62.5
 
-[node name="CollisionShape" type="CollisionShape2D" parent="Logic"]
+[node name="CollisionShape" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_1")
 
 [node name="View" type="Node2D" parent="."]

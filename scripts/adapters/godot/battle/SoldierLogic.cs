@@ -31,6 +31,7 @@ public partial class SoldierLogic : Node2D
 	private bool _statsPending;
 	private NavigationAgent2D _navigationAgent;
 	private Node2D _body;
+	private Vector2 _safeVelocity;
 
 	public void InitializeFromStats(UnitStats stats)
 	{
@@ -38,6 +39,7 @@ public partial class SoldierLogic : Node2D
 		{
 			_body = GetParent<Node2D>();
 			_navigationAgent = GetNode<NavigationAgent2D>("NavigationAgent");
+			_navigationAgent.VelocityComputed += OnVelocityComputed;
 			SoldierService svc = new SoldierService();
 			_eventRelay = new SoldierEventRelay();
 			AddChild(_eventRelay);
@@ -49,6 +51,8 @@ public partial class SoldierLogic : Node2D
 			_lifecycle = new SoldierLifecycle();
 		}
 		_service.Initialize(stats, IsPlayerUnit);
+		_service.ConfigureRvo();
+
 		if (_fieldRepo != null)
 			_fieldRepo.Register(_service);
 
@@ -158,7 +162,7 @@ public partial class SoldierLogic : Node2D
 		UpdateSleepVisual();
 	}
 
-	public override void _Process(double delta)
+	public override void _PhysicsProcess(double delta)
 	{
 		if (!IsAlive) return;
 		if (AdapterRegistry.Resolve<GameManager>()?.CurrentState == GameManager.GameState.GameOver) return;
@@ -188,14 +192,28 @@ public partial class SoldierLogic : Node2D
 
 		_service.UpdateBehavior(dt, edgeDist, marchX, marchY);
 
-		_body.GlobalPosition = new Vector2(
-			GameCoordinatesAdapter.GameUnitsToPixels(_service.GameX),
-			GameCoordinatesAdapter.GameUnitsToPixels(_service.GameY));
+		Vector2 currentPixelPos = _body.GlobalPosition;
+		Vector2 nextPathPos = _navigationAgent.GetNextPathPosition();
+		Vector2 direction = nextPathPos - currentPixelPos;
+		float pixelSpeed = GameCoordinatesAdapter.GameUnitsToPixels(_service.Speed);
+		Vector2 desiredVelocity = direction.Length() > 0.001f
+			? direction.Normalized() * pixelSpeed
+			: Vector2.Zero;
+		_navigationAgent.Velocity = desiredVelocity;
 
-		if (_navigationAgent != null)
-			_navigationAgent.AvoidanceEnabled = _service.State == SoldierState.Marching;
+		Vector2 moveVelocity = _safeVelocity != Vector2.Zero ? _safeVelocity : desiredVelocity;
+		_body.GlobalPosition += moveVelocity * dt;
+
+		_service.ApplyRvoPosition(
+			GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.X),
+			GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.Y));
 
 		_body.QueueRedraw();
+	}
+
+	private void OnVelocityComputed(Vector2 safeVelocity)
+	{
+		_safeVelocity = safeVelocity;
 	}
 
 	public void TakeDamage(int amount, SoldierLogic attacker = null)

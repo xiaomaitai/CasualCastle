@@ -18,11 +18,10 @@ public class NavigationPortAdapter : INavigationPort
 			GameCoordinatesAdapter.GameUnitsToPixels(gameY));
 	}
 
-	public (float gameX, float gameY) GetNextPosition(float currentGameX, float currentGameY)
+	public void ConfigureRvo(float radius, float neighborDistance, float timeHorizon)
 	{
-		Vector2 next = _agent.GetNextPathPosition();
-		return (
-			GameCoordinatesAdapter.PixelsToGameUnits(next.X),
-			GameCoordinatesAdapter.PixelsToGameUnits(next.Y));
+		_agent.Radius = GameCoordinatesAdapter.GameUnitsToPixels(radius);
+		_agent.NeighborDistance = GameCoordinatesAdapter.GameUnitsToPixels(neighborDistance);
+		_agent.TimeHorizonAgents = timeHorizon;
 	}
 }

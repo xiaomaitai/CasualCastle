@@ -15,6 +15,7 @@ public partial class UIManager : Node2D
     private BuildingManageUiController _buildingManageUi;
     private FusionProhibitUiController _fusionProhibitUi;
     private PauseMenuUiController _pauseMenuUi;
+    private SoldierInfoUiController _soldierInfoUi;
     private GameOverUiController _gameOverUi;
     private SettingsUiController _settingsUi;
     private bool _gameOver;
@@ -67,6 +68,7 @@ public partial class UIManager : Node2D
             _handUi?.IsPlacementActive == true || _shopUi?.IsDragging == true);
         _buildingInfoUi?.SetPauseOpen(_pauseMenuUi?.IsOpen == true || _settingsUi?.IsOpen == true);
         _buildingInfoUi?.Process();
+        _soldierInfoUi?.Process();
     }
 
     public override void _Input(InputEvent @event)
@@ -164,6 +166,7 @@ public partial class UIManager : Node2D
         Hand handService = AdapterRegistry.Resolve<Hand>();
         _handUi = new HandUiController(this, uiRoot, handService);
         _buildingInfoUi = new BuildingInfoUiController(this, uiRoot);
+        _soldierInfoUi = new SoldierInfoUiController(this, uiRoot);
         ButtonGroup toolGroup = new ButtonGroup();
         _buildingManageUi = new BuildingManageUiController(this, uiRoot, toolGroup);
         _fusionProhibitUi = new FusionProhibitUiController(this, uiRoot, toolGroup);

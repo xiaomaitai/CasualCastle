@@ -2,6 +2,9 @@ namespace CasualCastle.Domain.Battle;
 
 public class SoldierService : ISoldierService
 {
+    private const float RvoNeighborDistanceFactor = 4f;
+    private const float RvoTimeHorizon = 0.3f;
+
     internal Soldier Aggregate { get; }
     public ISoldierEventPort EventPort { get; set; }
 
@@ -14,6 +17,12 @@ public class SoldierService : ISoldierService
     public SoldierService()
     {
         Aggregate = new Soldier();
+    }
+
+    public void ConfigureRvo()
+    {
+        float radius = Aggregate.CollisionRadius;
+        NavPort.ConfigureRvo(radius, radius * RvoNeighborDistanceFactor, RvoTimeHorizon);
     }
 
     public bool IsAlive => Aggregate.IsAlive;
@@ -31,6 +40,18 @@ public class SoldierService : ISoldierService
     public float GameY => Aggregate.GameY;
     public SoldierState State => Aggregate.State;
     public ArmorType ArmorType => Aggregate.ArmorType;
+
+    public string TargetDescription
+    {
+        get
+        {
+            if (Aggregate.TargetEnemy != null && Aggregate.TargetEnemy.IsAlive)
+                return $"敌方士兵 ({Aggregate.TargetEnemy.GameX:F0}, {Aggregate.TargetEnemy.GameY:F0})";
+            if (Aggregate.TargetBuilding != null)
+                return "建筑";
+            return "行军目标";
+        }
+    }
 
     public void Initialize(UnitStats stats, bool isPlayerUnit)
     {
@@ -61,6 +82,12 @@ public class SoldierService : ISoldierService
     }
 
     public void MoveTo(float gameX, float gameY)
+    {
+        Aggregate.GameX = gameX;
+        Aggregate.GameY = gameY;
+    }
+
+    public void ApplyRvoPosition(float gameX, float gameY)
     {
         Aggregate.GameX = gameX;
         Aggregate.GameY = gameY;

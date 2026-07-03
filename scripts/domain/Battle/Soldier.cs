@@ -121,8 +121,6 @@ public class Soldier
 				else
 				{
 					NavPort.SetTarget(TargetEnemy.GameX, TargetEnemy.GameY);
-					(float nx, float ny) = NavPort.GetNextPosition(GameX, GameY);
-					MoveToward(dt, nx, ny);
 				}
 				break;
 
@@ -137,23 +135,13 @@ public class Soldier
 			case SoldierState.Marching:
 				TargetEnemy = null;
 				NavPort.SetTarget(marchTargetGameX, marchTargetGameY);
-				(float mx, float my) = NavPort.GetNextPosition(GameX, GameY);
-				MoveToward(dt, mx, my);
 				break;
 		}
 	}
 
-	private void MoveToward(float dt, float targetGameX, float targetGameY)
+	public void ApplyRvoPosition(float gameX, float gameY)
 	{
-		float dx = targetGameX - GameX;
-		float dy = targetGameY - GameY;
-		float dist = MathF.Sqrt(dx * dx + dy * dy);
-		if (dist < 0.001f)
-			return;
-
-		float moveAmount = Speed * dt;
-		float ratio = moveAmount / dist;
-		GameX += dx * ratio;
-		GameY += dy * ratio;
+		GameX = gameX;
+		GameY = gameY;
 	}
 }

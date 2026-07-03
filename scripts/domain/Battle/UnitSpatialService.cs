@@ -5,7 +5,7 @@ namespace CasualCastle.Domain.Battle;
 
 public class UnitSpatialService : ICombatUseCase
 {
-    private const float PushForce = 20f;
+    private const float PushForce = 500f;
 
     public void PushSoldiers(IReadOnlyList<ISoldierService> allUnits, float dt)
     {
