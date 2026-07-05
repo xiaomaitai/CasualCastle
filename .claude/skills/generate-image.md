@@ -46,7 +46,7 @@ print(sig)
 
 ### WebUI 文生图模式
 
-⚠️ 请求体必须包含 `templateUuid` 和 `generateParams`。`checkPointId` 在**顶层**（与 `templateUuid` 同级），其他生图参数在 `generateParams` 内部。
+⚠️ 请求体必须包含 `templateUuid` 和 `generateParams`。
 
 **已知可用的模板：**
 
@@ -67,6 +67,8 @@ print(sig)
 | 局部重绘      | [Controlnet局部重绘](https://liblibai.feishu.cn/wiki/UAMVw67NcifQHukf8fpccgS5n6d#share-P2seddEU6opN2hxPyZKcfFpPneb) | b689de89e8c9407a874acd415b3aa126 | 提取自文生图完整参数支持additional network和controlnet不支持高分辨率修复（hiresfix） |
 | 局部重绘      | [图生图局部重绘](https://liblibai.feishu.cn/wiki/UAMVw67NcifQHukf8fpccgS5n6d#share-MMB4dqZ33odraaxH8m6ckLDhn2f) | 74509e1b072a4c45a7f1843a963c8462 | 提取自图生图完整参数支持additionalNetwork不支持Controlnet    |
 | 人物换脸      | [InstantID人像换脸](https://liblibai.feishu.cn/wiki/UAMVw67NcifQHukf8fpccgS5n6d#share-DNLudcOIGoAfpAxmo5wc8FTlnjf) | 7d888009f81d4252a7c458c874cd017f | 仅用于人像换脸注意人像参考图中的人物面部特征务必清晰         |
+| Qwen-Image文生图 | [Qwen-Image文生图 - 自定义完整参数](https://liblibai.feishu.cn/wiki/UAMVw67NcifQHukf8fpccgS5n6d) | bf085132c7134622895b783b520b39ff | 可用模型范围：Qwen-Image。⚠️ **checkPointId 必传**，支持 additionalNetwork、controlNet、clipSkip、randnSource |
+| Qwen-Image图生图 | Qwen-Image图生图 - 自定义完整参数 | — | 如需图生图请去 liblib.art 创建模板获取 templateUuid |
 
 
 
@@ -94,6 +96,33 @@ curl -s -X POST "https://openapi.liblibai.cloud/api/generate/webui/text2img?Acce
   }'
 ```
 
+**Qwen-Image 文生图示例（checkPointId 必传，cfgScale 默认 4.0）：**
+
+```bash
+AUTH=$(LIBLIB_SIGN "/api/generate/webui/text2img")
+curl -s -X POST "https://openapi.liblibai.cloud/api/generate/webui/text2img?AccessKey=$(echo $AUTH | cut -d'&' -f1)&Signature=$(echo $AUTH | cut -d'&' -f2)&Timestamp=$(echo $AUTH | cut -d'&' -f3)&SignatureNonce=$(echo $AUTH | cut -d'&' -f4)" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "templateUuid": "bf085132c7134622895b783b520b39ff",
+    "generateParams": {
+        "checkPointId": "75e0be0c93b34dd8baeec9c968013e0c",
+        "prompt": "用户提供的提示词（英文）",
+        "negativePrompt": "",
+        "clipSkip": 2,
+        "sampler": 1,
+        "steps": 30,
+        "cfgScale": 4.0,
+        "width": 768,
+        "height": 1024,
+        "imgCount": 1,
+        "randnSource": 0,
+        "seed": -1,
+        "additionalNetwork": [],
+        "controlNet": []
+    }
+  }'
+```
+
 **顶层字段说明：**
 
 | 字段 | 类型 | 必需 | 说明 |
@@ -104,7 +133,7 @@ curl -s -X POST "https://openapi.liblibai.cloud/api/generate/webui/text2img?Acce
 
 | 字段 | 类型 | 必需 | 说明 |
 |------|------|------|------|
-| checkPointId | string | 否 | 底模 modelVersionUUID。不传则使用模板默认底模。 |
+| checkPointId | string | 否(模板) | 底模 modelVersionUUID。F.1 不使用；**Qwen-Image 必传**（默认 `75e0be0c93b34dd8baeec9c968013e0c`） |
 | prompt | string | 是 | 正向提示词（英文） |
 | negativePrompt | string | 否 | 负向提示词 |
 | sampler | int | 是 | 采样方法枚举（15 = DPM++ 2M SDE Karras） |
@@ -115,8 +144,25 @@ curl -s -X POST "https://openapi.liblibai.cloud/api/generate/webui/text2img?Acce
 | imgCount | int | 是 | 生成张数（1-4） |
 | seed | int | 否 | 随机种子，-1 表示随机 |
 | restoreFaces | int | 否 | 面部修复：0=关 1=开 |
-| additionalNetwork | array | 否 | LoRA 列表，最多 5 个 |
+| additionalNetwork | array | 否 | LoRA 列表，最多 5 个。每个元素为对象，字段见下方 |
 | hiResFixInfo | object | 否 | 高分辨率修复参数 |
+| clipSkip | int | 否 | **Qwen-Image 专属。** CLIP 跳过层数（默认 2） |
+| randnSource | int | 否 | **Qwen-Image 专属。** 噪声源：0=GPU，1=CPU |
+
+**additionalNetwork 数组元素字段：**
+
+| 字段 | 类型 | 必需 | 说明 |
+|------|------|------|------|
+| modelId | string | 是 | LoRA 模型版本 UUID |
+| weight | float | 否 | LoRA 权重（-4.00 ~ +4.00，默认0.8） |
+
+**additionalNetwork 示例：**
+```json
+"additionalNetwork": [
+    { "modelId": "31360f2f031b4ff6b589412a52713fcf", "weight": 0.3 },
+    { "modelId": "365e700254dd40bbb90d5e78c152ec7f", "weight": 0.6 }
+]
+```
 
 **响应：** `data.generateUuid` 是任务 ID，用于轮询。提交任务后立即在 config.db 中 INSERT 一条记录（见下方"任务记录"）。
 
@@ -226,6 +272,8 @@ UPDATE asset_gen_tasks SET status = 'completed', liblib_status = 5, image_url = 
 ```
 
 ### 模型选择
+
+**Qwen-Image 默认 checkPointId：** `75e0be0c93b34dd8baeec9c968013e0c`（Qwen-Image 官方底模，⚠️ 必传，不可省略）
 
 要使用不同模型，需在 liblib.art 网站创建对应模板：
 1. 登录 https://www.liblib.art
