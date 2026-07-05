@@ -78,9 +78,9 @@ AUTH=$(LIBLIB_SIGN "/api/generate/webui/text2img")
 curl -s -X POST "https://openapi.liblibai.cloud/api/generate/webui/text2img?AccessKey=$(echo $AUTH | cut -d'&' -f1)&Signature=$(echo $AUTH | cut -d'&' -f2)&Timestamp=$(echo $AUTH | cut -d'&' -f3)&SignatureNonce=$(echo $AUTH | cut -d'&' -f4)" \
   -H "Content-Type: application/json" \
   -d '{
-    "templateUuid": "e10adc3949ba59abbe56e057f20f883e",
+    "templateUuid": "test",
     "generateParams": {
-        "checkPointId": "0ea388c7eb854be3ba3c6f65aac6bfd3",
+        "checkPointId": "test",
         "prompt": "用户提供的提示词（英文）",
         "negativePrompt": "",
         "sampler": 15,
@@ -259,6 +259,7 @@ curl -s -X POST "https://openapi.liblibai.cloud/api/model/version/get?AccessKey=
 
 1. 用户要求生成图片时，先确认：
    - 提示词 → 如果用户给的描述太简单，帮助润色成更适合生图的英文 prompt
+   - 模型 → 从表格中选择checkpointId，也就是模型id。
    - 尺寸 → 根据用途对照 `assetSpecs.md` 选择合适尺寸。**若目标尺寸 < 512，先生成 ≥512 的图再缩放。** 如果没有合适尺寸，就建议并更新 assetSpecs.md
    - 文件名 → 保存到 `assets/` 下的路径，具体根据 assetSpec.md 的规定
 2. 生成昂贵高清图前向用户展示预估信息（模型、尺寸、保存路径），确认后开始生图。使用性价比模型时直接生图。
@@ -271,34 +272,3 @@ curl -s -X POST "https://openapi.liblibai.cloud/api/model/version/get?AccessKey=
    - 5 次轮询后仍非终态 → UPDATE 为 `timeout`，告知用户 generate_uuid 已记录在 db，稍后可手动查询
 6. 下载完成后告知文件路径尺寸等信息，询问是否需要调整
 7. **如果需要缩放到目标尺寸，下载后立即缩放并保存**
-
-## ComfyUI 工作流模式（高级）
-
-如需使用 ComfyUI 工作流而非简单文生图：
-
-1. 获取可用工作流列表：
-```bash
-AUTH=$(LIBLIB_SIGN "/api/generate/comfyui/app")
-curl -s "https://openapi.liblibai.cloud/api/generate/comfyui/app?AccessKey=$(echo $AUTH | cut -d'&' -f1)&Signature=$(echo $AUTH | cut -d'&' -f2)&Timestamp=$(echo $AUTH | cut -d'&' -f3)&SignatureNonce=$(echo $AUTH | cut -d'&' -f4)"
-```
-2. 创建生图任务（需要 `workflowVersionId`）：
-```bash
-AUTH=$(LIBLIB_SIGN "/api/generate/comfyui/app")
-curl -s -X POST "https://openapi.liblibai.cloud/api/generate/comfyui/app?AccessKey=$(echo $AUTH | cut -d'&' -f1)&Signature=$(echo $AUTH | cut -d'&' -f2)&Timestamp=$(echo $AUTH | cut -d'&' -f3)&SignatureNonce=$(echo $AUTH | cut -d'&' -f4)" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "workflowVersionId": "工作流版本ID",
-    "prompt": "用户提供的提示词"
-  }'
-```
-   - 响应中提取 `generateUuid`，INSERT 到 `asset_gen_tasks`
-3. 轮询结果（间隔 5 秒，最多等 5 分钟）：
-```bash
-AUTH=$(LIBLIB_SIGN "/api/generate/comfy/status")
-curl -s -X POST "https://openapi.liblibai.cloud/api/generate/comfy/status?AccessKey=$(echo $AUTH | cut -d'&' -f1)&Signature=$(echo $AUTH | cut -d'&' -f2)&Timestamp=$(echo $AUTH | cut -d'&' -f3)&SignatureNonce=$(echo $AUTH | cut -d'&' -f4)" \
-  -H "Content-Type: application/json" \
-  -d '{"generateUuid": "GENERATE_UUID"}'
-```
-   - `generateStatus`: 1=等待, 2=执行中, 3=已生成, 4=审核中, 5=成功, 6=失败
-   - 状态 5 时 `images[].imageUrl` 包含图片地址（有效期 7 天）
-4. 下载图片到项目 `assets/` 目录，UPDATE `asset_gen_tasks`
