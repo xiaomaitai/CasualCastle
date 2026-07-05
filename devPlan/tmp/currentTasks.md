@@ -1,132 +1,88 @@
-# 当前任务：士兵移动改用 Godot NavigationAgent2D RVO 寻路避障
+# 当前任务：P1 草地战场
 
 ## 背景
 
-当前士兵移动方案是自己实现的：域层 `Soldier.MoveToward()` 线性插值移向导航路径点，适配层 `SoldierLogic._Process()` 直接赋值 `_body.GlobalPosition`。NavigationAgent2D 虽然挂在场景上且 `avoidance_enabled = true`，但 RVO 从未被驱动——`Velocity` 从未赋值、`velocity_computed` 信号未连接、`radius` 为 0。士兵完全靠极弱的 `UnitSpatialService.PushForce=20` 推挤，必然重叠。
+当前战场为灰色单色背景（`ColorRect` 纯色填充），无可视化地形。P1 目标是将战场替换为绿色草地场景，包含草地底纹、装饰草和山云背景。
 
 ## 目标
 
-完全去掉自定义移动逻辑，改用 Godot 4 NavigationAgent2D 原生寻路 + RVO 避障。域层只负责"去哪"（设目标）和战斗判定，"怎么走"全部交给适配层 + NavigationAgent2D。
-
----
-
-## 新的移动数据流
-
-```
-域层 Soldier.UpdateBehavior()
-  → 只设 NavPort.SetTarget(target)，不做 MoveToward
-
-适配层 SoldierLogic._PhysicsProcess():
-  1. 域层 UpdateTargeting() + UpdateBehavior() → 设置导航目标
-  2. _agent.GetNextPathPosition() → 获取下一路径点
-  3. desiredVelocity = (nextPos - currentPos).Normalized() * pixelSpeed
-  4. _agent.Velocity = desiredVelocity  ← 触发 RVO 计算
-  5. velocity_computed 信号回调 → 存储 _safeVelocity
-  6. _body.GlobalPosition += _safeVelocity * dt
-  7. _service.MoveTo() 写回域层位置
-```
+用绿色草地纹理、随机装饰草和远景山云图片替换现有灰色战场，战场功能区域（城堡位置、交战区）不变。
 
 ---
 
 ## 实施步骤
 
-### P1. 修改 `INavigationPort` — 精简接口
+### P1.0 素材生成（使用 Liblib.art）
 
-**文件**: `scripts/domain/Battle/INavigationPort.cs`
+**工具**: `.claude/skills/generate-image.md`
 
-- 移除 `GetNextPosition(float currentGameX, float currentGameY)` 方法
-- 保留 `SetTarget(float gameX, float gameY)`
-- 域层不再关心路径细节，只管设置目标
+使用已配置的 Liblib API 生成 5 张素材图：
 
-### P2. 修改 `NavigationPortAdapter` — 对接 RVO
+| 素材 | 尺寸 | 保存路径 | 说明 |
+|------|------|---------|------|
+| 草地底纹 | 512×512 | `assets/textures/terrain/grass_tile.png` | 绿色草地无缝平铺纹理 |
+| 装饰草 A | 256×256 | `assets/textures/terrain/grass_clump_1.png` | 草丛 variant，透明背景 |
+| 装饰草 B | 256×256 | `assets/textures/terrain/grass_clump_2.png` | 草丛 variant，透明背景 |
+| 装饰草 C | 256×256 | `assets/textures/terrain/grass_clump_3.png` | 草丛 variant，透明背景 |
+| 远山背景 | 1920×540 | `assets/textures/background/mountains.png` | 远山剪影，底部透明过渡 |
+| 云层背景 | 1920×540 | `assets/textures/background/clouds.png` | 云朵，透明背景 |
 
-**文件**: `scripts/adapters/godot/battle/NavigationPortAdapter.cs`
+**生图流程**：逐张调用 `generate-image` skill → 下载到指定路径 → 验证尺寸和透明通道 → 导入 Godot（`CompressedTexture2D`，无损压缩）。
 
-- 移除 `GetNextPosition` 实现
-- `SetTarget()` 保持不变（内部设 `_agent.TargetPosition`，像素坐标）
-- 新增方法 `Vector2 ComputeDesiredVelocity(float currentGameX, float currentGameY, float gameSpeed)`
-  - 从当前位置（先转为像素）取 `_agent.GetNextPathPosition()`
-  - 计算方向向量，归一化后乘以像素速度
-  - 返回像素/秒的速度向量
-- 新增事件 `event Action<Vector2> SafeVelocityComputed`
-- 构造函数中连接 `_agent.VelocityCommitted` 信号（Godot 4 信号名），回调中触发 `SafeVelocityComputed`
+### P1.1 山云背景
 
-### P3. 修改域层 `Soldier` — 去掉 MoveToward
+**文件**: 修改 `scenes/main_game.tscn` — 在 Battlefield 节点下新增 `ParallaxBackground` 节点
 
-**文件**: `scripts/domain/Battle/Soldier.cs`
+- 在 Battlefield 节点下、现有 `Background` ColorRect 之上添加 `ParallaxBackground`
+- 包含两层 `ParallaxLayer`：
+  - **远山层**：`Sprite2D` 使用 `mountains.png`，`motion_scale` = (0.1, 0.1)，置于战场后方
+  - **云层**：`Sprite2D` 使用 `clouds.png`，`motion_scale` = (0.05, 0.05)
+- 替换现有绿色 `ColorRect` Background 为 `mountains.png` 底部延伸的纯色底
+- `ParallaxBackground` 的 `layer`（z_index）低于草地和游戏对象
 
-- 删除 `MoveToward(float dt, float targetGameX, float targetGameY)` 方法
-- `UpdateBehavior()` 中：
-  - Marching 状态：只调 `NavPort.SetTarget(marchTargetGameX, marchTargetGameY)`，不再调 `GetNextPosition` + `MoveToward`
-  - Fighting/Retaliating 状态（敌人超出攻击范围）：只调 `NavPort.SetTarget(TargetEnemy.GameX, TargetEnemy.GameY)`
-  - Sieging 状态：不变（不移动）
-- 新增 `void ApplyRvoPosition(float gameX, float gameY)` — 供适配层写回 RVO 后的位置
+### P1.2 草地底纹
 
-### P4. 修改 `SoldierService` / `ISoldierService` — 新增写回入口
+**文件**: 修改 `scenes/main_game.tscn` — 在 Battlefield 节点下新增草地底纹层
 
-**文件**: `scripts/domain/Battle/ISoldierService.cs`, `scripts/domain/Battle/SoldierService.cs`
+- 使用 `TextureRect` 平铺 `grass_tile.png`（`TextureRect` 设置 `stretch_mode = tile`）
+- 覆盖范围与战场区域一致（设计分辨率 1920×1080，需根据实际战场游戏单位范围换算像素后进行适当外扩）
+- 草地底纹层 z_index 在背景之上、装饰草之下
+- 替换现有绿色 `ColorRect` Background（P1.1 完成后即可移除）
 
-- 新增 `void ApplyRvoPosition(float gameX, float gameY)` 方法
-- 实现委托到 `Soldier.ApplyRvoPosition()`
-- 保留 `MoveTo()` 不变（初始化时使用）
-- 保留 `ApplyPush()` 不变（UnitSpatialService 保底推挤）
+### P1.3 装饰草
 
-### P5. 修改 `SoldierLogic` — 核心流程重构
+**文件**: 新建 `scripts/adapters/godot/battlefield/GrassDecoration.cs`
 
-**文件**: `scripts/adapters/godot/battle/SoldierLogic.cs`
+- 继承 `Node2D`，作为 Battlefield 的子节点
+- `_Ready()` 中初始化 `MultiMeshInstance2D`：
+  - 读取 `GameConfig.DesignWidth` / `GameConfig.DesignHeight` 确定散布范围（像素）
+  - 随机生成每簇草的位置（排除两侧城堡网格区域）、旋转（0–360°）、缩放（0.8–1.2）、variant index（0/1/2）
+  - 密度：约 500–800 簇覆盖整个战场（而非按 100×100 单位计算，避免过度密集）
+  - `instance_count` 控制在 2000 以内
+- 装饰草无碰撞体，纯视觉，z_index 在底纹之上、游戏对象之下
+- 无需实现接口，直接挂载到 Battlefield 节点即可
+- 精灵资源：`grass_clump_1/2/3.png`
 
-- 新增字段 `private Vector2 _safeVelocity` 存储 RVO 计算结果
-- `InitializeFromStats()` 中：
-  - 连接 `_navigationAgent.VelocityComputed += OnVelocityComputed`
-- `_Process()` 改为 `_PhysicsProcess()`（Godot RVO 在物理帧处理）
-- `_PhysicsProcess()` 新流程：
-  1. 存活/激活检查（不变）
-  2. 域层 `UpdateTargeting()` + `UpdateBehavior()`（不变）
-  3. 调用 `_navPort.ComputeDesiredVelocity()` 获取期望速度
-  4. `_navigationAgent.Velocity = desiredVelocity`（触发 RVO）
-  5. 使用上一帧的 `_safeVelocity` 移动 body（首帧降级用 desiredVelocity）
-  6. 像素坐标转游戏单位，`_service.ApplyRvoPosition()` 写回域层
-  7. `_body.QueueRedraw()`（不变）
-- 删除 `AvoidanceEnabled` 动态切换（始终开启，由 Godot 管理）
-- 新增 `OnVelocityComputed(Vector2 safeVelocity)` 信号回调：存储 `_safeVelocity`
-- 删除手动 `_body.GlobalPosition = new Vector2(...)`（第 191-193 行）
-- 删除 `SelectTarget()` 中的像素坐标转换（域层已有 marchX/marchY 游戏坐标）
+### P1.4 集成与验证
 
-### P6. 修改 `Soldier.tscn` — NavigationAgent2D 配置
+**文件**: `scenes/main_game.tscn`
 
-**文件**: `prefabs/Soldier.tscn`
-
-- NavigationAgent2D 节点设置 `radius = 62.5`（`DisplaySize / 2`）
-- 确认 `avoidance_enabled = true`（已设）
-- 确认 `path_desired_distance = 4.0`（已有）
-- 确认 `target_desired_distance = 4.0`（已有）
-- 将 `CollisionShape2D` 从 `Logic` 移到根 `Soldier`（Area2D）下（修复无效碰撞）
-
-### P7. 削弱 `UnitSpatialService` — RVO 保底推挤
-
-**文件**: `scripts/domain/Battle/UnitSpatialService.cs`
-
-- `PushForce` 从 20 提升到 500（RVO 正常时基本不触发，仅极端重叠时弹开）
-- 不改动计算逻辑
-
-### P8. 清理 `BattleManager`
-
-**文件**: `scripts/adapters/godot/battle/BattleManager.cs`
-
-- 保持不变（仍每帧调 `PushSoldiers`，但现在只是轻量保底）
+- z_index 层级：背景(ParallaxBackground) < 草地底纹 < 装饰草 < 城堡 < 建筑 < 士兵 < UI(CanvasLayer)
+- 移除或替换现有 `Background` ColorRect（被 P1.1/P1.2 替代）
+- Battlefield 的 `y_sort_enabled` 保持启用
+- 验证导航网格和碰撞检测不受影响
 
 ---
 
 ## 验收项
 
-1. 士兵行军时不再互相重叠
-2. 多个士兵追击同一敌人时保持间距
-3. 士兵绕过障碍物（建筑物）而非穿越
-4. 战斗/反击状态下士兵仍然保持合理间距
-5. 删除 `Soldier.MoveToward()` 后无编译错误
-6. 删除 `INavigationPort.GetNextPosition()` 后无编译错误
-7. RVO 避障效果在 2 个以上士兵同向移动时可观察到
-8. `CollisionShape2D` 挂载到正确的 Area2D 父节点下
+1. 战场显示为绿色草地纹理，不再是纯色灰色/绿色背景
+2. 草地上可见随机散布的装饰草丛，无明显规律感
+3. 战场后方可见山和云的远景，摄像机移动时有视差效果
+4. 城堡、建筑、士兵在草地上的渲染正确（z_index 排序、y_sort 无误）
+5. 装饰草不影响士兵移动、寻路、战斗
+6. 装饰草不影响建筑放置和碰撞检测
+7. 运行帧率与当前相当（MultiMeshInstance2D 开销可忽略）
 
 ---
 
@@ -134,18 +90,19 @@
 
 | 文件 | 变更类型 |
 |------|---------|
-| `scripts/domain/Battle/INavigationPort.cs` | 删除 GetNextPosition |
-| `scripts/domain/Battle/Soldier.cs` | 删除 MoveToward，新增 ApplyRvoPosition，UpdateBehavior 简化 |
-| `scripts/domain/Battle/ISoldierService.cs` | 新增 ApplyRvoPosition |
-| `scripts/domain/Battle/SoldierService.cs` | 新增 ApplyRvoPosition 实现 |
-| `scripts/domain/Battle/UnitSpatialService.cs` | PushForce 20→500 |
-| `scripts/adapters/godot/battle/NavigationPortAdapter.cs` | 新增 ComputeDesiredVelocity + SafeVelocityComputed 事件 |
-| `scripts/adapters/godot/battle/SoldierLogic.cs` | _Process→_PhysicsProcess，RVO 流程，VelocityComputed 信号 |
-| `prefabs/Soldier.tscn` | NavigationAgent2D radius，CollisionShape2D 父节点修复 |
+| `scenes/main_game.tscn` | 修改 Battlefield 子节点结构（背景、底纹、装饰草） |
+| `scripts/adapters/godot/battlefield/GrassDecoration.cs` | 新建 |
+| `assets/textures/terrain/grass_tile.png` | 新建（Liblib 生成） |
+| `assets/textures/terrain/grass_clump_1.png` | 新建（Liblib 生成） |
+| `assets/textures/terrain/grass_clump_2.png` | 新建（Liblib 生成） |
+| `assets/textures/terrain/grass_clump_3.png` | 新建（Liblib 生成） |
+| `assets/textures/background/mountains.png` | 新建（Liblib 生成） |
+| `assets/textures/background/clouds.png` | 新建（Liblib 生成） |
 
 ## 注意事项
 
-- Godot `velocity_computed` 信号在导航服务异步处理后触发，有 1 帧延迟——首帧用 `desiredVelocity` 降级
-- `_PhysicsProcess` 替代 `_Process` 是因为 NavigationServer 在物理帧同步 RVO 计算结果
-- NavigationAgent2D 的全局位置由父节点链自动推断（`Soldier` → `Logic` → `NavigationAgent`），保持父节点结构不变
-- 域层 `INavigationPort` 变为单方法接口（仅 `SetTarget`），符合六边形架构最小接口原则
+- **素材先行**：P1.0 先生成所有 6 张素材图，后续步骤依赖素材就绪。素材生成后立即导入 Godot
+- 装饰草散布范围排除城堡网格区域（城堡内部地面由城堡自身渲染）
+- 所有位置计算使用游戏单位 → `GameCoordinatesAdapter` 转换为像素
+- `ParallaxBackground` 跟随 `Battlefield/Camera2D` 自动滚动
+- 山/云图片尺寸 1920×540 覆盖战场宽度，高度为半屏
