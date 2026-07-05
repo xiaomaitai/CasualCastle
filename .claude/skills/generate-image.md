@@ -18,7 +18,7 @@ liblib国内直连，不需要使用代理。
 
 ## Liblib.art
 
-- Base URL: `https://openapi.liblibai.cloud`
+- Base URL: `https://openapi.liblibai.cloud`（纯 API 网关，无文档页面；API 文档见飞书 Wiki）
 - Auth: AccessKey + 签名（HMAC-SHA1）
 - 已配置凭据：
   - AccessKey: `VDg5YgVfesEiAiM1vRd_DA`
@@ -46,18 +46,17 @@ print(sig)
 
 ### WebUI 文生图模式
 
-⚠️ 请求体必须包含 `templateUuid` 和 `generateParams`，参数在 `generateParams` 内部。
+⚠️ 请求体必须包含 `templateUuid` 和 `generateParams`。`checkPointId` 在**顶层**（与 `templateUuid` 同级），其他生图参数在 `generateParams` 内部。
 
 **已知可用的模板：**
 
-| 模型名称 | checkPointId | 对应模版ID | 模型描述 |
-|------|------|-----|-----|
-| 萌系动物粗线条插画 | 6bce42cc0df444dd866f7c9f7855d917 | 6f7c4652458d4802969f8d089cf5b91f | 适用于动物IP组线条插画设计，只需要：（动物名字），即可生成。openapi 不返回此模型信息（modelType=21），请从网页确认底模和商用许可。 |
-| 简单线条-精致可爱二次元 | 491c449be47b41299bf0e9bae3e5cdba | 6f7c4652458d4802969f8d089cf5b91f | F.1 底模，适合简洁线条二次元风格 |
-| 平面游戏图标模型 | 39bfe441fd8641e78dbb57069b215fb3 | bf085132c7134622895b783b520b39ff | Qwen-Image 底模，适合平面化游戏图标 |
-| 扁平卡通游戏图标 | 265c08134df245bcba2f6968701bdde8 | bf085132c7134622895b783b520b39ff | Qwen-Image 底模，适合扁平卡通风格图标 |
-| 萌系Q版-可爱的粗线条画风 | b8262976e7d84e51b680053f500a86dd | 6f7c4652458d4802969f8d089cf5b91f | F.1 底模，适合Q版萌系粗线条角色/道具 |
-| 粗描边卡通游戏道具设计 | a6939b5467de47a980de12aac988a557 | 6f7c4652458d4802969f8d089cf5b91f | F.1 底模，适合粗描边卡通道具/图标 |
+| 模型名称                 | LoRAId                           | 模型       | 模型描述                     |
+| ------------------------ | -------------------------------- | ---------- | ---------------------------- |
+| 简单线条-精致可爱二次元  | 491c449be47b41299bf0e9bae3e5cdba | F.1        | 底模，适合简洁线条二次元风格 |
+| 平面游戏图标模型         | 39bfe441fd8641e78dbb57069b215fb3 | Qwen-Image | 适合平面化游戏图标           |
+| 扁平卡通游戏图标         | 265c08134df245bcba2f6968701bdde8 | Qwen-Image | 适合扁平卡通风格图标         |
+| 萌系Q版-可爱的粗线条画风 | b8262976e7d84e51b680053f500a86dd | F.1        | 适合Q版萌系粗线条角色/道具   |
+| 粗描边卡通游戏道具设计   | a6939b5467de47a980de12aac988a557 | F.1        | 适合粗描边卡通道具/图标      |
 
 | **适用方向**  | **模板名称**                                                 | templateUuid                     | **备注**                                                     |
 | ------------- | ------------------------------------------------------------ | -------------------------------- | ------------------------------------------------------------ |
@@ -95,11 +94,17 @@ curl -s -X POST "https://openapi.liblibai.cloud/api/generate/webui/text2img?Acce
   }'
 ```
 
+**顶层字段说明：**
+
+| 字段 | 类型 | 必需 | 说明 |
+|------|------|------|------|
+| templateUuid | string | 是 | 生图模板 UUID |
+
 **generateParams 字段说明：**
 
 | 字段 | 类型 | 必需 | 说明 |
 |------|------|------|------|
-| checkPointId | string | 是 | 底模 modelVersionUUID |
+| checkPointId | string | 否 | 底模 modelVersionUUID。不传则使用模板默认底模。 |
 | prompt | string | 是 | 正向提示词（英文） |
 | negativePrompt | string | 否 | 负向提示词 |
 | sampler | int | 是 | 采样方法枚举（15 = DPM++ 2M SDE Karras） |
