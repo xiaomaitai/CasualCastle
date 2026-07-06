@@ -7,6 +7,8 @@
 [ext_resource type="Script" path="res://scripts/adapters/godot/flow/MainGameController.cs" id="10"]
 [ext_resource type="PackedScene" uid="uid://d4settingspanel01" path="res://scenes/ui/settings_panel.tscn" id="13"]
 [ext_resource type="Script" path="res://scripts/adapters/godot/autoload/InitManager.cs" id="17"]
+[ext_resource type="Texture2D" path="res://assets/art/battlefield/mountain_bg.png" id="18"]
+[ext_resource type="Script" path="res://scripts/adapters/godot/battle/GrassBattlefield.cs" id="20"]
 
 [node name="MainGame" type="Node2D" unique_id=1]
 script = ExtResource("10")
@@ -31,12 +33,19 @@ y_sort_enabled = true
 position = Vector2(960, 540)
 current = true
 
-[node name="Background" type="ColorRect" parent="Battlefield" unique_id=13]
-color = Color(0.15, 0.3, 0.12, 1)
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 1920.0
-offset_bottom = 1080.0
+[node name="ParallaxBackground" type="ParallaxBackground" parent="Battlefield"]
+scroll_base_offset = Vector2(960, 540)
+
+[node name="SkyLayer" type="ParallaxLayer" parent="Battlefield/ParallaxBackground"]
+motion_scale = Vector2(0.02, 0.02)
+
+[node name="MountainSprite" type="Sprite2D" parent="Battlefield/ParallaxBackground/SkyLayer"]
+texture = ExtResource("18")
+position = Vector2(960, 650)
+scale = Vector2(2.0, 1.8)
+
+[node name="GrassBattlefield" type="Node2D" parent="Battlefield"]
+script = ExtResource("20")
 
 [node name="NavigationRegion" type="NavigationRegion2D" parent="Battlefield"]
 

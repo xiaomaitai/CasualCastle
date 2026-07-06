@@ -308,10 +308,20 @@ curl -s -X POST "https://openapi.liblibai.cloud/api/model/version/get?AccessKey=
 | commercialUse | 1=可商用，0=不可商用 |
 | modelUrl | 模型详情页链接 |
 
+## 提示词风格规范
+
+⚠️ **所有生图提示词必须强调以下三个要素：**
+
+1. **平面2D（flat 2D）** — 禁止立体感、阴影、渐变、3D 效果
+2. **萌系（cute/moe style）** — Q版可爱风格，角色圆润、道具可爱化
+3. **粗描边（thick outlines / bold lineart）** — 黑色或深色粗轮廓线，类似矢量插画
+
+生成 prompt 时，始终在描述末尾或合适位置加入：`flat 2D, cute moe style, thick bold outlines, no shading, no gradient, simple flat colors`。如果用户给的描述太简单，帮助润色成英文 prompt 时必须融入这三个要素。
+
 ## 通用工作流
 
 1. 用户要求生成图片时，先确认：
-   - 提示词 → 如果用户给的描述太简单，帮助润色成更适合生图的英文 prompt
+   - 提示词 → 如果用户给的描述太简单，帮助润色成更适合生图的英文 prompt。**必须融入平面2D、萌系、粗描边风格要素。**
    - 模型 → 从表格中选择checkpointId，也就是模型id。
    - 尺寸 → 根据用途对照 `assetSpecs.md` 选择合适尺寸。**若目标尺寸 < 512，先生成 ≥512 的图再缩放。** 如果没有合适尺寸，就建议并更新 assetSpecs.md
    - 文件名 → 保存到 `assets/` 下的路径，具体根据 assetSpec.md 的规定
