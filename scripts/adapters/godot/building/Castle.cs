@@ -25,6 +25,9 @@ public partial class Castle : Node2D
 	public Color AreaBgColor = new Color(1, 1, 1, 0.03f);
 
 	[Export]
+	public Texture2D[] CellTextures;
+
+	[Export]
 	public int CastleHeartGridX = 3;
 
 	[Export]
@@ -53,11 +56,27 @@ public partial class Castle : Node2D
 	private bool _previewValid;
 	private IReadOnlyList<Vector2I> _previewFootprint = BuildingSystem.GetFootprint("Barracks");
 	private CastleHighlightOverlay _highlightOverlay;
+	private int[,] _cellTextureIndices;
 
 	public override void _Ready()
 	{
 		_occupancy = new OccupancyGrid(GridColumns, GridRows);
 		_healthBar = GetNodeOrNull<ProgressBar>("HealthBar");
+		if (CellTextures == null || CellTextures.Length == 0)
+		{
+			CellTextures = new Texture2D[4];
+			CellTextures[0] = GD.Load<Texture2D>("res://assets/art/tiles/cell_dirt_01.png");
+			CellTextures[1] = GD.Load<Texture2D>("res://assets/art/tiles/cell_dirt_02.png");
+			CellTextures[2] = GD.Load<Texture2D>("res://assets/art/tiles/cell_dirt_03.png");
+			CellTextures[3] = GD.Load<Texture2D>("res://assets/art/tiles/cell_dirt_04.png");
+		}
+
+		Random rng = new Random();
+		_cellTextureIndices = new int[GridColumns, GridRows];
+		for (int row = 0; row < GridRows; row++)
+			for (int col = 0; col < GridColumns; col++)
+				_cellTextureIndices[col, row] = rng.Next(CellTextures.Length);
+
 		SetupHighlightOverlay();
 		SetupCastleHeart();
 		SetupBarracks();
@@ -303,7 +322,15 @@ public partial class Castle : Node2D
 			for (int col = 0; col < GridColumns; col++)
 			{
 				Vector2 position = GameCoordinatesAdapter.ToLocalPixels(GameCoordinateRules.CellBlockOrigin(col, row));
-				DrawRect(new Rect2(position, blockPixelSize), BlockColor);
+				if (CellTextures != null && CellTextures.Length > 0)
+				{
+					Texture2D texture = CellTextures[_cellTextureIndices[col, row] % CellTextures.Length];
+					DrawTextureRect(texture, new Rect2(position, blockPixelSize), false);
+				}
+				else
+				{
+					DrawRect(new Rect2(position, blockPixelSize), BlockColor);
+				}
 			}
 		}
 

@@ -333,9 +333,9 @@ curl -s -X POST "https://openapi.liblibai.cloud/api/model/version/get?AccessKey=
    - status=5 → 下载图片，UPDATE 为 `completed`，告知用户路径和尺寸，询问是否需要调整
    - status=6/7 → UPDATE 为 `failed`，告知用户失败，检查 prompt 或参数后重试
    - 5 次轮询后仍非终态 → UPDATE 为 `timeout`，告知用户 generate_uuid 已记录在 db，稍后可手动查询
-6. 下载完成后告知文件路径尺寸等信息，询问是否需要调整
+6. 下载完成后告知文件路径尺寸等信息
 7. **如果需要缩放到目标尺寸，下载后立即缩放并保存**
-8. **不要主动询问或执行抠图。** RGB PNG 可直接用于游戏，用户会在筛选素材后手动要求抠图
+8. **不透明图（RGB PNG）可直接用于游戏，不需要询问用户。** 素材被采用后，用户需要透明背景时会手动要求抠图，抠图后原地替换即可
 
 ## 后续步骤
 
