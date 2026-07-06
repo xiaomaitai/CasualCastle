@@ -325,3 +325,8 @@ curl -s -X POST "https://openapi.liblibai.cloud/api/model/version/get?AccessKey=
    - 5 次轮询后仍非终态 → UPDATE 为 `timeout`，告知用户 generate_uuid 已记录在 db，稍后可手动查询
 6. 下载完成后告知文件路径尺寸等信息，询问是否需要调整
 7. **如果需要缩放到目标尺寸，下载后立即缩放并保存**
+8. **不要主动询问或执行抠图。** RGB PNG 可直接用于游戏，用户会在筛选素材后手动要求抠图
+
+## 后续步骤
+
+生图产出的 RGB PNG 可直接用于游戏。用户筛选素材后如需透明背景，使用 **`remove-bg` skill**（`.claude/skills/remove-bg.md`）抠图并原地替换。详见 `devPlan/design/assetSpecs.md` 中的「AI 素材管线」章节。
