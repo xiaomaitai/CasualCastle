@@ -19,6 +19,9 @@ desktop.ini
 *.user
 *.userprops
 
+# Database binary — tracked via SQL dump instead
+assets/data/config.db
+
 # Export templates / builds
 export_presets.cfg
 
