@@ -1,0 +1,20 @@
+#!/bin/sh
+DB="assets/data/config.db"
+DUMP="assets/data/config_db_dump.sql"
+
+if [ ! -f "$DB" ]; then
+    echo "[pre-commit] $DB not found, skipping dump"
+    exit 0
+fi
+
+echo "[pre-commit] Dumping database to $DUMP ..."
+sqlite3 "$DB" .dump > "$DUMP"
+
+git add "$DUMP"
+
+if git ls-files --error-unmatch "$DB" >/dev/null 2>&1; then
+    echo "[pre-commit] Unstaging binary $DB ..."
+    git rm --cached "$DB" 2>/dev/null
+fi
+
+echo "[pre-commit] Done — $DUMP staged"
