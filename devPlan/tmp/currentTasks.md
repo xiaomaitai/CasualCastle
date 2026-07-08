@@ -1,61 +1,113 @@
-# P2 建筑与通道系统
+# P3 人类种族实现
 
 ## 目标
 
-建筑碰撞体贴合格子边缘（100 游戏单位/格），格间形成 ~15 单位通行通道；多格建筑内部无通道；导航网格随建筑放置/摧毁动态更新。
+6 座人类建筑（3 T1 + 3 T2）+ 6 种人类兵种，全部通过 `config.db` 配置；商店卡池改为加权随机；建筑视觉定义适配 2×2 占地。
 
 ---
 
 ## 任务拆解
 
-### 2.1 建筑碰撞体尺寸调整
+### 3.1 建筑数据配置（config.db → building_defs）
 
-将建筑碰撞体从当前 80×80（默认）改为填满所在格子（单格 100×100 游戏单位，多格按占地累加）。碰撞体变更影响：士兵物理阻挡、NavigationObstacle2D 尺寸、城堡网格渲染。
+替换现有测试建筑数据为 6 座人类建筑（全部 2×2 占地），保留 CastleHeart：
 
-**验收项：**
-- `BuildingData.CollisionWidth/Height` 默认值改为 `CellBlockSize`（94）或 100
-- `config.db` 中现有建筑记录的 `collision_width/height` 更新为填满格子的值
-- `BuildingSystem.ApplyVisual` 碰撞尺寸逻辑适配多格建筑（总尺寸 = 占地格数 × 格大小）
-- 多格建筑碰撞体为**单个矩形**，覆盖全部占地格子，内部无间隙
+| type_id | display_name | max_health | spawn_interval | unit_type_id | fusion_tier |
+|---------|-------------|------------|---------------|-------------|-------------|
+| Barracks | 兵营 | 200 | 8.0 | Spearman | 0 |
+| ArcheryRange | 靶场 | 150 | 10.0 | Archer | 0 |
+| Stable | 马厩 | 220 | 14.0 | Knight | 0 |
+| Armory | 军府 | 300 | 7.0 | Swordsman | 1 |
+| CrossbowTower | 射楼 | 220 | 9.0 | Crossbowman | 1 |
+| Ranch | 牧场 | 330 | 12.0 | HeavyCavalry | 1 |
 
-### 2.2 导航网格动态障碍
-
-建筑放置时在导航网格中挖洞，使士兵无法穿越建筑所在格子；建筑摧毁时恢复可通行。格间空隙（~15 单位）保持可通行。
-
-**实现方案：** 为 Building 预制体添加 `NavigationObstacle2D` 子节点，放置时根据建筑占地动态设置障碍尺寸与位置。
-
-**验收项：**
-- `Building.tscn` 预制体新增 `NavigationObstacle2D` 节点
-- 建筑放置时，`NavigationObstacle2D` 自动在导航网格中挖出建筑占地范围的洞
-- 建筑摧毁时，障碍自动移除，对应区域恢复可通行
-- 两座相邻单格建筑之间存在可通行的格间通道（~15 单位）
-- 多格建筑（2×2 等）内部无通道，士兵只能从外围绕行
-
-### 2.3 碰撞层配置
-
-启用建筑与士兵之间的物理碰撞检测，使士兵无法穿过建筑碰撞体。
+每座建筑 `footprint_json` 均为 `[[0,0],[1,0],[0,1],[1,1]]`；`collision_width/height` = 188（2×94）；`main_cell` 和 `spawn_cell` 需适配 2×2。
 
 **验收项：**
-- `Building.tscn` 碰撞层设为 Layer 3（值 4）
-- `Soldier.tscn` 碰撞掩码含 Layer 3（值 4），检测建筑
-- 士兵无法穿越建筑碰撞体（物理阻挡 + 导航绕行双重保障）
+- 删除旧的 Barracks(1×1)、ArcheryRange(2×1)、Stable(1×4)、WolfDen、BarracksT2、WolfDenT2 记录（这些是测试占位数据，人类种族不再使用）
+- 新增 6 条人类建筑记录，footprint、碰撞尺寸、产兵间隔等字段正确
+- CastleHeart 记录保持不变
+- `SqliteBuildingRepository` 能正常加载全部 7 条（1 Castle + 6 Human）
 
-### 2.4 OccupancyGrid 与导航同步
+### 3.2 单位数据配置（config.db → unit_stats）
 
-确保 `OccupancyGrid` 状态与导航障碍保持一致。放置/摧毁建筑时同步更新占用状态和导航网格。
+替换现有测试单位数据为 6 种人类兵种：
+
+| type_id | size | attack_type | damage_type | armor_type | health | damage | speed | atk_range | atk_cd | vision | night |
+|---------|------|-------------|-------------|------------|--------|--------|-------|-----------|--------|--------|-------|
+| Spearman | Medium(1) | Melee(0) | Normal(0) | Light(0) | 40 | 10 | 80 | 30 | 1.0 | 250 | 0 |
+| Archer | Medium(1) | Ranged(1) | Pierce(1) | Light(0) | 25 | 12 | 60 | 200 | 1.5 | 300 | 0 |
+| Knight | Large(2) | Melee(0) | Normal(0) | Heavy(1) | 60 | 18 | 120 | 35 | 1.2 | 280 | 0 |
+| Swordsman | Medium(1) | Melee(0) | Normal(0) | Light(0) | 55 | 16 | 80 | 30 | 0.9 | 260 | 0 |
+| Crossbowman | Medium(1) | Ranged(1) | Pierce(1) | Light(0) | 30 | 22 | 55 | 180 | 2.0 | 280 | 0 |
+| HeavyCavalry | Large(2) | Melee(0) | Normal(0) | Heavy(1) | 85 | 28 | 110 | 35 | 1.3 | 290 | 0 |
+
+`unit_color` 使用现有占位色值（后续素材管线替换）。
 
 **验收项：**
-- `Castle.PlaceBuilding` 中，`OccupancyGrid.OccupyCells` 与 `NavigationObstacle2D` 激活同步
-- `Castle.ReleaseBuildingFootprint` 中，`OccupancyGrid.ReleaseCells` 与障碍移除同步
-- `Castle.IsCellPassable` 正确反映当前占用状态（供导航查询参考）
+- 删除旧的 Swordsman、Archer、Cavalry、Werewolf、HeavySwordsman、WerewolfLord 记录
+- 新增 6 条人类单位记录，所有字段与设计表一致
+- `SqliteUnitRepository` 能正常加载全部 6 条
 
-### 2.5 集成测试
+### 3.3 商店加权随机
 
-验证完整的建筑-通道-导航链路。
+`ShopRules` 当前为均匀随机，扩展为加权随机。
+
+**代码改动：**
+- `CardData` 新增 `Weight` 属性
+- `shop_catalog` 表新增 `weight` 列（INTEGER，默认 1）
+- `GameDataLoader.LoadShopCatalog` 读取 `weight` 字段
+- `ShopRules.GenerateOffers` / `RefreshOfferSlot` 按权重抽样
+
+**商店卡池：**
+
+| id | name | cost | building_type | weight |
+|----|------|------|--------------|--------|
+| barracks | 兵营 | 3 | Barracks | 40 |
+| archery_range | 靶场 | 4 | ArcheryRange | 35 |
+| stable | 马厩 | 5 | Stable | 25 |
 
 **验收项：**
-- 放置两座相邻单格建筑 → 士兵可通过格间空隙行走
-- 放置 2×2 多格建筑 → 士兵无法穿越建筑内部，自动绕行
-- 摧毁建筑 → 对应区域恢复可通行
-- 多建筑场景 → 士兵正确沿通道网络寻路至敌方城堡
-- 放置预览时正确显示碰撞占地区域
+- `shop_catalog` 表含 3 条人类 T1 建筑卡，各带权重
+- `ShopRules` 按权重随机生成卡牌（非均匀）
+- 手牌购买流程正常（拖拽放置、直放均可用）
+- 敌方可复刻商店购买行为（ReplayService 适配不变）
+
+### 3.4 伤害矩阵更新（config.db → damage_matrix）
+
+替换当前 damage_matrix 为人类种族设计矩阵：
+
+| damage_type ↓ / armor → | Light(0) | Heavy(1) | Fortified(2) | Beast(3) |
+|--------------------------|----------|----------|-------------|---------|
+| Normal(0) | 1.0 | 0.8 | 0.6 | 1.0 |
+| Pierce(1) | 1.2 | 0.9 | 0.5 | 0.8 |
+| Siege(2) | 0.8 | 1.0 | 1.5 | 0.9 |
+| Magic(3) | 1.0 | 1.2 | 1.0 | 1.0 |
+
+**验收项：**
+- `damage_matrix` 表 16 行全部按设计值更新
+- `DamageMatrix.LoadFrom` 正确加载，`GetMultiplier` 返回对应倍率
+- 战斗中伤害计算使用矩阵倍率（弓箭手 Pierce → Light 造成 1.2× 伤害）
+
+### 3.5 建筑视觉定义更新
+
+`BuildingSystem.Visuals` 字典适配人类建筑类型：所有 6 座人类建筑均为 2×2，footprint 统一，视觉通过 Modulate 颜色区分。
+
+**验收项：**
+- Visuals 字典移除旧条目（Barracks 1×1、ArcheryRange 2×1、Stable 1×4、WolfDen、BarracksT2、WolfDenT2）
+- 新增 6 条人类建筑视觉定义（Barracks/ArcheryRange/Stable/Armory/CrossbowTower/Ranch），footprint 均为 2×2
+- 各建筑 Modulate 颜色与兵种色系呼应（步兵线蓝灰、射手线绿、骑兵线棕，T2 略亮）
+- 放置预览、碰撞体渲染与 2×2 占地一致
+
+### 3.6 集成测试
+
+验证人类种族从商店购买 → 放置 → 产兵 → 战斗的完整链路。
+
+**验收项：**
+- 商店展示 3 种 T1 建筑卡（兵营/靶场/马厩），按权重随机
+- 购买并放置兵营 → 8s 产出枪兵 → 枪兵向敌方推进
+- 购买并放置靶场 → 10s 产出弓箭手 → 弓箭手远程攻击（200 范围）
+- 购买并放置马厩 → 14s 产出骑士 → 骑士高速移动（120）
+- 多座建筑同时产兵，不同兵种移动速度、攻击范围差异明显
+- 伤害倍率生效：弓箭手（Pierce）对骑士（Heavy）伤害降低（0.9×）
+- 现有战报录制/回放功能不受影响

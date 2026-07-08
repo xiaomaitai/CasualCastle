@@ -18,6 +18,6 @@ public class BuildingData
 	public bool IsCore { get; init; }
 
 	public int FusionTier { get; init; }
-	public int CollisionWidth { get; init; } = 80;
-	public int CollisionHeight { get; init; } = 80;
+	public int CollisionWidth { get; init; } = GameCoordinateRules.CellBlockSize;
+	public int CollisionHeight { get; init; } = GameCoordinateRules.CellBlockSize;
 }

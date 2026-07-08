@@ -6,8 +6,9 @@ public static class GameCoordinateRules
 {
 	public const int UnitsPerCell = 100;
 
-	public const int CellBlockSize = 94;
-	public const int CellBlockInset = (UnitsPerCell - CellBlockSize) / 2;
+	public const int CellGapSize = 14;
+	public const int CellBlockSize = UnitsPerCell - CellGapSize;
+	public const int CellBlockInset = CellGapSize / 2;
 
 	public const int UnitSpawnCornerInset = 3;
 	public const int UnitSpawnSpreadStepX = 3;
@@ -21,6 +22,28 @@ public static class GameCoordinateRules
 
 	public static GameVector2 CellBlockOrigin(int gridX, int gridY) =>
 		new(gridX * UnitsPerCell + CellBlockInset, gridY * UnitsPerCell + CellBlockInset);
+
+	public static GameVector2 GetBuildingCollisionSize(IReadOnlyList<GridCellOffset> footprint)
+	{
+		int minX = footprint[0].X;
+		int maxX = footprint[0].X;
+		int minY = footprint[0].Y;
+		int maxY = footprint[0].Y;
+		for (int i = 1; i < footprint.Count; i++)
+		{
+			if (footprint[i].X < minX) minX = footprint[i].X;
+			if (footprint[i].X > maxX) maxX = footprint[i].X;
+			if (footprint[i].Y < minY) minY = footprint[i].Y;
+			if (footprint[i].Y > maxY) maxY = footprint[i].Y;
+		}
+
+		int cellsWide = maxX - minX + 1;
+		int cellsTall = maxY - minY + 1;
+		return new GameVector2(
+			cellsWide * UnitsPerCell - CellGapSize,
+			cellsTall * UnitsPerCell - CellGapSize
+		);
+	}
 
 	public static GameVector2 GetBuildingFootprintSpawnPoint(
 		IReadOnlyList<GridCellOffset> footprint, int anchorX, int anchorY, int spawnIndex = 0)

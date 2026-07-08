@@ -201,13 +201,19 @@ public partial class BuildingSystem : Node
             }
         }
 
+        IReadOnlyList<GridCellOffset> footprint = BuildingRepo.GetFootprint(building.TypeId);
+        GameVector2 collisionSize = GameCoordinateRules.GetBuildingCollisionSize(footprint);
+        float pixelW = GameCoordinatesAdapter.GameUnitsToPixels(collisionSize.X);
+        float pixelH = GameCoordinatesAdapter.GameUnitsToPixels(collisionSize.Y);
+        Vector2 pixelSize = new(pixelW, pixelH);
+
         CollisionShape2D shapeNode = building.GetNodeOrNull<CollisionShape2D>("Logic/CollisionShape");
         if (shapeNode?.Shape is RectangleShape2D rect)
-        {
-            float pixelW = GameCoordinatesAdapter.GameUnitsToPixels(BuildingRepo.GetCollisionWidth(building.TypeId));
-            float pixelH = GameCoordinatesAdapter.GameUnitsToPixels(BuildingRepo.GetCollisionHeight(building.TypeId));
-            rect.Size = new Vector2(pixelW, pixelH);
-        }
+            rect.Size = pixelSize;
+
+        CollisionShape2D navShapeNode = building.GetNodeOrNull<CollisionShape2D>("Logic/NavigationObstacle/CollisionShape");
+        if (navShapeNode?.Shape is RectangleShape2D navRect)
+            navRect.Size = pixelSize;
     }
 
     public bool CanPlace(Castle castle, string buildingType, int anchorX, int anchorY)
