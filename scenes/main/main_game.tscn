@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://scripts/adapters/godot/autoload/InitManager.cs" id="17"]
 [ext_resource type="Texture2D" path="res://assets/art/battlefield/mountain_bg.png" id="18"]
 [ext_resource type="Script" path="res://scripts/adapters/godot/battle/GrassBattlefield.cs" id="20"]
+[ext_resource type="Script" path="res://scripts/adapters/godot/flow/CameraController.cs" id="21"]
 
 [node name="MainGame" type="Node2D" unique_id=1]
 script = ExtResource("10")
@@ -32,6 +33,7 @@ y_sort_enabled = true
 [node name="Camera2D" type="Camera2D" parent="Battlefield"]
 position = Vector2(960, 540)
 current = true
+script = ExtResource("21")
 
 [node name="ParallaxBackground" type="ParallaxBackground" parent="Battlefield"]
 scroll_base_offset = Vector2(960, 540)

@@ -1,5 +1,6 @@
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.History;
+using CasualCastle.Domain.Shared;
 using Godot;
 using System.Collections.Generic;
 using System;
@@ -11,6 +12,7 @@ public partial class TitleScreen : Control
 
 	private SettingsUiController _settingsUi;
 	private Button _startButton;
+	private Button _continueButton;
 	private Button _settingsButton;
 	private Button _exitButton;
 	private OptionButton _reportOption;
@@ -18,16 +20,28 @@ public partial class TitleScreen : Control
 
 	public override void _Ready()
 	{
-		_startButton = GetNode<Button>("UI/StartButton");
-		_settingsButton = GetNode<Button>("UI/SettingsButton");
-		_exitButton = GetNode<Button>("UI/ExitButton");
+		VBoxContainer ui = GetNode<VBoxContainer>("UI");
+		_startButton = ui.GetNode<Button>("StartButton");
+		_settingsButton = ui.GetNode<Button>("SettingsButton");
+		_exitButton = ui.GetNode<Button>("ExitButton");
+		_reportOption = ui.GetNode<OptionButton>("ReportOption");
+
+		_continueButton = new Button();
+		_continueButton.Name = "ContinueButton";
+		_continueButton.Text = "继续游戏";
+		ui.AddChild(_continueButton);
+		ui.MoveChild(_continueButton, ui.GetChildCount() - 4);
+
 		_startButton.Pressed += OnStartPressed;
+		_continueButton.Pressed += OnContinuePressed;
 		_exitButton.Pressed += OnExitPressed;
 		_settingsButton.Pressed += OnSettingsPressed;
-		_reportOption = GetNode<OptionButton>("UI/ReportOption");
 
 		_settingsUi = new SettingsUiController(GetNode<Control>("SettingsPanel"));
 		BuildReportOptions();
+
+		ISaveRepository saveRepo = GameManager.Get<ISaveRepository>();
+		_continueButton.Disabled = !saveRepo.HasSave(0);
 	}
 
 	public override void _ExitTree()
@@ -54,11 +68,31 @@ public partial class TitleScreen : Control
 
 		_isStartingGame = true;
 		_startButton.Disabled = true;
+		_continueButton.Disabled = true;
 		_settingsButton.Disabled = true;
 		_exitButton.Disabled = true;
 		_reportOption.Disabled = true;
 		_startButton.Text = "加载中...";
+		AdapterRegistry.Resolve<GameManager>().PendingLoadSlot = -1;
 		ApplySelectedReportToGameManager();
+		await ForceClearMainGameResidue();
+		GetTree().ChangeSceneToFile(MainGameScene);
+	}
+
+	private async void OnContinuePressed()
+	{
+		if (_isStartingGame)
+			return;
+
+		_isStartingGame = true;
+		_startButton.Disabled = true;
+		_continueButton.Disabled = true;
+		_settingsButton.Disabled = true;
+		_exitButton.Disabled = true;
+		_reportOption.Disabled = true;
+		_continueButton.Text = "加载中...";
+		AdapterRegistry.Resolve<GameManager>().PendingLoadSlot = 0;
+		AdapterRegistry.Resolve<GameManager>().SetPendingReplayReportId("");
 		await ForceClearMainGameResidue();
 		GetTree().ChangeSceneToFile(MainGameScene);
 	}

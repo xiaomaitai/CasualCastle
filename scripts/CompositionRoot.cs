@@ -31,6 +31,7 @@ public static class CompositionRoot
         services.AddSingleton<IUnitRepository, SqliteUnitRepository>();
 		
         services.AddSingleton<IBuildingRepository, SqliteBuildingRepository>();
+        services.AddSingleton<ISaveRepository, SaveStorage>();
 
         return services.BuildServiceProvider();
     }
