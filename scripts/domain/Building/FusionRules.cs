@@ -60,6 +60,7 @@ public static class FusionRules
         if (materials.Count != recipe.MaterialCount)
             return false;
 
+        int mainFootprintLength = buildingRepo.GetFootprint(main.TypeId).Count;
         HashSet<IBuildingState> seen = new() { main };
         foreach (IBuildingState material in materials)
         {
@@ -70,6 +71,8 @@ public static class FusionRules
             if (material.TypeId != recipe.MaterialTypeId)
                 return false;
             if (!CanParticipate(material, buildingRepo))
+                return false;
+            if (buildingRepo.GetFootprint(material.TypeId).Count != mainFootprintLength)
                 return false;
         }
 

@@ -24,7 +24,6 @@ public interface IBuildingRepository
 	{
 		BuildingData bd = Get(typeId);
 		return bd.FusionTier == 0
-			&& bd.Footprint.Length == 1
 			&& !bd.IsCore;
 	}
 }
