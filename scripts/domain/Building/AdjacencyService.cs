@@ -34,7 +34,7 @@ public class AdjacencyService
         foreach (IBuildingState neighbor in neighbors)
         {
             if (neighbor is IAdjacencyBuilding adj &&
-                adj.TypeId == source.TypeId &&
+                FusionRules.IsSameLine(source.TypeId, adj.TypeId) &&
                 adj.ContributesToAdjacency)
             {
                 results.Add(adj);

@@ -113,6 +113,21 @@ public static class FusionRules
         return null;
     }
 
+    public static bool IsSameLine(string typeA, string typeB)
+    {
+        if (typeA == typeB)
+            return true;
+
+        foreach (FusionRecipe recipe in _recipes)
+        {
+            if ((recipe.MainTypeId == typeA && recipe.ResultTypeId == typeB)
+                || (recipe.MainTypeId == typeB && recipe.ResultTypeId == typeA))
+                return true;
+        }
+
+        return false;
+    }
+
     private static List<IBuildingState> PickMaterials(
         IBuildingState main, FusionRecipe recipe,
         IReadOnlyList<IBuildingState> allBuildings, HashSet<IBuildingState> used,

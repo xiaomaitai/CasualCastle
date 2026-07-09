@@ -68,11 +68,11 @@ public static class AdjacentRules
         int adjacentSameType = 0;
         foreach (IAdjacencyBuilding neighbor in GetAdjacentBuildings(building, allBuildings, buildingRepo))
         {
-            if (neighbor.TypeId == building.TypeId && neighbor.ContributesToAdjacency)
+            if (FusionRules.IsSameLine(building.TypeId, neighbor.TypeId) && neighbor.ContributesToAdjacency)
                 adjacentSameType++;
         }
 
-        return adjacentSameType > 0 ? 1f + 0.2f * adjacentSameType : 1f;
+        return adjacentSameType > 0 ? 1f / (float)System.Math.Pow(0.85, adjacentSameType) : 1f;
     }
 
     private static Dictionary<(int x, int y), IAdjacencyBuilding> BuildCellOwnerMap(
