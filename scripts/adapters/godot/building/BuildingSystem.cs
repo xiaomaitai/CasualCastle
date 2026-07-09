@@ -16,13 +16,7 @@ public partial class BuildingSystem : Node
     [Signal]
     public delegate void BuildingPlacedEventHandler(Castle castle, Building building, string buildingType);
 
-    private static readonly Vector2I[] Single = { Vector2I.Zero };
-    private static readonly Vector2I[] ArcheryRangeCells = { Vector2I.Zero, new(1, 0) };
-    private static readonly Vector2I[] StableCells =
-    {
-        Vector2I.Zero, new(0, 1), new(0, 2), new(1, 2),
-    };
-    private static readonly Vector2I[] CastleHeartCells =
+    private static readonly Vector2I[] Footprint2x2 =
     {
         Vector2I.Zero, new(1, 0), new(0, 1), new(1, 1),
     };
@@ -40,52 +34,80 @@ public partial class BuildingSystem : Node
     {
         ["CastleHeart"] = new()
         {
-            Footprint = CastleHeartCells,
+            Footprint = Footprint2x2,
             TexturePath = PlaceholderTexturePath,
             SpriteScale = new(0.125f, 0.125f),
             SpriteModulate = new Color(1f, 0.82f, 0.35f),
         },
         ["Barracks"] = new()
         {
-            Footprint = Single,
+            Footprint = Footprint2x2,
             TexturePath = PlaceholderTexturePath,
-            SpriteScale = new(0.0625f, 0.0625f),
-            SpriteModulate = Colors.White,
+            SpriteScale = new(0.125f, 0.125f),
+            SpriteModulate = new Color(0.55f, 0.6f, 0.75f),
+        },
+        ["ShieldCamp"] = new()
+        {
+            Footprint = Footprint2x2,
+            TexturePath = PlaceholderTexturePath,
+            SpriteScale = new(0.125f, 0.125f),
+            SpriteModulate = new Color(0.4f, 0.4f, 0.45f),
         },
         ["ArcheryRange"] = new()
         {
-            Footprint = ArcheryRangeCells,
+            Footprint = Footprint2x2,
             TexturePath = PlaceholderTexturePath,
-            SpriteScale = new(0.125f, 0.0625f),
-            SpriteModulate = new Color(0.55f, 0.85f, 0.45f),
+            SpriteScale = new(0.125f, 0.125f),
+            SpriteModulate = new Color(0.45f, 0.75f, 0.45f),
         },
         ["Stable"] = new()
         {
-            Footprint = StableCells,
+            Footprint = Footprint2x2,
             TexturePath = PlaceholderTexturePath,
-            SpriteScale = new(0.125f, 0.1875f),
-            SpriteModulate = new Color(0.75f, 0.55f, 0.3f),
+            SpriteScale = new(0.125f, 0.125f),
+            SpriteModulate = new Color(0.65f, 0.5f, 0.3f),
         },
-        ["WolfDen"] = new()
+        ["ScoutCamp"] = new()
         {
-            Footprint = Single,
+            Footprint = Footprint2x2,
             TexturePath = PlaceholderTexturePath,
-            SpriteScale = new(0.0625f, 0.0625f),
-            SpriteModulate = new Color(0.55f, 0.35f, 0.75f),
+            SpriteScale = new(0.125f, 0.125f),
+            SpriteModulate = new Color(0.5f, 0.65f, 0.85f),
         },
-        ["BarracksT2"] = new()
+        ["Armory"] = new()
         {
-            Footprint = Single,
+            Footprint = Footprint2x2,
             TexturePath = PlaceholderTexturePath,
-            SpriteScale = new(0.0625f, 0.0625f),
-            SpriteModulate = new Color(0.85f, 0.9f, 1f),
+            SpriteScale = new(0.125f, 0.125f),
+            SpriteModulate = new Color(0.65f, 0.7f, 0.85f),
         },
-        ["WolfDenT2"] = new()
+        ["Bulwark"] = new()
         {
-            Footprint = Single,
+            Footprint = Footprint2x2,
             TexturePath = PlaceholderTexturePath,
-            SpriteScale = new(0.0625f, 0.0625f),
-            SpriteModulate = new Color(0.65f, 0.45f, 0.85f),
+            SpriteScale = new(0.125f, 0.125f),
+            SpriteModulate = new Color(0.5f, 0.5f, 0.55f),
+        },
+        ["CrossbowTower"] = new()
+        {
+            Footprint = Footprint2x2,
+            TexturePath = PlaceholderTexturePath,
+            SpriteScale = new(0.125f, 0.125f),
+            SpriteModulate = new Color(0.55f, 0.85f, 0.55f),
+        },
+        ["Ranch"] = new()
+        {
+            Footprint = Footprint2x2,
+            TexturePath = PlaceholderTexturePath,
+            SpriteScale = new(0.125f, 0.125f),
+            SpriteModulate = new Color(0.75f, 0.6f, 0.4f),
+        },
+        ["RangerPost"] = new()
+        {
+            Footprint = Footprint2x2,
+            TexturePath = PlaceholderTexturePath,
+            SpriteScale = new(0.125f, 0.125f),
+            SpriteModulate = new Color(0.6f, 0.75f, 0.95f),
         },
     };
 

@@ -119,7 +119,7 @@ public sealed class BuildingInfoUiController
             return;
 
         AdjacencyService adjacencyService = GameManager.Get<AdjacencyService>();
-        IReadOnlyList<IAdjacencyBuilding> domainTargets = adjacencyService.GetBarracksTargets(hovered, castle.GetBuildingStates());
+        IReadOnlyList<IAdjacencyBuilding> domainTargets = adjacencyService.GetAdjacentSameTypeTargets(hovered, castle.GetBuildingStates());
         List<Building> targets = new();
         foreach (IAdjacencyBuilding t in domainTargets)
         {

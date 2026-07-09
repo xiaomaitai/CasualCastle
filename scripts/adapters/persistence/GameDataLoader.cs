@@ -38,7 +38,7 @@ public static class GameDataLoader
 
     private static List<CardData> LoadShopCatalog(SqliteCommand cmd)
     {
-        cmd.CommandText = "SELECT id, name, cost, building_type FROM shop_catalog";
+        cmd.CommandText = "SELECT id, name, cost, building_type, weight FROM shop_catalog";
         using SqliteDataReader reader = cmd.ExecuteReader();
         List<CardData> catalog = new();
         while (reader.Read())
@@ -49,6 +49,7 @@ public static class GameDataLoader
                 Name = reader.GetString(1),
                 Cost = reader.GetInt32(2),
                 BuildingType = reader.GetString(3),
+                Weight = reader.GetInt32(4),
             });
         }
         return catalog;

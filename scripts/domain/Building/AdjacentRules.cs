@@ -62,21 +62,18 @@ public static class AdjacentRules
         IAdjacencyBuilding building, IReadOnlyList<IAdjacencyBuilding> allBuildings,
         IBuildingRepository buildingRepo)
     {
-        if (!building.ContributesToAdjacency || !IsBarracksType(building.TypeId))
+        if (!building.ContributesToAdjacency)
             return 1f;
 
-        int adjacentBarracks = 0;
+        int adjacentSameType = 0;
         foreach (IAdjacencyBuilding neighbor in GetAdjacentBuildings(building, allBuildings, buildingRepo))
         {
-            if (IsBarracksType(neighbor.TypeId) && neighbor.ContributesToAdjacency)
-                adjacentBarracks++;
+            if (neighbor.TypeId == building.TypeId && neighbor.ContributesToAdjacency)
+                adjacentSameType++;
         }
 
-        return adjacentBarracks > 0 ? 1f + 0.2f * adjacentBarracks : 1f;
+        return adjacentSameType > 0 ? 1f + 0.2f * adjacentSameType : 1f;
     }
-
-    public static bool IsBarracksType(string typeId) =>
-        typeId == "Barracks" || typeId == "BarracksT2";
 
     private static Dictionary<(int x, int y), IAdjacencyBuilding> BuildCellOwnerMap(
         IReadOnlyList<IAdjacencyBuilding> buildings, IBuildingRepository buildingRepo)
