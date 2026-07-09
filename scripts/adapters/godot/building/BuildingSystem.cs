@@ -259,6 +259,7 @@ public partial class BuildingSystem : Node
         Building building = InstantiateBuilding();
         if (building == null) return false;
 
+        building.InitFromType(buildingType);
         building.BindToGrid(castle, anchorX, anchorY);
         if (!castle.PlaceBuilding(building, anchorX, anchorY, buildingType))
         {
