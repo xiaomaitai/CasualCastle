@@ -22,6 +22,7 @@ public sealed class HudUiController
         _goldLabel = uiRoot.GetNode<Label>("GoldLabel");
 
         _skipPhaseButton.Pressed += OnSkipPhasePressed;
+        _skipPhaseButton.Visible = DisplaySettingsManager.DevModeEnabled;
 
         AdapterRegistry.Resolve<GameManager>().PlayerHealthChanged += UpdatePlayerHealth;
         AdapterRegistry.Resolve<GameManager>().EnemyHealthChanged += UpdateEnemyHealth;
@@ -57,7 +58,7 @@ public sealed class HudUiController
 
     public void SetGameOverVisible(bool visible)
     {
-        _skipPhaseButton.Visible = !visible;
+        _skipPhaseButton.Visible = !visible && DisplaySettingsManager.DevModeEnabled;
     }
 
     private void OnSkipPhasePressed()
