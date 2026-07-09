@@ -53,7 +53,7 @@ public class ReplayTarget : IReplayTarget
         building.ApplySnapshotState(
             snapshot.Health,
             snapshot.IsManuallyPaused,
-            snapshot.IsFusionProhibited);
+            snapshot.IsCombineProhibited);
         return true;
     }
 

@@ -37,7 +37,7 @@ CREATE TABLE building_defs (
     spawn_cell_y      INTEGER DEFAULT 0,
     unit_type_id      TEXT,
     has_night_combat  INTEGER DEFAULT 0,
-    fusion_tier       INTEGER DEFAULT 0,
+    combine_tier       INTEGER DEFAULT 0,
     is_core           INTEGER DEFAULT 0,
     footprint_json    TEXT    NOT NULL,
     collision_width   INTEGER NOT NULL DEFAULT 80,
@@ -85,7 +85,7 @@ INSERT INTO shop_catalog VALUES
 ('stable',        '马厩',   5, 'Stable',       20),
 ('scout_camp',    '斥候营', 2, 'ScoutCamp',    16);
 
-CREATE TABLE fusion_recipes (
+CREATE TABLE combine_recipes (
     main_type_id     TEXT NOT NULL,
     material_type_id TEXT NOT NULL,
     material_count   INTEGER NOT NULL,
@@ -93,7 +93,7 @@ CREATE TABLE fusion_recipes (
     PRIMARY KEY (main_type_id, material_type_id)
 );
 
-INSERT INTO fusion_recipes VALUES
+INSERT INTO combine_recipes VALUES
 ('Barracks',     'Barracks',     1, 'Armory'),
 ('ShieldCamp',   'ShieldCamp',   1, 'Bulwark'),
 ('ArcheryRange', 'ArcheryRange', 1, 'CrossbowTower'),

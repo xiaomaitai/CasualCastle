@@ -68,7 +68,7 @@ public static class AdjacentRules
         int adjacentSameType = 0;
         foreach (IAdjacencyBuilding neighbor in GetAdjacentBuildings(building, allBuildings, buildingRepo))
         {
-            if (FusionRules.IsSameLine(building.TypeId, neighbor.TypeId) && neighbor.ContributesToAdjacency)
+            if (CombineRules.IsSameLine(building.TypeId, neighbor.TypeId) && neighbor.ContributesToAdjacency)
                 adjacentSameType++;
         }
 

@@ -3,13 +3,13 @@ using System.Linq;
 
 namespace CasualCastle.Domain.Building;
 
-public sealed class FusionGroup
+public sealed class CombineGroup
 {
     public IBuildingState Main { get; }
     public List<IBuildingState> Materials { get; }
-    public FusionRecipe Recipe { get; }
+    public CombineRecipe Recipe { get; }
 
-    public FusionGroup(IBuildingState main, List<IBuildingState> materials, FusionRecipe recipe)
+    public CombineGroup(IBuildingState main, List<IBuildingState> materials, CombineRecipe recipe)
     {
         Main = main;
         Materials = materials;
@@ -17,26 +17,26 @@ public sealed class FusionGroup
     }
 }
 
-public static class FusionRules
+public static class CombineRules
 {
-    private static FusionRecipe[] _recipes = System.Array.Empty<FusionRecipe>();
+    private static CombineRecipe[] _recipes = System.Array.Empty<CombineRecipe>();
 
-    public static void LoadRecipes(List<FusionRecipe> recipes)
+    public static void LoadRecipes(List<CombineRecipe> recipes)
     {
         _recipes = recipes.ToArray();
     }
 
-    public static IReadOnlyList<FusionRecipe> GetRecipes() => _recipes;
+    public static IReadOnlyList<CombineRecipe> GetRecipes() => _recipes;
 
     public static bool CanParticipate(IBuildingState building, IBuildingRepository buildingRepo)
     {
         if (building == null || building.IsDestroyed || building.IsManuallyPaused)
             return false;
-        if (building.IsFusionProhibited)
+        if (building.IsCombineProhibited)
             return false;
         if (buildingRepo.IsCoreBuilding(building.TypeId))
             return false;
-        if (!buildingRepo.IsFusibleMaterial(building.TypeId))
+        if (!buildingRepo.IsCombinableMaterial(building.TypeId))
             return false;
         if (!building.IsPlayerOwned)
             return false;
@@ -45,8 +45,8 @@ public static class FusionRules
         return true;
     }
 
-    public static bool CanFuseGroup(
-        IBuildingState main, IReadOnlyList<IBuildingState> materials, FusionRecipe recipe,
+    public static bool CanCombineGroup(
+        IBuildingState main, IReadOnlyList<IBuildingState> materials, CombineRecipe recipe,
         IBuildingRepository buildingRepo)
     {
         if (main == null || recipe == null || materials == null)
@@ -79,7 +79,7 @@ public static class FusionRules
         return true;
     }
 
-    public static FusionGroup FindBestFusibleGroup(
+    public static CombineGroup FindBestCombinableGroup(
         IReadOnlyList<IBuildingState> buildings, HashSet<IBuildingState> used,
         IBuildingRepository buildingRepo)
     {
@@ -94,7 +94,7 @@ public static class FusionRules
             if (!CanParticipate(main, buildingRepo))
                 continue;
 
-            foreach (FusionRecipe recipe in _recipes)
+            foreach (CombineRecipe recipe in _recipes)
             {
                 if (main.TypeId != recipe.MainTypeId)
                     continue;
@@ -103,10 +103,10 @@ public static class FusionRules
                 if (materials == null)
                     continue;
 
-                if (!CanFuseGroup(main, materials, recipe, buildingRepo))
+                if (!CanCombineGroup(main, materials, recipe, buildingRepo))
                     continue;
 
-                return new FusionGroup(main, materials, recipe);
+                return new CombineGroup(main, materials, recipe);
             }
         }
 
@@ -118,7 +118,7 @@ public static class FusionRules
         if (typeA == typeB)
             return true;
 
-        foreach (FusionRecipe recipe in _recipes)
+        foreach (CombineRecipe recipe in _recipes)
         {
             if ((recipe.MainTypeId == typeA && recipe.ResultTypeId == typeB)
                 || (recipe.MainTypeId == typeB && recipe.ResultTypeId == typeA))
@@ -129,7 +129,7 @@ public static class FusionRules
     }
 
     private static List<IBuildingState> PickMaterials(
-        IBuildingState main, FusionRecipe recipe,
+        IBuildingState main, CombineRecipe recipe,
         IReadOnlyList<IBuildingState> allBuildings, HashSet<IBuildingState> used,
         IBuildingRepository buildingRepo)
     {

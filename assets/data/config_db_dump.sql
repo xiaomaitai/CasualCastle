@@ -36,7 +36,7 @@ CREATE TABLE building_defs (
     spawn_cell_y      INTEGER DEFAULT 0,
     unit_type_id      TEXT,
     has_night_combat  INTEGER DEFAULT 0,
-    fusion_tier       INTEGER DEFAULT 0,
+    combine_tier       INTEGER DEFAULT 0,
     is_core           INTEGER DEFAULT 0,
     footprint_json    TEXT    NOT NULL,
     collision_width   INTEGER NOT NULL DEFAULT 80,
@@ -87,18 +87,18 @@ INSERT INTO shop_catalog VALUES('shield_camp','盾营',3,'ShieldCamp',20);
 INSERT INTO shop_catalog VALUES('archery_range','靶场',4,'ArcheryRange',24);
 INSERT INTO shop_catalog VALUES('stable','马厩',5,'Stable',20);
 INSERT INTO shop_catalog VALUES('scout_camp','斥候营',2,'ScoutCamp',16);
-CREATE TABLE fusion_recipes (
+CREATE TABLE IF NOT EXISTS "combine_recipes" (
     main_type_id     TEXT NOT NULL,
     material_type_id TEXT NOT NULL,
     material_count   INTEGER NOT NULL,
     result_type_id   TEXT NOT NULL,
     PRIMARY KEY (main_type_id, material_type_id)
 );
-INSERT INTO fusion_recipes VALUES('Barracks','Barracks',1,'Armory');
-INSERT INTO fusion_recipes VALUES('ShieldCamp','ShieldCamp',1,'Bulwark');
-INSERT INTO fusion_recipes VALUES('ArcheryRange','ArcheryRange',1,'CrossbowTower');
-INSERT INTO fusion_recipes VALUES('Stable','Stable',1,'Ranch');
-INSERT INTO fusion_recipes VALUES('ScoutCamp','ScoutCamp',1,'RangerPost');
+INSERT INTO combine_recipes VALUES('Barracks','Barracks',1,'Armory');
+INSERT INTO combine_recipes VALUES('ShieldCamp','ShieldCamp',1,'Bulwark');
+INSERT INTO combine_recipes VALUES('ArcheryRange','ArcheryRange',1,'CrossbowTower');
+INSERT INTO combine_recipes VALUES('Stable','Stable',1,'Ranch');
+INSERT INTO combine_recipes VALUES('ScoutCamp','ScoutCamp',1,'RangerPost');
 CREATE TABLE asset_gen_tasks (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   generate_uuid TEXT NOT NULL,

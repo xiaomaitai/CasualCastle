@@ -184,9 +184,9 @@ public partial class BuildingSystem : Node
     }
 
     public static bool GetHasNightCombat(string buildingType) => BuildingRepo.GetHasNightCombat(buildingType);
-    public static int GetFusionTier(string buildingType) => BuildingRepo.GetFusionTier(buildingType);
+    public static int GetCombineTier(string buildingType) => BuildingRepo.GetCombineTier(buildingType);
     public static bool IsCoreBuilding(string buildingType) => BuildingRepo.IsCoreBuilding(buildingType);
-    public static bool IsFusibleMaterial(string buildingType) => BuildingRepo.IsFusibleMaterial(buildingType);
+    public static bool IsCombinableMaterial(string buildingType) => BuildingRepo.IsCombinableMaterial(buildingType);
     public static int GetCollisionWidth(string buildingType) => BuildingRepo.GetCollisionWidth(buildingType);
     public static int GetCollisionHeight(string buildingType) => BuildingRepo.GetCollisionHeight(buildingType);
 

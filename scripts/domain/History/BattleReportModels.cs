@@ -9,7 +9,7 @@ public class BuildingSnapshot
 	public int AnchorGridY { get; set; }
 	public int Health { get; set; }
 	public bool IsManuallyPaused { get; set; }
-	public bool IsFusionProhibited { get; set; }
+	public bool IsCombineProhibited { get; set; }
 }
 
 public class CastleSnapshot

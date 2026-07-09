@@ -30,17 +30,17 @@ public class BuildingData
 	public float ProductionInterval; // 产出间隔
 	public string UnitType;     // 产出部队类型
 	public List<string> AdjacentBonuses; // 邻接加成列表
-	public int FusionTier;      // 融合阶数（0 = 未融合）
+	public int CombineTier;      // 组合阶数（0 = 未组合）
 	public bool HasNightCombat; // 夜战词条
 }
 ```
 
 ---
 
-## 融合配方（M5）
+## 组合配方（M5）
 
 ```csharp
-public class FusionRecipe
+public class CombineRecipe
 {
 	public string MainTypeId;      // 主体建筑类型（结果落点）
 	public string MaterialTypeId;  // 辅材建筑类型
@@ -49,7 +49,7 @@ public class FusionRecipe
 }
 ```
 
-运行时首版放在 `FusionSystem` 静态表中，与 `BuildingSystem.Definitions` 并列维护。
+运行时首版放在 `CombineSystem` 静态表中，与 `BuildingSystem.Definitions` 并列维护。
 
 ---
 
@@ -63,7 +63,7 @@ public class BuildingSnapshot
 	public int AnchorGridY;
 	public int Health;
 	public bool IsManuallyPaused;
-	public bool IsFusionProhibited;
+	public bool IsCombineProhibited;
 }
 
 public class CastleSnapshot

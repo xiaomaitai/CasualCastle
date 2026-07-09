@@ -36,7 +36,7 @@ public partial class InitManager : Node
             if (phase == GameManager.GamePhase.Night)
             {
                 shopService.RequestOpenShop();
-                _nightOrchestrator.ResolveNightFusions(gm);
+                _nightOrchestrator.ResolveNightCombines(gm);
             }
             if (phase == GameManager.GamePhase.Night && gm.CurrentNightIndex >= 1)
                 _nightOrchestrator.ApplyReplaySnapshot(gm);

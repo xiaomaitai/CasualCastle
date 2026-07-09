@@ -59,7 +59,7 @@ public static class ReportBuilder
             AnchorGridY = source.AnchorGridY,
             Health = source.Health,
             IsManuallyPaused = source.IsManuallyPaused,
-            IsFusionProhibited = source.IsFusionProhibited,
+            IsCombineProhibited = source.IsCombineProhibited,
         };
     }
 }

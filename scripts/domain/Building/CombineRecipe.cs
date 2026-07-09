@@ -1,6 +1,6 @@
 namespace CasualCastle.Domain.Building;
 
-public class FusionRecipe
+public class CombineRecipe
 {
 	public string MainTypeId { get; init; }
 	public string MaterialTypeId { get; init; }

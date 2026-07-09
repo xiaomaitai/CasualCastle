@@ -44,7 +44,7 @@ public partial class BattleReportSystem : Node
                 AnchorGridY = b.AnchorGridY,
                 Health = b.Health,
                 IsManuallyPaused = b.IsManuallyPaused,
-                IsFusionProhibited = b.IsFusionProhibited,
+                IsCombineProhibited = b.IsCombineProhibited,
             });
 
         _service.CaptureNightSnapshot(snapshots, nightIndex);

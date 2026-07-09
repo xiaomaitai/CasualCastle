@@ -4,21 +4,21 @@ using CasualCastle.Adapters.Godot;
 
 public class NightOrchestrator
 {
-    public void ResolveNightFusions(GameManager gm)
+    public void ResolveNightCombines(GameManager gm)
     {
         Castle playerCastle = gm.PlayerCastle;
         if (playerCastle == null)
             return;
 
-        FusionBuildingFactory factory = new FusionBuildingFactory(playerCastle);
-        FusionService fusionService = new FusionService(factory, GameManager.Get<IBuildingRepository>());
-        fusionService.FusionCompleted += result =>
+        CombineBuildingFactory factory = new CombineBuildingFactory(playerCastle);
+        CombineService combineService = new CombineService(factory, GameManager.Get<IBuildingRepository>());
+        combineService.CombineCompleted += result =>
         {
             AdjacencyService adj = GameManager.Get<AdjacencyService>();
             adj.RefreshCastle(playerCastle.GetBuildingStates());
         };
 
-        fusionService.ResolveFusions(
+        combineService.ResolveCombines(
             playerCastle.GetBuildingStates(),
             true,
             gm.IsNight,

@@ -42,7 +42,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 	public int MaxHealth { get; private set; }
 	public int Health { get; private set; }
 	public bool IsManuallyPaused { get; private set; }
-	public bool IsFusionProhibited { get; private set; }
+	public bool IsCombineProhibited { get; private set; }
 	public bool IsDestroyed => Health <= 0;
 	public bool IsOperational => Health > 0 && !IsManuallyPaused;
 	public bool ContributesToAdjacency => !IsDestroyed;
@@ -110,16 +110,16 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		RefreshOperationalState();
 	}
 
-	public void SetFusionProhibited(bool prohibited)
+	public void SetCombineProhibited(bool prohibited)
 	{
-		if (BuildingSystem.IsCoreBuilding(TypeId) || IsFusionProhibited == prohibited)
+		if (BuildingSystem.IsCoreBuilding(TypeId) || IsCombineProhibited == prohibited)
 			return;
 
-		IsFusionProhibited = prohibited;
+		IsCombineProhibited = prohibited;
 		UpdateStateIcon();
 	}
 
-	public void ApplySnapshotState(int health, bool manuallyPaused, bool fusionProhibited)
+	public void ApplySnapshotState(int health, bool manuallyPaused, bool combineProhibited)
 	{
 		if (BuildingSystem.IsCoreBuilding(TypeId))
 			return;
@@ -129,7 +129,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		UpdateDamageVisual();
 
 		IsManuallyPaused = manuallyPaused;
-		IsFusionProhibited = fusionProhibited;
+		IsCombineProhibited = combineProhibited;
 		RefreshOperationalState();
 	}
 
@@ -536,7 +536,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		if (_stateIcon == null || BuildingSystem.IsCoreBuilding(TypeId))
 		{
 			_stateIcon?.SetPaused(false);
-			_stateIcon?.SetFusionProhibited(false);
+			_stateIcon?.SetCombineProhibited(false);
 			return;
 		}
 
@@ -545,6 +545,6 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		else
 			_stateIcon.SetPaused(false);
 
-		_stateIcon.SetFusionProhibited(IsFusionProhibited);
+		_stateIcon.SetCombineProhibited(IsCombineProhibited);
 	}
 }

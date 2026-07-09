@@ -4,20 +4,20 @@ using System.Linq;
 
 namespace CasualCastle.Domain.Building;
 
-public class FusionService : IFusionUseCase
+public class CombineService : ICombineUseCase
 {
-	public event Action<IBuildingState> FusionCompleted;
+	public event Action<IBuildingState> CombineCompleted;
 
-	private readonly IFusionBuildingFactory _factory;
+	private readonly ICombineBuildingFactory _factory;
 	private readonly IBuildingRepository _buildingRepo;
 
-	public FusionService(IFusionBuildingFactory factory, IBuildingRepository buildingRepo)
+	public CombineService(ICombineBuildingFactory factory, IBuildingRepository buildingRepo)
 	{
 		_factory = factory;
 		_buildingRepo = buildingRepo;
 	}
 
-	public void ResolveFusions(List<IBuildingState> buildings, bool isPlayerSide, bool isNight, bool isPlaying)
+	public void ResolveCombines(List<IBuildingState> buildings, bool isPlayerSide, bool isNight, bool isPlaying)
 	{
 		if (!isPlayerSide || !isPlaying || !isNight)
 			return;
@@ -26,11 +26,11 @@ public class FusionService : IFusionUseCase
 
 		while (true)
 		{
-			FusionGroup group = FusionRules.FindBestFusibleGroup(buildings, used, _buildingRepo);
+			CombineGroup group = CombineRules.FindBestCombinableGroup(buildings, used, _buildingRepo);
 			if (group == null)
 				break;
 
-			if (!TryFuseGroup(buildings, group))
+			if (!TryCombineGroup(buildings, group))
 			{
 				used.Add(group.Main);
 				foreach (IBuildingState mat in group.Materials)
@@ -39,9 +39,9 @@ public class FusionService : IFusionUseCase
 		}
 	}
 
-	private bool TryFuseGroup(List<IBuildingState> buildings, FusionGroup group)
+	private bool TryCombineGroup(List<IBuildingState> buildings, CombineGroup group)
 	{
-		if (!FusionRules.CanFuseGroup(group.Main, group.Materials, group.Recipe, _buildingRepo))
+		if (!CombineRules.CanCombineGroup(group.Main, group.Materials, group.Recipe, _buildingRepo))
 			return false;
 
 		foreach (IBuildingState mat in group.Materials)
@@ -61,7 +61,7 @@ public class FusionService : IFusionUseCase
 		buildings.RemoveAll(b => group.Materials.Contains(b) || b == oldMain);
 		buildings.Add(result);
 
-		FusionCompleted?.Invoke(result);
+		CombineCompleted?.Invoke(result);
 		return true;
 	}
 }

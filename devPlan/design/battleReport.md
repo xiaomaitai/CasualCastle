@@ -9,7 +9,7 @@
 **战报（Battle Report）** = 一局游戏中，按夜晚序号排列的**玩家城堡快照**列表。
 
 - 每条快照在**夜晚结束**（切回白天之前）拍摄
-- 快照内容：玩家侧所有已放置建筑（类型、锚点格、生命值、手动暂停、禁止融合等实现所需字段）
+- 快照内容：玩家侧所有已放置建筑（类型、锚点格、生命值、手动暂停、禁止组合等实现所需字段）
 - 不包含敌方城堡、手牌、金币
 
 ---
@@ -17,7 +17,7 @@
 ## 录制时机
 
 ```text
-夜晚进行中（商店 / 修复 / 融合等）
+夜晚进行中（商店 / 修复 / 组合等）
   → 玩家操作或等待
   → 阶段切换：Night → Day（夜晚结束）
       → BattleReportSystem.CaptureNightSnapshot(playerCastle, nightIndex)
@@ -52,7 +52,7 @@
 | 字段 | 说明 |
 |------|------|
 | `NightIndex` | 夜晚序号 |
-| `Buildings` | 建筑列表：`TypeId`、`AnchorGridX/Y`、多格 `Footprint` 偏移、`Health`、`IsManuallyPaused`、`IsFusionProhibited` |
+| `Buildings` | 建筑列表：`TypeId`、`AnchorGridX/Y`、多格 `Footprint` 偏移、`Health`、`IsManuallyPaused`、`IsCombineProhibited` |
 
 城堡之心若需记录可单独字段；M6 默认不复制核心建筑到敌方（见 AI 文档）。
 
