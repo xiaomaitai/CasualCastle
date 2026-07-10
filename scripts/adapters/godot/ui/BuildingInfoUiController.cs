@@ -102,8 +102,8 @@ public sealed class BuildingInfoUiController
             return "已摧毁";
         if (building.IsManuallyPaused)
             return "手动暂停";
-        if (building.IsFusionProhibited)
-            return "已禁止融合";
+        if (building.IsCombineProhibited)
+            return "已禁止组合";
         if (GameManager.Instance?.IsNight == true)
             return building.HasNightCombat ? "夜晚可行动" : "夜晚休眠";
         return building.CanWork ? "工作中" : "停止工作";
@@ -119,7 +119,7 @@ public sealed class BuildingInfoUiController
             return;
 
         AdjacencyService adjacencyService = GameManager.Get<AdjacencyService>();
-        IReadOnlyList<IAdjacencyBuilding> domainTargets = adjacencyService.GetBarracksTargets(hovered, castle.GetBuildingStates());
+        IReadOnlyList<IAdjacencyBuilding> domainTargets = adjacencyService.GetAdjacentSameTypeTargets(hovered, castle.GetBuildingStates());
         List<Building> targets = new();
         foreach (IAdjacencyBuilding t in domainTargets)
         {

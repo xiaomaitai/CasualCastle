@@ -1,6 +1,6 @@
 # 敌方复刻（回放式 AI）— M6
 
-敌方**不自主决策**（不购卡、不选位、不融合）。每局从永久战报库中**选取一条战报**，在每次**夜晚开始**时，按当前夜晚序号取出对应快照，将建筑**镜像复刻**到敌方城堡。概念见 `devPlan/concepts.md` §战报；录制见 `devPlan/design/battleReport.md`。
+敌方**不自主决策**（不购卡、不选位、不组合）。每局从永久战报库中**选取一条战报**，在每次**夜晚开始**时，按当前夜晚序号取出对应快照，将建筑**镜像复刻**到敌方城堡。概念见 `devPlan/concepts.md` §战报；录制见 `devPlan/design/battleReport.md`。
 
 ---
 
@@ -10,11 +10,11 @@
 |------|------|
 | 决策方式 | **无**自主 AI；仅战报回放 |
 | 战报来源 | 局前或开局选定一条已保存战报 |
-| 触发时机 | 第 N 夜**开始**（`PhaseChanged → Night`，在玩家融合之前或之后需固定顺序，见下） |
+| 触发时机 | 第 N 夜**开始**（`PhaseChanged → Night`，在玩家组合之前或之后需固定顺序，见下） |
 | 取用条目 | 战报中 `NightIndex == N` 的快照（该条为历史对局**第 N 夜结束**时录制的玩家城堡） |
 | 复刻方式 | 快照建筑**水平镜像**映射到敌方城堡同格位（左右对称；实现时以双方 8×8 网格镜像 `gridX`） |
 | 跳过条件 | 目标格（或建筑占格任一格）被**玩家士兵**占据 → 该建筑不复制 |
-| 生命与状态 | 与快照一致（含受损、暂停、禁止融合标记） |
+| 生命与状态 | 与快照一致（含受损、暂停、禁止组合标记） |
 
 若无 `NightIndex == N` 的条目：敌方保持上一夜布局，本夜不追加复刻。
 
@@ -24,7 +24,7 @@
 
 ```text
 PhaseChanged → Night（NightIndex 已更新为 N）
-  → FusionSystem.ResolveNightFusions(playerCastle)   // 玩家先融合
+  → CombineSystem.ResolveNightCombines(playerCastle)   // 玩家先组合
   → ReplayAiSystem.ApplyNightSnapshot(enemyCastle, report, N)  // 再复刻敌方
   → ShopSystem 开商店…
 ```
@@ -41,7 +41,7 @@ PhaseChanged → Night（NightIndex 已更新为 N）
 4. 移除敌方城堡上需替换的旧建筑（非核心、与快照冲突格位）
 5. 在空位创建 `BuildingSystem.CreateBuilding(type)`，`BindToGrid`，写入快照生命与状态
 
-**不做：** 敌方 `FusionSystem` 独立融合；快照里已是融合结果则直接放置对应 `TypeId`（如 `BarracksT2`）。
+**不做：** 敌方 `CombineSystem` 独立组合；快照里已是组合结果则直接放置对应 `TypeId`（如 `BarracksT2`）。
 
 ---
 
@@ -74,6 +74,6 @@ PhaseChanged → Night（NightIndex 已更新为 N）
 
 ## 不做事项（M6）
 
-- 购卡、金币、放置评分、自主融合
+- 购卡、金币、放置评分、自主组合
 - 多条战报混合、按回合动态换战报
-- 敌方修复、禁止融合工具
+- 敌方修复、禁止组合工具

@@ -1,9 +1,11 @@
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
+using CasualCastle.Domain.Shared;
 using Godot;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 
 public partial class GameManager : Node2D, IGameState
 {
@@ -47,8 +49,9 @@ public partial class GameManager : Node2D, IGameState
     public bool IsNight => CurrentPhase == GamePhase.Night;
     public bool IsPaused { get; private set; }
     public float PhaseTimeRemaining { get; private set; }
-    public int CurrentNightIndex { get; private set; }
+    public int CurrentNightIndex { get; set; }
     public string PendingReplayReportId { get; private set; } = "";
+    public int PendingLoadSlot { get; set; } = -1;
 
     [Export]
     public int PlayerMaxHealth = 100;
@@ -226,6 +229,58 @@ public partial class GameManager : Node2D, IGameState
         SetProcess(false);
         EmitSignal(SignalName.GameStateChanged, (int)CurrentState);
         GD.Print(playerWon ? "Player Wins!" : "Enemy Wins!");
+
+        int slot = 0;
+        Get<ISaveRepository>().DeleteSave(slot);
+    }
+
+    public void SaveGame(int slot)
+    {
+        SaveData data = new SaveData
+        {
+            SlotIndex = slot,
+            Gold = AdapterRegistry.Resolve<Shop>().Gold,
+            CurrentNightIndex = CurrentNightIndex,
+            PendingReplayReportId = PendingReplayReportId,
+        };
+
+        List<Building> buildings = _playerCastle.GetBuildings();
+        foreach (Building b in buildings)
+        {
+            data.Buildings.Add(new BuildingSaveEntry
+            {
+                TypeId = b.TypeId,
+                AnchorGridX = b.AnchorGridX,
+                AnchorGridY = b.AnchorGridY,
+                Health = b.Health,
+            });
+        }
+
+        IReadOnlyList<CardData> handCards = AdapterRegistry.Resolve<Hand>().Cards;
+        foreach (CardData c in handCards)
+        {
+            data.HandCards.Add(new CardSaveEntry
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Cost = c.Cost,
+                BuildingType = c.BuildingType,
+                Weight = c.Weight,
+            });
+        }
+
+        Get<ISaveRepository>().Save(data);
+        GD.Print($"Game saved to slot {slot}");
+    }
+
+    public SaveData LoadSaveData(int slot)
+    {
+        return Get<ISaveRepository>().Load(slot);
+    }
+
+    public bool HasSave(int slot)
+    {
+        return Get<ISaveRepository>().HasSave(slot);
     }
 
     public void RestartGame()

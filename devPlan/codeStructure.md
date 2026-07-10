@@ -15,12 +15,12 @@ CasualCastle/
 │   │   │   ├── GameCoordinateRules.cs, GameRules.cs
 │   │   │   └── SharedModule.cs
 │   │   ├── Building/                               # Building.csproj → Shared
-│   │   │   ├── CardData.cs, FusionRecipe.cs
+│   │   │   ├── CardData.cs, CombineRecipe.cs
 │   │   │   ├── BuildingDefinitions.cs, OccupancyGrid.cs, Player.cs
-│   │   │   ├── AdjacentRules.cs, FusionRules.cs, ShopRules.cs, CardRules.cs
-│   │   │   ├── Hand.cs, Shop.cs, AdjacencyService.cs, FusionService.cs
+│   │   │   ├── AdjacentRules.cs, CombineRules.cs, ShopRules.cs, CardRules.cs
+│   │   │   ├── Hand.cs, Shop.cs, AdjacencyService.cs, CombineService.cs
 │   │   │   ├── IBuildingState.cs, IBuildingPlacement.cs
-│   │   │   ├── IBuildingRepository.cs, IFusionBuildingFactory.cs
+│   │   │   ├── IBuildingRepository.cs, ICombineBuildingFactory.cs
 │   │   │   └── BuildingModule.cs
 │   │   ├── Battle/                                 # Battle.csproj → Shared, Building
 │   │   │   ├── Soldier.cs, SoldierState.cs, UnitStats.cs, UnitSize.cs
@@ -53,7 +53,7 @@ CasualCastle/
 │   │       │                                       # SoldierLifecycle, SoldierVisual
 │   │       │                                       # NavigationPortAdapter, BattleManager, UnitSpawn
 │       │   ├── battle_report/ BattleReportSystem.cs
-│       │   ├── fusion/        FusionBuildingFactory.cs
+│       │   ├── combine/        CombineBuildingFactory.cs
 │       │   ├── replay/        ReplayTarget.cs
 │       │   ├── ui/            UIManager + 子控制器
 │       │   ├── flow/          TitleScreen, MainGameController, NightOrchestrator
@@ -155,7 +155,7 @@ domain 项目零 `using Godot`，单向无循环。
 | `SoldierService` | Battle | 手动 new（每个士兵实例，通过 SoldierLogic） |
 | `AdjacencyService` | Building | MS DI Singleton |
 | `ShopRules` | Building | MS DI Singleton |
-| `FusionService` | Building | 手动 new（每次入夜融合，通过 NightOrchestrator） |
+| `CombineService` | Building | 手动 new（每次入夜组合，通过 NightOrchestrator） |
 | `Hand` | Building | AdapterRegistry（依赖 Godot 桥接） |
 | `Shop` | Building | AdapterRegistry（依赖 Hand） |
 | `Player` | Building | 手动 new（通过 InitManager） |
@@ -171,8 +171,8 @@ domain 项目零 `using Godot`，单向无循环。
 | `ShopUiController` | 商店面板、购买、拖拽直放 |
 | `HandUiController` | 手牌展示、选中、拖拽放置 |
 | `BuildingInfoUiController` | 建筑悬停信息 |
-| `BuildingManageUiController` | 暂停/修复/禁止融合工具 |
-| `FusionProhibitUiController` | 禁止融合标记 |
+| `BuildingManageUiController` | 暂停/修复/禁止组合工具 |
+| `CombineProhibitUiController` | 禁止组合标记 |
 | `PauseMenuUiController` | 暂停菜单 |
 | `GameOverUiController` | 结算弹窗 |
 | `SettingsUiController` | 设置面板（显示模式/分辨率/开发者模式） |
@@ -186,7 +186,7 @@ domain 项目零 `using Godot`，单向无循环。
 3. `MainGameController._Ready()` 注册 Battlefield/Castle 到 GameManager
 4. `GameManager.StartGameSession()` → 开始昼夜循环（Day 60s / Night 30s）
 5. 白天：兵营产兵、士兵推进战斗（SoldierLogic → IFieldUnitRepository → UnitSpatialService）
-6. 夜晚：融合 → 敌方复刻 → 开商店 → 休眠无夜战单位
+6. 夜晚：组合 → 敌方复刻 → 开商店 → 休眠无夜战单位
 7. 任一方城堡血量归零 → GameOver → 结算弹窗（保存战报/返回标题）
 
 ---
@@ -204,11 +204,11 @@ domain 项目零 `using Godot`，单向无循环。
 | `ISoldierEventPort` | Domain.Battle | SoldierEventRelay | 出站 |
 | `IBuildingRef` | Domain.Battle | Building | 出站 |
 | `IBuildingTarget` | Domain.Battle | Building | 出站 |
-| `IFusionUseCase` | Domain.Building | FusionService | 入站 |
+| `ICombineUseCase` | Domain.Building | CombineService | 入站 |
 | `IBuildingPlacement` | Domain.Building | CastlePlacementAdapter | 入站 |
 | `IBuildingRepository` | Domain.Building | SqliteBuildingRepository | 出站 |
 | `IBuildingState` | Domain.Building | Building | 领域内接口 |
-| `IFusionBuildingFactory` | Domain.Building | FusionBuildingFactory | 出站 |
+| `ICombineBuildingFactory` | Domain.Building | CombineBuildingFactory | 出站 |
 | `IBattleReportRepository` | Domain.History | BattleReportStorage | 出站 |
 | `IReplayUseCase` | Domain.History | ReplayService | 入站 |
 | `IReplayTarget` | Domain.History | ReplayTarget | 出站 |

@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://scripts/adapters/godot/autoload/InitManager.cs" id="17"]
 [ext_resource type="Texture2D" path="res://assets/art/battlefield/mountain_bg.png" id="18"]
 [ext_resource type="Script" path="res://scripts/adapters/godot/battle/GrassBattlefield.cs" id="20"]
+[ext_resource type="Script" path="res://scripts/adapters/godot/flow/CameraController.cs" id="21"]
 
 [node name="MainGame" type="Node2D" unique_id=1]
 script = ExtResource("10")
@@ -32,6 +33,7 @@ y_sort_enabled = true
 [node name="Camera2D" type="Camera2D" parent="Battlefield"]
 position = Vector2(960, 540)
 current = true
+script = ExtResource("21")
 
 [node name="ParallaxBackground" type="ParallaxBackground" parent="Battlefield"]
 scroll_base_offset = Vector2(960, 540)
@@ -151,7 +153,7 @@ toggle_mode = true
 expand_icon = true
 tooltip_text = "修复建筑（仅夜晚）"
 
-[node name="FusionProhibitToolButton" type="Button" parent="UI"]
+[node name="CombineProhibitToolButton" type="Button" parent="UI"]
 custom_minimum_size = Vector2(72, 54)
 offset_left = 1651.5
 offset_top = 942
@@ -159,7 +161,7 @@ offset_right = 1723.5
 offset_bottom = 996
 toggle_mode = true
 expand_icon = true
-tooltip_text = "禁止融合"
+tooltip_text = "禁止组合"
 
 [node name="HandPanel" type="HBoxContainer" parent="UI"]
 offset_left = 460.5

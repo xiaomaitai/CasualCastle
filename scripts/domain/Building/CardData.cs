@@ -6,6 +6,7 @@ public class CardData
     public string Name { get; set; } = "";
     public int Cost { get; set; }
     public string BuildingType { get; set; } = "Barracks";
+    public int Weight { get; set; } = 1;
 
     public CardData Clone()
     {
@@ -15,6 +16,7 @@ public class CardData
             Name = Name,
             Cost = Cost,
             BuildingType = BuildingType,
+            Weight = Weight,
         };
     }
 }

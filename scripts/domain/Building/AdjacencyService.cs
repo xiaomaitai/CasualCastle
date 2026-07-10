@@ -24,17 +24,17 @@ public class AdjacencyService
         return new HashSet<IBuildingState>(neighbors.OfType<IBuildingState>());
     }
 
-    public IReadOnlyList<IAdjacencyBuilding> GetBarracksTargets(IAdjacencyBuilding source, List<IBuildingState> allBuildings)
+    public IReadOnlyList<IAdjacencyBuilding> GetAdjacentSameTypeTargets(IAdjacencyBuilding source, List<IBuildingState> allBuildings)
     {
         List<IAdjacencyBuilding> results = new();
-        if (!AdjacentRules.IsBarracksType(source.TypeId) || !source.ContributesToAdjacency)
+        if (!source.ContributesToAdjacency)
             return results;
 
         HashSet<IBuildingState> neighbors = GetAdjacentBuildings(source, allBuildings);
         foreach (IBuildingState neighbor in neighbors)
         {
             if (neighbor is IAdjacencyBuilding adj &&
-                AdjacentRules.IsBarracksType(adj.TypeId) &&
+                CombineRules.IsSameLine(source.TypeId, adj.TypeId) &&
                 adj.ContributesToAdjacency)
             {
                 results.Add(adj);

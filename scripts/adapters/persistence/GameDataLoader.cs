@@ -22,7 +22,7 @@ public static class GameDataLoader
         using SqliteCommand cmd = connection.CreateCommand();
         LoadDamageMatrix(cmd);
         ShopCatalog = LoadShopCatalog(cmd);
-        LoadFusionRecipes(cmd);
+        LoadCombineRecipes(cmd);
     }
 
 
@@ -38,7 +38,7 @@ public static class GameDataLoader
 
     private static List<CardData> LoadShopCatalog(SqliteCommand cmd)
     {
-        cmd.CommandText = "SELECT id, name, cost, building_type FROM shop_catalog";
+        cmd.CommandText = "SELECT id, name, cost, building_type, weight FROM shop_catalog";
         using SqliteDataReader reader = cmd.ExecuteReader();
         List<CardData> catalog = new();
         while (reader.Read())
@@ -49,19 +49,20 @@ public static class GameDataLoader
                 Name = reader.GetString(1),
                 Cost = reader.GetInt32(2),
                 BuildingType = reader.GetString(3),
+                Weight = reader.GetInt32(4),
             });
         }
         return catalog;
     }
 
-    private static void LoadFusionRecipes(SqliteCommand cmd)
+    private static void LoadCombineRecipes(SqliteCommand cmd)
     {
-        cmd.CommandText = "SELECT main_type_id, material_type_id, material_count, result_type_id FROM fusion_recipes";
+        cmd.CommandText = "SELECT main_type_id, material_type_id, material_count, result_type_id FROM combine_recipes";
         using SqliteDataReader reader = cmd.ExecuteReader();
-        List<FusionRecipe> recipes = new();
+        List<CombineRecipe> recipes = new();
         while (reader.Read())
         {
-            recipes.Add(new FusionRecipe
+            recipes.Add(new CombineRecipe
             {
                 MainTypeId = reader.GetString(0),
                 MaterialTypeId = reader.GetString(1),
@@ -69,6 +70,6 @@ public static class GameDataLoader
                 ResultTypeId = reader.GetString(3),
             });
         }
-        FusionRules.LoadRecipes(recipes);
+        CombineRules.LoadRecipes(recipes);
     }
 }

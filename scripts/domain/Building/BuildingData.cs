@@ -17,7 +17,7 @@ public class BuildingData
 	public bool HasNightCombat { get; init; }
 	public bool IsCore { get; init; }
 
-	public int FusionTier { get; init; }
+	public int CombineTier { get; init; }
 	public int CollisionWidth { get; init; } = GameCoordinateRules.CellBlockSize;
 	public int CollisionHeight { get; init; } = GameCoordinateRules.CellBlockSize;
 }

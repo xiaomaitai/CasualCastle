@@ -15,16 +15,15 @@ public interface IBuildingRepository
 	GridCellOffset GetSpawnCellOffset(string typeId) => Get(typeId).SpawnCellOffset;
 	string GetUnitTypeId(string typeId) => Get(typeId).UnitTypeId;
 	bool GetHasNightCombat(string typeId) => Get(typeId).HasNightCombat;
-	int GetFusionTier(string typeId) => Get(typeId).FusionTier;
+	int GetCombineTier(string typeId) => Get(typeId).CombineTier;
 	bool IsCoreBuilding(string typeId) => Get(typeId).IsCore;
 	int GetCollisionWidth(string typeId) => Get(typeId).CollisionWidth;
 	int GetCollisionHeight(string typeId) => Get(typeId).CollisionHeight;
 
-	bool IsFusibleMaterial(string typeId)
+	bool IsCombinableMaterial(string typeId)
 	{
 		BuildingData bd = Get(typeId);
-		return bd.FusionTier == 0
-			&& bd.Footprint.Length == 1
+		return bd.CombineTier == 0
 			&& !bd.IsCore;
 	}
 }

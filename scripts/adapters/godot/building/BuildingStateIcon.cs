@@ -6,9 +6,9 @@ public partial class BuildingStateIcon : Node2D
 	private static readonly Vector2 OverlayOffset = new(14f, -8f);
 
 	private Sprite2D _pauseSprite;
-	private Sprite2D _fusionProhibitSprite;
+	private Sprite2D _combineProhibitSprite;
 	private bool _paused;
-	private bool _fusionProhibited;
+	private bool _combineProhibited;
 
 	public override void _Ready()
 	{
@@ -18,14 +18,14 @@ public partial class BuildingStateIcon : Node2D
 			Centered = true,
 			Scale = DisplayScale,
 		};
-		_fusionProhibitSprite = new Sprite2D
+		_combineProhibitSprite = new Sprite2D
 		{
 			Centered = true,
 			Scale = DisplayScale,
 			Position = OverlayOffset,
 		};
 		AddChild(_pauseSprite);
-		AddChild(_fusionProhibitSprite);
+		AddChild(_combineProhibitSprite);
 		RefreshVisual();
 	}
 
@@ -38,18 +38,18 @@ public partial class BuildingStateIcon : Node2D
 		RefreshVisual();
 	}
 
-	public void SetFusionProhibited(bool prohibited)
+	public void SetCombineProhibited(bool prohibited)
 	{
-		if (_fusionProhibited == prohibited)
+		if (_combineProhibited == prohibited)
 			return;
 
-		_fusionProhibited = prohibited;
+		_combineProhibited = prohibited;
 		RefreshVisual();
 	}
 
 	private void RefreshVisual()
 	{
-		if (_pauseSprite == null || _fusionProhibitSprite == null)
+		if (_pauseSprite == null || _combineProhibitSprite == null)
 			return;
 
 		if (_paused)
@@ -63,18 +63,18 @@ public partial class BuildingStateIcon : Node2D
 			_pauseSprite.Visible = false;
 		}
 
-		if (_fusionProhibited)
+		if (_combineProhibited)
 		{
-			_fusionProhibitSprite.Texture = BuildingIcons.FusionProhibit;
-			_fusionProhibitSprite.Visible = true;
-			_fusionProhibitSprite.Position = _paused ? OverlayOffset : Vector2.Zero;
+			_combineProhibitSprite.Texture = BuildingIcons.CombineProhibit;
+			_combineProhibitSprite.Visible = true;
+			_combineProhibitSprite.Position = _paused ? OverlayOffset : Vector2.Zero;
 		}
 		else
 		{
-			_fusionProhibitSprite.Texture = null;
-			_fusionProhibitSprite.Visible = false;
+			_combineProhibitSprite.Texture = null;
+			_combineProhibitSprite.Visible = false;
 		}
 
-		Visible = _paused || _fusionProhibited;
+		Visible = _paused || _combineProhibited;
 	}
 }

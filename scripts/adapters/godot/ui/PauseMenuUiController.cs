@@ -8,6 +8,7 @@ public sealed class PauseMenuUiController
     private readonly Panel _panel;
     private readonly Button _menuButton;
     private readonly Button _continueButton;
+    private readonly Button _saveButton;
     private readonly Button _backToTitleButton;
     private readonly Button _settingsButton;
     private readonly Action _goToTitle;
@@ -29,8 +30,18 @@ public sealed class PauseMenuUiController
         _goToTitle = goToTitle;
         _openSettings = openSettings;
 
+        _saveButton = new Button();
+        _saveButton.Name = "SaveButton";
+        _saveButton.Text = "保存游戏";
+        _saveButton.OffsetLeft = 138;
+        _saveButton.OffsetTop = 438;
+        _saveButton.OffsetRight = 438;
+        _saveButton.OffsetBottom = 510;
+        _panel.AddChild(_saveButton);
+
         _menuButton.Pressed += OnMenuButtonPressed;
         _continueButton.Pressed += OnContinuePressed;
+        _saveButton.Pressed += OnSavePressed;
         _backToTitleButton.Pressed += OnBackToTitlePressed;
         _settingsButton.Pressed += OnSettingsPressed;
 
@@ -41,6 +52,7 @@ public sealed class PauseMenuUiController
     {
         _menuButton.Pressed -= OnMenuButtonPressed;
         _continueButton.Pressed -= OnContinuePressed;
+        _saveButton.Pressed -= OnSavePressed;
         _backToTitleButton.Pressed -= OnBackToTitlePressed;
         _settingsButton.Pressed -= OnSettingsPressed;
     }
@@ -87,6 +99,11 @@ public sealed class PauseMenuUiController
     private void OnMenuButtonPressed() => Open();
 
     private void OnContinuePressed() => Close();
+
+    private void OnSavePressed()
+    {
+        AdapterRegistry.Resolve<GameManager>().SaveGame(0);
+    }
 
     private void OnBackToTitlePressed()
     {

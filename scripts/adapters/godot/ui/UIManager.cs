@@ -13,7 +13,7 @@ public partial class UIManager : Node2D
     private HandUiController _handUi;
     private BuildingInfoUiController _buildingInfoUi;
     private BuildingManageUiController _buildingManageUi;
-    private FusionProhibitUiController _fusionProhibitUi;
+    private CombineProhibitUiController _combineProhibitUi;
     private PauseMenuUiController _pauseMenuUi;
     private SoldierInfoUiController _soldierInfoUi;
     private GameOverUiController _gameOverUi;
@@ -41,7 +41,7 @@ public partial class UIManager : Node2D
         }
         _handUi?.Dispose();
         _buildingManageUi?.Dispose();
-        _fusionProhibitUi?.Dispose();
+        _combineProhibitUi?.Dispose();
         if (_pauseMenuUi != null)
         {
             _pauseMenuUi.OpenChanged -= OnPauseMenuOpenChanged;
@@ -82,7 +82,7 @@ public partial class UIManager : Node2D
                 return;
             }
 
-            if (_fusionProhibitUi?.TryHandleEscape() == true)
+            if (_combineProhibitUi?.TryHandleEscape() == true)
             {
                 GetViewport().SetInputAsHandled();
                 return;
@@ -131,7 +131,7 @@ public partial class UIManager : Node2D
         if (_settingsUi?.IsOpen == true)
             return;
 
-        if (_fusionProhibitUi?.HandleInput(@event) == true)
+        if (_combineProhibitUi?.HandleInput(@event) == true)
         {
             GetViewport().SetInputAsHandled();
             return;
@@ -169,7 +169,7 @@ public partial class UIManager : Node2D
         _soldierInfoUi = new SoldierInfoUiController(this, uiRoot);
         ButtonGroup toolGroup = new ButtonGroup();
         _buildingManageUi = new BuildingManageUiController(this, uiRoot, toolGroup);
-        _fusionProhibitUi = new FusionProhibitUiController(this, uiRoot, toolGroup);
+        _combineProhibitUi = new CombineProhibitUiController(this, uiRoot, toolGroup);
         _settingsUi = new SettingsUiController(uiRoot.GetNode<Control>("SettingsPanel"));
         _pauseMenuUi = new PauseMenuUiController(uiRoot, GoToTitle, OpenSettings);
         _gameOverUi = new GameOverUiController(uiRoot, GoToTitle);
@@ -193,7 +193,7 @@ public partial class UIManager : Node2D
         _handUi.SetInputBlocked(_gameOver);
         _buildingInfoUi.SetInputBlocked(_gameOver);
         _buildingManageUi.SetGameOver(_gameOver);
-        _fusionProhibitUi.SetGameOver(_gameOver);
+        _combineProhibitUi.SetGameOver(_gameOver);
         _pauseMenuUi.SetGameOver(_gameOver);
         _gameOverUi.SetState(state);
     }
@@ -215,7 +215,7 @@ public partial class UIManager : Node2D
         else if (_pauseMenuUi?.IsOpen != true)
         {
             _buildingManageUi?.SetInputBlocked(_gameOver);
-            _fusionProhibitUi?.SetInputBlocked(_gameOver);
+            _combineProhibitUi?.SetInputBlocked(_gameOver);
         }
 
         UpdateHandInputBlocked();
@@ -229,12 +229,12 @@ public partial class UIManager : Node2D
             _handUi?.TryHandleEscape();
             _shopUi?.CancelDrag();
             _buildingManageUi?.SetInputBlocked(true);
-            _fusionProhibitUi?.SetInputBlocked(true);
+            _combineProhibitUi?.SetInputBlocked(true);
         }
         else
         {
             _buildingManageUi?.SetInputBlocked(_gameOver);
-            _fusionProhibitUi?.SetInputBlocked(_gameOver);
+            _combineProhibitUi?.SetInputBlocked(_gameOver);
         }
 
         UpdateHandInputBlocked();

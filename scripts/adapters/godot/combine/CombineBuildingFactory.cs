@@ -1,10 +1,10 @@
 using CasualCastle.Domain.Building;
 
-public class FusionBuildingFactory : IFusionBuildingFactory
+public class CombineBuildingFactory : ICombineBuildingFactory
 {
     private readonly Castle _castle;
 
-    public FusionBuildingFactory(Castle castle)
+    public CombineBuildingFactory(Castle castle)
     {
         _castle = castle;
     }

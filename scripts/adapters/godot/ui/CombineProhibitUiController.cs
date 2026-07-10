@@ -1,6 +1,6 @@
 using Godot;
 
-public sealed class FusionProhibitUiController
+public sealed class CombineProhibitUiController
 {
 	private readonly Button _button;
 	private readonly Castle _playerCastle;
@@ -12,10 +12,10 @@ public sealed class FusionProhibitUiController
 
 	public bool IsToolActive => _active;
 
-	public FusionProhibitUiController(Node owner, CanvasLayer uiRoot, ButtonGroup toolGroup)
+	public CombineProhibitUiController(Node owner, CanvasLayer uiRoot, ButtonGroup toolGroup)
 	{
 		_toolGroup = toolGroup;
-		_button = uiRoot.GetNode<Button>("FusionProhibitToolButton");
+		_button = uiRoot.GetNode<Button>("CombineProhibitToolButton");
 
 		Node mainGame = owner.GetParent();
 		_playerCastle = mainGame.GetNode<Castle>("Battlefield/PlayerSide/PlayerCastle");
@@ -23,10 +23,10 @@ public sealed class FusionProhibitUiController
 		_button.ButtonGroup = _toolGroup;
 		_button.ToggleMode = true;
 		_button.Toggled += OnToggled;
-		_button.Icon = BuildingIcons.FusionProhibit;
+		_button.Icon = BuildingIcons.CombineProhibit;
 		_button.ExpandIcon = true;
 		_button.Text = "";
-		_button.TooltipText = "禁止融合";
+		_button.TooltipText = "禁止组合";
 
 		UpdateButtonVisual();
 	}
@@ -83,7 +83,7 @@ public sealed class FusionProhibitUiController
 		if (!CanManage(building))
 			return false;
 
-		building.SetFusionProhibited(!building.IsFusionProhibited);
+		building.SetCombineProhibited(!building.IsCombineProhibited);
 		return true;
 	}
 
@@ -110,7 +110,7 @@ public sealed class FusionProhibitUiController
 	private void UpdateCursor()
 	{
 		if (_active)
-			Input.SetCustomMouseCursor(BuildingIcons.FusionProhibit, Input.CursorShape.Arrow, BuildingIcons.CursorHotspot);
+			Input.SetCustomMouseCursor(BuildingIcons.CombineProhibit, Input.CursorShape.Arrow, BuildingIcons.CursorHotspot);
 		else
 			Input.SetCustomMouseCursor(null);
 	}
