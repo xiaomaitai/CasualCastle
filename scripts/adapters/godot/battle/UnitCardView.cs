@@ -60,6 +60,7 @@ public partial class UnitCardView : Node2D
 	public void SetSelected(bool selected)
 	{
 		_selected = selected;
+		ZIndex = selected ? 20 : 0;
 		QueueRedraw();
 	}
 
@@ -111,7 +112,10 @@ public partial class UnitCardView : Node2D
 	public override void _Draw()
 	{
 		if (_selected)
-			DrawPanel(new Rect2(-55f, -105f, 110f, 110f), Colors.Transparent, SelectionColor, 3, 12);
+		{
+			DrawPanel(new Rect2(-59f, -109f, 118f, 118f), Colors.Transparent, new Color(1f, 0.82f, 0.24f, 0.45f), 4, 14);
+			DrawPanel(new Rect2(-55f, -105f, 110f, 110f), Colors.Transparent, SelectionColor, 5, 12);
+		}
 
 		DrawPanel(new Rect2(-50f, -100f, 100f, 100f), new Color(0.08f, 0.09f, 0.11f), new Color(0.02f, 0.02f, 0.025f), 4, 10);
 
