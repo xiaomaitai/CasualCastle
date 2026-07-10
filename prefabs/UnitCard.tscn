@@ -9,7 +9,9 @@ script = ExtResource("1")
 [node name="Portrait" type="Sprite2D" parent="."]
 texture = ExtResource("2")
 position = Vector2(0, -42)
-scale = Vector2(0.027, 0.027)
+scale = Vector2(0.09, 0.09)
+region_enabled = true
+region_rect = Rect2(180, 310, 650, 500)
 
 [node name="NameLabel" type="Label" parent="."]
 offset_left = -40.0

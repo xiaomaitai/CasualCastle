@@ -25,6 +25,10 @@ public partial class UnitCardView : Node2D
 	private bool _isPlayerUnit;
 	private bool _selected;
 	private UnitCardStatus _status;
+	private string _typeId;
+	private uint _unitColor;
+	private float _displaySize;
+	private bool _configured;
 
 	public override void _Ready()
 	{
@@ -32,15 +36,20 @@ public partial class UnitCardView : Node2D
 		_nameLabel = GetNode<Label>("NameLabel");
 		_statusLabel = GetNode<Label>("StatusLabel");
 		_buffLabel = GetNode<Label>("BuffLabel");
+		if (_configured)
+			ApplyConfiguration();
 		UpdateStatusLabel();
 	}
 
 	public void Configure(string typeId, bool isPlayerUnit, uint unitColor, float displaySize)
 	{
+		_typeId = typeId;
 		_isPlayerUnit = isPlayerUnit;
-		_nameLabel.Text = GetDisplayName(typeId);
-		SetPortraitTint(ToColor(unitColor));
-		Scale = Vector2.One * displaySize / CardSize;
+		_unitColor = unitColor;
+		_displaySize = displaySize;
+		_configured = true;
+		if (IsNodeReady())
+			ApplyConfiguration();
 		QueueRedraw();
 	}
 
@@ -59,7 +68,8 @@ public partial class UnitCardView : Node2D
 	public void SetStatus(UnitCardStatus status)
 	{
 		_status = status;
-		UpdateStatusLabel();
+		if (IsNodeReady())
+			UpdateStatusLabel();
 		QueueRedraw();
 	}
 
@@ -137,6 +147,13 @@ public partial class UnitCardView : Node2D
 			_ => string.Empty,
 		};
 		_statusLabel.Visible = _status != UnitCardStatus.None;
+	}
+
+	private void ApplyConfiguration()
+	{
+		_nameLabel.Text = GetDisplayName(_typeId);
+		_portrait.Modulate = ToColor(_unitColor);
+		Scale = Vector2.One * _displaySize / CardSize;
 	}
 
 	private Color GetHealthColor()
