@@ -153,7 +153,7 @@ public partial class UnitCardView : Node2D
 	{
 		_nameLabel.Text = GetDisplayName(_typeId);
 		_portrait.Modulate = ToColor(_unitColor);
-		Scale = Vector2.One * _displaySize / CardSize;
+		Scale = Vector2.One * Mathf.Max(_displaySize, 72f) / CardSize;
 	}
 
 	private Color GetHealthColor()
