@@ -30,7 +30,6 @@ public partial class SoldierLogic : Node2D
 	public ArmorType ArmorType { get; private set; } = ArmorType.Light;
 	public bool IsSelected { get; private set; }
 
-	private uint _unitColor;
 	private bool _statsPending;
 	private NavigationAgent2D _navigationAgent;
 	private Node2D _body;
@@ -66,7 +65,6 @@ public partial class SoldierLogic : Node2D
 		VisionRange = GameCoordinatesAdapter.GameUnitsToPixels(stats.VisionRange);
 		HasNightCombat = stats.HasNightCombat;
 		DisplaySize = stats.DisplaySize;
-		_unitColor = stats.UnitColor;
 		AttackType = stats.AttackType;
 		DamageType = stats.DamageType;
 		ArmorType = stats.ArmorType;
@@ -83,7 +81,6 @@ public partial class SoldierLogic : Node2D
 		_visual.ApplyStats(
 			_soldier.TypeId,
 			IsPlayerUnit,
-			_unitColor,
 			GameCoordinatesAdapter.GameUnitsToPixels(DisplaySize));
 		_visual.SetHealth(Health, MaxHealth);
 	}

@@ -14,13 +14,10 @@ public class SoldierVisual
         _card = body.GetNode<UnitCardView>("View/UnitCard");
     }
 
-    public void ApplyStats(string typeId, bool isPlayerUnit, uint unitColor, float displaySize)
+    public void ApplyStats(string typeId, bool isPlayerUnit, float displaySize)
     {
-        _portraitTint = new Color(
-            ((unitColor >> 16) & 0xFF) / 255f,
-            ((unitColor >> 8) & 0xFF) / 255f,
-            (unitColor & 0xFF) / 255f);
-        _card.Configure(typeId, isPlayerUnit, unitColor, displaySize);
+        _portraitTint = Colors.White;
+        _card.Configure(typeId, isPlayerUnit, displaySize);
     }
 
     public void StartHitFlash()

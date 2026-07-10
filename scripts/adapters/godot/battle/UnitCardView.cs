@@ -26,7 +26,6 @@ public partial class UnitCardView : Node2D
 	private bool _selected;
 	private UnitCardStatus _status;
 	private string _typeId;
-	private uint _unitColor;
 	private float _displaySize;
 	private bool _configured;
 
@@ -41,11 +40,10 @@ public partial class UnitCardView : Node2D
 		UpdateStatusLabel();
 	}
 
-	public void Configure(string typeId, bool isPlayerUnit, uint unitColor, float displaySize)
+	public void Configure(string typeId, bool isPlayerUnit, float displaySize)
 	{
 		_typeId = typeId;
 		_isPlayerUnit = isPlayerUnit;
-		_unitColor = unitColor;
 		_displaySize = displaySize;
 		_configured = true;
 		if (IsNodeReady())
@@ -152,7 +150,7 @@ public partial class UnitCardView : Node2D
 	private void ApplyConfiguration()
 	{
 		_nameLabel.Text = GetDisplayName(_typeId);
-		_portrait.Modulate = ToColor(_unitColor);
+		_portrait.Modulate = Colors.White;
 		Scale = Vector2.One * Mathf.Max(_displaySize, 72f) / CardSize;
 	}
 
@@ -189,11 +187,4 @@ public partial class UnitCardView : Node2D
 		};
 	}
 
-	private static Color ToColor(uint value)
-	{
-		return new Color(
-			((value >> 16) & 0xFF) / 255f,
-			((value >> 8) & 0xFF) / 255f,
-			(value & 0xFF) / 255f);
-	}
 }
