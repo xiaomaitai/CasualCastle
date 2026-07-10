@@ -28,6 +28,7 @@ public partial class SoldierLogic : Node2D
 	public AttackType AttackType { get; private set; }
 	public DamageType DamageType { get; private set; }
 	public ArmorType ArmorType { get; private set; } = ArmorType.Light;
+	public bool IsSelected { get; private set; }
 
 	private uint _unitColor;
 	private bool _statsPending;
@@ -79,7 +80,12 @@ public partial class SoldierLogic : Node2D
 			return;
 		_statsPending = false;
 
-		_visual.ApplyStats(_unitColor, GameCoordinatesAdapter.GameUnitsToPixels(DisplaySize));
+		_visual.ApplyStats(
+			_soldier.TypeId,
+			IsPlayerUnit,
+			_unitColor,
+			GameCoordinatesAdapter.GameUnitsToPixels(DisplaySize));
+		_visual.SetHealth(Health, MaxHealth);
 	}
 
 	public void SetTarget(SoldierLogic target)
@@ -122,23 +128,6 @@ public partial class SoldierLogic : Node2D
 			AdapterRegistry.Resolve<GameManager>().PhaseChanged -= OnPhaseChanged;
 	}
 
-	public override void _Draw()
-	{
-		float radius = GameCoordinatesAdapter.GameUnitsToPixels(CollisionRadius);
-		Color circleColor = IsPlayerUnit
-			? new Color(0, 1, 0, 0.3f)
-			: new Color(1, 0, 0, 0.3f);
-		DrawCircle(Vector2.Zero, radius, circleColor);
-
-		float barWidth = radius * 2f;
-		float barHeight = 4f;
-		float barY = -radius - 8f;
-		float healthPercent = (float)Health / MaxHealth;
-
-		DrawRect(new Rect2(-barWidth / 2f, barY, barWidth, barHeight), new Color(0.2f, 0.2f, 0.2f, 0.8f));
-		DrawRect(new Rect2(-barWidth / 2f, barY, barWidth * healthPercent, barHeight), new Color(0.2f, 0.8f, 0.2f, 0.9f));
-	}
-
 	private void OnPhaseChanged(GameManager.GamePhase phase)
 	{
 		UpdateSleepVisual();
@@ -162,6 +151,12 @@ public partial class SoldierLogic : Node2D
 	{
 		_visual?.SetBaseModulate(color);
 		UpdateSleepVisual();
+	}
+
+	public void SetSelected(bool selected)
+	{
+		IsSelected = selected;
+		_visual.SetSelected(selected);
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -210,7 +205,6 @@ public partial class SoldierLogic : Node2D
 			GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.X),
 			GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.Y));
 
-		_body.QueueRedraw();
 	}
 
 	private void OnVelocityComputed(Vector2 safeVelocity)
@@ -250,6 +244,7 @@ public partial class SoldierLogic : Node2D
 
 	private void OnDamaged()
 	{
+		_visual.SetHealth(Health, MaxHealth);
 		_visual?.StartHitFlash();
 		ISoldierHandle attacker = _eventRelay.LastAttacker;
 		if (attacker != null && attacker.IsAlive)
