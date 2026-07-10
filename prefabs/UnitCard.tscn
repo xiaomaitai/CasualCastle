@@ -14,8 +14,10 @@ script = ExtResource("1")
 texture = SubResource("AtlasTexture_portrait")
 position = Vector2(0, -42)
 scale = Vector2(0.09, 0.09)
+z_index = 1
 
 [node name="NameLabel" type="Label" parent="."]
+z_index = 2
 offset_left = -40.0
 offset_top = -90.0
 offset_right = 40.0
@@ -30,6 +32,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="StatusLabel" type="Label" parent="."]
+z_index = 2
 offset_left = 23.0
 offset_top = -73.0
 offset_right = 39.0
@@ -44,6 +47,7 @@ vertical_alignment = 1
 
 [node name="BuffLabel" type="Label" parent="."]
 visible = false
+z_index = 2
 offset_left = -37.0
 offset_top = -22.0
 offset_right = 37.0
