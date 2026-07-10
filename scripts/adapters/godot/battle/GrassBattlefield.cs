@@ -20,6 +20,7 @@ public partial class GrassBattlefield : Node2D
 		bg.Position = new Vector2(-Margin, -Margin);
 		bg.Size = new Vector2(WorldWidth + Margin * 2, WorldHeight + Margin * 2);
 		bg.ZIndex = -100;
+		bg.MouseFilter = Control.MouseFilterEnum.Ignore;
 		AddChild(bg);
 	}
 
@@ -36,6 +37,7 @@ public partial class GrassBattlefield : Node2D
 		tileRect.Position = new Vector2(-Margin, -Margin);
 		tileRect.Size = new Vector2(WorldWidth + Margin * 2, WorldHeight + Margin * 2);
 		tileRect.ZIndex = -10;
+		tileRect.MouseFilter = Control.MouseFilterEnum.Ignore;
 
 		ShaderMaterial tileMat = new ShaderMaterial();
 		Shader tileShader = new Shader();
