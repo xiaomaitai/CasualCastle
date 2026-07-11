@@ -52,15 +52,15 @@ CREATE TABLE unit_stats (
     vision_range     REAL    NOT NULL DEFAULT 170.0
 );
 INSERT INTO unit_stats VALUES('Spearman',1,0,0,0,40,10,80.0,30.0,1.0,0,4289733792,250.0);
-INSERT INTO unit_stats VALUES('ShieldBearer',1,0,0,1,70,5,45.0,30.0,1.80000000000000004,0,4286611584,200.0);
+INSERT INTO unit_stats VALUES('ShieldBearer',1,0,0,1,70,5,45.0,30.0,1.8,0,4286611584,200.0);
 INSERT INTO unit_stats VALUES('Archer',1,1,1,0,25,12,60.0,200.0,1.5,0,4286627968,300.0);
-INSERT INTO unit_stats VALUES('Knight',2,0,0,1,60,18,120.0,35.0,1.19999999999999995,0,4291862624,280.0);
+INSERT INTO unit_stats VALUES('Knight',2,0,0,1,60,18,120.0,35.0,1.2,0,4291862624,280.0);
 INSERT INTO unit_stats VALUES('Scout',0,0,0,0,15,3,160.0,25.0,1.0,0,4286644095,400.0);
-INSERT INTO unit_stats VALUES('Swordsman',1,0,0,0,55,16,80.0,30.0,0.900000000000000022,0,4285567184,260.0);
+INSERT INTO unit_stats VALUES('Swordsman',1,0,0,0,55,16,80.0,30.0,0.9,0,4285567184,260.0);
 INSERT INTO unit_stats VALUES('HeavyShield',2,0,0,1,110,8,40.0,35.0,1.5,0,4284515808,220.0);
 INSERT INTO unit_stats VALUES('Crossbowman',1,1,1,0,30,22,55.0,180.0,2.0,0,4283476000,280.0);
-INSERT INTO unit_stats VALUES('HeavyCavalry',2,0,0,1,85,28,110.0,35.0,1.30000000000000004,0,4288712672,290.0);
-INSERT INTO unit_stats VALUES('LightCavalry',1,0,0,0,25,8,180.0,30.0,0.800000000000000044,0,4286632191,450.0);
+INSERT INTO unit_stats VALUES('HeavyCavalry',2,0,0,1,85,28,110.0,35.0,1.3,0,4288712672,290.0);
+INSERT INTO unit_stats VALUES('LightCavalry',1,0,0,0,25,8,180.0,30.0,0.8,0,4286632191,450.0);
 CREATE TABLE building_defs (
     type_id           TEXT PRIMARY KEY,
     display_name      TEXT    NOT NULL,
@@ -96,19 +96,19 @@ CREATE TABLE damage_matrix (
     PRIMARY KEY (damage_type, armor_type)
 );
 INSERT INTO damage_matrix VALUES(0,0,1.0);
-INSERT INTO damage_matrix VALUES(0,1,0.800000000000000044);
-INSERT INTO damage_matrix VALUES(0,2,0.599999999999999977);
+INSERT INTO damage_matrix VALUES(0,1,0.8);
+INSERT INTO damage_matrix VALUES(0,2,0.6);
 INSERT INTO damage_matrix VALUES(0,3,1.0);
-INSERT INTO damage_matrix VALUES(1,0,1.19999999999999995);
-INSERT INTO damage_matrix VALUES(1,1,0.900000000000000022);
+INSERT INTO damage_matrix VALUES(1,0,1.2);
+INSERT INTO damage_matrix VALUES(1,1,0.9);
 INSERT INTO damage_matrix VALUES(1,2,0.5);
-INSERT INTO damage_matrix VALUES(1,3,0.800000000000000044);
-INSERT INTO damage_matrix VALUES(2,0,0.800000000000000044);
+INSERT INTO damage_matrix VALUES(1,3,0.8);
+INSERT INTO damage_matrix VALUES(2,0,0.8);
 INSERT INTO damage_matrix VALUES(2,1,1.0);
 INSERT INTO damage_matrix VALUES(2,2,1.5);
-INSERT INTO damage_matrix VALUES(2,3,0.900000000000000022);
+INSERT INTO damage_matrix VALUES(2,3,0.9);
 INSERT INTO damage_matrix VALUES(3,0,1.0);
-INSERT INTO damage_matrix VALUES(3,1,1.19999999999999995);
+INSERT INTO damage_matrix VALUES(3,1,1.2);
 INSERT INTO damage_matrix VALUES(3,2,1.0);
 INSERT INTO damage_matrix VALUES(3,3,1.0);
 CREATE TABLE shop_catalog (
@@ -135,6 +135,9 @@ INSERT INTO combine_recipes VALUES('ShieldCamp','ShieldCamp',1,'Bulwark');
 INSERT INTO combine_recipes VALUES('ArcheryRange','ArcheryRange',1,'CrossbowTower');
 INSERT INTO combine_recipes VALUES('Stable','Stable',1,'Ranch');
 INSERT INTO combine_recipes VALUES('ScoutCamp','ScoutCamp',1,'RangerPost');
+PRAGMA writable_schema=ON;
+CREATE TABLE IF NOT EXISTS sqlite_sequence(name,seq);
 DELETE FROM sqlite_sequence;
 INSERT INTO sqlite_sequence VALUES('asset_gen_tasks',16);
+PRAGMA writable_schema=OFF;
 COMMIT;
