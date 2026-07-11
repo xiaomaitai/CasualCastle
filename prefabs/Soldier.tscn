@@ -1,8 +1,7 @@
-[gd_scene format=3 uid="uid://d2m4n5p6q7r8s"]
+[gd_scene load_steps=4 format=3 uid="uid://d2m4n5p6q7r8s"]
 
 [ext_resource type="Script" id="1" path="res://scripts/adapters/godot/battle/Soldier.cs"]
-[ext_resource type="Texture2D" uid="uid://b1s6tjn65lbh8" path="res://assets/art/cards/goblin.png" id="2"]
-[ext_resource type="Script" path="res://scripts/adapters/godot/battle/SoldierSleepZEffect.cs" id="3"]
+[ext_resource type="PackedScene" uid="uid://c4unitcard970e" path="res://prefabs/UnitCard.tscn" id="2"]
 [ext_resource type="Script" path="res://scripts/adapters/godot/battle/SoldierLogic.cs" id="4"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_1"]
@@ -28,12 +27,4 @@ shape = SubResource("CircleShape2D_1")
 
 [node name="View" type="Node2D" parent="."]
 
-[node name="Sprite" type="Sprite2D" parent="View"]
-texture = ExtResource("2")
-scale = Vector2(0.03125, 0.03125)
-centered = true
-
-[node name="Effects" type="Node2D" parent="."]
-
-[node name="SleepZEffect" type="Node2D" parent="Effects"]
-script = ExtResource("3")
+[node name="UnitCard" parent="View" instance=ExtResource("2")]
