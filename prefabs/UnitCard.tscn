@@ -1,28 +1,47 @@
-[gd_scene load_steps=4 format=3 uid="uid://c4unitcard970e"]
+[gd_scene format=3 uid="uid://8gq2wbg88c2a"]
 
-[ext_resource type="Script" uid="uid://c4unitcardview970e" path="res://scripts/adapters/godot/battle/UnitCardView.cs" id="1"]
-[ext_resource type="Texture2D" uid="uid://b1s6tjn65lbh8" path="res://assets/art/cards/goblin.png" id="2"]
+[ext_resource type="Script" uid="uid://cxl88g0o4abwg" path="res://scripts/adapters/godot/battle/UnitCardView.cs" id="1"]
+[ext_resource type="Texture2D" uid="uid://dn6wsgo7yetwq" path="res://assets/art/cards/card_base.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://52icpu16ujyx" path="res://assets/art/cards/card_art_frame.png" id="3"]
+[ext_resource type="Texture2D" uid="uid://b1s6tjn65lbh8" path="res://assets/art/cards/goblin.png" id="4"]
+[ext_resource type="PackedScene" uid="uid://cice247abfolk" path="res://prefabs/HealthBar.tscn" id="5"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cardbase"]
+atlas = ExtResource("2")
+region = Rect2(0, 0, 1132, 1170)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_artframe"]
+atlas = ExtResource("3")
+region = Rect2(0, 0, 636, 531)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_portrait"]
-atlas = ExtResource("2")
+atlas = ExtResource("4")
 region = Rect2(360, 620, 1300, 1000)
 
-[node name="UnitCard" type="Node2D"]
+[node name="UnitCard" type="Node2D" unique_id=331876800]
 script = ExtResource("1")
 
-[node name="Portrait" type="Sprite2D" parent="."]
-texture = SubResource("AtlasTexture_portrait")
-position = Vector2(0, -42)
-scale = Vector2(0.045, 0.045)
-z_index = 1
+[node name="CardBase" type="Sprite2D" parent="." unique_id=1450340948]
+texture = SubResource("AtlasTexture_cardbase")
 
-[node name="NameLabel" type="Label" parent="."]
+[node name="CardArtFrame" type="Sprite2D" parent="." unique_id=928861222]
+clip_children = 2
 z_index = 2
+position = Vector2(1.7881393e-07, 85.999985)
+scale = Vector2(1.65, 1.717514)
+texture = SubResource("AtlasTexture_artframe")
+
+[node name="Portrait" type="Sprite2D" parent="CardArtFrame" unique_id=547684520]
+position = Vector2(-4.242424, 2.9111953)
+scale = Vector2(0.47185606, 0.52836514)
+texture = SubResource("AtlasTexture_portrait")
+
+[node name="NameLabel" type="Label" parent="." unique_id=1910810434]
+z_index = 4
 offset_left = -40.0
-offset_top = -90.0
+offset_top = -548.0
 offset_right = 40.0
-offset_bottom = -77.0
-mouse_filter = 2
+offset_bottom = -522.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.03, 0.03, 0.03, 1)
 theme_override_constants/outline_size = 3
@@ -31,13 +50,12 @@ text = "单位"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="StatusLabel" type="Label" parent="."]
-z_index = 2
+[node name="StatusLabel" type="Label" parent="." unique_id=1221761122]
+z_index = 4
 offset_left = 23.0
 offset_top = -73.0
 offset_right = 39.0
 offset_bottom = -57.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.05, 0.05, 0.06, 1)
 theme_override_constants/outline_size = 2
@@ -45,16 +63,19 @@ theme_override_font_sizes/font_size = 11
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="BuffLabel" type="Label" parent="."]
+[node name="BuffLabel" type="Label" parent="." unique_id=1022219110]
 visible = false
-z_index = 2
-offset_left = -37.0
-offset_top = -22.0
-offset_right = 37.0
-offset_bottom = -10.0
-mouse_filter = 2
+z_index = 4
+offset_left = -520.0
+offset_top = 470.0
+offset_right = -380.0
+offset_bottom = 510.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.05, 0.05, 0.06, 1)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 8
+theme_override_font_sizes/font_size = 40
 vertical_alignment = 1
+
+[node name="HealthBar" parent="." unique_id=1714879747 instance=ExtResource("5")]
+position = Vector2(0, -464)
+scale = Vector2(1.8, 2)

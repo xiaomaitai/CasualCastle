@@ -80,7 +80,6 @@ public partial class SoldierLogic : Node2D
 
 		_visual.ApplyStats(
 			_soldier.TypeId,
-			IsPlayerUnit,
 			GameCoordinatesAdapter.GameUnitsToPixels(DisplaySize));
 		_visual.SetHealth(Health, MaxHealth);
 	}
