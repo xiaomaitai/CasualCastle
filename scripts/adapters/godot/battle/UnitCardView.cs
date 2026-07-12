@@ -139,6 +139,8 @@ public partial class UnitCardView : Node2D
 	private void ApplyConfiguration()
 	{
 		_nameLabel.Text = GetDisplayName(_typeId);
+		Texture2D portrait = GD.Load<Texture2D>($"res://assets/art/cards/{_typeId}.png");
+		_cardArt.SetPortrait(portrait);
 		_cardArt.SetPortraitTint(Colors.White);
 		Scale = Vector2.One * Mathf.Max(_displaySize, 72f) / CardSpan;
 		_healthBar.Fill = _healthRatio;
