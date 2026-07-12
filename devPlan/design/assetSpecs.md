@@ -143,6 +143,27 @@ Soldier (Area2D)
 
 导入为 `CompressedTexture2D`，默认设置。
 
+### 单位主图
+
+战斗内单位卡牌上显示的兵种肖像图，由 `UnitCardView` 在运行时按 `res://assets/art/cards/{TypeId}.png` 动态加载。
+
+| 属性 | 值 |
+|------|-----|
+| 用途 | 战斗中单位卡牌的兵种肖像 |
+| 存放位置 | `assets/art/cards/{TypeId}.png`（TypeId 与 `unit_stats` 表一致） |
+| 生图尺寸 | 512×512 |
+| 最终尺寸 | 256×256（缩放后） |
+| 模型 | Qwen-Image（`bf085132c7134622895b783b520b39ff` / `75e0be0c93b34dd8baeec9c968013e0c`） |
+| 采样 | sampler=1, steps=30, cfgScale=4.0, clipSkip=2 |
+
+**提示词模板：**
+
+```
+A medieval [unit type] soldier, [weapon/gear], facing right, full body character, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors, game character icon
+```
+
+示例：`A medieval spearman soldier, holding a long spear, facing right, full body character, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors, game character icon`
+
 ---
 
 ## 4. UI 元素
