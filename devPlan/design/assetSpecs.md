@@ -150,7 +150,8 @@ Soldier (Area2D)
 | 属性 | 值 |
 |------|-----|
 | 用途 | 战斗中单位卡牌的兵种肖像 |
-| 存放位置 | `assets/art/cards/{TypeId}.png`（TypeId 与 `unit_stats` 表一致） |
+| 存放位置 | `assets/art/cards/{TypeId}_{taskId}.png`（TypeId 与 `unit_stats` 表一致，taskId 为 `asset_gen_tasks.id`） |
+| 加载方式 | `UnitCardView` 扫描 `assets/art/cards/{TypeId}_*.png` 匹配加载 |
 | 生图尺寸 | 512×512 |
 | 最终尺寸 | 256×256（缩放后） |
 | 模型 | Qwen-Image（`bf085132c7134622895b783b520b39ff` / `75e0be0c93b34dd8baeec9c968013e0c`） |

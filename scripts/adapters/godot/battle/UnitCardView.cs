@@ -141,10 +141,27 @@ public partial class UnitCardView : Node2D
 		_nameLabel.Text = GetDisplayName(_typeId);
 		Scale = Vector2.One * Mathf.Max(_displaySize, 72f) / CardSpan;
 		_healthBar.Fill = _healthRatio;
-		Texture2D portrait = GD.Load<Texture2D>($"res://assets/art/cards/{_typeId}.png");
+		Texture2D portrait = LoadPortrait(_typeId);
 		if (portrait != null)
 			_cardArt.SetPortrait(portrait);
 		_cardArt.SetPortraitTint(Colors.White);
+	}
+
+	private static Texture2D LoadPortrait(string typeId)
+	{
+		using DirAccess dir = DirAccess.Open("res://assets/art/cards/");
+		if (dir == null)
+			return null;
+		string prefix = typeId + "_";
+		dir.ListDirBegin();
+		string fileName = dir.GetNext();
+		while (fileName != "")
+		{
+			if (fileName.StartsWith(prefix) && fileName.EndsWith(".png") && !dir.CurrentIsDir())
+				return GD.Load<Texture2D>($"res://assets/art/cards/{fileName}");
+			fileName = dir.GetNext();
+		}
+		return null;
 	}
 
 	private static string GetDisplayName(string typeId)

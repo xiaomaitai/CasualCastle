@@ -313,10 +313,10 @@ curl -s -X POST "https://openapi.liblibai.cloud/api/model/version/get?AccessKey=
 ⚠️ **所有生图提示词必须强调以下三个要素：**
 
 1. **平面2D（flat 2D）** — 禁止立体感、阴影、渐变、3D 效果
-2. **萌系（cute/moe style）** — Q版可爱风格，角色圆润、道具可爱化
+2. **动漫风格（anime style）** — 日式动漫角色/道具风格
 3. **粗描边（thick outlines / bold lineart）** — 黑色或深色粗轮廓线，类似矢量插画
 
-生成 prompt 时，始终在描述末尾或合适位置加入：`flat 2D, cute moe style, thick bold outlines, no shading, no gradient, simple flat colors`。如果用户给的描述太简单，帮助润色成英文 prompt 时必须融入这三个要素。
+生成 prompt 时，始终在描述末尾或合适位置加入：`flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors`。如果用户给的描述太简单，帮助润色成英文 prompt 时必须融入这三个要素。
 
 ## 通用工作流
 
@@ -327,13 +327,13 @@ curl -s -X POST "https://openapi.liblibai.cloud/api/model/version/get?AccessKey=
    - 文件名 → 保存到 `assets/` 下的路径，具体根据 assetSpec.md 的规定
 2. 生成昂贵高清图前向用户展示预估信息（模型、尺寸、保存路径），确认后开始生图。使用性价比模型时直接生图。
 3. 调用 WebUI text2img API 提交任务，获取 `generateUuid`
-4. **立即 INSERT 一条记录到 `asset_gen_tasks` 表**
+4. **立即 INSERT 一条记录到 `asset_gen_tasks` 表**，记录返回的 `id`（SQLite `last_insert_rowid()`）
 5. 每隔 30 秒轮询 `/api/generate/webui/status`，最多 5 次（共 2.5 分钟）：
    - **每次轮询后 UPDATE `liblib_status`**
    - status=5 → 下载图片，UPDATE 为 `completed`，告知用户路径和尺寸，询问是否需要调整
    - status=6/7 → UPDATE 为 `failed`，告知用户失败，检查 prompt 或参数后重试
    - 5 次轮询后仍非终态 → UPDATE 为 `timeout`，告知用户 generate_uuid 已记录在 db，稍后可手动查询
-6. 下载完成后告知文件路径尺寸等信息
+6. 下载完成后按 `{name}_{db_id}.png` 格式命名保存，其中 `db_id` 为步骤 4 中记录的 `asset_gen_tasks.id`
 7. **如果需要缩放到目标尺寸，下载后立即缩放并保存**
 8. **不透明图（RGB PNG）可直接用于游戏，不需要询问用户。** 素材被采用后，用户需要透明背景时会手动要求抠图，抠图后原地替换即可
 
