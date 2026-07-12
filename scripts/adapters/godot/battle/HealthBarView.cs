@@ -8,17 +8,20 @@ public partial class HealthBarView : Node2D
 	private float _fill = 1f;
 	private float _emptyWidth;
 	private float _fullTexWidth;
+	private float _fullHeight;
+	private float _emptyLeft;
 
 	public override void _Ready()
 	{
 		_empty = GetNode<Sprite2D>("Empty");
 		_full = GetNode<Sprite2D>("Full");
-		_empty.Scale = new Vector2(1.8f, 1.8f);
-		_full.Scale = new Vector2(1.8f, 1.8f);
-		_emptyWidth = _empty.Texture.GetWidth() * _empty.Scale.X;
-		_fullTexWidth = _full.Texture.GetWidth() * _full.Scale.X;
+		_empty.Centered = false;
 		_full.Centered = false;
-		_full.Position = new Vector2(_emptyWidth, 0f);
+		_emptyWidth = _empty.Texture.GetWidth();
+		_fullTexWidth = _full.Texture.GetWidth();
+		_fullHeight = _full.Texture.GetHeight();
+		_emptyLeft = -_emptyWidth / 2f;
+		_empty.Position = new Vector2(_emptyLeft, -_empty.Texture.GetHeight() / 2f);
 		_ready = true;
 		ApplyFill();
 	}
@@ -36,7 +39,7 @@ public partial class HealthBarView : Node2D
 	private void ApplyFill()
 	{
 		float visibleFullWidth = Mathf.Max(0.0001f, _fill) * _emptyWidth;
-		_full.Scale = new Vector2(visibleFullWidth / _fullTexWidth, 1.8f);
-		_full.Position = new Vector2(_emptyWidth - visibleFullWidth, 0f);
+		_full.Scale = new Vector2(visibleFullWidth / _fullTexWidth, 1f);
+		_full.Position = new Vector2(_emptyLeft + _emptyWidth - visibleFullWidth, -_fullHeight / 2f);
 	}
 }

@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://8gq2wbg88c2a"]
 
-[ext_resource type="Script" uid="uid://cxl88g0o4abwg" path="res://scripts/adapters/godot/battle/UnitCardView.cs" id="1"]
+[ext_resource type="Script" uid="uid://c4unitcardview970e" path="res://scripts/adapters/godot/battle/UnitCardView.cs" id="1"]
 [ext_resource type="Texture2D" uid="uid://dn6wsgo7yetwq" path="res://assets/art/cards/card_base.png" id="2"]
 [ext_resource type="Texture2D" uid="uid://52icpu16ujyx" path="res://assets/art/cards/card_art_frame.png" id="3"]
 [ext_resource type="Texture2D" uid="uid://b1s6tjn65lbh8" path="res://assets/art/cards/goblin.png" id="4"]
