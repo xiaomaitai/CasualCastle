@@ -20,8 +20,7 @@ public partial class UnitCardView : Node2D
 
 	private Sprite2D _cardBase;
 	private HealthBarView _healthBar;
-	private Sprite2D _artFrame;
-	private Sprite2D _portrait;
+	private CardArtView _cardArt;
 	private Label _nameLabel;
 	private Label _statusLabel;
 	private Label _buffLabel;
@@ -36,8 +35,7 @@ public partial class UnitCardView : Node2D
 	{
 		_cardBase = GetNode<Sprite2D>("CardBase");
 		_healthBar = GetNode<HealthBarView>("HealthBar");
-		_artFrame = GetNode<Sprite2D>("CardArtFrame");
-		_portrait = GetNode<Sprite2D>("CardArtFrame/Portrait");
+		_cardArt = GetNode<CardArtView>("CardArt");
 		_nameLabel = GetNode<Label>("NameLabel");
 		_statusLabel = GetNode<Label>("StatusLabel");
 		_buffLabel = GetNode<Label>("BuffLabel");
@@ -87,7 +85,7 @@ public partial class UnitCardView : Node2D
 
 	public void SetPortraitTint(Color color)
 	{
-		_portrait.Modulate = color;
+		_cardArt.SetPortraitTint(color);
 	}
 
 	public void SetBuffs(IReadOnlyList<string> buffs)
@@ -141,7 +139,7 @@ public partial class UnitCardView : Node2D
 	private void ApplyConfiguration()
 	{
 		_nameLabel.Text = GetDisplayName(_typeId);
-		_portrait.Modulate = Colors.White;
+		_cardArt.SetPortraitTint(Colors.White);
 		Scale = Vector2.One * Mathf.Max(_displaySize, 72f) / CardSpan;
 		_healthBar.Fill = _healthRatio;
 	}
