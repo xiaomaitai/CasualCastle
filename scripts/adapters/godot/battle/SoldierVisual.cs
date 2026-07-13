@@ -72,4 +72,9 @@ public class SoldierVisual
     {
         _card.SetBuffs(buffs);
     }
+
+    public void SetFlipH(bool flip)
+    {
+        _card.SetFlipH(flip);
+    }
 }

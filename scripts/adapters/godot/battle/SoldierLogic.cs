@@ -197,6 +197,9 @@ public partial class SoldierLogic : Node2D
 		Vector2 moveVelocity = _safeVelocity != Vector2.Zero ? _safeVelocity : desiredVelocity;
 		_body.GlobalPosition += moveVelocity * dt;
 
+		if (Mathf.Abs(moveVelocity.X) > 0.1f)
+			_visual.SetFlipH(moveVelocity.X < 0);
+
 		_soldier.SetPosition(
 			GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.X),
 			GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.Y));

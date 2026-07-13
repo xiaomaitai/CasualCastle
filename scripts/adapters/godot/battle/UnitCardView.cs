@@ -87,6 +87,11 @@ public partial class UnitCardView : Node2D
 		_cardArt.SetPortraitTint(color);
 	}
 
+	public void SetFlipH(bool flip)
+	{
+		_cardArt.SetFlipH(flip);
+	}
+
 	public void SetBuffs(IReadOnlyList<string> buffs)
 	{
 		if (buffs.Count == 0)
