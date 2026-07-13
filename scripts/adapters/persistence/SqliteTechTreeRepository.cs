@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using CasualCastle.Domain.Building;
+using Godot;
 using Microsoft.Data.Sqlite;
 using GodotProjectSettings = Godot.ProjectSettings;
 
@@ -199,6 +200,7 @@ public class SqliteTechTreeRepository : ITechTreeRepository
 
         cmd.CommandText = "DELETE FROM tech_tree_nodes WHERE race_id = @raceId";
         cmd.Parameters.AddWithValue("@raceId", raceId);
+        GD.Print($"[SaveNodes] 清空种族旧节点数据: DELETE FROM tech_tree_nodes WHERE race_id = '{raceId}'");
         cmd.ExecuteNonQuery();
 
         cmd.CommandText = @"INSERT INTO tech_tree_nodes (type_id, race_id, tier, col, shop_available, gold_cost, shop_weight, unlock_night, display_name, unit_type_id, max_health, spawn_interval)
@@ -220,6 +222,8 @@ public class SqliteTechTreeRepository : ITechTreeRepository
             cmd.Parameters.AddWithValue("@maxHealth", node.MaxHealth);
             cmd.Parameters.AddWithValue("@spawnInterval", node.SpawnInterval);
             cmd.ExecuteNonQuery();
+
+            GD.Print($"[SaveNodes] 写入节点 [{node.DisplayName}]: INSERT INTO tech_tree_nodes (type_id, race_id, tier, col, shop_available, gold_cost, shop_weight, unlock_night, display_name, unit_type_id, max_health, spawn_interval) VALUES ('{node.TypeId}', '{raceId}', {node.Tier}, {node.Col}, {(node.ShopAvailable ? 1 : 0)}, {(node.ShopAvailable ? node.GoldCost.ToString() : "NULL")}, {(node.ShopAvailable ? node.ShopWeight.ToString() : "NULL")}, {node.UnlockNight}, '{node.DisplayName}', '{node.UnitTypeId ?? "NULL"}', {node.MaxHealth}, {node.SpawnInterval})");
         }
 
         transaction.Commit();
@@ -288,6 +292,7 @@ public class SqliteTechTreeRepository : ITechTreeRepository
             LEFT JOIN building_defs b ON b.type_id = n.type_id
             WHERE n.race_id = @raceId";
         cmd.Parameters.AddWithValue("@raceId", raceId);
+        GD.Print($"[SyncToGameTables] 同步科技树节点到建筑定义表: INSERT OR REPLACE INTO building_defs (...) SELECT ... FROM tech_tree_nodes n LEFT JOIN building_defs b ON b.type_id = n.type_id WHERE n.race_id = '{raceId}'");
         cmd.ExecuteNonQuery();
 
         cmd.CommandText = @"
@@ -297,6 +302,7 @@ public class SqliteTechTreeRepository : ITechTreeRepository
                 WHERE n.race_id = @raceId AND n.shop_available = 0
             )";
         cmd.Parameters.AddWithValue("@raceId", raceId);
+        GD.Print($"[SyncToGameTables] 移除不可购买的商店条目: DELETE FROM shop_catalog WHERE id IN (SELECT s.id FROM shop_catalog s INNER JOIN tech_tree_nodes n ON s.building_type = n.type_id WHERE n.race_id = '{raceId}' AND n.shop_available = 0)");
         cmd.ExecuteNonQuery();
 
         cmd.CommandText = @"
@@ -305,6 +311,7 @@ public class SqliteTechTreeRepository : ITechTreeRepository
             FROM tech_tree_nodes n
             WHERE n.race_id = @raceId AND n.shop_available = 1";
         cmd.Parameters.AddWithValue("@raceId", raceId);
+        GD.Print($"[SyncToGameTables] 同步可购买节点到商店目录: INSERT OR REPLACE INTO shop_catalog (id, name, cost, building_type, weight) SELECT n.type_id, n.display_name, n.gold_cost, n.type_id, n.shop_weight FROM tech_tree_nodes n WHERE n.race_id = '{raceId}' AND n.shop_available = 1");
         cmd.ExecuteNonQuery();
 
         transaction.Commit();
