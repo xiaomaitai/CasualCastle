@@ -25,7 +25,6 @@ public partial class BuildingSystem : Node
     {
         public Vector2I[] Footprint { get; init; }
         public string TexturePath { get; init; }
-        public Vector2 SpriteScale { get; init; }
         public Color SpriteModulate { get; init; }
         public string MaterialPath { get; init; }
     }
@@ -36,77 +35,66 @@ public partial class BuildingSystem : Node
         {
             Footprint = Footprint2x2,
             TexturePath = PlaceholderTexturePath,
-            SpriteScale = new(0.125f, 0.125f),
             SpriteModulate = new Color(1f, 0.82f, 0.35f),
         },
         ["Barracks"] = new()
         {
             Footprint = Footprint2x2,
             TexturePath = PlaceholderTexturePath,
-            SpriteScale = new(0.125f, 0.125f),
             SpriteModulate = new Color(0.55f, 0.6f, 0.75f),
         },
         ["ShieldCamp"] = new()
         {
             Footprint = Footprint2x2,
             TexturePath = PlaceholderTexturePath,
-            SpriteScale = new(0.125f, 0.125f),
             SpriteModulate = new Color(0.4f, 0.4f, 0.45f),
         },
         ["ArcheryRange"] = new()
         {
             Footprint = Footprint2x2,
             TexturePath = PlaceholderTexturePath,
-            SpriteScale = new(0.125f, 0.125f),
             SpriteModulate = new Color(0.45f, 0.75f, 0.45f),
         },
         ["Stable"] = new()
         {
             Footprint = Footprint2x2,
             TexturePath = PlaceholderTexturePath,
-            SpriteScale = new(0.125f, 0.125f),
             SpriteModulate = new Color(0.65f, 0.5f, 0.3f),
         },
         ["ScoutCamp"] = new()
         {
             Footprint = Footprint2x2,
             TexturePath = PlaceholderTexturePath,
-            SpriteScale = new(0.125f, 0.125f),
             SpriteModulate = new Color(0.5f, 0.65f, 0.85f),
         },
         ["Armory"] = new()
         {
             Footprint = Footprint2x2,
             TexturePath = PlaceholderTexturePath,
-            SpriteScale = new(0.125f, 0.125f),
             SpriteModulate = new Color(0.65f, 0.7f, 0.85f),
         },
         ["Bulwark"] = new()
         {
             Footprint = Footprint2x2,
             TexturePath = PlaceholderTexturePath,
-            SpriteScale = new(0.125f, 0.125f),
             SpriteModulate = new Color(0.5f, 0.5f, 0.55f),
         },
         ["CrossbowTower"] = new()
         {
             Footprint = Footprint2x2,
             TexturePath = PlaceholderTexturePath,
-            SpriteScale = new(0.125f, 0.125f),
             SpriteModulate = new Color(0.55f, 0.85f, 0.55f),
         },
         ["Ranch"] = new()
         {
             Footprint = Footprint2x2,
             TexturePath = PlaceholderTexturePath,
-            SpriteScale = new(0.125f, 0.125f),
             SpriteModulate = new Color(0.75f, 0.6f, 0.4f),
         },
         ["RangerPost"] = new()
         {
             Footprint = Footprint2x2,
             TexturePath = PlaceholderTexturePath,
-            SpriteScale = new(0.125f, 0.125f),
             SpriteModulate = new Color(0.6f, 0.75f, 0.95f),
         },
     };
@@ -209,12 +197,21 @@ public partial class BuildingSystem : Node
     public static void ApplyVisual(Building building)
     {
         VisualDef visual = GetVisual(building.TypeId);
+        IReadOnlyList<GridCellOffset> footprint = BuildingRepo.GetFootprint(building.TypeId);
+        GameVector2 collisionSize = GameCoordinateRules.GetBuildingCollisionSize(footprint);
+        float pixelW = GameCoordinatesAdapter.GameUnitsToPixels(collisionSize.X);
+        float pixelH = GameCoordinatesAdapter.GameUnitsToPixels(collisionSize.Y);
+        Vector2 pixelSize = new(pixelW, pixelH);
+
         Sprite2D sprite = building.GetNodeOrNull<Sprite2D>("View/Sprite");
         if (sprite != null)
         {
             Texture2D texture = GD.Load<Texture2D>(visual.TexturePath);
-            if (texture != null) sprite.Texture = texture;
-            sprite.Scale = visual.SpriteScale;
+            if (texture != null)
+            {
+                sprite.Texture = texture;
+                sprite.Scale = new Vector2(pixelW / texture.GetWidth(), pixelH / texture.GetHeight());
+            }
             sprite.Modulate = visual.SpriteModulate;
             if (!string.IsNullOrEmpty(visual.MaterialPath))
             {
@@ -222,12 +219,6 @@ public partial class BuildingSystem : Node
                 if (material != null) sprite.Material = material;
             }
         }
-
-        IReadOnlyList<GridCellOffset> footprint = BuildingRepo.GetFootprint(building.TypeId);
-        GameVector2 collisionSize = GameCoordinateRules.GetBuildingCollisionSize(footprint);
-        float pixelW = GameCoordinatesAdapter.GameUnitsToPixels(collisionSize.X);
-        float pixelH = GameCoordinatesAdapter.GameUnitsToPixels(collisionSize.Y);
-        Vector2 pixelSize = new(pixelW, pixelH);
 
         CollisionShape2D shapeNode = building.GetNodeOrNull<CollisionShape2D>("Logic/CollisionShape");
         if (shapeNode?.Shape is RectangleShape2D rect)

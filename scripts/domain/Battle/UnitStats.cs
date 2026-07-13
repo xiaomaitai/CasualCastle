@@ -16,19 +16,19 @@ public class UnitStats
 	public bool HasNightCombat { get; init; }
 	public float DisplaySize => Size switch
 	{
-		UnitSize.Small => 40f,
-		UnitSize.Medium => 60f,
-		UnitSize.Large => 80f,
-		UnitSize.Huge => 120f,
-		_ => 60f
+		UnitSize.Small => 60f,
+		UnitSize.Medium => 90f,
+		UnitSize.Large => 120f,
+		UnitSize.Huge => 180f,
+		_ => 90f
 	};
 	public float CollisionRadius => Size switch
 	{
-		UnitSize.Small => 12f,
-		UnitSize.Medium => 18f,
-		UnitSize.Large => 24f,
-		UnitSize.Huge => 36f,
-		_ => 18f
+		UnitSize.Small => 18f,
+		UnitSize.Medium => 27f,
+		UnitSize.Large => 36f,
+		UnitSize.Huge => 54f,
+		_ => 27f
 	};
 
 	public uint UnitColor { get; init; }

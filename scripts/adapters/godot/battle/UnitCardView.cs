@@ -139,7 +139,7 @@ public partial class UnitCardView : Node2D
 	private void ApplyConfiguration()
 	{
 		_nameLabel.Text = GetDisplayName(_typeId);
-		Scale = Vector2.One * Mathf.Max(_displaySize, 72f) / CardSpan;
+		Scale = Vector2.One * _displaySize / CardSpan;
 		_healthBar.Fill = _healthRatio;
 		Texture2D portrait = LoadPortrait(_typeId);
 		if (portrait != null)

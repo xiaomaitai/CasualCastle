@@ -7,7 +7,7 @@ namespace CasualCastle.Adapters.Godot;
 
 public static class GameCoordinatesAdapter
 {
-	public const int PixelsPerCell = 72;
+	public const int PixelsPerCell = 100;
 
 	public static float GameUnitsToPixels(float gameUnits) =>
 		gameUnits * PixelsPerCell / (float)GameCoordinateRules.UnitsPerCell;
