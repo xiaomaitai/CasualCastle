@@ -161,6 +161,7 @@ public class TechTreeEditorController
 		if (_currentRaceIndex > 0)
 		{
 			_currentRaceIndex--;
+			GD.Print($"[TechTreeEditor] 切换到上一个种族, 索引={_currentRaceIndex}, ID={_races[_currentRaceIndex].Id}");
 			LoadRaceAtIndex(_currentRaceIndex);
 		}
 	}
@@ -170,18 +171,21 @@ public class TechTreeEditorController
 		if (_currentRaceIndex < _races.Count - 1)
 		{
 			_currentRaceIndex++;
+			GD.Print($"[TechTreeEditor] 切换到下一个种族, 索引={_currentRaceIndex}, ID={_races[_currentRaceIndex].Id}");
 			LoadRaceAtIndex(_currentRaceIndex);
 		}
 	}
 
 	private void LoadRaceAtIndex(int index)
 	{
+		GD.Print($"[TechTreeEditor] LoadRaceAtIndex index={index}, raceId={_races[index].Id}, 切换前_nodes.Count={_nodes.Count}");
 		_currentRaceIndex = index;
 		RaceDef race = _races[index];
 		_currentRaceId = race.Id;
 		_raceNameLabel.Text = race.DisplayName;
 		_nodes = _repo.LoadNodes(race.Id);
 		_edges = _repo.LoadEdges(race.Id);
+		GD.Print($"[TechTreeEditor] 加载完成: raceId={race.Id}, nodes={_nodes.Count}, edges={_edges.Count}");
 		LayoutCards();
 		RefreshLibrary();
 		ShowStatus($"已加载 {_nodes.Count} 个节点，{_edges.Count} 条连线");
@@ -252,17 +256,25 @@ public class TechTreeEditorController
 
 	private void RefreshLibrary()
 	{
-		foreach (Node child in _libraryList.GetChildren())
+		for (int i = _libraryList.GetChildCount() - 1; i >= 0; i--)
+		{
+			Node child = _libraryList.GetChild(i);
+			_libraryList.RemoveChild(child);
 			child.QueueFree();
+		}
 
-		List<BuildingTypeSummary> allTypes = _repo.LoadAllBuildingTypes();
+		List<BuildingTypeSummary> allTypes = _repo.LoadAllBuildingTypes(_currentRaceId);
+		int placedCount = 0;
+		GD.Print($"[TechTreeEditor] RefreshLibrary: 建筑总数={allTypes.Count}, 当前种族节点数={_nodes.Count}");
 
 		foreach (BuildingTypeSummary type in allTypes)
 		{
 			bool placed = _nodes.Exists(n => n.TypeId == type.TypeId);
+			if (placed) placedCount++;
 			Panel item = CreateLibraryItem(type.TypeId, type.DisplayName, placed);
 			_libraryList.AddChild(item);
 		}
+		GD.Print($"[TechTreeEditor] RefreshLibrary 完成: 已放置={placedCount}, 未放置={allTypes.Count - placedCount}");
 	}
 
 	private Panel CreateLibraryItem(string typeId, string displayName, bool placed)
@@ -276,16 +288,21 @@ public class TechTreeEditorController
 
 		StyleBoxFlat styleBox = new();
 		styleBox.BgColor = placed
-			? new Color(0.3f, 0.3f, 0.3f)
-			: new Color(0.3f, 0.3f, 0.35f);
+			? new Color(0.25f, 0.25f, 0.25f)
+			: new Color(0.2f, 0.4f, 0.55f);
 		panel.AddThemeStyleboxOverride("panel", styleBox);
+
+		Color labelColor = placed
+			? new Color(0.5f, 0.5f, 0.5f)
+			: new Color(1f, 1f, 1f);
 
 		Label label = new()
 		{
 			Text = displayName,
 			Position = new Vector2(4, 8),
 			Size = new Vector2(172, 20),
-			HorizontalAlignment = HorizontalAlignment.Center
+			HorizontalAlignment = HorizontalAlignment.Center,
+			Modulate = labelColor
 		};
 		panel.AddChild(label);
 
@@ -503,7 +520,7 @@ public class TechTreeEditorController
 				maxCol = n.Col;
 		}
 
-		List<BuildingTypeSummary> allTypes = _repo.LoadAllBuildingTypes();
+		List<BuildingTypeSummary> allTypes = _repo.LoadAllBuildingTypes(_currentRaceId);
 		BuildingTypeSummary typeInfo = allTypes.Find(t => t.TypeId == typeId);
 		string displayName = typeInfo?.DisplayName ?? typeId;
 
@@ -698,9 +715,10 @@ public class TechTreeEditorController
 			using Microsoft.Data.Sqlite.SqliteConnection conn = new($"Data Source={dbPath}");
 			conn.Open();
 			using Microsoft.Data.Sqlite.SqliteCommand insertCmd = conn.CreateCommand();
-			insertCmd.CommandText = "INSERT OR IGNORE INTO building_defs (type_id, display_name, max_health, spawn_interval, footprint_json, collision_width, collision_height) VALUES (@id, @name, 200, 10.0, '[[0,0],[1,0],[0,1],[1,1]]', 188, 188)";
+			insertCmd.CommandText = "INSERT OR IGNORE INTO building_defs (type_id, display_name, race_id, max_health, spawn_interval, footprint_json, collision_width, collision_height) VALUES (@id, @name, @raceId, 200, 10.0, '[[0,0],[1,0],[0,1],[1,1]]', 188, 188)";
 			insertCmd.Parameters.AddWithValue("@id", typeId);
 			insertCmd.Parameters.AddWithValue("@name", displayName);
+			insertCmd.Parameters.AddWithValue("@raceId", _currentRaceId);
 			insertCmd.ExecuteNonQuery();
 
 			RefreshLibrary();

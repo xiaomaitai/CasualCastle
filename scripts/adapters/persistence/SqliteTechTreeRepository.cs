@@ -79,6 +79,19 @@ public class SqliteTechTreeRepository : ITechTreeRepository
         }
 
         MigrateCombineRecipesPK(connection);
+        MigrateBuildingDefsRaceId(connection);
+    }
+
+    private static void MigrateBuildingDefsRaceId(SqliteConnection connection)
+    {
+        using SqliteCommand cmd = connection.CreateCommand();
+        cmd.CommandText = "SELECT COUNT(*) FROM pragma_table_info('building_defs') WHERE name = 'race_id'";
+        long raceIdCol = (long)cmd.ExecuteScalar();
+        if (raceIdCol > 0)
+            return;
+
+        cmd.CommandText = "ALTER TABLE building_defs ADD COLUMN race_id TEXT NOT NULL DEFAULT 'human'";
+        cmd.ExecuteNonQuery();
     }
 
     private static void MigrateFromBuildingDefs(SqliteConnection connection)
@@ -174,12 +187,13 @@ public class SqliteTechTreeRepository : ITechTreeRepository
         return edges;
     }
 
-    public List<BuildingTypeSummary> LoadAllBuildingTypes()
+    public List<BuildingTypeSummary> LoadAllBuildingTypes(string raceId)
     {
         List<BuildingTypeSummary> types = new();
         using SqliteConnection connection = OpenConnection();
         using SqliteCommand cmd = connection.CreateCommand();
-        cmd.CommandText = "SELECT type_id, display_name FROM building_defs WHERE is_core = 0 ORDER BY display_name";
+        cmd.CommandText = "SELECT type_id, display_name FROM building_defs WHERE is_core = 0 AND race_id = @raceId ORDER BY display_name";
+        cmd.Parameters.AddWithValue("@raceId", raceId);
         using SqliteDataReader reader = cmd.ExecuteReader();
         while (reader.Read())
         {
@@ -281,10 +295,10 @@ public class SqliteTechTreeRepository : ITechTreeRepository
         using SqliteCommand cmd = connection.CreateCommand();
 
         cmd.CommandText = @"
-            INSERT OR REPLACE INTO building_defs (type_id, display_name, max_health, spawn_interval, main_cell_x, main_cell_y, spawn_cell_x, spawn_cell_y, unit_type_id, has_night_combat, combine_tier, is_core, footprint_json, collision_width, collision_height)
+            INSERT OR REPLACE INTO building_defs (type_id, display_name, max_health, spawn_interval, main_cell_x, main_cell_y, spawn_cell_x, spawn_cell_y, unit_type_id, has_night_combat, combine_tier, is_core, race_id, footprint_json, collision_width, collision_height)
             SELECT n.type_id, n.display_name, n.max_health, n.spawn_interval,
                    0, 0, 1, 1,
-                   n.unit_type_id, 0, n.tier - 1, 0,
+                   n.unit_type_id, 0, n.tier - 1, 0, @raceId,
                    COALESCE(b.footprint_json, '[[0,0],[1,0],[0,1],[1,1]]'),
                    COALESCE(b.collision_width, 188),
                    COALESCE(b.collision_height, 188)
@@ -292,9 +306,10 @@ public class SqliteTechTreeRepository : ITechTreeRepository
             LEFT JOIN building_defs b ON b.type_id = n.type_id
             WHERE n.race_id = @raceId";
         cmd.Parameters.AddWithValue("@raceId", raceId);
-        GD.Print($"[SyncToGameTables] 同步科技树节点到建筑定义表: INSERT OR REPLACE INTO building_defs (...) SELECT ... FROM tech_tree_nodes n LEFT JOIN building_defs b ON b.type_id = n.type_id WHERE n.race_id = '{raceId}'");
+        GD.Print($"[SyncToGameTables] 同步科技树节点到建筑定义表(race_id={raceId}): INSERT OR REPLACE INTO building_defs (..., race_id) SELECT ..., @raceId FROM tech_tree_nodes n LEFT JOIN building_defs b ON b.type_id = n.type_id WHERE n.race_id = '{raceId}'");
         cmd.ExecuteNonQuery();
 
+        cmd.Parameters.Clear();
         cmd.CommandText = @"
             DELETE FROM shop_catalog WHERE id IN (
                 SELECT s.id FROM shop_catalog s
@@ -305,6 +320,7 @@ public class SqliteTechTreeRepository : ITechTreeRepository
         GD.Print($"[SyncToGameTables] 移除不可购买的商店条目: DELETE FROM shop_catalog WHERE id IN (SELECT s.id FROM shop_catalog s INNER JOIN tech_tree_nodes n ON s.building_type = n.type_id WHERE n.race_id = '{raceId}' AND n.shop_available = 0)");
         cmd.ExecuteNonQuery();
 
+        cmd.Parameters.Clear();
         cmd.CommandText = @"
             INSERT OR REPLACE INTO shop_catalog (id, name, cost, building_type, weight)
             SELECT n.type_id, n.display_name, n.gold_cost, n.type_id, n.shop_weight

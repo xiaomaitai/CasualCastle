@@ -7,7 +7,7 @@ public interface ITechTreeRepository
     List<RaceDef> LoadRaces();
     List<TechTreeNode> LoadNodes(string raceId);
     List<CombineRecipe> LoadEdges(string raceId);
-    List<BuildingTypeSummary> LoadAllBuildingTypes();
+    List<BuildingTypeSummary> LoadAllBuildingTypes(string raceId);
     void SaveNodes(string raceId, List<TechTreeNode> nodes);
     void AddRecipe(CombineRecipe recipe);
     void RemoveRecipe(string mainTypeId, string materialTypeId, string resultTypeId);

@@ -90,27 +90,27 @@ CREATE TABLE building_defs (
     footprint_json    TEXT    NOT NULL,
     collision_width   INTEGER NOT NULL DEFAULT 80,
     collision_height  INTEGER NOT NULL DEFAULT 80
-);
-INSERT INTO building_defs VALUES('CastleHeart','城堡之心',500,NULL,0,0,0,0,NULL,0,0,1,'[[0,0],[1,0],[0,1],[1,1]]',180,180);
-INSERT INTO building_defs VALUES('Barracks','兵营',200,8.0,0,0,1,1,'Spearman',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188);
-INSERT INTO building_defs VALUES('ShieldCamp','盾营',250,12.0,0,0,1,1,'ShieldBearer',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188);
-INSERT INTO building_defs VALUES('ArcheryRange','靶场',150,10.0,0,0,1,1,'Archer',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188);
-INSERT INTO building_defs VALUES('Stable','马厩',220,14.0,0,0,1,1,'Knight',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188);
-INSERT INTO building_defs VALUES('ScoutCamp','斥候营',100,6.0,0,0,1,1,'Scout',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188);
-INSERT INTO building_defs VALUES('Armory','军府',300,7.0,0,0,1,1,'Swordsman',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188);
-INSERT INTO building_defs VALUES('Bulwark','壁垒',380,10.0,0,0,1,1,'HeavyShield',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188);
-INSERT INTO building_defs VALUES('CrossbowTower','射楼',220,9.0,0,0,1,1,'Crossbowman',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188);
-INSERT INTO building_defs VALUES('Ranch','牧场',330,12.0,0,0,1,1,'HeavyCavalry',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188);
-INSERT INTO building_defs VALUES('RangerPost','游骑哨',150,5.0,0,0,1,1,'LightCavalry',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188);
-INSERT INTO building_defs VALUES('RoyalArmory','皇家军营',300,7.0,0,0,1,1,'RoyalGuard',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188);
-INSERT INTO building_defs VALUES('RoyalBulwark','皇家壁垒',380,10.0,0,0,1,1,'RoyalShieldGuard',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188);
-INSERT INTO building_defs VALUES('RoyalArcheryRange','皇家射场',220,9.0,0,0,1,1,'RoyalSharpshooter',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188);
-INSERT INTO building_defs VALUES('RoyalStable','皇家马场',330,12.0,0,0,1,1,'RoyalKnight',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188);
-INSERT INTO building_defs VALUES('RoyalRanger','皇家游骑',150,5.0,0,0,1,1,'RoyalScout',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188);
-INSERT INTO building_defs VALUES('HolyWall','圣壁',500,14.0,0,0,1,1,'HolyShieldGuardian',0,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188);
-INSERT INTO building_defs VALUES('HeavenPunishmentTower','天罚塔',350,12.0,0,0,1,1,'DragonRiderCommander',0,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188);
-INSERT INTO building_defs VALUES('ShadowSanctum','暗影圣所',250,8.0,0,0,1,1,'ShadowLord',0,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188);
-INSERT INTO building_defs VALUES('RoyalCourt','王庭',800,30.0,0,0,1,1,'King',0,4,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188);
+, race_id TEXT NOT NULL DEFAULT 'human');
+INSERT INTO building_defs VALUES('CastleHeart','城堡之心',500,NULL,0,0,0,0,NULL,0,0,1,'[[0,0],[1,0],[0,1],[1,1]]',180,180,'human');
+INSERT INTO building_defs VALUES('RangerPost','游骑哨',150,5.0,0,0,1,1,'LightCavalry',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
+INSERT INTO building_defs VALUES('Barracks','兵营',200,8.0,0,0,1,1,'Spearman',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
+INSERT INTO building_defs VALUES('ShieldCamp','盾营',250,12.0,0,0,1,1,'ShieldBearer',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
+INSERT INTO building_defs VALUES('ArcheryRange','靶场',150,10.0,0,0,1,1,'Archer',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
+INSERT INTO building_defs VALUES('Stable','马厩',220,14.0,0,0,1,1,'Knight',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
+INSERT INTO building_defs VALUES('ScoutCamp','斥候营',100,6.0,0,0,1,1,'Scout',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
+INSERT INTO building_defs VALUES('Armory','军府',300,7.0,0,0,1,1,'Swordsman',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
+INSERT INTO building_defs VALUES('Bulwark','壁垒',380,10.0,0,0,1,1,'HeavyShield',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
+INSERT INTO building_defs VALUES('CrossbowTower','射楼',220,9.0,0,0,1,1,'Crossbowman',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
+INSERT INTO building_defs VALUES('Ranch','牧场',330,12.0,0,0,1,1,'HeavyCavalry',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
+INSERT INTO building_defs VALUES('RoyalArmory','皇家军营',300,7.0,0,0,1,1,'RoyalGuard',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
+INSERT INTO building_defs VALUES('RoyalBulwark','皇家壁垒',380,10.0,0,0,1,1,'RoyalShieldGuard',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
+INSERT INTO building_defs VALUES('RoyalArcheryRange','皇家射场',220,9.0,0,0,1,1,'RoyalSharpshooter',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
+INSERT INTO building_defs VALUES('RoyalStable','皇家马场',330,12.0,0,0,1,1,'RoyalKnight',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
+INSERT INTO building_defs VALUES('RoyalRanger','皇家游骑',150,5.0,0,0,1,1,'RoyalScout',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
+INSERT INTO building_defs VALUES('HolyWall','圣壁',500,14.0,0,0,1,1,'HolyShieldGuardian',0,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
+INSERT INTO building_defs VALUES('HeavenPunishmentTower','天罚塔',350,12.0,0,0,1,1,'DragonRiderCommander',0,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
+INSERT INTO building_defs VALUES('ShadowSanctum','暗影圣所',250,8.0,0,0,1,1,'ShadowLord',0,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
+INSERT INTO building_defs VALUES('RoyalCourt','王庭',800,30.0,0,0,1,1,'King',0,4,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
 CREATE TABLE damage_matrix (
     damage_type INTEGER NOT NULL,
     armor_type  INTEGER NOT NULL,
@@ -145,6 +145,17 @@ INSERT INTO shop_catalog VALUES('shield_camp','盾营',3,'ShieldCamp',20);
 INSERT INTO shop_catalog VALUES('archery_range','靶场',4,'ArcheryRange',24);
 INSERT INTO shop_catalog VALUES('stable','马厩',5,'Stable',20);
 INSERT INTO shop_catalog VALUES('scout_camp','斥候营',2,'ScoutCamp',16);
+INSERT INTO shop_catalog VALUES('Barracks','兵营',3,'Barracks',14);
+INSERT INTO shop_catalog VALUES('ShieldCamp','盾营',3,'ShieldCamp',10);
+INSERT INTO shop_catalog VALUES('ArcheryRange','靶场',4,'ArcheryRange',12);
+INSERT INTO shop_catalog VALUES('Stable','马厩',5,'Stable',10);
+INSERT INTO shop_catalog VALUES('ScoutCamp','斥候营',2,'ScoutCamp',8);
+INSERT INTO shop_catalog VALUES('Armory','军府',6,'Armory',8);
+INSERT INTO shop_catalog VALUES('Bulwark','壁垒',6,'Bulwark',6);
+INSERT INTO shop_catalog VALUES('Ranch','牧场',8,'Ranch',6);
+INSERT INTO shop_catalog VALUES('RoyalArmory','皇家军营',10,'RoyalArmory',4);
+INSERT INTO shop_catalog VALUES('RoyalBulwark','皇家壁垒',10,'RoyalBulwark',4);
+INSERT INTO shop_catalog VALUES('RoyalStable','皇家马场',12,'RoyalStable',4);
 CREATE TABLE race_defs (
     id TEXT PRIMARY KEY,
     display_name TEXT NOT NULL,
@@ -174,18 +185,17 @@ INSERT INTO tech_tree_nodes VALUES('Stable','human',1,3,1,5,10,0,'马厩','Knigh
 INSERT INTO tech_tree_nodes VALUES('ScoutCamp','human',1,4,1,2,8,0,'斥候营','Scout',100,6.0);
 INSERT INTO tech_tree_nodes VALUES('Armory','human',2,0,1,6,8,2,'军府','Swordsman',300,7.0);
 INSERT INTO tech_tree_nodes VALUES('Bulwark','human',2,1,1,6,6,2,'壁垒','HeavyShield',380,10.0);
-INSERT INTO tech_tree_nodes VALUES('CrossbowTower','human',2,2,0,NULL,NULL,NULL,'射楼','Crossbowman',220,9.0);
+INSERT INTO tech_tree_nodes VALUES('CrossbowTower','human',2,2,0,NULL,NULL,0,'射楼','Crossbowman',220,9.0);
 INSERT INTO tech_tree_nodes VALUES('Ranch','human',2,3,1,8,6,2,'牧场','HeavyCavalry',330,12.0);
-INSERT INTO tech_tree_nodes VALUES('RangerPost','human',2,4,0,NULL,NULL,NULL,'游骑哨','LightCavalry',150,5.0);
 INSERT INTO tech_tree_nodes VALUES('RoyalArmory','human',3,0,1,10,4,4,'皇家军营','RoyalGuard',300,7.0);
 INSERT INTO tech_tree_nodes VALUES('RoyalBulwark','human',3,1,1,10,4,4,'皇家壁垒','RoyalShieldGuard',380,10.0);
-INSERT INTO tech_tree_nodes VALUES('RoyalArcheryRange','human',3,2,0,NULL,NULL,NULL,'皇家射场','RoyalSharpshooter',220,9.0);
+INSERT INTO tech_tree_nodes VALUES('RoyalArcheryRange','human',3,2,0,NULL,NULL,0,'皇家射场','RoyalSharpshooter',220,9.0);
 INSERT INTO tech_tree_nodes VALUES('RoyalStable','human',3,3,1,12,4,4,'皇家马场','RoyalKnight',330,12.0);
-INSERT INTO tech_tree_nodes VALUES('RoyalRanger','human',3,4,0,NULL,NULL,NULL,'皇家游骑','RoyalScout',150,5.0);
-INSERT INTO tech_tree_nodes VALUES('HolyWall','human',4,0,0,NULL,NULL,NULL,'圣壁','HolyShieldGuardian',500,14.0);
-INSERT INTO tech_tree_nodes VALUES('HeavenPunishmentTower','human',4,2,0,NULL,NULL,NULL,'天罚塔','DragonRiderCommander',350,12.0);
-INSERT INTO tech_tree_nodes VALUES('ShadowSanctum','human',4,4,0,NULL,NULL,NULL,'暗影圣所','ShadowLord',250,8.0);
-INSERT INTO tech_tree_nodes VALUES('RoyalCourt','human',5,2,0,NULL,NULL,NULL,'王庭','King',800,30.0);
+INSERT INTO tech_tree_nodes VALUES('RoyalRanger','human',3,4,0,NULL,NULL,0,'皇家游骑','RoyalScout',150,5.0);
+INSERT INTO tech_tree_nodes VALUES('HolyWall','human',4,0,0,NULL,NULL,0,'圣壁','HolyShieldGuardian',500,14.0);
+INSERT INTO tech_tree_nodes VALUES('HeavenPunishmentTower','human',4,2,0,NULL,NULL,0,'天罚塔','DragonRiderCommander',350,12.0);
+INSERT INTO tech_tree_nodes VALUES('ShadowSanctum','human',4,4,0,NULL,NULL,0,'暗影圣所','ShadowLord',250,8.0);
+INSERT INTO tech_tree_nodes VALUES('RoyalCourt','human',5,2,0,NULL,NULL,0,'王庭','King',800,30.0);
 CREATE TABLE IF NOT EXISTS "combine_recipes" (
                 main_type_id TEXT NOT NULL,
                 material_type_id TEXT NOT NULL,
@@ -198,6 +208,7 @@ INSERT INTO combine_recipes VALUES('ArcheryRange','ArcheryRange',1,'CrossbowTowe
 INSERT INTO combine_recipes VALUES('Stable','Stable',1,'Ranch');
 INSERT INTO combine_recipes VALUES('Ranch','Ranch',2,'RoyalStable');
 INSERT INTO combine_recipes VALUES('Armory','Armory',2,'RoyalBulwark');
+INSERT INTO combine_recipes VALUES('Ranch','Ranch',2,'RoyalRanger');
 PRAGMA writable_schema=ON;
 CREATE TABLE IF NOT EXISTS sqlite_sequence(name,seq);
 DELETE FROM sqlite_sequence;

@@ -100,7 +100,7 @@ custom_minimum_size = Vector2(200, 0)
 
 [node name="LibraryTitle" type="Label" parent="EditorArea/LibraryPanel"]
 layout_mode = 2
-text = "建筑素材库"
+text = "建筑列表"
 horizontal_alignment = 1
 
 [node name="NewBuildingButton" type="Button" parent="EditorArea/LibraryPanel"]
