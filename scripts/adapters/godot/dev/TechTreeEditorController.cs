@@ -360,9 +360,16 @@ public class TechTreeEditorController
 
 	private void OnCardCanvasGuiInput(InputEvent @event)
 	{
-		if (@event is InputEventMouseButton rightClick && rightClick.Pressed && rightClick.ButtonIndex == MouseButton.Right)
+		if (@event is InputEventMouseButton mouseButton && mouseButton.Pressed)
 		{
-			if (!_dragActive)
+			if (mouseButton.ButtonIndex == MouseButton.Left && mouseButton.DoubleClick)
+			{
+				Vector2 clickPos = _cardCanvas.GetLocalMousePosition();
+				TryDeleteEdgeAt(clickPos);
+				return;
+			}
+
+			if (mouseButton.ButtonIndex == MouseButton.Right && !_dragActive)
 			{
 				Vector2 clickPos = _cardCanvas.GetLocalMousePosition();
 				TryDeleteEdgeAt(clickPos);
