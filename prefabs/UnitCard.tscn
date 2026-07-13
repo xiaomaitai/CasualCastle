@@ -17,10 +17,8 @@ texture = SubResource("AtlasTexture_cardbase")
 
 [node name="CardArt" parent="." instance=ExtResource("3")]
 position = Vector2(0, 86)
-z_index = 2
 
 [node name="NameLabel" type="Label" parent="." unique_id=1910810434]
-z_index = 4
 offset_left = -40.0
 offset_top = -548.0
 offset_right = 40.0
@@ -34,7 +32,6 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="StatusLabel" type="Label" parent="." unique_id=1221761122]
-z_index = 4
 offset_left = 23.0
 offset_top = -73.0
 offset_right = 39.0
@@ -48,7 +45,6 @@ vertical_alignment = 1
 
 [node name="BuffLabel" type="Label" parent="." unique_id=1022219110]
 visible = false
-z_index = 4
 offset_left = -520.0
 offset_top = 470.0
 offset_right = -380.0

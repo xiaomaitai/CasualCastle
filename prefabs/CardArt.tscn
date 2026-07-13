@@ -13,7 +13,6 @@ region = Rect2(0, 0, 636, 531)
 script = ExtResource("1")
 
 [node name="ArtFrame" type="Sprite2D" parent="." unique_id=402998912]
-z_index = 2
 scale = Vector2(1.65, 1.717514)
 texture = SubResource("AtlasTexture_artframe")
 

@@ -64,7 +64,6 @@ public partial class UnitCardView : Node2D
 	public void SetSelected(bool selected)
 	{
 		_selected = selected;
-		ZIndex = selected ? 20 : 0;
 		QueueRedraw();
 	}
 

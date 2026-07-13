@@ -3,6 +3,7 @@ using Godot;
 public class SoldierVisual
 {
     private UnitCardView _card;
+    private Node2D _body;
     private Color _portraitTint = Colors.White;
     private float _hitFlashTimer;
     private bool _isSleeping;
@@ -11,6 +12,7 @@ public class SoldierVisual
 
     public void Initialize(Node2D body)
     {
+        _body = body;
         _card = body.GetNode<UnitCardView>("View/UnitCard");
     }
 
@@ -63,5 +65,11 @@ public class SoldierVisual
     public void SetSelected(bool selected)
     {
         _card.SetSelected(selected);
+        _body.ZIndex = selected ? 20 : 0;
+    }
+
+    public void SetBuffs(string[] buffs)
+    {
+        _card.SetBuffs(buffs);
     }
 }
