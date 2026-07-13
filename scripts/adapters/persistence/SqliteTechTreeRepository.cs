@@ -41,9 +41,9 @@ public class SqliteTechTreeRepository : ITechTreeRepository
                     sort_order INTEGER NOT NULL DEFAULT 0
                 );
                 INSERT INTO race_defs (id, display_name, sort_order) VALUES
-                    ('kingdom', '王国军', 0),
-                    ('adventurer', '冒险者公会', 1),
-                    ('temple', '神殿卫士', 2);";
+                    ('human', '人族', 0),
+                    ('wizard', '巫师族', 1),
+                    ('dungeon', '地下城', 2);";
             cmd.ExecuteNonQuery();
         }
 
@@ -76,6 +76,8 @@ public class SqliteTechTreeRepository : ITechTreeRepository
         {
             MigrateFromBuildingDefs(connection);
         }
+
+        MigrateCombineRecipesPK(connection);
     }
 
     private static void MigrateFromBuildingDefs(SqliteConnection connection)
@@ -88,7 +90,7 @@ public class SqliteTechTreeRepository : ITechTreeRepository
 
         cmd.CommandText = @"
             INSERT OR IGNORE INTO tech_tree_nodes (type_id, race_id, tier, col, shop_available, gold_cost, shop_weight, unlock_night, display_name, unit_type_id, max_health, spawn_interval)
-            SELECT b.type_id, 'kingdom', b.combine_tier + 1, 0,
+            SELECT b.type_id, 'human', b.combine_tier + 1, 0,
                    CASE WHEN s.id IS NOT NULL THEN 1 ELSE 0 END,
                    s.cost, s.weight, 0,
                    b.display_name, b.unit_type_id, b.max_health, COALESCE(b.spawn_interval, 10.0)
@@ -235,13 +237,36 @@ public class SqliteTechTreeRepository : ITechTreeRepository
         cmd.ExecuteNonQuery();
     }
 
-    public void RemoveRecipe(string mainTypeId, string materialTypeId)
+    private static void MigrateCombineRecipesPK(SqliteConnection connection)
+    {
+        using SqliteCommand cmd = connection.CreateCommand();
+        cmd.CommandText = "SELECT COUNT(*) FROM pragma_table_info('combine_recipes') WHERE pk > 0";
+        int pkCount = Convert.ToInt32(cmd.ExecuteScalar());
+        if (pkCount >= 3)
+            return;
+
+        cmd.CommandText = @"
+            CREATE TABLE combine_recipes_new (
+                main_type_id TEXT NOT NULL,
+                material_type_id TEXT NOT NULL,
+                material_count INTEGER NOT NULL,
+                result_type_id TEXT NOT NULL,
+                PRIMARY KEY (main_type_id, material_type_id, result_type_id)
+            );
+            INSERT OR IGNORE INTO combine_recipes_new SELECT * FROM combine_recipes;
+            DROP TABLE combine_recipes;
+            ALTER TABLE combine_recipes_new RENAME TO combine_recipes;";
+        cmd.ExecuteNonQuery();
+    }
+
+    public void RemoveRecipe(string mainTypeId, string materialTypeId, string resultTypeId)
     {
         using SqliteConnection connection = OpenConnection();
         using SqliteCommand cmd = connection.CreateCommand();
-        cmd.CommandText = "DELETE FROM combine_recipes WHERE main_type_id = @main AND material_type_id = @mat";
+        cmd.CommandText = "DELETE FROM combine_recipes WHERE main_type_id = @main AND material_type_id = @mat AND result_type_id = @result";
         cmd.Parameters.AddWithValue("@main", mainTypeId);
         cmd.Parameters.AddWithValue("@mat", materialTypeId);
+        cmd.Parameters.AddWithValue("@result", resultTypeId);
         cmd.ExecuteNonQuery();
     }
 

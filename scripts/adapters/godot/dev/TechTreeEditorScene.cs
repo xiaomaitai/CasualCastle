@@ -3,28 +3,33 @@ using Godot;
 
 public partial class TechTreeEditorScene : Control
 {
-    private TechTreeEditorController _controller;
+	private TechTreeEditorController _controller;
 
-    public override void _Ready()
-    {
-        SetProcessInput(true);
-        _controller = new TechTreeEditorController(this);
-    }
+	public override void _Ready()
+	{
+		_controller = new TechTreeEditorController(this);
+		CallDeferred(nameof(LoadDeferred));
+	}
 
-    public override void _Process(double delta)
-    {
-        _controller.Process();
-    }
+	private void LoadDeferred()
+	{
+		_controller.LoadInitialData();
+	}
 
-    public override void _Input(InputEvent @event)
-    {
-        _controller.HandleGlobalInput(@event);
-    }
+	public override void _Process(double delta)
+	{
+		_controller.Process();
+	}
 
-    protected override void Dispose(bool disposing)
-    {
-        if (disposing)
-            _controller?.Dispose();
-        base.Dispose(disposing);
-    }
+	public override void _Input(InputEvent @event)
+	{
+		_controller.HandleGlobalInput(@event);
+	}
+
+	protected override void Dispose(bool disposing)
+	{
+		if (disposing)
+			_controller?.Dispose();
+		base.Dispose(disposing);
+	}
 }

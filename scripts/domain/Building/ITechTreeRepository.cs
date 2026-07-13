@@ -10,7 +10,7 @@ public interface ITechTreeRepository
     List<BuildingTypeSummary> LoadAllBuildingTypes();
     void SaveNodes(string raceId, List<TechTreeNode> nodes);
     void AddRecipe(CombineRecipe recipe);
-    void RemoveRecipe(string mainTypeId, string materialTypeId);
+    void RemoveRecipe(string mainTypeId, string materialTypeId, string resultTypeId);
     void SyncToGameTables(string raceId);
 }
 
