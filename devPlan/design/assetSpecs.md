@@ -10,10 +10,10 @@
 |------|-----|------|
 | 设计分辨率 | 1920 × 1080 px | `GameRules.DesignWidth/Height` |
 | 格子 | 100 × 100 unit | `GameCoordinateRules.UnitsPerCell` |
-| 渲染 | 48 px/格 | `GameCoordinatesAdapter.PixelsPerCell` |
+| 渲染 | 100 px/格 | `GameCoordinatesAdapter.PixelsPerCell` |
 | 缩放模式 | CanvasItems + Expand | `DisplaySettingsManager` |
 
-**换算公式：** `像素 = 游戏单位 × 48 / 100`
+**换算公式：** `像素 = 游戏单位`（PixelsPerCell = UnitsPerCell = 100，1:1 对应）
 
 所有战场内实体（建筑、士兵、弹体）的尺寸、距离、速度一律用 game unit 定义。像素仅用于 UI 和输出分辨率。
 
@@ -145,13 +145,13 @@ Soldier (Area2D)
 
 ### 单位主图
 
-战斗内单位卡牌上显示的兵种肖像图，由 `UnitCardView` 在运行时按 `res://assets/art/cards/{TypeId}.png` 动态加载。
+战斗内单位卡牌上显示的兵种肖像图，由 `UnitCardView.LoadPortrait` 按 `res://assets/art/cards/{TypeId}_*.png` 扫描匹配，交 `CardArtView` 按短边填满遮罩显示。
 
 | 属性 | 值 |
 |------|-----|
 | 用途 | 战斗中单位卡牌的兵种肖像 |
 | 存放位置 | `assets/art/cards/{TypeId}_{taskId}.png`（TypeId 与 `unit_stats` 表一致，taskId 为 `asset_gen_tasks.id`） |
-| 加载方式 | `UnitCardView` 扫描 `assets/art/cards/{TypeId}_*.png` 匹配加载 |
+| 加载方式 | `UnitCardView.LoadPortrait` 扫描 `assets/art/cards/{TypeId}_*.png` 匹配加载，`CardArtView` 按短边填满遮罩显示 |
 | 生图尺寸 | 512×512 |
 | 最终尺寸 | 256×256（缩放后） |
 | 模型 | Qwen-Image（`bf085132c7134622895b783b520b39ff` / `75e0be0c93b34dd8baeec9c968013e0c`） |
@@ -221,12 +221,12 @@ process/fix_alpha_border=true
 
 | 格数 | game unit | 像素 |
 |------|-----------|------|
-| 1 格 | 100 × 100 | 48 × 48 |
-| 2 格 | 200 | 96 |
-| 4 格 (2×2) | 200 × 200 | 96 × 96 |
-| 8 格 (城堡边长) | 800 | 384 |
+| 1 格 | 100 × 100 | 100 × 100 |
+| 2 格 | 200 | 200 |
+| 4 格 (2×2) | 200 × 200 | 200 × 200 |
+| 8 格 (城堡边长) | 800 | 800 |
 
-**换算：** `pixels = gameUnits × 48 / 100`　　`gameUnits = pixels × 100 / 48`
+**换算：** `pixels = gameUnits`（1:1 对应，`PixelsPerCell = UnitsPerCell = 100`）
 
 ---
 

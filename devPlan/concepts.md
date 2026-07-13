@@ -253,14 +253,16 @@
 | 坐标系统 | 所在层 | 单位 | 定义 |
 |----------|--------|------|------|
 | **游戏坐标** | domain 层 | 游戏单位（1 格 = 100 单位） | `GameCoordinateRules.UnitsPerCell = 100` |
-| **像素坐标** | adapter 层 | Godot 像素 | `GameCoordinatesAdapter.PixelsPerCell = 72` |
+| **像素坐标** | adapter 层 | Godot 像素 | `GameCoordinatesAdapter.PixelsPerCell = 100` |
 
 **转换**（仅在 adapter 层）：
 
 ```
-像素 = 游戏单位 × PixelsPerCell / UnitsPerCell = 游戏单位 × 72 / 100
-游戏单位 = 像素 × UnitsPerCell / PixelsPerCell = 像素 × 100 / 72
+像素 = 游戏单位 × PixelsPerCell / UnitsPerCell = 游戏单位 × 100 / 100 = 游戏单位
+游戏单位 = 像素 × UnitsPerCell / PixelsPerCell = 像素 × 100 / 100 = 像素
 ```
+
+PixelsPerCell = UnitsPerCell = 100，游戏坐标与像素 1:1 对应。
 
 **规则**：
 - domain 层所有数值（速度、射程、尺寸、碰撞半径等）一律使用**游戏单位**，禁止出现像素
