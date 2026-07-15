@@ -79,7 +79,6 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 	float IBuildingRef.MaxY => GameCoordinatesAdapter.PixelsToGameUnits(GlobalPosition.Y + GetBuildingSize().Y * 0.5f);
 
 	IBuildingTarget IBuildingRef.BuildingTarget => this;
-	object IBuildingRef.CastleRef => CastleRef;
 
 	public Vector2I GetMainGridPosition()
 	{
@@ -262,25 +261,11 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	public bool CanRepair()
 	{
-		if (Health >= MaxHealth)
-			return false;
-
-		if (BuildingSystem.IsCoreBuilding(TypeId))
-			return false;
-
-		if (CastleRef == null || !CastleRef.IsPlayerCastle)
-			return false;
-
-		if (HasEnemyOnTop)
-			return false;
-
-		if (_gameManager?.CurrentState != GameManager.GameState.Playing)
-			return false;
-
-		if (!_gameManager.IsNight)
-			return false;
-
-		return true;
+		bool isPlayerOwned = CastleRef != null && CastleRef.IsPlayerCastle;
+		bool isPlaying = _gameManager?.CurrentState == GameManager.GameState.Playing;
+		bool isNight = _gameManager != null && _gameManager.IsNight;
+		return RepairRules.CanRepair(Health, MaxHealth, BuildingSystem.IsCoreBuilding(TypeId),
+			isPlayerOwned, HasEnemyOnTop, isPlaying, isNight);
 	}
 
 	private void Repair()
@@ -291,7 +276,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		RefreshOperationalState();
 	}
 
-	public int GetRepairCost() => (MaxHealth - Health) * GameConfig.RepairGoldPerHealth;
+	public int GetRepairCost() => RepairRules.GetRepairCost(MaxHealth, Health, GameConfig.RepairGoldPerHealth);
 
 	public bool CanWork => IsOperational && NightRules.CanUnitWork(HasNightCombat, AdapterRegistry.Resolve<IGameState>().IsDay);
 

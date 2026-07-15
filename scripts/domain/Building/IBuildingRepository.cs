@@ -20,11 +20,10 @@ public interface IBuildingRepository
 	bool IsCoreBuilding(string typeId) => Get(typeId).IsCore;
 	int GetCollisionWidth(string typeId) => Get(typeId).CollisionWidth;
 	int GetCollisionHeight(string typeId) => Get(typeId).CollisionHeight;
-
-	bool IsCombinableMaterial(string typeId)
-	{
-		BuildingData bd = Get(typeId);
-		return bd.CombineTier < 4
-			&& !bd.IsCore;
-	}
+	string GetTexturePath(string typeId) => Get(typeId).TexturePath;
+	float GetSpriteModulateR(string typeId) => Get(typeId).SpriteModulateR;
+	float GetSpriteModulateG(string typeId) => Get(typeId).SpriteModulateG;
+	float GetSpriteModulateB(string typeId) => Get(typeId).SpriteModulateB;
+	float GetSpriteModulateA(string typeId) => Get(typeId).SpriteModulateA;
+	string GetMaterialPath(string typeId) => Get(typeId).MaterialPath;
 }

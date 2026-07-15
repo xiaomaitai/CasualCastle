@@ -1,4 +1,5 @@
 using CasualCastle.Adapters.Godot.Dev;
+using CasualCastle.Domain.Building;
 using Godot;
 
 public partial class TechTreeEditorScene : Control
@@ -7,7 +8,8 @@ public partial class TechTreeEditorScene : Control
 
 	public override void _Ready()
 	{
-		_controller = new TechTreeEditorController(this);
+		ITechTreeRepository repo = GameManager.Get<ITechTreeRepository>();
+		_controller = new TechTreeEditorController(this, repo);
 		CallDeferred(nameof(LoadDeferred));
 	}
 

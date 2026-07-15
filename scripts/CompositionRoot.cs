@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using CasualCastle.Adapters.Godot.Battle;
+using CasualCastle.Adapters.Godot.Flow;
 using CasualCastle.Adapters.Persistence;
 using CasualCastle.Domain.Shared;
 using CasualCastle.Domain.Building;
@@ -33,6 +35,7 @@ public static class CompositionRoot
 
 		services.AddSingleton<IBuildingRepository, SqliteBuildingRepository>();
 		services.AddSingleton<ISaveRepository, SaveStorage>();
+		services.AddSingleton<IGameSessionService, GameSessionService>();
 
 		return services.BuildServiceProvider();
 	}

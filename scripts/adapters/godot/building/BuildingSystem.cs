@@ -4,154 +4,15 @@ using CasualCastle.Domain.Shared;
 using CasualCastle.Adapters.Godot;
 using Godot;
 using System.Collections.Generic;
-using System.Linq;
 
 public partial class BuildingSystem : Node
 {
     public static BuildingSystem Instance { get; private set; }
 
     private const string BuildingPrefabPath = "res://prefabs/Building.tscn";
-    private const string PlaceholderTexturePath = "res://assets/art/placeholders/test_image.png";
 
     [Signal]
     public delegate void BuildingPlacedEventHandler(Castle castle, Building building, string buildingType);
-
-    private static readonly Vector2I[] Footprint2x2 =
-    {
-        Vector2I.Zero, new(1, 0), new(0, 1), new(1, 1),
-    };
-
-    private readonly struct VisualDef
-    {
-        public Vector2I[] Footprint { get; init; }
-        public string TexturePath { get; init; }
-        public Color SpriteModulate { get; init; }
-        public string MaterialPath { get; init; }
-    }
-
-    private static readonly Dictionary<string, VisualDef> Visuals = new()
-    {
-        ["CastleHeart"] = new()
-        {
-            Footprint = Footprint2x2,
-            TexturePath = PlaceholderTexturePath,
-            SpriteModulate = new Color(1f, 0.82f, 0.35f),
-        },
-        ["Barracks"] = new()
-        {
-            Footprint = Footprint2x2,
-            TexturePath = PlaceholderTexturePath,
-            SpriteModulate = new Color(0.55f, 0.6f, 0.75f),
-        },
-        ["ShieldCamp"] = new()
-        {
-            Footprint = Footprint2x2,
-            TexturePath = PlaceholderTexturePath,
-            SpriteModulate = new Color(0.4f, 0.4f, 0.45f),
-        },
-        ["ArcheryRange"] = new()
-        {
-            Footprint = Footprint2x2,
-            TexturePath = PlaceholderTexturePath,
-            SpriteModulate = new Color(0.45f, 0.75f, 0.45f),
-        },
-        ["Stable"] = new()
-        {
-            Footprint = Footprint2x2,
-            TexturePath = PlaceholderTexturePath,
-            SpriteModulate = new Color(0.65f, 0.5f, 0.3f),
-        },
-        ["ScoutCamp"] = new()
-        {
-            Footprint = Footprint2x2,
-            TexturePath = PlaceholderTexturePath,
-            SpriteModulate = new Color(0.5f, 0.65f, 0.85f),
-        },
-        ["Armory"] = new()
-        {
-            Footprint = Footprint2x2,
-            TexturePath = PlaceholderTexturePath,
-            SpriteModulate = new Color(0.65f, 0.7f, 0.85f),
-        },
-        ["Bulwark"] = new()
-        {
-            Footprint = Footprint2x2,
-            TexturePath = PlaceholderTexturePath,
-            SpriteModulate = new Color(0.5f, 0.5f, 0.55f),
-        },
-        ["CrossbowTower"] = new()
-        {
-            Footprint = Footprint2x2,
-            TexturePath = PlaceholderTexturePath,
-            SpriteModulate = new Color(0.55f, 0.85f, 0.55f),
-        },
-        ["Ranch"] = new()
-        {
-            Footprint = Footprint2x2,
-            TexturePath = PlaceholderTexturePath,
-            SpriteModulate = new Color(0.75f, 0.6f, 0.4f),
-        },
-        ["RangerPost"] = new()
-        {
-            Footprint = Footprint2x2,
-            TexturePath = PlaceholderTexturePath,
-            SpriteModulate = new Color(0.6f, 0.75f, 0.95f),
-        },
-        ["RoyalArmory"] = new()
-        {
-            Footprint = Footprint2x2,
-            TexturePath = PlaceholderTexturePath,
-            SpriteModulate = new Color(0.5f, 0.55f, 0.8f),
-        },
-        ["RoyalBulwark"] = new()
-        {
-            Footprint = Footprint2x2,
-            TexturePath = PlaceholderTexturePath,
-            SpriteModulate = new Color(0.35f, 0.38f, 0.5f),
-        },
-        ["RoyalArcheryRange"] = new()
-        {
-            Footprint = Footprint2x2,
-            TexturePath = PlaceholderTexturePath,
-            SpriteModulate = new Color(0.4f, 0.8f, 0.5f),
-        },
-        ["RoyalStable"] = new()
-        {
-            Footprint = Footprint2x2,
-            TexturePath = PlaceholderTexturePath,
-            SpriteModulate = new Color(0.7f, 0.55f, 0.35f),
-        },
-        ["RoyalRanger"] = new()
-        {
-            Footprint = Footprint2x2,
-            TexturePath = PlaceholderTexturePath,
-            SpriteModulate = new Color(0.55f, 0.7f, 0.9f),
-        },
-        ["HolyWall"] = new()
-        {
-            Footprint = Footprint2x2,
-            TexturePath = PlaceholderTexturePath,
-            SpriteModulate = new Color(0.55f, 0.58f, 0.65f),
-        },
-        ["HeavenPunishmentTower"] = new()
-        {
-            Footprint = Footprint2x2,
-            TexturePath = PlaceholderTexturePath,
-            SpriteModulate = new Color(0.7f, 0.45f, 0.85f),
-        },
-        ["ShadowSanctum"] = new()
-        {
-            Footprint = Footprint2x2,
-            TexturePath = PlaceholderTexturePath,
-            SpriteModulate = new Color(0.25f, 0.15f, 0.35f),
-        },
-        ["RoyalCourt"] = new()
-        {
-            Footprint = Footprint2x2,
-            TexturePath = PlaceholderTexturePath,
-            SpriteModulate = new Color(0.9f, 0.75f, 0.2f),
-        },
-    };
 
     private AdjacencyService _adjacencyService;
 
@@ -236,18 +97,15 @@ public partial class BuildingSystem : Node
     public static bool GetHasNightCombat(string buildingType) => BuildingRepo.GetHasNightCombat(buildingType);
     public static int GetCombineTier(string buildingType) => BuildingRepo.GetCombineTier(buildingType);
     public static bool IsCoreBuilding(string buildingType) => BuildingRepo.IsCoreBuilding(buildingType);
-    public static bool IsCombinableMaterial(string buildingType) => BuildingRepo.IsCombinableMaterial(buildingType);
+    public static bool IsCombinableMaterial(string buildingType) => CombineRules.IsCombinableMaterial(buildingType, BuildingRepo);
     public static int GetCollisionWidth(string buildingType) => BuildingRepo.GetCollisionWidth(buildingType);
     public static int GetCollisionHeight(string buildingType) => BuildingRepo.GetCollisionHeight(buildingType);
 
-    private static VisualDef GetVisual(string buildingType)
+    public static Color GetSpriteModulate(string buildingType)
     {
-        if (Visuals.TryGetValue(buildingType, out VisualDef def))
-            return def;
-        return Visuals["Barracks"];
+        IBuildingRepository repo = BuildingRepo;
+        return new Color(repo.GetSpriteModulateR(buildingType), repo.GetSpriteModulateG(buildingType), repo.GetSpriteModulateB(buildingType), repo.GetSpriteModulateA(buildingType));
     }
-
-    public static Color GetSpriteModulate(string buildingType) => GetVisual(buildingType).SpriteModulate;
 
     public static void ApplySoldierSpawnStats(string buildingType,SoldierLogic soldier)
     {
@@ -258,8 +116,9 @@ public partial class BuildingSystem : Node
 
     public static void ApplyVisual(Building building)
     {
-        VisualDef visual = GetVisual(building.TypeId);
-        IReadOnlyList<GridCellOffset> footprint = BuildingRepo.GetFootprint(building.TypeId);
+        IBuildingRepository repo = BuildingRepo;
+        string buildingType = building.TypeId;
+        IReadOnlyList<GridCellOffset> footprint = repo.GetFootprint(buildingType);
         GameVector2 collisionSize = GameCoordinateRules.GetBuildingCollisionSize(footprint);
         float pixelW = GameCoordinatesAdapter.GameUnitsToPixels(collisionSize.X);
         float pixelH = GameCoordinatesAdapter.GameUnitsToPixels(collisionSize.Y);
@@ -268,16 +127,21 @@ public partial class BuildingSystem : Node
         Sprite2D sprite = building.GetNodeOrNull<Sprite2D>("View/Sprite");
         if (sprite != null)
         {
-            Texture2D texture = GD.Load<Texture2D>(visual.TexturePath);
-            if (texture != null)
+            string texturePath = repo.GetTexturePath(buildingType);
+            if (!string.IsNullOrEmpty(texturePath))
             {
-                sprite.Texture = texture;
-                sprite.Scale = new Vector2(pixelW / texture.GetWidth(), pixelH / texture.GetHeight());
+                Texture2D texture = GD.Load<Texture2D>(texturePath);
+                if (texture != null)
+                {
+                    sprite.Texture = texture;
+                    sprite.Scale = new Vector2(pixelW / texture.GetWidth(), pixelH / texture.GetHeight());
+                }
             }
-            sprite.Modulate = visual.SpriteModulate;
-            if (!string.IsNullOrEmpty(visual.MaterialPath))
+            sprite.Modulate = new Color(repo.GetSpriteModulateR(buildingType), repo.GetSpriteModulateG(buildingType), repo.GetSpriteModulateB(buildingType), repo.GetSpriteModulateA(buildingType));
+            string materialPath = repo.GetMaterialPath(buildingType);
+            if (!string.IsNullOrEmpty(materialPath))
             {
-                Material material = GD.Load<Material>(visual.MaterialPath);
+                Material material = GD.Load<Material>(materialPath);
                 if (material != null) sprite.Material = material;
             }
         }

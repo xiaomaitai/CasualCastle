@@ -7,4 +7,9 @@ public static class GameRules
 	public const int InitialGold = 3000;
 	public const int RepairGoldPerHealth = 1;
 	public const int CastleHeartMaxHealth = 500;
+
+	public const float SkillNearbyAllyRadius = 150f;
+	public const float SkillTargetIsolatedRadius = 120f;
+
+	public static readonly float[] DodgeChanceByAllyRaceCount = { 0f, 0f, 0.10f, 0.20f, 0.30f, 0.35f, 0.40f, 0.40f };
 }

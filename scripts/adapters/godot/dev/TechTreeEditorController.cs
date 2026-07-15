@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using CasualCastle.Adapters.Persistence;
 using CasualCastle.Domain.Building;
 using Godot;
 
@@ -39,7 +38,7 @@ public class TechTreeEditorController
 	private const float CardHeight = 56;
 	private const float ColSpacing = 140;
 
-	public TechTreeEditorController(Control root)
+	public TechTreeEditorController(Control root, ITechTreeRepository repo)
 	{
 		_root = root;
 		_prevRaceButton = root.GetNode<Button>("TopBar/PrevRaceButton");
@@ -53,7 +52,7 @@ public class TechTreeEditorController
 		_newBuildingButton = root.GetNode<Button>("EditorArea/LibraryPanel/NewBuildingButton");
 		_statusBar = root.GetNode<Label>("StatusBar");
 
-		_repo = new SqliteTechTreeRepository();
+		_repo = repo;
 
 		_prevRaceButton.Pressed += OnPrevRacePressed;
 		_nextRaceButton.Pressed += OnNextRacePressed;

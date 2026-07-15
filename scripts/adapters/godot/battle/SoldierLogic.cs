@@ -17,18 +17,13 @@ public partial class SoldierLogic : Node2D
 	public bool IsPlayerUnit { get; set; }
 	public bool IsAlive => _soldier?.IsAlive ?? false;
 	public int Health => _soldier?.Health ?? 0;
-	public int MaxHealth { get; private set; } = 30;
+	public int MaxHealth => _soldier?.MaxHealth ?? 30;
 	public int Damage => _soldier?.Damage ?? 0;
-	public float Speed { get; private set; } = 252f;
-	public float AttackRange { get; private set; } = 90f;
-	public float AttackCooldown { get; private set; } = 1f;
-	public float VisionRange { get; private set; } = 250f;
-	public bool HasNightCombat { get; set; }
+	public bool HasNightCombat => _soldier?.HasNightCombat ?? false;
 	public float DisplaySize { get; private set; } = 125f;
 	public float CollisionRadius => _soldier?.CollisionRadius ?? 50f;
 	public AttackType AttackType { get; private set; }
-	public DamageType DamageType { get; private set; }
-	public ArmorType ArmorType { get; private set; } = ArmorType.Light;
+	public DamageType DamageType => _soldier?.DamageType ?? DamageType.Normal;
 	public bool IsSelected { get; private set; }
 
 	private bool _statsPending;
@@ -64,16 +59,8 @@ public partial class SoldierLogic : Node2D
 		if (_fieldRepo != null)
 			_fieldRepo.Register(_soldier);
 
-		MaxHealth = stats.Health;
-		Speed = GameCoordinatesAdapter.GameUnitsToPixels(stats.Speed);
-		AttackRange = GameCoordinatesAdapter.GameUnitsToPixels(stats.AttackRange);
-		AttackCooldown = stats.AttackCooldown;
-		VisionRange = GameCoordinatesAdapter.GameUnitsToPixels(stats.VisionRange);
-		HasNightCombat = stats.HasNightCombat;
 		DisplaySize = stats.DisplaySize;
 		AttackType = stats.AttackType;
-		DamageType = stats.DamageType;
-		ArmorType = stats.ArmorType;
 
 		_statsPending = true;
 	}

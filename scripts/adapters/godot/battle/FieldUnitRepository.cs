@@ -2,12 +2,10 @@ using System;
 using System.Collections.Generic;
 using CasualCastle.Domain.Battle;
 
-namespace CasualCastle.Adapters.Persistence;
+namespace CasualCastle.Adapters.Godot.Battle;
 
 public class FieldUnitRepository : IFieldUnitRepository
 {
-	private const float CellSize = 200f;
-
 	private readonly List<ISoldierHandle> _playerUnits = new();
 	private readonly List<ISoldierHandle> _enemyUnits = new();
 	private readonly List<IBuildingRef> _buildings = new();

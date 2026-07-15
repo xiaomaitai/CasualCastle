@@ -1,14 +1,15 @@
 using System.Collections.Generic;
+using CasualCastle.Domain.Shared;
 
 namespace CasualCastle.Domain.Battle;
 
 public class SkillService
 {
-	private const float NearbyAllyRadius = 150f;
-	private const float TargetIsolatedRadius = 120f;
-
 	public void UpdateContexts(IReadOnlyList<ISoldierHandle> allUnits)
 	{
+		float nearbyRadiusSq = GameRules.SkillNearbyAllyRadius * GameRules.SkillNearbyAllyRadius;
+		float isolatedRadiusSq = GameRules.SkillTargetIsolatedRadius * GameRules.SkillTargetIsolatedRadius;
+
 		for (int i = 0; i < allUnits.Count; i++)
 		{
 			ISoldierHandle unit = allUnits[i];
@@ -28,7 +29,7 @@ public class SkillService
 
 				float dx = unit.GameX - other.GameX;
 				float dy = unit.GameY - other.GameY;
-				if (dx * dx + dy * dy <= NearbyAllyRadius * NearbyAllyRadius)
+				if (dx * dx + dy * dy <= nearbyRadiusSq)
 				{
 					if (!string.IsNullOrEmpty(other.Race))
 						nearbyRaces.Add(other.Race);
@@ -50,7 +51,7 @@ public class SkillService
 
 					float dx = target.GameX - other.GameX;
 					float dy = target.GameY - other.GameY;
-					if (dx * dx + dy * dy <= TargetIsolatedRadius * TargetIsolatedRadius)
+					if (dx * dx + dy * dy <= isolatedRadiusSq)
 					{
 						isolated = false;
 						break;

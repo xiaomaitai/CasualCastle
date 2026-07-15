@@ -28,6 +28,12 @@ public static class CombineRules
 
     public static IReadOnlyList<CombineRecipe> GetRecipes() => _recipes;
 
+    public static bool IsCombinableMaterial(string typeId, IBuildingRepository buildingRepo)
+    {
+        return buildingRepo.GetCombineTier(typeId) < 4
+            && !buildingRepo.IsCoreBuilding(typeId);
+    }
+
     public static bool CanParticipate(IBuildingState building, IBuildingRepository buildingRepo)
     {
         if (building == null || building.IsDestroyed || building.IsManuallyPaused)
@@ -36,7 +42,7 @@ public static class CombineRules
             return false;
         if (buildingRepo.IsCoreBuilding(building.TypeId))
             return false;
-        if (!buildingRepo.IsCombinableMaterial(building.TypeId))
+        if (!IsCombinableMaterial(building.TypeId, buildingRepo))
             return false;
         if (!building.IsPlayerOwned)
             return false;

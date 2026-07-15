@@ -158,13 +158,6 @@ public partial class GameManager : Node2D, IGameState
         PendingReplayReportId = reportId ?? "";
     }
 
-    public bool CanUnitWork(bool hasNightCombat)
-    {
-        if (CurrentState != GameState.Playing || IsPaused) return false;
-        if (CurrentPhase == GamePhase.Day) return true;
-        return hasNightCombat;
-    }
-
     public void SetPaused(bool paused)
     {
         if (CurrentState != GameState.Playing)
@@ -231,7 +224,7 @@ public partial class GameManager : Node2D, IGameState
         GD.Print(playerWon ? "Player Wins!" : "Enemy Wins!");
 
         int slot = 0;
-        Get<ISaveRepository>().DeleteSave(slot);
+        Get<IGameSessionService>().DeleteSave(slot);
     }
 
     public void SaveGame(int slot)
@@ -269,18 +262,18 @@ public partial class GameManager : Node2D, IGameState
             });
         }
 
-        Get<ISaveRepository>().Save(data);
+        Get<IGameSessionService>().SaveGame(data);
         GD.Print($"Game saved to slot {slot}");
     }
 
     public SaveData LoadSaveData(int slot)
     {
-        return Get<ISaveRepository>().Load(slot);
+        return Get<IGameSessionService>().LoadSaveData(slot);
     }
 
     public bool HasSave(int slot)
     {
-        return Get<ISaveRepository>().HasSave(slot);
+        return Get<IGameSessionService>().HasSave(slot);
     }
 
     public void RestartGame()

@@ -9,5 +9,4 @@ public interface IBuildingRef
 	float MaxX { get; }
 	float MaxY { get; }
 	IBuildingTarget BuildingTarget { get; }
-	object CastleRef { get; }
 }

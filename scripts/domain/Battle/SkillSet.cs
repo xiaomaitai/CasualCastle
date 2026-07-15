@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using CasualCastle.Domain.Shared;
 
 namespace CasualCastle.Domain.Battle;
 
@@ -65,16 +66,10 @@ public class SkillSet
 		if (ctx.NearbyAllyRaces == null || ctx.NearbyAllyRaces.Count <= 1)
 			return 0f;
 		int raceCount = ctx.NearbyAllyRaces.Count;
-		float baseChance = raceCount switch
-		{
-			2 => 0.10f,
-			3 => 0.20f,
-			4 => 0.30f,
-			5 => 0.35f,
-			_ => 0.40f
-		};
-		if (raceCount > 6)
-			baseChance = 0.40f;
+		int idx = raceCount - 1;
+		if (idx >= GameRules.DodgeChanceByAllyRaceCount.Length)
+			idx = GameRules.DodgeChanceByAllyRaceCount.Length - 1;
+		float baseChance = GameRules.DodgeChanceByAllyRaceCount[idx];
 		return baseChance * GetStatMultiplier("dodge_chance", ctx);
 	}
 
