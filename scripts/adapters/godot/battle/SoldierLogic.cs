@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
 using Godot;
@@ -54,6 +55,10 @@ public partial class SoldierLogic : Node2D
 			_lifecycle = new SoldierLifecycle();
 		}
 		_soldier.Initialize(stats, IsPlayerUnit);
+		ISkillRepository skillRepo = GameManager.Get<ISkillRepository>();
+		IReadOnlyList<SkillDef> skills = skillRepo.GetByUnitType(stats.TypeId);
+		foreach (SkillDef skill in skills)
+			_soldier.Skills.Add(skill);
 		_rvoService.ConfigureRvo(_navPort, _soldier.CollisionRadius);
 
 		if (_fieldRepo != null)

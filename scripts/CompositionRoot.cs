@@ -10,29 +10,30 @@ namespace CasualCastle;
 
 public static class CompositionRoot
 {
-    public static ServiceProvider Build()
-    {
-        GameDataLoader.Load();
+	public static ServiceProvider Build()
+	{
+		GameDataLoader.Load();
 
-        ServiceCollection services = new ServiceCollection();
+		ServiceCollection services = new ServiceCollection();
 
-        services.AddSingleton<IReadOnlyList<CardData>>(_ => GameDataLoader.ShopCatalog);
-        services.AddDomainShared();
-        services.AddDomainBuilding();
-        services.AddDomainBattle();
-        services.AddDomainHistory();
+		services.AddSingleton<IReadOnlyList<CardData>>(_ => GameDataLoader.ShopCatalog);
+		services.AddDomainShared();
+		services.AddDomainBuilding();
+		services.AddDomainBattle();
+		services.AddDomainHistory();
 
-        services.AddSingleton<IGameState>(_ =>
-            CasualCastle.Adapters.Godot.AdapterRegistry.Resolve<IGameState>()
-            ?? throw new System.InvalidOperationException("IGameState not registered"));
+		services.AddSingleton<IGameState>(_ =>
+			CasualCastle.Adapters.Godot.AdapterRegistry.Resolve<IGameState>()
+			?? throw new System.InvalidOperationException("IGameState not registered"));
 
-        services.AddSingleton<IFieldUnitRepository, FieldUnitRepository>();
-        services.AddSingleton<IBattleReportRepository, BattleReportStorage>();
-        services.AddSingleton<IUnitRepository, SqliteUnitRepository>();
-		
-        services.AddSingleton<IBuildingRepository, SqliteBuildingRepository>();
-        services.AddSingleton<ISaveRepository, SaveStorage>();
+		services.AddSingleton<IFieldUnitRepository, FieldUnitRepository>();
+		services.AddSingleton<IBattleReportRepository, BattleReportStorage>();
+		services.AddSingleton<IUnitRepository, SqliteUnitRepository>();
+		services.AddSingleton<ISkillRepository, SqliteSkillRepository>();
 
-        return services.BuildServiceProvider();
-    }
+		services.AddSingleton<IBuildingRepository, SqliteBuildingRepository>();
+		services.AddSingleton<ISaveRepository, SaveStorage>();
+
+		return services.BuildServiceProvider();
+	}
 }

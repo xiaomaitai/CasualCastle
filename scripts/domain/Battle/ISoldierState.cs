@@ -18,5 +18,7 @@ public interface ISoldierState
 	SoldierState State { get; }
 	ArmorType ArmorType { get; }
 	DamageType DamageType { get; }
+	string Race { get; }
+	ISoldierHandle TargetEnemy { get; }
 	string TargetDescription { get; }
 }

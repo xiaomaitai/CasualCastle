@@ -33,4 +33,5 @@ public class UnitStats
 
 	public int UnitCost { get; init; }
 	public uint UnitColor { get; init; }
+	public string Race { get; init; }
 }

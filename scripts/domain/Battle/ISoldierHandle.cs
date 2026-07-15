@@ -7,4 +7,5 @@ public interface ISoldierHandle : ISoldierState
 	void ApplyPush(float dx, float dy);
 	void SetBuildingTarget(IBuildingTarget building);
 	void ClearBuildingTarget();
+	void SetGameContext(GameContext ctx);
 }

@@ -65,26 +65,34 @@ CREATE TABLE unit_stats (
     has_night_combat INTEGER NOT NULL DEFAULT 0,
     unit_color       INTEGER NOT NULL,
     vision_range     REAL    NOT NULL DEFAULT 170.0
-, unit_cost INTEGER NOT NULL DEFAULT 2000);
-INSERT INTO unit_stats VALUES('Spearman',1,0,0,0,120,4,80.0,30.0,1.0,0,4289733792,250.0,2000);
-INSERT INTO unit_stats VALUES('ShieldBearer',1,0,0,1,220,3,45.0,30.0,1.5,0,4286611584,200.0,2400);
-INSERT INTO unit_stats VALUES('Archer',1,1,1,0,50,12,60.0,200.0,1.5,0,4286627968,300.0,2200);
-INSERT INTO unit_stats VALUES('Knight',2,0,0,1,150,14,120.0,35.0,1.2,0,4291862624,280.0,2600);
-INSERT INTO unit_stats VALUES('Scout',0,0,0,0,35,4,160.0,25.0,0.8,0,4286644095,400.0,1400);
-INSERT INTO unit_stats VALUES('Swordsman',1,0,0,0,160,6,80.0,30.0,0.9,0,4285567184,260.0,2600);
-INSERT INTO unit_stats VALUES('HeavyShield',2,0,0,1,330,4,40.0,35.0,1.5,0,4284515808,220.0,3000);
-INSERT INTO unit_stats VALUES('Crossbowman',1,1,1,0,70,18,55.0,180.0,2.0,0,4283476000,280.0,2800);
-INSERT INTO unit_stats VALUES('HeavyCavalry',2,0,0,1,200,22,110.0,35.0,1.3,0,4288712672,290.0,3400);
-INSERT INTO unit_stats VALUES('LightCavalry',1,0,0,0,55,8,180.0,30.0,0.8,0,4286632191,450.0,1800);
-INSERT INTO unit_stats VALUES('HolyShieldGuardian',2,0,0,1,700,8,45.0,35.0,1.5,0,4286616704,170.0,5000);
-INSERT INTO unit_stats VALUES('DragonRiderCommander',2,1,1,0,300,40,120.0,180.0,0.8,0,4290526975,200.0,4600);
-INSERT INTO unit_stats VALUES('ShadowLord',1,0,0,0,180,50,100.0,30.0,1.0,0,4284248320,220.0,4000);
-INSERT INTO unit_stats VALUES('King',2,0,0,1,1200,20,60.0,35.0,1.2,0,4294956800,170.0,6000);
-INSERT INTO unit_stats VALUES('RoyalGuard',1,0,0,0,220,8,80.0,30.0,0.9,0,4488440,270.0,3400);
-INSERT INTO unit_stats VALUES('RoyalShieldGuard',2,0,0,1,480,5,40.0,35.0,1.5,0,12303291,230.0,3800);
-INSERT INTO unit_stats VALUES('RoyalSharpshooter',1,1,1,0,90,28,55.0,200.0,2.0,0,5621589,300.0,3600);
-INSERT INTO unit_stats VALUES('RoyalKnight',2,0,0,1,280,30,110.0,35.0,1.3,0,16754900,300.0,4200);
-INSERT INTO unit_stats VALUES('RoyalScout',1,0,0,0,80,14,180.0,30.0,0.8,0,10040232,500.0,2400);
+, unit_cost INTEGER NOT NULL DEFAULT 2000, race TEXT NOT NULL DEFAULT '');
+INSERT INTO unit_stats VALUES('Spearman',1,0,0,0,120,4,80.0,30.0,1.0,0,4289733792,250.0,2000,'Human');
+INSERT INTO unit_stats VALUES('ShieldBearer',1,0,0,1,220,3,45.0,30.0,1.5,0,4286611584,200.0,2400,'Human');
+INSERT INTO unit_stats VALUES('Archer',1,1,1,0,50,12,60.0,200.0,1.5,0,4286627968,300.0,2200,'Human');
+INSERT INTO unit_stats VALUES('Knight',2,0,0,1,150,14,120.0,35.0,1.2,0,4291862624,280.0,2600,'Human');
+INSERT INTO unit_stats VALUES('Scout',0,0,0,0,35,4,160.0,25.0,0.8,0,4286644095,400.0,1400,'Human');
+INSERT INTO unit_stats VALUES('Swordsman',1,0,0,0,160,6,80.0,30.0,0.9,0,4285567184,260.0,2600,'Human');
+INSERT INTO unit_stats VALUES('HeavyShield',2,0,0,1,330,4,40.0,35.0,1.5,0,4284515808,220.0,3000,'Human');
+INSERT INTO unit_stats VALUES('Crossbowman',1,1,1,0,70,18,55.0,180.0,2.0,0,4283476000,280.0,2800,'Human');
+INSERT INTO unit_stats VALUES('HeavyCavalry',2,0,0,1,200,22,110.0,35.0,1.3,0,4288712672,290.0,3400,'Human');
+INSERT INTO unit_stats VALUES('LightCavalry',1,0,0,0,55,8,180.0,30.0,0.8,0,4286632191,450.0,1800,'Human');
+INSERT INTO unit_stats VALUES('HolyShieldGuardian',2,0,0,1,700,8,45.0,35.0,1.5,0,4286616704,170.0,5000,'Human');
+INSERT INTO unit_stats VALUES('DragonRiderCommander',2,1,1,0,300,40,120.0,180.0,0.8,0,4290526975,200.0,4600,'Human');
+INSERT INTO unit_stats VALUES('ShadowLord',1,0,0,0,180,50,100.0,30.0,1.0,0,4284248320,220.0,4000,'Human');
+INSERT INTO unit_stats VALUES('King',2,0,0,1,1200,20,60.0,35.0,1.2,0,4294956800,170.0,6000,'Human');
+INSERT INTO unit_stats VALUES('RoyalGuard',1,0,0,0,220,8,80.0,30.0,0.9,0,4488440,270.0,3400,'Human');
+INSERT INTO unit_stats VALUES('RoyalShieldGuard',2,0,0,1,480,5,40.0,35.0,1.5,0,12303291,230.0,3800,'Human');
+INSERT INTO unit_stats VALUES('RoyalSharpshooter',1,1,1,0,90,28,55.0,200.0,2.0,0,5621589,300.0,3600,'Human');
+INSERT INTO unit_stats VALUES('RoyalKnight',2,0,0,1,280,30,110.0,35.0,1.3,0,16754900,300.0,4200,'Human');
+INSERT INTO unit_stats VALUES('RoyalScout',1,0,0,0,80,14,180.0,30.0,0.8,0,10040232,500.0,2400,'Human');
+INSERT INTO unit_stats VALUES('ElfRanger',0,1,1,0,45,14,150.0,220.0,1.2,0,4294954080,300.0,0,'Elf');
+INSERT INTO unit_stats VALUES('ElfSharpshooter',0,1,1,0,60,22,150.0,280.0,1.0,0,4294954320,350.0,0,'Elf');
+INSERT INTO unit_stats VALUES('DwarfWarrior',1,0,0,1,100,16,90.0,90.0,1.5,0,4286611584,170.0,0,'Dwarf');
+INSERT INTO unit_stats VALUES('DwarfBerserker',1,0,0,1,130,28,110.0,90.0,1.2,0,4286740992,170.0,0,'Dwarf');
+INSERT INTO unit_stats VALUES('HalflingThief',0,0,0,0,35,10,200.0,70.0,0.7,0,4278241280,200.0,0,'Halfling');
+INSERT INTO unit_stats VALUES('HalflingAssassin',0,0,0,0,50,20,220.0,70.0,0.6,0,4278237952,220.0,0,'Halfling');
+INSERT INTO unit_stats VALUES('DragonbornMage',1,1,3,0,55,18,110.0,200.0,1.8,0,4278190336,250.0,0,'Dragonborn');
+INSERT INTO unit_stats VALUES('DragonbornArchmage',1,1,3,0,75,30,110.0,240.0,1.5,0,4278190080,280.0,0,'Dragonborn');
 CREATE TABLE building_defs (
     type_id           TEXT PRIMARY KEY,
     display_name      TEXT    NOT NULL,
@@ -122,6 +130,16 @@ INSERT INTO building_defs VALUES('HolyWall','圣壁',500,14.0,0,0,1,1,'HolyShiel
 INSERT INTO building_defs VALUES('HeavenPunishmentTower','天罚塔',350,12.0,0,0,1,1,'DragonRiderCommander',0,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0);
 INSERT INTO building_defs VALUES('ShadowSanctum','暗影圣所',250,8.0,0,0,1,1,'ShadowLord',0,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0);
 INSERT INTO building_defs VALUES('RoyalCourt','王庭',800,30.0,0,0,1,1,'King',0,4,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0);
+INSERT INTO building_defs VALUES('RangerGuild','游侠公会',180,9.0,0,0,1,0,'ElfRanger',0,0,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'Elf',0.0);
+INSERT INTO building_defs VALUES('WindSanctum','风行圣殿',260,7.0,0,0,1,0,'ElfSharpshooter',0,1,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'Elf',0.0);
+INSERT INTO building_defs VALUES('WarriorGuild','战士公会',250,12.0,0,0,1,0,'DwarfWarrior',0,0,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'Dwarf',0.0);
+INSERT INTO building_defs VALUES('MountainFort','山丘要塞',360,10.0,0,0,1,0,'DwarfBerserker',0,1,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'Dwarf',0.0);
+INSERT INTO building_defs VALUES('ThiefGuild','盗贼行会',140,7.0,0,0,1,0,'HalflingThief',0,0,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'Halfling',0.0);
+INSERT INTO building_defs VALUES('ShadowGuild','暗影公会',200,5.0,0,0,1,0,'HalflingAssassin',0,1,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'Halfling',0.0);
+INSERT INTO building_defs VALUES('MageTower','术士高塔',160,14.0,0,0,1,0,'DragonbornMage',0,0,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'Dragonborn',0.0);
+INSERT INTO building_defs VALUES('DragonfireTower','龙火塔',230,12.0,0,0,1,0,'DragonbornArchmage',0,1,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'Dragonborn',0.0);
+INSERT INTO building_defs VALUES('Inn','酒馆',120,NULL,0,0,1,0,NULL,0,0,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'Human',0.0);
+INSERT INTO building_defs VALUES('AdventurerGuild','冒险者公会',200,NULL,0,0,1,0,NULL,0,1,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'Human',0.0);
 CREATE TABLE damage_matrix (
     damage_type INTEGER NOT NULL,
     armor_type  INTEGER NOT NULL,
@@ -167,6 +185,11 @@ INSERT INTO shop_catalog VALUES('Ranch','牧场',8,'Ranch',6);
 INSERT INTO shop_catalog VALUES('RoyalArmory','皇家军营',10,'RoyalArmory',4);
 INSERT INTO shop_catalog VALUES('RoyalBulwark','皇家壁垒',10,'RoyalBulwark',4);
 INSERT INTO shop_catalog VALUES('RoyalStable','皇家马场',12,'RoyalStable',4);
+INSERT INTO shop_catalog VALUES('card_ranger_guild','游侠公会',3,'RangerGuild',12);
+INSERT INTO shop_catalog VALUES('card_warrior_guild','战士公会',4,'WarriorGuild',10);
+INSERT INTO shop_catalog VALUES('card_thief_guild','盗贼行会',2,'ThiefGuild',10);
+INSERT INTO shop_catalog VALUES('card_mage_tower','术士高塔',5,'MageTower',6);
+INSERT INTO shop_catalog VALUES('card_inn','酒馆',2,'Inn',14);
 CREATE TABLE race_defs (
     id TEXT PRIMARY KEY,
     display_name TEXT NOT NULL,
@@ -175,6 +198,10 @@ CREATE TABLE race_defs (
 INSERT INTO race_defs VALUES('human','人族',0);
 INSERT INTO race_defs VALUES('wizard','巫师族',1);
 INSERT INTO race_defs VALUES('dungeon','地下城',2);
+INSERT INTO race_defs VALUES('Elf','精灵',3);
+INSERT INTO race_defs VALUES('Dwarf','矮人',4);
+INSERT INTO race_defs VALUES('Halfling','半身人',5);
+INSERT INTO race_defs VALUES('Dragonborn','龙裔',6);
 CREATE TABLE tech_tree_nodes (
     type_id TEXT PRIMARY KEY,
     race_id TEXT NOT NULL REFERENCES race_defs(id),
@@ -224,6 +251,37 @@ INSERT INTO combine_recipes VALUES('RoyalBulwark','RoyalArmory',1,'HolyWall');
 INSERT INTO combine_recipes VALUES('RoyalArcheryRange','RoyalStable',1,'HeavenPunishmentTower');
 INSERT INTO combine_recipes VALUES('RoyalRanger','RoyalStable',1,'ShadowSanctum');
 INSERT INTO combine_recipes VALUES('HolyWall','HeavenPunishmentTower',1,'RoyalCourt');
+INSERT INTO combine_recipes VALUES('RangerGuild','RangerGuild',1,'WindSanctum');
+INSERT INTO combine_recipes VALUES('WarriorGuild','WarriorGuild',1,'MountainFort');
+INSERT INTO combine_recipes VALUES('ThiefGuild','ThiefGuild',1,'ShadowGuild');
+INSERT INTO combine_recipes VALUES('MageTower','MageTower',1,'DragonfireTower');
+INSERT INTO combine_recipes VALUES('Inn','Inn',1,'AdventurerGuild');
+CREATE TABLE skill_defs (
+    id TEXT PRIMARY KEY,
+    display_name TEXT NOT NULL,
+    skill_type TEXT NOT NULL CHECK(skill_type IN ('stat_modifier','aura','on_hit','special')),
+    config_json TEXT NOT NULL
+);
+INSERT INTO skill_defs VALUES('berserker_rage','狂战士之怒','stat_modifier','{"trigger":"low_health","trigger_param":0.5,"modifiers":{"attack_speed_mult":1.5}}');
+INSERT INTO skill_defs VALUES('backstab','背刺','stat_modifier','{"trigger":"target_isolated","modifiers":{"attack_damage_mult":2.0}}');
+INSERT INTO skill_defs VALUES('slowing_strike','减速打击','on_hit','{"effects":[{"type":"slow","value":0.3,"duration":2.0}]}');
+INSERT INTO skill_defs VALUES('motley_crew','鱼龙混杂','stat_modifier','{"trigger":"nearby_diverse","modifiers":{"dodge_chance":0.0}}');
+CREATE TABLE unit_skills (
+    unit_type_id TEXT NOT NULL,
+    skill_id TEXT NOT NULL,
+    PRIMARY KEY (unit_type_id, skill_id)
+);
+INSERT INTO unit_skills VALUES('DwarfBerserker','berserker_rage');
+INSERT INTO unit_skills VALUES('HalflingAssassin','backstab');
+INSERT INTO unit_skills VALUES('HalflingThief','slowing_strike');
+INSERT INTO unit_skills VALUES('ElfRanger','motley_crew');
+INSERT INTO unit_skills VALUES('ElfSharpshooter','motley_crew');
+INSERT INTO unit_skills VALUES('DwarfWarrior','motley_crew');
+INSERT INTO unit_skills VALUES('DwarfBerserker','motley_crew');
+INSERT INTO unit_skills VALUES('HalflingThief','motley_crew');
+INSERT INTO unit_skills VALUES('HalflingAssassin','motley_crew');
+INSERT INTO unit_skills VALUES('DragonbornMage','motley_crew');
+INSERT INTO unit_skills VALUES('DragonbornArchmage','motley_crew');
 PRAGMA writable_schema=ON;
 CREATE TABLE IF NOT EXISTS sqlite_sequence(name,seq);
 DELETE FROM sqlite_sequence;

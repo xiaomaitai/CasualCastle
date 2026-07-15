@@ -8,6 +8,7 @@ public static class BattleModule
 	{
 		services.AddSingleton<ICombatUseCase, UnitSpatialService>();
 		services.AddSingleton<IRvoService, RvoService>();
+		services.AddSingleton<SkillService>();
 		return services;
 	}
 }

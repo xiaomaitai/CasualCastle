@@ -24,12 +24,16 @@ public class Soldier : ISoldierHandle
 	public bool HasNightCombat { get; set; }
 	public DamageType DamageType { get; set; }
 	public ArmorType ArmorType { get; set; }
+	public string Race { get; set; }
+	public SkillSet Skills { get; private set; }
+	public GameContext GameCtx { get; set; } = new();
 
 	public ISoldierHandle TargetEnemy { get; set; }
 	public IBuildingTarget TargetBuilding { get; set; }
 	public SoldierState State { get; set; }
 
 	private float _attackTimer;
+	private static readonly System.Random _random = new();
 
 	public string TargetDescription
 	{
@@ -63,6 +67,13 @@ public class Soldier : ISoldierHandle
 		HasNightCombat = stats.HasNightCombat;
 		DamageType = stats.DamageType;
 		ArmorType = stats.ArmorType;
+		Race = stats.Race;
+		Skills = new SkillSet();
+	}
+
+	public void SetGameContext(GameContext ctx)
+	{
+		GameCtx = ctx;
 	}
 
 	public void SetPosition(float gameX, float gameY)
@@ -90,6 +101,13 @@ public class Soldier : ISoldierHandle
 	{
 		if (!IsAlive)
 			return;
+
+		if (Skills != null && GameCtx != null)
+		{
+			float dodgeChance = Skills.GetDodgeChance(GameCtx);
+			if (dodgeChance > 0f && _random.NextDouble() < dodgeChance)
+				return;
+		}
 
 		Health = CombatRules.ApplyDamage(Health, amount);
 
@@ -142,6 +160,14 @@ public class Soldier : ISoldierHandle
 		if (!IsAlive)
 			return;
 
+		float effectiveAttackCooldown = AttackCooldown;
+		if (Skills != null)
+		{
+			float speedMult = Skills.GetStatMultiplier("attack_speed_mult", GameCtx);
+			if (speedMult != 1f)
+				effectiveAttackCooldown = AttackCooldown / speedMult;
+		}
+
 		if (_attackTimer > 0)
 			_attackTimer -= dt;
 
@@ -154,12 +180,28 @@ public class Soldier : ISoldierHandle
 				if (enemyEdgeDist <= AttackRange)
 				{
 					if (_attackTimer <= 0)
-				{
-					int finalDamage = CombatRules.CalculateDamage(Damage, DamageType, TargetEnemy.ArmorType);
-					TargetEnemy.TakeDamage(finalDamage, this, GameX, GameY);
-					EventPort?.OnAttack(TargetEnemy, TargetEnemy.GameX, TargetEnemy.GameY);
-					_attackTimer = AttackCooldown;
-				}
+					{
+						int effectiveDamage = Damage;
+						if (Skills != null)
+						{
+							float dmgMult = Skills.GetStatMultiplier("attack_damage_mult", GameCtx);
+							effectiveDamage = (int)(Damage * dmgMult);
+						}
+						int finalDamage = CombatRules.CalculateDamage(effectiveDamage, DamageType, TargetEnemy.ArmorType);
+						TargetEnemy.TakeDamage(finalDamage, this, GameX, GameY);
+
+						if (Skills != null)
+						{
+							foreach (OnHitEffect effect in Skills.GetOnHitEffects())
+							{
+								if (effect.Type == "slow" && TargetEnemy is ISoldierHandle targetHandle)
+									ApplySlow(targetHandle, effect.Value, effect.Duration);
+							}
+						}
+
+						EventPort?.OnAttack(TargetEnemy, TargetEnemy.GameX, TargetEnemy.GameY);
+						_attackTimer = effectiveAttackCooldown;
+					}
 				}
 				else
 				{
@@ -186,5 +228,9 @@ public class Soldier : ISoldierHandle
 	{
 		GameX += dx;
 		GameY += dy;
+	}
+
+	private static void ApplySlow(ISoldierHandle target, float slowValue, float duration)
+	{
 	}
 }
