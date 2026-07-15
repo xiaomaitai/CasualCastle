@@ -11,6 +11,7 @@ public interface IBuildingRepository
 	string GetDisplayName(string typeId) => Get(typeId).DisplayName;
 	int GetMaxHealth(string typeId) => Get(typeId).MaxHealth;
 	float GetSpawnInterval(string typeId) => Get(typeId).SpawnInterval;
+	float GetProductionRate(string typeId) => Get(typeId).ProductionRate;
 	GridCellOffset GetMainCellOffset(string typeId) => Get(typeId).MainCellOffset;
 	GridCellOffset GetSpawnCellOffset(string typeId) => Get(typeId).SpawnCellOffset;
 	string GetUnitTypeId(string typeId) => Get(typeId).UnitTypeId;
@@ -23,7 +24,7 @@ public interface IBuildingRepository
 	bool IsCombinableMaterial(string typeId)
 	{
 		BuildingData bd = Get(typeId);
-		return bd.CombineTier == 0
+		return bd.CombineTier < 4
 			&& !bd.IsCore;
 	}
 }

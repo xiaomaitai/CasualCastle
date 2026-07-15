@@ -11,6 +11,7 @@ public class BuildingData
 	public int MaxHealth { get; init; }
 
 	public float SpawnInterval { get; init; }
+	public float ProductionRate { get; init; }
 	public GridCellOffset SpawnCellOffset { get; init; }
 
 	public string UnitTypeId { get; init; }

@@ -16,7 +16,7 @@ public class SqliteBuildingRepository : IBuildingRepository
 		using SqliteConnection connection = new($"Data Source={fullPath}");
 		connection.Open();
 		using SqliteCommand cmd = connection.CreateCommand();
-		cmd.CommandText = "SELECT type_id, display_name, max_health, spawn_interval, main_cell_x, main_cell_y, spawn_cell_x, spawn_cell_y, unit_type_id, has_night_combat, combine_tier, is_core, footprint_json, collision_width, collision_height FROM building_defs";
+		cmd.CommandText = "SELECT type_id, display_name, max_health, spawn_interval, main_cell_x, main_cell_y, spawn_cell_x, spawn_cell_y, unit_type_id, has_night_combat, combine_tier, is_core, footprint_json, collision_width, collision_height, production_rate FROM building_defs";
 		using SqliteDataReader reader = cmd.ExecuteReader();
 		while (reader.Read())
 		{
@@ -38,6 +38,7 @@ public class SqliteBuildingRepository : IBuildingRepository
 				Footprint = offsets.ToArray(),
 				CollisionWidth = reader.GetInt32(13),
 				CollisionHeight = reader.GetInt32(14),
+				ProductionRate = reader.IsDBNull(15) ? 0 : reader.GetFloat(15),
 			};
 		}
 	}

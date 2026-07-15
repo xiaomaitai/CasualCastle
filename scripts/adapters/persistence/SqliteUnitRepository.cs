@@ -15,7 +15,7 @@ public class SqliteUnitRepository : IUnitRepository
 		using SqliteConnection connection = new($"Data Source={fullPath}");
 		connection.Open();
 		using SqliteCommand cmd = connection.CreateCommand();
-		cmd.CommandText = "SELECT type_id, size, attack_type, damage_type, armor_type, health, damage, speed, attack_range, attack_cooldown, vision_range, has_night_combat, unit_color FROM unit_stats";
+		cmd.CommandText = "SELECT type_id, size, attack_type, damage_type, armor_type, health, damage, speed, attack_range, attack_cooldown, vision_range, has_night_combat, unit_color, unit_cost FROM unit_stats";
 		using SqliteDataReader reader = cmd.ExecuteReader();
 		while (reader.Read())
 		{
@@ -34,6 +34,7 @@ public class SqliteUnitRepository : IUnitRepository
 				VisionRange = reader.GetFloat(10),
 				HasNightCombat = reader.GetInt32(11) != 0,
 				UnitColor = (uint)reader.GetInt64(12),
+				UnitCost = reader.GetInt32(13),
 			};
 		}
 	}

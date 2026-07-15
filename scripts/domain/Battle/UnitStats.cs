@@ -31,5 +31,6 @@ public class UnitStats
 		_ => 27f
 	};
 
+	public int UnitCost { get; init; }
 	public uint UnitColor { get; init; }
 }

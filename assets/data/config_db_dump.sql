@@ -49,6 +49,8 @@ INSERT INTO asset_gen_tasks VALUES(28,'08396d86782d409abfd5a5a344a65e80','comple
 INSERT INTO asset_gen_tasks VALUES(29,'32aacfe0a7d74af7b250c22ece212e8d','completed','A medieval crossbowman soldier, holding a crossbow, facing right, full body character, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors, game character icon','',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/be9b145ce97c260ccfee6c5e72e62b48d66b0886412f0773278a304d7edac93c.png','assets/art/cards/Crossbowman_29.png','2026-07-12T14:24:43Z','2026-07-12T14:25:26Z',NULL);
 INSERT INTO asset_gen_tasks VALUES(30,'44be777a5d6d4fc38493895d0549ad0d','completed','A medieval heavy cavalry knight on horseback, holding a lance, charging, facing right, full body character, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors, game character icon','',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/61cc6051381b551f5237ded9243676637f2b8013da083de59c036f0048ed5c80.png','assets/art/cards/HeavyCavalry_30.png','2026-07-12T14:25:37Z','2026-07-12T14:26:27Z',NULL);
 INSERT INTO asset_gen_tasks VALUES(31,'ed08be8227454b8ebd392a3d5c5e3dcd','completed','A medieval light cavalry rider on horseback, holding a saber, facing right, full body character, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors, game character icon','',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/a6a50fc65fbd6e093504697a0af0bc37ad1d70aef7f50158473910931642b46c.png','assets/art/cards/LightCavalry_31.png','2026-07-12T14:26:28Z','2026-07-12T14:27:07Z',NULL);
+INSERT INTO asset_gen_tasks VALUES(32,'','submitted','A medieval holy shield guardian soldier, holding a massive tower shield, wearing heavy silver plate armor with blue cape, facing right, full body character, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors, game character icon',NULL,512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',1,NULL,NULL,'2026-07-14T14:52:39Z',NULL,NULL);
+INSERT INTO asset_gen_tasks VALUES(33,'','submitted','A medieval holy shield guardian soldier, holding a massive tower shield, wearing heavy silver plate armor with blue cape, facing right, full body character, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors, game character icon',NULL,512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',1,NULL,NULL,'2026-07-14T14:52:51Z',NULL,NULL);
 CREATE TABLE unit_stats (
     type_id          TEXT PRIMARY KEY,
     size             INTEGER NOT NULL,
@@ -63,17 +65,26 @@ CREATE TABLE unit_stats (
     has_night_combat INTEGER NOT NULL DEFAULT 0,
     unit_color       INTEGER NOT NULL,
     vision_range     REAL    NOT NULL DEFAULT 170.0
-);
-INSERT INTO unit_stats VALUES('Spearman',1,0,0,0,40,10,80.0,30.0,1.0,0,4289733792,250.0);
-INSERT INTO unit_stats VALUES('ShieldBearer',1,0,0,1,70,5,45.0,30.0,1.8,0,4286611584,200.0);
-INSERT INTO unit_stats VALUES('Archer',1,1,1,0,25,12,60.0,200.0,1.5,0,4286627968,300.0);
-INSERT INTO unit_stats VALUES('Knight',2,0,0,1,60,18,120.0,35.0,1.2,0,4291862624,280.0);
-INSERT INTO unit_stats VALUES('Scout',0,0,0,0,15,3,160.0,25.0,1.0,0,4286644095,400.0);
-INSERT INTO unit_stats VALUES('Swordsman',1,0,0,0,55,16,80.0,30.0,0.9,0,4285567184,260.0);
-INSERT INTO unit_stats VALUES('HeavyShield',2,0,0,1,110,8,40.0,35.0,1.5,0,4284515808,220.0);
-INSERT INTO unit_stats VALUES('Crossbowman',1,1,1,0,30,22,55.0,180.0,2.0,0,4283476000,280.0);
-INSERT INTO unit_stats VALUES('HeavyCavalry',2,0,0,1,85,28,110.0,35.0,1.3,0,4288712672,290.0);
-INSERT INTO unit_stats VALUES('LightCavalry',1,0,0,0,25,8,180.0,30.0,0.8,0,4286632191,450.0);
+, unit_cost INTEGER NOT NULL DEFAULT 2000);
+INSERT INTO unit_stats VALUES('Spearman',1,0,0,0,120,4,80.0,30.0,1.0,0,4289733792,250.0,2000);
+INSERT INTO unit_stats VALUES('ShieldBearer',1,0,0,1,220,3,45.0,30.0,1.5,0,4286611584,200.0,2400);
+INSERT INTO unit_stats VALUES('Archer',1,1,1,0,50,12,60.0,200.0,1.5,0,4286627968,300.0,2200);
+INSERT INTO unit_stats VALUES('Knight',2,0,0,1,150,14,120.0,35.0,1.2,0,4291862624,280.0,2600);
+INSERT INTO unit_stats VALUES('Scout',0,0,0,0,35,4,160.0,25.0,0.8,0,4286644095,400.0,1400);
+INSERT INTO unit_stats VALUES('Swordsman',1,0,0,0,160,6,80.0,30.0,0.9,0,4285567184,260.0,2600);
+INSERT INTO unit_stats VALUES('HeavyShield',2,0,0,1,330,4,40.0,35.0,1.5,0,4284515808,220.0,3000);
+INSERT INTO unit_stats VALUES('Crossbowman',1,1,1,0,70,18,55.0,180.0,2.0,0,4283476000,280.0,2800);
+INSERT INTO unit_stats VALUES('HeavyCavalry',2,0,0,1,200,22,110.0,35.0,1.3,0,4288712672,290.0,3400);
+INSERT INTO unit_stats VALUES('LightCavalry',1,0,0,0,55,8,180.0,30.0,0.8,0,4286632191,450.0,1800);
+INSERT INTO unit_stats VALUES('HolyShieldGuardian',2,0,0,1,700,8,45.0,35.0,1.5,0,4286616704,170.0,5000);
+INSERT INTO unit_stats VALUES('DragonRiderCommander',2,1,1,0,300,40,120.0,180.0,0.8,0,4290526975,200.0,4600);
+INSERT INTO unit_stats VALUES('ShadowLord',1,0,0,0,180,50,100.0,30.0,1.0,0,4284248320,220.0,4000);
+INSERT INTO unit_stats VALUES('King',2,0,0,1,1200,20,60.0,35.0,1.2,0,4294956800,170.0,6000);
+INSERT INTO unit_stats VALUES('RoyalGuard',1,0,0,0,220,8,80.0,30.0,0.9,0,4488440,270.0,3400);
+INSERT INTO unit_stats VALUES('RoyalShieldGuard',2,0,0,1,480,5,40.0,35.0,1.5,0,12303291,230.0,3800);
+INSERT INTO unit_stats VALUES('RoyalSharpshooter',1,1,1,0,90,28,55.0,200.0,2.0,0,5621589,300.0,3600);
+INSERT INTO unit_stats VALUES('RoyalKnight',2,0,0,1,280,30,110.0,35.0,1.3,0,16754900,300.0,4200);
+INSERT INTO unit_stats VALUES('RoyalScout',1,0,0,0,80,14,180.0,30.0,0.8,0,10040232,500.0,2400);
 CREATE TABLE building_defs (
     type_id           TEXT PRIMARY KEY,
     display_name      TEXT    NOT NULL,
@@ -90,27 +101,27 @@ CREATE TABLE building_defs (
     footprint_json    TEXT    NOT NULL,
     collision_width   INTEGER NOT NULL DEFAULT 80,
     collision_height  INTEGER NOT NULL DEFAULT 80
-, race_id TEXT NOT NULL DEFAULT 'human');
-INSERT INTO building_defs VALUES('CastleHeart','城堡之心',500,NULL,0,0,0,0,NULL,0,0,1,'[[0,0],[1,0],[0,1],[1,1]]',180,180,'human');
-INSERT INTO building_defs VALUES('RangerPost','游骑哨',150,5.0,0,0,1,1,'LightCavalry',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
-INSERT INTO building_defs VALUES('Barracks','兵营',200,8.0,0,0,1,1,'Spearman',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
-INSERT INTO building_defs VALUES('ShieldCamp','盾营',250,12.0,0,0,1,1,'ShieldBearer',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
-INSERT INTO building_defs VALUES('ArcheryRange','靶场',150,10.0,0,0,1,1,'Archer',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
-INSERT INTO building_defs VALUES('Stable','马厩',220,14.0,0,0,1,1,'Knight',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
-INSERT INTO building_defs VALUES('ScoutCamp','斥候营',100,6.0,0,0,1,1,'Scout',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
-INSERT INTO building_defs VALUES('Armory','军府',300,7.0,0,0,1,1,'Swordsman',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
-INSERT INTO building_defs VALUES('Bulwark','壁垒',380,10.0,0,0,1,1,'HeavyShield',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
-INSERT INTO building_defs VALUES('CrossbowTower','射楼',220,9.0,0,0,1,1,'Crossbowman',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
-INSERT INTO building_defs VALUES('Ranch','牧场',330,12.0,0,0,1,1,'HeavyCavalry',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
-INSERT INTO building_defs VALUES('RoyalArmory','皇家军营',300,7.0,0,0,1,1,'RoyalGuard',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
-INSERT INTO building_defs VALUES('RoyalBulwark','皇家壁垒',380,10.0,0,0,1,1,'RoyalShieldGuard',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
-INSERT INTO building_defs VALUES('RoyalArcheryRange','皇家射场',220,9.0,0,0,1,1,'RoyalSharpshooter',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
-INSERT INTO building_defs VALUES('RoyalStable','皇家马场',330,12.0,0,0,1,1,'RoyalKnight',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
-INSERT INTO building_defs VALUES('RoyalRanger','皇家游骑',150,5.0,0,0,1,1,'RoyalScout',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
-INSERT INTO building_defs VALUES('HolyWall','圣壁',500,14.0,0,0,1,1,'HolyShieldGuardian',0,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
-INSERT INTO building_defs VALUES('HeavenPunishmentTower','天罚塔',350,12.0,0,0,1,1,'DragonRiderCommander',0,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
-INSERT INTO building_defs VALUES('ShadowSanctum','暗影圣所',250,8.0,0,0,1,1,'ShadowLord',0,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
-INSERT INTO building_defs VALUES('RoyalCourt','王庭',800,30.0,0,0,1,1,'King',0,4,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human');
+, race_id TEXT NOT NULL DEFAULT 'human', production_rate REAL NOT NULL DEFAULT 0.0);
+INSERT INTO building_defs VALUES('CastleHeart','城堡之心',500,NULL,0,0,0,0,NULL,0,0,1,'[[0,0],[1,0],[0,1],[1,1]]',180,180,'human',0.0);
+INSERT INTO building_defs VALUES('RangerPost','游骑哨',150,5.0,0,0,1,1,'LightCavalry',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0);
+INSERT INTO building_defs VALUES('Barracks','兵营',200,8.0,0,0,1,1,'Spearman',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0);
+INSERT INTO building_defs VALUES('ShieldCamp','盾营',250,12.0,0,0,1,1,'ShieldBearer',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0);
+INSERT INTO building_defs VALUES('ArcheryRange','靶场',150,10.0,0,0,1,1,'Archer',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0);
+INSERT INTO building_defs VALUES('Stable','马厩',220,14.0,0,0,1,1,'Knight',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0);
+INSERT INTO building_defs VALUES('ScoutCamp','斥候营',100,6.0,0,0,1,1,'Scout',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0);
+INSERT INTO building_defs VALUES('Armory','军府',300,7.0,0,0,1,1,'Swordsman',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0);
+INSERT INTO building_defs VALUES('Bulwark','壁垒',380,10.0,0,0,1,1,'HeavyShield',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0);
+INSERT INTO building_defs VALUES('CrossbowTower','射楼',220,9.0,0,0,1,1,'Crossbowman',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0);
+INSERT INTO building_defs VALUES('Ranch','牧场',330,12.0,0,0,1,1,'HeavyCavalry',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0);
+INSERT INTO building_defs VALUES('RoyalArmory','皇家军营',300,7.0,0,0,1,1,'RoyalGuard',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0);
+INSERT INTO building_defs VALUES('RoyalBulwark','皇家壁垒',380,10.0,0,0,1,1,'RoyalShieldGuard',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0);
+INSERT INTO building_defs VALUES('RoyalArcheryRange','皇家射场',220,9.0,0,0,1,1,'RoyalSharpshooter',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0);
+INSERT INTO building_defs VALUES('RoyalStable','皇家马场',330,12.0,0,0,1,1,'RoyalKnight',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0);
+INSERT INTO building_defs VALUES('RoyalRanger','皇家游骑',150,5.0,0,0,1,1,'RoyalScout',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0);
+INSERT INTO building_defs VALUES('HolyWall','圣壁',500,14.0,0,0,1,1,'HolyShieldGuardian',0,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0);
+INSERT INTO building_defs VALUES('HeavenPunishmentTower','天罚塔',350,12.0,0,0,1,1,'DragonRiderCommander',0,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0);
+INSERT INTO building_defs VALUES('ShadowSanctum','暗影圣所',250,8.0,0,0,1,1,'ShadowLord',0,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0);
+INSERT INTO building_defs VALUES('RoyalCourt','王庭',800,30.0,0,0,1,1,'King',0,4,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0);
 CREATE TABLE damage_matrix (
     damage_type INTEGER NOT NULL,
     armor_type  INTEGER NOT NULL,
@@ -209,9 +220,13 @@ INSERT INTO combine_recipes VALUES('Stable','Stable',1,'Ranch');
 INSERT INTO combine_recipes VALUES('Ranch','Ranch',2,'RoyalStable');
 INSERT INTO combine_recipes VALUES('Armory','Armory',2,'RoyalBulwark');
 INSERT INTO combine_recipes VALUES('Ranch','Ranch',2,'RoyalRanger');
+INSERT INTO combine_recipes VALUES('RoyalBulwark','RoyalArmory',1,'HolyWall');
+INSERT INTO combine_recipes VALUES('RoyalArcheryRange','RoyalStable',1,'HeavenPunishmentTower');
+INSERT INTO combine_recipes VALUES('RoyalRanger','RoyalStable',1,'ShadowSanctum');
+INSERT INTO combine_recipes VALUES('HolyWall','HeavenPunishmentTower',1,'RoyalCourt');
 PRAGMA writable_schema=ON;
 CREATE TABLE IF NOT EXISTS sqlite_sequence(name,seq);
 DELETE FROM sqlite_sequence;
-INSERT INTO sqlite_sequence VALUES('asset_gen_tasks',31);
+INSERT INTO sqlite_sequence VALUES('asset_gen_tasks',33);
 PRAGMA writable_schema=OFF;
 COMMIT;

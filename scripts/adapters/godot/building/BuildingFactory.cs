@@ -1,5 +1,6 @@
 using CasualCastle.Domain.Building;
 using CasualCastle.Adapters.Godot;
+using Godot;
 
 public class BuildingFactory : IBuildingFactory
 {
@@ -10,7 +11,7 @@ public class BuildingFactory : IBuildingFactory
 
     public void Destroy(Building building)
     {
-        if (building == null)
+        if (building == null || !GodotObject.IsInstanceValid(building))
             return;
         Castle castle = building.GetCastle();
         castle?.ReleaseBuildingFootprint(building);

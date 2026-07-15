@@ -154,11 +154,12 @@ public class Soldier : ISoldierHandle
 				if (enemyEdgeDist <= AttackRange)
 				{
 					if (_attackTimer <= 0)
-					{
-						int finalDamage = CombatRules.CalculateDamage(Damage, DamageType, TargetEnemy.ArmorType);
-						TargetEnemy.TakeDamage(finalDamage, this, GameX, GameY);
-						_attackTimer = AttackCooldown;
-					}
+				{
+					int finalDamage = CombatRules.CalculateDamage(Damage, DamageType, TargetEnemy.ArmorType);
+					TargetEnemy.TakeDamage(finalDamage, this, GameX, GameY);
+					EventPort?.OnAttack(TargetEnemy, TargetEnemy.GameX, TargetEnemy.GameY);
+					_attackTimer = AttackCooldown;
+				}
 				}
 				else
 				{

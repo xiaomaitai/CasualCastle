@@ -23,6 +23,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 	private Vector2 _spriteBasePosition;
 	private float _workRequired;
 	private float _workDone;
+	private float _productionRate;
 	private bool _workActive;
 	private bool _workPaused;
 	private bool _jumpTweenAwaitingResume;
@@ -188,7 +189,62 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 			CastleRef.ReleaseBuildingFootprint(this);
 
 		if (TypeId != "CastleHeart")
+		{
 			RefreshOperationalState();
+			PlayDestructionEffect();
+		}
+	}
+
+	private void PlayDestructionEffect()
+	{
+		Node parent = GetParent();
+		if (parent == null)
+			return;
+
+		Image img = Image.CreateEmpty(8, 8, false, Image.Format.Rgba8);
+		for (int x = 0; x < 8; x++)
+			for (int y = 0; y < 8; y++)
+				img.SetPixel(x, y, new Color(1, 1, 1, 1));
+		ImageTexture tex = ImageTexture.CreateFromImage(img);
+
+		ParticleProcessMaterial mat = new ParticleProcessMaterial();
+		mat.Gravity = new Vector3(0, 200, 0);
+		mat.InitialVelocityMin = -80;
+		mat.InitialVelocityMax = 80;
+		mat.ScaleMin = 1.5f;
+		mat.ScaleMax = 3.5f;
+		mat.DampingMin = 2f;
+		mat.DampingMax = 5f;
+		mat.AngleMin = 0;
+		mat.AngleMax = 360;
+		mat.AngularVelocityMin = -360;
+		mat.AngularVelocityMax = 360;
+		mat.Color = new Color(0.5f, 0.45f, 0.4f, 1f);
+
+		GpuParticles2D particles = new GpuParticles2D();
+		particles.OneShot = true;
+		particles.Explosiveness = 1f;
+		particles.Amount = 16;
+		particles.Lifetime = 0.6f;
+		particles.ProcessMaterial = mat;
+		particles.Texture = tex;
+		particles.GlobalPosition = GlobalPosition;
+		particles.Emitting = true;
+		parent.AddChild(particles);
+
+		if (_sprite != null)
+		{
+			Tween tween = CreateTween();
+			tween.TweenProperty(_sprite, "modulate:a", 0f, 0.3f);
+		}
+
+		Tween delayTween = CreateTween();
+		delayTween.TweenInterval(0.7f);
+		delayTween.TweenCallback(Callable.From(() =>
+		{
+			particles.QueueFree();
+			QueueFree();
+		}));
 	}
 
 	public bool TryRepair()
@@ -261,7 +317,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		SyncStateIconPosition();
 		RefreshOperationalState();
 
-		if (BuildingSystem.GetSpawnInterval(TypeId) > 0f)
+		if (BuildingSystem.GetProductionRate(TypeId) > 0f)
 		{
 			_battlefield = _gameManager?.Battlefield;
 			if (_battlefield == null)
@@ -295,7 +351,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		if (!_workActive || _workPaused || !CanWork)
 			return;
 
-		_workDone += (float)delta * _workSpeedMultiplier;
+		_workDone += (float)delta * _productionRate * _workSpeedMultiplier;
 		UpdateWorkEffectFromProgress();
 
 		if (_workDone < _workRequired)
@@ -337,9 +393,13 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	private void StartWorkCycle()
 	{
-		float workRequired = BuildingSystem.GetSpawnInterval(TypeId);
-		if (workRequired > 0f)
-			BeginWork(workRequired);
+		float productionRate = BuildingSystem.GetProductionRate(TypeId);
+		if (productionRate > 0f)
+		{
+			_productionRate = productionRate;
+			int unitCost = BuildingSystem.GetUnitCost(TypeId);
+			BeginWork(unitCost);
+		}
 	}
 
 	private void PerformWork()

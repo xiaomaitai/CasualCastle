@@ -1,4 +1,5 @@
 using CasualCastle.Domain.Building;
+using Godot;
 
 public class CombineBuildingFactory : ICombineBuildingFactory
 {
@@ -23,6 +24,8 @@ public class CombineBuildingFactory : ICombineBuildingFactory
     public void Destroy(IBuildingState building)
     {
         if (building is not Building b)
+            return;
+        if (!GodotObject.IsInstanceValid(b))
             return;
         _castle.ReleaseBuildingFootprint(b);
         b.GetParent()?.RemoveChild(b);

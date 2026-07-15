@@ -97,6 +97,60 @@ public partial class BuildingSystem : Node
             TexturePath = PlaceholderTexturePath,
             SpriteModulate = new Color(0.6f, 0.75f, 0.95f),
         },
+        ["RoyalArmory"] = new()
+        {
+            Footprint = Footprint2x2,
+            TexturePath = PlaceholderTexturePath,
+            SpriteModulate = new Color(0.5f, 0.55f, 0.8f),
+        },
+        ["RoyalBulwark"] = new()
+        {
+            Footprint = Footprint2x2,
+            TexturePath = PlaceholderTexturePath,
+            SpriteModulate = new Color(0.35f, 0.38f, 0.5f),
+        },
+        ["RoyalArcheryRange"] = new()
+        {
+            Footprint = Footprint2x2,
+            TexturePath = PlaceholderTexturePath,
+            SpriteModulate = new Color(0.4f, 0.8f, 0.5f),
+        },
+        ["RoyalStable"] = new()
+        {
+            Footprint = Footprint2x2,
+            TexturePath = PlaceholderTexturePath,
+            SpriteModulate = new Color(0.7f, 0.55f, 0.35f),
+        },
+        ["RoyalRanger"] = new()
+        {
+            Footprint = Footprint2x2,
+            TexturePath = PlaceholderTexturePath,
+            SpriteModulate = new Color(0.55f, 0.7f, 0.9f),
+        },
+        ["HolyWall"] = new()
+        {
+            Footprint = Footprint2x2,
+            TexturePath = PlaceholderTexturePath,
+            SpriteModulate = new Color(0.55f, 0.58f, 0.65f),
+        },
+        ["HeavenPunishmentTower"] = new()
+        {
+            Footprint = Footprint2x2,
+            TexturePath = PlaceholderTexturePath,
+            SpriteModulate = new Color(0.7f, 0.45f, 0.85f),
+        },
+        ["ShadowSanctum"] = new()
+        {
+            Footprint = Footprint2x2,
+            TexturePath = PlaceholderTexturePath,
+            SpriteModulate = new Color(0.25f, 0.15f, 0.35f),
+        },
+        ["RoyalCourt"] = new()
+        {
+            Footprint = Footprint2x2,
+            TexturePath = PlaceholderTexturePath,
+            SpriteModulate = new Color(0.9f, 0.75f, 0.2f),
+        },
     };
 
     private AdjacencyService _adjacencyService;
@@ -164,6 +218,14 @@ public partial class BuildingSystem : Node
     public static string GetDisplayName(string buildingType) => BuildingRepo.GetDisplayName(buildingType);
     public static int GetMaxHealth(string buildingType) => BuildingRepo.GetMaxHealth(buildingType);
     public static float GetSpawnInterval(string buildingType) => BuildingRepo.GetSpawnInterval(buildingType);
+    public static float GetProductionRate(string buildingType) => BuildingRepo.GetProductionRate(buildingType);
+    public static int GetUnitCost(string buildingType)
+    {
+        string unitTypeId = BuildingRepo.GetUnitTypeId(buildingType);
+        if (string.IsNullOrEmpty(unitTypeId))
+            return 0;
+        return GameManager.Get<IUnitRepository>().Get(unitTypeId).UnitCost;
+    }
 
     public static Vector2I GetSpawnCellOffset(string buildingType)
     {

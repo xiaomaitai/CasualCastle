@@ -46,6 +46,7 @@ public partial class SoldierLogic : Node2D
 			_soldier = new CasualCastle.Domain.Battle.Soldier(_navPort);
 			_eventRelay = new SoldierEventRelay();
 			AddChild(_eventRelay);
+			_eventRelay.Attack += OnAttack;
 			_soldier.EventPort = _eventRelay;
 			_fieldRepo = GameManager.Get<IFieldUnitRepository>();
 			_rvoService = GameManager.Get<IRvoService>();
@@ -258,5 +259,61 @@ public partial class SoldierLogic : Node2D
 		{
 			_fieldRepo?.Unregister(_soldier);
 		});
+	}
+
+	private static System.Collections.Generic.Dictionary<string, Texture2D> _projectileTextures;
+
+	private void OnAttack()
+	{
+		if (_body == null || _eventRelay == null)
+			return;
+
+		Node root = GetTree().CurrentScene;
+		if (root == null)
+			return;
+
+		Projectile projectile = new Projectile();
+		root.AddChild(projectile);
+
+		Vector2 fromPos = _body.GlobalPosition;
+		float targetPixelX = GameCoordinatesAdapter.GameUnitsToPixels(_eventRelay.LastAttackTargetX);
+		float targetPixelY = GameCoordinatesAdapter.GameUnitsToPixels(_eventRelay.LastAttackTargetY);
+		Vector2 toPos = new Vector2(targetPixelX, targetPixelY);
+
+		string texturePath = GetProjectileTexturePath();
+		Texture2D texture = LoadProjectileTexture(texturePath);
+		if (texture == null)
+			return;
+
+		float speed = AttackType == AttackType.Melee ? 600f : 400f;
+		projectile.Launch(fromPos, toPos, speed, texture);
+	}
+
+	private string GetProjectileTexturePath()
+	{
+		if (AttackType == AttackType.Ranged)
+		{
+			if (DamageType == DamageType.Magic)
+				return "res://assets/art/projectiles/magic_ball.png";
+			return "res://assets/art/projectiles/arrow.png";
+		}
+
+		if (DamageType == DamageType.Pierce)
+			return "res://assets/art/projectiles/spear.png";
+		return "res://assets/art/projectiles/sword.png";
+	}
+
+	private static Texture2D LoadProjectileTexture(string path)
+	{
+		if (_projectileTextures == null)
+			_projectileTextures = new System.Collections.Generic.Dictionary<string, Texture2D>();
+
+		if (_projectileTextures.TryGetValue(path, out Texture2D cached))
+			return cached;
+
+		Texture2D texture = GD.Load<Texture2D>(path);
+		if (texture != null)
+			_projectileTextures[path] = texture;
+		return texture;
 	}
 }
