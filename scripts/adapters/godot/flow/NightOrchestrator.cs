@@ -4,6 +4,15 @@ using CasualCastle.Adapters.Godot;
 
 public class NightOrchestrator
 {
+    private readonly IBuildingRepository _buildingRepo;
+    private readonly IReplayUseCase _replayService;
+
+    public NightOrchestrator(IBuildingRepository buildingRepo, IReplayUseCase replayService)
+    {
+        _buildingRepo = buildingRepo;
+        _replayService = replayService;
+    }
+
     public void ResolveNightCombines(GameManager gm)
     {
         Castle playerCastle = gm.PlayerCastle;
@@ -11,7 +20,7 @@ public class NightOrchestrator
             return;
 
         CombineBuildingFactory factory = new CombineBuildingFactory(playerCastle);
-        CombineService combineService = new CombineService(factory, GameManager.Get<IBuildingRepository>());
+        CombineService combineService = new CombineService(factory, _buildingRepo);
         combineService.CombineCompleted += result =>
         {
             AdjacencyService adj = GameManager.Get<AdjacencyService>();
@@ -31,9 +40,8 @@ public class NightOrchestrator
         if (enemyCastle == null)
             return;
 
-        IReplayUseCase replayService = GameManager.Get<IReplayUseCase>();
         ReplayTarget target = new ReplayTarget(enemyCastle);
-        replayService.ApplyNightSnapshot(target, gm.CurrentNightIndex);
+        _replayService.ApplyNightSnapshot(target, gm.CurrentNightIndex);
 
         AdjacencyService adj = GameManager.Get<AdjacencyService>();
         adj.RefreshCastle(enemyCastle.GetBuildingStates());

@@ -1,3 +1,4 @@
+using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Building;
 using Godot;
 
@@ -12,7 +13,7 @@ public class CombineBuildingFactory : ICombineBuildingFactory
 
     public IBuildingState Create(string typeId, int anchorX, int anchorY)
     {
-        Building building = BuildingSystem.CreateBuilding(typeId);
+        Building building = AdapterRegistry.Resolve<BuildingSystem>().CreateBuilding(typeId);
         if (building == null)
             return null;
 

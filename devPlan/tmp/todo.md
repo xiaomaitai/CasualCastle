@@ -74,13 +74,13 @@
 
 已有 `[Export] public Texture2D[] CellTextures`，硬编码路径仅作为未赋值时的 fallback。
 
-### 9. BuildingSystem 静态门面绕过 DI — `adapters/godot/building/BuildingSystem.cs`
+### 9. BuildingSystem 静态门面绕过 DI — `adapters/godot/building/BuildingSystem.cs` ✅
 
-大量 `static` 方法直接调用 `GameManager.Get<T>()` 获取 `IBuildingRepository`、`IUnitRepository`，绕过构造函数注入。依赖关系不透明，且单例模式（`static Instance`）与 MS DI 并存造成两套 DI 体系竞争。**→ 需独立 Phase 重构，影响面广（所有 BuildingSystem 调用方）。**
+已修复：移除 `static Instance` 和全部 `static` 数据访问方法。`IBuildingRepository`、`IUnitRepository` 在 `_Ready()` 中通过 `GameManager.Get<T>()` 注入为字段，依赖关系显式可见。所有调用方改为通过 `AdapterRegistry.Resolve<BuildingSystem>()` 获取实例。
 
-### 10. InitManager / NightOrchestrator 直接操作 Godot 节点
+### 10. InitManager / NightOrchestrator 直接操作 Godot 节点 ✅
 
-`InitManager.LoadSaveIntoGame()` 和 `NightOrchestrator.ResolveNightCombines()` 直接操作 Castle、Building 等 Godot 节点进行增删。编排逻辑应通过端口接口操作，不直接依赖 adapter 具体类型。**→ 需独立 Phase 重构，涉及初始化流程改造。**
+已修复：`ClearNonCoreBuildings` 逻辑提取至 `Castle`，消除 InitManager 与 ReplayTarget 重复。`NightOrchestrator` 改为构造函数注入 `IBuildingRepository`、`IReplayUseCase`，不再内部调用 `GameManager.Get<T>()`。`LoadSaveIntoGame` 改为实例方法。
 
 ### 11. IBuildingRef.CastleRef 类型泄露 — `domain/Battle/IBuildingRef.cs:12` ✅
 

@@ -91,8 +91,8 @@ public sealed class SettingsUiController
 	{
 		DisplayWindowMode mode = (DisplayWindowMode)_windowModeOption.GetSelectedId();
 		Vector2I resolution = DisplaySettingsManager.OutputResolutions[_resolutionOption.Selected];
-		AdapterRegistry.Resolve<DisplaySettingsManager>().SaveAndApply(mode, resolution);
 		DisplaySettingsManager.DevModeEnabled = _devModeCheck.ButtonPressed;
+		AdapterRegistry.Resolve<DisplaySettingsManager>().SaveAndApply(mode, resolution);
 	}
 
 	private void OnBackPressed() => Close();

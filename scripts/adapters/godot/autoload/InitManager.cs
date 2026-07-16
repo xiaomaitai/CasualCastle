@@ -1,5 +1,6 @@
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Building;
+using CasualCastle.Domain.History;
 using CasualCastle.Domain.Shared;
 using Godot;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ public partial class InitManager : Node
     {
         GameManager gm = AdapterRegistry.Resolve<GameManager>();
 
-        _nightOrchestrator = new NightOrchestrator();
+        _nightOrchestrator = new NightOrchestrator(GameManager.Get<IBuildingRepository>(), GameManager.Get<IReplayUseCase>());
 
         AddChild(new BattleManager());
 
@@ -52,7 +53,7 @@ public partial class InitManager : Node
             LoadSaveIntoGame(gm, shopService, hand);
     }
 
-    private static void LoadSaveIntoGame(GameManager gm, Shop shopService, Hand hand)
+    private void LoadSaveIntoGame(GameManager gm, Shop shopService, Hand hand)
     {
         SaveData data = gm.LoadSaveData(gm.PendingLoadSlot);
         if (data == null)
@@ -62,22 +63,14 @@ public partial class InitManager : Node
         if (playerCastle == null)
             return;
 
-        List<Building> existingBuildings = playerCastle.GetBuildings();
-        foreach (Building b in existingBuildings)
-        {
-            if (b == playerCastle.Heart)
-                continue;
-            playerCastle.ReleaseBuildingFootprint(b);
-            b.GetParent()?.RemoveChild(b);
-            b.QueueFree();
-        }
+        playerCastle.ClearNonCoreBuildings();
 
         foreach (BuildingSaveEntry entry in data.Buildings)
         {
             if (entry.TypeId == "CastleHeart")
                 continue;
 
-            Building building = BuildingSystem.CreateBuilding(entry.TypeId);
+            Building building = AdapterRegistry.Resolve<BuildingSystem>().CreateBuilding(entry.TypeId);
             if (building == null)
                 continue;
 

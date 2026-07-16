@@ -7,6 +7,12 @@ public partial class CastleHighlightOverlay : Node2D
 {
     private Castle _castle;
     private readonly HashSet<Building> _buildings = new();
+    private BuildingSystem _buildingSystem;
+
+    public override void _Ready()
+    {
+        _buildingSystem = AdapterRegistry.Resolve<BuildingSystem>();
+    }
 
     public void Bind(Castle castle)
     {
@@ -47,7 +53,7 @@ public partial class CastleHighlightOverlay : Node2D
 
         foreach (Building building in _buildings)
         {
-            foreach (Vector2I offset in BuildingSystem.GetFootprint(building.TypeId))
+            foreach (Vector2I offset in _buildingSystem.GetFootprint(building.TypeId))
             {
                 int col = building.AnchorGridX + offset.X;
                 int row = building.AnchorGridY + offset.Y;

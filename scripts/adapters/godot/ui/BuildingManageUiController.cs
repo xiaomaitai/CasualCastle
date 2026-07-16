@@ -200,7 +200,7 @@ public sealed class BuildingManageUiController
 		if (!building.GetCastle().IsPlayerCastle)
 			return false;
 
-		return !BuildingSystem.IsCoreBuilding(building.TypeId);
+		return !AdapterRegistry.Resolve<BuildingSystem>().IsCoreBuilding(building.TypeId);
 	}
 
 	private void TogglePause(Building building)

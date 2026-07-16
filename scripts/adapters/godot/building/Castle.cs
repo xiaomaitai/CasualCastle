@@ -54,12 +54,15 @@ public partial class Castle : Node2D
 	private int _previewGridX;
 	private int _previewGridY;
 	private bool _previewValid;
-	private IReadOnlyList<Vector2I> _previewFootprint = BuildingSystem.GetFootprint("Barracks");
+	private IReadOnlyList<Vector2I> _previewFootprint;
 	private CastleHighlightOverlay _highlightOverlay;
 	private int[,] _cellTextureIndices;
+	private BuildingSystem _buildingSystem;
 
 	public override void _Ready()
 	{
+		_buildingSystem = AdapterRegistry.Resolve<BuildingSystem>();
+		_previewFootprint = _buildingSystem.GetFootprint("Barracks");
 		_occupancy = new OccupancyGrid(GridColumns, GridRows);
 		_healthBar = GetNodeOrNull<ProgressBar>("HealthBar");
 		if (CellTextures == null || CellTextures.Length == 0)
@@ -150,7 +153,7 @@ public partial class Castle : Node2D
 		_previewGridX = gridX;
 		_previewGridY = gridY;
 		_previewValid = valid;
-		_previewFootprint = BuildingSystem.GetFootprint(buildingType);
+		_previewFootprint = _buildingSystem.GetFootprint(buildingType);
 		QueueRedraw();
 	}
 
@@ -167,7 +170,7 @@ public partial class Castle : Node2D
 
 		foreach (Building candidate in GetBuildings())
 		{
-			foreach (Vector2I offset in BuildingSystem.GetFootprint(candidate.TypeId))
+			foreach (Vector2I offset in _buildingSystem.GetFootprint(candidate.TypeId))
 			{
 				if (candidate.AnchorGridX + offset.X != gridX || candidate.AnchorGridY + offset.Y != gridY)
 					continue;
@@ -197,7 +200,7 @@ public partial class Castle : Node2D
 
 	public bool PlaceBuilding(Building building, int anchorX, int anchorY, string buildingType)
 	{
-		IReadOnlyList<Vector2I> footprint = BuildingSystem.GetFootprint(buildingType);
+		IReadOnlyList<Vector2I> footprint = _buildingSystem.GetFootprint(buildingType);
 		IReadOnlyList<GridCellOffset> domainFootprint = GameManager.Get<IBuildingRepository>().GetFootprint(buildingType);
 		if (!CanPlaceFootprint(buildingType, anchorX, anchorY))
 			return false;
@@ -207,6 +210,19 @@ public partial class Castle : Node2D
 		building.Position = GetFootprintCenter(anchorX, anchorY, footprint);
 		AddChild(building);
 		return true;
+	}
+
+	public void ClearNonCoreBuildings()
+	{
+		List<Building> buildings = GetBuildings();
+		foreach (Building b in buildings)
+		{
+			if (_buildingSystem.IsCoreBuilding(b.TypeId))
+				continue;
+			ReleaseBuildingFootprint(b);
+			b.GetParent()?.RemoveChild(b);
+			b.QueueFree();
+		}
 	}
 
 	public void ReleaseBuildingFootprint(Building building)
@@ -264,7 +280,7 @@ public partial class Castle : Node2D
 
 	private void SetupCastleHeart()
 	{
-		Building heart = BuildingSystem.CreateBuilding("CastleHeart");
+		Building heart = _buildingSystem.CreateBuilding("CastleHeart");
 		if (heart == null)
 			return;
 
@@ -283,7 +299,7 @@ public partial class Castle : Node2D
 
 	private void PlaceInitialBarracks(int gridX, int gridY)
 	{
-		Building building = BuildingSystem.CreateBuilding("Barracks");
+		Building building = _buildingSystem.CreateBuilding("Barracks");
 		if (building == null)
 			return;
 

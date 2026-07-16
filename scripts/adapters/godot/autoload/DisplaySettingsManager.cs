@@ -74,6 +74,7 @@ public partial class DisplaySettingsManager : Node
 		int width = (int)config.GetValue(Section, "width", OutputResolution.X);
 		int height = (int)config.GetValue(Section, "height", OutputResolution.Y);
 		OutputResolution = new Vector2I(width, height);
+		DevModeEnabled = (bool)config.GetValue(Section, "dev_mode", false);
 	}
 
 	private void Save()
@@ -82,6 +83,7 @@ public partial class DisplaySettingsManager : Node
 		config.SetValue(Section, "window_mode", (int)WindowMode);
 		config.SetValue(Section, "width", OutputResolution.X);
 		config.SetValue(Section, "height", OutputResolution.Y);
+		config.SetValue(Section, "dev_mode", DevModeEnabled);
 		config.Save(SettingsPath);
 	}
 

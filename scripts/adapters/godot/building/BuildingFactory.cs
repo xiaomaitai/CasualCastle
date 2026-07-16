@@ -6,7 +6,7 @@ public class BuildingFactory : IBuildingFactory
 {
     public Building Create(string typeId)
     {
-        return BuildingSystem.CreateBuilding(typeId);
+        return AdapterRegistry.Resolve<BuildingSystem>().CreateBuilding(typeId);
     }
 
     public void Destroy(Building building)

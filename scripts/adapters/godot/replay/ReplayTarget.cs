@@ -1,3 +1,4 @@
+using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Building;
 using CasualCastle.Domain.History;
 using CasualCastle.Domain.Shared;
@@ -17,15 +18,7 @@ public class ReplayTarget : IReplayTarget
 
     public void ClearNonCoreBuildings()
     {
-        foreach (Building building in _castle.GetBuildings())
-        {
-            if (GameManager.Get<IBuildingRepository>().IsCoreBuilding(building.TypeId))
-                continue;
-
-            _castle.ReleaseBuildingFootprint(building);
-            building.GetParent()?.RemoveChild(building);
-            building.QueueFree();
-        }
+        _castle.ClearNonCoreBuildings();
     }
 
     public bool TryPlaceMirrored(BuildingSnapshot snapshot)
@@ -35,11 +28,11 @@ public class ReplayTarget : IReplayTarget
             snapshot.AnchorGridX, snapshot.AnchorGridY,
             domainFootprint, _castle.GridColumns);
 
-        IReadOnlyList<Vector2I> footprint = BuildingSystem.GetFootprint(snapshot.TypeId);
+        IReadOnlyList<Vector2I> footprint = AdapterRegistry.Resolve<BuildingSystem>().GetFootprint(snapshot.TypeId);
         if (IsBlockedByPlayerSoldier(mirrorX, mirrorY, footprint))
             return false;
 
-        Building building = BuildingSystem.CreateBuilding(snapshot.TypeId);
+        Building building = AdapterRegistry.Resolve<BuildingSystem>().CreateBuilding(snapshot.TypeId);
         if (building == null)
             return false;
 

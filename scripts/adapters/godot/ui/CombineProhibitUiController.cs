@@ -1,3 +1,4 @@
+using CasualCastle.Adapters.Godot;
 using Godot;
 
 public sealed class CombineProhibitUiController
@@ -128,6 +129,6 @@ public sealed class CombineProhibitUiController
 		if (!building.GetCastle().IsPlayerCastle)
 			return false;
 
-		return !BuildingSystem.IsCoreBuilding(building.TypeId);
+		return !AdapterRegistry.Resolve<BuildingSystem>().IsCoreBuilding(building.TypeId);
 	}
 }
