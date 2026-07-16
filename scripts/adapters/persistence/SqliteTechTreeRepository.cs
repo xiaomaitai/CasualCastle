@@ -320,6 +320,32 @@ public class SqliteTechTreeRepository : ITechTreeRepository
         cmd.ExecuteNonQuery();
     }
 
+    public void SaveEdges(string factionId, List<CombineRecipe> edges)
+    {
+        using SqliteConnection connection = OpenConnection();
+        using SqliteTransaction transaction = connection.BeginTransaction();
+        using SqliteCommand cmd = connection.CreateCommand();
+
+        cmd.CommandText = "DELETE FROM combine_recipes WHERE main_type_id IN (SELECT type_id FROM tech_tree_nodes WHERE faction_id = @factionId)";
+        cmd.Parameters.AddWithValue("@factionId", factionId);
+        cmd.ExecuteNonQuery();
+        cmd.Parameters.Clear();
+
+        cmd.CommandText = "INSERT INTO combine_recipes (main_type_id, material_type_id, material_count, result_type_id) VALUES (@main, @mat, @count, @result)";
+
+        foreach (CombineRecipe edge in edges)
+        {
+            cmd.Parameters.Clear();
+            cmd.Parameters.AddWithValue("@main", edge.MainTypeId);
+            cmd.Parameters.AddWithValue("@mat", edge.MaterialTypeId);
+            cmd.Parameters.AddWithValue("@count", edge.MaterialCount);
+            cmd.Parameters.AddWithValue("@result", edge.ResultTypeId);
+            cmd.ExecuteNonQuery();
+        }
+
+        transaction.Commit();
+    }
+
     public void SyncToGameTables(string factionId)
     {
         using SqliteConnection connection = OpenConnection();

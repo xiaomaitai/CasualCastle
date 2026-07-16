@@ -444,13 +444,10 @@ public class TechTreeEditorController
 		}).ToList();
 
 		foreach (CombineRecipe edge in invalidEdges)
-			_repo.RemoveRecipe(edge.MainTypeId, edge.MaterialTypeId, edge.ResultTypeId);
+			_edges.Remove(edge);
 
 		if (invalidEdges.Count > 0)
-		{
-			_edges = _repo.LoadEdges(_currentFactionId);
 			ShowStatus($"已移除 {invalidEdges.Count} 条无效连线");
-		}
 	}
 
 	private void EndConnectionDrag()
@@ -490,8 +487,7 @@ public class TechTreeEditorController
 				MaterialCount = 2,
 				ResultTypeId = toId
 			};
-			_repo.AddRecipe(recipe);
-			_edges = _repo.LoadEdges(_currentFactionId);
+			_edges.Add(recipe);
 			LayoutCards();
 			ShowStatus($"连线已创建: {fromId} → {toId}");
 		}
@@ -560,35 +556,28 @@ public class TechTreeEditorController
 
 		foreach (CombineRecipe recipe in affectedRecipes)
 		{
+			_edges.Remove(recipe);
+
 			if (recipe.ResultTypeId == typeId)
-			{
-				_repo.RemoveRecipe(recipe.MainTypeId, recipe.MaterialTypeId, recipe.ResultTypeId);
 				continue;
-			}
+
+			if (recipe.MainTypeId == recipe.MaterialTypeId)
+				continue;
 
 			string otherBuilding = recipe.MainTypeId == typeId ? recipe.MaterialTypeId : recipe.MainTypeId;
-			bool otherIsSelf = recipe.MainTypeId == recipe.MaterialTypeId;
-
-			if (otherIsSelf || otherBuilding == typeId)
-			{
-				_repo.RemoveRecipe(recipe.MainTypeId, recipe.MaterialTypeId, recipe.ResultTypeId);
+			if (otherBuilding == typeId)
 				continue;
-			}
 
-			_repo.RemoveRecipe(recipe.MainTypeId, recipe.MaterialTypeId, recipe.ResultTypeId);
-
-			CombineRecipe newRecipe = new()
+			_edges.Add(new CombineRecipe
 			{
 				MainTypeId = otherBuilding,
 				MaterialTypeId = otherBuilding,
 				MaterialCount = 2,
 				ResultTypeId = recipe.ResultTypeId
-			};
-			_repo.AddRecipe(newRecipe);
+			});
 		}
 
 		_nodes.RemoveAll(n => n.TypeId == typeId);
-		_edges = _repo.LoadEdges(_currentFactionId);
 		LayoutCards();
 		RefreshLibrary();
 		ShowStatus($"已移除: {typeId}");
@@ -618,8 +607,7 @@ public class TechTreeEditorController
 
 		if (toDelete != null)
 		{
-			_repo.RemoveRecipe(toDelete.MainTypeId, toDelete.MaterialTypeId, toDelete.ResultTypeId);
-			_edges = _repo.LoadEdges(_currentFactionId);
+			_edges.Remove(toDelete);
 			LayoutCards();
 			ShowStatus($"连线已删除: {toDelete.MainTypeId} → {toDelete.ResultTypeId}");
 		}
@@ -845,6 +833,7 @@ public class TechTreeEditorController
 	private void OnSavePressed()
 	{
 		_repo.SaveNodes(_currentFactionId, _nodes);
+		_repo.SaveEdges(_currentFactionId, _edges);
 		_repo.SyncToGameTables(_currentFactionId);
 		ShowStatus("保存成功");
 	}
