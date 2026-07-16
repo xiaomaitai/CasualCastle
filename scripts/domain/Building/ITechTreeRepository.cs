@@ -4,14 +4,14 @@ namespace CasualCastle.Domain.Building;
 
 public interface ITechTreeRepository
 {
-    List<RaceDef> LoadRaces();
-    List<TechTreeNode> LoadNodes(string raceId);
-    List<CombineRecipe> LoadEdges(string raceId);
-    List<BuildingTypeSummary> LoadAllBuildingTypes(string raceId);
-    void SaveNodes(string raceId, List<TechTreeNode> nodes);
+    List<FactionDef> LoadFactions();
+    List<TechTreeNode> LoadNodes(string factionId);
+    List<CombineRecipe> LoadEdges(string factionId);
+    List<BuildingTypeSummary> LoadAllBuildingTypes(string factionId);
+    void SaveNodes(string factionId, List<TechTreeNode> nodes);
     void AddRecipe(CombineRecipe recipe);
     void RemoveRecipe(string mainTypeId, string materialTypeId, string resultTypeId);
-    void SyncToGameTables(string raceId);
+    void SyncToGameTables(string factionId);
 }
 
 public class BuildingTypeSummary

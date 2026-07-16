@@ -109,37 +109,37 @@ CREATE TABLE building_defs (
     footprint_json    TEXT    NOT NULL,
     collision_width   INTEGER NOT NULL DEFAULT 80,
     collision_height  INTEGER NOT NULL DEFAULT 80
-, race_id TEXT NOT NULL DEFAULT 'human', production_rate REAL NOT NULL DEFAULT 0.0, texture_path TEXT NOT NULL DEFAULT 'res://assets/art/placeholders/test_image.png', sprite_modulate_r REAL NOT NULL DEFAULT 1.0, sprite_modulate_g REAL NOT NULL DEFAULT 1.0, sprite_modulate_b REAL NOT NULL DEFAULT 1.0, sprite_modulate_a REAL NOT NULL DEFAULT 1.0, material_path TEXT NOT NULL DEFAULT '');
-INSERT INTO building_defs VALUES('CastleHeart','城堡之心',500,NULL,0,0,0,0,NULL,0,0,1,'[[0,0],[1,0],[0,1],[1,1]]',180,180,'human',0.0,'res://assets/art/placeholders/test_image.png',1.0,0.82,0.35,1.0,'');
-INSERT INTO building_defs VALUES('RangerPost','游骑哨',150,5.0,0,0,1,1,'LightCavalry',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0,'res://assets/art/placeholders/test_image.png',0.6,0.75,0.95,1.0,'');
-INSERT INTO building_defs VALUES('Barracks','兵营',200,8.0,0,0,1,1,'Spearman',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0,'res://assets/art/placeholders/test_image.png',0.55,0.6,0.75,1.0,'');
-INSERT INTO building_defs VALUES('ShieldCamp','盾营',250,12.0,0,0,1,1,'ShieldBearer',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0,'res://assets/art/placeholders/test_image.png',0.4,0.4,0.45,1.0,'');
-INSERT INTO building_defs VALUES('ArcheryRange','靶场',150,10.0,0,0,1,1,'Archer',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0,'res://assets/art/placeholders/test_image.png',0.45,0.75,0.45,1.0,'');
-INSERT INTO building_defs VALUES('Stable','马厩',220,14.0,0,0,1,1,'Knight',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0,'res://assets/art/placeholders/test_image.png',0.65,0.5,0.3,1.0,'');
-INSERT INTO building_defs VALUES('ScoutCamp','斥候营',100,6.0,0,0,1,1,'Scout',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0,'res://assets/art/placeholders/test_image.png',0.5,0.65,0.85,1.0,'');
-INSERT INTO building_defs VALUES('Armory','军府',300,7.0,0,0,1,1,'Swordsman',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0,'res://assets/art/placeholders/test_image.png',0.65,0.7,0.85,1.0,'');
-INSERT INTO building_defs VALUES('Bulwark','壁垒',380,10.0,0,0,1,1,'HeavyShield',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0,'res://assets/art/placeholders/test_image.png',0.5,0.5,0.55,1.0,'');
-INSERT INTO building_defs VALUES('CrossbowTower','射楼',220,9.0,0,0,1,1,'Crossbowman',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0,'res://assets/art/placeholders/test_image.png',0.55,0.85,0.55,1.0,'');
-INSERT INTO building_defs VALUES('Ranch','牧场',330,12.0,0,0,1,1,'HeavyCavalry',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0,'res://assets/art/placeholders/test_image.png',0.75,0.6,0.4,1.0,'');
-INSERT INTO building_defs VALUES('RoyalArmory','皇家军营',300,7.0,0,0,1,1,'RoyalGuard',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0,'res://assets/art/placeholders/test_image.png',0.5,0.55,0.8,1.0,'');
-INSERT INTO building_defs VALUES('RoyalBulwark','皇家壁垒',380,10.0,0,0,1,1,'RoyalShieldGuard',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0,'res://assets/art/placeholders/test_image.png',0.35,0.38,0.5,1.0,'');
-INSERT INTO building_defs VALUES('RoyalArcheryRange','皇家射场',220,9.0,0,0,1,1,'RoyalSharpshooter',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0,'res://assets/art/placeholders/test_image.png',0.4,0.8,0.5,1.0,'');
-INSERT INTO building_defs VALUES('RoyalStable','皇家马场',330,12.0,0,0,1,1,'RoyalKnight',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0,'res://assets/art/placeholders/test_image.png',0.7,0.55,0.35,1.0,'');
-INSERT INTO building_defs VALUES('RoyalRanger','皇家游骑',150,5.0,0,0,1,1,'RoyalScout',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0,'res://assets/art/placeholders/test_image.png',0.55,0.7,0.9,1.0,'');
-INSERT INTO building_defs VALUES('HolyWall','圣壁',500,14.0,0,0,1,1,'HolyShieldGuardian',0,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0,'res://assets/art/placeholders/test_image.png',0.55,0.58,0.65,1.0,'');
-INSERT INTO building_defs VALUES('HeavenPunishmentTower','天罚塔',350,12.0,0,0,1,1,'DragonRiderCommander',0,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0,'res://assets/art/placeholders/test_image.png',0.7,0.45,0.85,1.0,'');
-INSERT INTO building_defs VALUES('ShadowSanctum','暗影圣所',250,8.0,0,0,1,1,'ShadowLord',0,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0,'res://assets/art/placeholders/test_image.png',0.25,0.15,0.35,1.0,'');
-INSERT INTO building_defs VALUES('RoyalCourt','王庭',800,30.0,0,0,1,1,'King',0,4,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'human',100.0,'res://assets/art/placeholders/test_image.png',0.9,0.75,0.2,1.0,'');
-INSERT INTO building_defs VALUES('RangerGuild','游侠公会',180,9.0,0,0,1,0,'ElfRanger',0,0,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'Elf',0.0,'res://assets/art/placeholders/test_image.png',0.35,0.7,0.4,1.0,'');
-INSERT INTO building_defs VALUES('WindSanctum','风行圣殿',260,7.0,0,0,1,0,'ElfSharpshooter',0,1,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'Elf',0.0,'res://assets/art/placeholders/test_image.png',0.65,0.8,0.95,1.0,'');
-INSERT INTO building_defs VALUES('WarriorGuild','战士公会',250,12.0,0,0,1,0,'DwarfWarrior',0,0,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'Dwarf',0.0,'res://assets/art/placeholders/test_image.png',0.7,0.35,0.25,1.0,'');
-INSERT INTO building_defs VALUES('MountainFort','山丘要塞',360,10.0,0,0,1,0,'DwarfBerserker',0,1,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'Dwarf',0.0,'res://assets/art/placeholders/test_image.png',0.55,0.45,0.35,1.0,'');
-INSERT INTO building_defs VALUES('ThiefGuild','盗贼行会',140,7.0,0,0,1,0,'HalflingThief',0,0,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'Halfling',0.0,'res://assets/art/placeholders/test_image.png',0.35,0.35,0.4,1.0,'');
-INSERT INTO building_defs VALUES('ShadowGuild','暗影公会',200,5.0,0,0,1,0,'HalflingAssassin',0,1,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'Halfling',0.0,'res://assets/art/placeholders/test_image.png',0.3,0.2,0.4,1.0,'');
-INSERT INTO building_defs VALUES('MageTower','术士高塔',160,14.0,0,0,1,0,'DragonbornMage',0,0,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'Dragonborn',0.0,'res://assets/art/placeholders/test_image.png',0.5,0.3,0.8,1.0,'');
-INSERT INTO building_defs VALUES('DragonfireTower','龙火塔',230,12.0,0,0,1,0,'DragonbornArchmage',0,1,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'Dragonborn',0.0,'res://assets/art/placeholders/test_image.png',0.9,0.3,0.15,1.0,'');
-INSERT INTO building_defs VALUES('Inn','酒馆',120,NULL,0,0,1,0,NULL,0,0,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'Human',0.0,'res://assets/art/placeholders/test_image.png',0.85,0.6,0.25,1.0,'');
-INSERT INTO building_defs VALUES('AdventurerGuild','冒险者公会',200,NULL,0,0,1,0,NULL,0,1,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'Human',0.0,'res://assets/art/placeholders/test_image.png',0.8,0.5,0.2,1.0,'');
+, faction_id TEXT NOT NULL DEFAULT 'human', production_rate REAL NOT NULL DEFAULT 0.0, texture_path TEXT NOT NULL DEFAULT 'res://assets/art/placeholders/test_image.png', sprite_modulate_r REAL NOT NULL DEFAULT 1.0, sprite_modulate_g REAL NOT NULL DEFAULT 1.0, sprite_modulate_b REAL NOT NULL DEFAULT 1.0, sprite_modulate_a REAL NOT NULL DEFAULT 1.0, material_path TEXT NOT NULL DEFAULT '');
+INSERT INTO building_defs VALUES('CastleHeart','城堡之心',500,NULL,0,0,0,0,NULL,0,0,1,'[[0,0],[1,0],[0,1],[1,1]]',180,180,'alliance',0.0,'res://assets/art/placeholders/test_image.png',1.0,0.82,0.35,1.0,'');
+INSERT INTO building_defs VALUES('RangerPost','游骑哨',150,5.0,0,0,1,1,'LightCavalry',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.6,0.75,0.95,1.0,'');
+INSERT INTO building_defs VALUES('Barracks','兵营',200,8.0,0,0,1,1,'Spearman',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.55,0.6,0.75,1.0,'');
+INSERT INTO building_defs VALUES('ShieldCamp','盾营',250,12.0,0,0,1,1,'ShieldBearer',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.4,0.4,0.45,1.0,'');
+INSERT INTO building_defs VALUES('ArcheryRange','靶场',150,10.0,0,0,1,1,'Archer',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.45,0.75,0.45,1.0,'');
+INSERT INTO building_defs VALUES('Stable','马厩',220,14.0,0,0,1,1,'Knight',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.65,0.5,0.3,1.0,'');
+INSERT INTO building_defs VALUES('ScoutCamp','斥候营',100,6.0,0,0,1,1,'Scout',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.5,0.65,0.85,1.0,'');
+INSERT INTO building_defs VALUES('Armory','军府',300,7.0,0,0,1,1,'Swordsman',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.65,0.7,0.85,1.0,'');
+INSERT INTO building_defs VALUES('Bulwark','壁垒',380,10.0,0,0,1,1,'HeavyShield',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.5,0.5,0.55,1.0,'');
+INSERT INTO building_defs VALUES('CrossbowTower','射楼',220,9.0,0,0,1,1,'Crossbowman',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.55,0.85,0.55,1.0,'');
+INSERT INTO building_defs VALUES('Ranch','牧场',330,12.0,0,0,1,1,'HeavyCavalry',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.75,0.6,0.4,1.0,'');
+INSERT INTO building_defs VALUES('RoyalArmory','皇家军营',300,7.0,0,0,1,1,'RoyalGuard',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.5,0.55,0.8,1.0,'');
+INSERT INTO building_defs VALUES('RoyalBulwark','皇家壁垒',380,10.0,0,0,1,1,'RoyalShieldGuard',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.35,0.38,0.5,1.0,'');
+INSERT INTO building_defs VALUES('RoyalArcheryRange','皇家射场',220,9.0,0,0,1,1,'RoyalSharpshooter',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.4,0.8,0.5,1.0,'');
+INSERT INTO building_defs VALUES('RoyalStable','皇家马场',330,12.0,0,0,1,1,'RoyalKnight',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.7,0.55,0.35,1.0,'');
+INSERT INTO building_defs VALUES('RoyalRanger','皇家游骑',150,5.0,0,0,1,1,'RoyalScout',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.55,0.7,0.9,1.0,'');
+INSERT INTO building_defs VALUES('HolyWall','圣壁',500,14.0,0,0,1,1,'HolyShieldGuardian',0,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.55,0.58,0.65,1.0,'');
+INSERT INTO building_defs VALUES('HeavenPunishmentTower','天罚塔',350,12.0,0,0,1,1,'DragonRiderCommander',0,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.7,0.45,0.85,1.0,'');
+INSERT INTO building_defs VALUES('ShadowSanctum','暗影圣所',250,8.0,0,0,1,1,'ShadowLord',0,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.25,0.15,0.35,1.0,'');
+INSERT INTO building_defs VALUES('RoyalCourt','王庭',800,30.0,0,0,1,1,'King',0,4,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.9,0.75,0.2,1.0,'');
+INSERT INTO building_defs VALUES('RangerGuild','游侠公会',180,9.0,0,0,1,0,'ElfRanger',0,0,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'alliance',0.0,'res://assets/art/placeholders/test_image.png',0.35,0.7,0.4,1.0,'');
+INSERT INTO building_defs VALUES('WindSanctum','风行圣殿',260,7.0,0,0,1,0,'ElfSharpshooter',0,1,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'alliance',0.0,'res://assets/art/placeholders/test_image.png',0.65,0.8,0.95,1.0,'');
+INSERT INTO building_defs VALUES('WarriorGuild','战士公会',250,12.0,0,0,1,0,'DwarfWarrior',0,0,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'alliance',0.0,'res://assets/art/placeholders/test_image.png',0.7,0.35,0.25,1.0,'');
+INSERT INTO building_defs VALUES('MountainFort','山丘要塞',360,10.0,0,0,1,0,'DwarfBerserker',0,1,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'alliance',0.0,'res://assets/art/placeholders/test_image.png',0.55,0.45,0.35,1.0,'');
+INSERT INTO building_defs VALUES('ThiefGuild','盗贼行会',140,7.0,0,0,1,0,'HalflingThief',0,0,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'alliance',0.0,'res://assets/art/placeholders/test_image.png',0.35,0.35,0.4,1.0,'');
+INSERT INTO building_defs VALUES('ShadowGuild','暗影公会',200,5.0,0,0,1,0,'HalflingAssassin',0,1,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'alliance',0.0,'res://assets/art/placeholders/test_image.png',0.3,0.2,0.4,1.0,'');
+INSERT INTO building_defs VALUES('MageTower','术士高塔',160,14.0,0,0,1,0,'DragonbornMage',0,0,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'alliance',0.0,'res://assets/art/placeholders/test_image.png',0.5,0.3,0.8,1.0,'');
+INSERT INTO building_defs VALUES('DragonfireTower','龙火塔',230,12.0,0,0,1,0,'DragonbornArchmage',0,1,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'alliance',0.0,'res://assets/art/placeholders/test_image.png',0.9,0.3,0.15,1.0,'');
+INSERT INTO building_defs VALUES('Inn','酒馆',120,NULL,0,0,1,0,NULL,0,0,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'alliance',0.0,'res://assets/art/placeholders/test_image.png',0.85,0.6,0.25,1.0,'');
+INSERT INTO building_defs VALUES('AdventurerGuild','冒险者公会',200,NULL,0,0,1,0,NULL,0,1,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'alliance',0.0,'res://assets/art/placeholders/test_image.png',0.8,0.5,0.2,1.0,'');
 CREATE TABLE damage_matrix (
     damage_type INTEGER NOT NULL,
     armor_type  INTEGER NOT NULL,
@@ -190,21 +190,18 @@ INSERT INTO shop_catalog VALUES('card_warrior_guild','战士公会',4,'WarriorGu
 INSERT INTO shop_catalog VALUES('card_thief_guild','盗贼行会',2,'ThiefGuild',10);
 INSERT INTO shop_catalog VALUES('card_mage_tower','术士高塔',5,'MageTower',6);
 INSERT INTO shop_catalog VALUES('card_inn','酒馆',2,'Inn',14);
-CREATE TABLE race_defs (
+CREATE TABLE IF NOT EXISTS "faction_defs" (
     id TEXT PRIMARY KEY,
     display_name TEXT NOT NULL,
     sort_order INTEGER NOT NULL DEFAULT 0
 );
-INSERT INTO race_defs VALUES('human','人族',0);
-INSERT INTO race_defs VALUES('wizard','巫师族',1);
-INSERT INTO race_defs VALUES('dungeon','地下城',2);
-INSERT INTO race_defs VALUES('Elf','精灵',3);
-INSERT INTO race_defs VALUES('Dwarf','矮人',4);
-INSERT INTO race_defs VALUES('Halfling','半身人',5);
-INSERT INTO race_defs VALUES('Dragonborn','龙裔',6);
+INSERT INTO faction_defs VALUES('alliance','联盟',0);
+INSERT INTO faction_defs VALUES('horde','部落',1);
+INSERT INTO faction_defs VALUES('necromancer','死灵法师',2);
+INSERT INTO faction_defs VALUES('dungeon','地下城',3);
 CREATE TABLE tech_tree_nodes (
     type_id TEXT PRIMARY KEY,
-    race_id TEXT NOT NULL REFERENCES race_defs(id),
+    faction_id TEXT NOT NULL REFERENCES "faction_defs"(id),
     tier INTEGER NOT NULL CHECK(tier BETWEEN 1 AND 5),
     col INTEGER NOT NULL DEFAULT 0,
     shop_available INTEGER NOT NULL DEFAULT 0,
@@ -216,24 +213,24 @@ CREATE TABLE tech_tree_nodes (
     max_health INTEGER NOT NULL DEFAULT 200,
     spawn_interval REAL NOT NULL DEFAULT 10.0
 );
-INSERT INTO tech_tree_nodes VALUES('Barracks','human',1,0,1,3,14,0,'兵营','Spearman',200,8.0);
-INSERT INTO tech_tree_nodes VALUES('ShieldCamp','human',1,1,1,3,10,0,'盾营','ShieldBearer',250,12.0);
-INSERT INTO tech_tree_nodes VALUES('ArcheryRange','human',1,2,1,4,12,0,'靶场','Archer',150,10.0);
-INSERT INTO tech_tree_nodes VALUES('Stable','human',1,3,1,5,10,0,'马厩','Knight',220,14.0);
-INSERT INTO tech_tree_nodes VALUES('ScoutCamp','human',1,4,1,2,8,0,'斥候营','Scout',100,6.0);
-INSERT INTO tech_tree_nodes VALUES('Armory','human',2,0,1,6,8,2,'军府','Swordsman',300,7.0);
-INSERT INTO tech_tree_nodes VALUES('Bulwark','human',2,1,1,6,6,2,'壁垒','HeavyShield',380,10.0);
-INSERT INTO tech_tree_nodes VALUES('CrossbowTower','human',2,2,0,NULL,NULL,0,'射楼','Crossbowman',220,9.0);
-INSERT INTO tech_tree_nodes VALUES('Ranch','human',2,3,1,8,6,2,'牧场','HeavyCavalry',330,12.0);
-INSERT INTO tech_tree_nodes VALUES('RoyalArmory','human',3,0,1,10,4,4,'皇家军营','RoyalGuard',300,7.0);
-INSERT INTO tech_tree_nodes VALUES('RoyalBulwark','human',3,1,1,10,4,4,'皇家壁垒','RoyalShieldGuard',380,10.0);
-INSERT INTO tech_tree_nodes VALUES('RoyalArcheryRange','human',3,2,0,NULL,NULL,0,'皇家射场','RoyalSharpshooter',220,9.0);
-INSERT INTO tech_tree_nodes VALUES('RoyalStable','human',3,3,1,12,4,4,'皇家马场','RoyalKnight',330,12.0);
-INSERT INTO tech_tree_nodes VALUES('RoyalRanger','human',3,4,0,NULL,NULL,0,'皇家游骑','RoyalScout',150,5.0);
-INSERT INTO tech_tree_nodes VALUES('HolyWall','human',4,0,0,NULL,NULL,0,'圣壁','HolyShieldGuardian',500,14.0);
-INSERT INTO tech_tree_nodes VALUES('HeavenPunishmentTower','human',4,2,0,NULL,NULL,0,'天罚塔','DragonRiderCommander',350,12.0);
-INSERT INTO tech_tree_nodes VALUES('ShadowSanctum','human',4,4,0,NULL,NULL,0,'暗影圣所','ShadowLord',250,8.0);
-INSERT INTO tech_tree_nodes VALUES('RoyalCourt','human',5,2,0,NULL,NULL,0,'王庭','King',800,30.0);
+INSERT INTO tech_tree_nodes VALUES('Barracks','alliance',1,0,1,3,14,0,'兵营','Spearman',200,8.0);
+INSERT INTO tech_tree_nodes VALUES('ShieldCamp','alliance',1,1,1,3,10,0,'盾营','ShieldBearer',250,12.0);
+INSERT INTO tech_tree_nodes VALUES('ArcheryRange','alliance',1,2,1,4,12,0,'靶场','Archer',150,10.0);
+INSERT INTO tech_tree_nodes VALUES('Stable','alliance',1,3,1,5,10,0,'马厩','Knight',220,14.0);
+INSERT INTO tech_tree_nodes VALUES('ScoutCamp','alliance',1,4,1,2,8,0,'斥候营','Scout',100,6.0);
+INSERT INTO tech_tree_nodes VALUES('Armory','alliance',2,0,1,6,8,2,'军府','Swordsman',300,7.0);
+INSERT INTO tech_tree_nodes VALUES('Bulwark','alliance',2,1,1,6,6,2,'壁垒','HeavyShield',380,10.0);
+INSERT INTO tech_tree_nodes VALUES('CrossbowTower','alliance',2,2,0,NULL,NULL,0,'射楼','Crossbowman',220,9.0);
+INSERT INTO tech_tree_nodes VALUES('Ranch','alliance',2,3,1,8,6,2,'牧场','HeavyCavalry',330,12.0);
+INSERT INTO tech_tree_nodes VALUES('RoyalArmory','alliance',3,0,1,10,4,4,'皇家军营','RoyalGuard',300,7.0);
+INSERT INTO tech_tree_nodes VALUES('RoyalBulwark','alliance',3,1,1,10,4,4,'皇家壁垒','RoyalShieldGuard',380,10.0);
+INSERT INTO tech_tree_nodes VALUES('RoyalArcheryRange','alliance',3,2,0,NULL,NULL,0,'皇家射场','RoyalSharpshooter',220,9.0);
+INSERT INTO tech_tree_nodes VALUES('RoyalStable','alliance',3,3,1,12,4,4,'皇家马场','RoyalKnight',330,12.0);
+INSERT INTO tech_tree_nodes VALUES('RoyalRanger','alliance',3,4,0,NULL,NULL,0,'皇家游骑','RoyalScout',150,5.0);
+INSERT INTO tech_tree_nodes VALUES('HolyWall','alliance',4,0,0,NULL,NULL,0,'圣壁','HolyShieldGuardian',500,14.0);
+INSERT INTO tech_tree_nodes VALUES('HeavenPunishmentTower','alliance',4,2,0,NULL,NULL,0,'天罚塔','DragonRiderCommander',350,12.0);
+INSERT INTO tech_tree_nodes VALUES('ShadowSanctum','alliance',4,4,0,NULL,NULL,0,'暗影圣所','ShadowLord',250,8.0);
+INSERT INTO tech_tree_nodes VALUES('RoyalCourt','alliance',5,2,0,NULL,NULL,0,'王庭','King',800,30.0);
 CREATE TABLE IF NOT EXISTS "combine_recipes" (
                 main_type_id TEXT NOT NULL,
                 material_type_id TEXT NOT NULL,

@@ -9,9 +9,9 @@ namespace CasualCastle.Adapters.Godot.Dev;
 public class TechTreeEditorController
 {
 	private readonly Control _root;
-	private readonly Button _prevRaceButton;
-	private readonly Label _raceNameLabel;
-	private readonly Button _nextRaceButton;
+	private readonly Button _prevFactionButton;
+	private readonly Label _factionNameLabel;
+	private readonly Button _nextFactionButton;
 	private readonly Button _saveButton;
 	private readonly Button _closeButton;
 	private readonly Control _cardCanvas;
@@ -21,11 +21,11 @@ public class TechTreeEditorController
 	private readonly Label _statusBar;
 
 	private readonly ITechTreeRepository _repo;
-	private List<RaceDef> _races = new();
+	private List<FactionDef> _factions = new();
 	private List<TechTreeNode> _nodes = new();
 	private List<CombineRecipe> _edges = new();
-	private string _currentRaceId = "";
-	private int _currentRaceIndex = 0;
+	private string _currentFactionId = "";
+	private int _currentFactionIndex = 0;
 
 	private enum DragMode { None, MoveCard, CreateConnection, LibraryToCanvas, CanvasToLibrary }
 	private DragMode _dragMode;
@@ -41,9 +41,9 @@ public class TechTreeEditorController
 	public TechTreeEditorController(Control root, ITechTreeRepository repo)
 	{
 		_root = root;
-		_prevRaceButton = root.GetNode<Button>("TopBar/PrevRaceButton");
-		_raceNameLabel = root.GetNode<Label>("TopBar/RaceNameLabel");
-		_nextRaceButton = root.GetNode<Button>("TopBar/NextRaceButton");
+		_prevFactionButton = root.GetNode<Button>("TopBar/PrevFactionButton");
+		_factionNameLabel = root.GetNode<Label>("TopBar/FactionNameLabel");
+		_nextFactionButton = root.GetNode<Button>("TopBar/NextFactionButton");
 		_saveButton = root.GetNode<Button>("TopBar/SaveButton");
 		_closeButton = root.GetNode<Button>("TopBar/CloseButton");
 		_cardCanvas = root.GetNode<Control>("EditorArea/CardCanvas");
@@ -54,8 +54,8 @@ public class TechTreeEditorController
 
 		_repo = repo;
 
-		_prevRaceButton.Pressed += OnPrevRacePressed;
-		_nextRaceButton.Pressed += OnNextRacePressed;
+		_prevFactionButton.Pressed += OnPrevFactionPressed;
+		_nextFactionButton.Pressed += OnNextFactionPressed;
 		_saveButton.Pressed += OnSavePressed;
 		_closeButton.Pressed += OnClosePressed;
 		_newBuildingButton.Pressed += OnNewBuildingPressed;
@@ -65,17 +65,17 @@ public class TechTreeEditorController
 
 	public void LoadInitialData()
 	{
-		_races = _repo.LoadRaces();
-		if (_races.Count == 0)
+		_factions = _repo.LoadFactions();
+		if (_factions.Count == 0)
 			return;
-		_currentRaceIndex = 0;
-		LoadRaceAtIndex(0);
+		_currentFactionIndex = 0;
+		LoadFactionAtIndex(0);
 	}
 
 	public void Dispose()
 	{
-		_prevRaceButton.Pressed -= OnPrevRacePressed;
-		_nextRaceButton.Pressed -= OnNextRacePressed;
+		_prevFactionButton.Pressed -= OnPrevFactionPressed;
+		_nextFactionButton.Pressed -= OnNextFactionPressed;
 		_saveButton.Pressed -= OnSavePressed;
 		_closeButton.Pressed -= OnClosePressed;
 		_newBuildingButton.Pressed -= OnNewBuildingPressed;
@@ -155,36 +155,36 @@ public class TechTreeEditorController
 			CancelDrag();
 	}
 
-	private void OnPrevRacePressed()
+	private void OnPrevFactionPressed()
 	{
-		if (_currentRaceIndex > 0)
+		if (_currentFactionIndex > 0)
 		{
-			_currentRaceIndex--;
-			GD.Print($"[TechTreeEditor] 切换到上一个种族, 索引={_currentRaceIndex}, ID={_races[_currentRaceIndex].Id}");
-			LoadRaceAtIndex(_currentRaceIndex);
+			_currentFactionIndex--;
+			GD.Print($"[TechTreeEditor] 切换到上一个派系, 索引={_currentFactionIndex}, ID={_factions[_currentFactionIndex].Id}");
+			LoadFactionAtIndex(_currentFactionIndex);
 		}
 	}
 
-	private void OnNextRacePressed()
+	private void OnNextFactionPressed()
 	{
-		if (_currentRaceIndex < _races.Count - 1)
+		if (_currentFactionIndex < _factions.Count - 1)
 		{
-			_currentRaceIndex++;
-			GD.Print($"[TechTreeEditor] 切换到下一个种族, 索引={_currentRaceIndex}, ID={_races[_currentRaceIndex].Id}");
-			LoadRaceAtIndex(_currentRaceIndex);
+			_currentFactionIndex++;
+			GD.Print($"[TechTreeEditor] 切换到下一个派系, 索引={_currentFactionIndex}, ID={_factions[_currentFactionIndex].Id}");
+			LoadFactionAtIndex(_currentFactionIndex);
 		}
 	}
 
-	private void LoadRaceAtIndex(int index)
+	private void LoadFactionAtIndex(int index)
 	{
-		GD.Print($"[TechTreeEditor] LoadRaceAtIndex index={index}, raceId={_races[index].Id}, 切换前_nodes.Count={_nodes.Count}");
-		_currentRaceIndex = index;
-		RaceDef race = _races[index];
-		_currentRaceId = race.Id;
-		_raceNameLabel.Text = race.DisplayName;
-		_nodes = _repo.LoadNodes(race.Id);
-		_edges = _repo.LoadEdges(race.Id);
-		GD.Print($"[TechTreeEditor] 加载完成: raceId={race.Id}, nodes={_nodes.Count}, edges={_edges.Count}");
+		GD.Print($"[TechTreeEditor] LoadFactionAtIndex index={index}, factionId={_factions[index].Id}, 切换前_nodes.Count={_nodes.Count}");
+		_currentFactionIndex = index;
+		FactionDef faction = _factions[index];
+		_currentFactionId = faction.Id;
+		_factionNameLabel.Text = faction.DisplayName;
+		_nodes = _repo.LoadNodes(faction.Id);
+		_edges = _repo.LoadEdges(faction.Id);
+		GD.Print($"[TechTreeEditor] 加载完成: factionId={faction.Id}, nodes={_nodes.Count}, edges={_edges.Count}");
 		LayoutCards();
 		RefreshLibrary();
 		ShowStatus($"已加载 {_nodes.Count} 个节点，{_edges.Count} 条连线");
@@ -262,9 +262,9 @@ public class TechTreeEditorController
 			child.QueueFree();
 		}
 
-		List<BuildingTypeSummary> allTypes = _repo.LoadAllBuildingTypes(_currentRaceId);
+		List<BuildingTypeSummary> allTypes = _repo.LoadAllBuildingTypes(_currentFactionId);
 		int placedCount = 0;
-		GD.Print($"[TechTreeEditor] RefreshLibrary: 建筑总数={allTypes.Count}, 当前种族节点数={_nodes.Count}");
+		GD.Print($"[TechTreeEditor] RefreshLibrary: 建筑总数={allTypes.Count}, 当前派系节点数={_nodes.Count}");
 
 		foreach (BuildingTypeSummary type in allTypes)
 		{
@@ -447,7 +447,7 @@ public class TechTreeEditorController
 
 		if (invalidEdges.Count > 0)
 		{
-			_edges = _repo.LoadEdges(_currentRaceId);
+			_edges = _repo.LoadEdges(_currentFactionId);
 			ShowStatus($"已移除 {invalidEdges.Count} 条无效连线");
 		}
 	}
@@ -490,7 +490,7 @@ public class TechTreeEditorController
 				ResultTypeId = toId
 			};
 			_repo.AddRecipe(recipe);
-			_edges = _repo.LoadEdges(_currentRaceId);
+			_edges = _repo.LoadEdges(_currentFactionId);
 			LayoutCards();
 			ShowStatus($"连线已创建: {fromId} → {toId}");
 		}
@@ -526,14 +526,14 @@ public class TechTreeEditorController
 				maxCol = n.Col;
 		}
 
-		List<BuildingTypeSummary> allTypes = _repo.LoadAllBuildingTypes(_currentRaceId);
+		List<BuildingTypeSummary> allTypes = _repo.LoadAllBuildingTypes(_currentFactionId);
 		BuildingTypeSummary typeInfo = allTypes.Find(t => t.TypeId == typeId);
 		string displayName = typeInfo?.DisplayName ?? typeId;
 
 		TechTreeNode newNode = new()
 		{
 			TypeId = typeId,
-			RaceId = _currentRaceId,
+			FactionId = _currentFactionId,
 			Tier = tier,
 			Col = maxCol + 1,
 			ShopAvailable = false,
@@ -587,7 +587,7 @@ public class TechTreeEditorController
 		}
 
 		_nodes.RemoveAll(n => n.TypeId == typeId);
-		_edges = _repo.LoadEdges(_currentRaceId);
+		_edges = _repo.LoadEdges(_currentFactionId);
 		LayoutCards();
 		RefreshLibrary();
 		ShowStatus($"已移除: {typeId}");
@@ -618,7 +618,7 @@ public class TechTreeEditorController
 		if (toDelete != null)
 		{
 			_repo.RemoveRecipe(toDelete.MainTypeId, toDelete.MaterialTypeId, toDelete.ResultTypeId);
-			_edges = _repo.LoadEdges(_currentRaceId);
+			_edges = _repo.LoadEdges(_currentFactionId);
 			LayoutCards();
 			ShowStatus($"连线已删除: {toDelete.MainTypeId} → {toDelete.ResultTypeId}");
 		}
@@ -721,10 +721,10 @@ public class TechTreeEditorController
 			using Microsoft.Data.Sqlite.SqliteConnection conn = new($"Data Source={dbPath}");
 			conn.Open();
 			using Microsoft.Data.Sqlite.SqliteCommand insertCmd = conn.CreateCommand();
-			insertCmd.CommandText = "INSERT OR IGNORE INTO building_defs (type_id, display_name, race_id, max_health, spawn_interval, footprint_json, collision_width, collision_height) VALUES (@id, @name, @raceId, 200, 10.0, '[[0,0],[1,0],[0,1],[1,1]]', 188, 188)";
+			insertCmd.CommandText = "INSERT OR IGNORE INTO building_defs (type_id, display_name, faction_id, max_health, spawn_interval, footprint_json, collision_width, collision_height) VALUES (@id, @name, @factionId, 200, 10.0, '[[0,0],[1,0],[0,1],[1,1]]', 188, 188)";
 			insertCmd.Parameters.AddWithValue("@id", typeId);
 			insertCmd.Parameters.AddWithValue("@name", displayName);
-			insertCmd.Parameters.AddWithValue("@raceId", _currentRaceId);
+			insertCmd.Parameters.AddWithValue("@factionId", _currentFactionId);
 			insertCmd.ExecuteNonQuery();
 
 			RefreshLibrary();
@@ -843,8 +843,8 @@ public class TechTreeEditorController
 
 	private void OnSavePressed()
 	{
-		_repo.SaveNodes(_currentRaceId, _nodes);
-		_repo.SyncToGameTables(_currentRaceId);
+		_repo.SaveNodes(_currentFactionId, _nodes);
+		_repo.SyncToGameTables(_currentFactionId);
 		ShowStatus("保存成功");
 	}
 

@@ -18,17 +18,17 @@ anchor_right = 1.0
 grow_horizontal = 2
 custom_minimum_size = Vector2(0, 48)
 
-[node name="PrevRaceButton" type="Button" parent="TopBar"]
+[node name="PrevFactionButton" type="Button" parent="TopBar"]
 layout_mode = 2
 text = "<"
 
-[node name="RaceNameLabel" type="Label" parent="TopBar"]
+[node name="FactionNameLabel" type="Label" parent="TopBar"]
 layout_mode = 2
 text = "人族"
 horizontal_alignment = 1
 custom_minimum_size = Vector2(80, 0)
 
-[node name="NextRaceButton" type="Button" parent="TopBar"]
+[node name="NextFactionButton" type="Button" parent="TopBar"]
 layout_mode = 2
 text = ">"
 

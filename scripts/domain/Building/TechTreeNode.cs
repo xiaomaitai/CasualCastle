@@ -3,7 +3,7 @@ namespace CasualCastle.Domain.Building;
 public class TechTreeNode
 {
     public string TypeId { get; init; }
-    public string RaceId { get; set; }
+    public string FactionId { get; set; }
     public int Tier { get; set; }
     public int Col { get; set; }
     public bool ShopAvailable { get; set; }
