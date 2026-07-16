@@ -119,6 +119,10 @@ horizontal_alignment = 1
 layout_mode = 2
 text = "切换昼夜"
 
+[node name="CheatButton" type="Button" parent="UI/PhasePanel"]
+layout_mode = 2
+text = "作弊"
+
 [node name="MenuButton" type="Button" parent="UI"]
 offset_left = 1824
 offset_top = 21
@@ -511,5 +515,55 @@ offset_top = 165
 offset_right = 525
 offset_bottom = 232.5
 text = "不保存并返回标题"
+
+[node name="CheatOverlay" type="ColorRect" parent="UI"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0, 0, 0, 0.55)
+
+[node name="CheatPanel" type="Panel" parent="UI"]
+visible = false
+offset_left = 710
+offset_top = 350
+offset_right = 1210
+offset_bottom = 610
+
+[node name="PanelBackground" type="ColorRect" parent="UI/CheatPanel"]
+layout_mode = 0
+offset_right = 500
+offset_bottom = 260
+color = Color(0.12, 0.16, 0.22, 0.96)
+
+[node name="TitleLabel" type="Label" parent="UI/CheatPanel"]
+layout_mode = 0
+offset_left = 140
+offset_top = 24
+offset_right = 360
+offset_bottom = 72
+theme_override_font_sizes/font_size = 36
+text = "作弊菜单"
+horizontal_alignment = 1
+
+[node name="FastProductionCheck" type="CheckBox" parent="UI/CheatPanel"]
+layout_mode = 0
+offset_left = 60
+offset_top = 108
+offset_right = 440
+offset_bottom = 156
+theme_override_font_sizes/font_size = 27
+text = "快速生产 (10x)"
+
+[node name="CloseButton" type="Button" parent="UI/CheatPanel"]
+layout_mode = 0
+offset_left = 150
+offset_top = 186
+offset_right = 350
+offset_bottom = 240
+text = "关闭"
 
 [node name="SettingsPanel" parent="UI" instance=ExtResource("13")]

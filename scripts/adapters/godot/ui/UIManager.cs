@@ -15,6 +15,7 @@ public partial class UIManager : Node2D
     private BuildingManageUiController _buildingManageUi;
     private CombineProhibitUiController _combineProhibitUi;
     private PauseMenuUiController _pauseMenuUi;
+    private CheatMenuUiController _cheatMenu;
     private SoldierInfoUiController _soldierInfoUi;
     private SoldierSelectionController _soldierSelection;
     private GameOverUiController _gameOverUi;
@@ -43,6 +44,7 @@ public partial class UIManager : Node2D
         _handUi?.Dispose();
         _buildingManageUi?.Dispose();
         _combineProhibitUi?.Dispose();
+        _cheatMenu?.Dispose();
         if (_pauseMenuUi != null)
         {
             _pauseMenuUi.OpenChanged -= OnPauseMenuOpenChanged;
@@ -79,6 +81,12 @@ public partial class UIManager : Node2D
             && keyEvent.Keycode == Key.Escape)
         {
             if (_settingsUi?.Close() == true)
+            {
+                GetViewport().SetInputAsHandled();
+                return;
+            }
+
+            if (_cheatMenu?.TryHandleEscape() == true)
             {
                 GetViewport().SetInputAsHandled();
                 return;
@@ -133,6 +141,9 @@ public partial class UIManager : Node2D
         if (_settingsUi?.IsOpen == true)
             return;
 
+        if (_cheatMenu?.IsOpen == true)
+            return;
+
         if (_combineProhibitUi?.HandleInput(@event) == true)
         {
             GetViewport().SetInputAsHandled();
@@ -179,6 +190,7 @@ public partial class UIManager : Node2D
         ButtonGroup toolGroup = new ButtonGroup();
         _buildingManageUi = new BuildingManageUiController(this, uiRoot, toolGroup);
         _combineProhibitUi = new CombineProhibitUiController(this, uiRoot, toolGroup);
+        _cheatMenu = new CheatMenuUiController(uiRoot);
         _settingsUi = new SettingsUiController(uiRoot.GetNode<Control>("SettingsPanel"));
         _pauseMenuUi = new PauseMenuUiController(uiRoot, GoToTitle, OpenSettings);
         _gameOverUi = new GameOverUiController(uiRoot, GoToTitle);
@@ -204,6 +216,7 @@ public partial class UIManager : Node2D
         _buildingInfoUi.SetInputBlocked(_gameOver);
         _buildingManageUi.SetGameOver(_gameOver);
         _combineProhibitUi.SetGameOver(_gameOver);
+        _cheatMenu.SetGameOver(_gameOver);
         _pauseMenuUi.SetGameOver(_gameOver);
         _gameOverUi.SetState(state);
     }

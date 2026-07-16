@@ -35,6 +35,8 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 	private GameManager _gameManager;
 	private Shop _shop;
 	private AdjacencyService _adjacencyService;
+	private BuildingSystem _buildingSystemBacking;
+	private BuildingSystem BuildingSys => _buildingSystemBacking ??= AdapterRegistry.Resolve<BuildingSystem>();
 
 	[Signal]
 	public delegate void HealthChangedEventHandler(int health, int maxHealth);
@@ -48,7 +50,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 	public bool IsOperational => Health > 0 && !IsManuallyPaused;
 	public bool ContributesToAdjacency => !IsDestroyed;
 	public bool IsDamaged => Health < MaxHealth;
-	public string DisplayName => BuildingSystem.GetDisplayName(TypeId);
+	public string DisplayName => BuildingSys.GetDisplayName(TypeId);
 	public int AnchorGridX => GridX;
 	public int AnchorGridY => GridY;
 	public bool IsPlayerOwned => _isPlayerBuilding;
@@ -82,7 +84,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	public Vector2I GetMainGridPosition()
 	{
-		Vector2I offset = BuildingSystem.GetMainCellOffset(TypeId);
+		Vector2I offset = BuildingSys.GetMainCellOffset(TypeId);
 		return new Vector2I(AnchorGridX + offset.X, AnchorGridY + offset.Y);
 	}
 
@@ -103,7 +105,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	public void SetManuallyPaused(bool paused)
 	{
-		if (BuildingSystem.IsCoreBuilding(TypeId) || IsManuallyPaused == paused)
+		if (BuildingSys.IsCoreBuilding(TypeId) || IsManuallyPaused == paused)
 			return;
 
 		IsManuallyPaused = paused;
@@ -112,7 +114,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	public void SetCombineProhibited(bool prohibited)
 	{
-		if (BuildingSystem.IsCoreBuilding(TypeId) || IsCombineProhibited == prohibited)
+		if (BuildingSys.IsCoreBuilding(TypeId) || IsCombineProhibited == prohibited)
 			return;
 
 		IsCombineProhibited = prohibited;
@@ -121,7 +123,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	public void ApplySnapshotState(int health, bool manuallyPaused, bool combineProhibited)
 	{
-		if (BuildingSystem.IsCoreBuilding(TypeId))
+		if (BuildingSys.IsCoreBuilding(TypeId))
 			return;
 
 		Health = Mathf.Clamp(health, 1, MaxHealth);
@@ -136,10 +138,10 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 	public void InitFromType(string buildingType)
 	{
 		TypeId = buildingType;
-		MaxHealth = BuildingSystem.GetMaxHealth(buildingType);
+		MaxHealth = BuildingSys.GetMaxHealth(buildingType);
 		Health = MaxHealth;
-		HasNightCombat = BuildingSystem.GetHasNightCombat(buildingType);
-		_baseModulate = BuildingSystem.GetSpriteModulate(buildingType);
+		HasNightCombat = BuildingSys.GetHasNightCombat(buildingType);
+		_baseModulate = BuildingSys.GetSpriteModulate(buildingType);
 		TryApplyVisual();
 		UpdateDamageVisual();
 	}
@@ -152,7 +154,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 		if (!_visualApplied)
 		{
-			BuildingSystem.ApplyVisual(this);
+			BuildingSys.ApplyVisual(this);
 			_visualApplied = true;
 		}
 
@@ -264,7 +266,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		bool isPlayerOwned = CastleRef != null && CastleRef.IsPlayerCastle;
 		bool isPlaying = _gameManager?.CurrentState == GameManager.GameState.Playing;
 		bool isNight = _gameManager != null && _gameManager.IsNight;
-		return RepairRules.CanRepair(Health, MaxHealth, BuildingSystem.IsCoreBuilding(TypeId),
+		return RepairRules.CanRepair(Health, MaxHealth, BuildingSys.IsCoreBuilding(TypeId),
 			isPlayerOwned, HasEnemyOnTop, isPlaying, isNight);
 	}
 
@@ -302,7 +304,11 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		SyncStateIconPosition();
 		RefreshOperationalState();
 
-		if (BuildingSystem.GetProductionRate(TypeId) > 0f)
+		if (CheatState.FastProductionEnabled)
+			SetWorkSpeedMultiplier(10f);
+		CheatState.FastProductionChanged += OnFastProductionChanged;
+
+		if (BuildingSys.GetProductionRate(TypeId) > 0f)
 		{
 			_battlefield = _gameManager?.Battlefield;
 			if (_battlefield == null)
@@ -320,6 +326,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 		if (_gameManager != null)
 			_gameManager.PhaseChanged -= OnPhaseChanged;
+		CheatState.FastProductionChanged -= OnFastProductionChanged;
 		StopWork();
 	}
 
@@ -352,6 +359,11 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		UpdateWorkCycle();
 	}
 
+	private void OnFastProductionChanged()
+	{
+		SetWorkSpeedMultiplier(CheatState.FastProductionEnabled ? 10f : 1f);
+	}
+
 	protected void UpdateWorkCycle()
 	{
 		if (CanWork)
@@ -378,11 +390,11 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	private void StartWorkCycle()
 	{
-		float productionRate = BuildingSystem.GetProductionRate(TypeId);
+		float productionRate = BuildingSys.GetProductionRate(TypeId);
 		if (productionRate > 0f)
 		{
 			_productionRate = productionRate;
-			int unitCost = BuildingSystem.GetUnitCost(TypeId);
+			int unitCost = BuildingSys.GetUnitCost(TypeId);
 			BeginWork(unitCost);
 		}
 	}
@@ -408,10 +420,10 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 			Soldier shell = soldierScene.Instantiate<Soldier>();
 			SoldierLogic soldier = shell.GetNode<SoldierLogic>("Logic");
 			soldier.IsPlayerUnit = _isPlayerBuilding;
-			BuildingSystem.ApplySoldierSpawnStats(TypeId, soldier);
+			BuildingSys.ApplySoldierSpawnStats(TypeId, soldier);
 			UnitSpawn.PlaceSoldier(
 				_battlefield, CastleRef, shell,
-				BuildingSystem.GetFootprint(TypeId), GridX, GridY, _spawnCount);
+				BuildingSys.GetFootprint(TypeId), GridX, GridY, _spawnCount);
 			_spawnCount++;
 		}
 	}
@@ -571,14 +583,14 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		if (_stateIcon == null || CastleRef == null)
 			return;
 
-		Vector2I mainOffset = BuildingSystem.GetMainCellOffset(TypeId);
+		Vector2I mainOffset = BuildingSys.GetMainCellOffset(TypeId);
 		Vector2 mainCenter = CastleRef.GetCellCenter(GridX + mainOffset.X, GridY + mainOffset.Y);
 		_stateIcon.Position = mainCenter - Position;
 	}
 
 	private void UpdateStateIcon()
 	{
-		if (_stateIcon == null || BuildingSystem.IsCoreBuilding(TypeId))
+		if (_stateIcon == null || BuildingSys.IsCoreBuilding(TypeId))
 		{
 			_stateIcon?.SetPaused(false);
 			_stateIcon?.SetCombineProhibited(false);
