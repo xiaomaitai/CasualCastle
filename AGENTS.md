@@ -86,6 +86,11 @@ Godot **4.6** + **C# / .NET** 的 2.5D RTS 项目（斜视角纸片人，类皇�
 - 当用户说"继续当前任务"时，先查 `currentTasks.md`；如果已完成就查大纲找下一个 Phase
 - 当用户要求把新任务细化到当前任务时，先彻底清理 `currentTasks.md` 和 `todo.md` 中已完成的内容
 
+## Skills
+
+- 用户要求生成图片、素材、图标等图像时，使用 **`generate-image` skill**（`.claude/skills/generate-image.md`）
+- 用户要求抠图/去背景时，使用 **`remove-bg` skill**（`.claude/skills/remove-bg.md`）
+
 ## 工作规则
 
 - 当用户要求继续当前任务时，在查找 `devPlan/tmp/currentTasks.md`，如果里面所有任务已经完成，就在大纲中查找下一个 Phase 的任务，询问用户是否细化到当前任务。**不要**直接在 `devPlan/tmp/todo.md` 中查找
