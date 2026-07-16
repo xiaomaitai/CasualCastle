@@ -2,8 +2,11 @@ namespace CasualCastle.Domain.Battle;
 
 public enum DamageType
 {
-	Normal,
+	Slash,
 	Pierce,
+	Blunt,
 	Siege,
-	Magic
+	Magic,
+	Holy,
+	Chaos
 }

@@ -7,6 +7,7 @@ public class UnitStats
 	public AttackType AttackType { get; init; }
 	public DamageType DamageType { get; init; }
 	public ArmorType ArmorType { get; init; }
+	public int ArmorValue { get; init; }
 	public int Health { get; init; }
 	public int Damage { get; init; }
 	public float Speed { get; init; }

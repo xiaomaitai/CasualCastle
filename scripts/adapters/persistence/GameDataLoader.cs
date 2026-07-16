@@ -31,11 +31,9 @@ public static class GameDataLoader
 	{
 		cmd.CommandText = "SELECT damage_type, armor_type, multiplier FROM damage_matrix";
 		using SqliteDataReader reader = cmd.ExecuteReader();
-		float[,] matrix = new float[4, 4];
-		while (reader.Read())
-			matrix[reader.GetInt32(0), reader.GetInt32(1)] = reader.GetFloat(2);
 		DamageMatrix dm = new DamageMatrix();
-		dm.LoadFrom(matrix);
+		while (reader.Read())
+			dm.Set((DamageType)reader.GetInt32(0), (ArmorType)reader.GetInt32(1), reader.GetFloat(2));
 		return dm;
 	}
 

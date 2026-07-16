@@ -23,6 +23,7 @@ public class Soldier : ISoldierHandle
 	public float CollisionRadius { get; set; }
 	public DamageType DamageType { get; set; }
 	public ArmorType ArmorType { get; set; }
+	public int ArmorValue { get; set; }
 	public string Race { get; set; }
 	public SkillSet Skills { get; private set; }
 	public GameContext GameCtx { get; set; } = new();
@@ -66,6 +67,7 @@ public class Soldier : ISoldierHandle
 		CollisionRadius = stats.CollisionRadius;
 		DamageType = stats.DamageType;
 		ArmorType = stats.ArmorType;
+		ArmorValue = stats.ArmorValue;
 		Race = stats.Race;
 		Skills = new SkillSet();
 	}
@@ -191,7 +193,7 @@ public class Soldier : ISoldierHandle
 							float dmgMult = Skills.GetStatMultiplier("attack_damage_mult", GameCtx);
 							effectiveDamage = (int)(Damage * dmgMult);
 						}
-						int finalDamage = CombatRules.CalculateDamage(effectiveDamage, DamageType, TargetEnemy.ArmorType, _damageMatrix);
+						int finalDamage = CombatRules.CalculateDamage(effectiveDamage, DamageType, TargetEnemy.ArmorType, TargetEnemy.ArmorValue, _damageMatrix);
 						TargetEnemy.TakeDamage(finalDamage, this, GameX, GameY);
 
 						if (Skills != null)

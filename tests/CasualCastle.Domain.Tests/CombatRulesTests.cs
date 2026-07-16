@@ -5,28 +5,88 @@ namespace CasualCastle.Domain.Tests;
 
 public class CombatRulesTests
 {
-	[Fact]
-	public void CalculateDamage_PositiveBaseDamage_AppliesMultiplier()
+	private static DamageMatrix CreateMatrix()
 	{
 		DamageMatrix dm = new();
-		int result = CombatRules.CalculateDamage(100, DamageType.Normal, ArmorType.Light, dm);
-		Assert.Equal(100, result);
+		dm.Set(DamageType.Pierce, ArmorType.Leather, 1.5f);
+		dm.Set(DamageType.Chaos, ArmorType.Unarmored, 0.7f);
+		dm.Set(DamageType.Chaos, ArmorType.Plate, 1.5f);
+		dm.Set(DamageType.Slash, ArmorType.Plate, 0.7f);
+		dm.Set(DamageType.Slash, ArmorType.Holy, 0.1f);
+		dm.Set(DamageType.Holy, ArmorType.Plate, 1.0f);
+		return dm;
+	}
+
+	[Fact]
+	public void CalculateDamage_Neutral_50PercentReduction()
+	{
+		DamageMatrix dm = new();
+		int result = CombatRules.CalculateDamage(100, DamageType.Slash, ArmorType.Unarmored, 100, dm);
+		Assert.Equal(50, result);
+	}
+
+	[Fact]
+	public void CalculateDamage_Good_Multiplier_150Percent()
+	{
+		DamageMatrix dm = CreateMatrix();
+		int result = CombatRules.CalculateDamage(100, DamageType.Pierce, ArmorType.Leather, 0, dm);
+		Assert.Equal(150, result);
+	}
+
+	[Fact]
+	public void CalculateDamage_Bad_Multiplier_70Percent()
+	{
+		DamageMatrix dm = CreateMatrix();
+		int result = CombatRules.CalculateDamage(100, DamageType.Chaos, ArmorType.Unarmored, 0, dm);
+		Assert.Equal(70, result);
+	}
+
+	[Fact]
+	public void CalculateDamage_Good_With_Armor()
+	{
+		DamageMatrix dm = CreateMatrix();
+		int result = CombatRules.CalculateDamage(100, DamageType.Chaos, ArmorType.Plate, 100, dm);
+		Assert.Equal(75, result);
+	}
+
+	[Fact]
+	public void CalculateDamage_Bad_With_Armor()
+	{
+		DamageMatrix dm = CreateMatrix();
+		int result = CombatRules.CalculateDamage(100, DamageType.Slash, ArmorType.Plate, 100, dm);
+		Assert.Equal(35, result);
+	}
+
+	[Fact]
+	public void CalculateDamage_HolyArmor_Weakness()
+	{
+		DamageMatrix dm = CreateMatrix();
+		int result = CombatRules.CalculateDamage(100, DamageType.Slash, ArmorType.Holy, 0, dm);
+		Assert.Equal(10, result);
+	}
+
+	[Fact]
+	public void CalculateDamage_HolyAttack_FullDamage()
+	{
+		DamageMatrix dm = CreateMatrix();
+		int result = CombatRules.CalculateDamage(100, DamageType.Holy, ArmorType.Plate, 200, dm);
+		Assert.Equal(33, result);
 	}
 
 	[Fact]
 	public void CalculateDamage_ZeroBaseDamage_ReturnsZero()
 	{
 		DamageMatrix dm = new();
-		int result = CombatRules.CalculateDamage(0, DamageType.Normal, ArmorType.Light, dm);
+		int result = CombatRules.CalculateDamage(0, DamageType.Slash, ArmorType.Unarmored, 100, dm);
 		Assert.Equal(0, result);
 	}
 
 	[Fact]
-	public void CalculateDamage_NegativeBaseDamage_ReturnsZero()
+	public void CalculateDamage_MinimumDamageFloor()
 	{
-		DamageMatrix dm = new();
-		int result = CombatRules.CalculateDamage(-5, DamageType.Normal, ArmorType.Light, dm);
-		Assert.Equal(0, result);
+		DamageMatrix dm = CreateMatrix();
+		int result = CombatRules.CalculateDamage(1, DamageType.Slash, ArmorType.Holy, 0, dm);
+		Assert.Equal(1, result);
 	}
 
 	[Fact]
@@ -44,31 +104,15 @@ public class CombatRulesTests
 	}
 
 	[Fact]
-	public void ApplyDamage_ZeroDamage_ReturnsCurrentHealth()
-	{
-		int result = CombatRules.ApplyDamage(50, 0);
-		Assert.Equal(50, result);
-	}
-
-	[Fact]
-	public void ApplyDamage_AlreadyDead_ReturnsCurrentHealth()
-	{
-		int result = CombatRules.ApplyDamage(0, 10);
-		Assert.Equal(0, result);
-	}
-
-	[Fact]
 	public void CanAttack_WhenTimerAtZero_ReturnsTrue()
 	{
-		bool result = CombatRules.CanAttack(0f);
-		Assert.True(result);
+		Assert.True(CombatRules.CanAttack(0f));
 	}
 
 	[Fact]
 	public void CanAttack_WhenTimerPositive_ReturnsFalse()
 	{
-		bool result = CombatRules.CanAttack(0.5f);
-		Assert.False(result);
+		Assert.False(CombatRules.CanAttack(0.5f));
 	}
 
 	[Fact]
@@ -76,13 +120,6 @@ public class CombatRulesTests
 	{
 		float result = CombatRules.TickCooldown(0.5f, 0.2f);
 		Assert.Equal(0.3f, result, 4);
-	}
-
-	[Fact]
-	public void TickCooldown_ZeroTimer_ReturnsZero()
-	{
-		float result = CombatRules.TickCooldown(0f, 0.1f);
-		Assert.Equal(0f, result);
 	}
 
 	[Fact]

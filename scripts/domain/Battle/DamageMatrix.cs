@@ -1,24 +1,29 @@
+using System.Collections.Generic;
+
 namespace CasualCastle.Domain.Battle;
 
 public class DamageMatrix
 {
-	private float[,] _multiplier;
+	public const float ArmorK = 100f;
 
-	public DamageMatrix()
-	{
-		_multiplier = new float[4, 4];
-		for (int d = 0; d < 4; d++)
-			for (int a = 0; a < 4; a++)
-				_multiplier[d, a] = 1.0f;
-	}
+	private readonly Dictionary<(DamageType, ArmorType), float> _matrix = new();
 
-	public void LoadFrom(float[,] matrix)
+	public void Set(DamageType damage, ArmorType armor, float multiplier)
 	{
-		_multiplier = matrix;
+		_matrix[(damage, armor)] = multiplier;
 	}
 
 	public float GetMultiplier(DamageType damage, ArmorType armor)
 	{
-		return _multiplier[(int)damage, (int)armor];
+		if (_matrix.TryGetValue((damage, armor), out float value))
+			return value;
+		return 1.0f;
+	}
+
+	public static double CalculateReduction(int armorValue)
+	{
+		if (armorValue <= 0)
+			return 0.0;
+		return (double)armorValue / (armorValue + ArmorK);
 	}
 }

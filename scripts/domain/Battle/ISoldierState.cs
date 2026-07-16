@@ -16,6 +16,7 @@ public interface ISoldierState
 	float GameY { get; }
 	SoldierState State { get; }
 	ArmorType ArmorType { get; }
+	int ArmorValue { get; }
 	DamageType DamageType { get; }
 	string Race { get; }
 	ISoldierHandle TargetEnemy { get; }

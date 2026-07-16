@@ -2,12 +2,14 @@ namespace CasualCastle.Domain.Battle;
 
 public static class CombatRules
 {
-	public static int CalculateDamage(int baseDamage, DamageType damageType, ArmorType armorType, DamageMatrix damageMatrix)
+	public static int CalculateDamage(int baseDamage, DamageType damageType, ArmorType armorType, int armorValue, DamageMatrix damageMatrix)
 	{
 		if (baseDamage <= 0)
 			return 0;
-		float multiplier = damageMatrix.GetMultiplier(damageType, armorType);
-		return (int)(baseDamage * multiplier);
+		float typeMultiplier = damageMatrix.GetMultiplier(damageType, armorType);
+		double reduction = DamageMatrix.CalculateReduction(armorValue);
+		int finalDamage = (int)(baseDamage * typeMultiplier * (1.0 - reduction));
+		return System.Math.Max(1, finalDamage);
 	}
 
 	public static int ApplyDamage(int currentHealth, int damage)

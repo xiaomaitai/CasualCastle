@@ -24,7 +24,7 @@ public partial class SoldierLogic : Node2D
 	public float DisplaySize { get; private set; }
 	public float CollisionRadius => _soldier?.CollisionRadius ?? 50f;
 	public AttackType AttackType { get; private set; }
-	public DamageType DamageType => _soldier?.DamageType ?? DamageType.Normal;
+	public DamageType DamageType => _soldier?.DamageType ?? DamageType.Slash;
 	public bool IsSelected { get; private set; }
 
 	private bool _statsPending;

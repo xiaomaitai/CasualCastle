@@ -2,8 +2,11 @@ namespace CasualCastle.Domain.Battle;
 
 public enum ArmorType
 {
-	Light,
-	Heavy,
-	Fortified,
-	Beast
+	Unarmored,
+	Cloth,
+	Leather,
+	Chainmail,
+	Plate,
+	Fortification,
+	Holy
 }
