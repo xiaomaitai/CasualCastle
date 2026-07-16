@@ -8,12 +8,15 @@ namespace CasualCastle.Adapters.Godot.Dev;
 public sealed class DamageMatrixEditor
 {
 	private const string DevToolsMenuScene = "res://scenes/ui/dev_tools/dev_tools_menu.tscn";
-	private const int HeaderHeight = 40;
+	private const string TitleScene = "res://scenes/ui/title_screen.tscn";
+	private const int HeaderHeight = 36;
 	private const int CellWidth = 80;
-	private const int CellHeight = 36;
-	private const int RowLabelWidth = 60;
-	private const float GridStartX = RowLabelWidth + 8;
-	private const float GridStartY = HeaderHeight + 8;
+	private const int CellHeight = 34;
+	private const int RowLabelWidth = 56;
+	private const int ArmorCount = 7;
+	private const int DamageCount = 7;
+	private const float GridWidth = RowLabelWidth + ArmorCount * CellWidth;
+	private const float GridHeight = HeaderHeight + DamageCount * CellHeight;
 
 	private static readonly string[] ArmorLabels = { "无甲", "布甲", "皮甲", "锁甲", "板甲", "城防", "神圣" };
 	private static readonly string[] DamageLabels = { "挥砍", "穿刺", "钝击", "攻城", "魔法", "神圣", "混沌" };
@@ -39,12 +42,13 @@ public sealed class DamageMatrixEditor
 	public DamageMatrixEditor(Control root)
 	{
 		_root = root;
-		_saveButton = root.GetNode<Button>("TopBar/SaveButton");
-		_backButton = root.GetNode<Button>("TopBar/BackButton");
-		_gridContainer = root.GetNode<Control>("GridArea");
+		_saveButton = root.GetNode<Button>("BottomBar/SaveButton");
+		_backButton = root.GetNode<Button>("BottomBar/BackButton");
+		_gridContainer = root.GetNode<Control>("GridArea/GridPanel");
 
 		_saveButton.Pressed += OnSavePressed;
 		_backButton.Pressed += OnBackPressed;
+		_gridContainer.Draw += OnGridDraw;
 
 		BuildGrid();
 		LoadFromDatabase();
@@ -52,48 +56,81 @@ public sealed class DamageMatrixEditor
 
 	public void Dispose()
 	{
-		_saveButton.Pressed -= OnSavePressed;
-		_backButton.Pressed -= OnBackPressed;
+		if (GodotObject.IsInstanceValid(_saveButton))
+			_saveButton.Pressed -= OnSavePressed;
+		if (GodotObject.IsInstanceValid(_backButton))
+			_backButton.Pressed -= OnBackPressed;
+		if (GodotObject.IsInstanceValid(_gridContainer))
+			_gridContainer.Draw -= OnGridDraw;
 	}
 
 	private void BuildGrid()
 	{
-		for (int col = 0; col < ArmorLabels.Length; col++)
+		for (int col = 0; col < ArmorCount; col++)
 		{
 			Label header = new()
 			{
 				Text = ArmorLabels[col],
-				Position = new Vector2(GridStartX + col * CellWidth, 0),
+				Position = new Vector2(RowLabelWidth + col * CellWidth, 0),
 				Size = new Vector2(CellWidth, HeaderHeight),
 				HorizontalAlignment = HorizontalAlignment.Center,
 				VerticalAlignment = VerticalAlignment.Center
 			};
+			header.AddThemeColorOverride("font_color", new Color(0.9f, 0.9f, 0.9f));
 			_gridContainer.AddChild(header);
 		}
 
-		for (int row = 0; row < DamageLabels.Length; row++)
+		for (int row = 0; row < DamageCount; row++)
 		{
 			Label rowLabel = new()
 			{
 				Text = DamageLabels[row],
-				Position = new Vector2(0, GridStartY + row * CellHeight),
+				Position = new Vector2(0, HeaderHeight + row * CellHeight),
 				Size = new Vector2(RowLabelWidth, CellHeight),
 				HorizontalAlignment = HorizontalAlignment.Center,
 				VerticalAlignment = VerticalAlignment.Center
 			};
+			rowLabel.AddThemeColorOverride("font_color", new Color(0.9f, 0.9f, 0.9f));
 			_gridContainer.AddChild(rowLabel);
 
-			for (int col = 0; col < ArmorLabels.Length; col++)
+			for (int col = 0; col < ArmorCount; col++)
 			{
 				LineEdit cell = new()
 				{
-					Position = new Vector2(GridStartX + col * CellWidth, GridStartY + row * CellHeight),
+					Position = new Vector2(RowLabelWidth + col * CellWidth + 2, HeaderHeight + row * CellHeight + 2),
 					Size = new Vector2(CellWidth - 4, CellHeight - 4),
-					Alignment = HorizontalAlignment.Center
+					Alignment = HorizontalAlignment.Center,
+					Editable = true
 				};
+				StyleBoxFlat cellStyle = new()
+				{
+					BgColor = new Color(0.18f, 0.18f, 0.22f),
+					BorderWidthBottom = 0,
+					BorderWidthTop = 0,
+					BorderWidthLeft = 0,
+					BorderWidthRight = 0
+				};
+				cell.AddThemeStyleboxOverride("normal", cellStyle);
+				cell.AddThemeStyleboxOverride("focus", cellStyle);
 				_gridContainer.AddChild(cell);
 				_cells[(row, col)] = cell;
 			}
+		}
+	}
+
+	private void OnGridDraw()
+	{
+		Color lineColor = new(0.5f, 0.5f, 0.55f);
+
+		for (int row = 0; row <= DamageCount; row++)
+		{
+			float y = HeaderHeight + row * CellHeight;
+			_gridContainer.DrawLine(new Vector2(0, y), new Vector2(GridWidth, y), lineColor);
+		}
+		for (int col = 0; col <= ArmorCount; col++)
+		{
+			float x = RowLabelWidth + col * CellWidth;
+			_gridContainer.DrawLine(new Vector2(x, 0), new Vector2(x, GridHeight), lineColor);
 		}
 	}
 
@@ -106,7 +143,8 @@ public sealed class DamageMatrixEditor
 			for (int col = 0; col < ArmorTypes.Length; col++)
 			{
 				float value = dm.GetMultiplier(DamageTypes[row], ArmorTypes[col]);
-				_cells[(row, col)].Text = value.ToString("F1");
+				if (_cells.TryGetValue((row, col), out LineEdit cell))
+					cell.Text = value.ToString("F1");
 			}
 		}
 	}

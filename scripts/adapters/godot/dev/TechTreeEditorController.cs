@@ -37,6 +37,7 @@ public class TechTreeEditorController
 	private const float CardWidth = 120;
 	private const float CardHeight = 56;
 	private const float ColSpacing = 140;
+	private const string DevToolsMenuScene = "res://scenes/ui/dev_tools/dev_tools_menu.tscn";
 
 	public TechTreeEditorController(Control root, ITechTreeRepository repo)
 	{
@@ -850,7 +851,7 @@ public class TechTreeEditorController
 
 	private void OnClosePressed()
 	{
-		_root.GetTree().Quit();
+		_root.GetTree().ChangeSceneToFile(DevToolsMenuScene);
 	}
 
 	private void OnCardCanvasDraw()
