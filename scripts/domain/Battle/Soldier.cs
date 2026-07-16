@@ -21,7 +21,6 @@ public class Soldier : ISoldierHandle
 	public float AttackCooldown { get; set; }
 	public float VisionRange { get; set; }
 	public float CollisionRadius { get; set; }
-	public bool HasNightCombat { get; set; }
 	public DamageType DamageType { get; set; }
 	public ArmorType ArmorType { get; set; }
 	public string Race { get; set; }
@@ -65,7 +64,6 @@ public class Soldier : ISoldierHandle
 		AttackCooldown = stats.AttackCooldown;
 		VisionRange = stats.VisionRange;
 		CollisionRadius = stats.CollisionRadius;
-		HasNightCombat = stats.HasNightCombat;
 		DamageType = stats.DamageType;
 		ArmorType = stats.ArmorType;
 		Race = stats.Race;

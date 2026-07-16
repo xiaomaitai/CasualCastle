@@ -105,7 +105,7 @@ public sealed class BuildingInfoUiController
         if (building.IsCombineProhibited)
             return "已禁止组合";
         if (GameManager.Instance?.IsNight == true)
-            return building.HasNightCombat ? "夜晚可行动" : "夜晚休眠";
+            return "夜晚休眠";
         return building.CanWork ? "工作中" : "停止工作";
     }
 

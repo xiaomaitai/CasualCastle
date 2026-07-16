@@ -21,7 +21,6 @@ public partial class SoldierLogic : Node2D
 	public int Health => _soldier?.Health ?? 0;
 	public int MaxHealth => _soldier?.MaxHealth ?? 30;
 	public int Damage => _soldier?.Damage ?? 0;
-	public bool HasNightCombat => _soldier?.HasNightCombat ?? false;
 	public float DisplaySize { get; private set; }
 	public float CollisionRadius => _soldier?.CollisionRadius ?? 50f;
 	public AttackType AttackType { get; private set; }
@@ -126,14 +125,13 @@ public partial class SoldierLogic : Node2D
 		UpdateSleepVisual();
 	}
 
-	private bool IsActive => NightRules.CanUnitWork(HasNightCombat, AdapterRegistry.Resolve<IGameState>().IsDay);
+	private bool IsActive => AdapterRegistry.Resolve<IGameState>().IsDay;
 
 	private bool IsSleeping =>
 		IsAlive
 		&& AdapterRegistry.Resolve<GameManager>()?.CurrentState == GameManager.GameState.Playing
 		&& AdapterRegistry.Resolve<GameManager>().IsNight
-		&& !AdapterRegistry.Resolve<GameManager>().IsPaused
-		&& !HasNightCombat;
+		&& !AdapterRegistry.Resolve<GameManager>().IsPaused;
 
 	private void UpdateSleepVisual()
 	{

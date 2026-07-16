@@ -115,6 +115,11 @@ theme_override_font_sizes/font_size = 24
 text = "1:00"
 horizontal_alignment = 1
 
+[node name="NewDayButton" type="Button" parent="UI/PhasePanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "新的一天"
+
 [node name="SkipPhaseButton" type="Button" parent="UI/PhasePanel"]
 layout_mode = 2
 text = "切换昼夜"

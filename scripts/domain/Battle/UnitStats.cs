@@ -13,7 +13,6 @@ public class UnitStats
 	public float AttackRange { get; init; }
 	public float AttackCooldown { get; init; }
 	public float VisionRange { get; init; } = 170f;
-	public bool HasNightCombat { get; init; }
 	public float CollisionRadius => Size switch
 	{
 		UnitSize.Small => 18f,

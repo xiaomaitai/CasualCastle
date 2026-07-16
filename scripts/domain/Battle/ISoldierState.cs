@@ -12,7 +12,6 @@ public interface ISoldierState
 	float AttackCooldown { get; }
 	float VisionRange { get; }
 	float CollisionRadius { get; }
-	bool HasNightCombat { get; }
 	float GameX { get; }
 	float GameY { get; }
 	SoldierState State { get; }

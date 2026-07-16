@@ -15,7 +15,6 @@ public class BuildingData
 	public GridCellOffset SpawnCellOffset { get; init; }
 
 	public string UnitTypeId { get; init; }
-	public bool HasNightCombat { get; init; }
 	public bool IsCore { get; init; }
 
 	public int CombineTier { get; init; }

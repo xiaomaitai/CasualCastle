@@ -6,9 +6,6 @@ using Godot;
 
 public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildingRef
 {
-	[Export]
-	public bool HasNightCombat = false;
-
 	protected Castle CastleRef;
 	protected int GridX;
 	protected int GridY;
@@ -140,7 +137,6 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		TypeId = buildingType;
 		MaxHealth = BuildingSys.GetMaxHealth(buildingType);
 		Health = MaxHealth;
-		HasNightCombat = BuildingSys.GetHasNightCombat(buildingType);
 		TryApplyVisual();
 		UpdateDamageVisual();
 	}
@@ -279,7 +275,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	public int GetRepairCost() => RepairRules.GetRepairCost(MaxHealth, Health, GameRules.RepairGoldPerHealth);
 
-	public bool CanWork => IsOperational && NightRules.CanUnitWork(HasNightCombat, AdapterRegistry.Resolve<IGameState>().IsDay);
+	public bool CanWork => IsOperational && AdapterRegistry.Resolve<IGameState>().IsDay;
 
 	public override void _Ready()
 	{

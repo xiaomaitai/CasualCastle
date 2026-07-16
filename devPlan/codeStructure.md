@@ -25,7 +25,7 @@ CasualCastle/
 │   │   ├── Battle/                                 # Battle.csproj → Shared, Building
 │   │   │   ├── Soldier.cs, SoldierState.cs, UnitStats.cs, UnitSize.cs
 │   │   │   ├── CombatRules.cs, DamageMatrix.cs, DamageType.cs, AttackType.cs, ArmorType.cs
-│   │   │   ├── NightRules.cs, UnitSpatialService.cs
+│   │   │   ├── UnitSpatialService.cs
 │   │   │   ├── ISoldierService.cs, SoldierService.cs
 │   │   │   ├── IFieldUnitRepository.cs, IUnitRepository.cs
 │   │   │   ├── IGameState.cs, INavigationPort.cs, ISoldierEventPort.cs
@@ -186,7 +186,7 @@ domain 项目零 `using Godot`，单向无循环。
 3. `MainGameController._Ready()` 注册 Battlefield/Castle 到 GameManager
 4. `GameManager.StartGameSession()` → 开始昼夜循环（Day 60s / Night 30s）
 5. 白天：兵营产兵、士兵推进战斗（SoldierLogic → IFieldUnitRepository → UnitSpatialService）
-6. 夜晚：组合 → 敌方复刻 → 开商店 → 休眠无夜战单位
+6. 夜晚：组合 → 敌方复刻 → 开商店 → 全军休眠
 7. 任一方城堡血量归零 → GameOver → 结算弹窗（保存战报/返回标题）
 
 ---

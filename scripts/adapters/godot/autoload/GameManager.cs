@@ -87,9 +87,12 @@ public partial class GameManager : Node2D, IGameState
     {
         if (CurrentState != GameState.Playing || IsPaused) return;
 
-        PhaseTimeRemaining -= (float)delta;
-        if (PhaseTimeRemaining <= 0f)
-            AdvancePhase();
+        if (CurrentPhase == GamePhase.Day)
+        {
+            PhaseTimeRemaining -= (float)delta;
+            if (PhaseTimeRemaining <= 0f)
+                AdvancePhase();
+        }
     }
 
     public override void _ExitTree()
@@ -183,9 +186,7 @@ public partial class GameManager : Node2D, IGameState
             CurrentNightIndex++;
 
         CurrentPhase = phase;
-        PhaseTimeRemaining = phase == GamePhase.Day
-            ? GameRules.DayDurationSeconds
-            : GameRules.NightDurationSeconds;
+        PhaseTimeRemaining = GameRules.DayDurationSeconds;
 
         EmitSignal(SignalName.PhaseChanged, (int)phase);
         GD.Print(phase == GamePhase.Day ? "Phase: Day" : "Phase: Night");

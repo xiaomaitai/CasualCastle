@@ -92,7 +92,6 @@ public partial class BuildingSystem : Node
         return new Vector2I(offset.X, offset.Y);
     }
 
-    public bool GetHasNightCombat(string buildingType) => _buildingRepo.GetHasNightCombat(buildingType);
     public int GetCombineTier(string buildingType) => _buildingRepo.GetCombineTier(buildingType);
     public bool IsCoreBuilding(string buildingType) => _buildingRepo.IsCoreBuilding(buildingType);
     public bool IsCombinableMaterial(string buildingType)

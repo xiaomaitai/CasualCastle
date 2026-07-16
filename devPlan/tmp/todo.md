@@ -56,15 +56,15 @@
 
 ### 4. Building.cs 过大（610 行）混合多种职责 — `adapters/godot/building/Building.cs` ✅
 
-已修复：提取 `RepairRules`（`domain/Building/`），维修条件判断和费用计算移到领域层；工作循环状态机核心已在 `NightRules.CanUnitWork`，剩余为 Godot 视觉/节点管理（属于 adapter 合理职责）。
+已修复：提取 `RepairRules`（`domain/Building/`），维修条件判断和费用计算移到领域层；工作循环状态机通过 `IGameState.IsDay` 控制，剩余为 Godot 视觉/节点管理（属于 adapter 合理职责）。
 
 ### 5. SoldierLogic 属性重复 — `adapters/godot/battle/SoldierLogic.cs` ✅
 
-已修复：删除 `Speed`/`AttackRange`/`VisionRange`/`AttackCooldown`/`ArmorType` 只写死代码；`MaxHealth`/`HasNightCombat`/`DamageType` 改为委托 `_soldier`，消除双重数据源。
+已修复：删除 `Speed`/`AttackRange`/`VisionRange`/`AttackCooldown`/`ArmorType` 只写死代码；`MaxHealth`/`DamageType` 改为委托 `_soldier`，消除双重数据源。
 
-### 6. GameManager.CanUnitWork 与 NightRules.CanUnitWork 逻辑重复 ✅
+### 6. GameManager 死代码清理 ✅
 
-已修复：`GameManager.CanUnitWork` 为零调用方死代码，已删除。`Building` 和 `SoldierLogic` 均已统一走 `NightRules.CanUnitWork`。
+已修复：`GameManager.CanUnitWork` 为零调用方死代码，已删除。
 
 ### 7. FieldUnitRepository 未使用的常量 — `adapters/persistence/FieldUnitRepository.cs:9` ✅
 

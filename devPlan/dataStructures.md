@@ -31,7 +31,6 @@ public class BuildingData
 	public string UnitType;     // 产出部队类型
 	public List<string> AdjacentBonuses; // 邻接加成列表
 	public int CombineTier;      // 组合阶数（0 = 未组合）
-	public bool HasNightCombat; // 夜战词条
 }
 ```
 
@@ -95,7 +94,6 @@ public class UnitData
 	public int Damage;          // 攻击力
 	public int Health;          // 生命值
 	public float Speed;         // 移动速度
-	public bool NightActive;    // 是否夜间活动
 	public float VisionRange;   // 视野范围
 }
 ```

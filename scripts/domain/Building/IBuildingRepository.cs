@@ -15,7 +15,7 @@ public interface IBuildingRepository
 	GridCellOffset GetMainCellOffset(string typeId) => Get(typeId).MainCellOffset;
 	GridCellOffset GetSpawnCellOffset(string typeId) => Get(typeId).SpawnCellOffset;
 	string GetUnitTypeId(string typeId) => Get(typeId).UnitTypeId;
-	bool GetHasNightCombat(string typeId) => Get(typeId).HasNightCombat;
+
 	int GetCombineTier(string typeId) => Get(typeId).CombineTier;
 	bool IsCoreBuilding(string typeId) => Get(typeId).IsCore;
 	int GetCollisionWidth(string typeId) => Get(typeId).CollisionWidth;
