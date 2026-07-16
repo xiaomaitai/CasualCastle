@@ -2,7 +2,7 @@
 
 ## 王国军 T3 皇家兵种
 
-五条组合链的终点。设计见 `devPlan/design/allianceFaction.md` 第 3 章。
+五条组合链的终点。设计见 `devPlan/design/factions/allianceFaction.md` 第 3 章。
 
 - 5 座 T3 皇家建筑：皇家军营、皇家壁垒、皇家射场、皇家马场、皇家游骑
 - 5 种皇家兵种：皇家禁卫、皇家盾卫、皇家神射手、皇家骑士、皇家斥候
@@ -11,7 +11,7 @@
 
 ## 冒险者公会（联盟派系流派 2/3）
 
-多种族佣兵联盟，公会产人 + 酒馆组队。设计见 `devPlan/design/allianceFaction.md` 第 4 章。
+多种族佣兵联盟，公会产人 + 酒馆组队。设计见 `devPlan/design/factions/allianceFaction.md` 第 4 章。
 
 - **4 座公会建筑**（T1→T2）：游侠公会→风行圣殿（精灵）、战士公会→山丘要塞（矮人）、盗贼行会→暗影公会（半身人）、术士高塔→龙火塔（龙裔）
 - **1 座特殊建筑**：酒馆→冒险者公会（T1→T2），组队集结中心
@@ -27,7 +27,7 @@
 
 ## 神殿卫士（联盟派系流派 3/3）
 
-治疗续航型流派。设计见 `devPlan/design/allianceFaction.md` 第 5 章。
+治疗续航型流派。设计见 `devPlan/design/factions/allianceFaction.md` 第 5 章。
 
 - 3 座 T1：圣所、圣泉、裁判所
 - 3 座 T2：圣殿、圣光圣所、裁决厅
