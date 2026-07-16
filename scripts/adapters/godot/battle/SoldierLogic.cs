@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
+using CasualCastle.Domain.Shared;
 using Godot;
 
 public partial class SoldierLogic : Node2D
@@ -9,6 +10,7 @@ public partial class SoldierLogic : Node2D
 	private NavigationPortAdapter _navPort;
 	public ISoldierHandle Handle => _soldier;
 	private IFieldUnitRepository _fieldRepo;
+	private ITacticalQueries _tactical;
 	private IRvoService _rvoService;
 	private SoldierEventRelay _eventRelay;
 	private SoldierVisual _visual;
@@ -20,7 +22,7 @@ public partial class SoldierLogic : Node2D
 	public int MaxHealth => _soldier?.MaxHealth ?? 30;
 	public int Damage => _soldier?.Damage ?? 0;
 	public bool HasNightCombat => _soldier?.HasNightCombat ?? false;
-	public float DisplaySize { get; private set; } = 125f;
+	public float DisplaySize { get; private set; }
 	public float CollisionRadius => _soldier?.CollisionRadius ?? 50f;
 	public AttackType AttackType { get; private set; }
 	public DamageType DamageType => _soldier?.DamageType ?? DamageType.Normal;
@@ -45,11 +47,13 @@ public partial class SoldierLogic : Node2D
 			_eventRelay.Attack += OnAttack;
 			_soldier.EventPort = _eventRelay;
 			_fieldRepo = GameManager.Get<IFieldUnitRepository>();
+			_tactical = GameManager.Get<ITacticalQueries>();
 			_rvoService = GameManager.Get<IRvoService>();
 			_visual = new SoldierVisual();
 			_lifecycle = new SoldierLifecycle();
 		}
 		_soldier.Initialize(stats, IsPlayerUnit);
+		_soldier.SetDamageMatrix(GameManager.Get<DamageMatrix>());
 		ISkillRepository skillRepo = GameManager.Get<ISkillRepository>();
 		IReadOnlyList<SkillDef> skills = skillRepo.GetByUnitType(stats.TypeId);
 		foreach (SkillDef skill in skills)
@@ -59,7 +63,7 @@ public partial class SoldierLogic : Node2D
 		if (_fieldRepo != null)
 			_fieldRepo.Register(_soldier);
 
-		DisplaySize = stats.DisplaySize;
+		DisplaySize = ComputeDisplaySize(stats.Size);
 		AttackType = stats.AttackType;
 
 		_statsPending = true;
@@ -161,9 +165,9 @@ public partial class SoldierLogic : Node2D
 		if (!IsActive) return;
 		if (_fieldRepo == null || _body == null) return;
 
-		(ISoldierHandle nearest, float edgeDist) = _fieldRepo.FindNearestEnemy(_soldier);
+		(ISoldierHandle nearest, float edgeDist) = _tactical.FindNearestEnemy(_soldier);
 
-		IBuildingTarget buildingTarget = _fieldRepo.FindOverlappingBuilding(_soldier);
+		IBuildingTarget buildingTarget = _tactical.FindOverlappingBuilding(_soldier);
 		if (buildingTarget != null)
 			_soldier.SetBuildingTarget(buildingTarget);
 		else
@@ -240,7 +244,7 @@ public partial class SoldierLogic : Node2D
 		_visual?.StartHitFlash();
 		ISoldierHandle attacker = _eventRelay.LastAttacker;
 		if (attacker != null && attacker.IsAlive)
-			_fieldRepo.PropagateRetaliation(_soldier, attacker);
+			_tactical.PropagateRetaliation(_soldier, attacker);
 	}
 
 	private void OnDied()
@@ -277,7 +281,7 @@ public partial class SoldierLogic : Node2D
 		if (texture == null)
 			return;
 
-		float speed = AttackType == AttackType.Melee ? 600f : 400f;
+		float speed = AttackType == AttackType.Melee ? GameRules.ProjectileSpeedMelee : GameRules.ProjectileSpeedRanged;
 		projectile.Launch(fromPos, toPos, speed, texture);
 	}
 
@@ -307,5 +311,17 @@ public partial class SoldierLogic : Node2D
 		if (texture != null)
 			_projectileTextures[path] = texture;
 		return texture;
+	}
+
+	private static float ComputeDisplaySize(UnitSize size)
+	{
+		switch (size)
+		{
+			case UnitSize.Small: return 60f;
+			case UnitSize.Medium: return 90f;
+			case UnitSize.Large: return 120f;
+			case UnitSize.Huge: return 180f;
+			default: return 90f;
+		}
 	}
 }

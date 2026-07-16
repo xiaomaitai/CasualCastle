@@ -2,11 +2,11 @@ namespace CasualCastle.Domain.Battle;
 
 public static class CombatRules
 {
-	public static int CalculateDamage(int baseDamage, DamageType damageType, ArmorType armorType)
+	public static int CalculateDamage(int baseDamage, DamageType damageType, ArmorType armorType, DamageMatrix damageMatrix)
 	{
 		if (baseDamage <= 0)
 			return 0;
-		float multiplier = DamageMatrix.GetMultiplier(damageType, armorType);
+		float multiplier = damageMatrix.GetMultiplier(damageType, armorType);
 		return (int)(baseDamage * multiplier);
 	}
 

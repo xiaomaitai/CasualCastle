@@ -1,6 +1,7 @@
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
+using CasualCastle.Domain.Shared;
 using Godot;
 
 public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildingRef
@@ -13,7 +14,6 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 	protected int GridY;
 
 	private float _workSpeedMultiplier = 1f;
-	private Color _baseModulate = Colors.White;
 	private bool _visualApplied;
 
 	private Sprite2D _sprite;
@@ -59,10 +59,10 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 	{
 		get
 		{
-			IFieldUnitRepository fieldRepo = GameManager.Get<IFieldUnitRepository>();
-			if (fieldRepo == null || CastleRef == null)
+			ITacticalQueries tactical = GameManager.Get<ITacticalQueries>();
+			if (tactical == null || CastleRef == null)
 				return false;
-			return fieldRepo.HasEnemyOnBuilding(this);
+			return tactical.HasEnemyOnBuilding(this);
 		}
 	}
 
@@ -141,7 +141,6 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		MaxHealth = BuildingSys.GetMaxHealth(buildingType);
 		Health = MaxHealth;
 		HasNightCombat = BuildingSys.GetHasNightCombat(buildingType);
-		_baseModulate = BuildingSys.GetSpriteModulate(buildingType);
 		TryApplyVisual();
 		UpdateDamageVisual();
 	}
@@ -278,7 +277,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		RefreshOperationalState();
 	}
 
-	public int GetRepairCost() => RepairRules.GetRepairCost(MaxHealth, Health, GameConfig.RepairGoldPerHealth);
+	public int GetRepairCost() => RepairRules.GetRepairCost(MaxHealth, Health, GameRules.RepairGoldPerHealth);
 
 	public bool CanWork => IsOperational && NightRules.CanUnitWork(HasNightCombat, AdapterRegistry.Resolve<IGameState>().IsDay);
 
@@ -548,7 +547,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		else if (IsDamaged)
 			_sprite.Modulate = new Color(0.85f, 0.75f, 0.75f);
 		else
-			_sprite.Modulate = _baseModulate;
+			_sprite.Modulate = BuildingSys.GetSpriteModulate(TypeId);
 	}
 
 	private void RefreshOperationalState()

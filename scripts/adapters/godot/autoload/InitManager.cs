@@ -13,7 +13,7 @@ public partial class InitManager : Node
     {
         GameManager gm = AdapterRegistry.Resolve<GameManager>();
 
-        _nightOrchestrator = new NightOrchestrator(GameManager.Get<IBuildingRepository>(), GameManager.Get<IReplayUseCase>());
+        _nightOrchestrator = new NightOrchestrator(GameManager.Get<IBuildingRepository>(), GameManager.Get<IReplayUseCase>(), GameManager.Get<ICombineUseCase>(), GameManager.Get<AdjacencyService>());
 
         AddChild(new BattleManager());
 

@@ -21,11 +21,4 @@ public class BuildingData
 	public int CombineTier { get; init; }
 	public int CollisionWidth { get; init; } = GameCoordinateRules.CellBlockSize;
 	public int CollisionHeight { get; init; } = GameCoordinateRules.CellBlockSize;
-
-	public string TexturePath { get; init; }
-	public float SpriteModulateR { get; init; } = 1f;
-	public float SpriteModulateG { get; init; } = 1f;
-	public float SpriteModulateB { get; init; } = 1f;
-	public float SpriteModulateA { get; init; } = 1f;
-	public string MaterialPath { get; init; }
 }

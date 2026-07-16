@@ -6,18 +6,16 @@ namespace CasualCastle.Domain.Building;
 
 public class CombineService : ICombineUseCase
 {
-	public event Action<IBuildingState> CombineCompleted;
-
-	private readonly ICombineBuildingFactory _factory;
 	private readonly IBuildingRepository _buildingRepo;
+	private readonly CombineRules _combineRules;
 
-	public CombineService(ICombineBuildingFactory factory, IBuildingRepository buildingRepo)
+	public CombineService(IBuildingRepository buildingRepo, CombineRules combineRules)
 	{
-		_factory = factory;
 		_buildingRepo = buildingRepo;
+		_combineRules = combineRules;
 	}
 
-	public void ResolveCombines(List<IBuildingState> buildings, bool isPlayerSide, bool isNight, bool isPlaying)
+	public void ResolveCombines(List<IBuildingState> buildings, bool isPlayerSide, bool isNight, bool isPlaying, ICombineBuildingFactory factory, Action<IBuildingState> onCombineCompleted)
 	{
 		if (!isPlayerSide || !isPlaying || !isNight)
 			return;
@@ -26,42 +24,46 @@ public class CombineService : ICombineUseCase
 
 		while (true)
 		{
-			CombineGroup group = CombineRules.FindBestCombinableGroup(buildings, used, _buildingRepo);
+			CombineGroup group = _combineRules.FindBestCombinableGroup(buildings, used, _buildingRepo);
 			if (group == null)
 				break;
 
-			if (!TryCombineGroup(buildings, group))
+			IBuildingState result = TryCombineGroup(buildings, group, factory);
+			if (result == null)
 			{
 				used.Add(group.Main);
 				foreach (IBuildingState mat in group.Materials)
 					used.Add(mat);
 			}
+			else
+			{
+				onCombineCompleted?.Invoke(result);
+			}
 		}
 	}
 
-	private bool TryCombineGroup(List<IBuildingState> buildings, CombineGroup group)
+	private IBuildingState TryCombineGroup(List<IBuildingState> buildings, CombineGroup group, ICombineBuildingFactory factory)
 	{
-		if (!CombineRules.CanCombineGroup(group.Main, group.Materials, group.Recipe, _buildingRepo))
-			return false;
+		if (!_combineRules.CanCombineGroup(group.Main, group.Materials, group.Recipe, _buildingRepo))
+			return null;
 
 		foreach (IBuildingState mat in group.Materials)
-			_factory.Destroy(mat);
+			factory.Destroy(mat);
 
 		IBuildingState oldMain = group.Main;
-		_factory.Destroy(oldMain);
+		factory.Destroy(oldMain);
 
-		IBuildingState result = _factory.Create(
+		IBuildingState result = factory.Create(
 			group.Recipe.ResultTypeId,
 			oldMain.AnchorGridX,
 			oldMain.AnchorGridY);
 
 		if (result == null)
-			return false;
+			return null;
 
 		buildings.RemoveAll(b => group.Materials.Contains(b) || b == oldMain);
 		buildings.Add(result);
 
-		CombineCompleted?.Invoke(result);
-		return true;
+		return result;
 	}
 }

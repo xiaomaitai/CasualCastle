@@ -6,9 +6,10 @@ using GodotProjectSettings = Godot.ProjectSettings;
 
 namespace CasualCastle.Adapters.Persistence;
 
-public class SqliteBuildingRepository : IBuildingRepository
+public class SqliteBuildingRepository : IBuildingRepository, IBuildingVisualRepository
 {
 	private readonly Dictionary<string, BuildingData> _cache = new();
+	private readonly Dictionary<string, BuildingVisualData> _visualCache = new();
 
 	public SqliteBuildingRepository()
 	{
@@ -20,12 +21,13 @@ public class SqliteBuildingRepository : IBuildingRepository
 		using SqliteDataReader reader = cmd.ExecuteReader();
 		while (reader.Read())
 		{
+			string typeId = reader.GetString(0);
 			string footprintJson = reader.GetString(12);
 			List<GridCellOffset> offsets = ParseFootprint(footprintJson);
 
-			_cache[reader.GetString(0)] = new BuildingData
+			_cache[typeId] = new BuildingData
 			{
-				TypeId = reader.GetString(0),
+				TypeId = typeId,
 				DisplayName = reader.GetString(1),
 				MaxHealth = reader.GetInt32(2),
 				SpawnInterval = reader.IsDBNull(3) ? 0 : reader.GetFloat(3),
@@ -39,6 +41,10 @@ public class SqliteBuildingRepository : IBuildingRepository
 				CollisionWidth = reader.GetInt32(13),
 				CollisionHeight = reader.GetInt32(14),
 				ProductionRate = reader.IsDBNull(15) ? 0 : reader.GetFloat(15),
+			};
+
+			_visualCache[typeId] = new BuildingVisualData
+			{
 				TexturePath = reader.GetString(16),
 				SpriteModulateR = reader.GetFloat(17),
 				SpriteModulateG = reader.GetFloat(18),
@@ -52,6 +58,13 @@ public class SqliteBuildingRepository : IBuildingRepository
 	public BuildingData Get(string typeId)
 	{
 		if (_cache.TryGetValue(typeId, out BuildingData data))
+			return data;
+		throw new System.Collections.Generic.KeyNotFoundException($"Building type '{typeId}' not found");
+	}
+
+	public BuildingVisualData GetVisualData(string typeId)
+	{
+		if (_visualCache.TryGetValue(typeId, out BuildingVisualData data))
 			return data;
 		throw new System.Collections.Generic.KeyNotFoundException($"Building type '{typeId}' not found");
 	}

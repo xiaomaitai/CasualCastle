@@ -15,6 +15,7 @@ public partial class BuildingSystem : Node
     private AdjacencyService _adjacencyService;
     private IBuildingRepository _buildingRepo;
     private IUnitRepository _unitRepo;
+    private IBuildingVisualRepository _visualRepo;
 
     public override void _Ready()
     {
@@ -22,6 +23,7 @@ public partial class BuildingSystem : Node
         _adjacencyService = GameManager.Get<AdjacencyService>();
         _buildingRepo = GameManager.Get<IBuildingRepository>();
         _unitRepo = GameManager.Get<IUnitRepository>();
+        _visualRepo = GameManager.Get<IBuildingVisualRepository>();
     }
 
     public override void _ExitTree()
@@ -93,13 +95,18 @@ public partial class BuildingSystem : Node
     public bool GetHasNightCombat(string buildingType) => _buildingRepo.GetHasNightCombat(buildingType);
     public int GetCombineTier(string buildingType) => _buildingRepo.GetCombineTier(buildingType);
     public bool IsCoreBuilding(string buildingType) => _buildingRepo.IsCoreBuilding(buildingType);
-    public bool IsCombinableMaterial(string buildingType) => CombineRules.IsCombinableMaterial(buildingType, _buildingRepo);
+    public bool IsCombinableMaterial(string buildingType)
+    {
+        CombineRules combineRules = GameManager.Get<CombineRules>();
+        return combineRules.IsCombinableMaterial(buildingType, _buildingRepo);
+    }
     public int GetCollisionWidth(string buildingType) => _buildingRepo.GetCollisionWidth(buildingType);
     public int GetCollisionHeight(string buildingType) => _buildingRepo.GetCollisionHeight(buildingType);
 
     public Color GetSpriteModulate(string buildingType)
     {
-        return new Color(_buildingRepo.GetSpriteModulateR(buildingType), _buildingRepo.GetSpriteModulateG(buildingType), _buildingRepo.GetSpriteModulateB(buildingType), _buildingRepo.GetSpriteModulateA(buildingType));
+        BuildingVisualData data = _visualRepo.GetVisualData(buildingType);
+        return new Color(data.SpriteModulateR, data.SpriteModulateG, data.SpriteModulateB, data.SpriteModulateA);
     }
 
     public void ApplySoldierSpawnStats(string buildingType, SoldierLogic soldier)
@@ -121,7 +128,8 @@ public partial class BuildingSystem : Node
         Sprite2D sprite = building.GetNodeOrNull<Sprite2D>("View/Sprite");
         if (sprite != null)
         {
-            string texturePath = _buildingRepo.GetTexturePath(buildingType);
+            BuildingVisualData visualData = _visualRepo.GetVisualData(buildingType);
+            string texturePath = visualData.TexturePath;
             if (!string.IsNullOrEmpty(texturePath))
             {
                 Texture2D texture = GD.Load<Texture2D>(texturePath);
@@ -131,8 +139,8 @@ public partial class BuildingSystem : Node
                     sprite.Scale = new Vector2(pixelW / texture.GetWidth(), pixelH / texture.GetHeight());
                 }
             }
-            sprite.Modulate = new Color(_buildingRepo.GetSpriteModulateR(buildingType), _buildingRepo.GetSpriteModulateG(buildingType), _buildingRepo.GetSpriteModulateB(buildingType), _buildingRepo.GetSpriteModulateA(buildingType));
-            string materialPath = _buildingRepo.GetMaterialPath(buildingType);
+            sprite.Modulate = new Color(visualData.SpriteModulateR, visualData.SpriteModulateG, visualData.SpriteModulateB, visualData.SpriteModulateA);
+            string materialPath = visualData.MaterialPath;
             if (!string.IsNullOrEmpty(materialPath))
             {
                 Material material = GD.Load<Material>(materialPath);

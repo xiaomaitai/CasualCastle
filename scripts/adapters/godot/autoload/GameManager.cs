@@ -76,6 +76,7 @@ public partial class GameManager : Node2D, IGameState
     {
         Instance = this;
         Services = CasualCastle.CompositionRoot.Build();
+        Services.GetRequiredService<GameStateProvider>().Current = this;
         AdapterRegistry.Register<GameManager>(this);
         AdapterRegistry.Register<IGameState>(this);
         SetProcess(false);
@@ -183,8 +184,8 @@ public partial class GameManager : Node2D, IGameState
 
         CurrentPhase = phase;
         PhaseTimeRemaining = phase == GamePhase.Day
-            ? GameConfig.DayDurationSeconds
-            : GameConfig.NightDurationSeconds;
+            ? GameRules.DayDurationSeconds
+            : GameRules.NightDurationSeconds;
 
         EmitSignal(SignalName.PhaseChanged, (int)phase);
         GD.Print(phase == GamePhase.Day ? "Phase: Day" : "Phase: Night");

@@ -9,67 +9,72 @@ namespace CasualCastle.Adapters.Persistence;
 
 public static class GameDataLoader
 {
-    private const string DbPath = "res://assets/data/config.db";
+	private const string DbPath = "res://assets/data/config.db";
 
-    public static List<CardData> ShopCatalog { get; private set; }
+	public static DamageMatrix DamageMatrix { get; private set; }
+	public static CombineRules CombineRules { get; private set; }
+	public static List<CardData> ShopCatalog { get; private set; }
 
-    public static void Load()
-    {
-        string fullPath = GodotProjectSettings.GlobalizePath(DbPath);
-        using SqliteConnection connection = new($"Data Source={fullPath}");
-        connection.Open();
+	public static void Load()
+	{
+		string fullPath = GodotProjectSettings.GlobalizePath(DbPath);
+		using SqliteConnection connection = new($"Data Source={fullPath}");
+		connection.Open();
 
-        using SqliteCommand cmd = connection.CreateCommand();
-        LoadDamageMatrix(cmd);
-        ShopCatalog = LoadShopCatalog(cmd);
-        LoadCombineRecipes(cmd);
-    }
+		using SqliteCommand cmd = connection.CreateCommand();
+		DamageMatrix = LoadDamageMatrix(cmd);
+		ShopCatalog = LoadShopCatalog(cmd);
+		CombineRules = LoadCombineRecipes(cmd);
+	}
 
+	private static DamageMatrix LoadDamageMatrix(SqliteCommand cmd)
+	{
+		cmd.CommandText = "SELECT damage_type, armor_type, multiplier FROM damage_matrix";
+		using SqliteDataReader reader = cmd.ExecuteReader();
+		float[,] matrix = new float[4, 4];
+		while (reader.Read())
+			matrix[reader.GetInt32(0), reader.GetInt32(1)] = reader.GetFloat(2);
+		DamageMatrix dm = new DamageMatrix();
+		dm.LoadFrom(matrix);
+		return dm;
+	}
 
-    private static void LoadDamageMatrix(SqliteCommand cmd)
-    {
-        cmd.CommandText = "SELECT damage_type, armor_type, multiplier FROM damage_matrix";
-        using SqliteDataReader reader = cmd.ExecuteReader();
-        float[,] matrix = new float[4, 4];
-        while (reader.Read())
-            matrix[reader.GetInt32(0), reader.GetInt32(1)] = reader.GetFloat(2);
-        DamageMatrix.LoadFrom(matrix);
-    }
+	private static List<CardData> LoadShopCatalog(SqliteCommand cmd)
+	{
+		cmd.CommandText = "SELECT id, name, cost, building_type, weight FROM shop_catalog";
+		using SqliteDataReader reader = cmd.ExecuteReader();
+		List<CardData> catalog = new();
+		while (reader.Read())
+		{
+			catalog.Add(new CardData
+			{
+				Id = reader.GetString(0),
+				Name = reader.GetString(1),
+				Cost = reader.GetInt32(2),
+				BuildingType = reader.GetString(3),
+				Weight = reader.GetInt32(4),
+			});
+		}
+		return catalog;
+	}
 
-    private static List<CardData> LoadShopCatalog(SqliteCommand cmd)
-    {
-        cmd.CommandText = "SELECT id, name, cost, building_type, weight FROM shop_catalog";
-        using SqliteDataReader reader = cmd.ExecuteReader();
-        List<CardData> catalog = new();
-        while (reader.Read())
-        {
-            catalog.Add(new CardData
-            {
-                Id = reader.GetString(0),
-                Name = reader.GetString(1),
-                Cost = reader.GetInt32(2),
-                BuildingType = reader.GetString(3),
-                Weight = reader.GetInt32(4),
-            });
-        }
-        return catalog;
-    }
-
-    private static void LoadCombineRecipes(SqliteCommand cmd)
-    {
-        cmd.CommandText = "SELECT main_type_id, material_type_id, material_count, result_type_id FROM combine_recipes";
-        using SqliteDataReader reader = cmd.ExecuteReader();
-        List<CombineRecipe> recipes = new();
-        while (reader.Read())
-        {
-            recipes.Add(new CombineRecipe
-            {
-                MainTypeId = reader.GetString(0),
-                MaterialTypeId = reader.GetString(1),
-                MaterialCount = reader.GetInt32(2),
-                ResultTypeId = reader.GetString(3),
-            });
-        }
-        CombineRules.LoadRecipes(recipes);
-    }
+	private static CombineRules LoadCombineRecipes(SqliteCommand cmd)
+	{
+		cmd.CommandText = "SELECT main_type_id, material_type_id, material_count, result_type_id FROM combine_recipes";
+		using SqliteDataReader reader = cmd.ExecuteReader();
+		List<CombineRecipe> recipes = new();
+		while (reader.Read())
+		{
+			recipes.Add(new CombineRecipe
+			{
+				MainTypeId = reader.GetString(0),
+				MaterialTypeId = reader.GetString(1),
+				MaterialCount = reader.GetInt32(2),
+				ResultTypeId = reader.GetString(3),
+			});
+		}
+		CombineRules rules = new CombineRules();
+		rules.LoadRecipes(recipes);
+		return rules;
+	}
 }

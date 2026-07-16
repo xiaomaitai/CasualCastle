@@ -9,6 +9,7 @@ public static class BattleModule
 		services.AddSingleton<ICombatUseCase, UnitSpatialService>();
 		services.AddSingleton<IRvoService, RvoService>();
 		services.AddSingleton<SkillService>();
+		services.AddSingleton<ITacticalQueries, TacticalQueryService>();
 		return services;
 	}
 }

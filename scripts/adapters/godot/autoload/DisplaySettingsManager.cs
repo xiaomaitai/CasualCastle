@@ -1,5 +1,4 @@
 using CasualCastle.Adapters.Godot;
-using CasualCastle.Domain.Shared;
 using Godot;
 using System;
 
@@ -14,6 +13,9 @@ public partial class DisplaySettingsManager : Node
 	public static DisplaySettingsManager Instance { get; private set; }
 	public static bool DevModeEnabled { get; set; }
 
+	private const int DesignWidth = 1920;
+	private const int DesignHeight = 1080;
+
 	public static readonly Vector2I[] OutputResolutions =
 	{
 		new(1920, 1080),
@@ -26,7 +28,7 @@ public partial class DisplaySettingsManager : Node
 	private const string Section = "display";
 
 	public DisplayWindowMode WindowMode { get; private set; } = DisplayWindowMode.BorderlessFullscreen;
-	public Vector2I OutputResolution { get; private set; } = new(GameConfig.DesignWidth, GameConfig.DesignHeight);
+	public Vector2I OutputResolution { get; private set; } = new(DesignWidth, DesignHeight);
 
 	public override void _Ready()
 	{
@@ -90,7 +92,7 @@ public partial class DisplaySettingsManager : Node
 	private void Apply()
 	{
 		Window window = GetTree().Root;
-		window.ContentScaleSize = new Vector2I(GameConfig.DesignWidth, GameConfig.DesignHeight);
+		window.ContentScaleSize = new Vector2I(DesignWidth, DesignHeight);
 		window.ContentScaleMode = Window.ContentScaleModeEnum.CanvasItems;
 		window.ContentScaleAspect = Window.ContentScaleAspectEnum.Expand;
 

@@ -4,46 +4,44 @@ using CasualCastle.Adapters.Godot;
 
 public class NightOrchestrator
 {
-    private readonly IBuildingRepository _buildingRepo;
-    private readonly IReplayUseCase _replayService;
+	private readonly IBuildingRepository _buildingRepo;
+	private readonly IReplayUseCase _replayService;
+	private readonly ICombineUseCase _combineService;
+	private readonly AdjacencyService _adjacencyService;
 
-    public NightOrchestrator(IBuildingRepository buildingRepo, IReplayUseCase replayService)
-    {
-        _buildingRepo = buildingRepo;
-        _replayService = replayService;
-    }
+	public NightOrchestrator(IBuildingRepository buildingRepo, IReplayUseCase replayService, ICombineUseCase combineService, AdjacencyService adjacencyService)
+	{
+		_buildingRepo = buildingRepo;
+		_replayService = replayService;
+		_combineService = combineService;
+		_adjacencyService = adjacencyService;
+	}
 
-    public void ResolveNightCombines(GameManager gm)
-    {
-        Castle playerCastle = gm.PlayerCastle;
-        if (playerCastle == null)
-            return;
+	public void ResolveNightCombines(GameManager gm)
+	{
+		Castle playerCastle = gm.PlayerCastle;
+		if (playerCastle == null)
+			return;
 
-        CombineBuildingFactory factory = new CombineBuildingFactory(playerCastle);
-        CombineService combineService = new CombineService(factory, _buildingRepo);
-        combineService.CombineCompleted += result =>
-        {
-            AdjacencyService adj = GameManager.Get<AdjacencyService>();
-            adj.RefreshCastle(playerCastle.GetBuildingStates());
-        };
+		CombineBuildingFactory factory = new CombineBuildingFactory(playerCastle);
+		_combineService.ResolveCombines(
+			playerCastle.GetBuildingStates(),
+			true,
+			gm.IsNight,
+			gm.CurrentState == GameManager.GameState.Playing,
+			factory,
+			result => _adjacencyService.RefreshCastle(playerCastle.GetBuildingStates()));
+	}
 
-        combineService.ResolveCombines(
-            playerCastle.GetBuildingStates(),
-            true,
-            gm.IsNight,
-            gm.CurrentState == GameManager.GameState.Playing);
-    }
+	public void ApplyReplaySnapshot(GameManager gm)
+	{
+		Castle enemyCastle = gm.EnemyCastle;
+		if (enemyCastle == null)
+			return;
 
-    public void ApplyReplaySnapshot(GameManager gm)
-    {
-        Castle enemyCastle = gm.EnemyCastle;
-        if (enemyCastle == null)
-            return;
+		ReplayTarget target = new ReplayTarget(enemyCastle);
+		_replayService.ApplyNightSnapshot(target, gm.CurrentNightIndex);
 
-        ReplayTarget target = new ReplayTarget(enemyCastle);
-        _replayService.ApplyNightSnapshot(target, gm.CurrentNightIndex);
-
-        AdjacencyService adj = GameManager.Get<AdjacencyService>();
-        adj.RefreshCastle(enemyCastle.GetBuildingStates());
-    }
+		_adjacencyService.RefreshCastle(enemyCastle.GetBuildingStates());
+	}
 }

@@ -17,24 +17,24 @@ public sealed class CombineGroup
     }
 }
 
-public static class CombineRules
+public class CombineRules
 {
-    private static CombineRecipe[] _recipes = System.Array.Empty<CombineRecipe>();
+    private CombineRecipe[] _recipes = System.Array.Empty<CombineRecipe>();
 
-    public static void LoadRecipes(List<CombineRecipe> recipes)
+    public void LoadRecipes(List<CombineRecipe> recipes)
     {
         _recipes = recipes.ToArray();
     }
 
-    public static IReadOnlyList<CombineRecipe> GetRecipes() => _recipes;
+    public IReadOnlyList<CombineRecipe> GetRecipes() => _recipes;
 
-    public static bool IsCombinableMaterial(string typeId, IBuildingRepository buildingRepo)
+    public bool IsCombinableMaterial(string typeId, IBuildingRepository buildingRepo)
     {
         return buildingRepo.GetCombineTier(typeId) < 4
             && !buildingRepo.IsCoreBuilding(typeId);
     }
 
-    public static bool CanParticipate(IBuildingState building, IBuildingRepository buildingRepo)
+    public bool CanParticipate(IBuildingState building, IBuildingRepository buildingRepo)
     {
         if (building == null || building.IsDestroyed || building.IsManuallyPaused)
             return false;
@@ -51,7 +51,7 @@ public static class CombineRules
         return true;
     }
 
-    public static bool CanCombineGroup(
+    public bool CanCombineGroup(
         IBuildingState main, IReadOnlyList<IBuildingState> materials, CombineRecipe recipe,
         IBuildingRepository buildingRepo)
     {
@@ -85,7 +85,7 @@ public static class CombineRules
         return true;
     }
 
-    public static CombineGroup FindBestCombinableGroup(
+    public CombineGroup FindBestCombinableGroup(
         IReadOnlyList<IBuildingState> buildings, HashSet<IBuildingState> used,
         IBuildingRepository buildingRepo)
     {
@@ -119,7 +119,7 @@ public static class CombineRules
         return null;
     }
 
-    public static bool IsSameLine(string typeA, string typeB)
+    public bool IsSameLine(string typeA, string typeB)
     {
         if (typeA == typeB)
             return true;
@@ -134,7 +134,7 @@ public static class CombineRules
         return false;
     }
 
-    private static List<IBuildingState> PickMaterials(
+    private List<IBuildingState> PickMaterials(
         IBuildingState main, CombineRecipe recipe,
         IReadOnlyList<IBuildingState> allBuildings, HashSet<IBuildingState> used,
         IBuildingRepository buildingRepo)

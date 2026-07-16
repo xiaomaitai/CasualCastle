@@ -1,23 +1,24 @@
 namespace CasualCastle.Domain.Battle;
 
-public static class DamageMatrix
+public class DamageMatrix
 {
-    private static float[,] _multiplier = new float[4, 4];
+	private float[,] _multiplier;
 
-    static DamageMatrix()
-    {
-        for (int d = 0; d < 4; d++)
-            for (int a = 0; a < 4; a++)
-                _multiplier[d, a] = 1.0f;
-    }
+	public DamageMatrix()
+	{
+		_multiplier = new float[4, 4];
+		for (int d = 0; d < 4; d++)
+			for (int a = 0; a < 4; a++)
+				_multiplier[d, a] = 1.0f;
+	}
 
-    public static void LoadFrom(float[,] matrix)
-    {
-        _multiplier = matrix;
-    }
+	public void LoadFrom(float[,] matrix)
+	{
+		_multiplier = matrix;
+	}
 
-    public static float GetMultiplier(DamageType damage, ArmorType armor)
-    {
-        return _multiplier[(int)damage, (int)armor];
-    }
+	public float GetMultiplier(DamageType damage, ArmorType armor)
+	{
+		return _multiplier[(int)damage, (int)armor];
+	}
 }

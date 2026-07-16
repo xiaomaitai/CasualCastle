@@ -8,6 +8,7 @@ public static class BuildingModule
 	{
 		services.AddSingleton<ShopRules>();
 		services.AddSingleton<AdjacencyService>();
+		services.AddSingleton<ICombineUseCase, CombineService>();
 		return services;
 	}
 }

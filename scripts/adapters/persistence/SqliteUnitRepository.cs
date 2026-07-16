@@ -33,7 +33,6 @@ public class SqliteUnitRepository : IUnitRepository
 				AttackCooldown = reader.GetFloat(9),
 				VisionRange = reader.GetFloat(10),
 				HasNightCombat = reader.GetInt32(11) != 0,
-				UnitColor = (uint)reader.GetInt64(12),
 				UnitCost = reader.GetInt32(13),
 				Race = reader.IsDBNull(14) ? "" : reader.GetString(14),
 			};

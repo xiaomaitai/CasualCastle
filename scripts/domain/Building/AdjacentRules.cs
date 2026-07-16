@@ -60,7 +60,8 @@ public static class AdjacentRules
 
     public static float CalculateWorkSpeedMultiplier(
         IAdjacencyBuilding building, IReadOnlyList<IAdjacencyBuilding> allBuildings,
-        IBuildingRepository buildingRepo)
+        IBuildingRepository buildingRepo,
+        System.Func<string, string, bool> isSameLine)
     {
         if (!building.ContributesToAdjacency)
             return 1f;
@@ -68,7 +69,7 @@ public static class AdjacentRules
         int adjacentSameType = 0;
         foreach (IAdjacencyBuilding neighbor in GetAdjacentBuildings(building, allBuildings, buildingRepo))
         {
-            if (CombineRules.IsSameLine(building.TypeId, neighbor.TypeId) && neighbor.ContributesToAdjacency)
+            if (isSameLine(building.TypeId, neighbor.TypeId) && neighbor.ContributesToAdjacency)
                 adjacentSameType++;
         }
 

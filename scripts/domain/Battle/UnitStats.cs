@@ -14,14 +14,6 @@ public class UnitStats
 	public float AttackCooldown { get; init; }
 	public float VisionRange { get; init; } = 170f;
 	public bool HasNightCombat { get; init; }
-	public float DisplaySize => Size switch
-	{
-		UnitSize.Small => 60f,
-		UnitSize.Medium => 90f,
-		UnitSize.Large => 120f,
-		UnitSize.Huge => 180f,
-		_ => 90f
-	};
 	public float CollisionRadius => Size switch
 	{
 		UnitSize.Small => 18f,
@@ -32,6 +24,5 @@ public class UnitStats
 	};
 
 	public int UnitCost { get; init; }
-	public uint UnitColor { get; init; }
 	public string Race { get; init; }
 }

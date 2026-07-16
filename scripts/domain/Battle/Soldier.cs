@@ -33,7 +33,8 @@ public class Soldier : ISoldierHandle
 	public SoldierState State { get; set; }
 
 	private float _attackTimer;
-	private static readonly System.Random _random = new();
+	private DamageMatrix _damageMatrix;
+	private readonly System.Random _rng = new();
 
 	public string TargetDescription
 	{
@@ -76,6 +77,11 @@ public class Soldier : ISoldierHandle
 		GameCtx = ctx;
 	}
 
+	public void SetDamageMatrix(DamageMatrix dm)
+	{
+		_damageMatrix = dm;
+	}
+
 	public void SetPosition(float gameX, float gameY)
 	{
 		GameX = gameX;
@@ -105,7 +111,7 @@ public class Soldier : ISoldierHandle
 		if (Skills != null && GameCtx != null)
 		{
 			float dodgeChance = Skills.GetDodgeChance(GameCtx);
-			if (dodgeChance > 0f && _random.NextDouble() < dodgeChance)
+			if (dodgeChance > 0f && _rng.NextDouble() < dodgeChance)
 				return;
 		}
 
@@ -187,7 +193,7 @@ public class Soldier : ISoldierHandle
 							float dmgMult = Skills.GetStatMultiplier("attack_damage_mult", GameCtx);
 							effectiveDamage = (int)(Damage * dmgMult);
 						}
-						int finalDamage = CombatRules.CalculateDamage(effectiveDamage, DamageType, TargetEnemy.ArmorType);
+						int finalDamage = CombatRules.CalculateDamage(effectiveDamage, DamageType, TargetEnemy.ArmorType, _damageMatrix);
 						TargetEnemy.TakeDamage(finalDamage, this, GameX, GameY);
 
 						if (Skills != null)

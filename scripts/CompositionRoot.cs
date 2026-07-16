@@ -19,21 +19,24 @@ public static class CompositionRoot
 		ServiceCollection services = new ServiceCollection();
 
 		services.AddSingleton<IReadOnlyList<CardData>>(_ => GameDataLoader.ShopCatalog);
-		services.AddDomainShared();
 		services.AddDomainBuilding();
 		services.AddDomainBattle();
 		services.AddDomainHistory();
 
-		services.AddSingleton<IGameState>(_ =>
-			CasualCastle.Adapters.Godot.AdapterRegistry.Resolve<IGameState>()
-			?? throw new System.InvalidOperationException("IGameState not registered"));
+		services.AddSingleton<GameStateProvider>();
+		services.AddSingleton<IGameState>(sp => sp.GetRequiredService<GameStateProvider>().Current);
 
 		services.AddSingleton<IFieldUnitRepository, FieldUnitRepository>();
 		services.AddSingleton<IBattleReportRepository, BattleReportStorage>();
 		services.AddSingleton<IUnitRepository, SqliteUnitRepository>();
 		services.AddSingleton<ISkillRepository, SqliteSkillRepository>();
 
-		services.AddSingleton<IBuildingRepository, SqliteBuildingRepository>();
+		SqliteBuildingRepository buildingRepo = new SqliteBuildingRepository();
+		services.AddSingleton<IBuildingRepository>(buildingRepo);
+		services.AddSingleton<IBuildingVisualRepository>(buildingRepo);
+		services.AddSingleton<ITechTreeRepository, SqliteTechTreeRepository>();
+		services.AddSingleton<DamageMatrix>(_ => GameDataLoader.DamageMatrix);
+		services.AddSingleton<CombineRules>(_ => GameDataLoader.CombineRules);
 		services.AddSingleton<ISaveRepository, SaveStorage>();
 		services.AddSingleton<IGameSessionService, GameSessionService>();
 
