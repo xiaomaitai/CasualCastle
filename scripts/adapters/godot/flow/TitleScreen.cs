@@ -15,6 +15,7 @@ public partial class TitleScreen : Control
 	private Button _continueButton;
 	private Button _settingsButton;
 	private Button _exitButton;
+	private Button _devToolsButton;
 	private OptionButton _reportOption;
 	private bool _isStartingGame;
 
@@ -32,10 +33,18 @@ public partial class TitleScreen : Control
 		ui.AddChild(_continueButton);
 		ui.MoveChild(_continueButton, ui.GetChildCount() - 4);
 
+		_devToolsButton = new Button();
+		_devToolsButton.Name = "DevToolsButton";
+		_devToolsButton.Text = "开发者工具";
+		_devToolsButton.Visible = DisplaySettingsManager.DevModeEnabled;
+		ui.AddChild(_devToolsButton);
+		ui.MoveChild(_devToolsButton, ui.GetChildCount() - 2);
+
 		_startButton.Pressed += OnStartPressed;
 		_continueButton.Pressed += OnContinuePressed;
 		_exitButton.Pressed += OnExitPressed;
 		_settingsButton.Pressed += OnSettingsPressed;
+		_devToolsButton.Pressed += OnDevToolsPressed;
 
 		_settingsUi = new SettingsUiController(GetNode<Control>("SettingsPanel"));
 		BuildReportOptions();
@@ -105,6 +114,11 @@ public partial class TitleScreen : Control
 	private void OnSettingsPressed()
 	{
 		_settingsUi?.Open();
+	}
+
+	private void OnDevToolsPressed()
+	{
+		GetTree().ChangeSceneToFile("res://scenes/ui/dev_tools/dev_tools_menu.tscn");
 	}
 
 	private void BuildReportOptions()
