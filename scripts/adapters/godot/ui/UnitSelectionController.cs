@@ -40,7 +40,7 @@ public sealed class UnitSelectionController
 		if (hoveredControl != null && hoveredControl.MouseFilter != Control.MouseFilterEnum.Ignore)
 			return false;
 
-		UnitLogic picked = PickUnit(mouseButton.Position);
+		UnitLogic picked = PickUnit(mouseButton.GlobalPosition);
 		if (picked == _selected)
 			return true;
 
@@ -49,8 +49,9 @@ public sealed class UnitSelectionController
 		{
 			_selected = picked;
 			_selected.SetSelected(true);
+			return true;
 		}
-		return true;
+		return false;
 	}
 
 	private UnitLogic PickUnit(Vector2 globalPoint)

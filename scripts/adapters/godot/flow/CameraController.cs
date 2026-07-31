@@ -2,6 +2,10 @@ using Godot;
 
 public partial class CameraController : Camera2D
 {
+	private const float DragThreshold = 8f;
+	private const float EdgeScrollMargin = 48f;
+	private const float EdgeScrollSpeed = 700f;
+
 	[Export]
 	public float MinZoom = 0.5f;
 
@@ -15,6 +19,7 @@ public partial class CameraController : Camera2D
 	public Rect2 Boundary = BattlefieldMetrics.WorldRect;
 
 	private Vector2 _dragStartPosition;
+	private bool _dragCandidate;
 	private bool _isDragging;
 
 	public override void _Ready()
@@ -22,12 +27,33 @@ public partial class CameraController : Camera2D
 		AnchorMode = AnchorModeEnum.DragCenter;
 	}
 
+	public override void _Process(double delta)
+	{
+		if (_isDragging || _dragCandidate)
+			return;
+		if (!GetWindow().HasFocus())
+			return;
+
+		Vector2 mousePosition = GetViewport().GetMousePosition();
+		if (!GetViewportRect().HasPoint(mousePosition))
+			return;
+		if (IsBlockingUiHovered())
+			return;
+
+		Vector2 direction = ComputeEdgeScrollDirection(mousePosition, GetViewportRect().Size);
+		if (direction == Vector2.Zero)
+			return;
+
+		Position += direction * EdgeScrollSpeed * (float)delta / Zoom;
+		ClampToBoundary();
+	}
+
 	public override void _UnhandledInput(InputEvent @event)
 	{
 		if (@event is InputEventMouseButton mouseButton)
 			HandleMouseButton(mouseButton);
 
-		if (@event is InputEventMouseMotion mouseMotion && _isDragging)
+		if (@event is InputEventMouseMotion mouseMotion && _dragCandidate)
 			HandleDrag(mouseMotion);
 	}
 
@@ -47,26 +73,56 @@ public partial class CameraController : Camera2D
 
 	private void HandleMouseButton(InputEventMouseButton mouseButton)
 	{
-		if (mouseButton.ButtonIndex == MouseButton.Middle)
+		if (mouseButton.ButtonIndex != MouseButton.Middle)
+			return;
+
+		if (mouseButton.Pressed)
 		{
-			if (mouseButton.Pressed)
-			{
-				_isDragging = true;
-				_dragStartPosition = GetGlobalMousePosition();
-			}
-			else
-			{
-				_isDragging = false;
-			}
+			_dragCandidate = true;
+			_isDragging = false;
+			_dragStartPosition = GetGlobalMousePosition();
+		}
+		else
+		{
+			_dragCandidate = false;
+			_isDragging = false;
 		}
 	}
 
 	private void HandleDrag(InputEventMouseMotion mouseMotion)
 	{
-		Vector2 mouseDelta = GetGlobalMousePosition() - _dragStartPosition;
-		_dragStartPosition = GetGlobalMousePosition();
+		Vector2 currentPosition = GetGlobalMousePosition();
+		if (!_isDragging)
+		{
+			if (currentPosition.DistanceTo(_dragStartPosition) < DragThreshold)
+				return;
+			_isDragging = true;
+		}
+
+		Vector2 mouseDelta = currentPosition - _dragStartPosition;
+		_dragStartPosition = currentPosition;
 		Position -= mouseDelta / Zoom;
 		ClampToBoundary();
+	}
+
+	private bool IsBlockingUiHovered()
+	{
+		Control hoveredControl = GetViewport().GuiGetHoveredControl();
+		return hoveredControl != null && hoveredControl.MouseFilter == Control.MouseFilterEnum.Stop;
+	}
+
+	private Vector2 ComputeEdgeScrollDirection(Vector2 mousePosition, Vector2 viewportSize)
+	{
+		Vector2 direction = Vector2.Zero;
+		if (mousePosition.X < EdgeScrollMargin)
+			direction.X = -1f;
+		else if (mousePosition.X > viewportSize.X - EdgeScrollMargin)
+			direction.X = 1f;
+		if (mousePosition.Y < EdgeScrollMargin)
+			direction.Y = -1f;
+		else if (mousePosition.Y > viewportSize.Y - EdgeScrollMargin)
+			direction.Y = 1f;
+		return direction;
 	}
 
 	private void ZoomIn()
