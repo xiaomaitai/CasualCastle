@@ -386,12 +386,15 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 	private void StartWorkCycle()
 	{
 		float productionRate = BuildingSys.GetProductionRate(TypeId);
-		if (productionRate > 0f)
-		{
-			_productionRate = productionRate;
-			int unitCost = BuildingSys.GetUnitCost(TypeId);
-			BeginWork(unitCost);
-		}
+		if (productionRate <= 0f)
+			return;
+
+		int unitCost = BuildingSys.GetUnitCost(TypeId);
+		if (unitCost <= 0)
+			return;
+
+		_productionRate = productionRate;
+		BeginWork(unitCost);
 	}
 
 	private void PerformWork()

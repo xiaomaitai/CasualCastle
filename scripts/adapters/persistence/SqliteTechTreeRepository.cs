@@ -353,13 +353,14 @@ public class SqliteTechTreeRepository : ITechTreeRepository
         using SqliteCommand cmd = connection.CreateCommand();
 
         cmd.CommandText = @"
-            INSERT OR REPLACE INTO building_defs (type_id, display_name, max_health, spawn_interval, main_cell_x, main_cell_y, spawn_cell_x, spawn_cell_y, unit_type_id, combine_tier, is_core, faction_id, footprint_json, collision_width, collision_height)
+            INSERT OR REPLACE INTO building_defs (type_id, display_name, max_health, spawn_interval, main_cell_x, main_cell_y, spawn_cell_x, spawn_cell_y, unit_type_id, combine_tier, is_core, faction_id, footprint_json, collision_width, collision_height, production_rate)
             SELECT n.type_id, n.display_name, n.max_health, n.spawn_interval,
                    0, 0, 1, 1,
                    n.unit_type_id, n.tier - 1, 0, @factionId,
                    COALESCE(b.footprint_json, '[[0,0],[1,0],[0,1],[1,1]]'),
                    COALESCE(b.collision_width, 188),
-                   COALESCE(b.collision_height, 188)
+                   COALESCE(b.collision_height, 188),
+                   COALESCE(b.production_rate, 100.0)
             FROM tech_tree_nodes n
             LEFT JOIN building_defs b ON b.type_id = n.type_id
             WHERE n.faction_id = @factionId";
@@ -369,13 +370,11 @@ public class SqliteTechTreeRepository : ITechTreeRepository
 
         cmd.Parameters.Clear();
         cmd.CommandText = @"
-            DELETE FROM shop_catalog WHERE id IN (
-                SELECT s.id FROM shop_catalog s
-                INNER JOIN tech_tree_nodes n ON s.building_type = n.type_id
-                WHERE n.faction_id = @factionId AND n.shop_available = 0
+            DELETE FROM shop_catalog WHERE building_type IN (
+                SELECT type_id FROM tech_tree_nodes WHERE faction_id = @factionId
             )";
         cmd.Parameters.AddWithValue("@factionId", factionId);
-        GD.Print($"[SyncToGameTables] 移除不可购买的商店条目: DELETE FROM shop_catalog WHERE id IN (SELECT s.id FROM shop_catalog s INNER JOIN tech_tree_nodes n ON s.building_type = n.type_id WHERE n.faction_id = '{factionId}' AND n.shop_available = 0)");
+        GD.Print($"[SyncToGameTables] 清空该派系节点关联的商店条目并重建: DELETE FROM shop_catalog WHERE building_type IN (SELECT type_id FROM tech_tree_nodes WHERE faction_id = '{factionId}')");
         cmd.ExecuteNonQuery();
 
         cmd.Parameters.Clear();

@@ -18,7 +18,3 @@
 - 新系统：治疗单位 AI（牧师不攻击，改为治疗周围友军）
 - 核心机制：恩典——受到治疗触发各兵种特有额外效果（护盾/冷却缩减/范围伤害）
 - 商店卡池新增 3 种卡
-
-## 商店卡池数据重复
-
-`shop_catalog` 存在新旧两套 ID 命名：王国军 5 张 T1 卡同时存在小写旧条目（如 `barracks`）与 `tech_tree_nodes.type_id` 同步的新条目（如 `Barracks`），公会 5 卡只有旧 `card_*` 条目。需以 `tech_tree_nodes.type_id` 为准清理旧行——`SqliteTechTreeRepository.SyncToGameTables` 的删除逻辑只清理 `shop_available = 0` 且能关联到节点的行，无节点对应的旧条目会残留。
