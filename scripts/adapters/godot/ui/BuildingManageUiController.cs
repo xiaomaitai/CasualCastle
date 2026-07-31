@@ -108,7 +108,7 @@ public sealed class BuildingManageUiController
 		if (mouseButton.ButtonIndex != MouseButton.Left)
 			return false;
 
-		if (!_playerCastle.TryGetBuildingAtGlobalPoint(mouseButton.GlobalPosition, out Building building))
+		if (!_playerCastle.TryGetBuildingAtScreenPoint(mouseButton.GlobalPosition, out Building building))
 			return false;
 
 		if (!CanManage(building))
@@ -171,7 +171,7 @@ public sealed class BuildingManageUiController
 	{
 		bool blocked = false;
 		Vector2 mouse = _owner.GetViewport().GetMousePosition();
-		if (_playerCastle.TryGetBuildingAtGlobalPoint(mouse, out Building building)
+		if (_playerCastle.TryGetBuildingAtScreenPoint(mouse, out Building building)
 			&& CanManage(building)
 			&& building.IsDamaged
 			&& !building.CanRepair())

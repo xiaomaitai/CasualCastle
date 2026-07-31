@@ -144,10 +144,17 @@ public sealed class HandUiController
         if (_inputBlocked || _dragging || _gameManager.CurrentState == GameManager.GameState.GameOver)
             return false;
 
-        if (!_hand.HasSelection)
+        if (!_hand.HasSelection || IsInteractiveUiHovered())
             return false;
 
-        TryPlaceAtMouse(mouseButton.GlobalPosition);
+        Castle playerCastle = _gameManager.PlayerCastle;
+        if (playerCastle == null)
+            return false;
+
+        if (!playerCastle.TryGetGridFromScreenPoint(mouseButton.GlobalPosition, out int gridX, out int gridY))
+            return false;
+
+        _hand.TryPlaceSelected(gridX, gridY);
         return true;
     }
 
@@ -158,6 +165,12 @@ public sealed class HandUiController
 
         _hand.ClearSelection();
         return true;
+    }
+
+    private bool IsInteractiveUiHovered()
+    {
+        Control hoveredControl = _owner.GetViewport().GuiGetHoveredControl();
+        return hoveredControl != null && hoveredControl.MouseFilter != Control.MouseFilterEnum.Ignore;
     }
 
     private void OnHandButtonPressed(int handIndex)
@@ -204,13 +217,13 @@ public sealed class HandUiController
         UpdatePlacementHint();
     }
 
-    private void TryCompleteDrag(Vector2 globalPosition)
+    private void TryCompleteDrag(Vector2 screenPosition)
     {
         Castle playerCastle = _gameManager.PlayerCastle;
         if (playerCastle == null || _dragHandIndex < 0)
             return;
 
-        if (!playerCastle.TryGetGridFromGlobalPoint(globalPosition, out int gridX, out int gridY))
+        if (!playerCastle.TryGetGridFromScreenPoint(screenPosition, out int gridX, out int gridY))
             return;
 
         _hand.TryPlaceAtIndex(_dragHandIndex, gridX, gridY);
@@ -277,8 +290,8 @@ public sealed class HandUiController
             return;
         }
 
-        Vector2 mouseGlobal = _owner.GetViewport().GetMousePosition();
-        if (!playerCastle.TryGetGridFromGlobalPoint(mouseGlobal, out int gridX, out int gridY))
+        Vector2 mouseScreen = _owner.GetViewport().GetMousePosition();
+        if (!playerCastle.TryGetGridFromScreenPoint(mouseScreen, out int gridX, out int gridY))
         {
             playerCastle.ClearPlacementPreview();
             return;
@@ -298,17 +311,5 @@ public sealed class HandUiController
             return _hand.SelectedCard.BuildingType;
 
         return "Barracks";
-    }
-
-    private void TryPlaceAtMouse(Vector2 globalPosition)
-    {
-        Castle playerCastle = _gameManager.PlayerCastle;
-        if (playerCastle == null)
-            return;
-
-        if (!playerCastle.TryGetGridFromGlobalPoint(globalPosition, out int gridX, out int gridY))
-            return;
-
-        _hand.TryPlaceSelected(gridX, gridY);
     }
 }

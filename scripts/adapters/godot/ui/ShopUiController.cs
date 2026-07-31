@@ -197,13 +197,13 @@ public sealed class ShopUiController
         _dragSlotIndex = slotIndex;
     }
 
-    private void TryCompleteDrag(Vector2 globalPosition)
+    private void TryCompleteDrag(Vector2 screenPosition)
     {
         Castle playerCastle = _gameManager.PlayerCastle;
         if (playerCastle == null || _dragSlotIndex < 0)
             return;
 
-        if (!playerCastle.TryGetGridFromGlobalPoint(globalPosition, out int gridX, out int gridY))
+        if (!playerCastle.TryGetGridFromScreenPoint(screenPosition, out int gridX, out int gridY))
             return;
 
         _shop.TryPlaceOfferDirect(_dragSlotIndex, gridX, gridY);
@@ -215,8 +215,8 @@ public sealed class ShopUiController
         if (playerCastle == null)
             return;
 
-        Vector2 mouseGlobal = _owner.GetViewport().GetMousePosition();
-        if (!playerCastle.TryGetGridFromGlobalPoint(mouseGlobal, out int gridX, out int gridY))
+        Vector2 mouseScreen = _owner.GetViewport().GetMousePosition();
+        if (!playerCastle.TryGetGridFromScreenPoint(mouseScreen, out int gridX, out int gridY))
         {
             playerCastle.ClearPlacementPreview();
             return;

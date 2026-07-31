@@ -117,6 +117,18 @@ public partial class Castle : Node2D
 		return IsInBounds(gridX, gridY);
 	}
 
+	public bool TryGetGridFromScreenPoint(Vector2 screenPoint, out int gridX, out int gridY)
+	{
+		Vector2 worldPoint = GameCoordinatesAdapter.ScreenToWorld(GetViewport(), screenPoint);
+		return TryGetGridFromGlobalPoint(worldPoint, out gridX, out gridY);
+	}
+
+	public bool TryGetBuildingAtScreenPoint(Vector2 screenPoint, out Building building)
+	{
+		Vector2 worldPoint = GameCoordinatesAdapter.ScreenToWorld(GetViewport(), screenPoint);
+		return TryGetBuildingAtGlobalPoint(worldPoint, out building);
+	}
+
 	public bool CanPlaceFootprint(string buildingType, int anchorX, int anchorY)
 	{
 		IReadOnlyList<GridCellOffset> footprint = GameManager.Get<IBuildingRepository>().GetFootprint(buildingType);

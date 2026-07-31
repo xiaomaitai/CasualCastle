@@ -28,6 +28,9 @@ public static class GameCoordinatesAdapter
 			(int)Math.Round(localPixels.X * GameCoordinateRules.UnitsPerCell / (float)PixelsPerCell),
 			(int)Math.Round(localPixels.Y * GameCoordinateRules.UnitsPerCell / (float)PixelsPerCell));
 
+	public static Vector2 ScreenToWorld(Viewport viewport, Vector2 screenPosition) =>
+		viewport.GetCanvasTransform().AffineInverse() * screenPosition;
+
 	public static Vector2I FloorGridFromLocalPixels(Vector2 localPixels) =>
 		new(
 			(int)Math.Floor(localPixels.X / PixelsPerCell),

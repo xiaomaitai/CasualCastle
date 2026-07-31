@@ -78,7 +78,7 @@ public sealed class CombineProhibitUiController
 		if (mouseButton.ButtonIndex != MouseButton.Left)
 			return false;
 
-		if (!_playerCastle.TryGetBuildingAtGlobalPoint(mouseButton.GlobalPosition, out Building building))
+		if (!_playerCastle.TryGetBuildingAtScreenPoint(mouseButton.GlobalPosition, out Building building))
 			return false;
 
 		if (!CanManage(building))

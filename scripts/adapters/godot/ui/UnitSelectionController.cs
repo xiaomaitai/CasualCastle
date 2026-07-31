@@ -1,3 +1,4 @@
+using CasualCastle.Adapters.Godot;
 using Godot;
 
 public sealed class UnitSelectionController
@@ -40,7 +41,8 @@ public sealed class UnitSelectionController
 		if (hoveredControl != null && hoveredControl.MouseFilter != Control.MouseFilterEnum.Ignore)
 			return false;
 
-		UnitLogic picked = PickUnit(mouseButton.GlobalPosition);
+		Vector2 worldPoint = GameCoordinatesAdapter.ScreenToWorld(_owner.GetViewport(), mouseButton.GlobalPosition);
+		UnitLogic picked = PickUnit(worldPoint);
 		if (picked == _selected)
 			return true;
 

@@ -58,8 +58,8 @@ public sealed class BuildingInfoUiController
         if (_inputBlocked || _placementActive || _pauseOpen)
             return;
 
-        Vector2 mouseGlobal = _owner.GetViewport().GetMousePosition();
-        Building building = PickBuilding(mouseGlobal);
+        Vector2 mouseScreen = _owner.GetViewport().GetMousePosition();
+        Building building = PickBuilding(mouseScreen);
         if (building == null)
         {
             ClearHover();
@@ -77,12 +77,12 @@ public sealed class BuildingInfoUiController
         UpdateHighlights(building);
     }
 
-    private Building PickBuilding(Vector2 globalPoint)
+    private Building PickBuilding(Vector2 screenPoint)
     {
-        if (_playerCastle.TryGetBuildingAtGlobalPoint(globalPoint, out Building building))
+        if (_playerCastle.TryGetBuildingAtScreenPoint(screenPoint, out Building building))
             return building;
 
-        if (_enemyCastle.TryGetBuildingAtGlobalPoint(globalPoint, out building))
+        if (_enemyCastle.TryGetBuildingAtScreenPoint(screenPoint, out building))
             return building;
 
         return null;
