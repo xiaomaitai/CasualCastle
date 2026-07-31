@@ -1,6 +1,6 @@
 # 数据结构设计 — CasualCastle
 
-卡牌、建筑、单位等核心运行时/配置数据的 C# 结构草案。概念定义见 `concepts.md`，开发顺序与系统划分见 `outline/`。
+卡牌、建筑、单位等核心运行时/配置数据的 C# 结构。概念定义见 `concepts.md`，开发顺序与系统划分见 `outline/`。
 
 ---
 
@@ -9,13 +9,15 @@
 ```csharp
 public class CardData
 {
-	public string Id;           // 卡牌ID
+	public string Id;           // 卡牌 ID，与建筑 type_id 一致
 	public string Name;         // 卡牌名称
-	public int Cost;           // 购买费用
+	public int Cost;            // 购买费用
 	public string BuildingType; // 对应建筑类型
-	public Texture2D Icon;     // 卡牌图标
+	public int Weight;          // 卡池权重
 }
 ```
+
+商店卡池 `shop_catalog` 以 `tech_tree_nodes.type_id` 为权威 ID；建筑卡 ID 与建筑 `type_id` 一致，同一建筑不允许出现多条卡池记录。
 
 ---
 
@@ -24,19 +26,27 @@ public class CardData
 ```csharp
 public class BuildingData
 {
-	public string Id;           // 建筑ID
-	public string Name;         // 建筑名称
-	public int Health;          // 生命值
-	public float ProductionInterval; // 产出间隔
-	public string UnitType;     // 产出单位类型
-	public List<string> AdjacentBonuses; // 邻接加成列表
-	public int CombineTier;      // 组合阶数（0 = 未组合）
+	public string TypeId;               // 建筑类型 ID
+	public GridCellOffset[] Footprint;  // 占地格偏移
+	public GridCellOffset MainCellOffset;  // 主格偏移（邻接/图标定位）
+	public string DisplayName;          // 显示名
+	public int MaxHealth;               // 最大生命
+	public float SpawnInterval;         // 旧产兵间隔字段，编辑器维护，不驱动产兵
+	public float ProductionRate;        // 产兵生产率（点数/秒，统一 100）
+	public GridCellOffset SpawnCellOffset;  // 产兵点偏移
+	public string UnitTypeId;           // 产出单位类型
+	public bool IsCore;                 // 核心建筑（城堡之心）
+	public int CombineTier;             // 组合阶数（0 = 未组合）
+	public int CollisionWidth;          // 碰撞尺寸（游戏单位）
+	public int CollisionHeight;
 }
 ```
 
+产兵采用**点数累积制**：工作进度按 `ProductionRate` 每秒累计，累计满产出单位（`UnitTypeId`）的 `UnitCost` 后产兵并清零；耗时 = `UnitCost` / `ProductionRate` 秒。规则见 `design/battleSystem.md` §2.2。
+
 ---
 
-## 组合配方（M5）
+## 组合配方
 
 ```csharp
 public class CombineRecipe
@@ -48,11 +58,11 @@ public class CombineRecipe
 }
 ```
 
-运行时首版放在 `CombineSystem` 静态表中，与 `BuildingSystem.Definitions` 并列维护。
+配方存于 `config.db` 的 `combine_recipes`，由科技树编辑器维护。
 
 ---
 
-## 战报（M6）
+## 战报
 
 ```csharp
 public class BuildingSnapshot
@@ -87,13 +97,46 @@ public class BattleReport
 ## 单位数据
 
 ```csharp
-public class UnitData
+public class UnitStats
 {
-	public string Id;           // 单位ID
-	public string Name;         // 单位名称
-	public int Damage;          // 攻击力
-	public int Health;          // 生命值
-	public float Speed;         // 移动速度
-	public float VisionRange;   // 视野范围
+	public string TypeId;        // 单位类型 ID
+	public UnitSize Size;        // 体型，决定碰撞半径与显示尺寸
+	public AttackType AttackType;   // 近战/远程
+	public DamageType DamageType;   // 物理/穿刺/魔法等
+	public ArmorType ArmorType;     // 护甲类型
+	public int ArmorValue;       // 护甲值
+	public int Health;           // 生命值
+	public int Damage;           // 攻击力
+	public float Speed;          // 移动速度
+	public float AttackRange;    // 攻击范围
+	public float AttackCooldown; // 攻击冷却
+	public float VisionRange;    // 视野范围
+	public int UnitCost;         // 产兵所需点数
+	public string Race;          // 种族（鱼龙混杂闪避判定）
 }
 ```
+
+`UnitCost` 必须 > 0；为 0 视为数据未配置，对应建筑不启动产兵。产兵耗时 = `UnitCost` / 100 秒。
+
+---
+
+## 科技树节点
+
+```csharp
+public class TechTreeNode
+{
+	public string TypeId;      // 与 building_defs.type_id 一致
+	public string FactionId;   // 派系 ID
+	public int Tier;           // 阶数 1~5
+	public int Col;            // 画布列位置
+	public bool ShopAvailable; // 是否进入商店卡池
+	public int GoldCost;       // 商店价格
+	public int ShopWeight;     // 卡池权重
+	public string DisplayName; // 显示名
+	public string UnitTypeId;  // 产出单位类型
+	public int MaxHealth;      // 建筑最大生命
+	public float SpawnInterval; // 旧产兵间隔字段
+}
+```
+
+科技树编辑器保存时以本表为准重建该派系的 `building_defs` 与 `shop_catalog`：建筑定义保留 `production_rate`，商店卡 ID = 建筑 `type_id`。
