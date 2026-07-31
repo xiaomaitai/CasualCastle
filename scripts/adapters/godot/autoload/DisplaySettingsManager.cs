@@ -15,6 +15,10 @@ public partial class DisplaySettingsManager : Node
 
 	private const int DesignWidth = 1920;
 	private const int DesignHeight = 1080;
+	public const float DragSpeedMin = 0.5f;
+	public const float DragSpeedMax = 2.0f;
+	public const float DragSpeedStep = 0.1f;
+	public const float DefaultDragSpeed = 1.0f;
 
 	public static readonly Vector2I[] OutputResolutions =
 	{
@@ -29,6 +33,7 @@ public partial class DisplaySettingsManager : Node
 
 	public DisplayWindowMode WindowMode { get; private set; } = DisplayWindowMode.BorderlessFullscreen;
 	public Vector2I OutputResolution { get; private set; } = new(DesignWidth, DesignHeight);
+	public float CameraDragSpeed { get; private set; } = DefaultDragSpeed;
 
 	public override void _Ready()
 	{
@@ -47,10 +52,11 @@ public partial class DisplaySettingsManager : Node
 		}
 	}
 
-	public void SaveAndApply(DisplayWindowMode mode, Vector2I resolution)
+	public void SaveAndApply(DisplayWindowMode mode, Vector2I resolution, float dragSpeed)
 	{
 		WindowMode = mode;
 		OutputResolution = resolution;
+		CameraDragSpeed = Mathf.Clamp(dragSpeed, DragSpeedMin, DragSpeedMax);
 		Save();
 		Apply();
 	}
@@ -77,6 +83,10 @@ public partial class DisplaySettingsManager : Node
 		int height = (int)config.GetValue(Section, "height", OutputResolution.Y);
 		OutputResolution = new Vector2I(width, height);
 		DevModeEnabled = (bool)config.GetValue(Section, "dev_mode", false);
+		CameraDragSpeed = Mathf.Clamp(
+			(float)config.GetValue(Section, "camera_drag_speed", CameraDragSpeed),
+			DragSpeedMin,
+			DragSpeedMax);
 	}
 
 	private void Save()
@@ -86,6 +96,7 @@ public partial class DisplaySettingsManager : Node
 		config.SetValue(Section, "width", OutputResolution.X);
 		config.SetValue(Section, "height", OutputResolution.Y);
 		config.SetValue(Section, "dev_mode", DevModeEnabled);
+		config.SetValue(Section, "camera_drag_speed", CameraDragSpeed);
 		config.Save(SettingsPath);
 	}
 

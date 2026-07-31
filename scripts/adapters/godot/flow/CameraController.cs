@@ -18,7 +18,7 @@ public partial class CameraController : Camera2D
 	[Export]
 	public Rect2 Boundary = BattlefieldMetrics.WorldRect;
 
-	private Vector2 _dragStartPosition;
+	private Vector2 _dragStartScreenPosition;
 	private bool _dragCandidate;
 	private bool _isDragging;
 
@@ -80,7 +80,7 @@ public partial class CameraController : Camera2D
 		{
 			_dragCandidate = true;
 			_isDragging = false;
-			_dragStartPosition = GetGlobalMousePosition();
+			_dragStartScreenPosition = GetViewport().GetMousePosition();
 		}
 		else
 		{
@@ -91,17 +91,17 @@ public partial class CameraController : Camera2D
 
 	private void HandleDrag(InputEventMouseMotion mouseMotion)
 	{
-		Vector2 currentPosition = GetGlobalMousePosition();
+		Vector2 currentScreenPosition = GetViewport().GetMousePosition();
 		if (!_isDragging)
 		{
-			if (currentPosition.DistanceTo(_dragStartPosition) < DragThreshold)
+			if (currentScreenPosition.DistanceTo(_dragStartScreenPosition) < DragThreshold)
 				return;
 			_isDragging = true;
 		}
 
-		Vector2 mouseDelta = currentPosition - _dragStartPosition;
-		_dragStartPosition = currentPosition;
-		Position -= mouseDelta / Zoom;
+		Vector2 screenDelta = currentScreenPosition - _dragStartScreenPosition;
+		_dragStartScreenPosition = currentScreenPosition;
+		Position -= screenDelta / Zoom * DisplaySettingsManager.Instance.CameraDragSpeed;
 		ClampToBoundary();
 	}
 

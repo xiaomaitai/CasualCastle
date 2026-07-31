@@ -98,18 +98,43 @@ offset_top = 224.0
 offset_right = 300.0
 offset_bottom = 268.0
 
+[node name="DragSpeedLabel" type="Label" parent="Panel"]
+layout_mode = 0
+offset_left = 48.0
+offset_top = 288.0
+offset_right = 200.0
+offset_bottom = 324.0
+theme_override_font_sizes/font_size = 20
+text = "拖拽速度"
+
+[node name="DragSpeedSlider" type="HSlider" parent="Panel"]
+layout_mode = 0
+offset_left = 220.0
+offset_top = 292.0
+offset_right = 420.0
+offset_bottom = 324.0
+
+[node name="DragSpeedValueLabel" type="Label" parent="Panel"]
+layout_mode = 0
+offset_left = 436.0
+offset_top = 288.0
+offset_right = 552.0
+offset_bottom = 324.0
+theme_override_font_sizes/font_size = 20
+text = "1.0×"
+
 [node name="ApplyButton" type="Button" parent="Panel"]
 layout_mode = 0
 offset_left = 96.0
-offset_top = 300.0
+offset_top = 356.0
 offset_right = 296.0
-offset_bottom = 356.0
+offset_bottom = 412.0
 text = "应用"
 
 [node name="BackButton" type="Button" parent="Panel"]
 layout_mode = 0
 offset_left = 304.0
-offset_top = 300.0
+offset_top = 356.0
 offset_right = 504.0
-offset_bottom = 356.0
+offset_bottom = 412.0
 text = "返回"

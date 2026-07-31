@@ -8,11 +8,14 @@ public sealed class SettingsUiController
 	private readonly OptionButton _windowModeOption;
 	private readonly OptionButton _resolutionOption;
 	private readonly CheckBox _devModeCheck;
+	private readonly HSlider _dragSpeedSlider;
+	private readonly Label _dragSpeedValueLabel;
 	private readonly Button _applyButton;
 	private readonly Button _backButton;
 
 	public bool IsOpen { get; private set; }
 	public event Action<bool> OpenChanged;
+	private float _dragSpeed = DisplaySettingsManager.DefaultDragSpeed;
 
 	public SettingsUiController(Control root)
 	{
@@ -20,6 +23,8 @@ public sealed class SettingsUiController
 		_windowModeOption = root.GetNode<OptionButton>("Panel/WindowModeOption");
 		_resolutionOption = root.GetNode<OptionButton>("Panel/ResolutionOption");
 		_devModeCheck = root.GetNode<CheckBox>("Panel/DevModeCheck");
+		_dragSpeedSlider = root.GetNode<HSlider>("Panel/DragSpeedSlider");
+		_dragSpeedValueLabel = root.GetNode<Label>("Panel/DragSpeedValueLabel");
 		_applyButton = root.GetNode<Button>("Panel/ApplyButton");
 		_backButton = root.GetNode<Button>("Panel/BackButton");
 
@@ -32,6 +37,10 @@ public sealed class SettingsUiController
 			_resolutionOption.AddItem($"{resolution.X} × {resolution.Y}", _resolutionOption.ItemCount);
 
 		_windowModeOption.ItemSelected += OnWindowModeSelected;
+		_dragSpeedSlider.MinValue = DisplaySettingsManager.DragSpeedMin;
+		_dragSpeedSlider.MaxValue = DisplaySettingsManager.DragSpeedMax;
+		_dragSpeedSlider.Step = DisplaySettingsManager.DragSpeedStep;
+		_dragSpeedSlider.ValueChanged += OnDragSpeedChanged;
 		_applyButton.Pressed += OnApplyPressed;
 		_backButton.Pressed += OnBackPressed;
 
@@ -41,6 +50,7 @@ public sealed class SettingsUiController
 	public void Dispose()
 	{
 		_windowModeOption.ItemSelected -= OnWindowModeSelected;
+		_dragSpeedSlider.ValueChanged -= OnDragSpeedChanged;
 		_applyButton.Pressed -= OnApplyPressed;
 		_backButton.Pressed -= OnBackPressed;
 	}
@@ -73,6 +83,9 @@ public sealed class SettingsUiController
 		_windowModeOption.Select(_windowModeOption.GetItemIndex((int)settings.WindowMode));
 		_resolutionOption.Select(settings.FindResolutionIndex(settings.OutputResolution));
 		_devModeCheck.ButtonPressed = DisplaySettingsManager.DevModeEnabled;
+		_dragSpeed = settings.CameraDragSpeed;
+		_dragSpeedSlider.Value = _dragSpeed;
+		UpdateDragSpeedLabel();
 		UpdateResolutionEnabled();
 	}
 
@@ -87,12 +100,23 @@ public sealed class SettingsUiController
 		_resolutionOption.Disabled = !windowed;
 	}
 
+	private void OnDragSpeedChanged(double value)
+	{
+		_dragSpeed = (float)value;
+		UpdateDragSpeedLabel();
+	}
+
+	private void UpdateDragSpeedLabel()
+	{
+		_dragSpeedValueLabel.Text = $"{_dragSpeed:0.0}×";
+	}
+
 	private void OnApplyPressed()
 	{
 		DisplayWindowMode mode = (DisplayWindowMode)_windowModeOption.GetSelectedId();
 		Vector2I resolution = DisplaySettingsManager.OutputResolutions[_resolutionOption.Selected];
 		DisplaySettingsManager.DevModeEnabled = _devModeCheck.ButtonPressed;
-		AdapterRegistry.Resolve<DisplaySettingsManager>().SaveAndApply(mode, resolution);
+		AdapterRegistry.Resolve<DisplaySettingsManager>().SaveAndApply(mode, resolution, _dragSpeed);
 	}
 
 	private void OnBackPressed() => Close();
