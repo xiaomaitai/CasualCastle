@@ -5,15 +5,15 @@ namespace CasualCastle.Adapters.Godot.Battle;
 
 public class FieldUnitRepository : IFieldUnitRepository
 {
-	private readonly List<ISoldierHandle> _playerUnits = new();
-	private readonly List<ISoldierHandle> _enemyUnits = new();
+	private readonly List<IUnitHandle> _playerUnits = new();
+	private readonly List<IUnitHandle> _enemyUnits = new();
 	private readonly List<IBuildingRef> _buildings = new();
 
-	public IReadOnlyList<ISoldierHandle> AllUnits
+	public IReadOnlyList<IUnitHandle> AllUnits
 	{
 		get
 		{
-			List<ISoldierHandle> all = new(_playerUnits.Count + _enemyUnits.Count);
+			List<IUnitHandle> all = new(_playerUnits.Count + _enemyUnits.Count);
 			all.AddRange(_playerUnits);
 			all.AddRange(_enemyUnits);
 			return all;
@@ -22,20 +22,20 @@ public class FieldUnitRepository : IFieldUnitRepository
 
 	public IReadOnlyList<IBuildingRef> AllBuildings => _buildings;
 
-	public void Register(ISoldierHandle soldier)
+	public void Register(IUnitHandle unit)
 	{
-		if (soldier.IsPlayerUnit)
-			_playerUnits.Add(soldier);
+		if (unit.IsPlayerUnit)
+			_playerUnits.Add(unit);
 		else
-			_enemyUnits.Add(soldier);
+			_enemyUnits.Add(unit);
 	}
 
-	public void Unregister(ISoldierHandle soldier)
+	public void Unregister(IUnitHandle unit)
 	{
-		if (soldier.IsPlayerUnit)
-			_playerUnits.Remove(soldier);
+		if (unit.IsPlayerUnit)
+			_playerUnits.Remove(unit);
 		else
-			_enemyUnits.Remove(soldier);
+			_enemyUnits.Remove(unit);
 	}
 
 	public void RegisterBuilding(IBuildingRef building)

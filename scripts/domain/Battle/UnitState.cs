@@ -1,6 +1,6 @@
 namespace CasualCastle.Domain.Battle;
 
-public enum SoldierState
+public enum UnitState
 {
 	Marching,
 	Fighting,

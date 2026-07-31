@@ -65,11 +65,11 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	bool IBuildingRef.IsDestroyed => IsDestroyed;
 
-	bool IBuildingRef.IsEnemyOf(ISoldierState soldier)
+	bool IBuildingRef.IsEnemyOf(IUnitState unit)
 	{
 		if (CastleRef == null)
 			return false;
-		return CastleRef.IsPlayerCastle != soldier.IsPlayerUnit;
+		return CastleRef.IsPlayerCastle != unit.IsPlayerUnit;
 	}
 
 	float IBuildingRef.MinX => GameCoordinatesAdapter.PixelsToGameUnits(GlobalPosition.X - GetBuildingSize().X * 0.5f);
@@ -406,17 +406,17 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		if (_gameManager?.CurrentState == GameManager.GameState.GameOver)
 			return;
 
-		PackedScene soldierScene = GD.Load<PackedScene>("res://prefabs/Soldier.tscn");
-		if (soldierScene == null)
+		PackedScene unitScene = GD.Load<PackedScene>("res://prefabs/Unit.tscn");
+		if (unitScene == null)
 			return;
 
 		for (int i = 0; i < count; i++)
 		{
-			Soldier shell = soldierScene.Instantiate<Soldier>();
-			SoldierLogic soldier = shell.GetNode<SoldierLogic>("Logic");
-			soldier.IsPlayerUnit = _isPlayerBuilding;
-			BuildingSys.ApplySoldierSpawnStats(TypeId, soldier);
-			UnitSpawn.PlaceSoldier(
+			Unit shell = unitScene.Instantiate<Unit>();
+			UnitLogic unit = shell.GetNode<UnitLogic>("Logic");
+			unit.IsPlayerUnit = _isPlayerBuilding;
+			BuildingSys.ApplyUnitSpawnStats(TypeId, unit);
+			UnitSpawn.PlaceUnit(
 				_battlefield, CastleRef, shell,
 				BuildingSys.GetFootprint(TypeId), GridX, GridY, _spawnCount);
 			_spawnCount++;

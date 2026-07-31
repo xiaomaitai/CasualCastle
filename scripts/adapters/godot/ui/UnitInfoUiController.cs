@@ -3,13 +3,13 @@ using CasualCastle.Domain.Battle;
 using Godot;
 using System.Collections.Generic;
 
-public sealed class SoldierInfoUiController
+public sealed class UnitInfoUiController
 {
 	private readonly Node _owner;
 	private readonly Panel _panel;
 	private readonly Label _label;
 
-	public SoldierInfoUiController(Node owner, CanvasLayer uiRoot)
+	public UnitInfoUiController(Node owner, CanvasLayer uiRoot)
 	{
 		_owner = owner;
 
@@ -38,34 +38,34 @@ public sealed class SoldierInfoUiController
 	public void Process()
 	{
 		Vector2 mouseGlobal = _owner.GetViewport().GetMousePosition();
-		SoldierLogic soldier = PickSoldier(mouseGlobal);
+		UnitLogic unit = PickUnit(mouseGlobal);
 
-		if (soldier == null || !soldier.IsAlive)
+		if (unit == null || !unit.IsAlive)
 		{
 			_panel.Visible = false;
 			return;
 		}
 
-		ISoldierState svc = soldier.Handle;
+		IUnitState svc = unit.Handle;
 		if (svc == null)
 		{
 			_panel.Visible = false;
 			return;
 		}
 
-		string side = soldier.IsPlayerUnit ? "我方" : "敌方";
+		string side = unit.IsPlayerUnit ? "我方" : "敌方";
 		string stateText = svc.State switch
 		{
-			SoldierState.Marching => "行军",
-			SoldierState.Fighting => "战斗",
-			SoldierState.Retaliating => "反击",
-			SoldierState.Sieging => "攻城",
+			UnitState.Marching => "行军",
+			UnitState.Fighting => "战斗",
+			UnitState.Retaliating => "反击",
+			UnitState.Sieging => "攻城",
 			_ => "未知"
 		};
 		string pos = $"位置: ({svc.GameX:F0}, {svc.GameY:F0})";
 		string target = $"目标: {svc.TargetDescription}";
 
-		_label.Text = $"{side} {stateText} | HP:{svc.Health}/{soldier.MaxHealth}\n{pos}\n{target}";
+		_label.Text = $"{side} {stateText} | HP:{svc.Health}/{unit.MaxHealth}\n{pos}\n{target}";
 		_panel.Position = mouseGlobal + new Vector2(16, 16);
 		_panel.Visible = true;
 	}
@@ -73,7 +73,7 @@ public sealed class SoldierInfoUiController
 	private Node2D _battlefield;
 	private float _pickRadiusPixels = 40f;
 
-	private SoldierLogic PickSoldier(Vector2 globalPoint)
+	private UnitLogic PickUnit(Vector2 globalPoint)
 	{
 		if (_battlefield == null)
 		{
@@ -83,7 +83,7 @@ public sealed class SoldierInfoUiController
 				return null;
 		}
 
-		SoldierLogic closest = null;
+		UnitLogic closest = null;
 		float closestDist = _pickRadiusPixels;
 
 		foreach (Node child in _battlefield.GetChildren())
@@ -92,7 +92,7 @@ public sealed class SoldierInfoUiController
 			if (area == null)
 				continue;
 
-			SoldierLogic logic = area.GetNodeOrNull<SoldierLogic>("Logic");
+			UnitLogic logic = area.GetNodeOrNull<UnitLogic>("Logic");
 			if (logic == null || !logic.IsAlive)
 				continue;
 

@@ -12,7 +12,7 @@ public partial class CameraController : Camera2D
 	public float ZoomStep = 0.1f;
 
 	[Export]
-	public Rect2 Boundary = new Rect2(0, 0, 1920, 1080);
+	public Rect2 Boundary = BattlefieldMetrics.WorldRect;
 
 	private Vector2 _dragStartPosition;
 	private bool _isDragging;

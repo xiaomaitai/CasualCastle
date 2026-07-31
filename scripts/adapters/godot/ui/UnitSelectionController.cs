@@ -1,13 +1,13 @@
 using Godot;
 
-public sealed class SoldierSelectionController
+public sealed class UnitSelectionController
 {
 	private readonly Node _owner;
 	private readonly Node2D _battlefield;
-	private SoldierLogic _selected;
+	private UnitLogic _selected;
 	private bool _inputBlocked;
 
-	public SoldierSelectionController(Node owner)
+	public UnitSelectionController(Node owner)
 	{
 		_owner = owner;
 		_battlefield = owner.GetParent().GetNode<Node2D>("Battlefield");
@@ -40,7 +40,7 @@ public sealed class SoldierSelectionController
 		if (hoveredControl != null && hoveredControl.MouseFilter != Control.MouseFilterEnum.Ignore)
 			return false;
 
-		SoldierLogic picked = PickSoldier(mouseButton.Position);
+		UnitLogic picked = PickUnit(mouseButton.Position);
 		if (picked == _selected)
 			return true;
 
@@ -53,9 +53,9 @@ public sealed class SoldierSelectionController
 		return true;
 	}
 
-	private SoldierLogic PickSoldier(Vector2 globalPoint)
+	private UnitLogic PickUnit(Vector2 globalPoint)
 	{
-		SoldierLogic closest = null;
+		UnitLogic closest = null;
 		float closestDistance = 40f;
 
 		foreach (Node child in _battlefield.GetChildren())
@@ -64,7 +64,7 @@ public sealed class SoldierSelectionController
 			if (area == null)
 				continue;
 
-			SoldierLogic logic = area.GetNodeOrNull<SoldierLogic>("Logic");
+			UnitLogic logic = area.GetNodeOrNull<UnitLogic>("Logic");
 			if (logic == null || !logic.IsAlive)
 				continue;
 

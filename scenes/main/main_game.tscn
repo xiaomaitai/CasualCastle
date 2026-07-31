@@ -31,7 +31,7 @@ script = ExtResource("4")
 y_sort_enabled = true
 
 [node name="Camera2D" type="Camera2D" parent="Battlefield"]
-position = Vector2(960, 540)
+position = Vector2(960, 1610)
 current = true
 script = ExtResource("21")
 
@@ -43,8 +43,8 @@ motion_scale = Vector2(0.02, 0.02)
 
 [node name="MountainSprite" type="Sprite2D" parent="Battlefield/ParallaxBackground/SkyLayer"]
 texture = ExtResource("18")
-position = Vector2(960, 650)
-scale = Vector2(2.0, 1.8)
+position = Vector2(1920, 560)
+scale = Vector2(4.2, 2.2)
 
 [node name="GrassBattlefield" type="Node2D" parent="Battlefield"]
 script = ExtResource("20")
@@ -52,7 +52,7 @@ script = ExtResource("20")
 [node name="NavigationRegion" type="NavigationRegion2D" parent="Battlefield"]
 
 [node name="PlayerSide" type="Node2D" parent="Battlefield" unique_id=3]
-position = Vector2(75, 156)
+position = Vector2(150, 1210)
 
 [node name="PlayerCastle" parent="Battlefield/PlayerSide" unique_id=14 instance=ExtResource("2")]
 IsPlayerCastle = true
@@ -60,7 +60,7 @@ BarracksGridX = 7
 BarracksGridY = 4
 
 [node name="EnemySide" type="Node2D" parent="Battlefield" unique_id=4]
-position = Vector2(1077, 156)
+position = Vector2(2890, 1210)
 
 [node name="EnemyCastle" parent="Battlefield/EnemySide" unique_id=15 instance=ExtResource("2")]
 IsPlayerCastle = false

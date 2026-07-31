@@ -250,7 +250,7 @@ public partial class Castle : Node2D
 	public Vector2 GetBuildingSpawnPosition(IReadOnlyList<Vector2I> footprint, int anchorX, int anchorY, int spawnIndex = 0) =>
 		ToLocal(GetBuildingSpawnGlobalPosition(footprint, anchorX, anchorY, spawnIndex));
 
-	public bool IsAnyCellOccupiedByPlayerSoldier(IReadOnlyList<Vector2I> cells)
+	public bool IsAnyCellOccupiedByPlayerUnit(IReadOnlyList<Vector2I> cells)
 	{
 		if (cells == null || cells.Count == 0)
 			return false;
@@ -262,10 +262,10 @@ public partial class Castle : Node2D
 
 		foreach (Node child in battlefield.GetChildren())
 		{
-			if (child is not SoldierLogic soldier || !soldier.IsAlive || !soldier.IsPlayerUnit)
+			if (child is not UnitLogic unit || !unit.IsAlive || !unit.IsPlayerUnit)
 				continue;
 
-			if (!TryGetGridFromGlobalPoint(soldier.GlobalPosition, out int gridX, out int gridY))
+			if (!TryGetGridFromGlobalPoint(unit.GlobalPosition, out int gridX, out int gridY))
 				continue;
 
 			foreach (Vector2I cell in cells)

@@ -4,27 +4,27 @@ using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Shared;
 using Godot;
 
-public partial class SoldierLogic : Node2D
+public partial class UnitLogic : Node2D
 {
-	internal CasualCastle.Domain.Battle.Soldier _soldier;
+	internal CasualCastle.Domain.Battle.Unit _unit;
 	private NavigationPortAdapter _navPort;
-	public ISoldierHandle Handle => _soldier;
+	public IUnitHandle Handle => _unit;
 	private IFieldUnitRepository _fieldRepo;
 	private ITacticalQueries _tactical;
 	private IRvoService _rvoService;
-	private SoldierEventRelay _eventRelay;
-	private SoldierVisual _visual;
-	private SoldierLifecycle _lifecycle;
+	private UnitEventRelay _eventRelay;
+	private UnitVisual _visual;
+	private UnitLifecycle _lifecycle;
 
 	public bool IsPlayerUnit { get; set; }
-	public bool IsAlive => _soldier?.IsAlive ?? false;
-	public int Health => _soldier?.Health ?? 0;
-	public int MaxHealth => _soldier?.MaxHealth ?? 30;
-	public int Damage => _soldier?.Damage ?? 0;
+	public bool IsAlive => _unit?.IsAlive ?? false;
+	public int Health => _unit?.Health ?? 0;
+	public int MaxHealth => _unit?.MaxHealth ?? 30;
+	public int Damage => _unit?.Damage ?? 0;
 	public float DisplaySize { get; private set; }
-	public float CollisionRadius => _soldier?.CollisionRadius ?? 50f;
+	public float CollisionRadius => _unit?.CollisionRadius ?? 50f;
 	public AttackType AttackType { get; private set; }
-	public DamageType DamageType => _soldier?.DamageType ?? DamageType.Slash;
+	public DamageType DamageType => _unit?.DamageType ?? DamageType.Slash;
 	public bool IsSelected { get; private set; }
 
 	private bool _statsPending;
@@ -34,33 +34,33 @@ public partial class SoldierLogic : Node2D
 
 	public void InitializeFromStats(UnitStats stats)
 	{
-		if (_soldier == null)
+		if (_unit == null)
 		{
 			_body = GetParent<Node2D>();
 			_navigationAgent = GetNode<NavigationAgent2D>("NavigationAgent");
 			_navigationAgent.VelocityComputed += OnVelocityComputed;
 			_navPort = new NavigationPortAdapter(_navigationAgent);
-			_soldier = new CasualCastle.Domain.Battle.Soldier(_navPort);
-			_eventRelay = new SoldierEventRelay();
+			_unit = new CasualCastle.Domain.Battle.Unit(_navPort);
+			_eventRelay = new UnitEventRelay();
 			AddChild(_eventRelay);
 			_eventRelay.Attack += OnAttack;
-			_soldier.EventPort = _eventRelay;
+			_unit.EventPort = _eventRelay;
 			_fieldRepo = GameManager.Get<IFieldUnitRepository>();
 			_tactical = GameManager.Get<ITacticalQueries>();
 			_rvoService = GameManager.Get<IRvoService>();
-			_visual = new SoldierVisual();
-			_lifecycle = new SoldierLifecycle();
+			_visual = new UnitVisual();
+			_lifecycle = new UnitLifecycle();
 		}
-		_soldier.Initialize(stats, IsPlayerUnit);
-		_soldier.SetDamageMatrix(GameManager.Get<DamageMatrix>());
+		_unit.Initialize(stats, IsPlayerUnit);
+		_unit.SetDamageMatrix(GameManager.Get<DamageMatrix>());
 		ISkillRepository skillRepo = GameManager.Get<ISkillRepository>();
 		IReadOnlyList<SkillDef> skills = skillRepo.GetByUnitType(stats.TypeId);
 		foreach (SkillDef skill in skills)
-			_soldier.Skills.Add(skill);
-		_rvoService.ConfigureRvo(_navPort, _soldier.CollisionRadius);
+			_unit.Skills.Add(skill);
+		_rvoService.ConfigureRvo(_navPort, _unit.CollisionRadius);
 
 		if (_fieldRepo != null)
-			_fieldRepo.Register(_soldier);
+			_fieldRepo.Register(_unit);
 
 		DisplaySize = ComputeDisplaySize(stats.Size);
 		AttackType = stats.AttackType;
@@ -75,14 +75,14 @@ public partial class SoldierLogic : Node2D
 		_statsPending = false;
 
 		_visual.ApplyStats(
-			_soldier.TypeId,
+			_unit.TypeId,
 			GameCoordinatesAdapter.GameUnitsToPixels(DisplaySize));
 		_visual.SetHealth(Health, MaxHealth);
 	}
 
-	public void SetTarget(SoldierLogic target)
+	public void SetTarget(UnitLogic target)
 	{
-		_soldier?.SetEnemyTarget(target?.Handle);
+		_unit?.SetEnemyTarget(target?.Handle);
 	}
 
 	public override void _Ready()
@@ -92,9 +92,9 @@ public partial class SoldierLogic : Node2D
 
 		ApplyPendingStats();
 
-		if (_soldier != null)
+		if (_unit != null)
 		{
-			_soldier.SetPosition(
+			_unit.SetPosition(
 				GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.X),
 				GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.Y));
 		}
@@ -114,7 +114,7 @@ public partial class SoldierLogic : Node2D
 
 	public override void _ExitTree()
 	{
-		_fieldRepo?.Unregister(_soldier);
+		_fieldRepo?.Unregister(_unit);
 
 		if (AdapterRegistry.Resolve<GameManager>() != null)
 			AdapterRegistry.Resolve<GameManager>().PhaseChanged -= OnPhaseChanged;
@@ -163,27 +163,27 @@ public partial class SoldierLogic : Node2D
 		if (!IsActive) return;
 		if (_fieldRepo == null || _body == null) return;
 
-		(ISoldierHandle nearest, float edgeDist) = _tactical.FindNearestEnemy(_soldier);
+		(IUnitHandle nearest, float edgeDist) = _tactical.FindNearestEnemy(_unit);
 
-		IBuildingTarget buildingTarget = _tactical.FindOverlappingBuilding(_soldier);
+		IBuildingTarget buildingTarget = _tactical.FindOverlappingBuilding(_unit);
 		if (buildingTarget != null)
-			_soldier.SetBuildingTarget(buildingTarget);
+			_unit.SetBuildingTarget(buildingTarget);
 		else
-			_soldier.ClearBuildingTarget();
+			_unit.ClearBuildingTarget();
 
-		_soldier.UpdateTargeting(nearest, edgeDist);
+		_unit.UpdateTargeting(nearest, edgeDist);
 
 		float marchX, marchY;
 		Vector2 marchDest = SelectTarget();
 		marchX = GameCoordinatesAdapter.PixelsToGameUnits(marchDest.X);
 		marchY = GameCoordinatesAdapter.PixelsToGameUnits(marchDest.Y);
 
-		_soldier.UpdateBehavior(dt, edgeDist, marchX, marchY);
+		_unit.UpdateBehavior(dt, edgeDist, marchX, marchY);
 
 		Vector2 currentPixelPos = _body.GlobalPosition;
 		Vector2 nextPathPos = _navigationAgent.GetNextPathPosition();
 		Vector2 direction = nextPathPos - currentPixelPos;
-		float pixelSpeed = GameCoordinatesAdapter.GameUnitsToPixels(_soldier.Speed);
+		float pixelSpeed = GameCoordinatesAdapter.GameUnitsToPixels(_unit.Speed);
 		Vector2 desiredVelocity = direction.Length() > 0.001f
 			? direction.Normalized() * pixelSpeed
 			: Vector2.Zero;
@@ -195,7 +195,7 @@ public partial class SoldierLogic : Node2D
 		if (Mathf.Abs(moveVelocity.X) > 0.1f)
 			_visual.SetFlipH(moveVelocity.X < 0);
 
-		_soldier.SetPosition(
+		_unit.SetPosition(
 			GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.X),
 			GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.Y));
 
@@ -206,7 +206,7 @@ public partial class SoldierLogic : Node2D
 		_safeVelocity = safeVelocity;
 	}
 
-	public void TakeDamage(int amount, SoldierLogic attacker = null)
+	public void TakeDamage(int amount, UnitLogic attacker = null)
 	{
 		if (!IsAlive) return;
 
@@ -216,7 +216,7 @@ public partial class SoldierLogic : Node2D
 			atkX = GameCoordinatesAdapter.PixelsToGameUnits(attacker._body.GlobalPosition.X);
 			atkY = GameCoordinatesAdapter.PixelsToGameUnits(attacker._body.GlobalPosition.Y);
 		}
-		_soldier.TakeDamage(amount, attacker?.Handle, atkX, atkY);
+		_unit.TakeDamage(amount, attacker?.Handle, atkX, atkY);
 	}
 
 	private Vector2 SelectTarget()
@@ -240,9 +240,9 @@ public partial class SoldierLogic : Node2D
 	{
 		_visual.SetHealth(Health, MaxHealth);
 		_visual?.StartHitFlash();
-		ISoldierHandle attacker = _eventRelay.LastAttacker;
+		IUnitHandle attacker = _eventRelay.LastAttacker;
 		if (attacker != null && attacker.IsAlive)
-			_tactical.PropagateRetaliation(_soldier, attacker);
+			_tactical.PropagateRetaliation(_unit, attacker);
 	}
 
 	private void OnDied()
@@ -251,7 +251,7 @@ public partial class SoldierLogic : Node2D
 
 		_lifecycle?.PlayDeathAnimation(this, () =>
 		{
-			_fieldRepo?.Unregister(_soldier);
+			_fieldRepo?.Unregister(_unit);
 		});
 	}
 

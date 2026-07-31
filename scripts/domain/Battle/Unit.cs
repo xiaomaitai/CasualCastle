@@ -2,10 +2,10 @@ using System;
 
 namespace CasualCastle.Domain.Battle;
 
-public class Soldier : ISoldierHandle
+public class Unit : IUnitHandle
 {
 	internal INavigationPort NavPort { get; }
-	public ISoldierEventPort EventPort { get; set; }
+	public IUnitEventPort EventPort { get; set; }
 
 	public string TypeId { get; set; }
 	public bool IsPlayerUnit { get; set; }
@@ -28,9 +28,9 @@ public class Soldier : ISoldierHandle
 	public SkillSet Skills { get; private set; }
 	public GameContext GameCtx { get; set; } = new();
 
-	public ISoldierHandle TargetEnemy { get; set; }
+	public IUnitHandle TargetEnemy { get; set; }
 	public IBuildingTarget TargetBuilding { get; set; }
-	public SoldierState State { get; set; }
+	public UnitState State { get; set; }
 
 	private float _attackTimer;
 	private DamageMatrix _damageMatrix;
@@ -48,7 +48,7 @@ public class Soldier : ISoldierHandle
 		}
 	}
 
-	public Soldier(INavigationPort navPort)
+	public Unit(INavigationPort navPort)
 	{
 		NavPort = navPort;
 	}
@@ -88,7 +88,7 @@ public class Soldier : ISoldierHandle
 		GameY = gameY;
 	}
 
-	public void SetEnemyTarget(ISoldierHandle target)
+	public void SetEnemyTarget(IUnitHandle target)
 	{
 		TargetEnemy = target;
 	}
@@ -103,7 +103,7 @@ public class Soldier : ISoldierHandle
 		TargetBuilding = null;
 	}
 
-	public void TakeDamage(int amount, ISoldierHandle attacker, float attackerGameX, float attackerGameY)
+	public void TakeDamage(int amount, IUnitHandle attacker, float attackerGameX, float attackerGameY)
 	{
 		if (!IsAlive)
 			return;
@@ -135,7 +135,7 @@ public class Soldier : ISoldierHandle
 		}
 	}
 
-	public void UpdateTargeting(ISoldierHandle nearestEnemy, float enemyEdgeDist)
+	public void UpdateTargeting(IUnitHandle nearestEnemy, float enemyEdgeDist)
 	{
 		if (!IsAlive)
 			return;
@@ -143,21 +143,21 @@ public class Soldier : ISoldierHandle
 		if (nearestEnemy != null && nearestEnemy.IsAlive)
 		{
 			TargetEnemy = nearestEnemy;
-			State = SoldierState.Fighting;
+			State = UnitState.Fighting;
 		}
 		else if (TargetEnemy != null && TargetEnemy.IsAlive)
 		{
-			State = SoldierState.Retaliating;
+			State = UnitState.Retaliating;
 		}
 		else if (TargetBuilding != null)
 		{
 			TargetEnemy = null;
-			State = SoldierState.Sieging;
+			State = UnitState.Sieging;
 		}
 		else
 		{
 			TargetEnemy = null;
-			State = SoldierState.Marching;
+			State = UnitState.Marching;
 		}
 	}
 
@@ -179,8 +179,8 @@ public class Soldier : ISoldierHandle
 
 		switch (State)
 		{
-			case SoldierState.Fighting:
-			case SoldierState.Retaliating:
+			case UnitState.Fighting:
+			case UnitState.Retaliating:
 				if (TargetEnemy == null || !TargetEnemy.IsAlive)
 					break;
 				if (enemyEdgeDist <= AttackRange)
@@ -200,7 +200,7 @@ public class Soldier : ISoldierHandle
 						{
 							foreach (OnHitEffect effect in Skills.GetOnHitEffects())
 							{
-								if (effect.Type == "slow" && TargetEnemy is ISoldierHandle targetHandle)
+								if (effect.Type == "slow" && TargetEnemy is IUnitHandle targetHandle)
 									ApplySlow(targetHandle, effect.Value, effect.Duration);
 							}
 						}
@@ -215,7 +215,7 @@ public class Soldier : ISoldierHandle
 				}
 				break;
 
-			case SoldierState.Sieging:
+			case UnitState.Sieging:
 				if (_attackTimer <= 0 && TargetBuilding != null && !TargetBuilding.IsDestroyed)
 				{
 					TargetBuilding.TakeDamage(Damage);
@@ -223,7 +223,7 @@ public class Soldier : ISoldierHandle
 				}
 				break;
 
-			case SoldierState.Marching:
+			case UnitState.Marching:
 				TargetEnemy = null;
 				NavPort.SetTarget(marchTargetGameX, marchTargetGameY);
 				break;
@@ -236,7 +236,7 @@ public class Soldier : ISoldierHandle
 		GameY += dy;
 	}
 
-	private static void ApplySlow(ISoldierHandle target, float slowValue, float duration)
+	private static void ApplySlow(IUnitHandle target, float slowValue, float duration)
 	{
 	}
 }

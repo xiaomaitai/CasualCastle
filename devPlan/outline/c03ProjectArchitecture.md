@@ -20,7 +20,7 @@ CasualCastle/
 │       │   │   ├── DisplaySettingsManager.cs      # 分辨率/窗口管理 + DevModeEnabled
 │       │   │   └── AdapterRegistry.cs             # Godot 节点服务定位器
 │       │   ├── building/  Castle, Building, BuildingSystem, AdjacentSystem, AdjacentLinkPulse, CastleHighlightOverlay
-│       │   ├── battle/    Soldier, UnitSpawn
+│       │   ├── battle/    Unit, UnitSpawn
 │       │   ├── shop/      ShopSystem
 │       │   ├── card/      CardSystem
 │       │   ├── night/     NightSystem
@@ -116,8 +116,8 @@ GameManager._Ready()
 | `CombineRules` | Domain.Building | CombineSystem | 配方匹配、合成组查找、参与条件 |
 | `ShopRules` | Domain.Building | ShopSystem | 卡牌目录、随机生成商品 |
 | `CardRules` | Domain.Building | CardSystem | 手牌上限、索引校验 |
-| `SoldierData` | Domain.Battle | 新建 | 战斗属性数据类 |
-| `CombatRules` | Domain.Battle | Soldier | 伤害计算、冷却计时 |
+| `UnitData` | Domain.Battle | 新建 | 战斗属性数据类 |
+| `CombatRules` | Domain.Battle | Unit | 伤害计算、冷却计时 |
 | `ReportBuilder` | Domain.History | BattleReportSystem | 快照捕获、战报构建、克隆 |
 | `MirrorRules` | Domain.History | ReplayAiSystem | 镜像锚点计算 |
 | `BattleReportModels` | Domain.History | 新建 | 战报/快照数据模型 |

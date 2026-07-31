@@ -12,19 +12,19 @@ public class TacticalQueryService : ITacticalQueries
 		_repo = repo;
 	}
 
-	public (ISoldierHandle nearest, float edgeDist) FindNearestEnemy(ISoldierHandle soldier)
+	public (IUnitHandle nearest, float edgeDist) FindNearestEnemy(IUnitHandle unit)
 	{
-		if (!soldier.IsAlive)
+		if (!unit.IsAlive)
 			return (null, float.MaxValue);
 
-		ISoldierHandle best = null;
+		IUnitHandle best = null;
 		float bestScore = float.MaxValue;
 
-		foreach (ISoldierHandle candidate in _repo.AllUnits)
+		foreach (IUnitHandle candidate in _repo.AllUnits)
 		{
-			if (!candidate.IsAlive || candidate.IsPlayerUnit == soldier.IsPlayerUnit)
+			if (!candidate.IsAlive || candidate.IsPlayerUnit == unit.IsPlayerUnit)
 				continue;
-			float dist = DistSq(soldier, candidate);
+			float dist = DistSq(unit, candidate);
 			if (dist < bestScore)
 			{
 				bestScore = dist;
@@ -35,21 +35,21 @@ public class TacticalQueryService : ITacticalQueries
 		if (best == null)
 			return (null, float.MaxValue);
 
-		float edgeDist = MathF.Sqrt(bestScore) - soldier.CollisionRadius - best.CollisionRadius;
-		if (MathF.Sqrt(bestScore) > soldier.VisionRange)
+		float edgeDist = MathF.Sqrt(bestScore) - unit.CollisionRadius - best.CollisionRadius;
+		if (MathF.Sqrt(bestScore) > unit.VisionRange)
 			return (null, float.MaxValue);
 
 		return (best, edgeDist);
 	}
 
-	public void PropagateRetaliation(ISoldierHandle center, ISoldierHandle attacker)
+	public void PropagateRetaliation(IUnitHandle center, IUnitHandle attacker)
 	{
 		float radius = center.VisionRange;
-		foreach (ISoldierHandle ally in _repo.AllUnits)
+		foreach (IUnitHandle ally in _repo.AllUnits)
 		{
 			if (ally == center || !ally.IsAlive || ally.IsPlayerUnit != center.IsPlayerUnit)
 				continue;
-			if (ally.State == SoldierState.Fighting)
+			if (ally.State == UnitState.Fighting)
 				continue;
 			float dx = ally.GameX - center.GameX;
 			float dy = ally.GameY - center.GameY;
@@ -59,14 +59,14 @@ public class TacticalQueryService : ITacticalQueries
 		}
 	}
 
-	public IBuildingTarget FindOverlappingBuilding(ISoldierHandle soldier)
+	public IBuildingTarget FindOverlappingBuilding(IUnitHandle unit)
 	{
 		foreach (IBuildingRef b in _repo.AllBuildings)
 		{
-			if (b.IsDestroyed || !b.IsEnemyOf(soldier))
+			if (b.IsDestroyed || !b.IsEnemyOf(unit))
 				continue;
-			if (soldier.GameX >= b.MinX && soldier.GameX <= b.MaxX
-				&& soldier.GameY >= b.MinY && soldier.GameY <= b.MaxY)
+			if (unit.GameX >= b.MinX && unit.GameX <= b.MaxX
+				&& unit.GameY >= b.MinY && unit.GameY <= b.MaxY)
 				return b.BuildingTarget;
 		}
 		return null;
@@ -74,7 +74,7 @@ public class TacticalQueryService : ITacticalQueries
 
 	public bool HasEnemyOnBuilding(IBuildingRef building)
 	{
-		foreach (ISoldierHandle s in _repo.AllUnits)
+		foreach (IUnitHandle s in _repo.AllUnits)
 		{
 			if (!s.IsAlive || !building.IsEnemyOf(s))
 				continue;
@@ -85,7 +85,7 @@ public class TacticalQueryService : ITacticalQueries
 		return false;
 	}
 
-	private static float DistSq(ISoldierHandle a, ISoldierHandle b)
+	private static float DistSq(IUnitHandle a, IUnitHandle b)
 	{
 		float dx = a.GameX - b.GameX;
 		float dy = a.GameY - b.GameY;

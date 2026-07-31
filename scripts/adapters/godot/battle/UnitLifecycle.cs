@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public class SoldierLifecycle
+public class UnitLifecycle
 {
     public void PlayDeathAnimation(Node2D owner, Action onCleanup)
     {

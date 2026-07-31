@@ -14,9 +14,9 @@ public partial class MainGameController : Node2D
         NavigationPolygon navPoly = new NavigationPolygon();
         navPoly.AddOutline(new Vector2[] {
             new Vector2(0, 0),
-            new Vector2(1920, 0),
-            new Vector2(1920, 1080),
-            new Vector2(0, 1080)
+            new Vector2(BattlefieldMetrics.WorldWidth, 0),
+            new Vector2(BattlefieldMetrics.WorldWidth, BattlefieldMetrics.WorldHeight),
+            new Vector2(0, BattlefieldMetrics.WorldHeight)
         });
         navRegion.NavigationPolygon = navPoly;
         navRegion.BakeNavigationPolygon();

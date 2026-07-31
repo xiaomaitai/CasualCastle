@@ -29,7 +29,7 @@ public class ReplayTarget : IReplayTarget
             domainFootprint, _castle.GridColumns);
 
         IReadOnlyList<Vector2I> footprint = AdapterRegistry.Resolve<BuildingSystem>().GetFootprint(snapshot.TypeId);
-        if (IsBlockedByPlayerSoldier(mirrorX, mirrorY, footprint))
+        if (IsBlockedByPlayerUnit(mirrorX, mirrorY, footprint))
             return false;
 
         Building building = AdapterRegistry.Resolve<BuildingSystem>().CreateBuilding(snapshot.TypeId);
@@ -50,11 +50,11 @@ public class ReplayTarget : IReplayTarget
         return true;
     }
 
-    private bool IsBlockedByPlayerSoldier(int anchorX, int anchorY, IReadOnlyList<Vector2I> footprint)
+    private bool IsBlockedByPlayerUnit(int anchorX, int anchorY, IReadOnlyList<Vector2I> footprint)
     {
         List<Vector2I> occupiedCells = new();
         foreach (Vector2I offset in footprint)
             occupiedCells.Add(new Vector2I(anchorX + offset.X, anchorY + offset.Y));
-        return _castle.IsAnyCellOccupiedByPlayerSoldier(occupiedCells);
+        return _castle.IsAnyCellOccupiedByPlayerUnit(occupiedCells);
     }
 }

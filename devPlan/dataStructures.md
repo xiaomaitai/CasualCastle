@@ -1,6 +1,6 @@
 # 数据结构设计 — CasualCastle
 
-卡牌、建筑、部队等核心运行时/配置数据的 C# 结构草案。概念定义见 `concepts.md`，开发顺序与系统划分见 `outline/`。
+卡牌、建筑、单位等核心运行时/配置数据的 C# 结构草案。概念定义见 `concepts.md`，开发顺序与系统划分见 `outline/`。
 
 ---
 
@@ -28,7 +28,7 @@ public class BuildingData
 	public string Name;         // 建筑名称
 	public int Health;          // 生命值
 	public float ProductionInterval; // 产出间隔
-	public string UnitType;     // 产出部队类型
+	public string UnitType;     // 产出单位类型
 	public List<string> AdjacentBonuses; // 邻接加成列表
 	public int CombineTier;      // 组合阶数（0 = 未组合）
 }
@@ -84,13 +84,13 @@ public class BattleReport
 
 ---
 
-## 部队数据
+## 单位数据
 
 ```csharp
 public class UnitData
 {
-	public string Id;           // 部队ID
-	public string Name;         // 部队名称
+	public string Id;           // 单位ID
+	public string Name;         // 单位名称
 	public int Damage;          // 攻击力
 	public int Health;          // 生命值
 	public float Speed;         // 移动速度

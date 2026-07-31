@@ -1,6 +1,6 @@
 namespace CasualCastle.Domain.Battle;
 
-public interface ISoldierState
+public interface IUnitState
 {
 	bool IsAlive { get; }
 	bool IsPlayerUnit { get; }
@@ -14,11 +14,11 @@ public interface ISoldierState
 	float CollisionRadius { get; }
 	float GameX { get; }
 	float GameY { get; }
-	SoldierState State { get; }
+	UnitState State { get; }
 	ArmorType ArmorType { get; }
 	int ArmorValue { get; }
 	DamageType DamageType { get; }
 	string Race { get; }
-	ISoldierHandle TargetEnemy { get; }
+	IUnitHandle TargetEnemy { get; }
 	string TargetDescription { get; }
 }

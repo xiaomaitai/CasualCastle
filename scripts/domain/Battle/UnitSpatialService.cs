@@ -7,18 +7,18 @@ public class UnitSpatialService : ICombatUseCase
 {
 	private const float PushForce = 500f;
 
-	public void PushSoldiers(IReadOnlyList<ISoldierHandle> allUnits, float dt)
+	public void PushUnits(IReadOnlyList<IUnitHandle> allUnits, float dt)
 	{
 		for (int i = 0; i < allUnits.Count; i++)
 		{
-			ISoldierHandle a = allUnits[i];
-			if (!a.IsAlive || a.State == SoldierState.Sieging)
+			IUnitHandle a = allUnits[i];
+			if (!a.IsAlive || a.State == UnitState.Sieging)
 				continue;
 
 			for (int j = i + 1; j < allUnits.Count; j++)
 			{
-				ISoldierHandle b = allUnits[j];
-				if (!b.IsAlive || b.State == SoldierState.Sieging)
+				IUnitHandle b = allUnits[j];
+				if (!b.IsAlive || b.State == UnitState.Sieging)
 					continue;
 
 				float dx = a.GameX - b.GameX;

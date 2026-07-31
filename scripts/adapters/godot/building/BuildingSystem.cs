@@ -108,11 +108,11 @@ public partial class BuildingSystem : Node
         return new Color(data.SpriteModulateR, data.SpriteModulateG, data.SpriteModulateB, data.SpriteModulateA);
     }
 
-    public void ApplySoldierSpawnStats(string buildingType, SoldierLogic soldier)
+    public void ApplyUnitSpawnStats(string buildingType, UnitLogic unit)
     {
         string unitTypeId = _buildingRepo.GetUnitTypeId(buildingType);
         UnitStats stats = _unitRepo.Get(unitTypeId);
-        soldier.InitializeFromStats(stats);
+        unit.InitializeFromStats(stats);
     }
 
     public void ApplyVisual(Building building)

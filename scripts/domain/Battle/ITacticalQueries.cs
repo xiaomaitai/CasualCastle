@@ -4,8 +4,8 @@ namespace CasualCastle.Domain.Battle;
 
 public interface ITacticalQueries
 {
-	(ISoldierHandle nearest, float edgeDist) FindNearestEnemy(ISoldierHandle soldier);
-	void PropagateRetaliation(ISoldierHandle center, ISoldierHandle attacker);
-	IBuildingTarget FindOverlappingBuilding(ISoldierHandle soldier);
+	(IUnitHandle nearest, float edgeDist) FindNearestEnemy(IUnitHandle unit);
+	void PropagateRetaliation(IUnitHandle center, IUnitHandle attacker);
+	IBuildingTarget FindOverlappingBuilding(IUnitHandle unit);
 	bool HasEnemyOnBuilding(IBuildingRef building);
 }

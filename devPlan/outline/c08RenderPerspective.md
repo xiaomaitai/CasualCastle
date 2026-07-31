@@ -8,9 +8,9 @@
 
 ## 已完成
 
-- 士兵碰撞体在脚下（CircleShape2D），精灵 Y 偏移让脚部落到圆上
+- 单位碰撞体在脚下（CircleShape2D），精灵 Y 偏移让脚部落到圆上
 - 建筑碰撞体从 domain 取值、`GameUnitsToPixels()` 转换
-- `Battlefield` 启用 `y_sort_enabled`，士兵/建筑按 Y 轴排序
+- `Battlefield` 启用 `y_sort_enabled`，单位/建筑按 Y 轴排序
 - `Camera2D` 节点已添加，绑定 Battlefield，`current = true`
 
 ## 待办
@@ -25,6 +25,6 @@
 当前是测试贴图，需要按纸片人风格绘制：
 
 - [ ] 确定精灵绘制角度和锚点（脚底中心）
-- [ ] 士兵 sprite
+- [ ] 单位 sprite
 - [ ] 建筑 sprite
 - [ ] 地面阴影贴图（可选，椭圆 decal 挂在脚下）

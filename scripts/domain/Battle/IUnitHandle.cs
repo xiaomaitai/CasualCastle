@@ -1,9 +1,9 @@
 namespace CasualCastle.Domain.Battle;
 
-public interface ISoldierHandle : ISoldierState
+public interface IUnitHandle : IUnitState
 {
-	void TakeDamage(int amount, ISoldierHandle attacker, float attackerGameX, float attackerGameY);
-	void SetEnemyTarget(ISoldierHandle target);
+	void TakeDamage(int amount, IUnitHandle attacker, float attackerGameX, float attackerGameY);
+	void SetEnemyTarget(IUnitHandle target);
 	void ApplyPush(float dx, float dy);
 	void SetBuildingTarget(IBuildingTarget building);
 	void ClearBuildingTarget();

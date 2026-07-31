@@ -4,9 +4,9 @@ namespace CasualCastle.Domain.Battle;
 
 public interface IFieldUnitRepository
 {
-	void Register(ISoldierHandle soldier);
-	void Unregister(ISoldierHandle soldier);
-	IReadOnlyList<ISoldierHandle> AllUnits { get; }
+	void Register(IUnitHandle unit);
+	void Unregister(IUnitHandle unit);
+	IReadOnlyList<IUnitHandle> AllUnits { get; }
 
 	void RegisterBuilding(IBuildingRef building);
 	void UnregisterBuilding(IBuildingRef building);

@@ -15,7 +15,7 @@
 
 **换算公式：** `像素 = 游戏单位`（PixelsPerCell = UnitsPerCell = 100，1:1 对应）
 
-所有战场内实体（建筑、士兵、弹体）的尺寸、距离、速度一律用 game unit 定义。像素仅用于 UI 和输出分辨率。
+所有战场内实体（建筑、单位、弹体）的尺寸、距离、速度一律用 game unit 定义。像素仅用于 UI 和输出分辨率。
 
 ---
 
@@ -36,12 +36,12 @@ assets/
 
 ---
 
-## 1. 士兵/单位
+## 1. 单位/单位
 
 ### 节点结构
 
 ```
-Soldier (Area2D)
+Unit (Area2D)
 ├── CollisionCircle     # 碰撞圈：可视化圆圈，我方绿/敌方红
 ├── Sprite2D            # 显示体：正方形 sprite
 └── CircleShape2D       # 碰撞体：与 CollisionCircle 同半径
@@ -58,7 +58,7 @@ Soldier (Area2D)
 | 我方 | 绿色 | `Color.Green`，半透明 |
 | 敌方 | 红色 | `Color.Red`，半透明 |
 
-在 `Soldier._Draw()` 中用 `DrawCircle(Vector2.Zero, collisionRadius, color)` 绘制。
+在 `Unit._Draw()` 中用 `DrawCircle(Vector2.Zero, collisionRadius, color)` 绘制。
 
 ### 四种体型
 
@@ -127,7 +127,7 @@ Soldier (Area2D)
 | 双格（靶场） | 200 × 100 | 180 × 80 |
 | L 形（马厩） | 按 footprint | 按格分别缩进 |
 
-碰撞体略小于占地，避免邻接建筑碰撞重叠，同时保证士兵能检测到建筑阻挡。
+碰撞体略小于占地，避免邻接建筑碰撞重叠，同时保证单位能检测到建筑阻挡。
 
 ---
 
@@ -160,10 +160,10 @@ Soldier (Area2D)
 **提示词模板：**
 
 ```
-A medieval [unit type] soldier, [weapon/gear], facing right, full body character, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors, game character icon
+A medieval [unit type] unit, [weapon/gear], facing right, full body character, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors, game character icon
 ```
 
-示例：`A medieval spearman soldier, holding a long spear, facing right, full body character, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors, game character icon`
+示例：`A medieval spearman unit, holding a long spear, facing right, full body character, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors, game character icon`
 
 ---
 
@@ -232,13 +232,13 @@ process/fix_alpha_border=true
 
 ## AI 素材管线
 
-游戏素材（士兵、建筑、图标等）通过 AI 生成，可选抠图。两个阶段均由 `.claude/skills/` 下的 skill 驱动。
+游戏素材（单位、建筑、图标等）通过 AI 生成，可选抠图。两个阶段均由 `.claude/skills/` 下的 skill 驱动。
 
 ### 阶段一：生图（generate-image）
 
 使用 Liblib.art WebUI 文生图 API，根据提示词生成基础 PNG。
 
-**触发方式：** 直接对 Claude 描述想要的素材（如"生成一个持剑骷髅士兵"），Claude 自动调用 `generate-image` skill。
+**触发方式：** 直接对 Claude 描述想要的素材（如"生成一个持剑骷髅单位"），Claude 自动调用 `generate-image` skill。
 
 **关键规则：**
 - 生图前必须对照本文档确定目标尺寸（game unit → 像素换算见上文速查表）
@@ -275,7 +275,7 @@ process/fix_alpha_border=true
 
 **典型对话示例：**
 
-> 用户：帮我生成一个中型狼人士兵，粗描边卡通风格
+> 用户：帮我生成一个中型狼人单位，粗描边卡通风格
 >
 > Claude：
 > 1. 查 assetSpecs.md → Medium 体型，生成 512×512 缩放到 256×256

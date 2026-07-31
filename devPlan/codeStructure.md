@@ -23,12 +23,12 @@ CasualCastle/
 │   │   │   ├── IBuildingRepository.cs, ICombineBuildingFactory.cs
 │   │   │   └── BuildingModule.cs
 │   │   ├── Battle/                                 # Battle.csproj → Shared, Building
-│   │   │   ├── Soldier.cs, SoldierState.cs, UnitStats.cs, UnitSize.cs
+│   │   │   ├── Unit.cs, UnitState.cs, UnitStats.cs, UnitSize.cs
 │   │   │   ├── CombatRules.cs, DamageMatrix.cs, DamageType.cs, AttackType.cs, ArmorType.cs
 │   │   │   ├── UnitSpatialService.cs
-│   │   │   ├── ISoldierService.cs, SoldierService.cs
+│   │   │   ├── IUnitService.cs, UnitService.cs
 │   │   │   ├── IFieldUnitRepository.cs, IUnitRepository.cs
-│   │   │   ├── IGameState.cs, INavigationPort.cs, ISoldierEventPort.cs
+│   │   │   ├── IGameState.cs, INavigationPort.cs, IUnitEventPort.cs
 │   │   │   ├── IBuildingRef.cs, IBuildingTarget.cs
 │   │   │   ├── UnitRegistry.cs
 │   │   │   └── BattleModule.cs
@@ -49,8 +49,8 @@ CasualCastle/
 │       │   │   ├── DisplaySettingsManager.cs       # 分辨率/窗口 + DevModeEnabled
 │       │   │   └── AdapterRegistry.cs              # Godot 节点服务定位器
 │       │   ├── building/                           # Castle, Building, BuildingSystem, CastlePlacementAdapter
-│       │   ├── battle/                             # Soldier, SoldierLogic, SoldierEventRelay
-│   │       │                                       # SoldierLifecycle, SoldierVisual
+│       │   ├── battle/                             # Unit, UnitLogic, UnitEventRelay
+│   │       │                                       # UnitLifecycle, UnitVisual
 │   │       │                                       # NavigationPortAdapter, BattleManager, UnitSpawn
 │       │   ├── battle_report/ BattleReportSystem.cs
 │       │   ├── combine/        CombineBuildingFactory.cs
@@ -107,7 +107,7 @@ domain 项目零 `using Godot`，单向无循环。
   ├── GameManager, DisplaySettingsManager
   ├── BattleManager, BuildingSystem, BattleReportSystem
   ├── Hand, Shop, IBuildingFactory
-  └── 动态实例（Building, Soldier）按需解析
+  └── 动态实例（Building, Unit）按需解析
 ```
 
 - `CompositionRoot.Build()` 构建 MS DI 容器
@@ -133,7 +133,7 @@ domain 项目零 `using Godot`，单向无循环。
 |----|------|
 | `MainGameController` | 场景入口，注册 Battlefield/Castle 到 GameManager |
 | `UIManager` | UI 总控，组合 HUD/商店/手牌/暂停/设置/结算控制器 |
-| `BattleManager` | 每帧调用 UnitSpatialService.PushSoldiers |
+| `BattleManager` | 每帧调用 UnitSpatialService.PushUnits |
 | `BuildingSystem` | 统一放置、占地配置表、产兵属性应用 |
 | `BattleReportSystem` | 夜末快照、局内缓存、持久化 |
 
@@ -143,16 +143,16 @@ domain 项目零 `using Godot`，单向无循环。
 |----|------|------|
 | `Castle` | Node2D | 网格占用、建筑放置、血条、放置预览 |
 | `Building` | Area2D | 建筑基类，工作循环，实现 IBuildingState/IBuildingTarget/IBuildingRef |
-| `Soldier` | Area2D | 战斗单位容器（空壳），逻辑在 SoldierLogic 子节点 |
-| `SoldierLifecycle` | — | 士兵死亡动画、队列移除（纯 Godot 视觉） |
-| `SoldierVisual` | — | 士兵外观（颜色、睡眠视觉、受击闪白） |
+| `Unit` | Area2D | 战斗单位容器（空壳），逻辑在 UnitLogic 子节点 |
+| `UnitLifecycle` | — | 单位死亡动画、队列移除（纯 Godot 视觉） |
+| `UnitVisual` | — | 单位外观（颜色、睡眠视觉、受击闪白） |
 
 ### 领域服务
 
 | 类 | 子域 | 注册方式 |
 |----|------|---------|
 | `UnitSpatialService` | Battle | MS DI Singleton（通过 ICombatUseCase） |
-| `SoldierService` | Battle | 手动 new（每个士兵实例，通过 SoldierLogic） |
+| `UnitService` | Battle | 手动 new（每个单位实例，通过 UnitLogic） |
 | `AdjacencyService` | Building | MS DI Singleton |
 | `ShopRules` | Building | MS DI Singleton |
 | `CombineService` | Building | 手动 new（每次入夜组合，通过 NightOrchestrator） |
@@ -185,7 +185,7 @@ domain 项目零 `using Godot`，单向无循环。
 2. 点击开始 → `main_game.tscn`
 3. `MainGameController._Ready()` 注册 Battlefield/Castle 到 GameManager
 4. `GameManager.StartGameSession()` → 开始昼夜循环（Day 60s / Night 30s）
-5. 白天：兵营产兵、士兵推进战斗（SoldierLogic → IFieldUnitRepository → UnitSpatialService）
+5. 白天：兵营产兵、单位推进战斗（UnitLogic → IFieldUnitRepository → UnitSpatialService）
 6. 夜晚：组合 → 敌方复刻 → 开商店 → 全军休眠
 7. 任一方城堡血量归零 → GameOver → 结算弹窗（保存战报/返回标题）
 
@@ -196,12 +196,12 @@ domain 项目零 `using Godot`，单向无循环。
 | 端口 | 定义位置 | 实现方 | 类型 |
 |------|----------|--------|------|
 | `IGameState` | Domain.Battle | GameManager | 入站 |
-| `ISoldierService` | Domain.Battle | SoldierService | 入站 |
+| `IUnitService` | Domain.Battle | UnitService | 入站 |
 | `ICombatUseCase` | Domain.Battle | UnitSpatialService | 入站 |
 | `IFieldUnitRepository` | Domain.Battle | FieldUnitRepository | 出站 |
 | `IUnitRepository` | Domain.Battle | SqliteUnitRepository | 出站 |
 | `INavigationPort` | Domain.Battle | NavigationPortAdapter | 出站 |
-| `ISoldierEventPort` | Domain.Battle | SoldierEventRelay | 出站 |
+| `IUnitEventPort` | Domain.Battle | UnitEventRelay | 出站 |
 | `IBuildingRef` | Domain.Battle | Building | 出站 |
 | `IBuildingTarget` | Domain.Battle | Building | 出站 |
 | `ICombineUseCase` | Domain.Building | CombineService | 入站 |

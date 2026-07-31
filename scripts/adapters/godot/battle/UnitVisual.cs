@@ -1,6 +1,6 @@
 using Godot;
 
-public class SoldierVisual
+public class UnitVisual
 {
     private UnitCardView _card;
     private Node2D _body;

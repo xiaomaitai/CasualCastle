@@ -16,8 +16,8 @@ public partial class UIManager : Node2D
     private CombineProhibitUiController _combineProhibitUi;
     private PauseMenuUiController _pauseMenuUi;
     private CheatMenuUiController _cheatMenu;
-    private SoldierInfoUiController _soldierInfoUi;
-    private SoldierSelectionController _soldierSelection;
+    private UnitInfoUiController _unitInfoUi;
+    private UnitSelectionController _unitSelection;
     private GameOverUiController _gameOverUi;
     private SettingsUiController _settingsUi;
     private bool _gameOver;
@@ -71,8 +71,8 @@ public partial class UIManager : Node2D
             _handUi?.IsPlacementActive == true || _shopUi?.IsDragging == true);
         _buildingInfoUi?.SetPauseOpen(_pauseMenuUi?.IsOpen == true || _settingsUi?.IsOpen == true);
         _buildingInfoUi?.Process();
-        _soldierInfoUi?.Process();
-        _soldierSelection?.Process();
+        _unitInfoUi?.Process();
+        _unitSelection?.Process();
     }
 
     public override void _Input(InputEvent @event)
@@ -168,7 +168,7 @@ public partial class UIManager : Node2D
             return;
         }
 
-        if (_soldierSelection?.HandleInput(@event) == true)
+        if (_unitSelection?.HandleInput(@event) == true)
         {
             GetViewport().SetInputAsHandled();
         }
@@ -185,8 +185,8 @@ public partial class UIManager : Node2D
         Hand handService = AdapterRegistry.Resolve<Hand>();
         _handUi = new HandUiController(this, uiRoot, handService);
         _buildingInfoUi = new BuildingInfoUiController(this, uiRoot);
-        _soldierInfoUi = new SoldierInfoUiController(this, uiRoot);
-        _soldierSelection = new SoldierSelectionController(this);
+        _unitInfoUi = new UnitInfoUiController(this, uiRoot);
+        _unitSelection = new UnitSelectionController(this);
         ButtonGroup toolGroup = new ButtonGroup();
         _buildingManageUi = new BuildingManageUiController(this, uiRoot, toolGroup);
         _combineProhibitUi = new CombineProhibitUiController(this, uiRoot, toolGroup);
@@ -212,7 +212,7 @@ public partial class UIManager : Node2D
         _hudUi.SetGameOverVisible(show);
         _shopUi.SetGameOver(show);
         _handUi.SetInputBlocked(_gameOver);
-        _soldierSelection.SetInputBlocked(_gameOver);
+        _unitSelection.SetInputBlocked(_gameOver);
         _buildingInfoUi.SetInputBlocked(_gameOver);
         _buildingManageUi.SetGameOver(_gameOver);
         _combineProhibitUi.SetGameOver(_gameOver);

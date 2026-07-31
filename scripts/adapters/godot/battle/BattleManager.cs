@@ -25,7 +25,7 @@ public partial class BattleManager : Node
 		{
 			if (_skillService != null)
 				_skillService.UpdateContexts(fieldRepo.AllUnits);
-			combatUseCase.PushSoldiers(fieldRepo.AllUnits, (float)delta);
+			combatUseCase.PushUnits(fieldRepo.AllUnits, (float)delta);
 		}
 	}
 }

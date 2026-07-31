@@ -195,7 +195,7 @@ public static class AdapterRegistry
 | `Hand` | `Hand` | InitManager | `IBuildingPlacement` |
 | `Shop` | `Shop` | InitManager | `ShopRules` (MS DI), `Hand` |
 | `Building`（动态） | 不注册 | 实例化时 | `IFieldUnitRepository`, `GameManager`, `Shop`, `AdjacencyService` |
-| `SoldierLogic`（动态） | 不注册 | 实例化时 | `IFieldUnitRepository` (MS DI), `GameManager`, `IGameState` |
+| `UnitLogic`（动态） | 不注册 | 实例化时 | `IFieldUnitRepository` (MS DI), `GameManager`, `IGameState` |
 
 ---
 
@@ -254,12 +254,12 @@ var repo = GameManager.Get<IBattleReportRepository>();
 
 ```
 domain 聚合
-  → 调用 ISoldierEventPort.OnDamaged()     [端口接口，domain 定义]
+  → 调用 IUnitEventPort.OnDamaged()     [端口接口，domain 定义]
       ↓
-  SoldierEventRelay : Node, ISoldierEventPort   [adapter 层]
+  UnitEventRelay : Node, IUnitEventPort   [adapter 层]
       → EmitSignal(Damaged)                     [Godot signal]
           ↓
-  SoldierLogic.OnDamaged()                  [adapter 层 handler]
+  UnitLogic.OnDamaged()                  [adapter 层 handler]
 ```
 
 **规则：**
@@ -271,7 +271,7 @@ domain 聚合
 
 **与场景 C 的区别：** 场景 C 是全局单例服务（如 `IGameState`），此模式是**每个领域实例独立持有端口**，relay 作为子节点挂在消费方下。
 
-**当前实例：** `ISoldierEventPort` → `SoldierEventRelay` → `SoldierLogic`
+**当前实例：** `IUnitEventPort` → `UnitEventRelay` → `UnitLogic`
 
 ---
 
@@ -297,7 +297,7 @@ domain 聚合
 │  → 消费 MS DI + AdapterRegistry           │
 │  (唯一可用 Godot API 的层)                 │
 └─────────────┬────────────────────────────┘
-              │  出站端口（ISoldierEventPort 等）
+              │  出站端口（IUnitEventPort 等）
               │  Domain 定义，Adapter 实现为 Signal Relay
               │  编译期依赖：Adapter → Domain
               │  运行时调用：Domain 聚合 → 端口 → Relay → Signal → Handler
@@ -348,7 +348,7 @@ public static IServiceCollection AddDomainShared(this IServiceCollection service
 
 ### 场景 D：domain 聚合需要发出事件（出站端口 + Signal）
 
-参考 `ISoldierEventPort` 模式（详见 7.3）：
+参考 `IUnitEventPort` 模式（详见 7.3）：
 1. 在对应 Domain 项目中定义出站端口接口
 2. 在 adapter 项目创建 Relay 类：继承 `Node`，实现端口接口，声明 `[Signal]`，方法体内存储数据 + `EmitSignal`
 3. 消费方创建 Relay 实例作为子节点，将 relay 注入 domain 聚合的端口属性

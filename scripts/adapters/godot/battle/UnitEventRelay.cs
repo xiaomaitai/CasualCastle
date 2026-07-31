@@ -1,7 +1,7 @@
 using CasualCastle.Domain.Battle;
 using Godot;
 
-public partial class SoldierEventRelay : Node, ISoldierEventPort
+public partial class UnitEventRelay : Node, IUnitEventPort
 {
 	[Signal]
 	public delegate void DamagedEventHandler();
@@ -13,12 +13,12 @@ public partial class SoldierEventRelay : Node, ISoldierEventPort
 	public delegate void AttackEventHandler();
 
 	public int LastDamageAmount { get; private set; }
-	public ISoldierHandle LastAttacker { get; private set; }
-	public ISoldierHandle LastAttackTarget { get; private set; }
+	public IUnitHandle LastAttacker { get; private set; }
+	public IUnitHandle LastAttackTarget { get; private set; }
 	public float LastAttackTargetX { get; private set; }
 	public float LastAttackTargetY { get; private set; }
 
-	public void OnDamaged(int amount, ISoldierHandle attacker)
+	public void OnDamaged(int amount, IUnitHandle attacker)
 	{
 		LastDamageAmount = amount;
 		LastAttacker = attacker;
@@ -30,7 +30,7 @@ public partial class SoldierEventRelay : Node, ISoldierEventPort
 		EmitSignal(SignalName.Died);
 	}
 
-	public void OnAttack(ISoldierHandle target, float targetGameX, float targetGameY)
+	public void OnAttack(IUnitHandle target, float targetGameX, float targetGameY)
 	{
 		LastAttackTarget = target;
 		LastAttackTargetX = targetGameX;

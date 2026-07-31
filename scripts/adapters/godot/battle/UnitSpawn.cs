@@ -14,11 +14,11 @@ public static class UnitSpawn
 		return castle.ToGlobal(GameCoordinatesAdapter.ToLocalPixels(spawnPoint));
 	}
 
-	public static void PlaceSoldier(
-		Node2D battlefield, Castle castle, Soldier soldier,
+	public static void PlaceUnit(
+		Node2D battlefield, Castle castle, Unit unit,
 		IReadOnlyList<Vector2I> footprint, int anchorX, int anchorY, int spawnIndex = 0)
 	{
-		soldier.GlobalPosition = GetSpawnGlobalPosition(castle, footprint, anchorX, anchorY, spawnIndex);
-		battlefield.AddChild(soldier);
+		unit.GlobalPosition = GetSpawnGlobalPosition(castle, footprint, anchorX, anchorY, spawnIndex);
+		battlefield.AddChild(unit);
 	}
 }

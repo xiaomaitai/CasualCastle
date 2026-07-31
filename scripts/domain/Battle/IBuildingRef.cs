@@ -3,7 +3,7 @@ namespace CasualCastle.Domain.Battle;
 public interface IBuildingRef
 {
 	bool IsDestroyed { get; }
-	bool IsEnemyOf(ISoldierState soldier);
+	bool IsEnemyOf(IUnitState unit);
 	float MinX { get; }
 	float MinY { get; }
 	float MaxX { get; }
