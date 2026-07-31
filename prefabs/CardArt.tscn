@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://dggad0fvw02ow" path="res://scripts/adapters/godot/battle/CardArtView.cs" id="1"]
 [ext_resource type="Texture2D" uid="uid://52icpu16ujyx" path="res://assets/art/cards/card_art_frame.png" id="2"]
 [ext_resource type="Texture2D" uid="uid://c0ikeu862d6gd" path="res://assets/art/cards/card_art_mask.png" id="3"]
-[ext_resource type="Texture2D" uid="uid://dpn4ylhyb8t0i" path="res://assets/art/placeholders/test_image.png" id="4"]
+[ext_resource type="Texture2D" uid="uid://beaql1n3myc8e" path="res://assets/art/placeholders/test_image.png" id="4"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_artframe"]
 atlas = ExtResource("2")
