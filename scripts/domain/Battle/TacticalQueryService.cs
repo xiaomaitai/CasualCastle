@@ -18,27 +18,25 @@ public class TacticalQueryService : ITacticalQueries
 			return (null, float.MaxValue);
 
 		IUnitHandle best = null;
-		float bestScore = float.MaxValue;
+		float bestDistanceSq = float.MaxValue;
 
 		foreach (IUnitHandle candidate in _repo.AllUnits)
 		{
 			if (!candidate.IsAlive || candidate.IsPlayerUnit == unit.IsPlayerUnit)
 				continue;
-			float dist = DistSq(unit, candidate);
-			if (dist < bestScore)
-			{
-				bestScore = dist;
-				best = candidate;
-			}
+			float distanceSq = DistSq(unit, candidate);
+			if (distanceSq >= bestDistanceSq)
+				continue;
+			if (MathF.Sqrt(distanceSq) > unit.VisionRange)
+				continue;
+			best = candidate;
+			bestDistanceSq = distanceSq;
 		}
 
 		if (best == null)
 			return (null, float.MaxValue);
 
-		float edgeDist = MathF.Sqrt(bestScore) - unit.CollisionRadius - best.CollisionRadius;
-		if (MathF.Sqrt(bestScore) > unit.VisionRange)
-			return (null, float.MaxValue);
-
+		float edgeDist = MathF.Sqrt(bestDistanceSq) - unit.CollisionRadius - best.CollisionRadius;
 		return (best, edgeDist);
 	}
 

@@ -31,6 +31,7 @@ public partial class UnitLogic : Node2D
 	private NavigationAgent2D _navigationAgent;
 	private Node2D _body;
 	private Vector2 _safeVelocity;
+	private const float PushSyncEpsilonSq = 0.01f;
 
 	public void InitializeFromStats(UnitStats stats)
 	{
@@ -159,11 +160,17 @@ public partial class UnitLogic : Node2D
 
 		_visual?.UpdateHitFlash(dt);
 
+		Vector2 pushedPixelPos = new Vector2(
+			GameCoordinatesAdapter.GameUnitsToPixels(_unit.GameX),
+			GameCoordinatesAdapter.GameUnitsToPixels(_unit.GameY));
+		if ((pushedPixelPos - _body.GlobalPosition).LengthSquared() > PushSyncEpsilonSq)
+			_body.GlobalPosition = pushedPixelPos;
+
 		UpdateSleepVisual();
 		if (!IsActive) return;
 		if (_fieldRepo == null || _body == null) return;
 
-		(IUnitHandle nearest, float edgeDist) = _tactical.FindNearestEnemy(_unit);
+		(IUnitHandle nearest, _) = _tactical.FindNearestEnemy(_unit);
 
 		IBuildingTarget buildingTarget = _tactical.FindOverlappingBuilding(_unit);
 		if (buildingTarget != null)
@@ -171,14 +178,14 @@ public partial class UnitLogic : Node2D
 		else
 			_unit.ClearBuildingTarget();
 
-		_unit.UpdateTargeting(nearest, edgeDist);
+		_unit.UpdateTargeting(nearest);
 
 		float marchX, marchY;
 		Vector2 marchDest = SelectTarget();
 		marchX = GameCoordinatesAdapter.PixelsToGameUnits(marchDest.X);
 		marchY = GameCoordinatesAdapter.PixelsToGameUnits(marchDest.Y);
 
-		_unit.UpdateBehavior(dt, edgeDist, marchX, marchY);
+		_unit.UpdateBehavior(dt, marchX, marchY);
 
 		Vector2 currentPixelPos = _body.GlobalPosition;
 		Vector2 nextPathPos = _navigationAgent.GetNextPathPosition();

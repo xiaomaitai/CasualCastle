@@ -65,6 +65,8 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	bool IBuildingRef.IsDestroyed => IsDestroyed;
 
+	bool IBuildingRef.IsCore => BuildingSys.IsCoreBuilding(TypeId);
+
 	bool IBuildingRef.IsEnemyOf(IUnitState unit)
 	{
 		if (CastleRef == null)

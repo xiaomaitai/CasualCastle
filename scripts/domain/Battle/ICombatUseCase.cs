@@ -4,5 +4,5 @@ namespace CasualCastle.Domain.Battle;
 
 public interface ICombatUseCase
 {
-	void PushUnits(IReadOnlyList<IUnitHandle> allUnits, float dt);
+	void PushUnits(IReadOnlyList<IUnitHandle> allUnits, IReadOnlyList<IBuildingRef> buildings, float dt);
 }

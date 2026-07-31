@@ -41,7 +41,7 @@ public class Unit : IUnitHandle
 		get
 		{
 			if (TargetEnemy != null && TargetEnemy.IsAlive)
-				return $"敌方士兵 ({TargetEnemy.GameX:F0}, {TargetEnemy.GameY:F0})";
+				return $"敌方单位 ({TargetEnemy.GameX:F0}, {TargetEnemy.GameY:F0})";
 			if (TargetBuilding != null)
 				return "建筑";
 			return "行军目标";
@@ -135,7 +135,7 @@ public class Unit : IUnitHandle
 		}
 	}
 
-	public void UpdateTargeting(IUnitHandle nearestEnemy, float enemyEdgeDist)
+	public void UpdateTargeting(IUnitHandle nearestEnemy)
 	{
 		if (!IsAlive)
 			return;
@@ -161,7 +161,7 @@ public class Unit : IUnitHandle
 		}
 	}
 
-	public void UpdateBehavior(float dt, float enemyEdgeDist, float marchTargetGameX, float marchTargetGameY)
+	public void UpdateBehavior(float dt, float marchTargetGameX, float marchTargetGameY)
 	{
 		if (!IsAlive)
 			return;
@@ -181,38 +181,7 @@ public class Unit : IUnitHandle
 		{
 			case UnitState.Fighting:
 			case UnitState.Retaliating:
-				if (TargetEnemy == null || !TargetEnemy.IsAlive)
-					break;
-				if (enemyEdgeDist <= AttackRange)
-				{
-					if (_attackTimer <= 0)
-					{
-						int effectiveDamage = Damage;
-						if (Skills != null)
-						{
-							float dmgMult = Skills.GetStatMultiplier("attack_damage_mult", GameCtx);
-							effectiveDamage = (int)(Damage * dmgMult);
-						}
-						int finalDamage = CombatRules.CalculateDamage(effectiveDamage, DamageType, TargetEnemy.ArmorType, TargetEnemy.ArmorValue, _damageMatrix);
-						TargetEnemy.TakeDamage(finalDamage, this, GameX, GameY);
-
-						if (Skills != null)
-						{
-							foreach (OnHitEffect effect in Skills.GetOnHitEffects())
-							{
-								if (effect.Type == "slow" && TargetEnemy is IUnitHandle targetHandle)
-									ApplySlow(targetHandle, effect.Value, effect.Duration);
-							}
-						}
-
-						EventPort?.OnAttack(TargetEnemy, TargetEnemy.GameX, TargetEnemy.GameY);
-						_attackTimer = effectiveAttackCooldown;
-					}
-				}
-				else
-				{
-					NavPort.SetTarget(TargetEnemy.GameX, TargetEnemy.GameY);
-				}
+				TryEngage(effectiveAttackCooldown);
 				break;
 
 			case UnitState.Sieging:
@@ -221,6 +190,10 @@ public class Unit : IUnitHandle
 					TargetBuilding.TakeDamage(Damage);
 					_attackTimer = AttackCooldown;
 				}
+				else
+				{
+					NavPort.SetTarget(GameX, GameY);
+				}
 				break;
 
 			case UnitState.Marching:
@@ -228,6 +201,51 @@ public class Unit : IUnitHandle
 				NavPort.SetTarget(marchTargetGameX, marchTargetGameY);
 				break;
 		}
+	}
+
+	private void TryEngage(float effectiveAttackCooldown)
+	{
+		if (TargetEnemy == null || !TargetEnemy.IsAlive)
+			return;
+		if (EdgeDistanceTo(TargetEnemy) <= AttackRange)
+			TryAttack(effectiveAttackCooldown);
+		else
+			NavPort.SetTarget(TargetEnemy.GameX, TargetEnemy.GameY);
+	}
+
+	private void TryAttack(float effectiveAttackCooldown)
+	{
+		NavPort.SetTarget(GameX, GameY);
+		if (_attackTimer > 0)
+			return;
+
+		int effectiveDamage = Damage;
+		if (Skills != null)
+		{
+			float dmgMult = Skills.GetStatMultiplier("attack_damage_mult", GameCtx);
+			effectiveDamage = (int)(Damage * dmgMult);
+		}
+		int finalDamage = CombatRules.CalculateDamage(effectiveDamage, DamageType, TargetEnemy.ArmorType, TargetEnemy.ArmorValue, _damageMatrix);
+		TargetEnemy.TakeDamage(finalDamage, this, GameX, GameY);
+
+		if (Skills != null)
+		{
+			foreach (OnHitEffect effect in Skills.GetOnHitEffects())
+			{
+				if (effect.Type == "slow" && TargetEnemy is IUnitHandle targetHandle)
+					ApplySlow(targetHandle, effect.Value, effect.Duration);
+			}
+		}
+
+		EventPort?.OnAttack(TargetEnemy, TargetEnemy.GameX, TargetEnemy.GameY);
+		_attackTimer = effectiveAttackCooldown;
+	}
+
+	private float EdgeDistanceTo(IUnitHandle target)
+	{
+		float dx = GameX - target.GameX;
+		float dy = GameY - target.GameY;
+		return MathF.Sqrt(dx * dx + dy * dy) - CollisionRadius - target.CollisionRadius;
 	}
 
 	public void ApplyPush(float dx, float dy)
