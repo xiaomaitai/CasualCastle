@@ -7,8 +7,7 @@
 [ext_resource type="Script" path="res://scripts/adapters/godot/flow/MainGameController.cs" id="10"]
 [ext_resource type="PackedScene" uid="uid://d4settingspanel01" path="res://scenes/ui/settings_panel.tscn" id="13"]
 [ext_resource type="Script" path="res://scripts/adapters/godot/autoload/InitManager.cs" id="17"]
-[ext_resource type="Texture2D" path="res://assets/art/battlefield/mountain_bg.png" id="18"]
-[ext_resource type="Script" path="res://scripts/adapters/godot/battle/GrassBattlefield.cs" id="20"]
+[ext_resource type="Script" path="res://scripts/adapters/godot/battlefield/BattlefieldTileMap.cs" id="20"]
 [ext_resource type="Script" path="res://scripts/adapters/godot/flow/CameraController.cs" id="21"]
 
 [node name="MainGame" type="Node2D" unique_id=1]
@@ -35,24 +34,21 @@ position = Vector2(960, 1610)
 current = true
 script = ExtResource("21")
 
-[node name="ParallaxBackground" type="ParallaxBackground" parent="Battlefield"]
-scroll_base_offset = Vector2(960, 540)
-
-[node name="SkyLayer" type="ParallaxLayer" parent="Battlefield/ParallaxBackground"]
-motion_scale = Vector2(0.02, 0.02)
-
-[node name="MountainSprite" type="Sprite2D" parent="Battlefield/ParallaxBackground/SkyLayer"]
-texture = ExtResource("18")
-position = Vector2(1920, 560)
-scale = Vector2(4.2, 2.2)
-
-[node name="GrassBattlefield" type="Node2D" parent="Battlefield"]
+[node name="BattlefieldTileMap" type="Node2D" parent="Battlefield"]
+z_index = -100
 script = ExtResource("20")
+
+[node name="GroundLayer" type="TileMapLayer" parent="Battlefield/BattlefieldTileMap"]
+texture_filter = 1
+
+[node name="DetailLayer" type="TileMapLayer" parent="Battlefield/BattlefieldTileMap"]
+z_index = 1
+texture_filter = 1
 
 [node name="NavigationRegion" type="NavigationRegion2D" parent="Battlefield"]
 
 [node name="PlayerSide" type="Node2D" parent="Battlefield" unique_id=3]
-position = Vector2(150, 1210)
+position = Vector2(170, 1210)
 
 [node name="PlayerCastle" parent="Battlefield/PlayerSide" unique_id=14 instance=ExtResource("2")]
 IsPlayerCastle = true
@@ -60,7 +56,7 @@ BarracksGridX = 7
 BarracksGridY = 4
 
 [node name="EnemySide" type="Node2D" parent="Battlefield" unique_id=4]
-position = Vector2(2890, 1210)
+position = Vector2(2870, 1210)
 
 [node name="EnemyCastle" parent="Battlefield/EnemySide" unique_id=15 instance=ExtResource("2")]
 IsPlayerCastle = false
