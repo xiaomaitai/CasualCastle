@@ -94,4 +94,18 @@ public class SkillConfigTests
 		SpecialConfig cfg = SpecialConfig.Parse("{\"behavior\": \"stealth\", \"param\": 180}");
 		Assert.Equal(GameRules.StealthSpeedMult, cfg.SpeedMult);
 	}
+
+	[Fact]
+	public void SpecialConfig_Parse_WithCooldown_ReturnsCorrectConfig()
+	{
+		SpecialConfig cfg = SpecialConfig.Parse("{\"behavior\": \"stealth\", \"cooldown\": 3.0}");
+		Assert.Equal(3f, cfg.Cooldown);
+	}
+
+	[Fact]
+	public void SpecialConfig_Parse_NoCooldown_DefaultsToZero()
+	{
+		SpecialConfig cfg = SpecialConfig.Parse("{\"behavior\": \"stealth\", \"param\": 180}");
+		Assert.Equal(0f, cfg.Cooldown);
+	}
 }

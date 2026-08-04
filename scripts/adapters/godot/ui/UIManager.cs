@@ -18,6 +18,7 @@ public partial class UIManager : Node2D
     private CheatMenuUiController _cheatMenu;
     private UnitInfoUiController _unitInfoUi;
     private UnitSelectionController _unitSelection;
+    private AttributePanelController _attributePanel;
     private GameOverUiController _gameOverUi;
     private SettingsUiController _settingsUi;
     private bool _gameOver;
@@ -73,6 +74,7 @@ public partial class UIManager : Node2D
         _buildingInfoUi?.Process();
         _unitInfoUi?.Process();
         _unitSelection?.Process();
+        _attributePanel?.Process();
     }
 
     public override void _Input(InputEvent @event)
@@ -187,6 +189,7 @@ public partial class UIManager : Node2D
         _buildingInfoUi = new BuildingInfoUiController(this, uiRoot);
         _unitInfoUi = new UnitInfoUiController(this, uiRoot);
         _unitSelection = new UnitSelectionController(this);
+        _attributePanel = new AttributePanelController(this, uiRoot, _unitSelection);
         ButtonGroup toolGroup = new ButtonGroup();
         _buildingManageUi = new BuildingManageUiController(this, uiRoot, toolGroup);
         _combineProhibitUi = new CombineProhibitUiController(this, uiRoot, toolGroup);

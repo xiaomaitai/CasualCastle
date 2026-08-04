@@ -100,11 +100,14 @@ internal static class UnitTestFactory
 		return unit;
 	}
 
-	public static SkillDef CreateStealthSkill(float engageDistance, float speedMult)
+	public static SkillDef CreateStealthSkill(float engageDistance, float speedMult, float cooldown = 0f)
 	{
 		string distanceText = engageDistance.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture);
 		string speedText = speedMult.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
-		string json = "{\"behavior\":\"stealth\",\"param\":" + distanceText + ",\"speed_mult\":" + speedText + "}";
+		string cooldownText = cooldown.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+		string json = "{\"behavior\":\"stealth\",\"param\":" + distanceText
+			+ ",\"speed_mult\":" + speedText
+			+ ",\"cooldown\":" + cooldownText + "}";
 		return new SkillDef
 		{
 			Id = "stealth",

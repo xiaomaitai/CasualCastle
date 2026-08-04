@@ -272,6 +272,81 @@ offset_bottom = 198
 theme_override_font_sizes/font_size = 27
 text = "工作中"
 
+[node name="AttributePanel" type="Panel" parent="UI"]
+visible = false
+offset_left = 24
+offset_top = 828
+offset_right = 456
+offset_bottom = 1070
+mouse_filter = 2
+
+[node name="AttributeBackground" type="ColorRect" parent="UI/AttributePanel"]
+layout_mode = 0
+offset_right = 432
+offset_bottom = 242
+mouse_filter = 2
+color = Color(0.1, 0.14, 0.2, 0.92)
+
+[node name="PortraitRect" type="TextureRect" parent="UI/AttributePanel"]
+layout_mode = 0
+offset_left = 14
+offset_top = 14
+offset_right = 92
+offset_bottom = 92
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NameLabel" type="Label" parent="UI/AttributePanel"]
+layout_mode = 0
+offset_left = 100
+offset_top = 12
+offset_right = 440
+offset_bottom = 50
+mouse_filter = 2
+theme_override_font_sizes/font_size = 30
+text = "单位"
+
+[node name="SubLabel" type="Label" parent="UI/AttributePanel"]
+layout_mode = 0
+offset_left = 100
+offset_top = 50
+offset_right = 440
+offset_bottom = 78
+mouse_filter = 2
+theme_override_font_sizes/font_size = 19
+text = "我方"
+
+[node name="StatsLabel" type="Label" parent="UI/AttributePanel"]
+layout_mode = 0
+offset_left = 100
+offset_top = 80
+offset_right = 440
+offset_bottom = 168
+mouse_filter = 2
+theme_override_font_sizes/font_size = 17
+text = "属性"
+
+[node name="SkillsLabel" type="Label" parent="UI/AttributePanel"]
+visible = false
+layout_mode = 0
+offset_left = 16
+offset_top = 176
+offset_right = 64
+offset_bottom = 200
+mouse_filter = 2
+theme_override_font_sizes/font_size = 19
+text = "技能"
+
+[node name="SkillsRow" type="HBoxContainer" parent="UI/AttributePanel"]
+layout_mode = 0
+offset_left = 68
+offset_top = 172
+offset_right = 440
+offset_bottom = 236
+mouse_filter = 2
+theme_override_constants/separation = 8
+
 [node name="ShopPanel" type="Panel" parent="UI"]
 visible = false
 offset_left = 1228.5

@@ -89,8 +89,9 @@ Godot **4.6** + **C# / .NET** 的 2.5D RTS 项目（斜视角纸片人，类皇�
 
 ## Skills
 
-- 用户要求生成图片、素材、图标等图像时，使用 **`generate-image` skill**（`.claude/skills/generate-image.md`）
-- 用户要求抠图/去背景时，使用 **`remove-bg` skill**（`.claude/skills/remove-bg.md`）
+- 用户要求生成图片、素材、图标等图像时，使用 **`generate-image` skill**（Codex 版：`$CODEX_HOME/skills/generate-image`，源自 `.claude/skills/generate-image.md`）
+- 用户要求抠图/去背景时，使用 **`remove-bg` skill**（Codex 版：`$CODEX_HOME/skills/remove-bg`，源自 `.claude/skills/remove-bg.md`）
+- 用户要求细化任务、准备当前任务时，使用 **`refine-tasks` skill**（Codex 版：`$CODEX_HOME/skills/refine-tasks`）
 
 ## 工作规则
 
@@ -120,4 +121,3 @@ Godot **4.6** + **C# / .NET** 的 2.5D RTS 项目（斜视角纸片人，类皇�
     git config core.hooksPath githooks
 
 `assets/data/config_db_dump.sql` 由 pre-commit hook 自动 dump 生成，**不要手动阅读或编辑此文件**。修改数据库应直接操作 `config.db`，提交时 hook 会自动更新 dump。
-

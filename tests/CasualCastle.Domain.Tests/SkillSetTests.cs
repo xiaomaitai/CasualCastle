@@ -143,4 +143,34 @@ public class SkillSetTests
 
 		Assert.Null(cfg);
 	}
+
+	[Fact]
+	public void GetSpecialById_MatchingSkill_ReturnsConfigWithSkillId()
+	{
+		SkillSet skills = new();
+		SkillDef skill = new()
+		{
+			Id = "stealth",
+			DisplayName = "Stealth",
+			Type = SkillType.Special,
+			ConfigJson = "{\"behavior\":\"stealth\",\"param\":180}"
+		};
+		skills.Add(skill);
+
+		SpecialConfig cfg = skills.GetSpecialById("stealth");
+
+		Assert.NotNull(cfg);
+		Assert.Equal("stealth", cfg.SkillId);
+	}
+
+	[Fact]
+	public void All_ReturnsAddedSkills()
+	{
+		SkillSet skills = new();
+		SkillDef skill = new() { Id = "s1", DisplayName = "Test", Type = SkillType.StatModifier, ConfigJson = "{}" };
+		skills.Add(skill);
+
+		Assert.Single(skills.All);
+		Assert.Same(skill, skills.All[0]);
+	}
 }

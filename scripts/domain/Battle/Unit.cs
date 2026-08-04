@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace CasualCastle.Domain.Battle;
 
@@ -16,6 +17,7 @@ public class Unit : IUnitHandle
 	public int Health { get; set; }
 	public int MaxHealth { get; set; }
 	public int Damage { get; set; }
+	public int UnitCost { get; set; }
 	public float Speed { get; set; }
 	public float AttackRange { get; set; }
 	public float AttackCooldown { get; set; }
@@ -38,6 +40,7 @@ public class Unit : IUnitHandle
 	private float _attackTimer;
 	private DamageMatrix _damageMatrix;
 	private readonly System.Random _rng = new();
+	private readonly Dictionary<string, float> _skillCooldowns = new();
 
 	public string TargetDescription
 	{
@@ -63,6 +66,7 @@ public class Unit : IUnitHandle
 		MaxHealth = stats.Health;
 		Health = stats.Health;
 		Damage = stats.Damage;
+		UnitCost = stats.UnitCost;
 		Speed = stats.Speed;
 		AttackRange = stats.AttackRange;
 		AttackCooldown = stats.AttackCooldown;
@@ -113,6 +117,39 @@ public class Unit : IUnitHandle
 		return Speed * stealth.SpeedMult;
 	}
 
+	public float GetSkillCooldownRemaining(string skillId)
+	{
+		if (_skillCooldowns.TryGetValue(skillId, out float remaining))
+			return remaining;
+		return 0f;
+	}
+
+	public void StartSkillCooldown(string skillId)
+	{
+		SpecialConfig cfg = Skills.GetSpecialById(skillId);
+		if (cfg == null || cfg.Cooldown <= 0f)
+			return;
+		_skillCooldowns[skillId] = cfg.Cooldown;
+	}
+
+	public void TickSkillCooldowns(float dt)
+	{
+		if (_skillCooldowns.Count == 0)
+			return;
+
+		List<string> expired = new();
+		foreach (KeyValuePair<string, float> kv in _skillCooldowns)
+		{
+			float next = kv.Value - dt;
+			if (next <= 0f)
+				expired.Add(kv.Key);
+			else
+				_skillCooldowns[kv.Key] = next;
+		}
+		foreach (string skillId in expired)
+			_skillCooldowns.Remove(skillId);
+	}
+
 	public void SetBuildingTarget(IBuildingTarget building)
 	{
 		TargetBuilding = building;
@@ -138,7 +175,10 @@ public class Unit : IUnitHandle
 		Health = CombatRules.ApplyDamage(Health, amount);
 
 		if (isAoe && IsStealthed)
+		{
 			IsStealthed = false;
+			StartStealthCooldown();
+		}
 
 		EventPort?.OnDamaged(amount, attacker);
 
@@ -188,6 +228,8 @@ public class Unit : IUnitHandle
 	{
 		if (!IsAlive)
 			return;
+
+		TickSkillCooldowns(dt);
 
 		float effectiveAttackCooldown = AttackCooldown;
 		if (Skills != null)
@@ -243,6 +285,7 @@ public class Unit : IUnitHandle
 			return;
 
 		IsStealthed = false;
+		StartStealthCooldown();
 
 		int effectiveDamage = Damage;
 		if (Skills != null)
@@ -264,6 +307,13 @@ public class Unit : IUnitHandle
 
 		EventPort?.OnAttack(TargetEnemy, TargetEnemy.GameX, TargetEnemy.GameY);
 		_attackTimer = effectiveAttackCooldown;
+	}
+
+	private void StartStealthCooldown()
+	{
+		SpecialConfig stealth = Skills.GetSpecial(SpecialBehavior.Stealth);
+		if (stealth != null)
+			StartSkillCooldown(stealth.SkillId);
 	}
 
 	private float EdgeDistanceTo(IUnitHandle target)

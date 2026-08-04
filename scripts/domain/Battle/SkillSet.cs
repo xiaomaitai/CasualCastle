@@ -12,6 +12,7 @@ public class SkillSet
 	private readonly Dictionary<string, SpecialConfig> _specialCache = new();
 
 	public int Count => _skills.Count;
+	public IReadOnlyList<SkillDef> All => _skills;
 
 	public void Add(SkillDef skill)
 	{
@@ -21,7 +22,11 @@ public class SkillSet
 		else if (skill.Type == SkillType.OnHit)
 			_onHitCache[skill.Id] = OnHitConfig.Parse(skill.ConfigJson);
 		else if (skill.Type == SkillType.Special)
-			_specialCache[skill.Id] = SpecialConfig.Parse(skill.ConfigJson);
+		{
+			SpecialConfig cfg = SpecialConfig.Parse(skill.ConfigJson);
+			cfg.SkillId = skill.Id;
+			_specialCache[skill.Id] = cfg;
+		}
 	}
 
 	public bool Remove(string skillId)
@@ -48,6 +53,13 @@ public class SkillSet
 			if (cfg.Behavior == behavior)
 				return cfg;
 		}
+		return null;
+	}
+
+	public SpecialConfig GetSpecialById(string skillId)
+	{
+		if (_specialCache.TryGetValue(skillId, out SpecialConfig cfg))
+			return cfg;
 		return null;
 	}
 

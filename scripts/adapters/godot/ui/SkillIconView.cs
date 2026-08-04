@@ -1,0 +1,226 @@
+using CasualCastle.Domain.Battle;
+using Godot;
+
+public partial class SkillIconView : Control
+{
+	private const float IconSize = 56f;
+	private const float GlyphRadius = 23f;
+	private static readonly Color Background = new(0.14f, 0.18f, 0.26f, 1f);
+	private static readonly Color BorderColor = new(0.42f, 0.5f, 0.62f, 1f);
+	private static readonly Color CooldownShade = new(0.02f, 0.03f, 0.06f, 0.72f);
+	private static readonly Color CooldownLine = new(1f, 0.9f, 0.55f, 1f);
+	private static readonly Color Steel = new(0.82f, 0.87f, 0.93f, 1f);
+	private static readonly Color Gold = new(0.92f, 0.76f, 0.32f, 1f);
+	private static readonly Color Ice = new(0.62f, 0.86f, 1f, 1f);
+	private static readonly Color Flame = new(0.95f, 0.46f, 0.2f, 1f);
+	private static readonly Color FlameCore = new(0.98f, 0.85f, 0.36f, 1f);
+	private static readonly Color Eye = new(0.76f, 0.9f, 1f, 1f);
+	private static readonly Color Pupil = new(0.12f, 0.22f, 0.38f, 1f);
+	private static readonly Color SlashRed = new(0.95f, 0.34f, 0.3f, 1f);
+	private static readonly Color RaceGreen = new(0.5f, 0.86f, 0.42f, 1f);
+	private static readonly Color RaceBrown = new(0.72f, 0.52f, 0.3f, 1f);
+	private static readonly Color RaceOrange = new(0.96f, 0.66f, 0.3f, 1f);
+	private static readonly Color RacePurple = new(0.72f, 0.52f, 0.96f, 1f);
+
+	private string _skillId;
+	private float _remaining;
+	private float _total;
+	private StyleBoxFlat _bg;
+	private Texture2D _iconTexture;
+
+	public override void _Ready()
+	{
+		CustomMinimumSize = new Vector2(IconSize, IconSize);
+		SizeFlagsVertical = SizeFlags.ShrinkCenter;
+		MouseFilter = MouseFilterEnum.Stop;
+		CreateBackgroundStyle();
+	}
+
+	public void Configure(SkillDef skill)
+	{
+		_skillId = skill.Id;
+		TooltipText = skill.DisplayName;
+		_iconTexture = LoadSkillIcon(skill.Id);
+		QueueRedraw();
+	}
+
+	public void SetCooldown(float remaining, float total)
+	{
+		if (Mathf.IsEqualApprox(_remaining, remaining) && Mathf.IsEqualApprox(_total, total))
+			return;
+		_remaining = remaining;
+		_total = total;
+		QueueRedraw();
+	}
+
+	public override void _Draw()
+	{
+		if (_bg == null)
+			CreateBackgroundStyle();
+		DrawStyleBox(_bg, new Rect2(Vector2.Zero, new Vector2(IconSize, IconSize)));
+		if (_iconTexture != null)
+			DrawTextureRect(_iconTexture, new Rect2(5f, 5f, IconSize - 10f, IconSize - 10f), false);
+		else
+			DrawSkillGlyph();
+		if (_total > 0f && _remaining > 0f)
+		{
+			float progress = Mathf.Clamp(_remaining / _total, 0f, 1f);
+			DrawCooldownSweep(progress);
+		}
+	}
+
+	private static Texture2D LoadSkillIcon(string skillId)
+	{
+		using DirAccess dir = DirAccess.Open("res://assets/art/skills/");
+		if (dir == null)
+			return null;
+		string prefix = skillId + "_";
+		dir.ListDirBegin();
+		string fileName = dir.GetNext();
+		while (fileName != "")
+		{
+			if (fileName.StartsWith(prefix) && fileName.EndsWith(".png") && !dir.CurrentIsDir())
+				return GD.Load<Texture2D>($"res://assets/art/skills/{fileName}");
+			fileName = dir.GetNext();
+		}
+		return null;
+	}
+
+	private void DrawSkillGlyph()
+	{
+		switch (_skillId)
+		{
+			case "stealth":
+				DrawStealthGlyph();
+				break;
+			case "backstab":
+				DrawBackstabGlyph();
+				break;
+			case "slowing_strike":
+				DrawSnowflakeGlyph();
+				break;
+			case "motley_crew":
+				DrawMotleyGlyph();
+				break;
+			case "berserker_rage":
+				DrawRageGlyph();
+				break;
+			default:
+				DrawFallbackGlyph();
+				break;
+		}
+	}
+
+	private void DrawBackstabGlyph()
+	{
+		DrawColoredPolygon(new Vector2[]
+		{
+			new(28, 7),
+			new(22, 29),
+			new(34, 29),
+		}, Steel);
+		DrawRect(new Rect2(17, 31, 22, 3), Gold);
+		DrawRect(new Rect2(25, 34, 6, 12), new Color(0.45f, 0.3f, 0.18f, 1f));
+	}
+
+	private void DrawSnowflakeGlyph()
+	{
+		Vector2 center = new(28, 28);
+		for (int i = 0; i < 6; i++)
+		{
+			float angle = i * Mathf.Pi / 3f;
+			Vector2 dir = new(Mathf.Cos(angle), Mathf.Sin(angle));
+			DrawLine(center + dir * 5f, center + dir * 22f, Ice, 2f);
+			DrawLine(center + dir * 13f, center + dir * 13f + Perp(dir) * 5f, Ice, 2f);
+		}
+		DrawCircle(center, 3f, Ice);
+	}
+
+	private void DrawMotleyGlyph()
+	{
+		DrawCircle(new Vector2(20, 18), 7f, RaceGreen);
+		DrawCircle(new Vector2(36, 18), 7f, RaceBrown);
+		DrawCircle(new Vector2(20, 34), 7f, RaceOrange);
+		DrawCircle(new Vector2(36, 34), 7f, RacePurple);
+	}
+
+	private void DrawRageGlyph()
+	{
+		DrawColoredPolygon(new Vector2[]
+		{
+			new(28, 7),
+			new(40, 27),
+			new(34, 45),
+			new(28, 41),
+			new(22, 45),
+			new(16, 27),
+		}, Flame);
+		DrawColoredPolygon(new Vector2[]
+		{
+			new(28, 18),
+			new(35, 30),
+			new(31, 40),
+			new(28, 37),
+			new(25, 40),
+			new(21, 30),
+		}, FlameCore);
+	}
+
+	private void DrawStealthGlyph()
+	{
+		DrawCircle(new Vector2(28, 28), 11f, Eye);
+		DrawArc(new Vector2(28, 28), 11f, 0f, Mathf.Tau, 32, new Color(0.3f, 0.55f, 0.8f, 1f), 2f);
+		DrawCircle(new Vector2(28, 28), 4f, Pupil);
+		DrawLine(new Vector2(16, 16), new Vector2(40, 40), SlashRed, 3f);
+	}
+
+	private void DrawFallbackGlyph()
+	{
+		Font font = GetThemeDefaultFont();
+		DrawString(font, new Vector2(0, 36), "?", HorizontalAlignment.Center, IconSize, 24, Steel);
+	}
+
+	private void DrawCooldownSweep(float progress)
+	{
+		Vector2 center = new(IconSize / 2f, IconSize / 2f);
+		float startAngle = -Mathf.Pi / 2f;
+		float endAngle = startAngle + progress * Mathf.Tau;
+		DrawColoredPolygon(BuildSector(center, GlyphRadius, startAngle, endAngle), CooldownShade);
+		Vector2 edge = center + new Vector2(Mathf.Cos(endAngle), Mathf.Sin(endAngle)) * GlyphRadius;
+		DrawLine(center, edge, CooldownLine, 2f);
+		if (_remaining > 0f)
+		{
+			Font font = GetThemeDefaultFont();
+			DrawString(font, new Vector2(0, 36), _remaining.ToString("0.0"), HorizontalAlignment.Center, IconSize, 13, CooldownLine);
+		}
+	}
+
+	private static Vector2[] BuildSector(Vector2 center, float radius, float startAngle, float endAngle)
+	{
+		float span = Mathf.Abs(endAngle - startAngle);
+		int steps = Mathf.Max(2, (int)(span / (Mathf.Tau / 48f)));
+		Vector2[] points = new Vector2[steps + 2];
+		points[0] = center;
+		for (int i = 0; i <= steps; i++)
+		{
+			float t = i / (float)steps;
+			float angle = Mathf.Lerp(startAngle, endAngle, t);
+			points[i + 1] = center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
+		}
+		return points;
+	}
+
+	private static Vector2 Perp(Vector2 dir)
+	{
+		return new Vector2(-dir.Y, dir.X);
+	}
+
+	private void CreateBackgroundStyle()
+	{
+		_bg = new StyleBoxFlat();
+		_bg.BgColor = Background;
+		_bg.BorderColor = BorderColor;
+		_bg.SetBorderWidthAll(2);
+		_bg.SetCornerRadiusAll(8);
+	}
+}

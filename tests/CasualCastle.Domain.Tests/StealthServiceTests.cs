@@ -117,4 +117,49 @@ public class StealthServiceTests
 
 		Assert.Null(enemy.TargetEnemy);
 	}
+
+	[Fact]
+	public void UpdateStealth_OnCooldownAfterBreak_DoesNotReEnterStealth()
+	{
+		FakeUnitRepository repo = new();
+		Unit assassin = CreateStealthyUnit(true, 0, 0);
+		assassin.Skills.Remove("stealth");
+		assassin.Skills.Add(UnitTestFactory.CreateStealthSkill(180f, 0.85f, 3f));
+		Unit target = UnitTestFactory.CreateUnit(AttackType.Melee, false);
+		target.SetPosition(120, 0);
+		repo.Register(assassin);
+		repo.Register(target);
+		assassin.SetEnemyTarget(target);
+		assassin.UpdateTargeting(target);
+		assassin.SetStealth(true);
+
+		assassin.UpdateBehavior(2f, 0, 0);
+		target.SetPosition(1000, 0);
+		new StealthService().UpdateStealth(assassin, repo);
+
+		Assert.False(assassin.IsStealthed);
+	}
+
+	[Fact]
+	public void UpdateStealth_CooldownExpired_ReEntersStealth()
+	{
+		FakeUnitRepository repo = new();
+		Unit assassin = CreateStealthyUnit(true, 0, 0);
+		assassin.Skills.Remove("stealth");
+		assassin.Skills.Add(UnitTestFactory.CreateStealthSkill(180f, 0.85f, 3f));
+		Unit target = UnitTestFactory.CreateUnit(AttackType.Melee, false);
+		target.SetPosition(120, 0);
+		repo.Register(assassin);
+		repo.Register(target);
+		assassin.SetEnemyTarget(target);
+		assassin.UpdateTargeting(target);
+		assassin.SetStealth(true);
+
+		assassin.UpdateBehavior(2f, 0, 0);
+		target.SetPosition(1000, 0);
+		assassin.UpdateBehavior(3.1f, 0, 0);
+		new StealthService().UpdateStealth(assassin, repo);
+
+		Assert.True(assassin.IsStealthed);
+	}
 }

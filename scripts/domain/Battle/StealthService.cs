@@ -17,7 +17,7 @@ public class StealthService
 		bool hasDetector = EnemyHasDetector(unit, repo);
 		bool shouldStealth = unit.IsStealthed
 			? !hasDetector
-			: !hasDetector && IsFarFromEnemies(unit, stealth.Param, repo);
+			: !hasDetector && !IsOnCooldown(unit, stealth) && IsFarFromEnemies(unit, stealth.Param, repo);
 
 		if (unit.IsStealthed != shouldStealth)
 		{
@@ -51,6 +51,11 @@ public class StealthService
 				return false;
 		}
 		return true;
+	}
+
+	private static bool IsOnCooldown(IUnitHandle unit, SpecialConfig stealth)
+	{
+		return unit.GetSkillCooldownRemaining(stealth.SkillId) > 0f;
 	}
 
 	private static void ClearEnemyTargetsOf(IFieldUnitRepository repo, IUnitHandle unit)

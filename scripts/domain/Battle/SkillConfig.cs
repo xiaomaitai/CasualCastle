@@ -109,9 +109,11 @@ public class AuraConfig
 
 public class SpecialConfig
 {
+	public string SkillId { get; set; }
 	public SpecialBehavior Behavior { get; set; }
 	public float Param { get; set; }
 	public float SpeedMult { get; set; }
+	public float Cooldown { get; set; }
 
 	public static SpecialConfig Parse(string json)
 	{
@@ -128,7 +130,8 @@ public class SpecialConfig
 				_ => SpecialBehavior.Stealth
 			},
 			Param = root.TryGetProperty("param", out JsonElement p) ? p.GetSingle() : 0f,
-			SpeedMult = root.TryGetProperty("speed_mult", out JsonElement s) ? s.GetSingle() : GameRules.StealthSpeedMult
+			SpeedMult = root.TryGetProperty("speed_mult", out JsonElement s) ? s.GetSingle() : GameRules.StealthSpeedMult,
+			Cooldown = root.TryGetProperty("cooldown", out JsonElement c) ? c.GetSingle() : 0f
 		};
 	}
 }

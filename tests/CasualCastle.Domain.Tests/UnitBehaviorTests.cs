@@ -150,4 +150,45 @@ public class UnitBehaviorTests
 
 		Assert.Equal(self.Speed, self.GetCurrentSpeed());
 	}
+
+	[Fact]
+	public void UpdateBehavior_AttackBreaksStealth_StartsStealthCooldown()
+	{
+		Unit target = UnitTestFactory.CreateUnit(AttackType.Melee, false);
+		Unit self = UnitTestFactory.CreateUnit(AttackType.Melee, true);
+		self.Skills.Add(UnitTestFactory.CreateStealthSkill(180f, 0.85f, 3f));
+		self.SetStealth(true);
+		target.SetPosition(120, 0);
+		self.SetPosition(0, 0);
+		self.SetEnemyTarget(target);
+		self.UpdateTargeting(target);
+
+		self.UpdateBehavior(2f, 0, 0);
+
+		Assert.Equal(3f, self.GetSkillCooldownRemaining("stealth"));
+	}
+
+	[Fact]
+	public void TickSkillCooldowns_ReducesRemaining()
+	{
+		Unit self = UnitTestFactory.CreateUnit(AttackType.Melee, true);
+		self.Skills.Add(UnitTestFactory.CreateStealthSkill(180f, 0.85f, 3f));
+		self.SetStealth(true);
+		self.SetPosition(0, 0);
+		Unit attacker = UnitTestFactory.CreateUnit(AttackType.Melee, false);
+		self.TakeDamage(10, attacker, 100, 0, true);
+
+		self.UpdateBehavior(0.5f, 0, 0);
+
+		Assert.Equal(2.5f, self.GetSkillCooldownRemaining("stealth"), 2);
+	}
+
+	[Fact]
+	public void GetSkillCooldownRemaining_NoCooldown_ReturnsZero()
+	{
+		Unit self = UnitTestFactory.CreateUnit(AttackType.Melee, true);
+		self.Skills.Add(UnitTestFactory.CreateStealthSkill(180f, 0.85f));
+
+		Assert.Equal(0f, self.GetSkillCooldownRemaining("stealth"));
+	}
 }

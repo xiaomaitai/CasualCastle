@@ -189,19 +189,6 @@ public partial class UnitCardView : Node2D
 
 	private static string GetDisplayName(string typeId)
 	{
-		return typeId switch
-		{
-			"Swordsman" => "剑士",
-			"Archer" => "弓箭手",
-			"Cavalry" => "骑兵",
-			"Werewolf" => "狼人",
-			"HeavySwordsman" => "重剑士",
-			"WerewolfLord" => "狼人领主",
-			"HolyShieldGuardian" => "圣盾守护者",
-			"DragonRiderCommander" => "龙骑统帅",
-			"ShadowLord" => "暗影之主",
-			"King" => "国王",
-			_ => typeId,
-		};
+		return UnitDisplayName.Get(typeId);
 	}
 }

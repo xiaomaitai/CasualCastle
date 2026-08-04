@@ -5,13 +5,21 @@ public sealed class UnitSelectionController
 {
 	private readonly Node _owner;
 	private readonly Node2D _battlefield;
-	private UnitLogic _selected;
+	private readonly Castle _playerCastle;
+	private readonly Castle _enemyCastle;
+	private UnitLogic _selectedUnit;
+	private Building _selectedBuilding;
 	private bool _inputBlocked;
+
+	public UnitLogic SelectedUnit => _selectedUnit;
+	public Building SelectedBuilding => _selectedBuilding;
 
 	public UnitSelectionController(Node owner)
 	{
 		_owner = owner;
 		_battlefield = owner.GetParent().GetNode<Node2D>("Battlefield");
+		_playerCastle = _battlefield.GetNodeOrNull<Castle>("PlayerSide/PlayerCastle");
+		_enemyCastle = _battlefield.GetNodeOrNull<Castle>("EnemySide/EnemyCastle");
 	}
 
 	public void SetInputBlocked(bool blocked)
@@ -23,7 +31,9 @@ public sealed class UnitSelectionController
 
 	public void Process()
 	{
-		if (_selected != null && (!GodotObject.IsInstanceValid(_selected) || !_selected.IsAlive))
+		if (_selectedUnit != null && (!GodotObject.IsInstanceValid(_selectedUnit) || !_selectedUnit.IsAlive))
+			ClearSelection();
+		if (_selectedBuilding != null && (!GodotObject.IsInstanceValid(_selectedBuilding) || _selectedBuilding.IsDestroyed))
 			ClearSelection();
 	}
 
@@ -43,16 +53,27 @@ public sealed class UnitSelectionController
 
 		Vector2 worldPoint = GameCoordinatesAdapter.ScreenToWorld(_owner.GetViewport(), mouseButton.GlobalPosition);
 		UnitLogic picked = PickUnit(worldPoint);
-		if (picked == _selected)
-			return true;
-
-		ClearSelection();
 		if (picked != null)
 		{
-			_selected = picked;
-			_selected.SetSelected(true);
+			if (picked == _selectedUnit)
+				return true;
+			ClearSelection();
+			_selectedUnit = picked;
+			_selectedUnit.SetSelected(true);
 			return true;
 		}
+
+		Building pickedBuilding = PickBuilding(mouseButton.GlobalPosition);
+		if (pickedBuilding != null)
+		{
+			if (pickedBuilding == _selectedBuilding)
+				return true;
+			ClearSelection();
+			_selectedBuilding = pickedBuilding;
+			return true;
+		}
+
+		ClearSelection();
 		return false;
 	}
 
@@ -82,10 +103,20 @@ public sealed class UnitSelectionController
 		return closest;
 	}
 
+	private Building PickBuilding(Vector2 screenPoint)
+	{
+		if (_playerCastle != null && _playerCastle.TryGetBuildingAtScreenPoint(screenPoint, out Building building))
+			return building;
+		if (_enemyCastle != null && _enemyCastle.TryGetBuildingAtScreenPoint(screenPoint, out building))
+			return building;
+		return null;
+	}
+
 	private void ClearSelection()
 	{
-		if (_selected != null && GodotObject.IsInstanceValid(_selected))
-			_selected.SetSelected(false);
-		_selected = null;
+		if (_selectedUnit != null && GodotObject.IsInstanceValid(_selectedUnit))
+			_selectedUnit.SetSelected(false);
+		_selectedUnit = null;
+		_selectedBuilding = null;
 	}
 }
