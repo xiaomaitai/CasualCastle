@@ -238,6 +238,7 @@ else:
    - 10 次后仍非终态 → UPDATE 为 `timeout`
 5. 验证 nodeId=17 的输出为 RGBA 且透明像素占比 > 5%
 6. 告知用户已完成替换，透明像素占比
+7. 替换完成后，若项目为 Godot，使用 **`godot-import` skill**（`.claude/skills/godot-import.md`）无头导入，刷新被替换 PNG 的导入缓存
 
 ## 注意事项
 

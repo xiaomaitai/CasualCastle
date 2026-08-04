@@ -335,7 +335,8 @@ curl -s -X POST "https://openapi.liblibai.cloud/api/model/version/get?AccessKey=
    - 5 次轮询后仍非终态 → UPDATE 为 `timeout`，告知用户 generate_uuid 已记录在 db，稍后可手动查询
 6. 下载完成后按 `{name}_{db_id}.png` 格式命名保存，其中 `db_id` 为步骤 4 中记录的 `asset_gen_tasks.id`
 7. **如果需要缩放到目标尺寸，下载后立即缩放并保存**
-8. **不透明图（RGB PNG）可直接用于游戏，不需要询问用户。** 素材被采用后，用户需要透明背景时会手动要求抠图，抠图后原地替换即可
+8. 生图完成并保存后，若项目为 Godot，使用 **`godot-import` skill**（`.claude/skills/godot-import.md`）无头导入新 PNG，生成 `.import` 侧车，无需用户手动打开编辑器
+9. **不透明图（RGB PNG）可直接用于游戏，不需要询问用户。** 素材被采用后，用户需要透明背景时会手动要求抠图，抠图后原地替换即可
 
 ## 后续步骤
 
