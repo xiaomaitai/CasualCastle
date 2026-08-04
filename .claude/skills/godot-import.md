@@ -25,10 +25,10 @@
 & '<Godot 可执行文件路径>' --headless --import --path '<项目根目录>'
 ```
 
-或使用 Codex 版自带脚本（`$CODEX_HOME/skills/godot-import`）：
+或使用仓库自带脚本（`tools/godot_import.py`，随项目版本控制，重装 Codex 后仍可用）：
 
 ```bash
-python "$CODEX_HOME/skills/godot-import/scripts/godot_import.py" --project <项目根目录> [--godot <Godot 路径>] [--assets a.png b.tscn ...]
+python tools/godot_import.py --project <项目根目录> [--godot <Godot 路径>] [--assets a.png b.tscn ...]
 ```
 
 脚本自动定位 Godot、运行导入并校验侧车文件；`--assets` 传入的资源必须已有 `.import`（PNG）或 `.uid`（.cs/.tscn/.tres）。

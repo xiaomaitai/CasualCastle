@@ -320,6 +320,12 @@ curl -s -X POST "https://openapi.liblibai.cloud/api/model/version/get?AccessKey=
 
 ## 通用工作流
 
+自动化脚本：`tools/liblib_gen.py`（随仓库版本控制，重装 Codex 后仍可用），支持 submit/status/poll/download/scale/finish/batch 子命令：
+
+```bash
+python tools/liblib_gen.py batch <spec.json> [--max-concurrent 3] [--submit-delay 8] [--interval 30] [--max-attempts 5]
+```
+
 1. 用户要求生成图片时，先确认：
    - 提示词 → 如果用户给的描述太简单，帮助润色成更适合生图的英文 prompt。**必须融入平面2D、萌系、粗描边风格要素。**
    - 模型 → 从表格中选择checkpointId，也就是模型id。

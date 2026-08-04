@@ -227,6 +227,12 @@ else:
 
 ## 通用工作流
 
+自动化脚本：`tools/liblib_remove_bg.py`（随仓库版本控制，重装 Codex 后仍可用）：
+
+```bash
+python tools/liblib_remove_bg.py <imageUrl> <目标文件路径> [--interval 15] [--max-attempts 10]
+```
+
 1. 用户要求抠图时，确认：
    - 输入图片 → 从 `asset_gen_tasks` 表查原图的 Liblib.art URL（或用户提供的公网 URL）
    - 目标文件 → **原文件路径**（抠图结果直接替换原文件）

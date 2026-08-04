@@ -93,6 +93,7 @@ Godot **4.6** + **C# / .NET** 的 2.5D RTS 项目（斜视角纸片人，类皇�
 - 用户要求抠图/去背景时，使用 **`remove-bg` skill**（Codex 版：`$CODEX_HOME/skills/remove-bg`，源自 `.claude/skills/remove-bg.md`）
 - 用户要求细化任务、准备当前任务时，使用 **`refine-tasks` skill**（Codex 版：`$CODEX_HOME/skills/refine-tasks`）
 - 新增或变更 Godot 素材（PNG/.tscn/.tres/.cs 等）后，使用 **`godot-import` skill**（Codex 版：`$CODEX_HOME/skills/godot-import`，源自 `.claude/skills/godot-import.md`）无头导入，自动生成 `.import`/`.uid` 侧车文件，避免用户手动打开编辑器导入
+- AI 素材管线脚本（生图 `tools/liblib_gen.py`、抠图 `tools/liblib_remove_bg.py`、Godot 导入 `tools/godot_import.py`）统一存放在仓库 `tools/` 并随项目版本控制，不在 `$CODEX_HOME` 单独维护，避免重装 Codex 后丢失
 
 ## 工作规则
 
