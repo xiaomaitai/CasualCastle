@@ -122,6 +122,13 @@ public partial class SkillIconView : Control
 			case "berserker_rage":
 				DrawRageGlyph();
 				break;
+			case "orc_rage_t1":
+			case "orc_rage_t2":
+				DrawRageGlyph();
+				break;
+			case "orc_rage_aura":
+				DrawAuraGlyph();
+				break;
 			case "grace_shield":
 				DrawGraceShieldGlyph();
 				break;
@@ -243,6 +250,14 @@ public partial class SkillIconView : Control
 			new(25, 40),
 			new(21, 30),
 		}, FlameCore);
+	}
+
+	private void DrawAuraGlyph()
+	{
+		Color green = new(0.45f, 0.9f, 0.5f, 1f);
+		DrawCircle(new Vector2(28, 28), 11f, new Color(0.35f, 0.8f, 0.4f, 1f));
+		DrawArc(new Vector2(28, 28), 18f, 0f, Mathf.Tau, 32, green, 3f);
+		DrawArc(new Vector2(28, 28), 24f, 0f, Mathf.Tau, 32, new Color(green.R, green.G, green.B, 0.7f), 2f);
 	}
 
 	private void DrawStealthGlyph()
