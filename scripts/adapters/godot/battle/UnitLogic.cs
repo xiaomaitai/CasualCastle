@@ -35,8 +35,6 @@ public partial class UnitLogic : Node2D
 	private Vector2 _safeVelocity;
 	private bool _isDead;
 	private const float PushSyncEpsilonSq = 0.01f;
-	private static readonly string[] StealthBuffNames = { "隐身" };
-	private static readonly string[] EmptyBuffNames = System.Array.Empty<string>();
 
 	public void InitializeFromStats(UnitStats stats)
 	{
@@ -58,9 +56,10 @@ public partial class UnitLogic : Node2D
 			_lifecycle = new UnitLifecycle();
 			_corpseService = GameManager.Get<CorpseService>();
 		}
-		_unit.Initialize(stats, IsPlayerUnit);
-		_unit.SetDamageMatrix(GameManager.Get<DamageMatrix>());
-		ISkillRepository skillRepo = GameManager.Get<ISkillRepository>();
+			_unit.Initialize(stats, IsPlayerUnit);
+			_unit.SetDamageMatrix(GameManager.Get<DamageMatrix>());
+			_unit.Tactical = _tactical;
+			ISkillRepository skillRepo = GameManager.Get<ISkillRepository>();
 		IReadOnlyList<SkillDef> skills = skillRepo.GetByUnitType(stats.TypeId);
 		foreach (SkillDef skill in skills)
 			_unit.Skills.Add(skill);
@@ -114,6 +113,7 @@ public partial class UnitLogic : Node2D
 		{
 			_eventRelay.Damaged += OnDamaged;
 			_eventRelay.Died += OnDied;
+			_eventRelay.Healed += OnHealed;
 		}
 
 		UpdateSleepVisual();
@@ -126,6 +126,9 @@ public partial class UnitLogic : Node2D
 
 		if (AdapterRegistry.Resolve<GameManager>() != null)
 			AdapterRegistry.Resolve<GameManager>().PhaseChanged -= OnPhaseChanged;
+
+		if (_eventRelay != null)
+			_eventRelay.Healed -= OnHealed;
 	}
 
 	private void OnPhaseChanged(GameManager.GamePhase phase)
@@ -150,7 +153,17 @@ public partial class UnitLogic : Node2D
 	{
 		bool stealthed = _unit != null && _unit.IsStealthed;
 		_visual?.SetStealthVisual(stealthed);
-		_visual?.SetBuffs(stealthed ? StealthBuffNames : EmptyBuffNames);
+		UpdateBuffs();
+	}
+
+	private void UpdateBuffs()
+	{
+		List<string> buffs = new();
+		if (_unit != null && _unit.IsStealthed)
+			buffs.Add("隐身");
+		if (_unit != null && _unit.ShieldHealth > 0)
+			buffs.Add("护盾");
+		_visual?.SetBuffs(buffs.ToArray());
 	}
 
 	public void SetBaseSpriteModulate(Color color)
@@ -273,6 +286,30 @@ public partial class UnitLogic : Node2D
 		_visual?.UpdateSleepVisual(false, false);
 		_lifecycle?.PlayDeathAnimation(_body);
 		_corpseService?.ScheduleCorpseRemoval(_unit);
+	}
+
+	private void OnHealed()
+	{
+		if (_body == null || _eventRelay == null)
+			return;
+
+		Node root = GetTree().CurrentScene;
+		if (root == null)
+			return;
+
+		Projectile projectile = new Projectile();
+		root.AddChild(projectile);
+		projectile.SetModulate(new Color(0.5f, 1f, 0.6f));
+
+		Vector2 fromPos = _body.GlobalPosition;
+		Vector2 toPos = new Vector2(
+			GameCoordinatesAdapter.GameUnitsToPixels(_eventRelay.LastHealTargetX),
+			GameCoordinatesAdapter.GameUnitsToPixels(_eventRelay.LastHealTargetY));
+		Texture2D texture = LoadProjectileTexture("res://assets/art/projectiles/magic_ball.png");
+		if (texture == null)
+			return;
+
+		projectile.Launch(fromPos, toPos, GameRules.HealProjectileSpeed, texture);
 	}
 
 	private static System.Collections.Generic.Dictionary<string, Texture2D> _projectileTextures;

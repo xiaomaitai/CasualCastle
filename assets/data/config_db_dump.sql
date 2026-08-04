@@ -75,6 +75,14 @@ INSERT INTO asset_gen_tasks VALUES(54,'d529b001471c4b3e8c9e5aaa1fdb70d7','comple
 INSERT INTO asset_gen_tasks VALUES(55,'8fb2ea9e6ab14a8595be95ab0da615ea','completed','A dragon rider commander riding a dragon with spread wings, holding a lance, silver armor with a green cape, facing right, full body character, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors, game character icon','',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/ef9ca729694b0c25fb0c2e745983c684ddea57a0602e95e630b26ca3b8456eeb.png','assets/art/cards\DragonRiderCommander_55.png','2026-08-04T08:20:43Z','2026-08-04T08:21:09Z',NULL);
 INSERT INTO asset_gen_tasks VALUES(56,'d07e868c5a26406ab7d1f218c8a3d50c','completed','A shadow lord warlord assassin, dark hooded black armor with glowing purple eyes, holding twin shadow daggers, surrounded by dark mist, facing right, full body character, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors, game character icon','',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/a2db045ed37565956fd14cad90fc48308c7fcea69a507d69a8825b366b813d44.png','assets/art/cards\ShadowLord_56.png','2026-08-04T08:20:52Z','2026-08-04T08:21:40Z',NULL);
 INSERT INTO asset_gen_tasks VALUES(57,'64ffabdcdcce4ebe9aad455bc9016eb4','completed','A medieval king wearing a golden crown and ornate royal red and gold robe with ermine trim, holding a scepter and a sword, facing right, full body character, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors, game character icon','',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/9af4d2f459ba27d53bbdf571a4a7e040278e7209c4d0d77da9642572afb32058.png','assets/art/cards\King_57.png','2026-08-04T08:21:00Z','2026-08-04T08:21:40Z',NULL);
+INSERT INTO asset_gen_tasks VALUES(61,'d56f806f70d3432194cce34a116c6fca','completed','A hooded eye with a red diagonal slash across it, dark blue stealth theme, game skill icon, centered composition, complete icon design with decorative emblem background, thick gold frame, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors','white background, plain solid color background, transparency',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/a740ef5f9681cf799a761243953e4f042fc72cb6c50704e6ccd3508124ddec17.png','assets/art/skills\stealth_61.png','2026-08-04T10:48:03Z','2026-08-04T10:48:59Z',NULL);
+INSERT INTO asset_gen_tasks VALUES(62,'dfb0b3bab90740d08f1b9f910accdcda','completed','A shining steel dagger stabbing down into a red target mark, rogue ambush theme, game skill icon, centered composition, complete icon design with decorative emblem background, thick gold frame, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors','white background, plain solid color background, transparency',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/c34440822320e9ba0aa980e3cfb584fb65d4b2b2e33eced26f49084b861ea32e.png','assets/art/skills\backstab_62.png','2026-08-04T10:48:12Z','2026-08-04T10:49:00Z',NULL);
+INSERT INTO asset_gen_tasks VALUES(63,'50f98f0878a349399e51082b59c2eded','completed','An ice blue snowflake with a sword behind it, frost effect, game skill icon, centered composition, complete icon design with decorative emblem background, thick gold frame, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors','white background, plain solid color background, transparency',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/c18e9de2467967c206d73e6f1946a9af44f01e6b08c6ded52d03dcc7e36d86d4.png','assets/art/skills\slowing_strike_63.png','2026-08-04T10:48:20Z','2026-08-04T10:49:00Z',NULL);
+INSERT INTO asset_gen_tasks VALUES(64,'96431b58d0e44bfeb42810e8a6d5ab6d','completed','Four small adventurer head portraits together, an elf, a dwarf, a halfling and a dragonborn, colorful group emblem, game skill icon, centered composition, complete icon design with decorative emblem background, thick gold frame, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors','white background, plain solid color background, transparency',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/821043a27ff7a06568380e677b17fd9cb4bd660511a816cdbcdfb635f41e92f8.png','assets/art/skills\motley_crew_64.png','2026-08-04T10:49:01Z','2026-08-04T10:49:57Z',NULL);
+INSERT INTO asset_gen_tasks VALUES(65,'50683c1198b74b60b4fbe476edab77eb','completed','A blazing red and orange flame shaped like an angry face, rage energy burst, game skill icon, centered composition, complete icon design with decorative emblem background, thick gold frame, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors','white background, plain solid color background, transparency',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/2dc6bba862f1ac37f01dd43bf5d5fdf295580a29ad1d4231b8360937556afa92.png','assets/art/skills\berserker_rage_65.png','2026-08-04T10:49:09Z','2026-08-04T10:49:57Z',NULL);
+INSERT INTO asset_gen_tasks VALUES(66,'783048e9c94043cab1bfae47f9dcce11','completed','A golden holy shield with a glowing cross emblem, divine protection, game skill icon, centered composition, complete icon design with decorative emblem background, thick gold frame, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors','white background, plain solid color background, transparency',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/2fc35b10d313289f89573131591a5bcc552b2b07cafc5e8119aeaea9be36f7f5.png','assets/art/skills\grace_shield_66.png','2026-08-04T10:49:18Z','2026-08-04T10:49:57Z',NULL);
+INSERT INTO asset_gen_tasks VALUES(67,'31cd60c7c65947538f6b1809c4bbf994','completed','A golden hourglass radiating holy light rays, divine blessing, game skill icon, centered composition, complete icon design with decorative emblem background, thick gold frame, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors','white background, plain solid color background, transparency',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/5d3b96ac06d4269a2ad81d13d640c80b5614d1257277e3e9d65b884ef068dff9.png','assets/art/skills\grace_cooldown_67.png','2026-08-04T10:49:58Z','2026-08-04T10:50:45Z',NULL);
+INSERT INTO asset_gen_tasks VALUES(68,'f7ca9814593f4067902ae88d1207968c','completed','Holy white-gold flames burning on a sacred emblem, divine judgment, game skill icon, centered composition, complete icon design with decorative emblem background, thick gold frame, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors','white background, plain solid color background, transparency',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/952278849b6ffbafd17a3490fadfbb1b7835092e8de0ffbe4b0cae615594229e.png','assets/art/skills\grace_burn_68.png','2026-08-04T10:50:06Z','2026-08-04T10:50:45Z',NULL);
 CREATE TABLE unit_stats (
     type_id          TEXT PRIMARY KEY,
     size             INTEGER NOT NULL,
@@ -89,34 +97,40 @@ CREATE TABLE unit_stats (
     has_night_combat INTEGER NOT NULL DEFAULT 0,
     unit_color       INTEGER NOT NULL,
     vision_range     REAL    NOT NULL DEFAULT 170.0
-, unit_cost INTEGER NOT NULL DEFAULT 2000, race TEXT NOT NULL DEFAULT '', armor_value INTEGER NOT NULL DEFAULT 0, can_detect_stealth INTEGER NOT NULL DEFAULT 0);
-INSERT INTO unit_stats VALUES('Spearman',1,0,1,2,120,4,80.0,30.0,1.0,0,4289733792,250.0,2000,'Human',30,0);
-INSERT INTO unit_stats VALUES('ShieldBearer',1,0,2,4,220,3,45.0,30.0,1.5,0,4286611584,200.0,2400,'Human',80,0);
-INSERT INTO unit_stats VALUES('Archer',1,1,1,1,50,12,60.0,200.0,1.5,0,4286627968,300.0,2200,'Human',20,0);
-INSERT INTO unit_stats VALUES('Knight',2,0,0,4,150,14,120.0,35.0,1.2,0,4291862624,280.0,2600,'Human',60,0);
-INSERT INTO unit_stats VALUES('Scout',0,0,0,0,35,4,160.0,25.0,0.8,0,4286644095,400.0,1400,'Human',10,0);
-INSERT INTO unit_stats VALUES('Swordsman',1,0,0,3,160,6,80.0,30.0,0.9,0,4285567184,260.0,2600,'Human',50,0);
-INSERT INTO unit_stats VALUES('HeavyShield',2,0,2,4,330,4,40.0,35.0,1.5,0,4284515808,220.0,3000,'Human',120,0);
-INSERT INTO unit_stats VALUES('Crossbowman',1,1,1,1,70,18,55.0,180.0,2.0,0,4283476000,280.0,2800,'Human',40,0);
-INSERT INTO unit_stats VALUES('HeavyCavalry',2,0,0,4,200,22,110.0,35.0,1.3,0,4288712672,290.0,3400,'Human',90,0);
-INSERT INTO unit_stats VALUES('LightCavalry',1,0,0,0,55,8,180.0,30.0,0.8,0,4286632191,450.0,1800,'Human',25,1);
-INSERT INTO unit_stats VALUES('HolyShieldGuardian',2,0,2,4,700,8,45.0,35.0,1.5,0,4286616704,170.0,5000,'Human',250,0);
-INSERT INTO unit_stats VALUES('DragonRiderCommander',2,1,1,3,300,40,120.0,180.0,0.8,0,4290526975,200.0,4600,'Human',120,0);
-INSERT INTO unit_stats VALUES('ShadowLord',1,0,6,2,180,50,100.0,30.0,1.0,0,4284248320,220.0,4000,'Human',80,0);
-INSERT INTO unit_stats VALUES('King',2,0,5,6,1200,20,60.0,35.0,1.2,0,4294956800,170.0,6000,'Human',300,0);
-INSERT INTO unit_stats VALUES('RoyalGuard',1,0,0,4,220,8,80.0,30.0,0.9,0,4488440,270.0,3400,'Human',80,0);
-INSERT INTO unit_stats VALUES('RoyalShieldGuard',2,0,2,4,480,5,40.0,35.0,1.5,0,12303291,230.0,3800,'Human',180,0);
-INSERT INTO unit_stats VALUES('RoyalSharpshooter',1,1,1,2,90,28,55.0,200.0,2.0,0,5621589,300.0,3600,'Human',70,0);
-INSERT INTO unit_stats VALUES('RoyalKnight',2,0,0,4,280,30,110.0,35.0,1.3,0,16754900,300.0,4200,'Human',140,0);
-INSERT INTO unit_stats VALUES('RoyalScout',1,0,0,2,80,14,180.0,30.0,0.8,0,10040232,500.0,2400,'Human',50,0);
-INSERT INTO unit_stats VALUES('ElfRanger',0,1,1,1,45,14,150.0,220.0,1.2,0,4294954080,300.0,2400,'Elf',20,0);
-INSERT INTO unit_stats VALUES('ElfSharpshooter',0,1,1,1,60,22,150.0,280.0,1.0,0,4294954320,350.0,3400,'Elf',35,0);
-INSERT INTO unit_stats VALUES('DwarfWarrior',1,0,0,4,100,16,90.0,90.0,1.5,0,4286611584,170.0,2400,'Dwarf',70,0);
-INSERT INTO unit_stats VALUES('DwarfBerserker',1,0,0,3,130,28,110.0,90.0,1.2,0,4286740992,170.0,3400,'Dwarf',90,0);
-INSERT INTO unit_stats VALUES('HalflingThief',0,0,1,0,35,10,200.0,70.0,0.7,0,4278241280,200.0,1800,'Halfling',10,0);
-INSERT INTO unit_stats VALUES('HalflingAssassin',0,0,1,0,50,20,220.0,70.0,0.6,0,4278237952,220.0,3200,'Halfling',15,0);
-INSERT INTO unit_stats VALUES('DragonbornMage',1,1,4,1,55,18,110.0,200.0,1.8,0,4278190336,250.0,2600,'Dragonborn',25,0);
-INSERT INTO unit_stats VALUES('DragonbornArchmage',1,1,4,1,75,30,110.0,240.0,1.5,0,4278190080,280.0,3800,'Dragonborn',40,0);
+, unit_cost INTEGER NOT NULL DEFAULT 2000, race TEXT NOT NULL DEFAULT '', armor_value INTEGER NOT NULL DEFAULT 0, can_detect_stealth INTEGER NOT NULL DEFAULT 0, heal_amount REAL NOT NULL DEFAULT 0, heal_range REAL NOT NULL DEFAULT 0, heal_interval REAL NOT NULL DEFAULT 0);
+INSERT INTO unit_stats VALUES('Spearman',1,0,1,2,120,4,80.0,30.0,1.0,0,4289733792,250.0,2000,'Human',30,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('ShieldBearer',1,0,2,4,220,3,45.0,30.0,1.5,0,4286611584,200.0,2400,'Human',80,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('Archer',1,1,1,1,50,12,60.0,200.0,1.5,0,4286627968,300.0,2200,'Human',20,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('Knight',2,0,0,4,150,14,120.0,35.0,1.2,0,4291862624,280.0,2600,'Human',60,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('Scout',0,0,0,0,35,4,160.0,25.0,0.8,0,4286644095,400.0,1400,'Human',10,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('Swordsman',1,0,0,3,160,6,80.0,30.0,0.9,0,4285567184,260.0,2600,'Human',50,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('HeavyShield',2,0,2,4,330,4,40.0,35.0,1.5,0,4284515808,220.0,3000,'Human',120,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('Crossbowman',1,1,1,1,70,18,55.0,180.0,2.0,0,4283476000,280.0,2800,'Human',40,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('HeavyCavalry',2,0,0,4,200,22,110.0,35.0,1.3,0,4288712672,290.0,3400,'Human',90,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('LightCavalry',1,0,0,0,55,8,180.0,30.0,0.8,0,4286632191,450.0,1800,'Human',25,1,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('HolyShieldGuardian',2,0,2,4,700,8,45.0,35.0,1.5,0,4286616704,170.0,5000,'Human',250,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('DragonRiderCommander',2,1,1,3,300,40,120.0,180.0,0.8,0,4290526975,200.0,4600,'Human',120,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('ShadowLord',1,0,6,2,180,50,100.0,30.0,1.0,0,4284248320,220.0,4000,'Human',80,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('King',2,0,5,6,1200,20,60.0,35.0,1.2,0,4294956800,170.0,6000,'Human',300,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('RoyalGuard',1,0,0,4,220,8,80.0,30.0,0.9,0,4488440,270.0,3400,'Human',80,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('RoyalShieldGuard',2,0,2,4,480,5,40.0,35.0,1.5,0,12303291,230.0,3800,'Human',180,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('RoyalSharpshooter',1,1,1,2,90,28,55.0,200.0,2.0,0,5621589,300.0,3600,'Human',70,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('RoyalKnight',2,0,0,4,280,30,110.0,35.0,1.3,0,16754900,300.0,4200,'Human',140,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('RoyalScout',1,0,0,2,80,14,180.0,30.0,0.8,0,10040232,500.0,2400,'Human',50,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('ElfRanger',0,1,1,1,45,14,150.0,220.0,1.2,0,4294954080,300.0,2400,'Elf',20,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('ElfSharpshooter',0,1,1,1,60,22,150.0,280.0,1.0,0,4294954320,350.0,3400,'Elf',35,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('DwarfWarrior',1,0,0,4,100,16,90.0,90.0,1.5,0,4286611584,170.0,2400,'Dwarf',70,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('DwarfBerserker',1,0,0,3,130,28,110.0,90.0,1.2,0,4286740992,170.0,3400,'Dwarf',90,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('HalflingThief',0,0,1,0,35,10,200.0,70.0,0.7,0,4278241280,200.0,1800,'Halfling',10,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('HalflingAssassin',0,0,1,0,50,20,220.0,70.0,0.6,0,4278237952,220.0,3200,'Halfling',15,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('DragonbornMage',1,1,4,1,55,18,110.0,200.0,1.8,0,4278190336,250.0,2600,'Dragonborn',25,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('DragonbornArchmage',1,1,4,1,75,30,110.0,240.0,1.5,0,4278190080,280.0,3800,'Dragonborn',40,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('HolyShieldBearer',2,0,2,4,300,35,3.5,45.0,1.5,0,4294956800,200.0,2600,'Human',0,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('Paladin',2,0,2,4,450,55,4.0,45.0,1.5,0,4294954080,210.0,3600,'Human',0,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('Priest',1,0,5,4,90,0,5.0,0.0,10.0,0,4290526975,220.0,2600,'Human',0,0,30.0,150.0,2.0);
+INSERT INTO unit_stats VALUES('Archbishop',1,0,5,4,120,0,5.0,0.0,10.0,0,4288712672,240.0,3600,'Human',0,0,40.0,200.0,1.5);
+INSERT INTO unit_stats VALUES('Inquisitor',1,1,1,4,140,45,6.0,170.0,2.0,0,4286644095,300.0,2800,'Human',0,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('Punisher',1,1,1,4,180,65,6.5,190.0,1.8,0,4286632191,320.0,3800,'Human',0,0,0.0,0.0,0.0);
 CREATE TABLE building_defs (
     type_id           TEXT PRIMARY KEY,
     display_name      TEXT    NOT NULL,
@@ -164,6 +178,12 @@ INSERT INTO building_defs VALUES('HolyWall','圣壁',500,14.0,0,0,1,1,'HolyShiel
 INSERT INTO building_defs VALUES('HeavenPunishmentTower','天罚塔',350,12.0,0,0,1,1,'DragonRiderCommander',0,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'');
 INSERT INTO building_defs VALUES('ShadowSanctum','暗影圣所',250,8.0,0,0,1,1,'ShadowLord',0,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'');
 INSERT INTO building_defs VALUES('RoyalCourt','王庭',800,30.0,0,0,1,1,'King',0,4,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'');
+INSERT INTO building_defs VALUES('Sanctum','圣所',280,12.0,0,0,1,1,'HolyShieldBearer',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.95,0.85,0.4,1.0,'');
+INSERT INTO building_defs VALUES('HolySpring','圣泉',180,10.0,0,0,1,1,'Priest',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.55,0.8,1.0,1.0,'');
+INSERT INTO building_defs VALUES('Tribunal','裁判所',200,11.0,0,0,1,1,'Inquisitor',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.85,0.5,0.9,1.0,'');
+INSERT INTO building_defs VALUES('GreatTemple','圣殿',420,9.0,0,0,1,1,'Paladin',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,0.9,0.55,1.0,'');
+INSERT INTO building_defs VALUES('HolyLightSanctum','圣光圣所',280,8.0,0,0,1,1,'Archbishop',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.7,0.9,1.0,1.0,'');
+INSERT INTO building_defs VALUES('JudgementHall','裁决厅',320,9.0,0,0,1,1,'Punisher',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.95,0.65,1.0,1.0,'');
 CREATE TABLE damage_matrix (
     damage_type INTEGER NOT NULL,
     armor_type  INTEGER NOT NULL,
@@ -242,6 +262,9 @@ INSERT INTO shop_catalog VALUES('Ranch','牧场',8,'Ranch',6);
 INSERT INTO shop_catalog VALUES('RoyalArmory','皇家军营',10,'RoyalArmory',4);
 INSERT INTO shop_catalog VALUES('RoyalBulwark','皇家壁垒',10,'RoyalBulwark',4);
 INSERT INTO shop_catalog VALUES('RoyalStable','皇家马场',12,'RoyalStable',4);
+INSERT INTO shop_catalog VALUES('Sanctum','圣所',5,'Sanctum',6);
+INSERT INTO shop_catalog VALUES('HolySpring','圣泉',5,'HolySpring',4);
+INSERT INTO shop_catalog VALUES('Tribunal','裁判所',6,'Tribunal',2);
 CREATE TABLE IF NOT EXISTS "faction_defs" (
     id TEXT PRIMARY KEY,
     display_name TEXT NOT NULL,
@@ -283,6 +306,12 @@ INSERT INTO tech_tree_nodes VALUES('HolyWall','alliance',4,0,0,NULL,NULL,0,'圣�
 INSERT INTO tech_tree_nodes VALUES('HeavenPunishmentTower','alliance',4,2,0,NULL,NULL,0,'天罚塔','DragonRiderCommander',350,12.0);
 INSERT INTO tech_tree_nodes VALUES('ShadowSanctum','alliance',4,4,0,NULL,NULL,0,'暗影圣所','ShadowLord',250,8.0);
 INSERT INTO tech_tree_nodes VALUES('RoyalCourt','alliance',5,2,0,NULL,NULL,0,'王庭','King',800,30.0);
+INSERT INTO tech_tree_nodes VALUES('Sanctum','alliance',1,0,1,5,6,0,'圣所','HolyShieldBearer',280,12.0);
+INSERT INTO tech_tree_nodes VALUES('HolySpring','alliance',1,1,1,5,4,0,'圣泉','Priest',180,10.0);
+INSERT INTO tech_tree_nodes VALUES('Tribunal','alliance',1,2,1,6,2,0,'裁判所','Inquisitor',200,11.0);
+INSERT INTO tech_tree_nodes VALUES('GreatTemple','alliance',2,0,0,NULL,NULL,0,'圣殿','Paladin',420,9.0);
+INSERT INTO tech_tree_nodes VALUES('HolyLightSanctum','alliance',2,1,0,NULL,NULL,0,'圣光圣所','Archbishop',280,8.0);
+INSERT INTO tech_tree_nodes VALUES('JudgementHall','alliance',2,2,0,NULL,NULL,0,'裁决厅','Punisher',320,9.0);
 CREATE TABLE IF NOT EXISTS "combine_recipes" (
                 main_type_id TEXT NOT NULL,
                 material_type_id TEXT NOT NULL,
@@ -305,17 +334,9 @@ INSERT INTO combine_recipes VALUES('RoyalBulwark','RoyalArmory',1,'HolyWall');
 INSERT INTO combine_recipes VALUES('HolyWall','HeavenPunishmentTower',1,'RoyalCourt');
 INSERT INTO combine_recipes VALUES('RoyalArcheryRange','RoyalArcheryRange',2,'HeavenPunishmentTower');
 INSERT INTO combine_recipes VALUES('RoyalRanger','RoyalRanger',2,'ShadowSanctum');
-CREATE TABLE skill_defs (
-    id TEXT PRIMARY KEY,
-    display_name TEXT NOT NULL,
-    skill_type TEXT NOT NULL CHECK(skill_type IN ('stat_modifier','aura','on_hit','special')),
-    config_json TEXT NOT NULL
-);
-INSERT INTO skill_defs VALUES('berserker_rage','狂战士之怒','stat_modifier','{"trigger":"low_health","trigger_param":0.5,"modifiers":{"attack_speed_mult":1.5}}');
-INSERT INTO skill_defs VALUES('backstab','背刺','stat_modifier','{"trigger":"target_isolated","modifiers":{"attack_damage_mult":2.0}}');
-INSERT INTO skill_defs VALUES('slowing_strike','减速打击','on_hit','{"effects":[{"type":"slow","value":0.3,"duration":2.0}]}');
-INSERT INTO skill_defs VALUES('motley_crew','鱼龙混杂','stat_modifier','{"trigger":"nearby_diverse","modifiers":{"dodge_chance":0.0}}');
-INSERT INTO skill_defs VALUES('stealth','潜行','special','{"behavior": "stealth", "param": 180, "speed_mult": 0.85, "cooldown": 3.0}');
+INSERT INTO combine_recipes VALUES('Sanctum','Sanctum',1,'GreatTemple');
+INSERT INTO combine_recipes VALUES('HolySpring','HolySpring',1,'HolyLightSanctum');
+INSERT INTO combine_recipes VALUES('Tribunal','Tribunal',1,'JudgementHall');
 CREATE TABLE unit_skills (
     unit_type_id TEXT NOT NULL,
     skill_id TEXT NOT NULL,
@@ -333,9 +354,30 @@ INSERT INTO unit_skills VALUES('HalflingAssassin','motley_crew');
 INSERT INTO unit_skills VALUES('DragonbornMage','motley_crew');
 INSERT INTO unit_skills VALUES('DragonbornArchmage','motley_crew');
 INSERT INTO unit_skills VALUES('HalflingAssassin','stealth');
+INSERT INTO unit_skills VALUES('HolyShieldBearer','grace_shield');
+INSERT INTO unit_skills VALUES('Paladin','grace_shield');
+INSERT INTO unit_skills VALUES('Priest','grace_cooldown');
+INSERT INTO unit_skills VALUES('Archbishop','grace_cooldown');
+INSERT INTO unit_skills VALUES('Inquisitor','grace_burn_t1');
+INSERT INTO unit_skills VALUES('Punisher','grace_burn_t2');
+CREATE TABLE IF NOT EXISTS "skill_defs" (
+    id TEXT PRIMARY KEY,
+    display_name TEXT NOT NULL,
+    skill_type TEXT NOT NULL CHECK(skill_type IN ('stat_modifier','aura','on_hit','on_heal','special')),
+    config_json TEXT NOT NULL
+);
+INSERT INTO skill_defs VALUES('berserker_rage','狂战士之怒','stat_modifier','{"trigger":"low_health","trigger_param":0.5,"modifiers":{"attack_speed_mult":1.5}}');
+INSERT INTO skill_defs VALUES('backstab','背刺','stat_modifier','{"trigger":"target_isolated","modifiers":{"attack_damage_mult":2.0}}');
+INSERT INTO skill_defs VALUES('slowing_strike','减速打击','on_hit','{"effects":[{"type":"slow","value":0.3,"duration":2.0}]}');
+INSERT INTO skill_defs VALUES('motley_crew','鱼龙混杂','stat_modifier','{"trigger":"nearby_diverse","modifiers":{"dodge_chance":0.0}}');
+INSERT INTO skill_defs VALUES('stealth','潜行','special','{"behavior": "stealth", "param": 180, "speed_mult": 0.85, "cooldown": 3.0}');
+INSERT INTO skill_defs VALUES('grace_shield','恩典·护盾','on_heal','{"effects":[{"type":"shield"}]}');
+INSERT INTO skill_defs VALUES('grace_cooldown','恩典·冷却祝福','on_heal','{"effects":[{"type":"cooldown_reduction","value":1.0}]}');
+INSERT INTO skill_defs VALUES('grace_burn_t1','恩典·灼烧','on_heal','{"effects":[{"type":"burn","value":15,"range":120}]}');
+INSERT INTO skill_defs VALUES('grace_burn_t2','恩典·灼烧','on_heal','{"effects":[{"type":"burn","value":25,"range":120}]}');
 PRAGMA writable_schema=ON;
 CREATE TABLE IF NOT EXISTS sqlite_sequence(name,seq);
 DELETE FROM sqlite_sequence;
-INSERT INTO sqlite_sequence VALUES('asset_gen_tasks',60);
+INSERT INTO sqlite_sequence VALUES('asset_gen_tasks',68);
 PRAGMA writable_schema=OFF;
 COMMIT;

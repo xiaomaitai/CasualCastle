@@ -9,6 +9,7 @@ public class SkillSet
 	private readonly List<SkillDef> _skills = new();
 	private readonly Dictionary<string, StatModifierConfig> _statModCache = new();
 	private readonly Dictionary<string, OnHitConfig> _onHitCache = new();
+	private readonly Dictionary<string, OnHealConfig> _onHealCache = new();
 	private readonly Dictionary<string, SpecialConfig> _specialCache = new();
 
 	public int Count => _skills.Count;
@@ -21,6 +22,8 @@ public class SkillSet
 			_statModCache[skill.Id] = StatModifierConfig.Parse(skill.ConfigJson);
 		else if (skill.Type == SkillType.OnHit)
 			_onHitCache[skill.Id] = OnHitConfig.Parse(skill.ConfigJson);
+		else if (skill.Type == SkillType.OnHeal)
+			_onHealCache[skill.Id] = OnHealConfig.Parse(skill.ConfigJson);
 		else if (skill.Type == SkillType.Special)
 		{
 			SpecialConfig cfg = SpecialConfig.Parse(skill.ConfigJson);
@@ -37,6 +40,7 @@ public class SkillSet
 		_skills.Remove(found);
 		_statModCache.Remove(skillId);
 		_onHitCache.Remove(skillId);
+		_onHealCache.Remove(skillId);
 		_specialCache.Remove(skillId);
 		return true;
 	}
@@ -104,6 +108,15 @@ public class SkillSet
 		foreach (KeyValuePair<string, OnHitConfig> kv in _onHitCache)
 		{
 			foreach (OnHitEffect effect in kv.Value.Effects)
+				yield return effect;
+		}
+	}
+
+	public IEnumerable<OnHealEffect> GetOnHealEffects()
+	{
+		foreach (KeyValuePair<string, OnHealConfig> kv in _onHealCache)
+		{
+			foreach (OnHealEffect effect in kv.Value.Effects)
 				yield return effect;
 		}
 	}

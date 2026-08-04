@@ -165,6 +165,30 @@ A medieval [unit type] unit, [weapon/gear], facing right, full body character, f
 
 示例：`A medieval spearman unit, holding a long spear, facing right, full body character, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors, game character icon`
 
+### 技能图标
+
+| 属性 | 值 |
+|------|-----|
+| 用途 | 技能栏/属性面板技能图标（`SkillIconView` 56×56 显示） |
+| 存放位置 | `assets/art/skills/{skillId}_{taskId}.png`（skillId 与 `skill_defs.id` 一致） |
+| 加载方式 | `SkillIconView.LoadSkillIcon` 按 `{skillId}_*.png` 匹配 |
+| 生图尺寸 | 512×512 |
+| 最终尺寸 | 256×256（缩放后） |
+
+**风格要求**：
+
+- 完整图案构图：图标自带装饰背景（徽章/框线/纹理），主体居中，占画面约 60~80%
+- **禁止白底、禁止纯色底再抠成透明图**：背景是图案设计的一部分，成品直接用 RGB PNG，不需要透明通道
+- 风格沿用 `flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors`
+
+**提示词模板：**
+
+```
+A [skill theme] game skill icon, centered composition, complete icon design with decorative emblem background, thick gold frame, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors
+```
+
+负向提示词：`white background, plain solid color background, transparency`
+
 ---
 
 ## 4. UI 元素
@@ -260,6 +284,7 @@ process/fix_alpha_border=true
 - 输出多张图中，**取 nodeId=17**（硬边 RGBA 抠图），适合游戏 sprite
 - 验证输出为 RGBA 且透明像素占比 > 5%
 - **抠图结果直接替换原文件**（原地覆盖，保持同一路径和文件名）
+- **技能图标不参与抠图**：按技能图标规格直接生成 RGB PNG 使用，不执行 remove-bg
 
 **参考：** `$CODEX_HOME/skills/remove-bg`
 

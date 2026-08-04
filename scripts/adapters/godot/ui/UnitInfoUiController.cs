@@ -60,6 +60,7 @@ public sealed class UnitInfoUiController
 			UnitState.Fighting => "战斗",
 			UnitState.Retaliating => "反击",
 			UnitState.Sieging => "攻城",
+			UnitState.Healing => "治疗",
 			_ => "未知"
 		};
 		string pos = $"位置: ({svc.GameX:F0}, {svc.GameY:F0})";

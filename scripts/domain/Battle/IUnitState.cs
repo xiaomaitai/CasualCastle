@@ -8,6 +8,7 @@ public interface IUnitState
 	int Health { get; }
 	int MaxHealth { get; }
 	int Damage { get; }
+	int ShieldHealth { get; }
 	int UnitCost { get; }
 	float Speed { get; }
 	float AttackRange { get; }
@@ -24,6 +25,9 @@ public interface IUnitState
 	string Race { get; }
 	bool IsStealthed { get; }
 	bool CanDetectStealth { get; }
+	float HealAmount { get; }
+	float HealRange { get; }
+	float HealInterval { get; }
 	SkillSet Skills { get; }
 	float GetSkillCooldownRemaining(string skillId);
 	IUnitHandle TargetEnemy { get; }

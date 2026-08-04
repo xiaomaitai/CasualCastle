@@ -5,5 +5,6 @@ public enum UnitState
 	Marching,
 	Fighting,
 	Retaliating,
-	Sieging
+	Sieging,
+	Healing
 }

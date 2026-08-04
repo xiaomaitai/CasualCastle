@@ -62,7 +62,8 @@ public class UnitSpatialService : ICombatUseCase
 	{
 		return unit.State == UnitState.Fighting
 			|| unit.State == UnitState.Retaliating
-			|| unit.State == UnitState.Sieging;
+			|| unit.State == UnitState.Sieging
+			|| unit.State == UnitState.Healing;
 	}
 
 	private static void PushOutOfBuilding(IUnitHandle unit, IBuildingRef building)

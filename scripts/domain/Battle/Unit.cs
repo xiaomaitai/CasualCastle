@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using CasualCastle.Domain.Shared;
 
 namespace CasualCastle.Domain.Battle;
 
@@ -30,14 +31,21 @@ public class Unit : IUnitHandle
 	public string Race { get; set; }
 	public bool IsStealthed { get; private set; }
 	public bool CanDetectStealth { get; set; }
+	public float HealAmount { get; set; }
+	public float HealRange { get; set; }
+	public float HealInterval { get; set; }
+	public int ShieldHealth { get; private set; }
+	public ITacticalQueries Tactical { get; set; }
 	public SkillSet Skills { get; private set; }
 	public GameContext GameCtx { get; set; } = new();
 
 	public IUnitHandle TargetEnemy { get; set; }
+	public IUnitHandle HealTarget { get; set; }
 	public IBuildingTarget TargetBuilding { get; set; }
 	public UnitState State { get; set; }
 
 	private float _attackTimer;
+	private float _healTimer;
 	private DamageMatrix _damageMatrix;
 	private readonly System.Random _rng = new();
 	private readonly Dictionary<string, float> _skillCooldowns = new();
@@ -78,6 +86,9 @@ public class Unit : IUnitHandle
 		ArmorValue = stats.ArmorValue;
 		Race = stats.Race;
 		CanDetectStealth = stats.CanDetectStealth;
+		HealAmount = stats.HealAmount;
+		HealRange = stats.HealRange;
+		HealInterval = stats.HealInterval;
 		Skills = new SkillSet();
 	}
 
@@ -105,6 +116,68 @@ public class Unit : IUnitHandle
 	public void SetStealth(bool stealthed)
 	{
 		IsStealthed = stealthed;
+	}
+
+	public int Heal(int amount)
+	{
+		if (!IsAlive || amount <= 0)
+			return 0;
+
+		int healable = MaxHealth - Health;
+		if (healable <= 0)
+			return 0;
+
+		int healed = System.Math.Min(healable, amount);
+		Health += healed;
+		ApplyGraceEffects(healed);
+		return healed;
+	}
+
+	public void AddShield(int amount)
+	{
+		if (amount <= 0)
+			return;
+		ShieldHealth = System.Math.Min(MaxHealth, ShieldHealth + amount);
+	}
+
+	private void ApplyGraceEffects(int healed)
+	{
+		if (Skills == null)
+			return;
+		foreach (OnHealEffect effect in Skills.GetOnHealEffects())
+		{
+			if (effect.Type == "shield")
+				AddShield((int)(healed * GameRules.GraceShieldMult));
+			else if (effect.Type == "cooldown_reduction")
+				ReduceSkillCooldowns(GameRules.GraceCooldownReduction);
+			else if (effect.Type == "burn")
+				ApplyBurn(effect);
+		}
+	}
+
+	private void ReduceSkillCooldowns(float seconds)
+	{
+		if (_skillCooldowns.Count == 0 || seconds <= 0f)
+			return;
+
+		List<string> keys = new(_skillCooldowns.Keys);
+		foreach (string skillId in keys)
+		{
+			float next = _skillCooldowns[skillId] - seconds;
+			if (next <= 0f)
+				_skillCooldowns.Remove(skillId);
+			else
+				_skillCooldowns[skillId] = next;
+		}
+	}
+
+	private void ApplyBurn(OnHealEffect effect)
+	{
+		int burnDamage = (int)effect.Value;
+		if (Tactical == null || burnDamage <= 0 || effect.Range <= 0f)
+			return;
+		foreach (IUnitHandle enemy in Tactical.FindEnemiesNear(this, effect.Range))
+			enemy.TakeDamage(burnDamage, this, GameX, GameY);
 	}
 
 	public float GetCurrentSpeed()
@@ -172,7 +245,15 @@ public class Unit : IUnitHandle
 				return;
 		}
 
-		Health = CombatRules.ApplyDamage(Health, amount);
+		int remaining = amount;
+		if (ShieldHealth > 0)
+		{
+			int absorbed = System.Math.Min(ShieldHealth, remaining);
+			ShieldHealth -= absorbed;
+			remaining -= absorbed;
+		}
+
+		Health = CombatRules.ApplyDamage(Health, remaining);
 
 		if (isAoe && IsStealthed)
 		{
@@ -202,6 +283,23 @@ public class Unit : IUnitHandle
 	{
 		if (!IsAlive)
 			return;
+
+		if (HealAmount > 0f && HealRange > 0f)
+		{
+			TargetEnemy = null;
+			IUnitHandle injured = Tactical != null ? Tactical.FindNearestInjuredAlly(this, HealRange) : null;
+			if (injured != null)
+			{
+				HealTarget = injured;
+				State = UnitState.Healing;
+			}
+			else
+			{
+				HealTarget = null;
+				State = UnitState.Marching;
+			}
+			return;
+		}
 
 		if (nearestEnemy != null && nearestEnemy.IsAlive)
 		{
@@ -241,6 +339,8 @@ public class Unit : IUnitHandle
 
 		if (_attackTimer > 0)
 			_attackTimer -= dt;
+		if (_healTimer > 0)
+			_healTimer -= dt;
 
 		switch (State)
 		{
@@ -261,11 +361,41 @@ public class Unit : IUnitHandle
 				}
 				break;
 
+			case UnitState.Healing:
+				TryHeal();
+				break;
+
 			case UnitState.Marching:
 				TargetEnemy = null;
 				NavPort.SetTarget(marchTargetGameX, marchTargetGameY);
 				break;
 		}
+	}
+
+	private void TryHeal()
+	{
+		if (HealTarget == null || !HealTarget.IsAlive || HealTarget.Health >= HealTarget.MaxHealth)
+		{
+			NavPort.SetTarget(GameX, GameY);
+			return;
+		}
+
+		float dx = HealTarget.GameX - GameX;
+		float dy = HealTarget.GameY - GameY;
+		if (MathF.Sqrt(dx * dx + dy * dy) > HealRange)
+		{
+			NavPort.SetTarget(HealTarget.GameX, HealTarget.GameY);
+			return;
+		}
+
+		NavPort.SetTarget(GameX, GameY);
+		if (_healTimer > 0f)
+			return;
+
+		int healed = HealTarget.Heal((int)HealAmount);
+		if (healed > 0)
+			EventPort?.OnHeal(HealTarget, healed);
+		_healTimer = HealInterval;
 	}
 
 	private void TryEngage(float effectiveAttackCooldown)

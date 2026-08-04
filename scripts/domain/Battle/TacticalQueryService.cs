@@ -96,6 +96,46 @@ public class TacticalQueryService : ITacticalQueries
 		return false;
 	}
 
+	public IReadOnlyList<IUnitHandle> FindEnemiesNear(IUnitHandle center, float radius)
+	{
+		List<IUnitHandle> found = new();
+		float radiusSq = radius * radius;
+		foreach (IUnitHandle candidate in _repo.AllUnits)
+		{
+			if (!candidate.IsAlive || candidate.IsPlayerUnit == center.IsPlayerUnit)
+				continue;
+			if (candidate.IsStealthed && !center.CanDetectStealth)
+				continue;
+			float dx = candidate.GameX - center.GameX;
+			float dy = candidate.GameY - center.GameY;
+			if (dx * dx + dy * dy <= radiusSq)
+				found.Add(candidate);
+		}
+		return found;
+	}
+
+	public IUnitHandle FindNearestInjuredAlly(IUnitHandle unit, float range)
+	{
+		IUnitHandle best = null;
+		float bestDistanceSq = float.MaxValue;
+		float rangeSq = range * range;
+		foreach (IUnitHandle ally in _repo.AllUnits)
+		{
+			if (!ally.IsAlive || ally == unit || ally.IsPlayerUnit != unit.IsPlayerUnit)
+				continue;
+			if (ally.Health >= ally.MaxHealth)
+				continue;
+			float dx = ally.GameX - unit.GameX;
+			float dy = ally.GameY - unit.GameY;
+			float distanceSq = dx * dx + dy * dy;
+			if (distanceSq > rangeSq || distanceSq >= bestDistanceSq)
+				continue;
+			best = ally;
+			bestDistanceSq = distanceSq;
+		}
+		return best;
+	}
+
 	private static float DistSq(IUnitHandle a, IUnitHandle b)
 	{
 		float dx = a.GameX - b.GameX;

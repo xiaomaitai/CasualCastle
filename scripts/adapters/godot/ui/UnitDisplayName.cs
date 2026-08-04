@@ -31,6 +31,12 @@ public static class UnitDisplayName
 			"HalflingAssassin" => "半身人刺客",
 			"DragonbornMage" => "龙裔术士",
 			"DragonbornArchmage" => "龙裔大法师",
+			"HolyShieldBearer" => "圣盾兵",
+			"Paladin" => "圣骑士",
+			"Priest" => "牧师",
+			"Archbishop" => "大主教",
+			"Inquisitor" => "审判官",
+			"Punisher" => "惩戒者",
 			_ => typeId,
 		};
 	}

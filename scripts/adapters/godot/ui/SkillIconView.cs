@@ -105,10 +105,72 @@ public partial class SkillIconView : Control
 			case "berserker_rage":
 				DrawRageGlyph();
 				break;
+			case "grace_shield":
+				DrawGraceShieldGlyph();
+				break;
+			case "grace_cooldown":
+				DrawGraceCooldownGlyph();
+				break;
+			case "grace_burn_t1":
+			case "grace_burn_t2":
+				DrawGraceBurnGlyph();
+				break;
 			default:
 				DrawFallbackGlyph();
 				break;
 		}
+	}
+
+	private void DrawGraceShieldGlyph()
+	{
+		DrawColoredPolygon(new Vector2[]
+		{
+			new(28, 8),
+			new(44, 15),
+			new(44, 30),
+			new(28, 42),
+			new(12, 30),
+			new(12, 15),
+		}, Gold);
+		DrawColoredPolygon(new Vector2[]
+		{
+			new(28, 14),
+			new(38, 19),
+			new(38, 29),
+			new(28, 37),
+			new(18, 29),
+			new(18, 19),
+		}, new Color(0.98f, 0.92f, 0.68f, 1f));
+	}
+
+	private void DrawGraceCooldownGlyph()
+	{
+		DrawCircle(new Vector2(28, 28), 15f, Ice);
+		DrawArc(new Vector2(28, 28), 15f, 0f, Mathf.Tau, 32, new Color(0.4f, 0.55f, 0.7f, 1f), 2f);
+		DrawLine(new Vector2(28, 28), new Vector2(28, 17), Steel, 2f);
+		DrawLine(new Vector2(28, 28), new Vector2(36, 32), Steel, 2f);
+	}
+
+	private void DrawGraceBurnGlyph()
+	{
+		DrawColoredPolygon(new Vector2[]
+		{
+			new(28, 8),
+			new(38, 24),
+			new(33, 40),
+			new(28, 36),
+			new(23, 40),
+			new(18, 24),
+		}, Flame);
+		DrawColoredPolygon(new Vector2[]
+		{
+			new(28, 17),
+			new(34, 27),
+			new(31, 36),
+			new(28, 33),
+			new(25, 36),
+			new(22, 27),
+		}, FlameCore);
 	}
 
 	private void DrawBackstabGlyph()

@@ -5,6 +5,7 @@ public enum SkillType
 	StatModifier,
 	Aura,
 	OnHit,
+	OnHeal,
 	Special
 }
 

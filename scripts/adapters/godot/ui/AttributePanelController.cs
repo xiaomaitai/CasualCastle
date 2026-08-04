@@ -116,10 +116,15 @@ public sealed class AttributePanelController
 	{
 		string attack = state.AttackType == AttackType.Ranged ? "远程" : "近战";
 		string status = state.IsStealthed ? "隐身中" : "正常";
+		string shieldLine = state.ShieldHealth > 0 ? $"   护盾 {state.ShieldHealth}\n" : "";
+		string healLine = state.HealAmount > 0f
+			? $"治疗 {state.HealAmount:0}   范围 {state.HealRange:0}   间隔 {state.HealInterval:0.0}s\n"
+			: "";
 		return $"生命 {state.Health}/{state.MaxHealth}   伤害 {state.Damage}\n"
 			+ $"速度 {state.Speed:0}   射程 {state.AttackRange:0}   冷却 {state.AttackCooldown:0.0}s\n"
 			+ $"视野 {state.VisionRange:0}   攻击 {attack}·{DamageName(state.DamageType)}\n"
-			+ $"护甲 {ArmorName(state.ArmorType)} {state.ArmorValue}   费用 {state.UnitCost}   状态 {status}";
+			+ $"护甲 {ArmorName(state.ArmorType)} {state.ArmorValue}   费用 {state.UnitCost}   状态 {status}\n"
+			+ shieldLine + healLine;
 	}
 
 	private static string BuildBuildingStats(Building building)

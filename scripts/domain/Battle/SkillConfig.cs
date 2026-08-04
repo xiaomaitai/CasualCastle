@@ -85,6 +85,40 @@ public class OnHitConfig
 	}
 }
 
+public class OnHealEffect
+{
+	public string Type { get; set; }
+	public float Value { get; set; }
+	public float Range { get; set; }
+}
+
+public class OnHealConfig
+{
+	public List<OnHealEffect> Effects { get; set; }
+
+	public static OnHealConfig Parse(string json)
+	{
+		JsonElement root = JsonDocument.Parse(json).RootElement;
+		OnHealConfig config = new() { Effects = new List<OnHealEffect>() };
+
+		if (root.TryGetProperty("effects", out JsonElement effectsElem))
+		{
+			foreach (JsonElement effectElem in effectsElem.EnumerateArray())
+			{
+				OnHealEffect effect = new()
+				{
+					Type = effectElem.GetProperty("type").GetString(),
+					Value = effectElem.TryGetProperty("value", out JsonElement valueElem) ? valueElem.GetSingle() : 0f,
+					Range = effectElem.TryGetProperty("range", out JsonElement rangeElem) ? rangeElem.GetSingle() : 0f
+				};
+				config.Effects.Add(effect);
+			}
+		}
+
+		return config;
+	}
+}
+
 public class AuraConfig
 {
 	public AuraTarget Target { get; set; }

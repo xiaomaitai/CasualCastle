@@ -32,6 +32,7 @@ public class SqliteSkillRepository : ISkillRepository
 						{
 							"aura" => SkillType.Aura,
 							"on_hit" => SkillType.OnHit,
+							"on_heal" => SkillType.OnHeal,
 							"special" => SkillType.Special,
 							_ => SkillType.StatModifier
 						},
