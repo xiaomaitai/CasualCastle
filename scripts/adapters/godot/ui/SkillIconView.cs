@@ -5,6 +5,8 @@ public partial class SkillIconView : Control
 {
 	private const float IconSize = 56f;
 	private const float GlyphRadius = 23f;
+	private const string TierT1Suffix = "_t1";
+	private const string TierT2Suffix = "_t2";
 	private static readonly Color Background = new(0.14f, 0.18f, 0.26f, 1f);
 	private static readonly Color BorderColor = new(0.42f, 0.5f, 0.62f, 1f);
 	private static readonly Color CooldownShade = new(0.02f, 0.03f, 0.06f, 0.72f);
@@ -71,6 +73,14 @@ public partial class SkillIconView : Control
 
 	private static Texture2D LoadSkillIcon(string skillId)
 	{
+		Texture2D texture = FindIcon(skillId);
+		if (texture != null)
+			return texture;
+		return FindIcon(StripTierSuffix(skillId));
+	}
+
+	private static Texture2D FindIcon(string skillId)
+	{
 		using DirAccess dir = DirAccess.Open("res://assets/art/skills/");
 		if (dir == null)
 			return null;
@@ -84,6 +94,13 @@ public partial class SkillIconView : Control
 			fileName = dir.GetNext();
 		}
 		return null;
+	}
+
+	private static string StripTierSuffix(string skillId)
+	{
+		if (skillId.EndsWith(TierT1Suffix) || skillId.EndsWith(TierT2Suffix))
+			return skillId.Substring(0, skillId.Length - TierT1Suffix.Length);
+		return skillId;
 	}
 
 	private void DrawSkillGlyph()
