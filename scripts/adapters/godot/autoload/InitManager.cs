@@ -42,7 +42,16 @@ public partial class InitManager : Node
             if (phase == GameManager.GamePhase.Night && gm.CurrentNightIndex >= 1)
                 _nightOrchestrator.ApplyReplaySnapshot(gm);
             if (phase == GameManager.GamePhase.Day && gm.CurrentNightIndex >= 1)
-                gm.SaveGame(0);
+            {
+                try
+                {
+                    gm.SaveGame(0);
+                }
+                catch (System.Exception ex)
+                {
+                    GD.Print($"自动存档失败：{ex.Message}");
+                }
+            }
         };
         gm.GameStateChanged += state =>
         {

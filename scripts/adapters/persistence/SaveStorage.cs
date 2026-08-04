@@ -25,7 +25,7 @@ public class SaveStorage : ISaveRepository
         if (File.Exists(path))
             File.Delete(path);
 
-        using SqliteConnection conn = new($"Data Source={path}");
+        using SqliteConnection conn = new($"Data Source={path};Pooling=False");
         conn.Open();
         using SqliteCommand cmd = conn.CreateCommand();
 
@@ -90,7 +90,7 @@ public class SaveStorage : ISaveRepository
         if (!File.Exists(path))
             return null;
 
-        using SqliteConnection conn = new($"Data Source={path}");
+        using SqliteConnection conn = new($"Data Source={path};Pooling=False");
         conn.Open();
         using SqliteCommand cmd = conn.CreateCommand();
 
