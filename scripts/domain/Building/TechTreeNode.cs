@@ -10,7 +10,8 @@ public class TechTreeNode
     public int GoldCost { get; set; }
     public int ShopWeight { get; set; }
     public string DisplayName { get; set; }
-    public string UnitTypeId { get; init; }
-    public int MaxHealth { get; set; }
-    public float SpawnInterval { get; set; }
+	public string UnitTypeId { get; init; }
+	public int MaxHealth { get; set; }
+	public float SpawnInterval { get; set; }
+	public int Value { get; set; }
 }

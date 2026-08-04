@@ -423,6 +423,8 @@ public class Unit : IUnitHandle
 			float dmgMult = Skills.GetStatMultiplier("attack_damage_mult", GameCtx);
 			effectiveDamage = (int)(Damage * dmgMult);
 		}
+		if (GameCtx.AuraAttackMultiplier != 1f)
+			effectiveDamage = (int)(effectiveDamage * GameCtx.AuraAttackMultiplier);
 		int finalDamage = CombatRules.CalculateDamage(effectiveDamage, DamageType, TargetEnemy.ArmorType, TargetEnemy.ArmorValue, _damageMatrix);
 		TargetEnemy.TakeDamage(finalDamage, this, GameX, GameY);
 

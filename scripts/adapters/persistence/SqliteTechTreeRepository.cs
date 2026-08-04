@@ -92,6 +92,9 @@ public class SqliteTechTreeRepository : ITechTreeRepository
         MigrateRaceIdToFactionId(connection);
         MigrateCombineRecipesPK(connection);
         MigrateBuildingDefsFactionId(connection);
+        MigrateValueColumns(connection);
+        MigrateUpgradeRecipes(connection);
+        BackfillValues(connection);
     }
 
     private static void MigrateRaceIdToFactionId(SqliteConnection connection)
@@ -172,7 +175,7 @@ public class SqliteTechTreeRepository : ITechTreeRepository
         List<TechTreeNode> nodes = new();
         using SqliteConnection connection = OpenConnection();
         using SqliteCommand cmd = connection.CreateCommand();
-        cmd.CommandText = "SELECT type_id, faction_id, tier, col, shop_available, gold_cost, shop_weight, display_name, unit_type_id, max_health, spawn_interval FROM tech_tree_nodes WHERE faction_id = @factionId ORDER BY tier, col";
+        cmd.CommandText = "SELECT type_id, faction_id, tier, col, shop_available, gold_cost, shop_weight, display_name, unit_type_id, max_health, spawn_interval, value FROM tech_tree_nodes WHERE faction_id = @factionId ORDER BY tier, col";
         cmd.Parameters.AddWithValue("@factionId", factionId);
         using SqliteDataReader reader = cmd.ExecuteReader();
         while (reader.Read())
@@ -189,7 +192,8 @@ public class SqliteTechTreeRepository : ITechTreeRepository
                 DisplayName = reader.GetString(7),
                 UnitTypeId = reader.IsDBNull(8) ? null : reader.GetString(8),
                 MaxHealth = reader.GetInt32(9),
-                SpawnInterval = reader.GetFloat(10)
+                SpawnInterval = reader.GetFloat(10),
+                Value = reader.IsDBNull(11) ? 0 : reader.GetInt32(11)
             });
         }
         return nodes;
@@ -220,12 +224,35 @@ public class SqliteTechTreeRepository : ITechTreeRepository
         return edges;
     }
 
+    public List<UpgradeRecipe> LoadUpgradeEdges(string factionId)
+    {
+        List<UpgradeRecipe> edges = new();
+        using SqliteConnection connection = OpenConnection();
+        using SqliteCommand cmd = connection.CreateCommand();
+        cmd.CommandText = @"
+            SELECT u.source_type_id, u.result_type_id
+            FROM upgrade_recipes u
+            INNER JOIN tech_tree_nodes n ON n.type_id = u.source_type_id
+            WHERE n.faction_id = @factionId";
+        cmd.Parameters.AddWithValue("@factionId", factionId);
+        using SqliteDataReader reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            edges.Add(new UpgradeRecipe
+            {
+                SourceTypeId = reader.GetString(0),
+                ResultTypeId = reader.GetString(1)
+            });
+        }
+        return edges;
+    }
+
     public List<BuildingTypeSummary> LoadAllBuildingTypes(string factionId)
     {
         List<BuildingTypeSummary> types = new();
         using SqliteConnection connection = OpenConnection();
         using SqliteCommand cmd = connection.CreateCommand();
-        cmd.CommandText = "SELECT type_id, display_name FROM building_defs WHERE is_core = 0 AND faction_id = @factionId ORDER BY display_name";
+        cmd.CommandText = "SELECT type_id, display_name, value FROM building_defs WHERE is_core = 0 AND faction_id = @factionId ORDER BY display_name";
         cmd.Parameters.AddWithValue("@factionId", factionId);
         using SqliteDataReader reader = cmd.ExecuteReader();
         while (reader.Read())
@@ -233,7 +260,8 @@ public class SqliteTechTreeRepository : ITechTreeRepository
             types.Add(new BuildingTypeSummary
             {
                 TypeId = reader.GetString(0),
-                DisplayName = reader.GetString(1)
+                DisplayName = reader.GetString(1),
+                Value = reader.IsDBNull(2) ? 0 : reader.GetInt32(2)
             });
         }
         return types;
@@ -250,8 +278,8 @@ public class SqliteTechTreeRepository : ITechTreeRepository
         GD.Print($"[SaveNodes] 清空派系旧节点数据: DELETE FROM tech_tree_nodes WHERE faction_id = '{factionId}'");
         cmd.ExecuteNonQuery();
 
-        cmd.CommandText = @"INSERT INTO tech_tree_nodes (type_id, faction_id, tier, col, shop_available, gold_cost, shop_weight, display_name, unit_type_id, max_health, spawn_interval)
-            VALUES (@typeId, @factionId, @tier, @col, @shopAvail, @goldCost, @shopWeight, @displayName, @unitTypeId, @maxHealth, @spawnInterval)";
+        cmd.CommandText = @"INSERT INTO tech_tree_nodes (type_id, faction_id, tier, col, shop_available, gold_cost, shop_weight, display_name, unit_type_id, max_health, spawn_interval, value)
+            VALUES (@typeId, @factionId, @tier, @col, @shopAvail, @goldCost, @shopWeight, @displayName, @unitTypeId, @maxHealth, @spawnInterval, @value)";
 
         foreach (TechTreeNode node in nodes)
         {
@@ -267,9 +295,34 @@ public class SqliteTechTreeRepository : ITechTreeRepository
             cmd.Parameters.AddWithValue("@unitTypeId", node.UnitTypeId ?? (object)DBNull.Value);
             cmd.Parameters.AddWithValue("@maxHealth", node.MaxHealth);
             cmd.Parameters.AddWithValue("@spawnInterval", node.SpawnInterval);
+            cmd.Parameters.AddWithValue("@value", node.Value > 0 ? node.Value : node.GoldCost);
             cmd.ExecuteNonQuery();
 
-            GD.Print($"[SaveNodes] 写入节点 [{node.DisplayName}]: INSERT INTO tech_tree_nodes (type_id, faction_id, tier, col, shop_available, gold_cost, shop_weight, display_name, unit_type_id, max_health, spawn_interval) VALUES ('{node.TypeId}', '{factionId}', {node.Tier}, {node.Col}, {(node.ShopAvailable ? 1 : 0)}, {(node.ShopAvailable ? node.GoldCost.ToString() : "NULL")}, {(node.ShopAvailable ? node.ShopWeight.ToString() : "NULL")}, '{node.DisplayName}', '{node.UnitTypeId ?? "NULL"}', {node.MaxHealth}, {node.SpawnInterval})");
+            GD.Print($"[SaveNodes] 写入节点 [{node.DisplayName}]: INSERT INTO tech_tree_nodes (type_id, faction_id, tier, col, shop_available, gold_cost, shop_weight, display_name, unit_type_id, max_health, spawn_interval, value) VALUES ('{node.TypeId}', '{factionId}', {node.Tier}, {node.Col}, {(node.ShopAvailable ? 1 : 0)}, {(node.ShopAvailable ? node.GoldCost.ToString() : "NULL")}, {(node.ShopAvailable ? node.ShopWeight.ToString() : "NULL")}, '{node.DisplayName}', '{node.UnitTypeId ?? "NULL"}', {node.MaxHealth}, {node.SpawnInterval}, {node.Value})");
+        }
+
+        transaction.Commit();
+    }
+
+    public void SaveUpgradeEdges(string factionId, List<UpgradeRecipe> edges)
+    {
+        using SqliteConnection connection = OpenConnection();
+        using SqliteTransaction transaction = connection.BeginTransaction();
+        using SqliteCommand cmd = connection.CreateCommand();
+
+        cmd.CommandText = "DELETE FROM upgrade_recipes WHERE source_type_id IN (SELECT type_id FROM tech_tree_nodes WHERE faction_id = @factionId)";
+        cmd.Parameters.AddWithValue("@factionId", factionId);
+        cmd.ExecuteNonQuery();
+        cmd.Parameters.Clear();
+
+        cmd.CommandText = "INSERT INTO upgrade_recipes (source_type_id, result_type_id) VALUES (@source, @result)";
+
+        foreach (UpgradeRecipe edge in edges)
+        {
+            cmd.Parameters.Clear();
+            cmd.Parameters.AddWithValue("@source", edge.SourceTypeId);
+            cmd.Parameters.AddWithValue("@result", edge.ResultTypeId);
+            cmd.ExecuteNonQuery();
         }
 
         transaction.Commit();
@@ -353,19 +406,20 @@ public class SqliteTechTreeRepository : ITechTreeRepository
         using SqliteCommand cmd = connection.CreateCommand();
 
         cmd.CommandText = @"
-            INSERT OR REPLACE INTO building_defs (type_id, display_name, max_health, spawn_interval, main_cell_x, main_cell_y, spawn_cell_x, spawn_cell_y, unit_type_id, combine_tier, is_core, faction_id, footprint_json, collision_width, collision_height, production_rate)
+            INSERT OR REPLACE INTO building_defs (type_id, display_name, max_health, spawn_interval, main_cell_x, main_cell_y, spawn_cell_x, spawn_cell_y, unit_type_id, combine_tier, is_core, faction_id, footprint_json, collision_width, collision_height, production_rate, value)
             SELECT n.type_id, n.display_name, n.max_health, n.spawn_interval,
                    0, 0, 1, 1,
                    n.unit_type_id, n.tier - 1, 0, @factionId,
                    COALESCE(b.footprint_json, '[[0,0],[1,0],[0,1],[1,1]]'),
                    COALESCE(b.collision_width, 188),
                    COALESCE(b.collision_height, 188),
-                   COALESCE(b.production_rate, 100.0)
+                   COALESCE(b.production_rate, 100.0),
+                   COALESCE(NULLIF(n.value, 0), b.value, n.gold_cost, 0)
             FROM tech_tree_nodes n
             LEFT JOIN building_defs b ON b.type_id = n.type_id
             WHERE n.faction_id = @factionId";
         cmd.Parameters.AddWithValue("@factionId", factionId);
-        GD.Print($"[SyncToGameTables] 同步科技树节点到建筑定义表(faction_id={factionId}): INSERT OR REPLACE INTO building_defs (..., faction_id) SELECT ..., @factionId FROM tech_tree_nodes n LEFT JOIN building_defs b ON b.type_id = n.type_id WHERE n.faction_id = '{factionId}'");
+        GD.Print($"[SyncToGameTables] 同步科技树节点到建筑定义表(faction_id={factionId}): INSERT OR REPLACE INTO building_defs (..., faction_id, value) SELECT ..., @factionId, value FROM tech_tree_nodes n LEFT JOIN building_defs b ON b.type_id = n.type_id WHERE n.faction_id = '{factionId}'");
         cmd.ExecuteNonQuery();
 
         cmd.Parameters.Clear();
@@ -388,5 +442,57 @@ public class SqliteTechTreeRepository : ITechTreeRepository
         cmd.ExecuteNonQuery();
 
         transaction.Commit();
+    }
+
+    private static void MigrateValueColumns(SqliteConnection connection)
+    {
+        using SqliteCommand cmd = connection.CreateCommand();
+        AddValueColumn(cmd, "tech_tree_nodes");
+        AddValueColumn(cmd, "building_defs");
+    }
+
+    private static void AddValueColumn(SqliteCommand cmd, string table)
+    {
+        cmd.CommandText = $"SELECT COUNT(*) FROM pragma_table_info('{table}') WHERE name = 'value'";
+        long hasValue = (long)cmd.ExecuteScalar();
+        if (hasValue > 0)
+            return;
+
+        cmd.CommandText = $"ALTER TABLE {table} ADD COLUMN value INTEGER";
+        cmd.ExecuteNonQuery();
+    }
+
+    private static void MigrateUpgradeRecipes(SqliteConnection connection)
+    {
+        using SqliteCommand cmd = connection.CreateCommand();
+        cmd.CommandText = "SELECT name FROM sqlite_master WHERE type='table' AND name='upgrade_recipes'";
+        if (cmd.ExecuteScalar() == null)
+        {
+            cmd.CommandText = @"
+                CREATE TABLE upgrade_recipes (
+                    source_type_id TEXT NOT NULL,
+                    result_type_id TEXT NOT NULL,
+                    PRIMARY KEY (source_type_id, result_type_id)
+                );";
+            cmd.ExecuteNonQuery();
+        }
+
+        cmd.CommandText = @"
+            INSERT OR IGNORE INTO upgrade_recipes (source_type_id, result_type_id)
+            SELECT main_type_id, result_type_id FROM combine_recipes WHERE main_type_id = material_type_id";
+        cmd.ExecuteNonQuery();
+
+        cmd.CommandText = "DELETE FROM combine_recipes WHERE main_type_id = material_type_id";
+        cmd.ExecuteNonQuery();
+    }
+
+    private static void BackfillValues(SqliteConnection connection)
+    {
+        using SqliteCommand cmd = connection.CreateCommand();
+        cmd.CommandText = "UPDATE tech_tree_nodes SET value = gold_cost WHERE value IS NULL OR value = 0";
+        cmd.ExecuteNonQuery();
+
+        cmd.CommandText = "UPDATE building_defs SET value = COALESCE((SELECT value FROM tech_tree_nodes WHERE type_id = building_defs.type_id), 0) WHERE value IS NULL OR value = 0";
+        cmd.ExecuteNonQuery();
     }
 }

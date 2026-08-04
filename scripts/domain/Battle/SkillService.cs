@@ -5,6 +5,13 @@ namespace CasualCastle.Domain.Battle;
 
 public class SkillService
 {
+	private readonly AuraService _auraService;
+
+	public SkillService(AuraService auraService)
+	{
+		_auraService = auraService;
+	}
+
 	public void UpdateContexts(IReadOnlyList<IUnitHandle> allUnits)
 	{
 		float nearbyRadiusSq = GameRules.SkillNearbyAllyRadius * GameRules.SkillNearbyAllyRadius;
@@ -59,6 +66,7 @@ public class SkillService
 				}
 			}
 			ctx.TargetIsIsolated = isolated && target != null && target.IsAlive;
+			ctx.AuraAttackMultiplier = _auraService.CalculateAttackMultiplier(unit, allUnits);
 
 			unit.SetGameContext(ctx);
 		}

@@ -13,6 +13,7 @@ public enum StatModifierTrigger
 {
 	Always,
 	LowHealth,
+	LowHealthStep,
 	TargetIsolated,
 	NearbyDiverse
 }

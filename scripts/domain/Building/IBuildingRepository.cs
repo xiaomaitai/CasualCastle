@@ -20,4 +20,5 @@ public interface IBuildingRepository
 	bool IsCoreBuilding(string typeId) => Get(typeId).IsCore;
 	int GetCollisionWidth(string typeId) => Get(typeId).CollisionWidth;
 	int GetCollisionHeight(string typeId) => Get(typeId).CollisionHeight;
+	int GetValue(string typeId) => Get(typeId).Value;
 }

@@ -16,8 +16,9 @@ public class SqliteBuildingRepository : IBuildingRepository, IBuildingVisualRepo
 		string fullPath = GodotProjectSettings.GlobalizePath("res://assets/data/config.db");
 		using SqliteConnection connection = new($"Data Source={fullPath}");
 		connection.Open();
+		EnsureValueColumn(connection);
 		using SqliteCommand cmd = connection.CreateCommand();
-		cmd.CommandText = "SELECT type_id, display_name, max_health, spawn_interval, main_cell_x, main_cell_y, spawn_cell_x, spawn_cell_y, unit_type_id, combine_tier, is_core, footprint_json, collision_width, collision_height, production_rate, texture_path, sprite_modulate_r, sprite_modulate_g, sprite_modulate_b, sprite_modulate_a, material_path FROM building_defs";
+		cmd.CommandText = "SELECT type_id, display_name, max_health, spawn_interval, main_cell_x, main_cell_y, spawn_cell_x, spawn_cell_y, unit_type_id, combine_tier, is_core, footprint_json, collision_width, collision_height, production_rate, texture_path, sprite_modulate_r, sprite_modulate_g, sprite_modulate_b, sprite_modulate_a, material_path, value FROM building_defs";
 		using SqliteDataReader reader = cmd.ExecuteReader();
 		while (reader.Read())
 		{
@@ -40,6 +41,7 @@ public class SqliteBuildingRepository : IBuildingRepository, IBuildingVisualRepo
 				CollisionWidth = reader.GetInt32(12),
 				CollisionHeight = reader.GetInt32(13),
 				ProductionRate = reader.IsDBNull(14) ? 0 : reader.GetFloat(14),
+				Value = reader.IsDBNull(21) ? 0 : reader.GetInt32(21),
 			};
 
 			_visualCache[typeId] = new BuildingVisualData
@@ -52,6 +54,17 @@ public class SqliteBuildingRepository : IBuildingRepository, IBuildingVisualRepo
 				MaterialPath = reader.GetString(20),
 			};
 		}
+	}
+
+	private static void EnsureValueColumn(SqliteConnection connection)
+	{
+		using SqliteCommand cmd = connection.CreateCommand();
+		cmd.CommandText = "SELECT COUNT(*) FROM pragma_table_info('building_defs') WHERE name = 'value'";
+		long hasValue = (long)cmd.ExecuteScalar();
+		if (hasValue > 0)
+			return;
+		cmd.CommandText = "ALTER TABLE building_defs ADD COLUMN value INTEGER";
+		cmd.ExecuteNonQuery();
 	}
 
 	public BuildingData Get(string typeId)

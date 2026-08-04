@@ -6,11 +6,14 @@ namespace CasualCastle.Domain.Battle;
 
 public class SkillSet
 {
+	private const float StepEpsilon = 0.0001f;
+
 	private readonly List<SkillDef> _skills = new();
 	private readonly Dictionary<string, StatModifierConfig> _statModCache = new();
 	private readonly Dictionary<string, OnHitConfig> _onHitCache = new();
 	private readonly Dictionary<string, OnHealConfig> _onHealCache = new();
 	private readonly Dictionary<string, SpecialConfig> _specialCache = new();
+	private readonly Dictionary<string, AuraConfig> _auraCache = new();
 
 	public int Count => _skills.Count;
 	public IReadOnlyList<SkillDef> All => _skills;
@@ -30,6 +33,8 @@ public class SkillSet
 			cfg.SkillId = skill.Id;
 			_specialCache[skill.Id] = cfg;
 		}
+		else if (skill.Type == SkillType.Aura)
+			_auraCache[skill.Id] = AuraConfig.Parse(skill.ConfigJson);
 	}
 
 	public bool Remove(string skillId)
@@ -42,6 +47,7 @@ public class SkillSet
 		_onHitCache.Remove(skillId);
 		_onHealCache.Remove(skillId);
 		_specialCache.Remove(skillId);
+		_auraCache.Remove(skillId);
 		return true;
 	}
 
@@ -67,6 +73,21 @@ public class SkillSet
 		return null;
 	}
 
+	public bool HasAura()
+	{
+		return _auraCache.Count > 0;
+	}
+
+	public float GetAuraRange()
+	{
+		foreach (AuraConfig cfg in _auraCache.Values)
+		{
+			if (cfg.Range > 0f)
+				return cfg.Range;
+		}
+		return GameRules.AuraRangeRadius;
+	}
+
 	public float GetStatMultiplier(string key, GameContext ctx)
 	{
 		float result = key == "dodge_chance" ? 0f : 1f;
@@ -75,6 +96,15 @@ public class SkillSet
 			StatModifierConfig cfg = kv.Value;
 			if (!IsTriggerMet(cfg, ctx))
 				continue;
+
+			if (cfg.Trigger == StatModifierTrigger.LowHealthStep
+				&& cfg.StepBonuses.TryGetValue(key, out float perStep)
+				&& cfg.StepCaps.TryGetValue(key, out float cap))
+			{
+				result *= CalculateStepMultiplier(cfg, key, perStep, cap, ctx);
+				continue;
+			}
+
 			if (cfg.Modifiers.TryGetValue(key, out float val))
 			{
 				if (key == "dodge_chance")
@@ -127,9 +157,20 @@ public class SkillSet
 		{
 			StatModifierTrigger.Always => true,
 			StatModifierTrigger.LowHealth => ctx.CurrentHpRatio <= cfg.TriggerParam,
+			StatModifierTrigger.LowHealthStep => true,
 			StatModifierTrigger.TargetIsolated => ctx.TargetIsIsolated,
 			StatModifierTrigger.NearbyDiverse => true,
 			_ => false
 		};
+	}
+
+	private static float CalculateStepMultiplier(
+		StatModifierConfig cfg, string key, float perStep, float cap, GameContext ctx)
+	{
+		float baseValue = cfg.Modifiers.TryGetValue(key, out float baseMult) ? baseMult : 1f;
+		float healthLost = System.Math.Clamp(1f - ctx.CurrentHpRatio, 0f, 1f);
+		int steps = (int)((healthLost + StepEpsilon) / cfg.TriggerParam);
+		float bonus = System.Math.Min(steps * perStep, cap - baseValue);
+		return baseValue + bonus;
 	}
 }

@@ -10,6 +10,7 @@ public static class BattleModule
 		services.AddSingleton<IRvoService, RvoService>();
 		services.AddSingleton<SkillService>();
 		services.AddSingleton<StealthService>();
+		services.AddSingleton<AuraService>();
 		services.AddSingleton<ITacticalQueries, TacticalQueryService>();
 		services.AddSingleton<CorpseService>();
 		return services;

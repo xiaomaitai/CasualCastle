@@ -23,7 +23,7 @@ public class TechTreeEditorController
 	private readonly ITechTreeRepository _repo;
 	private List<FactionDef> _factions = new();
 	private List<TechTreeNode> _nodes = new();
-	private List<CombineRecipe> _edges = new();
+	private List<TechTreeEdge> _edges = new();
 	private string _currentFactionId = "";
 	private int _currentFactionIndex = 0;
 
@@ -37,6 +37,7 @@ public class TechTreeEditorController
 	private const float CardWidth = 120;
 	private const float CardHeight = 56;
 	private const float ColSpacing = 140;
+	private const int DefaultBuildingValue = 1;
 	private const string DevToolsMenuScene = "res://scenes/ui/dev_tools/dev_tools_menu.tscn";
 
 	public TechTreeEditorController(Control root, ITechTreeRepository repo)
@@ -161,6 +162,7 @@ public class TechTreeEditorController
 		if (_currentFactionIndex > 0)
 		{
 			_currentFactionIndex--;
+			SaveAll();
 			GD.Print($"[TechTreeEditor] 切换到上一个派系, 索引={_currentFactionIndex}, ID={_factions[_currentFactionIndex].Id}");
 			LoadFactionAtIndex(_currentFactionIndex);
 		}
@@ -171,6 +173,7 @@ public class TechTreeEditorController
 		if (_currentFactionIndex < _factions.Count - 1)
 		{
 			_currentFactionIndex++;
+			SaveAll();
 			GD.Print($"[TechTreeEditor] 切换到下一个派系, 索引={_currentFactionIndex}, ID={_factions[_currentFactionIndex].Id}");
 			LoadFactionAtIndex(_currentFactionIndex);
 		}
@@ -184,7 +187,7 @@ public class TechTreeEditorController
 		_currentFactionId = faction.Id;
 		_factionNameLabel.Text = faction.DisplayName;
 		_nodes = _repo.LoadNodes(faction.Id);
-		_edges = _repo.LoadEdges(faction.Id);
+		_edges = LoadCanvasEdges(faction.Id);
 		GD.Print($"[TechTreeEditor] 加载完成: factionId={faction.Id}, nodes={_nodes.Count}, edges={_edges.Count}");
 		LayoutCards();
 		RefreshLibrary();
@@ -230,7 +233,7 @@ public class TechTreeEditorController
 		};
 
 		StyleBoxFlat styleBox = new();
-		bool hasIncomingEdge = _edges.Exists(e => e.ResultTypeId == node.TypeId);
+		bool hasIncomingEdge = _edges.Exists(e => e.ToTypeId == node.TypeId);
 		styleBox.BgColor = hasIncomingEdge
 			? new Color(0.15f, 0.25f, 0.5f)
 			: new Color(0.15f, 0.5f, 0.15f);
@@ -428,22 +431,22 @@ public class TechTreeEditorController
 
 	private void RemoveInvalidEdges(TechTreeNode movedNode)
 	{
-		List<CombineRecipe> invalidEdges = _edges.Where(e =>
+		List<TechTreeEdge> invalidEdges = _edges.Where(e =>
 		{
-			if (e.MainTypeId == movedNode.TypeId)
+			if (e.FromTypeId == movedNode.TypeId)
 			{
-				TechTreeNode resultNode = _nodes.Find(n => n.TypeId == e.ResultTypeId);
+				TechTreeNode resultNode = _nodes.Find(n => n.TypeId == e.ToTypeId);
 				return resultNode != null && resultNode.Tier <= movedNode.Tier;
 			}
-			if (e.ResultTypeId == movedNode.TypeId)
+			if (e.ToTypeId == movedNode.TypeId)
 			{
-				TechTreeNode sourceNode = _nodes.Find(n => n.TypeId == e.MainTypeId);
+				TechTreeNode sourceNode = _nodes.Find(n => n.TypeId == e.FromTypeId);
 				return sourceNode != null && movedNode.Tier <= sourceNode.Tier;
 			}
 			return false;
 		}).ToList();
 
-		foreach (CombineRecipe edge in invalidEdges)
+		foreach (TechTreeEdge edge in invalidEdges)
 			_edges.Remove(edge);
 
 		if (invalidEdges.Count > 0)
@@ -480,14 +483,14 @@ public class TechTreeEditorController
 			string fromId = dragIsLower ? dragId : dropId;
 			string toId = dragIsLower ? dropId : dragId;
 
-			CombineRecipe recipe = new()
+			if (_edges.Exists(e => e.FromTypeId == fromId && e.ToTypeId == toId))
 			{
-				MainTypeId = fromId,
-				MaterialTypeId = fromId,
-				MaterialCount = 2,
-				ResultTypeId = toId
-			};
-			_edges.Add(recipe);
+				ShowStatus("连线已存在");
+				CancelDrag();
+				return;
+			}
+
+			_edges.Add(new TechTreeEdge { FromTypeId = fromId, ToTypeId = toId });
 			LayoutCards();
 			ShowStatus($"连线已创建: {fromId} → {toId}");
 		}
@@ -537,7 +540,8 @@ public class TechTreeEditorController
 			DisplayName = displayName,
 			UnitTypeId = typeId,
 			MaxHealth = 200,
-			SpawnInterval = 10.0f
+			SpawnInterval = 10.0f,
+			Value = typeInfo?.Value ?? DefaultBuildingValue
 		};
 
 		_nodes.Add(newNode);
@@ -551,31 +555,7 @@ public class TechTreeEditorController
 	{
 		string typeId = card.GetMeta("type_id").AsString();
 
-		List<CombineRecipe> affectedRecipes = _edges.Where(e =>
-			e.MainTypeId == typeId || e.MaterialTypeId == typeId || e.ResultTypeId == typeId).ToList();
-
-		foreach (CombineRecipe recipe in affectedRecipes)
-		{
-			_edges.Remove(recipe);
-
-			if (recipe.ResultTypeId == typeId)
-				continue;
-
-			if (recipe.MainTypeId == recipe.MaterialTypeId)
-				continue;
-
-			string otherBuilding = recipe.MainTypeId == typeId ? recipe.MaterialTypeId : recipe.MainTypeId;
-			if (otherBuilding == typeId)
-				continue;
-
-			_edges.Add(new CombineRecipe
-			{
-				MainTypeId = otherBuilding,
-				MaterialTypeId = otherBuilding,
-				MaterialCount = 2,
-				ResultTypeId = recipe.ResultTypeId
-			});
-		}
+		_edges.RemoveAll(e => e.FromTypeId == typeId || e.ToTypeId == typeId);
 
 		_nodes.RemoveAll(n => n.TypeId == typeId);
 		LayoutCards();
@@ -589,11 +569,11 @@ public class TechTreeEditorController
 		float rowHeight = canvasHeight / 5;
 		float tolerance = 10f;
 
-		CombineRecipe toDelete = null;
-		foreach (CombineRecipe edge in _edges)
+		TechTreeEdge toDelete = null;
+		foreach (TechTreeEdge edge in _edges)
 		{
-			Vector2 fromCenter = GetCardBottomCenter(edge.MainTypeId, rowHeight);
-			Vector2 toCenter = GetCardTopCenter(edge.ResultTypeId, rowHeight);
+			Vector2 fromCenter = GetCardBottomCenter(edge.FromTypeId, rowHeight);
+			Vector2 toCenter = GetCardTopCenter(edge.ToTypeId, rowHeight);
 			if (fromCenter == Vector2.Zero || toCenter == Vector2.Zero)
 				continue;
 
@@ -609,7 +589,7 @@ public class TechTreeEditorController
 		{
 			_edges.Remove(toDelete);
 			LayoutCards();
-			ShowStatus($"连线已删除: {toDelete.MainTypeId} → {toDelete.ResultTypeId}");
+			ShowStatus($"连线已删除: {toDelete.FromTypeId} → {toDelete.ToTypeId}");
 		}
 	}
 
@@ -638,6 +618,12 @@ public class TechTreeEditorController
 		costSpin.Value = node.GoldCost;
 		content.AddChild(costRow);
 
+		HBoxContainer valueRow = CreateEditRow("价值", out SpinBox valueSpin);
+		valueSpin.MinValue = 0;
+		valueSpin.MaxValue = 999;
+		valueSpin.Value = node.Value;
+		content.AddChild(valueRow);
+
 		HBoxContainer weightRow = CreateEditRow("权重", out SpinBox weightSpin);
 		weightSpin.MinValue = 0;
 		weightSpin.MaxValue = 99;
@@ -653,6 +639,11 @@ public class TechTreeEditorController
 		CheckBox shopCheck = new() { Text = "商店可买", ButtonPressed = node.ShopAvailable };
 		content.AddChild(shopCheck);
 
+		Label upgradeCostLabel = new();
+		content.AddChild(upgradeCostLabel);
+		UpdateUpgradeCostLabel(upgradeCostLabel, node.TypeId, node.Value);
+		valueSpin.ValueChanged += _ => UpdateUpgradeCostLabel(upgradeCostLabel, node.TypeId, (int)valueSpin.Value);
+
 		dialog.AddChild(content);
 		_root.AddChild(dialog);
 
@@ -661,6 +652,7 @@ public class TechTreeEditorController
 			int oldTier = node.Tier;
 			node.DisplayName = nameEdit.Text;
 			node.GoldCost = (int)costSpin.Value;
+			node.Value = (int)valueSpin.Value;
 			node.ShopWeight = (int)weightSpin.Value;
 			node.Tier = (int)tierSpin.Value;
 			node.ShopAvailable = shopCheck.ButtonPressed;
@@ -693,6 +685,12 @@ public class TechTreeEditorController
 		nameEdit.Text = "新建筑";
 		content.AddChild(nameRow);
 
+		HBoxContainer valueRow = CreateEditRow("价值", out SpinBox valueSpin);
+		valueSpin.MinValue = 0;
+		valueSpin.MaxValue = 999;
+		valueSpin.Value = DefaultBuildingValue;
+		content.AddChild(valueRow);
+
 		dialog.AddChild(content);
 		_root.AddChild(dialog);
 
@@ -710,10 +708,11 @@ public class TechTreeEditorController
 			using Microsoft.Data.Sqlite.SqliteConnection conn = new($"Data Source={dbPath}");
 			conn.Open();
 			using Microsoft.Data.Sqlite.SqliteCommand insertCmd = conn.CreateCommand();
-			insertCmd.CommandText = "INSERT OR IGNORE INTO building_defs (type_id, display_name, faction_id, max_health, spawn_interval, footprint_json, collision_width, collision_height) VALUES (@id, @name, @factionId, 200, 10.0, '[[0,0],[1,0],[0,1],[1,1]]', 188, 188)";
+			insertCmd.CommandText = "INSERT OR IGNORE INTO building_defs (type_id, display_name, faction_id, max_health, spawn_interval, footprint_json, collision_width, collision_height, value) VALUES (@id, @name, @factionId, 200, 10.0, '[[0,0],[1,0],[0,1],[1,1]]', 188, 188, @value)";
 			insertCmd.Parameters.AddWithValue("@id", typeId);
 			insertCmd.Parameters.AddWithValue("@name", displayName);
 			insertCmd.Parameters.AddWithValue("@factionId", _currentFactionId);
+			insertCmd.Parameters.AddWithValue("@value", (int)valueSpin.Value);
 			insertCmd.ExecuteNonQuery();
 
 			RefreshLibrary();
@@ -832,10 +831,57 @@ public class TechTreeEditorController
 
 	private void OnSavePressed()
 	{
-		_repo.SaveNodes(_currentFactionId, _nodes);
-		_repo.SaveEdges(_currentFactionId, _edges);
-		_repo.SyncToGameTables(_currentFactionId);
+		SaveAll();
 		ShowStatus("保存成功");
+	}
+
+	private void SaveAll()
+	{
+		_repo.SaveNodes(_currentFactionId, _nodes);
+		SaveEdgesByIncomingCount();
+		_repo.SyncToGameTables(_currentFactionId);
+	}
+
+	private void SaveEdgesByIncomingCount()
+	{
+		List<CombineRecipe> combineEdges = new();
+		List<UpgradeRecipe> upgradeEdges = new();
+
+		foreach (IGrouping<string, TechTreeEdge> group in _edges.GroupBy(e => e.ToTypeId))
+		{
+			List<TechTreeEdge> incoming = group.ToList();
+			if (incoming.Count == 1)
+			{
+				upgradeEdges.Add(new UpgradeRecipe
+				{
+					SourceTypeId = incoming[0].FromTypeId,
+					ResultTypeId = group.Key
+				});
+				continue;
+			}
+			AddCombineRecipes(combineEdges, incoming, group.Key);
+		}
+
+		_repo.SaveEdges(_currentFactionId, combineEdges);
+		_repo.SaveUpgradeEdges(_currentFactionId, upgradeEdges);
+	}
+
+	private static void AddCombineRecipes(List<CombineRecipe> combineEdges, List<TechTreeEdge> incoming, string resultTypeId)
+	{
+		string mainTypeId = incoming[0].FromTypeId;
+		HashSet<string> materialTypes = new();
+		foreach (TechTreeEdge edge in incoming)
+		{
+			if (edge.FromTypeId == mainTypeId || !materialTypes.Add(edge.FromTypeId))
+				continue;
+			combineEdges.Add(new CombineRecipe
+			{
+				MainTypeId = mainTypeId,
+				MaterialTypeId = edge.FromTypeId,
+				MaterialCount = 1,
+				ResultTypeId = resultTypeId
+			});
+		}
 	}
 
 	private void OnClosePressed()
@@ -860,16 +906,16 @@ public class TechTreeEditorController
 		Color separatorColor = new(0.5f, 0.5f, 0.5f);
 		_cardCanvas.DrawLine(new Vector2(canvasWidth - 1, 0), new Vector2(canvasWidth - 1, canvasHeight), separatorColor, 2);
 
-		foreach (CombineRecipe edge in _edges)
+		foreach (TechTreeEdge edge in _edges)
 		{
-			Vector2 fromCenter = GetCardBottomCenter(edge.MainTypeId, rowHeight);
-			Vector2 toCenter = GetCardTopCenter(edge.ResultTypeId, rowHeight);
+			Vector2 fromCenter = GetCardBottomCenter(edge.FromTypeId, rowHeight);
+			Vector2 toCenter = GetCardTopCenter(edge.ToTypeId, rowHeight);
 
 			if (fromCenter == Vector2.Zero || toCenter == Vector2.Zero)
 				continue;
 
-			bool isCrossLine = edge.MaterialTypeId != edge.MainTypeId;
-			Color lineColor = isCrossLine ? new Color(1f, 0.6f, 0f) : new Color(1f, 1f, 1f, 0.6f);
+			bool isUpgradeEdge = _edges.Count(e => e.ToTypeId == edge.ToTypeId) == 1;
+			Color lineColor = isUpgradeEdge ? new Color(0.2f, 0.8f, 0.9f) : new Color(1f, 0.6f, 0f);
 
 			Vector2 c1 = fromCenter + new Vector2(0, 30);
 			Vector2 c2 = toCenter - new Vector2(0, 30);
@@ -892,6 +938,38 @@ public class TechTreeEditorController
 			Vector2 to = _cardCanvas.GetLocalMousePosition();
 			_cardCanvas.DrawLine(from, to, new Color(1f, 1f, 0f), 2);
 		}
+	}
+
+	private List<TechTreeEdge> LoadCanvasEdges(string factionId)
+	{
+		List<TechTreeEdge> edges = new();
+		foreach (CombineRecipe recipe in _repo.LoadEdges(factionId))
+		{
+			edges.Add(new TechTreeEdge { FromTypeId = recipe.MainTypeId, ToTypeId = recipe.ResultTypeId });
+			if (recipe.MaterialTypeId != recipe.MainTypeId)
+				edges.Add(new TechTreeEdge { FromTypeId = recipe.MaterialTypeId, ToTypeId = recipe.ResultTypeId });
+		}
+		foreach (UpgradeRecipe recipe in _repo.LoadUpgradeEdges(factionId))
+			edges.Add(new TechTreeEdge { FromTypeId = recipe.SourceTypeId, ToTypeId = recipe.ResultTypeId });
+		return edges;
+	}
+
+	private void UpdateUpgradeCostLabel(Label label, string nodeTypeId, int nodeValue)
+	{
+		List<TechTreeEdge> incoming = _edges.Where(e => e.ToTypeId == nodeTypeId).ToList();
+		if (incoming.Count != 1)
+		{
+			label.Text = "升级费用: -";
+			return;
+		}
+
+		TechTreeNode sourceNode = _nodes.Find(n => n.TypeId == incoming[0].FromTypeId);
+		if (sourceNode == null)
+		{
+			label.Text = "升级费用: -";
+			return;
+		}
+		label.Text = $"升级费用: {nodeValue - sourceNode.Value}（{sourceNode.Value} → {nodeValue}）";
 	}
 
 	private void DrawArrowHead(Vector2 to, Vector2 control, Color color)
