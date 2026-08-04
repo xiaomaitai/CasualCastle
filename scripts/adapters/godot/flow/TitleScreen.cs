@@ -8,7 +8,8 @@ using System;
 public partial class TitleScreen : Control
 {
 	private const string MainGameScene = "res://scenes/main/main_game.tscn";
-	private const int NoReportItemId = 0;
+	private const int RandomReportItemId = 0;
+	private const int NoReportItemId = 1;
 
 	private SettingsUiController _settingsUi;
 	private Button _startButton;
@@ -124,17 +125,18 @@ public partial class TitleScreen : Control
 	private void BuildReportOptions()
 	{
 		_reportOption.Clear();
-		_reportOption.AddItem("不使用战报", NoReportItemId);
-		_reportOption.SetItemMetadata(0, "");
+		_reportOption.AddItem("随机使用战报", RandomReportItemId);
 		_reportOption.Selected = 0;
+		_reportOption.AddItem("不使用战报", NoReportItemId);
 
 		List<BattleReport> reports = GameManager.Get<IBattleReportRepository>()?.LoadAll() ?? new();
+		int firstReportItemId = _reportOption.ItemCount;
 		for (int i = 0; i < reports.Count; i++)
 		{
 			BattleReport report = reports[i];
 			string item = $"{report.DisplayName}（{report.Nights.Count} 夜）";
-			_reportOption.AddItem(item, i + 1);
-			_reportOption.SetItemMetadata(i + 1, report.ReportId);
+			_reportOption.AddItem(item, firstReportItemId + i);
+			_reportOption.SetItemMetadata(firstReportItemId + i, report.ReportId);
 		}
 	}
 
@@ -144,7 +146,14 @@ public partial class TitleScreen : Control
 			return;
 
 		int selectedIndex = _reportOption.Selected;
-		if (selectedIndex <= 0)
+		int selectedItemId = _reportOption.GetItemId(selectedIndex);
+		if (selectedItemId == RandomReportItemId)
+		{
+			ApplyRandomReport();
+			return;
+		}
+
+		if (selectedItemId == NoReportItemId)
 		{
 			AdapterRegistry.Resolve<GameManager>().SetPendingReplayReportId("");
 			return;
@@ -153,6 +162,19 @@ public partial class TitleScreen : Control
 		Variant metadata = _reportOption.GetItemMetadata(selectedIndex);
 		string reportId = metadata.VariantType == Variant.Type.Nil ? "" : metadata.AsString();
 		AdapterRegistry.Resolve<GameManager>().SetPendingReplayReportId(reportId);
+	}
+
+	private void ApplyRandomReport()
+	{
+		List<BattleReport> reports = GameManager.Get<IBattleReportRepository>()?.LoadAll() ?? new();
+		if (reports.Count == 0)
+		{
+			AdapterRegistry.Resolve<GameManager>().SetPendingReplayReportId("");
+			return;
+		}
+
+		int randomIndex = Random.Shared.Next(reports.Count);
+		AdapterRegistry.Resolve<GameManager>().SetPendingReplayReportId(reports[randomIndex].ReportId);
 	}
 
 	private async System.Threading.Tasks.Task ForceClearMainGameResidue()
