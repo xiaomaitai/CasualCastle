@@ -112,7 +112,8 @@ Godot **4.6** + **C# / .NET** 的 2.5D RTS 项目（斜视角纸片人，类皇�
 
 ## Git 规则
 
-- **仅用户明确要求时**才 `git add` / `git commit`；不要自动提交
+- **小改动和已完成的 bug 修复**可以直接 `git add` / `git commit` 提交，无需额外确认
+- **大的修改、重构或涉及架构的改动**，需先向用户说明并得到确认后再提交
 - 新建 `.cs`、`.tscn`、`.tres` 时，**一并提交**同名 `.uid` 文件
 - 不提交 `.godot/`、`.mono/`、`*.csproj.user` 等缓存（已在 gitignore）
 
