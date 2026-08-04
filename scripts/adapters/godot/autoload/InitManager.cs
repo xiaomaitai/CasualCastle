@@ -37,10 +37,13 @@ public partial class InitManager : Node
             if (phase == GameManager.GamePhase.Night)
             {
                 shopService.RequestOpenShop();
+            }
+            if (phase == GameManager.GamePhase.Combine)
+            {
                 _nightOrchestrator.ResolveNightCombines(gm);
             }
-            if (phase == GameManager.GamePhase.Night && gm.CurrentNightIndex >= 1)
-                _nightOrchestrator.ApplyReplaySnapshot(gm);
+            if (phase == GameManager.GamePhase.Day)
+                _nightOrchestrator.ApplyReplaySnapshot(gm, gm.CurrentNightIndex + 1, BattlePhase.Day);
             if (phase == GameManager.GamePhase.Day && gm.CurrentNightIndex >= 1)
             {
                 try
@@ -50,6 +53,14 @@ public partial class InitManager : Node
                 catch (System.Exception ex)
                 {
                     GD.Print($"自动存档失败：{ex.Message}");
+                }
+                try
+                {
+                    AdapterRegistry.Resolve<BattleReportSystem>()?.SaveCurrentReportDaily();
+                }
+                catch (System.Exception ex)
+                {
+                    GD.Print($"战报自动保存失败：{ex.Message}");
                 }
             }
         };

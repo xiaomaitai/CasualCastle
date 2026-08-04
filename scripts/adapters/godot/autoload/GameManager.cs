@@ -1,6 +1,7 @@
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
+using CasualCastle.Domain.History;
 using CasualCastle.Domain.Shared;
 using Godot;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,13 +41,15 @@ public partial class GameManager : Node2D, IGameState
     public enum GamePhase
     {
         Day,
-        Night
+        Night,
+        Combine
     }
 
     public GameState CurrentState { get; private set; } = GameState.Playing;
     public GamePhase CurrentPhase { get; private set; } = GamePhase.Day;
     public bool IsDay => CurrentPhase == GamePhase.Day;
     public bool IsNight => CurrentPhase == GamePhase.Night;
+    public bool IsCombine => CurrentPhase == GamePhase.Combine;
     public bool IsPaused { get; private set; }
     public float PhaseTimeRemaining { get; private set; }
     public int CurrentNightIndex { get; set; }
@@ -87,7 +90,7 @@ public partial class GameManager : Node2D, IGameState
     {
         if (CurrentState != GameState.Playing || IsPaused) return;
 
-        if (CurrentPhase == GamePhase.Day)
+        if (CurrentPhase == GamePhase.Day || CurrentPhase == GamePhase.Combine)
         {
             PhaseTimeRemaining -= (float)delta;
             if (PhaseTimeRemaining <= 0f)
@@ -174,22 +177,38 @@ public partial class GameManager : Node2D, IGameState
     public void AdvancePhase()
     {
         if (CurrentState != GameState.Playing) return;
-        BeginPhase(CurrentPhase == GamePhase.Day ? GamePhase.Night : GamePhase.Day);
+        GamePhase nextPhase = CurrentPhase switch
+        {
+            GamePhase.Day => GamePhase.Night,
+            GamePhase.Night => GamePhase.Combine,
+            _ => GamePhase.Day,
+        };
+        BeginPhase(nextPhase);
     }
 
     private void BeginPhase(GamePhase phase)
     {
-        if (phase == GamePhase.Day && CurrentPhase == GamePhase.Night)
-            BattleReportSystem?.CaptureNightSnapshot(_playerCastle, CurrentNightIndex);
-
-        if (phase == GamePhase.Night)
+        if (phase == GamePhase.Night && CurrentPhase == GamePhase.Day)
+        {
             CurrentNightIndex++;
+            BattleReportSystem?.CapturePhaseSnapshot(_playerCastle, CurrentNightIndex, BattlePhase.Day);
+        }
+        else if (phase == GamePhase.Combine && CurrentPhase == GamePhase.Night)
+        {
+            BattleReportSystem?.CapturePhaseSnapshot(_playerCastle, CurrentNightIndex, BattlePhase.Night);
+        }
+        else if (phase == GamePhase.Day && CurrentPhase == GamePhase.Combine)
+        {
+            BattleReportSystem?.CapturePhaseSnapshot(_playerCastle, CurrentNightIndex, BattlePhase.Combine);
+        }
 
         CurrentPhase = phase;
-        PhaseTimeRemaining = GameRules.DayDurationSeconds;
+        PhaseTimeRemaining = phase == GamePhase.Combine
+            ? GameRules.CombineDurationSeconds
+            : GameRules.DayDurationSeconds;
 
         EmitSignal(SignalName.PhaseChanged, (int)phase);
-        GD.Print(phase == GamePhase.Day ? "Phase: Day" : "Phase: Night");
+        GD.Print($"Phase: {phase}");
     }
 
     public void OnCastleHeartHealthChanged(bool isPlayer, int health, int maxHealth)

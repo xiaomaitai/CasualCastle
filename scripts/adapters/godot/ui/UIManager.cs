@@ -275,7 +275,7 @@ public partial class UIManager : Node2D
         SetProcessInput(false);
         AdapterRegistry.Resolve<GameManager>()?.SetPaused(false);
         AdapterRegistry.Resolve<Hand>().ResetHand();
-        AdapterRegistry.Resolve<BattleReportSystem>()?.DiscardCurrentReport();
+        AdapterRegistry.Resolve<BattleReportSystem>()?.ClearCurrentCache();
         GetTree().ChangeSceneToFile(TitleScene);
     }
 }

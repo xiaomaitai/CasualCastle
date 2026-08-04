@@ -30,7 +30,7 @@ public partial class BattleReportSystem : Node
         _service.StartMatch(selectedReportId);
     }
 
-    public void CaptureNightSnapshot(Castle castle, int nightIndex)
+    public void CapturePhaseSnapshot(Castle castle, int nightIndex, BattlePhase phase)
     {
         if (castle == null || nightIndex <= 0)
             return;
@@ -47,7 +47,7 @@ public partial class BattleReportSystem : Node
                 IsCombineProhibited = b.IsCombineProhibited,
             });
 
-        _service.CaptureNightSnapshot(snapshots, nightIndex);
+        _service.CapturePhaseSnapshot(snapshots, nightIndex, phase);
     }
 
     public void DiscardCurrentReport()
@@ -55,14 +55,24 @@ public partial class BattleReportSystem : Node
         _service.DiscardCurrentReport();
     }
 
+    public void ClearCurrentCache()
+    {
+        _service.ClearCurrentCache();
+    }
+
     public BattleReport SaveCurrentReport()
     {
         return _service.SaveCurrentReport("", DateTimeOffset.Now.ToString("yyyy-MM-dd HH:mm"));
     }
 
-    public CastleSnapshot GetSelectedNightSnapshot(int nightIndex)
+    public BattleReport SaveCurrentReportDaily()
     {
-        return _service.GetSelectedNightSnapshot(nightIndex);
+        return _service.SaveCurrentReportDaily(DateTimeOffset.Now.ToString("yyyy-MM-dd HH:mm"));
+    }
+
+    public CastleSnapshot GetSelectedPhaseSnapshot(int nightIndex, BattlePhase phase)
+    {
+        return _service.GetSelectedPhaseSnapshot(nightIndex, phase);
     }
 
     public void ReloadSavedReports()

@@ -27,20 +27,20 @@ public class NightOrchestrator
 		_combineService.ResolveCombines(
 			playerCastle.GetBuildingStates(),
 			true,
-			gm.IsNight,
+			gm.IsCombine,
 			gm.CurrentState == GameManager.GameState.Playing,
 			factory,
 			result => _adjacencyService.RefreshCastle(playerCastle.GetBuildingStates()));
 	}
 
-	public void ApplyReplaySnapshot(GameManager gm)
+	public void ApplyReplaySnapshot(GameManager gm, int nightIndex, BattlePhase phase)
 	{
 		Castle enemyCastle = gm.EnemyCastle;
 		if (enemyCastle == null)
 			return;
 
 		ReplayTarget target = new ReplayTarget(enemyCastle);
-		_replayService.ApplyNightSnapshot(target, gm.CurrentNightIndex);
+		_replayService.ApplyNightSnapshot(target, nightIndex, phase);
 
 		_adjacencyService.RefreshCastle(enemyCastle.GetBuildingStates());
 	}

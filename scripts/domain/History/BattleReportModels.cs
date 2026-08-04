@@ -2,6 +2,13 @@ using System.Collections.Generic;
 
 namespace CasualCastle.Domain.History;
 
+public enum BattlePhase
+{
+	Day,
+	Night,
+	Combine
+}
+
 public class BuildingSnapshot
 {
 	public string TypeId { get; set; } = "";
@@ -15,6 +22,7 @@ public class BuildingSnapshot
 public class CastleSnapshot
 {
 	public int NightIndex { get; set; }
+	public BattlePhase Phase { get; set; }
 	public List<BuildingSnapshot> Buildings { get; set; } = new();
 }
 

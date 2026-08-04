@@ -4,6 +4,7 @@ using CasualCastle.Domain.Shared;
 using Godot;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 
 public partial class TitleScreen : Control
 {
@@ -134,7 +135,8 @@ public partial class TitleScreen : Control
 		for (int i = 0; i < reports.Count; i++)
 		{
 			BattleReport report = reports[i];
-			string item = $"{report.DisplayName}（{report.Nights.Count} 夜）";
+			int nightCount = report.Nights.Select(s => s.NightIndex).Distinct().Count();
+			string item = $"{report.DisplayName}（{nightCount} 夜）";
 			_reportOption.AddItem(item, firstReportItemId + i);
 			_reportOption.SetItemMetadata(firstReportItemId + i, report.ReportId);
 		}

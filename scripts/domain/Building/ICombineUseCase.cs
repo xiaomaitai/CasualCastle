@@ -5,5 +5,5 @@ namespace CasualCastle.Domain.Building;
 
 public interface ICombineUseCase
 {
-	void ResolveCombines(List<IBuildingState> buildings, bool isPlayerSide, bool isNight, bool isPlaying, ICombineBuildingFactory factory, Action<IBuildingState> onCombineCompleted);
+	void ResolveCombines(List<IBuildingState> buildings, bool isPlayerSide, bool isCombinePhase, bool isPlaying, ICombineBuildingFactory factory, Action<IBuildingState> onCombineCompleted);
 }

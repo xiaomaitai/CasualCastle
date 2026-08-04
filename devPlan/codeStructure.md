@@ -155,7 +155,7 @@ domain 项目零 `using Godot`，单向无循环。
 | `UnitService` | Battle | 手动 new（每个单位实例，通过 UnitLogic） |
 | `AdjacencyService` | Building | MS DI Singleton |
 | `ShopRules` | Building | MS DI Singleton |
-| `CombineService` | Building | 手动 new（每次入夜组合，通过 NightOrchestrator） |
+| `CombineService` | Building | 手动 new（每次合成阶段组合，通过 NightOrchestrator） |
 | `Hand` | Building | AdapterRegistry（依赖 Godot 桥接） |
 | `Shop` | Building | AdapterRegistry（依赖 Hand） |
 | `Player` | Building | 手动 new（通过 InitManager） |

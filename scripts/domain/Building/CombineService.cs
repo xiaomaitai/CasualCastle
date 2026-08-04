@@ -15,9 +15,9 @@ public class CombineService : ICombineUseCase
 		_combineRules = combineRules;
 	}
 
-	public void ResolveCombines(List<IBuildingState> buildings, bool isPlayerSide, bool isNight, bool isPlaying, ICombineBuildingFactory factory, Action<IBuildingState> onCombineCompleted)
+	public void ResolveCombines(List<IBuildingState> buildings, bool isPlayerSide, bool isCombinePhase, bool isPlaying, ICombineBuildingFactory factory, Action<IBuildingState> onCombineCompleted)
 	{
-		if (!isPlayerSide || !isPlaying || !isNight)
+		if (!isPlayerSide || !isPlaying || !isCombinePhase)
 			return;
 
 		HashSet<IBuildingState> used = new();

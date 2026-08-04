@@ -60,10 +60,10 @@ position = Vector2(2870, 1210)
 
 [node name="EnemyCastle" parent="Battlefield/EnemySide" unique_id=15 instance=ExtResource("2")]
 IsPlayerCastle = false
-BarracksGridX = 0
-BarracksGridY = 4
-SecondBarracksGridX = 1
-SecondBarracksGridY = 4
+BarracksGridX = -1
+BarracksGridY = -1
+SecondBarracksGridX = -1
+SecondBarracksGridY = -1
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=5]
 

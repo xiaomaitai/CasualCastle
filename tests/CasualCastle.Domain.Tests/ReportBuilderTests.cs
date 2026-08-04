@@ -15,11 +15,12 @@ public class ReportBuilderTests
 			new BuildingSnapshot { TypeId = "Barracks", AnchorGridX = 2, AnchorGridY = 3, Health = 80 },
 		};
 
-		CastleSnapshot snapshot = ReportBuilder.CaptureSnapshot(source, 1, typeId => typeId == "CastleHeart");
+		CastleSnapshot snapshot = ReportBuilder.CaptureSnapshot(source, 1, BattlePhase.Day, typeId => typeId == "CastleHeart");
 
 		Assert.Single(snapshot.Buildings);
 		Assert.Equal("Barracks", snapshot.Buildings[0].TypeId);
 		Assert.Equal(1, snapshot.NightIndex);
+		Assert.Equal(BattlePhase.Day, snapshot.Phase);
 	}
 
 	[Fact]
@@ -34,7 +35,7 @@ public class ReportBuilderTests
 			},
 		};
 
-		CastleSnapshot snapshot = ReportBuilder.CaptureSnapshot(source, 2, _ => false);
+		CastleSnapshot snapshot = ReportBuilder.CaptureSnapshot(source, 2, BattlePhase.Night, _ => false);
 
 		Assert.Single(snapshot.Buildings);
 		BuildingSnapshot building = snapshot.Buildings[0];
@@ -44,6 +45,7 @@ public class ReportBuilderTests
 		Assert.Equal(60, building.Health);
 		Assert.True(building.IsManuallyPaused);
 		Assert.False(building.IsCombineProhibited);
+		Assert.Equal(BattlePhase.Night, snapshot.Phase);
 	}
 
 	[Fact]
@@ -84,12 +86,13 @@ public class ReportBuilderTests
 	[Fact]
 	public void CloneSnapshot_ReturnsDeepCopyWithIndependentBuildings()
 	{
-		CastleSnapshot source = new() { NightIndex = 2 };
+		CastleSnapshot source = new() { NightIndex = 2, Phase = BattlePhase.Combine };
 		source.Buildings.Add(new BuildingSnapshot { TypeId = "Barracks", AnchorGridX = 3, AnchorGridY = 4, Health = 50 });
 
 		CastleSnapshot clone = ReportBuilder.CloneSnapshot(source);
 
 		Assert.Equal(source.NightIndex, clone.NightIndex);
+		Assert.Equal(source.Phase, clone.Phase);
 		Assert.Single(clone.Buildings);
 		Assert.NotSame(source.Buildings[0], clone.Buildings[0]);
 	}

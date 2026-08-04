@@ -175,7 +175,7 @@ Adapter 类（Godot 节点）委托给上述领域类，自身只保留 Godot �
 | Castle | building/Castle.cs | Godot Node | 网格占用委托给 OccupancyGrid ✅ |
 | Building | building/Building.cs | Godot Node | 实现 IBuildingState + IAdjacencyBuilding ✅ |
 | CombineSystem | combine/CombineSystem.cs | Godot Node | 组合逻辑委托给 CombineRules ✅ |
-| NightOrchestrator | flow/NightOrchestrator.cs | 纯 C# | 入夜组合与回放快照编排 ✅ |
+| NightOrchestrator | flow/NightOrchestrator.cs | 纯 C# | 合成阶段组合与白天回放快照编排 ✅ |
 | ReplayAiSystem | replay/ReplayAiSystem.cs | Godot Node | 镜像计算委托给 MirrorRules ✅ |
 | BattleReportSystem | battle_report/BattleReportSystem.cs | Godot Node | 战报构建委托给 ReportBuilder ✅ |
 | BattleReportStorage | persistence/BattleReportStorage.cs | 纯 C# | 实现 IBattleReportRepository ✅ |

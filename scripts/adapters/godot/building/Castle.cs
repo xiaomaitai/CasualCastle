@@ -297,6 +297,9 @@ public partial class Castle : Node2D
 
 	private void SetupBarracks()
 	{
+		if (!IsPlayerCastle)
+			return;
+
 		PlaceInitialBarracks(BarracksGridX, BarracksGridY);
 		if (SecondBarracksGridX >= 0 && SecondBarracksGridY >= 0)
 			PlaceInitialBarracks(SecondBarracksGridX, SecondBarracksGridY);

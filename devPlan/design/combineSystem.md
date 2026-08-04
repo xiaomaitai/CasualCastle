@@ -1,15 +1,15 @@
 # 组合系统设计 — M5
 
-夜晚将满足配方、且与**主体建筑**四向邻接的材料建筑，自动合并为一座强化建筑（类似背包乱斗的同类合成升级）。概念入口见 `devPlan/concepts.md`；架构归属见 `devPlan/outline/c05ProjectArchitecture.md`。
+合成阶段（夜晚结束后、下一天白天开始前）将满足配方、且与**主体建筑**四向邻接的材料建筑，自动合并为一座强化建筑（类似背包乱斗的同类合成升级）。概念入口见 `devPlan/concepts.md`；架构归属见 `devPlan/outline/c05ProjectArchitecture.md`。
 
 ---
 
 ## 时机与触发
 
-- **仅夜晚**：在 `GameManager` 切换到 `Night` 时，由 `CombineSystem` **自动扫描并执行**所有合法组合
+- **仅合成阶段**：在 `GameManager` 切换到 `Combine`（夜晚结束）时，由 `CombineSystem` **自动扫描并执行**所有合法组合
 - **局内条件**：`Playing` 且未暂停、未结算
 - **仅玩家侧**：敌方城堡建筑不参与组合
-- **无组合工具按钮**：玩家不手动点选「组合」；入夜后系统自动完成
+- **无组合工具按钮**：玩家不手动点选「组合」；进入合成阶段后系统自动完成
 - **禁止组合工具**：底部工具栏提供「禁止组合」按钮（与暂停、修复并列），用于标记不参与自动组合的建筑
 
 ---
@@ -66,15 +66,15 @@
 
 - 组合**不消耗金币**
 
-### 入夜自动执行顺序
+### 合成阶段自动执行顺序
 
 ```text
-PhaseChanged → Night
+PhaseChanged → Combine（夜晚购买/放置/修复完成后）
   → CombineSystem.ResolveNightCombines(castle)
        循环直到无可组合组：
          扫描城堡内所有合法 (主体 + 辅材) 组
          按稳定规则选取一组（见下）→ TryFuse → 刷新邻接
-  → 继续夜晚流程（开商店等）
+  → 合成结束 → PhaseChanged → Day（下一天开始）
 ```
 
 **选取规则（实现约定，避免歧义）：**
@@ -92,7 +92,7 @@ PhaseChanged → Night
 - 底部「禁止组合」按钮：toggle 工具模式（与暂停 / 修复互斥，`ButtonGroup`）
 - 激活后左键点击玩家侧、非核心建筑：切换该建筑的 `IsCombineProhibited`
 - 右键 / Esc：退出工具
-- **白天也可用**（提前标记，入夜生效）；与修复工具不同，不限制夜晚
+- **白天也可用**（提前标记，合成阶段生效）；与修复工具不同，不限制夜晚
 
 ### 表现
 
@@ -102,7 +102,7 @@ PhaseChanged → Night
 ### 语义
 
 - `IsCombineProhibited == true` 的建筑**不能**作为主体或辅材
-- 取消禁止后，下一夜入夜扫描可正常参与组合
+- 取消禁止后，下一循环合成阶段扫描可正常参与组合
 
 ---
 
@@ -127,7 +127,7 @@ PhaseChanged → Night
 | `Building` | `IsCombineProhibited` 字段及状态图标 |
 | `BuildingSystem` | 强化建筑定义、`CreateBuilding`、占地与产兵属性 |
 | `CombineProhibitUiController` | 禁止组合工具按钮、点击切换标记、光标 |
-| `GameManager` | 入夜时调用 `CombineSystem.ResolveNightCombines` |
+| `GameManager` | 合成阶段开始时调用 `CombineSystem.ResolveNightCombines` |
 | `ShopSystem` | 无组合费用关联 |
 | `UIManager` | 注册禁止组合工具的 `Process` / `HandleInput` |
 
@@ -141,7 +141,7 @@ PhaseChanged → Night
 |------|------|
 | 白天 | 不执行组合；可标记禁止组合 |
 | 材料被敌军占据 | 该建筑不参与组合 |
-| 游戏中途暂停 | 入夜组合在暂停前已执行；禁止组合工具退出 |
+| 游戏中途暂停 | 合成阶段组合在暂停前已执行；禁止组合工具退出 |
 | 手牌卡牌 | 手牌为**一次性放置卡**，打出后消耗，**不与场上建筑绑定**；组合不改变手牌 |
 | 组合动画 | 可选：简短缩放/闪光；无动画亦可通过验收 |
 | AI 组合 | M6 敌方由战报镜像复刻，不单独跑组合逻辑 |
@@ -150,7 +150,7 @@ PhaseChanged → Night
 
 ## 验收标准（M5）
 
-- [ ] 入夜时，两座邻接同类型单格兵营（未禁止、够金币）自动组合为强化兵营
+- [ ] 合成阶段，两座邻接同类型单格兵营（未禁止、够金币）自动组合为强化兵营
 - [ ] 结果落在主体锚点，辅材移除，结果**满血**
 - [ ] 「禁止组合」工具可标记 / 取消标记；被标记建筑不参与自动组合
 - [ ] 白天不组合；核心建筑、多格建筑、已 1 阶建筑不可误融

@@ -1,6 +1,6 @@
 # 敌方复刻（回放式 AI）— M6
 
-敌方**不自主决策**（不购卡、不选位、不组合）。每局从永久战报库中**选取一条战报**，在每次**夜晚开始**时，按当前夜晚序号取出对应快照，将建筑**镜像复刻**到敌方城堡。概念见 `devPlan/concepts.md` §战报；录制见 `devPlan/design/battleReport.md`。
+敌方**不自主决策**（不购卡、不选位、不组合）。每局从永久战报库中**选取一条战报**，在每天**白天开始**时，取出当天循环对应的**白天阶段快照**，将建筑**镜像复刻**到敌方城堡。概念见 `devPlan/concepts.md` §战报；录制见 `devPlan/design/battleReport.md`。
 
 ---
 
@@ -10,32 +10,31 @@
 |------|------|
 | 决策方式 | **无**自主 AI；仅战报回放 |
 | 战报来源 | 局前或开局选定一条已保存战报 |
-| 触发时机 | 第 N 夜**开始**（`PhaseChanged → Night`，在玩家组合之前或之后需固定顺序，见下） |
-| 取用条目 | 战报中 `NightIndex == N` 的快照（该条为历史对局**第 N 夜结束**时录制的玩家城堡） |
+| 触发时机 | 第 N 天**开始**（`PhaseChanged → Day`；此时 `NightIndex` 为 N-1，取 `N = NightIndex + 1`，见下） |
+| 取用条目 | 战报中 `NightIndex == N` 且 `Phase == Day` 的快照（该条为历史对局**第 N 天白天阶段结束**时录制的玩家城堡） |
 | 复刻方式 | 快照建筑**水平镜像**映射到敌方城堡同格位（左右对称；实现时以双方 8×8 网格镜像 `gridX`） |
 | 跳过条件 | 目标格（或建筑占格任一格）被**玩家单位**占据 → 该建筑不复制 |
 | 生命与状态 | 与快照一致（含受损、暂停、禁止组合标记） |
 
-若无 `NightIndex == N` 的条目：敌方保持上一夜布局，本夜不追加复刻。
+若无 `NightIndex == N` 且 `Phase == Day` 的条目：敌方保持上一布局，当天不追加复刻。
 
 ---
 
-## 入夜顺序（建议）
+## 白天开始顺序（建议）
 
 ```text
-PhaseChanged → Night（NightIndex 已更新为 N）
-  → CombineSystem.ResolveNightCombines(playerCastle)   // 玩家先组合
-  → ReplayAiSystem.ApplyNightSnapshot(enemyCastle, report, N)  // 再复刻敌方
-  → ShopSystem 开商店…
+PhaseChanged → Day（NightIndex 为 N-1）
+  → ReplayAiSystem.ApplyPhaseSnapshot(enemyCastle, report, N = NightIndex + 1, Day)  // 复刻敌方
+  → 自动存档、保存战报…
 ```
 
-夜晚结束切白天时：`NightIndex` 不变；下一夜开始再 +1 或由「结束夜晚」计数，与战报录制序号对齐（实现时与 `BattleReportSystem` 共用同一计数器）。
+白天切夜晚（入夜）时：`NightIndex` +1；夜晚切合成、合成切白天时：`NightIndex` 不变。`NightIndex` 与战报录制共用同一计数器，白天开始时快照序号 N 对应第 N 天**白天阶段结束**时录制的玩家城堡。
 
 ---
 
 ## 敌方城堡同步逻辑
 
-1. 读取战报第 N 条快照的建筑列表
+1. 读取战报中 `NightIndex == N` 且 `Phase == Day` 的快照的建筑列表
 2. 对每座建筑，将玩家锚点 `(x, y)` 镜像为敌方 `(mirrorX, y)`（如 `mirrorX = GridColumns - 1 - x - footprintWidth + 1`，多格建筑按锚点与 footprint 计算）
 3. 若占格任一格上有玩家 `Unit` 存活且 `IsPlayerUnit == true` → **跳过**该建筑
 4. 移除敌方城堡上需替换的旧建筑（非核心、与快照冲突格位）
@@ -48,7 +47,7 @@ PhaseChanged → Night（NightIndex 已更新为 N）
 ## 战报选择
 
 - M6 首版：开局或标题页选**一条**已保存战报作为本局 AI 参考；标题页默认「随机使用战报」（无战报时回退为不使用战报）
-- 无战报时：敌方仅保留场景初始兵营（或空城，实现时二选一并在验收写明）
+- 无战报时：敌方仅保留城堡之心（**已移除初始兵营**，空城）
 
 ---
 
@@ -56,8 +55,8 @@ PhaseChanged → Night（NightIndex 已更新为 N）
 
 | 模块 | 职责 |
 |------|------|
-| `ReplayAiSystem` | 选定战报、入夜镜像复刻、占格与玩家单位冲突检测 |
-| `BattleReportSystem` | 提供已保存战报与按 `NightIndex` 查询快照 |
+| `ReplayAiSystem` | 选定战报、每天开始时镜像复刻、占格与玩家单位冲突检测 |
+| `BattleReportSystem` | 提供已保存战报与按 `NightIndex` + `Phase` 查询快照 |
 | `BuildingSystem` | 敌方城堡创建/移除建筑 |
 | `Castle` | 占格查询、单位与格位重叠检测（或委托 `Battlefield`） |
 
@@ -65,9 +64,9 @@ PhaseChanged → Night（NightIndex 已更新为 N）
 
 ## 验收标准（AI / 复刻部分）
 
-- [ ] 选定战报后，第 1 夜开始敌方布局与战报第 1 条快照镜像一致（未被单位挡住的格）
+- [ ] 选定战报后，第 1 天开始敌方布局与战报第 1 循环白天阶段快照镜像一致（未被单位挡住的格）
 - [ ] 玩家单位站在某格上时，该格对应建筑不复刻
-- [ ] 后续夜晚按序号继续复刻；无条目则不变
+- [ ] 后续每天按序号继续复刻；无条目则保持上一布局
 - [ ] 敌方仍正常产兵、战斗；玩家侧功能无回归
 
 ---

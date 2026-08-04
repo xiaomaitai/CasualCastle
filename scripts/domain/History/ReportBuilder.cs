@@ -7,12 +7,13 @@ namespace CasualCastle.Domain.History;
 public static class ReportBuilder
 {
     public static CastleSnapshot CaptureSnapshot(
-        IEnumerable<BuildingSnapshot> sourceBuildings, int nightIndex,
+        IEnumerable<BuildingSnapshot> sourceBuildings, int nightIndex, BattlePhase phase,
         System.Func<string, bool> isCoreBuilding)
     {
         CastleSnapshot snapshot = new()
         {
             NightIndex = nightIndex,
+            Phase = phase,
         };
 
         foreach (BuildingSnapshot building in sourceBuildings)
@@ -44,6 +45,7 @@ public static class ReportBuilder
         return new CastleSnapshot
         {
             NightIndex = source.NightIndex,
+            Phase = source.Phase,
             Buildings = source.Buildings
                 .Select(CloneBuildingSnapshot)
                 .ToList(),

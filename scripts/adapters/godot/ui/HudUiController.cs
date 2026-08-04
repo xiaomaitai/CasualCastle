@@ -102,12 +102,12 @@ public sealed class HudUiController
 	private void UpdatePhaseDisplay()
 	{
 		GameManager gm = AdapterRegistry.Resolve<GameManager>();
-		_phaseLabel.Text = gm.IsDay ? "白天" : "夜晚";
-		if (gm.IsDay)
+		_phaseLabel.Text = gm.IsDay ? "白天" : gm.IsCombine ? "合成" : "夜晚";
+		if (gm.IsDay || gm.IsCombine)
 		{
 			_phaseTimerLabel.Text = FormatTime(gm.PhaseTimeRemaining);
 			_newDayButton.Visible = false;
-			_skipPhaseButton.Visible = DisplaySettingsManager.DevModeEnabled;
+			_skipPhaseButton.Visible = gm.IsDay && DisplaySettingsManager.DevModeEnabled;
 		}
 		else
 		{

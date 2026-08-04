@@ -13,9 +13,9 @@ public class ReplayService : IReplayUseCase
         _buildingRepo = buildingRepo;
     }
 
-    public void ApplyNightSnapshot(IReplayTarget target, int nightIndex)
+    public void ApplyNightSnapshot(IReplayTarget target, int nightIndex, BattlePhase phase)
     {
-        CastleSnapshot snapshot = _reportService.GetSelectedNightSnapshot(nightIndex);
+        CastleSnapshot snapshot = _reportService.GetSelectedPhaseSnapshot(nightIndex, phase);
         if (snapshot == null)
             return;
 

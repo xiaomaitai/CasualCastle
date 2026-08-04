@@ -77,9 +77,12 @@ public class BuildingSnapshot
 	public bool IsCombineProhibited;
 }
 
+public enum BattlePhase { Day, Night, Combine }
+
 public class CastleSnapshot
 {
-	public int NightIndex;              // 第几夜结束时的快照
+	public int NightIndex;              // 第几个昼夜循环
+	public BattlePhase Phase;           // 阶段：白天 / 夜晚 / 合成
 	public List<BuildingSnapshot> Buildings;
 }
 

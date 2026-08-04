@@ -3,6 +3,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 public class BattleReportStorage : IBattleReportRepository
 {
@@ -12,6 +13,7 @@ public class BattleReportStorage : IBattleReportRepository
 	private static readonly JsonSerializerOptions JsonOptions = new()
 	{
 		WriteIndented = true,
+		Converters = { new JsonStringEnumConverter() },
 	};
 
 	public List<BattleReport> LoadAll()

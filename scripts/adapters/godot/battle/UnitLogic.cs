@@ -138,11 +138,11 @@ public partial class UnitLogic : Node2D
 
 	private bool IsActive => AdapterRegistry.Resolve<IGameState>().IsDay;
 
-	private bool IsSleeping =>
-		IsAlive
-		&& AdapterRegistry.Resolve<GameManager>()?.CurrentState == GameManager.GameState.Playing
-		&& AdapterRegistry.Resolve<GameManager>().IsNight
-		&& !AdapterRegistry.Resolve<GameManager>().IsPaused;
+    private bool IsSleeping =>
+        IsAlive
+        && AdapterRegistry.Resolve<GameManager>()?.CurrentState == GameManager.GameState.Playing
+        && (AdapterRegistry.Resolve<GameManager>().IsNight || AdapterRegistry.Resolve<GameManager>().IsCombine)
+        && !AdapterRegistry.Resolve<GameManager>().IsPaused;
 
 	private void UpdateSleepVisual()
 	{
