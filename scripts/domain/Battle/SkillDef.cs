@@ -40,6 +40,7 @@ public class SkillDef
 {
 	public string Id { get; init; }
 	public string DisplayName { get; init; }
+	public string Description { get; init; } = "";
 	public SkillType Type { get; init; }
 	public string ConfigJson { get; init; }
 }

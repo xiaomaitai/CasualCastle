@@ -41,7 +41,9 @@ public partial class SkillIconView : Control
 	public void Configure(SkillDef skill)
 	{
 		_skillId = skill.Id;
-		TooltipText = skill.DisplayName;
+		TooltipText = string.IsNullOrEmpty(skill.Description)
+			? skill.DisplayName
+			: $"{skill.DisplayName}\n{skill.Description}";
 		_iconTexture = LoadSkillIcon(skill.Id);
 		QueueRedraw();
 	}

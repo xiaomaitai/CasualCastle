@@ -15,10 +15,11 @@ public class SqliteSkillRepository : ISkillRepository
 		string fullPath = GodotProjectSettings.GlobalizePath("res://assets/data/config.db");
 		using SqliteConnection connection = new($"Data Source={fullPath}");
 		connection.Open();
+		EnsureDescriptionColumn(connection);
 
 		using (SqliteCommand cmd = connection.CreateCommand())
 		{
-			cmd.CommandText = "SELECT id, display_name, skill_type, config_json FROM skill_defs";
+			cmd.CommandText = "SELECT id, display_name, skill_type, config_json, description FROM skill_defs";
 			using (SqliteDataReader reader = cmd.ExecuteReader())
 			{
 				while (reader.Read())
@@ -28,6 +29,7 @@ public class SqliteSkillRepository : ISkillRepository
 					{
 						Id = id,
 						DisplayName = reader.GetString(1),
+						Description = reader.IsDBNull(4) ? "" : reader.GetString(4),
 						Type = reader.GetString(2) switch
 						{
 							"aura" => SkillType.Aura,
@@ -58,6 +60,17 @@ public class SqliteSkillRepository : ISkillRepository
 				}
 			}
 		}
+	}
+
+	private static void EnsureDescriptionColumn(SqliteConnection connection)
+	{
+		using SqliteCommand cmd = connection.CreateCommand();
+		cmd.CommandText = "SELECT COUNT(*) FROM pragma_table_info('skill_defs') WHERE name = 'description'";
+		long hasColumn = (long)cmd.ExecuteScalar();
+		if (hasColumn > 0)
+			return;
+		cmd.CommandText = "ALTER TABLE skill_defs ADD COLUMN description TEXT";
+		cmd.ExecuteNonQuery();
 	}
 
 	public SkillDef Get(string skillId)

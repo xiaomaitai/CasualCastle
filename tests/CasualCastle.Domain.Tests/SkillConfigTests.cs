@@ -8,6 +8,21 @@ namespace CasualCastle.Domain.Tests;
 public class SkillConfigTests
 {
 	[Fact]
+	public void SkillDef_Description_StoredOnSkill()
+	{
+		SkillDef skill = new()
+		{
+			Id = "orc_rage_t1",
+			DisplayName = "狂怒",
+			Description = "每损失 20% 生命，攻击力 +10%（最高 +40%）",
+			Type = SkillType.StatModifier,
+			ConfigJson = "{}"
+		};
+
+		Assert.Equal("每损失 20% 生命，攻击力 +10%（最高 +40%）", skill.Description);
+	}
+
+	[Fact]
 	public void StatModifierConfig_Parse_TriggerAlways_ReturnsCorrectConfig()
 	{
 		StatModifierConfig cfg = StatModifierConfig.Parse("{\"trigger\": \"always\", \"modifiers\": {\"attack_damage_mult\": 1.5}}");

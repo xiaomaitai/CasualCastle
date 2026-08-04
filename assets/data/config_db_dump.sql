@@ -139,8 +139,8 @@ INSERT INTO unit_stats VALUES('Priest',1,0,5,4,90,0,5.0,0.0,10.0,0,4290526975,22
 INSERT INTO unit_stats VALUES('Archbishop',1,0,5,4,120,0,5.0,0.0,10.0,0,4288712672,240.0,3600,'Human',0,0,40.0,200.0,1.5);
 INSERT INTO unit_stats VALUES('Inquisitor',1,1,1,4,140,45,6.0,170.0,2.0,0,4286644095,300.0,2800,'Human',0,0,0.0,0.0,0.0);
 INSERT INTO unit_stats VALUES('Punisher',1,1,1,4,180,65,6.5,190.0,1.8,0,4286632191,320.0,3800,'Human',0,0,0.0,0.0,0.0);
-INSERT INTO unit_stats VALUES('OrcWarrior',2,0,2,4,360,40,3.0,45.0,1.6,0,4283337530,200.0,2800,'Orc',70,0,0.0,0.0,0.0);
-INSERT INTO unit_stats VALUES('OrcBerserker',2,0,2,4,480,60,3.2,45.0,1.3,0,4288359712,210.0,3800,'Orc',90,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('OrcWarrior',2,0,2,4,360,40,45.0,45.0,1.6,0,4283337530,200.0,2800,'Orc',70,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('OrcBerserker',2,0,2,4,480,60,55.0,45.0,1.3,0,4288359712,210.0,3800,'Orc',90,0,0.0,0.0,0.0);
 CREATE TABLE building_defs (
     type_id           TEXT PRIMARY KEY,
     display_name      TEXT    NOT NULL,
@@ -158,7 +158,7 @@ CREATE TABLE building_defs (
     collision_width   INTEGER NOT NULL DEFAULT 80,
     collision_height  INTEGER NOT NULL DEFAULT 80
 , faction_id TEXT NOT NULL DEFAULT 'human', production_rate REAL NOT NULL DEFAULT 0.0, texture_path TEXT NOT NULL DEFAULT 'res://assets/art/placeholders/test_image.png', sprite_modulate_r REAL NOT NULL DEFAULT 1.0, sprite_modulate_g REAL NOT NULL DEFAULT 1.0, sprite_modulate_b REAL NOT NULL DEFAULT 1.0, sprite_modulate_a REAL NOT NULL DEFAULT 1.0, material_path TEXT NOT NULL DEFAULT '', value INTEGER);
-INSERT INTO building_defs VALUES('CastleHeart','城堡之心',500,NULL,0,0,0,0,NULL,0,0,1,'[[0,0],[1,0],[0,1],[1,1]]',180,180,'alliance',0.0,'res://assets/art/placeholders/test_image.png',1.0,0.82,0.35,1.0,'',NULL);
+INSERT INTO building_defs VALUES('CastleHeart','城堡之心',500,NULL,0,0,0,0,NULL,0,0,1,'[[0,0],[1,0],[0,1],[1,1]]',180,180,'alliance',0.0,'res://assets/art/placeholders/test_image.png',1.0,0.82,0.35,1.0,'',0);
 INSERT INTO building_defs VALUES('RangerPost','游骑哨',150,5.0,0,0,1,1,'LightCavalry',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.6,0.75,0.95,1.0,'',5);
 INSERT INTO building_defs VALUES('RangerGuild','游侠公会',180,9.0,0,0,1,0,'ElfRanger',0,0,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.35,0.7,0.4,1.0,'',3);
 INSERT INTO building_defs VALUES('WindSanctum','风行圣殿',260,7.0,0,0,1,0,'ElfSharpshooter',0,1,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.65,0.8,0.95,1.0,'',7);
@@ -368,19 +368,19 @@ CREATE TABLE IF NOT EXISTS "skill_defs" (
     display_name TEXT NOT NULL,
     skill_type TEXT NOT NULL CHECK(skill_type IN ('stat_modifier','aura','on_hit','on_heal','special')),
     config_json TEXT NOT NULL
-);
-INSERT INTO skill_defs VALUES('berserker_rage','狂战士之怒','stat_modifier','{"trigger":"low_health","trigger_param":0.5,"modifiers":{"attack_speed_mult":1.5}}');
-INSERT INTO skill_defs VALUES('backstab','背刺','stat_modifier','{"trigger":"target_isolated","modifiers":{"attack_damage_mult":2.0}}');
-INSERT INTO skill_defs VALUES('slowing_strike','减速打击','on_hit','{"effects":[{"type":"slow","value":0.3,"duration":2.0}]}');
-INSERT INTO skill_defs VALUES('motley_crew','鱼龙混杂','stat_modifier','{"trigger":"nearby_diverse","modifiers":{"dodge_chance":0.0}}');
-INSERT INTO skill_defs VALUES('stealth','潜行','special','{"behavior": "stealth", "param": 180, "speed_mult": 0.85, "cooldown": 3.0}');
-INSERT INTO skill_defs VALUES('grace_shield','恩典·护盾','on_heal','{"effects":[{"type":"shield"}]}');
-INSERT INTO skill_defs VALUES('grace_cooldown','恩典·冷却祝福','on_heal','{"effects":[{"type":"cooldown_reduction","value":1.0}]}');
-INSERT INTO skill_defs VALUES('grace_burn_t1','恩典·灼烧','on_heal','{"effects":[{"type":"burn","value":15,"range":120}]}');
-INSERT INTO skill_defs VALUES('grace_burn_t2','恩典·灼烧','on_heal','{"effects":[{"type":"burn","value":25,"range":120}]}');
-INSERT INTO skill_defs VALUES('orc_rage_t1','狂怒','stat_modifier','{"trigger":"low_health_step","tier":1}');
-INSERT INTO skill_defs VALUES('orc_rage_t2','狂暴','stat_modifier','{"trigger":"low_health_step","tier":2}');
-INSERT INTO skill_defs VALUES('orc_rage_aura','狂怒共鸣','aura','{"target":"nearby_allies","range":150}');
+, description TEXT);
+INSERT INTO skill_defs VALUES('berserker_rage','狂战士之怒','stat_modifier','{"trigger":"low_health","trigger_param":0.5,"modifiers":{"attack_speed_mult":1.5}}','生命低于 50% 时攻击速度提升 50%');
+INSERT INTO skill_defs VALUES('backstab','背刺','stat_modifier','{"trigger":"target_isolated","modifiers":{"attack_damage_mult":2.0}}','对孤立目标的攻击伤害提升 100%');
+INSERT INTO skill_defs VALUES('slowing_strike','减速打击','on_hit','{"effects":[{"type":"slow","value":0.3,"duration":2.0}]}','攻击命中使目标减速 30%，持续 2 秒');
+INSERT INTO skill_defs VALUES('motley_crew','鱼龙混杂','stat_modifier','{"trigger":"nearby_diverse","modifiers":{"dodge_chance":0.0}}','周围友军种族越多，闪避率越高');
+INSERT INTO skill_defs VALUES('stealth','潜行','special','{"behavior": "stealth", "param": 180, "speed_mult": 0.85, "cooldown": 3.0}','脱离战斗后进入潜行，移动速度降低 15%，被 AOE 命中会现身');
+INSERT INTO skill_defs VALUES('grace_shield','恩典·护盾','on_heal','{"effects":[{"type":"shield"}]}','受到治疗时获得护盾（治疗量×150%）');
+INSERT INTO skill_defs VALUES('grace_cooldown','恩典·冷却祝福','on_heal','{"effects":[{"type":"cooldown_reduction","value":1.0}]}','受到治疗时技能冷却减少 1 秒');
+INSERT INTO skill_defs VALUES('grace_burn_t1','恩典·灼烧','on_heal','{"effects":[{"type":"burn","value":15,"range":120}]}','受到治疗时灼烧周围 120 范围内敌人，造成 15 点伤害');
+INSERT INTO skill_defs VALUES('grace_burn_t2','恩典·灼烧','on_heal','{"effects":[{"type":"burn","value":25,"range":120}]}','受到治疗时灼烧周围 120 范围内敌人，造成 25 点伤害');
+INSERT INTO skill_defs VALUES('orc_rage_t1','狂怒','stat_modifier','{"trigger":"low_health_step","tier":1}','每损失 20% 生命，攻击力 +10%（最高 +40%）');
+INSERT INTO skill_defs VALUES('orc_rage_t2','狂暴','stat_modifier','{"trigger":"low_health_step","tier":2}','每损失 15% 生命，攻击力 +12%（最高 +48%），攻速 +8%（最高 +32%）');
+INSERT INTO skill_defs VALUES('orc_rage_aura','狂怒共鸣','aura','{"target":"nearby_allies","range":150}','周围友方部落单位攻击力 +10%，同种族光环不叠加');
 CREATE TABLE upgrade_recipes (
     source_type_id TEXT NOT NULL,
     result_type_id TEXT NOT NULL,
