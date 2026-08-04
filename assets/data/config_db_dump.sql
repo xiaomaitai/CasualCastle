@@ -170,14 +170,22 @@ INSERT INTO building_defs VALUES('MageTower','术士高塔',160,14.0,0,0,1,0,'Dr
 INSERT INTO building_defs VALUES('DragonfireTower','龙火塔',230,12.0,0,0,1,0,'DragonbornArchmage',0,1,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.9,0.3,0.15,1.0,'',10);
 INSERT INTO building_defs VALUES('Inn','酒馆',120,NULL,0,0,1,0,NULL,0,0,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'alliance',0.0,'res://assets/art/placeholders/test_image.png',0.85,0.6,0.25,1.0,'',2);
 INSERT INTO building_defs VALUES('AdventurerGuild','冒险者公会',200,NULL,0,0,1,0,NULL,0,1,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'alliance',0.0,'res://assets/art/placeholders/test_image.png',0.8,0.5,0.2,1.0,'',6);
+INSERT INTO building_defs VALUES('OrcCamp','兽人营地',260,9.0,0,0,1,1,'OrcWarrior',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',3);
+INSERT INTO building_defs VALUES('OrcFortress','兽人要塞',400,7.0,0,0,1,1,'OrcBerserker',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',7);
 INSERT INTO building_defs VALUES('Barracks','兵营',200,8.0,0,0,1,1,'Spearman',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',3);
+INSERT INTO building_defs VALUES('Sanctum','圣所',280,12.0,0,0,1,1,'HolyShieldBearer',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',5);
 INSERT INTO building_defs VALUES('ShieldCamp','盾营',250,12.0,0,0,1,1,'ShieldBearer',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',3);
+INSERT INTO building_defs VALUES('HolySpring','圣泉',180,10.0,0,0,1,1,'Priest',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',5);
 INSERT INTO building_defs VALUES('ArcheryRange','靶场',150,10.0,0,0,1,1,'Archer',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',4);
+INSERT INTO building_defs VALUES('Tribunal','裁判所',200,11.0,0,0,1,1,'Inquisitor',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',6);
 INSERT INTO building_defs VALUES('Stable','马厩',220,14.0,0,0,1,1,'Knight',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',5);
 INSERT INTO building_defs VALUES('ScoutCamp','斥候营',100,6.0,0,0,1,1,'Scout',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',2);
 INSERT INTO building_defs VALUES('Armory','军府',300,7.0,0,0,1,1,'Swordsman',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',6);
+INSERT INTO building_defs VALUES('GreatTemple','圣殿',420,9.0,0,0,1,1,'Paladin',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',10);
 INSERT INTO building_defs VALUES('Bulwark','壁垒',380,10.0,0,0,1,1,'HeavyShield',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',6);
+INSERT INTO building_defs VALUES('HolyLightSanctum','圣光圣所',280,8.0,0,0,1,1,'Archbishop',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',10);
 INSERT INTO building_defs VALUES('CrossbowTower','射楼',220,9.0,0,0,1,1,'Crossbowman',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',8);
+INSERT INTO building_defs VALUES('JudgementHall','裁决厅',320,9.0,0,0,1,1,'Punisher',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',12);
 INSERT INTO building_defs VALUES('Ranch','牧场',330,12.0,0,0,1,1,'HeavyCavalry',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',8);
 INSERT INTO building_defs VALUES('RoyalArmory','皇家军营',300,7.0,0,0,1,1,'RoyalGuard',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',10);
 INSERT INTO building_defs VALUES('RoyalBulwark','皇家壁垒',380,10.0,0,0,1,1,'RoyalShieldGuard',0,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',10);
@@ -188,14 +196,6 @@ INSERT INTO building_defs VALUES('HolyWall','圣壁',500,14.0,0,0,1,1,'HolyShiel
 INSERT INTO building_defs VALUES('HeavenPunishmentTower','天罚塔',350,12.0,0,0,1,1,'DragonRiderCommander',0,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',30);
 INSERT INTO building_defs VALUES('ShadowSanctum','暗影圣所',250,8.0,0,0,1,1,'ShadowLord',0,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',16);
 INSERT INTO building_defs VALUES('RoyalCourt','王庭',800,30.0,0,0,1,1,'King',0,4,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',60);
-INSERT INTO building_defs VALUES('Sanctum','圣所',280,12.0,0,0,1,1,'HolyShieldBearer',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.95,0.85,0.4,1.0,'',5);
-INSERT INTO building_defs VALUES('HolySpring','圣泉',180,10.0,0,0,1,1,'Priest',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.55,0.8,1.0,1.0,'',5);
-INSERT INTO building_defs VALUES('Tribunal','裁判所',200,11.0,0,0,1,1,'Inquisitor',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.85,0.5,0.9,1.0,'',6);
-INSERT INTO building_defs VALUES('GreatTemple','圣殿',420,9.0,0,0,1,1,'Paladin',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,0.9,0.55,1.0,'',10);
-INSERT INTO building_defs VALUES('HolyLightSanctum','圣光圣所',280,8.0,0,0,1,1,'Archbishop',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.7,0.9,1.0,1.0,'',10);
-INSERT INTO building_defs VALUES('JudgementHall','裁决厅',320,9.0,0,0,1,1,'Punisher',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.95,0.65,1.0,1.0,'',12);
-INSERT INTO building_defs VALUES('OrcCamp','兽人营地',260,9.0,0,0,1,1,'OrcWarrior',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',100.0,'res://assets/art/placeholders/test_image.png',0.85,0.5,0.35,1.0,'',3);
-INSERT INTO building_defs VALUES('OrcFortress','兽人要塞',400,7.0,0,0,1,1,'OrcBerserker',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',100.0,'res://assets/art/placeholders/test_image.png',0.9,0.35,0.28,1.0,'',7);
 CREATE TABLE damage_matrix (
     damage_type INTEGER NOT NULL,
     armor_type  INTEGER NOT NULL,
@@ -263,9 +263,13 @@ INSERT INTO shop_catalog VALUES('WarriorGuild','战士公会',4,'WarriorGuild',1
 INSERT INTO shop_catalog VALUES('ThiefGuild','盗贼行会',2,'ThiefGuild',10);
 INSERT INTO shop_catalog VALUES('MageTower','术士高塔',5,'MageTower',6);
 INSERT INTO shop_catalog VALUES('Inn','酒馆',2,'Inn',14);
+INSERT INTO shop_catalog VALUES('OrcCamp','兽人营地',3,'OrcCamp',12);
 INSERT INTO shop_catalog VALUES('Barracks','兵营',3,'Barracks',14);
+INSERT INTO shop_catalog VALUES('Sanctum','圣所',5,'Sanctum',6);
 INSERT INTO shop_catalog VALUES('ShieldCamp','盾营',3,'ShieldCamp',10);
+INSERT INTO shop_catalog VALUES('HolySpring','圣泉',5,'HolySpring',4);
 INSERT INTO shop_catalog VALUES('ArcheryRange','靶场',4,'ArcheryRange',12);
+INSERT INTO shop_catalog VALUES('Tribunal','裁判所',6,'Tribunal',2);
 INSERT INTO shop_catalog VALUES('Stable','马厩',5,'Stable',10);
 INSERT INTO shop_catalog VALUES('ScoutCamp','斥候营',2,'ScoutCamp',8);
 INSERT INTO shop_catalog VALUES('Armory','军府',6,'Armory',8);
@@ -274,10 +278,6 @@ INSERT INTO shop_catalog VALUES('Ranch','牧场',8,'Ranch',6);
 INSERT INTO shop_catalog VALUES('RoyalArmory','皇家军营',10,'RoyalArmory',4);
 INSERT INTO shop_catalog VALUES('RoyalBulwark','皇家壁垒',10,'RoyalBulwark',4);
 INSERT INTO shop_catalog VALUES('RoyalStable','皇家马场',12,'RoyalStable',4);
-INSERT INTO shop_catalog VALUES('Sanctum','圣所',5,'Sanctum',6);
-INSERT INTO shop_catalog VALUES('HolySpring','圣泉',5,'HolySpring',4);
-INSERT INTO shop_catalog VALUES('Tribunal','裁判所',6,'Tribunal',2);
-INSERT INTO shop_catalog VALUES('OrcCamp','兽人营地',3,'OrcCamp',12);
 CREATE TABLE IF NOT EXISTS "faction_defs" (
     id TEXT PRIMARY KEY,
     display_name TEXT NOT NULL,
@@ -301,14 +301,22 @@ CREATE TABLE tech_tree_nodes (
     max_health INTEGER NOT NULL DEFAULT 200,
     spawn_interval REAL NOT NULL DEFAULT 10.0
 , value INTEGER);
+INSERT INTO tech_tree_nodes VALUES('OrcCamp','horde',1,0,1,3,12,0,'兽人营地','OrcWarrior',260,9.0,3);
+INSERT INTO tech_tree_nodes VALUES('OrcFortress','horde',2,0,0,NULL,NULL,0,'兽人要塞','OrcBerserker',400,7.0,7);
 INSERT INTO tech_tree_nodes VALUES('Barracks','alliance',1,0,1,3,14,0,'兵营','Spearman',200,8.0,3);
+INSERT INTO tech_tree_nodes VALUES('Sanctum','alliance',1,0,1,5,6,0,'圣所','HolyShieldBearer',280,12.0,5);
 INSERT INTO tech_tree_nodes VALUES('ShieldCamp','alliance',1,1,1,3,10,0,'盾营','ShieldBearer',250,12.0,3);
+INSERT INTO tech_tree_nodes VALUES('HolySpring','alliance',1,1,1,5,4,0,'圣泉','Priest',180,10.0,5);
 INSERT INTO tech_tree_nodes VALUES('ArcheryRange','alliance',1,2,1,4,12,0,'靶场','Archer',150,10.0,4);
+INSERT INTO tech_tree_nodes VALUES('Tribunal','alliance',1,2,1,6,2,0,'裁判所','Inquisitor',200,11.0,6);
 INSERT INTO tech_tree_nodes VALUES('Stable','alliance',1,3,1,5,10,0,'马厩','Knight',220,14.0,5);
 INSERT INTO tech_tree_nodes VALUES('ScoutCamp','alliance',1,4,1,2,8,0,'斥候营','Scout',100,6.0,2);
 INSERT INTO tech_tree_nodes VALUES('Armory','alliance',2,0,1,6,8,0,'军府','Swordsman',300,7.0,6);
+INSERT INTO tech_tree_nodes VALUES('GreatTemple','alliance',2,0,0,NULL,NULL,0,'圣殿','Paladin',420,9.0,10);
 INSERT INTO tech_tree_nodes VALUES('Bulwark','alliance',2,1,1,6,6,0,'壁垒','HeavyShield',380,10.0,6);
+INSERT INTO tech_tree_nodes VALUES('HolyLightSanctum','alliance',2,1,0,NULL,NULL,0,'圣光圣所','Archbishop',280,8.0,10);
 INSERT INTO tech_tree_nodes VALUES('CrossbowTower','alliance',2,2,0,NULL,NULL,0,'射楼','Crossbowman',220,9.0,8);
+INSERT INTO tech_tree_nodes VALUES('JudgementHall','alliance',2,2,0,NULL,NULL,0,'裁决厅','Punisher',320,9.0,12);
 INSERT INTO tech_tree_nodes VALUES('Ranch','alliance',2,3,1,8,6,0,'牧场','HeavyCavalry',330,12.0,8);
 INSERT INTO tech_tree_nodes VALUES('RoyalArmory','alliance',3,0,1,10,4,0,'皇家军营','RoyalGuard',300,7.0,10);
 INSERT INTO tech_tree_nodes VALUES('RoyalBulwark','alliance',3,1,1,10,4,0,'皇家壁垒','RoyalShieldGuard',380,10.0,10);
@@ -319,14 +327,6 @@ INSERT INTO tech_tree_nodes VALUES('HolyWall','alliance',4,0,0,NULL,NULL,0,'圣�
 INSERT INTO tech_tree_nodes VALUES('HeavenPunishmentTower','alliance',4,2,0,NULL,NULL,0,'天罚塔','DragonRiderCommander',350,12.0,30);
 INSERT INTO tech_tree_nodes VALUES('ShadowSanctum','alliance',4,4,0,NULL,NULL,0,'暗影圣所','ShadowLord',250,8.0,16);
 INSERT INTO tech_tree_nodes VALUES('RoyalCourt','alliance',5,2,0,NULL,NULL,0,'王庭','King',800,30.0,60);
-INSERT INTO tech_tree_nodes VALUES('Sanctum','alliance',1,0,1,5,6,0,'圣所','HolyShieldBearer',280,12.0,5);
-INSERT INTO tech_tree_nodes VALUES('HolySpring','alliance',1,1,1,5,4,0,'圣泉','Priest',180,10.0,5);
-INSERT INTO tech_tree_nodes VALUES('Tribunal','alliance',1,2,1,6,2,0,'裁判所','Inquisitor',200,11.0,6);
-INSERT INTO tech_tree_nodes VALUES('GreatTemple','alliance',2,0,0,NULL,NULL,0,'圣殿','Paladin',420,9.0,10);
-INSERT INTO tech_tree_nodes VALUES('HolyLightSanctum','alliance',2,1,0,NULL,NULL,0,'圣光圣所','Archbishop',280,8.0,10);
-INSERT INTO tech_tree_nodes VALUES('JudgementHall','alliance',2,2,0,NULL,NULL,0,'裁决厅','Punisher',320,9.0,12);
-INSERT INTO tech_tree_nodes VALUES('OrcCamp','horde',1,0,1,3,12,0,'兽人营地','OrcWarrior',260,9.0,3);
-INSERT INTO tech_tree_nodes VALUES('OrcFortress','horde',2,0,0,NULL,NULL,0,'兽人要塞','OrcBerserker',400,7.0,7);
 CREATE TABLE IF NOT EXISTS "combine_recipes" (
                 main_type_id TEXT NOT NULL,
                 material_type_id TEXT NOT NULL,
@@ -386,18 +386,18 @@ CREATE TABLE upgrade_recipes (
     result_type_id TEXT NOT NULL,
     PRIMARY KEY (source_type_id, result_type_id)
 );
+INSERT INTO upgrade_recipes VALUES('OrcCamp','OrcFortress');
+INSERT INTO upgrade_recipes VALUES('Sanctum','GreatTemple');
 INSERT INTO upgrade_recipes VALUES('ShieldCamp','Bulwark');
+INSERT INTO upgrade_recipes VALUES('HolySpring','HolyLightSanctum');
 INSERT INTO upgrade_recipes VALUES('ArcheryRange','CrossbowTower');
+INSERT INTO upgrade_recipes VALUES('Tribunal','JudgementHall');
 INSERT INTO upgrade_recipes VALUES('Stable','Ranch');
 INSERT INTO upgrade_recipes VALUES('Armory','RoyalBulwark');
 INSERT INTO upgrade_recipes VALUES('Ranch','RoyalRanger');
 INSERT INTO upgrade_recipes VALUES('Ranch','RoyalStable');
 INSERT INTO upgrade_recipes VALUES('RoyalArcheryRange','HeavenPunishmentTower');
 INSERT INTO upgrade_recipes VALUES('RoyalRanger','ShadowSanctum');
-INSERT INTO upgrade_recipes VALUES('Sanctum','GreatTemple');
-INSERT INTO upgrade_recipes VALUES('HolySpring','HolyLightSanctum');
-INSERT INTO upgrade_recipes VALUES('Tribunal','JudgementHall');
-INSERT INTO upgrade_recipes VALUES('OrcCamp','OrcFortress');
 PRAGMA writable_schema=ON;
 CREATE TABLE IF NOT EXISTS sqlite_sequence(name,seq);
 DELETE FROM sqlite_sequence;
