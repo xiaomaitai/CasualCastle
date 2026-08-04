@@ -74,6 +74,11 @@ internal static class UnitTestFactory
 
 	public static Unit CreateUnit(AttackType attackType, bool isPlayerUnit, float attackRange, INavigationPort navPort = null)
 	{
+		return CreateUnit(attackType, isPlayerUnit, attackRange, navPort, false);
+	}
+
+	public static Unit CreateUnit(AttackType attackType, bool isPlayerUnit, float attackRange, INavigationPort navPort, bool canDetectStealth)
+	{
 		UnitStats stats = new()
 		{
 			TypeId = "test",
@@ -87,10 +92,25 @@ internal static class UnitTestFactory
 			AttackRange = attackRange,
 			AttackCooldown = 0.5f,
 			VisionRange = 400,
+			CanDetectStealth = canDetectStealth,
 		};
 		Unit unit = new(navPort ?? new RecordingNavPort());
 		unit.Initialize(stats, isPlayerUnit);
 		unit.SetDamageMatrix(new DamageMatrix());
 		return unit;
+	}
+
+	public static SkillDef CreateStealthSkill(float engageDistance, float speedMult)
+	{
+		string distanceText = engageDistance.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture);
+		string speedText = speedMult.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+		string json = "{\"behavior\":\"stealth\",\"param\":" + distanceText + ",\"speed_mult\":" + speedText + "}";
+		return new SkillDef
+		{
+			Id = "stealth",
+			DisplayName = "Stealth",
+			Type = SkillType.Special,
+			ConfigJson = json
+		};
 	}
 }

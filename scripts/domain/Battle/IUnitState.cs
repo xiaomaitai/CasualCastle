@@ -18,7 +18,11 @@ public interface IUnitState
 	ArmorType ArmorType { get; }
 	int ArmorValue { get; }
 	DamageType DamageType { get; }
+	AttackType AttackType { get; }
 	string Race { get; }
+	bool IsStealthed { get; }
+	bool CanDetectStealth { get; }
+	SkillSet Skills { get; }
 	IUnitHandle TargetEnemy { get; }
 	string TargetDescription { get; }
 }

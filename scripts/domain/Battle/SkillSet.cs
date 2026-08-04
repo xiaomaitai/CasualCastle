@@ -9,6 +9,7 @@ public class SkillSet
 	private readonly List<SkillDef> _skills = new();
 	private readonly Dictionary<string, StatModifierConfig> _statModCache = new();
 	private readonly Dictionary<string, OnHitConfig> _onHitCache = new();
+	private readonly Dictionary<string, SpecialConfig> _specialCache = new();
 
 	public int Count => _skills.Count;
 
@@ -19,6 +20,8 @@ public class SkillSet
 			_statModCache[skill.Id] = StatModifierConfig.Parse(skill.ConfigJson);
 		else if (skill.Type == SkillType.OnHit)
 			_onHitCache[skill.Id] = OnHitConfig.Parse(skill.ConfigJson);
+		else if (skill.Type == SkillType.Special)
+			_specialCache[skill.Id] = SpecialConfig.Parse(skill.ConfigJson);
 	}
 
 	public bool Remove(string skillId)
@@ -29,12 +32,23 @@ public class SkillSet
 		_skills.Remove(found);
 		_statModCache.Remove(skillId);
 		_onHitCache.Remove(skillId);
+		_specialCache.Remove(skillId);
 		return true;
 	}
 
 	public bool HasSkill(string skillId)
 	{
 		return _skills.Exists(s => s.Id == skillId);
+	}
+
+	public SpecialConfig GetSpecial(SpecialBehavior behavior)
+	{
+		foreach (SpecialConfig cfg in _specialCache.Values)
+		{
+			if (cfg.Behavior == behavior)
+				return cfg;
+		}
+		return null;
 	}
 
 	public float GetStatMultiplier(string key, GameContext ctx)

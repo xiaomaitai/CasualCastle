@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text.Json;
+using CasualCastle.Domain.Shared;
 
 namespace CasualCastle.Domain.Battle;
 
@@ -110,6 +111,7 @@ public class SpecialConfig
 {
 	public SpecialBehavior Behavior { get; set; }
 	public float Param { get; set; }
+	public float SpeedMult { get; set; }
 
 	public static SpecialConfig Parse(string json)
 	{
@@ -125,7 +127,8 @@ public class SpecialConfig
 				"summon" => SpecialBehavior.Summon,
 				_ => SpecialBehavior.Stealth
 			},
-			Param = root.TryGetProperty("param", out JsonElement p) ? p.GetSingle() : 0f
+			Param = root.TryGetProperty("param", out JsonElement p) ? p.GetSingle() : 0f,
+			SpeedMult = root.TryGetProperty("speed_mult", out JsonElement s) ? s.GetSingle() : GameRules.StealthSpeedMult
 		};
 	}
 }

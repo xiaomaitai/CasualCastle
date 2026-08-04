@@ -58,4 +58,59 @@ public class TacticalQueryServiceTests
 
 		Assert.Same(melee, nearest);
 	}
+
+	[Fact]
+	public void FindNearestEnemy_StealthedEnemy_NotSelectedAsTarget()
+	{
+		FakeUnitRepository repo = new();
+		Unit self = UnitTestFactory.CreateUnit(AttackType.Melee, true);
+		Unit stealthed = UnitTestFactory.CreateUnit(AttackType.Melee, false);
+		self.SetPosition(0, 0);
+		stealthed.SetPosition(100, 0);
+		stealthed.SetStealth(true);
+		repo.Register(self);
+		repo.Register(stealthed);
+
+		(IUnitHandle nearest, _) = new TacticalQueryService(repo).FindNearestEnemy(self);
+
+		Assert.Null(nearest);
+	}
+
+	[Fact]
+	public void FindNearestEnemy_DetectorUnit_CanSelectStealthedEnemy()
+	{
+		FakeUnitRepository repo = new();
+		Unit self = UnitTestFactory.CreateUnit(AttackType.Melee, true, 90f, null, true);
+		Unit stealthed = UnitTestFactory.CreateUnit(AttackType.Melee, false);
+		self.SetPosition(0, 0);
+		stealthed.SetPosition(100, 0);
+		stealthed.SetStealth(true);
+		repo.Register(self);
+		repo.Register(stealthed);
+
+		(IUnitHandle nearest, _) = new TacticalQueryService(repo).FindNearestEnemy(self);
+
+		Assert.Same(stealthed, nearest);
+	}
+
+	[Fact]
+	public void FindNearestEnemy_StealthedAssassin_PrefersRangedEnemy()
+	{
+		FakeUnitRepository repo = new();
+		Unit assassin = UnitTestFactory.CreateUnit(AttackType.Melee, true);
+		assassin.Skills.Add(UnitTestFactory.CreateStealthSkill(180f, 0.85f));
+		assassin.SetStealth(true);
+		Unit melee = UnitTestFactory.CreateUnit(AttackType.Melee, false);
+		Unit ranged = UnitTestFactory.CreateUnit(AttackType.Ranged, false);
+		assassin.SetPosition(0, 0);
+		melee.SetPosition(80, 0);
+		ranged.SetPosition(150, 0);
+		repo.Register(assassin);
+		repo.Register(melee);
+		repo.Register(ranged);
+
+		(IUnitHandle nearest, _) = new TacticalQueryService(repo).FindNearestEnemy(assassin);
+
+		Assert.Same(ranged, nearest);
+	}
 }

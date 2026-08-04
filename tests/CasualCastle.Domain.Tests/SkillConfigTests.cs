@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using CasualCastle.Domain.Battle;
+using CasualCastle.Domain.Shared;
 using Xunit;
 
 namespace CasualCastle.Domain.Tests;
@@ -76,5 +77,21 @@ public class SkillConfigTests
 		SpecialConfig cfg = SpecialConfig.Parse("{\"behavior\": \"stealth\"}");
 		Assert.Equal(SpecialBehavior.Stealth, cfg.Behavior);
 		Assert.Equal(0f, cfg.Param);
+	}
+
+	[Fact]
+	public void SpecialConfig_Parse_WithSpeedMult_ReturnsCorrectConfig()
+	{
+		SpecialConfig cfg = SpecialConfig.Parse("{\"behavior\": \"stealth\", \"param\": 180, \"speed_mult\": 0.85}");
+		Assert.Equal(SpecialBehavior.Stealth, cfg.Behavior);
+		Assert.Equal(180f, cfg.Param);
+		Assert.Equal(0.85f, cfg.SpeedMult);
+	}
+
+	[Fact]
+	public void SpecialConfig_Parse_NoSpeedMult_DefaultsToGameRule()
+	{
+		SpecialConfig cfg = SpecialConfig.Parse("{\"behavior\": \"stealth\", \"param\": 180}");
+		Assert.Equal(GameRules.StealthSpeedMult, cfg.SpeedMult);
 	}
 }

@@ -50,12 +50,17 @@ public class UnitVisual
             _card.SetStatus(isSleeping ? UnitCardStatus.Sleeping : UnitCardStatus.None);
     }
 
-    public void SetBaseModulate(Color color)
-    {
-        _portraitTint = color;
-        if (_hitFlashTimer <= 0f)
-            _card.SetPortraitTint(color);
-    }
+	public void SetBaseModulate(Color color)
+	{
+		_portraitTint = color;
+		if (_hitFlashTimer <= 0f)
+			_card.SetPortraitTint(color);
+	}
+
+	public void SetStealthVisual(bool stealthed)
+	{
+		_card.SetStealth(stealthed);
+	}
 
     public void SetHealth(int current, int maximum)
     {

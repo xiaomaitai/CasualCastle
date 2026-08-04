@@ -17,6 +17,8 @@ public partial class UnitCardView : Node2D
 	private const float StatusIndicatorCy = -420f;
 	private const float StatusIndicatorR = 60f;
 	private const float StatusIndicatorRingR = 72f;
+	private static readonly Color StealthModulate = new(0.72f, 0.82f, 1f, 0.45f);
+	private static readonly Color DimmedModulate = new(0.66f, 0.72f, 0.86f, 0.88f);
 
 	private Sprite2D _cardBase;
 	private HealthBarView _healthBar;
@@ -27,6 +29,8 @@ public partial class UnitCardView : Node2D
 	private float _healthRatio = 1f;
 	private bool _selected;
 	private UnitCardStatus _status;
+	private bool _dimmed;
+	private bool _stealthed;
 	private string _typeId;
 	private float _displaySize;
 	private bool _configured;
@@ -77,9 +81,14 @@ public partial class UnitCardView : Node2D
 
 	public void SetDimmed(bool dimmed)
 	{
-		Modulate = dimmed
-			? new Color(0.66f, 0.72f, 0.86f, 0.88f)
-			: Colors.White;
+		_dimmed = dimmed;
+		ApplyModulate();
+	}
+
+	public void SetStealth(bool stealthed)
+	{
+		_stealthed = stealthed;
+		ApplyModulate();
 	}
 
 	public void SetPortraitTint(Color color)
@@ -127,6 +136,16 @@ public partial class UnitCardView : Node2D
 			: new Color(0.92f, 0.2f, 0.18f);
 		DrawCircle(new Vector2(StatusIndicatorCx, StatusIndicatorCy), StatusIndicatorR, fill);
 		DrawArc(new Vector2(StatusIndicatorCx, StatusIndicatorCy), StatusIndicatorRingR, 0f, Mathf.Tau, 32, new Color(0.06f, 0.07f, 0.1f), 16f);
+	}
+
+	private void ApplyModulate()
+	{
+		if (_stealthed)
+			Modulate = StealthModulate;
+		else if (_dimmed)
+			Modulate = DimmedModulate;
+		else
+			Modulate = Colors.White;
 	}
 
 	private void UpdateStatusLabel()

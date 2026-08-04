@@ -86,4 +86,68 @@ public class UnitBehaviorTests
 		Assert.Equal(500f, navPort.LastTargetX);
 		Assert.Equal(800f, navPort.LastTargetY);
 	}
+
+	[Fact]
+	public void UpdateBehavior_StealthedAssassinAttacks_BreaksStealth()
+	{
+		Unit target = UnitTestFactory.CreateUnit(AttackType.Melee, false);
+		Unit self = UnitTestFactory.CreateUnit(AttackType.Melee, true);
+		self.Skills.Add(UnitTestFactory.CreateStealthSkill(180f, 0.85f));
+		self.SetStealth(true);
+		target.SetPosition(120, 0);
+		self.SetPosition(0, 0);
+		self.SetEnemyTarget(target);
+		self.UpdateTargeting(target);
+
+		self.UpdateBehavior(2f, 0, 0);
+
+		Assert.False(self.IsStealthed);
+	}
+
+	[Fact]
+	public void TakeDamage_AoeWhileStealthed_BreaksStealth()
+	{
+		Unit attacker = UnitTestFactory.CreateUnit(AttackType.Melee, false);
+		Unit self = UnitTestFactory.CreateUnit(AttackType.Melee, true);
+		self.Skills.Add(UnitTestFactory.CreateStealthSkill(180f, 0.85f));
+		self.SetStealth(true);
+		self.SetPosition(0, 0);
+
+		self.TakeDamage(10, attacker, 100, 0, true);
+
+		Assert.False(self.IsStealthed);
+	}
+
+	[Fact]
+	public void TakeDamage_TargetedWhileStealthed_KeepsStealth()
+	{
+		Unit attacker = UnitTestFactory.CreateUnit(AttackType.Melee, false);
+		Unit self = UnitTestFactory.CreateUnit(AttackType.Melee, true);
+		self.Skills.Add(UnitTestFactory.CreateStealthSkill(180f, 0.85f));
+		self.SetStealth(true);
+		self.SetPosition(0, 0);
+
+		self.TakeDamage(10, attacker, 100, 0);
+
+		Assert.True(self.IsStealthed);
+	}
+
+	[Fact]
+	public void GetCurrentSpeed_WhileStealthed_AppliesSpeedMultiplier()
+	{
+		Unit self = UnitTestFactory.CreateUnit(AttackType.Melee, true);
+		self.Skills.Add(UnitTestFactory.CreateStealthSkill(180f, 0.85f));
+		self.SetStealth(true);
+
+		Assert.Equal(self.Speed * 0.85f, self.GetCurrentSpeed());
+	}
+
+	[Fact]
+	public void GetCurrentSpeed_NotStealthed_UsesBaseSpeed()
+	{
+		Unit self = UnitTestFactory.CreateUnit(AttackType.Melee, true);
+		self.Skills.Add(UnitTestFactory.CreateStealthSkill(180f, 0.85f));
+
+		Assert.Equal(self.Speed, self.GetCurrentSpeed());
+	}
 }

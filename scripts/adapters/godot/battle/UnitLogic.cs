@@ -32,6 +32,8 @@ public partial class UnitLogic : Node2D
 	private Node2D _body;
 	private Vector2 _safeVelocity;
 	private const float PushSyncEpsilonSq = 0.01f;
+	private static readonly string[] StealthBuffNames = { "隐身" };
+	private static readonly string[] EmptyBuffNames = System.Array.Empty<string>();
 
 	public void InitializeFromStats(UnitStats stats)
 	{
@@ -139,6 +141,13 @@ public partial class UnitLogic : Node2D
 		_visual?.UpdateSleepVisual(IsActive, IsSleeping);
 	}
 
+	private void UpdateStealthVisual()
+	{
+		bool stealthed = _unit != null && _unit.IsStealthed;
+		_visual?.SetStealthVisual(stealthed);
+		_visual?.SetBuffs(stealthed ? StealthBuffNames : EmptyBuffNames);
+	}
+
 	public void SetBaseSpriteModulate(Color color)
 	{
 		_visual?.SetBaseModulate(color);
@@ -167,6 +176,7 @@ public partial class UnitLogic : Node2D
 			_body.GlobalPosition = pushedPixelPos;
 
 		UpdateSleepVisual();
+		UpdateStealthVisual();
 		if (!IsActive) return;
 		if (_fieldRepo == null || _body == null) return;
 
@@ -190,7 +200,7 @@ public partial class UnitLogic : Node2D
 		Vector2 currentPixelPos = _body.GlobalPosition;
 		Vector2 nextPathPos = _navigationAgent.GetNextPathPosition();
 		Vector2 direction = nextPathPos - currentPixelPos;
-		float pixelSpeed = GameCoordinatesAdapter.GameUnitsToPixels(_unit.Speed);
+		float pixelSpeed = GameCoordinatesAdapter.GameUnitsToPixels(_unit.GetCurrentSpeed());
 		Vector2 desiredVelocity = direction.Length() > 0.001f
 			? direction.Normalized() * pixelSpeed
 			: Vector2.Zero;
@@ -213,7 +223,7 @@ public partial class UnitLogic : Node2D
 		_safeVelocity = safeVelocity;
 	}
 
-	public void TakeDamage(int amount, UnitLogic attacker = null)
+	public void TakeDamage(int amount, UnitLogic attacker = null, bool isAoe = false)
 	{
 		if (!IsAlive) return;
 
@@ -223,7 +233,7 @@ public partial class UnitLogic : Node2D
 			atkX = GameCoordinatesAdapter.PixelsToGameUnits(attacker._body.GlobalPosition.X);
 			atkY = GameCoordinatesAdapter.PixelsToGameUnits(attacker._body.GlobalPosition.Y);
 		}
-		_unit.TakeDamage(amount, attacker?.Handle, atkX, atkY);
+		_unit.TakeDamage(amount, attacker?.Handle, atkX, atkY, isAoe);
 	}
 
 	private Vector2 SelectTarget()

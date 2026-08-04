@@ -113,4 +113,34 @@ public class SkillSetTests
 		SkillSet skills = new();
 		Assert.False(skills.HasTrigger(StatModifierTrigger.LowHealth));
 	}
+
+	[Fact]
+	public void GetSpecial_MatchingBehavior_ReturnsConfig()
+	{
+		SkillSet skills = new();
+		SkillDef skill = new()
+		{
+			Id = "stealth",
+			DisplayName = "Stealth",
+			Type = SkillType.Special,
+			ConfigJson = "{\"behavior\":\"stealth\",\"param\":180,\"speed_mult\":0.85}"
+		};
+		skills.Add(skill);
+
+		SpecialConfig cfg = skills.GetSpecial(SpecialBehavior.Stealth);
+
+		Assert.NotNull(cfg);
+		Assert.Equal(180f, cfg.Param);
+		Assert.Equal(0.85f, cfg.SpeedMult);
+	}
+
+	[Fact]
+	public void GetSpecial_NoMatchingBehavior_ReturnsNull()
+	{
+		SkillSet skills = new();
+
+		SpecialConfig cfg = skills.GetSpecial(SpecialBehavior.Stealth);
+
+		Assert.Null(cfg);
+	}
 }

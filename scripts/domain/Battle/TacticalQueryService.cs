@@ -17,12 +17,29 @@ public class TacticalQueryService : ITacticalQueries
 		if (!unit.IsAlive)
 			return (null, float.MaxValue);
 
+		IUnitHandle best = FindBestEnemy(unit, unit.IsStealthed);
+		if (best == null && unit.IsStealthed)
+			best = FindBestEnemy(unit, false);
+
+		if (best == null)
+			return (null, float.MaxValue);
+
+		float edgeDist = MathF.Sqrt(DistSq(unit, best)) - unit.CollisionRadius - best.CollisionRadius;
+		return (best, edgeDist);
+	}
+
+	private IUnitHandle FindBestEnemy(IUnitHandle unit, bool rangedOnly)
+	{
 		IUnitHandle best = null;
 		float bestDistanceSq = float.MaxValue;
 
 		foreach (IUnitHandle candidate in _repo.AllUnits)
 		{
 			if (!candidate.IsAlive || candidate.IsPlayerUnit == unit.IsPlayerUnit)
+				continue;
+			if (candidate.IsStealthed && !unit.CanDetectStealth)
+				continue;
+			if (rangedOnly && candidate.AttackType != AttackType.Ranged)
 				continue;
 			float distanceSq = DistSq(unit, candidate);
 			if (distanceSq >= bestDistanceSq)
@@ -33,11 +50,7 @@ public class TacticalQueryService : ITacticalQueries
 			bestDistanceSq = distanceSq;
 		}
 
-		if (best == null)
-			return (null, float.MaxValue);
-
-		float edgeDist = MathF.Sqrt(bestDistanceSq) - unit.CollisionRadius - best.CollisionRadius;
-		return (best, edgeDist);
+		return best;
 	}
 
 	public void PropagateRetaliation(IUnitHandle center, IUnitHandle attacker)

@@ -12,6 +12,7 @@ public static class GameRules
 
 	public const float ProjectileSpeedMelee = 600f;
 	public const float ProjectileSpeedRanged = 400f;
+	public const float StealthSpeedMult = 0.85f;
 
 	public static readonly float[] DodgeChanceByAllyRaceCount = { 0f, 0f, 0.10f, 0.20f, 0.30f, 0.35f, 0.40f, 0.40f };
 }

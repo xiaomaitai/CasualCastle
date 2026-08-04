@@ -22,9 +22,12 @@ public class Unit : IUnitHandle
 	public float VisionRange { get; set; }
 	public float CollisionRadius { get; set; }
 	public DamageType DamageType { get; set; }
+	public AttackType AttackType { get; set; }
 	public ArmorType ArmorType { get; set; }
 	public int ArmorValue { get; set; }
 	public string Race { get; set; }
+	public bool IsStealthed { get; private set; }
+	public bool CanDetectStealth { get; set; }
 	public SkillSet Skills { get; private set; }
 	public GameContext GameCtx { get; set; } = new();
 
@@ -66,9 +69,11 @@ public class Unit : IUnitHandle
 		VisionRange = stats.VisionRange;
 		CollisionRadius = stats.CollisionRadius;
 		DamageType = stats.DamageType;
+		AttackType = stats.AttackType;
 		ArmorType = stats.ArmorType;
 		ArmorValue = stats.ArmorValue;
 		Race = stats.Race;
+		CanDetectStealth = stats.CanDetectStealth;
 		Skills = new SkillSet();
 	}
 
@@ -93,6 +98,21 @@ public class Unit : IUnitHandle
 		TargetEnemy = target;
 	}
 
+	public void SetStealth(bool stealthed)
+	{
+		IsStealthed = stealthed;
+	}
+
+	public float GetCurrentSpeed()
+	{
+		if (!IsStealthed)
+			return Speed;
+		SpecialConfig stealth = Skills.GetSpecial(SpecialBehavior.Stealth);
+		if (stealth == null)
+			return Speed;
+		return Speed * stealth.SpeedMult;
+	}
+
 	public void SetBuildingTarget(IBuildingTarget building)
 	{
 		TargetBuilding = building;
@@ -103,7 +123,7 @@ public class Unit : IUnitHandle
 		TargetBuilding = null;
 	}
 
-	public void TakeDamage(int amount, IUnitHandle attacker, float attackerGameX, float attackerGameY)
+	public void TakeDamage(int amount, IUnitHandle attacker, float attackerGameX, float attackerGameY, bool isAoe = false)
 	{
 		if (!IsAlive)
 			return;
@@ -116,6 +136,9 @@ public class Unit : IUnitHandle
 		}
 
 		Health = CombatRules.ApplyDamage(Health, amount);
+
+		if (isAoe && IsStealthed)
+			IsStealthed = false;
 
 		EventPort?.OnDamaged(amount, attacker);
 
@@ -218,6 +241,8 @@ public class Unit : IUnitHandle
 		NavPort.SetTarget(GameX, GameY);
 		if (_attackTimer > 0)
 			return;
+
+		IsStealthed = false;
 
 		int effectiveDamage = Damage;
 		if (Skills != null)
