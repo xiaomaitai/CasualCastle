@@ -28,6 +28,10 @@ public partial class UnitLogic : Node2D
 	public AttackType AttackType { get; private set; }
 	public DamageType DamageType => _unit?.DamageType ?? DamageType.Slash;
 	public bool IsSelected { get; private set; }
+	public float FuryDamageMultiplier => _unit != null
+		? _unit.Skills.GetStatMultiplier("attack_damage_mult", _unit.GameCtx)
+		: 1f;
+	public float AuraAttackMultiplier => _unit?.GameCtx.AuraAttackMultiplier ?? 1f;
 
 	private bool _statsPending;
 	private NavigationAgent2D _navigationAgent;
@@ -163,6 +167,10 @@ public partial class UnitLogic : Node2D
 			buffs.Add("隐身");
 		if (_unit != null && _unit.ShieldHealth > 0)
 			buffs.Add("护盾");
+		if (FuryDamageMultiplier > 1.01f)
+			buffs.Add($"狂怒 +{Mathf.RoundToInt((FuryDamageMultiplier - 1f) * 100f)}%");
+		if (AuraAttackMultiplier > 1.01f)
+			buffs.Add($"共鸣 +{Mathf.RoundToInt((AuraAttackMultiplier - 1f) * 100f)}%");
 		_visual?.SetBuffs(buffs.ToArray());
 	}
 

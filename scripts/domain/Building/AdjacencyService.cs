@@ -52,6 +52,14 @@ public class AdjacencyService
 			return;
 
 		List<IAdjacencyBuilding> domainBuildings = allBuildings.OfType<IAdjacencyBuilding>().ToList();
+
+		if (_buildingRepo.GetFactionId(building.TypeId) == FactionDef.HordeId)
+		{
+			float intervalMultiplier = HordeAdjacencyRules.CalculateSpawnIntervalMultiplier(adjBuilding, domainBuildings, _buildingRepo);
+			adjBuilding.SetWorkSpeedMultiplier(1f / intervalMultiplier);
+			return;
+		}
+
 		float multiplier = AdjacentRules.CalculateWorkSpeedMultiplier(adjBuilding, domainBuildings, _buildingRepo, _combineRules.IsSameLine);
 		adjBuilding.SetWorkSpeedMultiplier(multiplier);
 	}

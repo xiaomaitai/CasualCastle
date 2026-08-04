@@ -24,6 +24,7 @@ public partial class BuildingSystem : Node
         _buildingRepo = GameManager.Get<IBuildingRepository>();
         _unitRepo = GameManager.Get<IUnitRepository>();
         _visualRepo = GameManager.Get<IBuildingVisualRepository>();
+        LoadUpgradeRecipes();
     }
 
     public override void _ExitTree()
@@ -77,6 +78,8 @@ public partial class BuildingSystem : Node
     public int GetMaxHealth(string buildingType) => _buildingRepo.GetMaxHealth(buildingType);
     public float GetSpawnInterval(string buildingType) => _buildingRepo.GetSpawnInterval(buildingType);
     public float GetProductionRate(string buildingType) => _buildingRepo.GetProductionRate(buildingType);
+    public string GetFactionId(string buildingType) => _buildingRepo.GetFactionId(buildingType);
+    public int GetValue(string buildingType) => _buildingRepo.GetValue(buildingType);
 
     public int GetUnitCost(string buildingType)
     {
@@ -101,6 +104,16 @@ public partial class BuildingSystem : Node
     }
     public int GetCollisionWidth(string buildingType) => _buildingRepo.GetCollisionWidth(buildingType);
     public int GetCollisionHeight(string buildingType) => _buildingRepo.GetCollisionHeight(buildingType);
+
+    public void LoadUpgradeRecipes()
+    {
+        ITechTreeRepository repo = GameManager.Get<ITechTreeRepository>();
+        UpgradeRules rules = GameManager.Get<UpgradeRules>();
+        List<UpgradeRecipe> edges = new();
+        foreach (FactionDef faction in repo.LoadFactions())
+            edges.AddRange(repo.LoadUpgradeEdges(faction.Id));
+        rules.LoadRecipes(edges);
+    }
 
     public Color GetSpriteModulate(string buildingType)
     {

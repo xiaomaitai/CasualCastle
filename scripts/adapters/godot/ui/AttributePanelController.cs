@@ -15,10 +15,12 @@ public sealed class AttributePanelController
 	private readonly Label _statsLabel;
 	private readonly Label _skillsLabel;
 	private readonly HBoxContainer _skillsRow;
+	private readonly Button _upgradeButton;
 	private readonly UnitSelectionController _selection;
 	private readonly List<SkillIconView> _skillIcons = new();
 	private UnitLogic _currentUnit;
 	private Building _currentBuilding;
+	private UpgradeRecipe _pendingUpgrade;
 
 	public AttributePanelController(Node owner, CanvasLayer uiRoot, UnitSelectionController selection)
 	{
@@ -30,6 +32,9 @@ public sealed class AttributePanelController
 		_statsLabel = uiRoot.GetNode<Label>("AttributePanel/StatsLabel");
 		_skillsLabel = uiRoot.GetNode<Label>("AttributePanel/SkillsLabel");
 		_skillsRow = uiRoot.GetNode<HBoxContainer>("AttributePanel/SkillsRow");
+		_upgradeButton = uiRoot.GetNode<Button>("AttributePanel/UpgradeButton");
+		_upgradeButton.Visible = false;
+		_upgradeButton.Pressed += OnUpgradePressed;
 		_panel.Visible = false;
 	}
 
@@ -58,6 +63,8 @@ public sealed class AttributePanelController
 		_panel.Visible = false;
 		_currentUnit = null;
 		_currentBuilding = null;
+		_pendingUpgrade = null;
+		_upgradeButton.Visible = false;
 		ClearSkillsRow();
 	}
 
@@ -72,7 +79,7 @@ public sealed class AttributePanelController
 		_subLabel.Text = (unit.IsPlayerUnit ? "我方" : "敌方")
 			+ " · " + RaceName(state.Race)
 			+ (state.IsStealthed ? " · 隐身中" : "");
-		_statsLabel.Text = BuildUnitStats(state);
+		_statsLabel.Text = BuildUnitStats(state) + BuildFuryAuraLine(unit);
 
 		ClearSkillsRow();
 		foreach (SkillDef skill in state.Skills.All)
@@ -97,6 +104,7 @@ public sealed class AttributePanelController
 		_statsLabel.Text = BuildBuildingStats(building);
 		_skillsLabel.Visible = false;
 		ClearSkillsRow();
+		RefreshUpgradeButton(building);
 	}
 
 	private void RefreshUnitCooldowns(UnitLogic unit)
@@ -132,7 +140,7 @@ public sealed class AttributePanelController
 		BuildingSystem system = AdapterRegistry.Resolve<BuildingSystem>();
 		string type = system.IsCoreBuilding(building.TypeId) ? "核心建筑" : "普通建筑";
 		string lines = $"生命 {building.Health}/{building.MaxHealth}   占地 {system.GetFootprint(building.TypeId).Count} 格\n"
-			+ $"类型 {type}\n";
+			+ $"类型 {type}   价值 {system.GetValue(building.TypeId)}\n";
 
 		string unitTypeId = GameManager.Get<IBuildingRepository>().GetUnitTypeId(building.TypeId);
 		if (string.IsNullOrEmpty(unitTypeId))
@@ -154,6 +162,70 @@ public sealed class AttributePanelController
 		if (GameManager.Instance?.IsNight == true)
 			return "夜晚休眠";
 		return building.CanWork ? "工作中" : "停止工作";
+	}
+
+	private static string BuildFuryAuraLine(UnitLogic unit)
+	{
+		string line = "";
+		if (unit.FuryDamageMultiplier > 1.01f)
+			line += $"狂怒 攻击 +{Mathf.RoundToInt((unit.FuryDamageMultiplier - 1f) * 100f)}%\n";
+		if (unit.AuraAttackMultiplier > 1.01f)
+			line += $"共鸣 攻击 +{Mathf.RoundToInt((unit.AuraAttackMultiplier - 1f) * 100f)}%\n";
+		return line;
+	}
+
+	private void RefreshUpgradeButton(Building building)
+	{
+		_pendingUpgrade = null;
+		if (!building.IsPlayerOwned)
+		{
+			_upgradeButton.Visible = false;
+			return;
+		}
+
+		UpgradeRules rules = GameManager.Get<UpgradeRules>();
+		UpgradeRecipe recipe = rules.FindRecipe(building.TypeId);
+		if (recipe == null)
+		{
+			_upgradeButton.Visible = false;
+			return;
+		}
+
+		int cost = rules.CalculateCost(building.TypeId, recipe.ResultTypeId, GameManager.Get<IBuildingRepository>());
+		if (cost <= 0)
+		{
+			_upgradeButton.Visible = false;
+			return;
+		}
+
+		_pendingUpgrade = recipe;
+		string resultName = AdapterRegistry.Resolve<BuildingSystem>().GetDisplayName(recipe.ResultTypeId);
+		_upgradeButton.Text = $"升级为{resultName}（{cost} 金币）";
+		_upgradeButton.Visible = true;
+	}
+
+	private void OnUpgradePressed()
+	{
+		if (_pendingUpgrade == null || _currentBuilding == null || !GodotObject.IsInstanceValid(_currentBuilding))
+			return;
+
+		Building building = _currentBuilding;
+		float healthRatio = building.MaxHealth > 0 ? building.Health / (float)building.MaxHealth : 1f;
+		Castle castle = building.GetCastle();
+		if (castle == null)
+			return;
+
+		IUpgradeUseCase useCase = GameManager.Get<IUpgradeUseCase>();
+		UpgradeBuildingFactory factory = new(castle);
+		IBuildingState upgraded = useCase.TryUpgrade(
+			building, _pendingUpgrade.ResultTypeId, healthRatio,
+			AdapterRegistry.Resolve<Shop>().TrySpendGold, factory);
+		if (upgraded == null)
+			return;
+
+		_currentBuilding = null;
+		_pendingUpgrade = null;
+		_upgradeButton.Visible = false;
 	}
 
 	private void ClearSkillsRow()

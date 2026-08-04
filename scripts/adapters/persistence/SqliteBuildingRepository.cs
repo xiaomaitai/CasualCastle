@@ -18,7 +18,7 @@ public class SqliteBuildingRepository : IBuildingRepository, IBuildingVisualRepo
 		connection.Open();
 		EnsureValueColumn(connection);
 		using SqliteCommand cmd = connection.CreateCommand();
-		cmd.CommandText = "SELECT type_id, display_name, max_health, spawn_interval, main_cell_x, main_cell_y, spawn_cell_x, spawn_cell_y, unit_type_id, combine_tier, is_core, footprint_json, collision_width, collision_height, production_rate, texture_path, sprite_modulate_r, sprite_modulate_g, sprite_modulate_b, sprite_modulate_a, material_path, value FROM building_defs";
+		cmd.CommandText = "SELECT type_id, display_name, max_health, spawn_interval, main_cell_x, main_cell_y, spawn_cell_x, spawn_cell_y, unit_type_id, combine_tier, is_core, footprint_json, collision_width, collision_height, faction_id, production_rate, texture_path, sprite_modulate_r, sprite_modulate_g, sprite_modulate_b, sprite_modulate_a, material_path, value FROM building_defs";
 		using SqliteDataReader reader = cmd.ExecuteReader();
 		while (reader.Read())
 		{
@@ -29,6 +29,7 @@ public class SqliteBuildingRepository : IBuildingRepository, IBuildingVisualRepo
 			_cache[typeId] = new BuildingData
 			{
 				TypeId = typeId,
+				FactionId = reader.GetString(14),
 				DisplayName = reader.GetString(1),
 				MaxHealth = reader.GetInt32(2),
 				SpawnInterval = reader.IsDBNull(3) ? 0 : reader.GetFloat(3),
@@ -40,18 +41,18 @@ public class SqliteBuildingRepository : IBuildingRepository, IBuildingVisualRepo
 				Footprint = offsets.ToArray(),
 				CollisionWidth = reader.GetInt32(12),
 				CollisionHeight = reader.GetInt32(13),
-				ProductionRate = reader.IsDBNull(14) ? 0 : reader.GetFloat(14),
-				Value = reader.IsDBNull(21) ? 0 : reader.GetInt32(21),
+				ProductionRate = reader.IsDBNull(15) ? 0 : reader.GetFloat(15),
+				Value = reader.IsDBNull(22) ? 0 : reader.GetInt32(22),
 			};
 
 			_visualCache[typeId] = new BuildingVisualData
 			{
-				TexturePath = reader.GetString(15),
-				SpriteModulateR = reader.GetFloat(16),
-				SpriteModulateG = reader.GetFloat(17),
-				SpriteModulateB = reader.GetFloat(18),
-				SpriteModulateA = reader.GetFloat(19),
-				MaterialPath = reader.GetString(20),
+				TexturePath = reader.GetString(16),
+				SpriteModulateR = reader.GetFloat(17),
+				SpriteModulateG = reader.GetFloat(18),
+				SpriteModulateB = reader.GetFloat(19),
+				SpriteModulateA = reader.GetFloat(20),
+				MaterialPath = reader.GetString(21),
 			};
 		}
 	}

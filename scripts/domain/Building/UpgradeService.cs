@@ -26,11 +26,8 @@ public class UpgradeService : IUpgradeUseCase
 		if (cost < 0 || !trySpendGold(cost))
 			return null;
 
-		IBuildingState result = factory.Create(resultTypeId, source.AnchorGridX, source.AnchorGridY, healthRatio);
-		if (result == null)
-			return null;
-
 		factory.Destroy(source);
+		IBuildingState result = factory.Create(resultTypeId, source.AnchorGridX, source.AnchorGridY, healthRatio);
 		return result;
 	}
 }

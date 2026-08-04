@@ -118,6 +118,9 @@ public sealed class BuildingInfoUiController
         if (castle == null)
             return;
 
+        if (GameManager.Get<IBuildingRepository>().GetFactionId(hovered.TypeId) == FactionDef.HordeId)
+            return;
+
         AdjacencyService adjacencyService = GameManager.Get<AdjacencyService>();
         IReadOnlyList<IAdjacencyBuilding> domainTargets = adjacencyService.GetAdjacentSameTypeTargets(hovered, castle.GetBuildingStates());
         List<Building> targets = new();

@@ -12,6 +12,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	private float _workSpeedMultiplier = 1f;
 	private bool _visualApplied;
+	private bool _isHordeBuilding;
 
 	private Sprite2D _sprite;
 	private ShaderMaterial _workMaterial;
@@ -25,6 +26,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 	private bool _workPaused;
 	private bool _jumpTweenAwaitingResume;
 	private BuildingStateIcon _stateIcon;
+	private HordeAdjacencyIndicator _hordeIndicator;
 	private Node2D _battlefield;
 	private int _spawnCount;
 	private bool _isPlayerBuilding;
@@ -132,6 +134,16 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		IsManuallyPaused = manuallyPaused;
 		IsCombineProhibited = combineProhibited;
 		RefreshOperationalState();
+	}
+
+	public void ApplyHealthRatio(float ratio)
+	{
+		if (BuildingSys.IsCoreBuilding(TypeId))
+			return;
+
+		Health = Mathf.Clamp(Mathf.RoundToInt(MaxHealth * ratio), 1, MaxHealth);
+		EmitSignal(SignalName.HealthChanged, Health, MaxHealth);
+		UpdateDamageVisual();
 	}
 
 	public void InitFromType(string buildingType)
@@ -298,6 +310,12 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		_stateIcon = new BuildingStateIcon();
 		Node2D effects = GetNodeOrNull<Node2D>("Effects");
 		effects?.AddChild(_stateIcon);
+		_isHordeBuilding = BuildingSys.GetFactionId(TypeId) == FactionDef.HordeId;
+		if (_isHordeBuilding)
+		{
+			_hordeIndicator = new HordeAdjacencyIndicator();
+			effects?.AddChild(_hordeIndicator);
+		}
 		SyncStateIconPosition();
 		RefreshOperationalState();
 
@@ -383,6 +401,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 			return;
 
 		_workSpeedMultiplier = multiplier;
+		UpdateHordeIndicator(multiplier);
 	}
 
 	private void StartWorkCycle()
@@ -586,6 +605,18 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		Vector2I mainOffset = BuildingSys.GetMainCellOffset(TypeId);
 		Vector2 mainCenter = CastleRef.GetCellCenter(GridX + mainOffset.X, GridY + mainOffset.Y);
 		_stateIcon.Position = mainCenter - Position;
+		if (_hordeIndicator != null)
+			_hordeIndicator.Position = mainCenter - Position;
+	}
+
+	private void UpdateHordeIndicator(float multiplier)
+	{
+		if (_hordeIndicator == null)
+			return;
+
+		float intervalMultiplier = 1f / multiplier;
+		int emptyCount = Mathf.RoundToInt((1f - intervalMultiplier) / GameRules.HordeAdjacencySpawnSpeedBonusPerEmptyCell);
+		_hordeIndicator.SetEmptyCellCount(emptyCount);
 	}
 
 	private void UpdateStateIcon()

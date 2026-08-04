@@ -21,4 +21,5 @@ public interface IBuildingRepository
 	int GetCollisionWidth(string typeId) => Get(typeId).CollisionWidth;
 	int GetCollisionHeight(string typeId) => Get(typeId).CollisionHeight;
 	int GetValue(string typeId) => Get(typeId).Value;
+	string GetFactionId(string typeId) => Get(typeId).FactionId;
 }
