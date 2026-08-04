@@ -40,6 +40,6 @@ public partial class HealthBarView : Node2D
 	{
 		float visibleFullWidth = Mathf.Max(0.0001f, _fill) * _emptyWidth;
 		_full.Scale = new Vector2(visibleFullWidth / _fullTexWidth, 1f);
-		_full.Position = new Vector2(_emptyLeft + _emptyWidth - visibleFullWidth, -_fullHeight / 2f);
+		_full.Position = new Vector2(_emptyLeft, -_fullHeight / 2f);
 	}
 }
