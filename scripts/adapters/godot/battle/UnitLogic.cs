@@ -1,3 +1,4 @@
+// 单位逻辑节点：桥接领域单位与战场表现，并在死亡后保留逻辑尸体供其他系统使用
 using System.Collections.Generic;
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
@@ -15,6 +16,7 @@ public partial class UnitLogic : Node2D
 	private UnitEventRelay _eventRelay;
 	private UnitVisual _visual;
 	private UnitLifecycle _lifecycle;
+	private CorpseService _corpseService;
 
 	public bool IsPlayerUnit { get; set; }
 	public bool IsAlive => _unit?.IsAlive ?? false;
@@ -31,6 +33,7 @@ public partial class UnitLogic : Node2D
 	private NavigationAgent2D _navigationAgent;
 	private Node2D _body;
 	private Vector2 _safeVelocity;
+	private bool _isDead;
 	private const float PushSyncEpsilonSq = 0.01f;
 	private static readonly string[] StealthBuffNames = { "隐身" };
 	private static readonly string[] EmptyBuffNames = System.Array.Empty<string>();
@@ -53,6 +56,7 @@ public partial class UnitLogic : Node2D
 			_rvoService = GameManager.Get<IRvoService>();
 			_visual = new UnitVisual();
 			_lifecycle = new UnitLifecycle();
+			_corpseService = GameManager.Get<CorpseService>();
 		}
 		_unit.Initialize(stats, IsPlayerUnit);
 		_unit.SetDamageMatrix(GameManager.Get<DamageMatrix>());
@@ -117,7 +121,8 @@ public partial class UnitLogic : Node2D
 
 	public override void _ExitTree()
 	{
-		_fieldRepo?.Unregister(_unit);
+		if (!_isDead)
+			_fieldRepo?.Unregister(_unit);
 
 		if (AdapterRegistry.Resolve<GameManager>() != null)
 			AdapterRegistry.Resolve<GameManager>().PhaseChanged -= OnPhaseChanged;
@@ -264,12 +269,10 @@ public partial class UnitLogic : Node2D
 
 	private void OnDied()
 	{
+		_isDead = true;
 		_visual?.UpdateSleepVisual(false, false);
-
-		_lifecycle?.PlayDeathAnimation(this, () =>
-		{
-			_fieldRepo?.Unregister(_unit);
-		});
+		_lifecycle?.PlayDeathAnimation(_body);
+		_corpseService?.ScheduleCorpseRemoval(_unit);
 	}
 
 	private static System.Collections.Generic.Dictionary<string, Texture2D> _projectileTextures;

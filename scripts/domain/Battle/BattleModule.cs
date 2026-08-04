@@ -11,6 +11,7 @@ public static class BattleModule
 		services.AddSingleton<SkillService>();
 		services.AddSingleton<StealthService>();
 		services.AddSingleton<ITacticalQueries, TacticalQueryService>();
+		services.AddSingleton<CorpseService>();
 		return services;
 	}
 }

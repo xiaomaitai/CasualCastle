@@ -27,6 +27,7 @@ public static class CompositionRoot
 		services.AddSingleton<IGameState>(sp => sp.GetRequiredService<GameStateProvider>().Current);
 
 		services.AddSingleton<IFieldUnitRepository, FieldUnitRepository>();
+		services.AddSingleton<IDelayScheduler, DelaySchedulerAdapter>();
 		services.AddSingleton<IBattleReportRepository, BattleReportStorage>();
 		services.AddSingleton<IUnitRepository, SqliteUnitRepository>();
 		services.AddSingleton<ISkillRepository, SqliteSkillRepository>();

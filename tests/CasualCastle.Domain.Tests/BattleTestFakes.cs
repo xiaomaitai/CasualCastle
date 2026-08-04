@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System;
 using CasualCastle.Domain.Battle;
 
 namespace CasualCastle.Domain.Tests;
@@ -62,6 +63,24 @@ internal sealed class FakeBuilding : IBuildingRef
 	public bool IsEnemyOf(IUnitState unit)
 	{
 		return IsEnemyOfUnit;
+	}
+}
+
+internal sealed class FakeDelayScheduler : IDelayScheduler
+{
+	public float LastDelaySeconds { get; private set; }
+	private readonly List<Action> _callbacks = new();
+
+	public void Schedule(float delaySeconds, Action callback)
+	{
+		LastDelaySeconds = delaySeconds;
+		_callbacks.Add(callback);
+	}
+
+	public void FireAll()
+	{
+		foreach (Action callback in _callbacks)
+			callback();
 	}
 }
 
