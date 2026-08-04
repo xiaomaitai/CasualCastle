@@ -336,6 +336,6 @@ INSERT INTO unit_skills VALUES('HalflingAssassin','stealth');
 PRAGMA writable_schema=ON;
 CREATE TABLE IF NOT EXISTS sqlite_sequence(name,seq);
 DELETE FROM sqlite_sequence;
-INSERT INTO sqlite_sequence VALUES('asset_gen_tasks',57);
+INSERT INTO sqlite_sequence VALUES('asset_gen_tasks',60);
 PRAGMA writable_schema=OFF;
 COMMIT;
