@@ -57,6 +57,20 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(240, 48)
 layout_mode = 2
 
+[node name="FactionLabel" type="Label" parent="UI"]
+layout_mode = 2
+text = "选择派系"
+horizontal_alignment = 1
+
+[node name="FactionOption" type="OptionButton" parent="UI"]
+custom_minimum_size = Vector2(240, 48)
+layout_mode = 2
+item_count = 2
+popup/item_0/text = "联盟"
+popup/item_0/id = 0
+popup/item_1/text = "部落"
+popup/item_1/id = 1
+
 [node name="StartButton" type="Button" parent="UI"]
 custom_minimum_size = Vector2(240, 48)
 layout_mode = 2

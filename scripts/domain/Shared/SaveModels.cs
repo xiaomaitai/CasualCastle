@@ -5,6 +5,7 @@ namespace CasualCastle.Domain.Shared;
 public class SaveData
 {
     public int SlotIndex { get; set; }
+    public string FactionId { get; set; } = "alliance";
     public List<BuildingSaveEntry> Buildings { get; set; } = new();
     public int Gold { get; set; }
     public int CurrentNightIndex { get; set; }

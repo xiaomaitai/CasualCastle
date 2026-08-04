@@ -1,4 +1,5 @@
 using CasualCastle.Adapters.Godot;
+using CasualCastle.Domain.Building;
 using CasualCastle.Domain.History;
 using CasualCastle.Domain.Shared;
 using Godot;
@@ -19,6 +20,7 @@ public partial class TitleScreen : Control
 	private Button _exitButton;
 	private Button _devToolsButton;
 	private OptionButton _reportOption;
+	private OptionButton _factionOption;
 	private bool _isStartingGame;
 
 	public override void _Ready()
@@ -28,6 +30,7 @@ public partial class TitleScreen : Control
 		_settingsButton = ui.GetNode<Button>("SettingsButton");
 		_exitButton = ui.GetNode<Button>("ExitButton");
 		_reportOption = ui.GetNode<OptionButton>("ReportOption");
+		_factionOption = ui.GetNode<OptionButton>("FactionOption");
 
 		_continueButton = new Button();
 		_continueButton.Name = "ContinueButton";
@@ -83,8 +86,10 @@ public partial class TitleScreen : Control
 		_settingsButton.Disabled = true;
 		_exitButton.Disabled = true;
 		_reportOption.Disabled = true;
+		_factionOption.Disabled = true;
 		_startButton.Text = "加载中...";
 		AdapterRegistry.Resolve<GameManager>().PendingLoadSlot = -1;
+		ApplySelectedFaction();
 		ApplySelectedReportToGameManager();
 		await ForceClearMainGameResidue();
 		GetTree().ChangeSceneToFile(MainGameScene);
@@ -101,6 +106,7 @@ public partial class TitleScreen : Control
 		_settingsButton.Disabled = true;
 		_exitButton.Disabled = true;
 		_reportOption.Disabled = true;
+		_factionOption.Disabled = true;
 		_continueButton.Text = "加载中...";
 		AdapterRegistry.Resolve<GameManager>().PendingLoadSlot = 0;
 		AdapterRegistry.Resolve<GameManager>().SetPendingReplayReportId("");
@@ -164,6 +170,14 @@ public partial class TitleScreen : Control
 		Variant metadata = _reportOption.GetItemMetadata(selectedIndex);
 		string reportId = metadata.VariantType == Variant.Type.Nil ? "" : metadata.AsString();
 		AdapterRegistry.Resolve<GameManager>().SetPendingReplayReportId(reportId);
+	}
+
+	private void ApplySelectedFaction()
+	{
+		string factionId = _factionOption.GetItemId(_factionOption.Selected) == 1
+			? FactionDef.HordeId
+			: "alliance";
+		AdapterRegistry.Resolve<Shop>()?.SetFaction(factionId);
 	}
 
 	private void ApplyRandomReport()

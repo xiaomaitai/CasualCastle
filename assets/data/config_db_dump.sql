@@ -275,6 +275,7 @@ INSERT INTO shop_catalog VALUES('RoyalStable','皇家马场',12,'RoyalStable',4)
 INSERT INTO shop_catalog VALUES('Sanctum','圣所',5,'Sanctum',6);
 INSERT INTO shop_catalog VALUES('HolySpring','圣泉',5,'HolySpring',4);
 INSERT INTO shop_catalog VALUES('Tribunal','裁判所',6,'Tribunal',2);
+INSERT INTO shop_catalog VALUES('OrcCamp','兽人营地',3,'OrcCamp',12);
 CREATE TABLE IF NOT EXISTS "faction_defs" (
     id TEXT PRIMARY KEY,
     display_name TEXT NOT NULL,

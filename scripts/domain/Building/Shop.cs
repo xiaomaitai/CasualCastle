@@ -19,6 +19,7 @@ public class Shop
 
     public int Gold => _player.Gold;
     public bool IsShopAvailable => _player.IsShopAvailable;
+    public string FactionId => _player.FactionId;
 
     public Shop(Hand handService, ShopRules shopRules, Player player)
     {
@@ -53,6 +54,16 @@ public class Shop
     {
         _player.Gold += amount;
         GoldChanged?.Invoke(_player.Gold);
+    }
+
+    public void SetFaction(string factionId)
+    {
+        if (_player.FactionId == factionId)
+            return;
+
+        _player.FactionId = factionId;
+        _shopRules.SetFaction(factionId);
+        RefreshOffers();
     }
 
     public void RefreshOffers()

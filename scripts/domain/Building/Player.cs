@@ -8,6 +8,7 @@ public class Player
     private readonly CardData[] _shopOffers = new CardData[ShopRules.OfferCount];
 
     public int Gold { get; set; }
+    public string FactionId { get; set; } = "alliance";
     public IReadOnlyList<CardData> HandCards => _handCards;
     public CardData[] ShopOffers => _shopOffers;
     public int SelectedHandIndex { get; set; } = -1;

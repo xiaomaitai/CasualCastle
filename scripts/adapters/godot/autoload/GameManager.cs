@@ -253,6 +253,7 @@ public partial class GameManager : Node2D, IGameState
         SaveData data = new SaveData
         {
             SlotIndex = slot,
+            FactionId = AdapterRegistry.Resolve<Shop>()?.FactionId ?? "alliance",
             Gold = AdapterRegistry.Resolve<Shop>().Gold,
             CurrentNightIndex = CurrentNightIndex,
             PendingReplayReportId = PendingReplayReportId,

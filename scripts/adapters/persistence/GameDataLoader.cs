@@ -39,7 +39,10 @@ public static class GameDataLoader
 
 	private static List<CardData> LoadShopCatalog(SqliteCommand cmd)
 	{
-		cmd.CommandText = "SELECT id, name, cost, building_type, weight FROM shop_catalog";
+		cmd.CommandText = @"
+			SELECT s.id, s.name, COALESCE(b.value, s.cost), s.building_type, s.weight, COALESCE(b.faction_id, 'alliance')
+			FROM shop_catalog s
+			LEFT JOIN building_defs b ON b.type_id = s.building_type";
 		using SqliteDataReader reader = cmd.ExecuteReader();
 		List<CardData> catalog = new();
 		while (reader.Read())
@@ -51,6 +54,7 @@ public static class GameDataLoader
 				Cost = reader.GetInt32(2),
 				BuildingType = reader.GetString(3),
 				Weight = reader.GetInt32(4),
+				FactionId = reader.GetString(5),
 			});
 		}
 		return catalog;

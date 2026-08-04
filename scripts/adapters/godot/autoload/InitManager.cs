@@ -120,6 +120,7 @@ public partial class InitManager : Node
         if (!string.IsNullOrEmpty(data.PendingReplayReportId))
             gm.SetPendingReplayReportId(data.PendingReplayReportId);
 
+        shopService.SetFaction(data.FactionId);
         GameManager.Get<AdjacencyService>().RefreshCastle(playerCastle.GetBuildingStates());
     }
 }

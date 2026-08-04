@@ -49,4 +49,53 @@ public class ShopRulesTests
 		Assert.NotNull(card);
 		Assert.Equal("a", card.Id);
 	}
+
+	[Fact]
+	public void SetFaction_Horde_OnlyOffersHordeAndNeutralCards()
+	{
+		CardData[] catalog = new[]
+		{
+			new CardData { Id = "a", Name = "A", Cost = 10, BuildingType = "Barracks", Weight = 1, FactionId = "alliance" },
+			new CardData { Id = "b", Name = "B", Cost = 10, BuildingType = "OrcCamp", Weight = 1, FactionId = FactionDef.HordeId },
+			new CardData { Id = "c", Name = "C", Cost = 10, BuildingType = "Barracks", Weight = 1, FactionId = "" },
+		};
+		ShopRules rules = new(catalog);
+		rules.SetFaction(FactionDef.HordeId);
+
+		CardData[] offers = rules.GenerateOffers(new Random(42));
+
+		Assert.All(offers, card => Assert.True(card.Id == "b" || card.Id == "c"));
+	}
+
+	[Fact]
+	public void SetFaction_Alliance_OnlyOffersAllianceAndNeutralCards()
+	{
+		CardData[] catalog = new[]
+		{
+			new CardData { Id = "a", Name = "A", Cost = 10, BuildingType = "Barracks", Weight = 1, FactionId = "alliance" },
+			new CardData { Id = "b", Name = "B", Cost = 10, BuildingType = "OrcCamp", Weight = 1, FactionId = FactionDef.HordeId },
+			new CardData { Id = "c", Name = "C", Cost = 10, BuildingType = "Barracks", Weight = 1, FactionId = "" },
+		};
+		ShopRules rules = new(catalog);
+		rules.SetFaction("alliance");
+
+		CardData[] offers = rules.GenerateOffers(new Random(42));
+
+		Assert.All(offers, card => Assert.True(card.Id == "a" || card.Id == "c"));
+	}
+
+	[Fact]
+	public void SetFaction_Empty_KeepsFullCatalog()
+	{
+		CardData[] catalog = new[]
+		{
+			new CardData { Id = "a", Name = "A", Cost = 10, BuildingType = "Barracks", Weight = 1, FactionId = "alliance" },
+			new CardData { Id = "b", Name = "B", Cost = 10, BuildingType = "OrcCamp", Weight = 1, FactionId = FactionDef.HordeId },
+		};
+		ShopRules rules = new(catalog);
+
+		CardData[] offers = rules.GenerateOffers(new Random(42));
+
+		Assert.All(offers, card => Assert.True(card.Id == "a" || card.Id == "b"));
+	}
 }

@@ -7,17 +7,31 @@ public class ShopRules
 {
 	public const int OfferCount = 5;
 
-	private readonly CardData[] _catalog;
-	private readonly int _totalWeight;
+	private readonly CardData[] _allCatalog;
+	private CardData[] _catalog = System.Array.Empty<CardData>();
+	private int _totalWeight;
 
 	public ShopRules(IReadOnlyList<CardData> catalog)
 	{
-		_catalog = new CardData[catalog.Count];
+		_allCatalog = new CardData[catalog.Count];
 		for (int i = 0; i < catalog.Count; i++)
+			_allCatalog[i] = catalog[i];
+		SetFaction("");
+	}
+
+	public void SetFaction(string factionId)
+	{
+		List<CardData> filtered = new();
+		foreach (CardData card in _allCatalog)
 		{
-			_catalog[i] = catalog[i];
-			_totalWeight += catalog[i].Weight;
+			if (!string.IsNullOrEmpty(factionId) && !string.IsNullOrEmpty(card.FactionId) && card.FactionId != factionId)
+				continue;
+			filtered.Add(card);
 		}
+		_catalog = filtered.ToArray();
+		_totalWeight = 0;
+		foreach (CardData card in _catalog)
+			_totalWeight += card.Weight;
 	}
 
 	public CardData[] GenerateOffers(Random random)
