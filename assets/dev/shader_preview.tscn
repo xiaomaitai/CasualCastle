@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://cshaderpreview01"]
+[gd_scene format=3 uid="uid://qs6udfrgj1au"]
 
 [ext_resource type="Script" path="res://scripts/adapters/godot/dev/ShaderPreviewController.cs" id="1"]
 

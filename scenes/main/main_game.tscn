@@ -1,10 +1,10 @@
 [gd_scene format=3 uid="uid://c4j2n4cvyoaq0"]
 
-[ext_resource type="PackedScene" uid="uid://c8a3s7l4e9012" path="res://prefabs/Castle.tscn" id="2"]
+[ext_resource type="PackedScene" uid="uid://c8a3s7l4fa012" path="res://prefabs/Castle.tscn" id="2"]
 [ext_resource type="Script" path="res://scripts/adapters/godot/ui/UIManager.cs" id="4"]
 [ext_resource type="Script" path="res://scripts/adapters/godot/dev/DevInputLogger.cs" id="6"]
 [ext_resource type="Script" path="res://scripts/adapters/godot/flow/MainGameController.cs" id="10"]
-[ext_resource type="PackedScene" uid="uid://d4settingspanel01" path="res://scenes/ui/settings_panel.tscn" id="13"]
+[ext_resource type="PackedScene" uid="uid://bygrrmvcskot1" path="res://scenes/ui/settings_panel.tscn" id="13"]
 [ext_resource type="Script" path="res://scripts/adapters/godot/autoload/InitManager.cs" id="17"]
 [ext_resource type="Script" path="res://scripts/adapters/godot/battlefield/BattlefieldTileMap.cs" id="20"]
 [ext_resource type="Script" path="res://scripts/adapters/godot/flow/CameraController.cs" id="21"]

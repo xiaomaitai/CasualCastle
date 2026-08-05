@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://8gq2wbg88c2a"]
 
-[ext_resource type="Script" uid="uid://c4unitcardview970e" path="res://scripts/adapters/godot/battle/UnitCardView.cs" id="1"]
+[ext_resource type="Script" uid="uid://cxl88g0o4abwg" path="res://scripts/adapters/godot/battle/UnitCardView.cs" id="1"]
 [ext_resource type="Texture2D" uid="uid://dn6wsgo7yetwq" path="res://assets/art/cards/card_base.png" id="2"]
-[ext_resource type="PackedScene" uid="uid://bcardartscnp9q" path="res://prefabs/CardArt.tscn" id="3"]
+[ext_resource type="PackedScene" uid="uid://bh3iyaki8tugu" path="res://prefabs/CardArt.tscn" id="3"]
 [ext_resource type="PackedScene" uid="uid://cice247abfolk" path="res://prefabs/HealthBar.tscn" id="4"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_cardbase"]

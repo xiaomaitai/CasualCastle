@@ -70,6 +70,12 @@ def main():
         print(f"[ERROR] 导入失败，退出码 {code}")
         sys.exit(code)
 
+    check_script = Path(__file__).resolve().parent / "check_uids.py"
+    check = subprocess.run([sys.executable, str(check_script), "--project", str(project)])
+    if check.returncode != 0:
+        print("[ERROR] UID 校验未通过，请先规范化非规范 uid 文本")
+        sys.exit(check.returncode)
+
     if args.assets:
         sys.exit(verify_sidecars(project, args.assets))
     print("[done] 导入完成")
