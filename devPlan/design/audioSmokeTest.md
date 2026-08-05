@@ -10,7 +10,7 @@
 |------|---------|---------|
 | 1 | Music / SFX 音频总线存在 | `AudioServer.GetBusIndex` |
 | 2 | 15 首 BGM 资源可加载 | 逐个 `GD.Load<AudioStream>` |
-| 3 | 32 个 SFX 事件资源可加载 | 逐个 `GD.Load<AudioStream>` |
+| 3 | 31 个 SFX 事件资源可加载 | 逐个 `GD.Load<AudioStream>` |
 | 4 | 标题/对局/结算曲目池切换 | `PlayTitleMusic` / `UpdateGameplayMusic` / `PlayResultMusic` |
 | 5 | SFX 播放与防重入 | `PlaySfx` 连续调用多个事件 |
 | 6 | 音量写入生效 | `SetMusicVolume(0.5)` 后读回总线 dB 对比 |

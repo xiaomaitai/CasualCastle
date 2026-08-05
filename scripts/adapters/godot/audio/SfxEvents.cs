@@ -1,7 +1,6 @@
 // SFX 事件名常量：与 devPlan/design/audioRequirements.md 的 S1–S25 一一对应。
 public static class SfxEvents
 {
-	public const string ButtonHover = "button_hover";
 	public const string ButtonClick = "button_click";
 	public const string UiStart = "ui_start";
 	public const string SliderChange = "slider_change";

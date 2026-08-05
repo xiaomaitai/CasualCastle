@@ -33,7 +33,6 @@ public partial class AudioSmoke : Node
 
 	private static readonly string[] SfxEventNames =
 	{
-		SfxEvents.ButtonHover,
 		SfxEvents.ButtonClick,
 		SfxEvents.UiStart,
 		SfxEvents.SliderChange,

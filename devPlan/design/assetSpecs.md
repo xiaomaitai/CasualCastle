@@ -243,7 +243,7 @@ UI 元素使用**屏幕像素**，放在 `CanvasLayer` 下。
 
 命名 `sfx_<事件>.ogg`，对应 `audioRequirements.md` 的 S1–S25：
 
-`button_hover`、`button_click`、`ui_start`、`slider_change`、`unit_select`、`building_select`、`shop_open`、`shop_close`、`buy`、`coin_change`、`place`、`place_cancel`、`repair`、`combine`、`upgrade`、`melee_attack`、`melee_slash`、`melee_pierce`、`projectile_launch`、`launch_arrow`、`launch_magic`、`projectile_hit`、`hit`、`hit_slash`、`hit_pierce`、`hit_magic`、`unit_death`、`building_hit`、`building_destroy`、`phase_change`、`victory`、`defeat`
+`button_click`、`ui_start`、`slider_change`、`unit_select`、`building_select`、`shop_open`、`shop_close`、`buy`、`coin_change`、`place`、`place_cancel`、`repair`、`combine`、`upgrade`、`melee_attack`、`melee_slash`、`melee_pierce`、`projectile_launch`、`launch_arrow`、`launch_magic`、`projectile_hit`、`hit`、`hit_slash`、`hit_pierce`、`hit_magic`、`unit_death`、`building_hit`、`building_destroy`、`phase_change`、`victory`、`defeat`
 
 ### 素材来源与许可
 

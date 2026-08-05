@@ -1,4 +1,4 @@
-// UI 音效绑定工具：为按钮统一挂接悬停与点击音效。
+// UI 音效绑定工具：为按钮统一挂接点击音效。
 using Godot;
 using System.Collections.Generic;
 
@@ -12,7 +12,6 @@ public static class UiSfx
 
 	public static void BindButton(Button button)
 	{
-		button.MouseEntered += () => Sfx.Play(SfxEvents.ButtonHover);
 		button.Pressed += () => Sfx.Play(SfxEvents.ButtonClick);
 	}
 
