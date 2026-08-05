@@ -118,6 +118,9 @@ text = "切换昼夜"
 [node name="CheatButton" type="Button" parent="UI/PhasePanel"]
 layout_mode = 2
 text = "作弊"
+[node name="InfoButton" type="Button" parent="UI/PhasePanel"]
+layout_mode = 2
+text = "信息"
 
 [node name="MenuButton" type="Button" parent="UI"]
 offset_left = 1824

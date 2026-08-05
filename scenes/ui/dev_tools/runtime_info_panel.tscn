@@ -1,0 +1,49 @@
+[gd_scene format=3 uid="uid://cnovsae0wbuo6"]
+
+[node name="RuntimeInfoPanel" type="Panel"]
+visible = false
+offset_left = 24
+offset_top = 96
+offset_right = 474
+offset_bottom = 380
+
+[node name="PanelBackground" type="ColorRect" parent="."]
+layout_mode = 0
+offset_right = 450
+offset_bottom = 284
+color = Color(0.1, 0.14, 0.2, 0.92)
+
+[node name="TitleLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 20
+offset_top = 14
+offset_right = 220
+offset_bottom = 58
+theme_override_font_sizes/font_size = 30
+text = "运行时信息"
+
+[node name="CloseButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 392
+offset_top = 12
+offset_right = 440
+offset_bottom = 60
+text = "X"
+
+[node name="WealthCheck" type="CheckBox" parent="."]
+layout_mode = 0
+offset_left = 20
+offset_top = 70
+offset_right = 240
+offset_bottom = 110
+theme_override_font_sizes/font_size = 22
+text = "财富"
+button_pressed = true
+
+[node name="InfoLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 20
+offset_top = 114
+offset_right = 450
+offset_bottom = 280
+theme_override_font_sizes/font_size = 20

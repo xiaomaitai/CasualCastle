@@ -1,4 +1,5 @@
 using CasualCastle.Adapters.Godot;
+using CasualCastle.Adapters.Godot.Dev;
 using CasualCastle.Domain.Building;
 using Godot;
 
@@ -16,6 +17,7 @@ public partial class UIManager : Node2D
     private CombineProhibitUiController _combineProhibitUi;
     private PauseMenuUiController _pauseMenuUi;
     private CheatMenuUiController _cheatMenu;
+    private RuntimeInfoPanelController _runtimeInfoPanel;
     private UnitInfoUiController _unitInfoUi;
     private UnitSelectionController _unitSelection;
     private AttributePanelController _attributePanel;
@@ -46,6 +48,7 @@ public partial class UIManager : Node2D
         _buildingManageUi?.Dispose();
         _combineProhibitUi?.Dispose();
         _cheatMenu?.Dispose();
+        _runtimeInfoPanel?.Dispose();
         if (_pauseMenuUi != null)
         {
             _pauseMenuUi.OpenChanged -= OnPauseMenuOpenChanged;
@@ -63,6 +66,7 @@ public partial class UIManager : Node2D
     public override void _Process(double _)
     {
         _hudUi?.Process();
+        _runtimeInfoPanel?.Process();
         _shopUi?.Process();
         _buildingManageUi?.Process();
         if (_shopUi?.IsDragging != true)
@@ -89,6 +93,11 @@ public partial class UIManager : Node2D
             }
 
             if (_cheatMenu?.TryHandleEscape() == true)
+            {
+                GetViewport().SetInputAsHandled();
+                return;
+            }
+            if (_runtimeInfoPanel?.TryHandleEscape() == true)
             {
                 GetViewport().SetInputAsHandled();
                 return;
@@ -194,6 +203,7 @@ public partial class UIManager : Node2D
         _buildingManageUi = new BuildingManageUiController(this, uiRoot, toolGroup);
         _combineProhibitUi = new CombineProhibitUiController(this, uiRoot, toolGroup);
         _cheatMenu = new CheatMenuUiController(uiRoot);
+        _runtimeInfoPanel = new RuntimeInfoPanelController(uiRoot);
         _settingsUi = new SettingsUiController(uiRoot.GetNode<Control>("SettingsPanel"));
         _pauseMenuUi = new PauseMenuUiController(uiRoot, GoToTitle, OpenSettings);
         _gameOverUi = new GameOverUiController(uiRoot, GoToTitle);
@@ -221,6 +231,7 @@ public partial class UIManager : Node2D
         _buildingManageUi.SetGameOver(_gameOver);
         _combineProhibitUi.SetGameOver(_gameOver);
         _cheatMenu.SetGameOver(_gameOver);
+        _runtimeInfoPanel?.SetGameOver(_gameOver);
         _pauseMenuUi.SetGameOver(_gameOver);
         _gameOverUi.SetState(state);
     }
