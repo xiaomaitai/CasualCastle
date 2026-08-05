@@ -17,8 +17,9 @@ public class SqliteBuildingRepository : IBuildingRepository, IBuildingVisualRepo
 		using SqliteConnection connection = new($"Data Source={fullPath}");
 		connection.Open();
 		EnsureValueColumn(connection);
+		EnsureRaceIdColumn(connection);
 		using SqliteCommand cmd = connection.CreateCommand();
-		cmd.CommandText = "SELECT type_id, display_name, max_health, spawn_interval, main_cell_x, main_cell_y, spawn_cell_x, spawn_cell_y, unit_type_id, combine_tier, is_core, footprint_json, collision_width, collision_height, faction_id, production_rate, texture_path, sprite_modulate_r, sprite_modulate_g, sprite_modulate_b, sprite_modulate_a, material_path, value FROM building_defs";
+		cmd.CommandText = "SELECT type_id, display_name, max_health, spawn_interval, main_cell_x, main_cell_y, spawn_cell_x, spawn_cell_y, unit_type_id, combine_tier, is_core, footprint_json, collision_width, collision_height, faction_id, production_rate, texture_path, sprite_modulate_r, sprite_modulate_g, sprite_modulate_b, sprite_modulate_a, material_path, value, race_id FROM building_defs";
 		using SqliteDataReader reader = cmd.ExecuteReader();
 		while (reader.Read())
 		{
@@ -30,6 +31,7 @@ public class SqliteBuildingRepository : IBuildingRepository, IBuildingVisualRepo
 			{
 				TypeId = typeId,
 				FactionId = reader.GetString(14),
+				RaceId = reader.IsDBNull(23) ? "" : reader.GetString(23),
 				DisplayName = reader.GetString(1),
 				MaxHealth = reader.GetInt32(2),
 				SpawnInterval = reader.IsDBNull(3) ? 0 : reader.GetFloat(3),
@@ -65,6 +67,17 @@ public class SqliteBuildingRepository : IBuildingRepository, IBuildingVisualRepo
 		if (hasValue > 0)
 			return;
 		cmd.CommandText = "ALTER TABLE building_defs ADD COLUMN value INTEGER";
+		cmd.ExecuteNonQuery();
+	}
+
+	private static void EnsureRaceIdColumn(SqliteConnection connection)
+	{
+		using SqliteCommand cmd = connection.CreateCommand();
+		cmd.CommandText = "SELECT COUNT(*) FROM pragma_table_info('building_defs') WHERE name = 'race_id'";
+		long hasRaceId = (long)cmd.ExecuteScalar();
+		if (hasRaceId > 0)
+			return;
+		cmd.CommandText = "ALTER TABLE building_defs ADD COLUMN race_id TEXT NOT NULL DEFAULT ''";
 		cmd.ExecuteNonQuery();
 	}
 

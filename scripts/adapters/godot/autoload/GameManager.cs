@@ -55,6 +55,7 @@ public partial class GameManager : Node2D, IGameState
     public int CurrentNightIndex { get; set; }
     public string PendingReplayReportId { get; private set; } = "";
     public int PendingLoadSlot { get; set; } = -1;
+    public string SelectedFaction { get; private set; } = "alliance";
 
     [Export]
     public int PlayerMaxHealth = 100;
@@ -163,6 +164,11 @@ public partial class GameManager : Node2D, IGameState
     public void SetPendingReplayReportId(string reportId)
     {
         PendingReplayReportId = reportId ?? "";
+    }
+
+    public void SetSelectedFaction(string factionId)
+    {
+        SelectedFaction = string.IsNullOrEmpty(factionId) ? "alliance" : factionId;
     }
 
     public void SetPaused(bool paused)

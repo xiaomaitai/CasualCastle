@@ -285,12 +285,36 @@ public partial class Castle : Node2D
 
 	private void SetupCastleHeart()
 	{
-		Building heart = _buildingSystem.CreateBuilding("CastleHeart");
+		string heartTypeId = GameManager.Instance != null && GameManager.Instance.SelectedFaction == FactionDef.HordeId
+			? HordeCoreRules.CoreLevelTypeIds[0]
+			: "CastleHeart";
+		Building heart = _buildingSystem.CreateBuilding(heartTypeId);
 		if (heart == null)
 			return;
 
 		heart.BindToGrid(this, CastleHeartGridX, CastleHeartGridY);
-		PlaceBuilding(heart, CastleHeartGridX, CastleHeartGridY, "CastleHeart");
+		PlaceBuilding(heart, CastleHeartGridX, CastleHeartGridY, heartTypeId);
+		Heart = heart;
+		heart.HealthChanged += OnHeartHealthChanged;
+	}
+
+	public void ReplaceHeart(string typeId, int health)
+	{
+		if (Heart == null)
+			return;
+
+		Building oldHeart = Heart;
+		ReleaseBuildingFootprint(oldHeart);
+		oldHeart.GetParent()?.RemoveChild(oldHeart);
+		oldHeart.QueueFree();
+
+		Building heart = _buildingSystem.CreateBuilding(typeId);
+		if (heart == null)
+			return;
+
+		heart.BindToGrid(this, CastleHeartGridX, CastleHeartGridY);
+		PlaceBuilding(heart, CastleHeartGridX, CastleHeartGridY, typeId);
+		heart.ApplySnapshotState(health, false, false);
 		Heart = heart;
 		heart.HealthChanged += OnHeartHealthChanged;
 	}

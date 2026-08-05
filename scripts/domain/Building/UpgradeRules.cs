@@ -26,10 +26,24 @@ public class UpgradeRules
 
 	public bool CanUpgrade(IBuildingState building, IBuildingRepository buildingRepo)
 	{
+		return CanUpgrade(building, buildingRepo, int.MaxValue, 0);
+	}
+
+	public bool CanUpgrade(IBuildingState building, IBuildingRepository buildingRepo, int coreLevel, int burrowCount)
+	{
 		if (building == null || building.IsDestroyed || !building.IsPlayerOwned)
 			return false;
-		if (buildingRepo.IsCoreBuilding(building.TypeId))
+
+		UpgradeRecipe recipe = FindRecipe(building.TypeId);
+		if (recipe == null)
 			return false;
-		return FindRecipe(building.TypeId) != null;
+
+		if (HordeCoreRules.IsCoreUpgrade(building.TypeId, recipe.ResultTypeId))
+			return burrowCount >= HordeCoreRules.GetUpgradeBurrowRequirement(HordeCoreRules.GetLevel(building.TypeId));
+
+		if (buildingRepo.GetFactionId(building.TypeId) == FactionDef.HordeId)
+			return coreLevel >= HordeCoreRules.GetRequiredCoreLevel(recipe.ResultTypeId, buildingRepo);
+
+		return true;
 	}
 }

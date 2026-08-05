@@ -6,6 +6,7 @@ public class BuildingData
 {
 	public string TypeId { get; init; }
 	public string FactionId { get; init; }
+	public string RaceId { get; init; } = "";
 	public GridCellOffset[] Footprint { get; init; }
 	public GridCellOffset MainCellOffset { get; init; }
 	public string DisplayName { get; init; }

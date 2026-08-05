@@ -13,9 +13,9 @@ public class UpgradeService : IUpgradeUseCase
 		_buildingRepo = buildingRepo;
 	}
 
-	public IBuildingState TryUpgrade(IBuildingState source, string resultTypeId, float healthRatio, Func<int, bool> trySpendGold, IUpgradeBuildingFactory factory)
+	public IBuildingState TryUpgrade(IBuildingState source, string resultTypeId, float healthRatio, Func<int, bool> trySpendGold, IUpgradeBuildingFactory factory, int coreLevel = int.MaxValue, int burrowCount = 0)
 	{
-		if (!_upgradeRules.CanUpgrade(source, _buildingRepo))
+		if (!_upgradeRules.CanUpgrade(source, _buildingRepo, coreLevel, burrowCount))
 			return null;
 
 		UpgradeRecipe recipe = _upgradeRules.FindRecipe(source.TypeId);

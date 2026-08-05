@@ -18,6 +18,8 @@ public sealed class AttributePanelController
 	private readonly Button _upgradeButton;
 	private readonly UnitSelectionController _selection;
 	private readonly List<SkillIconView> _skillIcons = new();
+	private readonly TextureRect _burrowIconRect;
+	private readonly Label _burrowProgressLabel;
 	private UnitLogic _currentUnit;
 	private Building _currentBuilding;
 	private UpgradeRecipe _pendingUpgrade;
@@ -36,6 +38,27 @@ public sealed class AttributePanelController
 		_upgradeButton.Visible = false;
 		_upgradeButton.Pressed += OnUpgradePressed;
 		_panel.Visible = false;
+
+		_burrowIconRect = new TextureRect
+		{
+			Texture = BuildingIcons.Burrow,
+			Position = new Vector2(16, 192),
+			CustomMinimumSize = new Vector2(30, 30),
+			ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+			StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+			MouseFilter = Control.MouseFilterEnum.Ignore,
+		};
+		_burrowIconRect.Visible = false;
+		_panel.AddChild(_burrowIconRect);
+
+		_burrowProgressLabel = new Label
+		{
+			Position = new Vector2(52, 194),
+			MouseFilter = Control.MouseFilterEnum.Ignore,
+		};
+		_burrowProgressLabel.AddThemeFontSizeOverride("font_size", 18);
+		_burrowProgressLabel.Visible = false;
+		_panel.AddChild(_burrowProgressLabel);
 	}
 
 	public void Process()
@@ -65,6 +88,7 @@ public sealed class AttributePanelController
 		_currentBuilding = null;
 		_pendingUpgrade = null;
 		_upgradeButton.Visible = false;
+		HideBurrowProgress();
 		ClearSkillsRow();
 	}
 
@@ -72,6 +96,7 @@ public sealed class AttributePanelController
 	{
 		_currentUnit = unit;
 		_currentBuilding = null;
+		HideBurrowProgress();
 		IUnitState state = unit.Handle;
 
 		_portraitRect.Texture = LoadUnitPortrait(state.TypeId) ?? LoadPlaceholder();
@@ -185,8 +210,16 @@ public sealed class AttributePanelController
 	private void RefreshUpgradeButton(Building building)
 	{
 		_pendingUpgrade = null;
+		HideBurrowProgress();
 		if (!building.IsPlayerOwned)
 		{
+			_upgradeButton.Visible = false;
+			return;
+		}
+
+		if (HordeCoreRules.GetLevel(building.TypeId) >= HordeCoreRules.CoreLevelTypeIds.Length)
+		{
+			ShowBurrowCount(HordeCoreRules.CountBurrows(building.GetCastle().GetBuildingStates()));
 			_upgradeButton.Visible = false;
 			return;
 		}
@@ -206,10 +239,53 @@ public sealed class AttributePanelController
 			return;
 		}
 
+		IBuildingRepository repo = GameManager.Get<IBuildingRepository>();
+		List<IBuildingState> states = building.GetCastle().GetBuildingStates();
+		int coreLevel = HordeCoreRules.GetCoreLevel(states);
+		int burrowCount = HordeCoreRules.CountBurrows(states);
+		string blockReason = "";
+		bool upgradeBlocked = false;
+		if (HordeCoreRules.IsCoreUpgrade(building.TypeId, recipe.ResultTypeId))
+		{
+			int required = HordeCoreRules.GetUpgradeBurrowRequirement(HordeCoreRules.GetLevel(building.TypeId));
+			ShowBurrowProgress(burrowCount, required);
+			upgradeBlocked = burrowCount < required;
+		}
+		else if (repo.GetFactionId(building.TypeId) == FactionDef.HordeId)
+		{
+			int required = HordeCoreRules.GetRequiredCoreLevel(recipe.ResultTypeId, repo);
+			if (coreLevel < required)
+			{
+				blockReason = $"（需核心 {required} 级）";
+				upgradeBlocked = true;
+			}
+		}
+
 		_pendingUpgrade = recipe;
 		string resultName = AdapterRegistry.Resolve<BuildingSystem>().GetDisplayName(recipe.ResultTypeId);
-		_upgradeButton.Text = $"升级为{resultName}（{cost} 金币）";
+		_upgradeButton.Text = $"升级为{resultName}（{cost} 金币）{blockReason}";
+		_upgradeButton.Disabled = upgradeBlocked;
 		_upgradeButton.Visible = true;
+	}
+
+	private void ShowBurrowProgress(int current, int required)
+	{
+		_burrowIconRect.Visible = true;
+		_burrowProgressLabel.Visible = true;
+		_burrowProgressLabel.Text = $"{current}/{required}";
+	}
+
+	private void ShowBurrowCount(int current)
+	{
+		_burrowIconRect.Visible = true;
+		_burrowProgressLabel.Visible = true;
+		_burrowProgressLabel.Text = $"{current}";
+	}
+
+	private void HideBurrowProgress()
+	{
+		_burrowIconRect.Visible = false;
+		_burrowProgressLabel.Visible = false;
 	}
 
 	private void OnUpgradePressed()
@@ -225,9 +301,11 @@ public sealed class AttributePanelController
 
 		IUpgradeUseCase useCase = GameManager.Get<IUpgradeUseCase>();
 		UpgradeBuildingFactory factory = new(castle);
+		List<IBuildingState> states = building.GetCastle().GetBuildingStates();
 		IBuildingState upgraded = useCase.TryUpgrade(
 			building, _pendingUpgrade.ResultTypeId, healthRatio,
-			AdapterRegistry.Resolve<Shop>().TrySpendGold, factory);
+			AdapterRegistry.Resolve<Shop>().TrySpendGold, factory,
+			HordeCoreRules.GetCoreLevel(states), HordeCoreRules.CountBurrows(states));
 		if (upgraded == null)
 			return;
 

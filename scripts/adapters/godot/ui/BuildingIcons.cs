@@ -9,6 +9,7 @@ public static class BuildingIcons
 	private static Texture2D _repair;
 	private static Texture2D _repairBlocked;
 	private static Texture2D _combineProhibit;
+	private static Texture2D _burrow;
 
 	public static Vector2I IconSize => new(Width, Height);
 	public static Vector2 CursorHotspot => new(Width * 0.5f, Height * 0.5f);
@@ -17,6 +18,7 @@ public static class BuildingIcons
 	public static Texture2D Repair => _repair ??= CreateRepairIcon();
 	public static Texture2D RepairBlocked => _repairBlocked ??= CreateRepairBlockedIcon();
 	public static Texture2D CombineProhibit => _combineProhibit ??= CreateCombineProhibitIcon();
+	public static Texture2D Burrow => _burrow ??= CreateBurrowIcon();
 
 	private static Texture2D CreatePauseIcon()
 	{
@@ -46,6 +48,16 @@ public static class BuildingIcons
 	{
 		Image image = CreateCanvas();
 		DrawProhibitOverlay(image);
+		return ToTexture(image);
+	}
+
+	private static Texture2D CreateBurrowIcon()
+	{
+		Image image = CreateCanvas();
+		Color rim = new(0.55f, 0.4f, 0.25f, 1f);
+		Color hole = new(0.12f, 0.08f, 0.05f, 1f);
+		FillEllipse(image, 24, 27, 15, 13, rim);
+		FillEllipse(image, 24, 25, 11, 9, hole);
 		return ToTexture(image);
 	}
 
@@ -85,6 +97,20 @@ public static class BuildingIcons
 		{
 			for (int col = x; col < x + w; col++)
 				SetPixel(image, col, row, color);
+		}
+	}
+
+	private static void FillEllipse(Image image, int cx, int cy, int rx, int ry, Color color)
+	{
+		for (int row = cy - ry; row <= cy + ry; row++)
+		{
+			for (int col = cx - rx; col <= cx + rx; col++)
+			{
+				float nx = (col - cx) / (float)rx;
+				float ny = (row - cy) / (float)ry;
+				if (nx * nx + ny * ny <= 1f)
+					SetPixel(image, col, row, color);
+			}
 		}
 	}
 

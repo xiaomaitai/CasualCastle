@@ -4,6 +4,7 @@ public class TechTreeNode
 {
     public string TypeId { get; init; }
     public string FactionId { get; set; }
+    public string RaceId { get; set; } = "";
     public int Tier { get; set; }
     public int Col { get; set; }
     public bool ShopAvailable { get; set; }
@@ -14,4 +15,5 @@ public class TechTreeNode
 	public int MaxHealth { get; set; }
 	public float SpawnInterval { get; set; }
 	public int Value { get; set; }
+	public bool IsCore { get; set; }
 }

@@ -6,26 +6,47 @@ namespace CasualCastle.Domain.Building;
 
 public static class HordeAdjacencyRules
 {
-	public static int CountAdjacentEmptyCells(
+	public static int CountAdjacencyBonusCells(
 		IAdjacencyBuilding building, IReadOnlyList<IAdjacencyBuilding> allBuildings,
 		IBuildingRepository buildingRepo)
 	{
-		HashSet<(int x, int y)> occupied = CollectOccupiedCells(allBuildings, buildingRepo);
+		Dictionary<(int x, int y), IAdjacencyBuilding> owners = CollectCellOwners(allBuildings, buildingRepo);
+		string raceId = buildingRepo.GetRaceId(building.TypeId);
 		int count = 0;
 		foreach ((int x, int y) cell in GetSideCells(building, buildingRepo))
 		{
-			if (!occupied.Contains(cell))
+			if (!owners.TryGetValue(cell, out IAdjacencyBuilding neighbor) || !neighbor.ContributesToAdjacency)
+			{
+				count++;
+				continue;
+			}
+			if (HordeCoreRules.IsBurrow(neighbor.TypeId))
+				count++;
+			else if (!string.IsNullOrEmpty(raceId) && buildingRepo.GetRaceId(neighbor.TypeId) == raceId)
 				count++;
 		}
-		return System.Math.Min(count, GameRules.HordeAdjacencyMaxEmptyCells);
+		return System.Math.Min(count, GameRules.HordeAdjacencyMaxCells);
 	}
 
 	public static float CalculateSpawnIntervalMultiplier(
 		IAdjacencyBuilding building, IReadOnlyList<IAdjacencyBuilding> allBuildings,
 		IBuildingRepository buildingRepo)
 	{
-		int emptyCount = CountAdjacentEmptyCells(building, allBuildings, buildingRepo);
-		return 1f - emptyCount * GameRules.HordeAdjacencySpawnSpeedBonusPerEmptyCell;
+		int count = CountAdjacencyBonusCells(building, allBuildings, buildingRepo);
+		float rate = GameRules.HordeAdjacencySpawnSpeedBonusPerCell
+			+ GameRules.HordeBurrowSpawnSpeedBonusPerBurrow * CountBurrows(allBuildings);
+		return 1f - count * rate;
+	}
+
+	public static int CountBurrows(IReadOnlyList<IAdjacencyBuilding> buildings)
+	{
+		int count = 0;
+		foreach (IAdjacencyBuilding building in buildings)
+		{
+			if (HordeCoreRules.IsBurrow(building.TypeId) && building.ContributesToAdjacency)
+				count++;
+		}
+		return count;
 	}
 
 	private static IEnumerable<(int x, int y)> GetSideCells(
@@ -43,15 +64,15 @@ public static class HordeAdjacencyRules
 		yield return (maxX + 1, minY);
 	}
 
-	private static HashSet<(int x, int y)> CollectOccupiedCells(
+	private static Dictionary<(int x, int y), IAdjacencyBuilding> CollectCellOwners(
 		IReadOnlyList<IAdjacencyBuilding> buildings, IBuildingRepository buildingRepo)
 	{
-		HashSet<(int x, int y)> occupied = new();
+		Dictionary<(int x, int y), IAdjacencyBuilding> owners = new();
 		foreach (IAdjacencyBuilding building in buildings)
 		{
 			foreach (GridCellOffset offset in buildingRepo.GetFootprint(building.TypeId))
-				occupied.Add((building.AnchorGridX + offset.X, building.AnchorGridY + offset.Y));
+				owners[(building.AnchorGridX + offset.X, building.AnchorGridY + offset.Y)] = building;
 		}
-		return occupied;
+		return owners;
 	}
 }

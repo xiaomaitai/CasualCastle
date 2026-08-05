@@ -18,8 +18,9 @@ public static class GameRules
 	public const float GraceShieldMult = 1.5f;
 	public const float GraceCooldownReduction = 1.0f;
 
-	public const float HordeAdjacencySpawnSpeedBonusPerEmptyCell = 0.12f;
-	public const int HordeAdjacencyMaxEmptyCells = 4;
+	public const float HordeAdjacencySpawnSpeedBonusPerCell = 0.05f;
+	public const float HordeBurrowSpawnSpeedBonusPerBurrow = 0.01f;
+	public const int HordeAdjacencyMaxCells = 4;
 	public const float AuraRangeRadius = 150f;
 	public const float AuraAttackBonusMultiplier = 1.10f;
 

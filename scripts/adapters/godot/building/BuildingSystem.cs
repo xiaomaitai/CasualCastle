@@ -112,6 +112,7 @@ public partial class BuildingSystem : Node
         List<UpgradeRecipe> edges = new();
         foreach (FactionDef faction in repo.LoadFactions())
             edges.AddRange(repo.LoadUpgradeEdges(faction.Id));
+        edges.AddRange(HordeCoreRules.CreateUpgradeRecipes());
         rules.LoadRecipes(edges);
     }
 

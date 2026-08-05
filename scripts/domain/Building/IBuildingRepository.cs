@@ -22,4 +22,5 @@ public interface IBuildingRepository
 	int GetCollisionHeight(string typeId) => Get(typeId).CollisionHeight;
 	int GetValue(string typeId) => Get(typeId).Value;
 	string GetFactionId(string typeId) => Get(typeId).FactionId;
+	string GetRaceId(string typeId) => Get(typeId).RaceId;
 }

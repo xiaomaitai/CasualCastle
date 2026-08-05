@@ -5,7 +5,7 @@ public partial class HordeAdjacencyIndicator : Node2D
 {
 	private const float BaseRadius = 42f;
 
-	private int _emptyCellCount;
+	private int _adjacencyCellCount;
 
 	public override void _Ready()
 	{
@@ -13,19 +13,19 @@ public partial class HordeAdjacencyIndicator : Node2D
 		Visible = false;
 	}
 
-	public void SetEmptyCellCount(int count)
+	public void SetAdjacencyCellCount(int count)
 	{
-		_emptyCellCount = Mathf.Clamp(count, 0, GameRules.HordeAdjacencyMaxEmptyCells);
-		Visible = _emptyCellCount > 0;
+		_adjacencyCellCount = Mathf.Clamp(count, 0, GameRules.HordeAdjacencyMaxCells);
+		Visible = _adjacencyCellCount > 0;
 		QueueRedraw();
 	}
 
 	public override void _Draw()
 	{
-		if (_emptyCellCount <= 0)
+		if (_adjacencyCellCount <= 0)
 			return;
 
-		float intensity = _emptyCellCount / (float)GameRules.HordeAdjacencyMaxEmptyCells;
+		float intensity = _adjacencyCellCount / (float)GameRules.HordeAdjacencyMaxCells;
 		Color ringColor = new(0.35f, 0.92f, 0.45f, 0.55f + 0.35f * intensity);
 		DrawCircle(Vector2.Zero, BaseRadius, new Color(0.2f, 0.85f, 0.35f, 0.08f + 0.12f * intensity));
 		DrawArc(Vector2.Zero, BaseRadius, 0f, Mathf.Tau, 48, ringColor, 3f);

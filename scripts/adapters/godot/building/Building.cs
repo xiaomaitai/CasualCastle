@@ -3,6 +3,8 @@ using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
 using CasualCastle.Domain.Shared;
 using Godot;
+using System.Collections.Generic;
+using System.Linq;
 
 public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildingRef
 {
@@ -124,7 +126,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	public void ApplySnapshotState(int health, bool manuallyPaused, bool combineProhibited)
 	{
-		if (BuildingSys.IsCoreBuilding(TypeId))
+		if (TypeId == "CastleHeart")
 			return;
 
 		Health = Mathf.Clamp(health, 1, MaxHealth);
@@ -138,7 +140,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	public void ApplyHealthRatio(float ratio)
 	{
-		if (BuildingSys.IsCoreBuilding(TypeId))
+		if (TypeId == "CastleHeart")
 			return;
 
 		Health = Mathf.Clamp(Mathf.RoundToInt(MaxHealth * ratio), 1, MaxHealth);
@@ -184,12 +186,12 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		EmitSignal(SignalName.HealthChanged, Health, MaxHealth);
 		UpdateDamageVisual();
 
-		if (TypeId == "CastleHeart" && CastleRef != null)
+		if (BuildingSys.IsCoreBuilding(TypeId) && CastleRef != null)
 			_gameManager?.OnCastleHeartHealthChanged(CastleRef.IsPlayerCastle, Health, MaxHealth);
 
 		if (Health <= 0)
 			OnDestroyed();
-		else if (TypeId == "CastleHeart")
+		else if (BuildingSys.IsCoreBuilding(TypeId))
 			PauseWork();
 	}
 
@@ -401,7 +403,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 			return;
 
 		_workSpeedMultiplier = multiplier;
-		UpdateHordeIndicator(multiplier);
+		UpdateHordeIndicator();
 	}
 
 	private void StartWorkCycle()
@@ -609,14 +611,15 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 			_hordeIndicator.Position = mainCenter - Position;
 	}
 
-	private void UpdateHordeIndicator(float multiplier)
+	private void UpdateHordeIndicator()
 	{
-		if (_hordeIndicator == null)
+		if (_hordeIndicator == null || CastleRef == null)
 			return;
 
-		float intervalMultiplier = 1f / multiplier;
-		int emptyCount = Mathf.RoundToInt((1f - intervalMultiplier) / GameRules.HordeAdjacencySpawnSpeedBonusPerEmptyCell);
-		_hordeIndicator.SetEmptyCellCount(emptyCount);
+		List<IBuildingState> all = CastleRef.GetBuildingStates();
+		List<IAdjacencyBuilding> domain = all.OfType<IAdjacencyBuilding>().ToList();
+		int count = HordeAdjacencyRules.CountAdjacencyBonusCells(this, domain, GameManager.Get<IBuildingRepository>());
+		_hordeIndicator.SetAdjacencyCellCount(count);
 	}
 
 	private void UpdateStateIcon()

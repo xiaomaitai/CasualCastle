@@ -15,13 +15,14 @@ public class AdjacencyServiceTests
 		Mock<IBuildingRepository> repo = new();
 		repo.Setup(r => r.GetFootprint(It.IsAny<string>())).Returns(SingleCell);
 		repo.Setup(r => r.GetFactionId(It.IsAny<string>())).Returns(factionId);
+		repo.Setup(r => r.GetRaceId(It.IsAny<string>())).Returns("");
 		return repo;
 	}
 
-	private static Mock<IBuildingState> CreateBuilding(int x, int y)
+	private static Mock<IBuildingState> CreateBuilding(int x, int y, string typeId = "TestBuilding")
 	{
 		Mock<IBuildingState> building = new();
-		building.SetupGet(b => b.TypeId).Returns("TestBuilding");
+		building.SetupGet(b => b.TypeId).Returns(typeId);
 		building.SetupGet(b => b.AnchorGridX).Returns(x);
 		building.SetupGet(b => b.AnchorGridY).Returns(y);
 		building.SetupGet(b => b.ContributesToAdjacency).Returns(true);
@@ -34,7 +35,7 @@ public class AdjacencyServiceTests
 		Mock<IBuildingRepository> repo = CreateRepo(FactionDef.HordeId);
 		Mock<IBuildingState> building = CreateBuilding(5, 5);
 		AdjacencyService service = new(repo.Object, new CombineRules());
-		float expected = 1f / 0.52f;
+		float expected = 1f / 0.80f;
 
 		service.RefreshCastle(new List<IBuildingState> { building.Object });
 
@@ -48,7 +49,7 @@ public class AdjacencyServiceTests
 		Mock<IBuildingState> building = CreateBuilding(5, 5);
 		Mock<IBuildingState> neighbor = CreateBuilding(5, 4);
 		AdjacencyService service = new(repo.Object, new CombineRules());
-		float expected = 1f / 0.64f;
+		float expected = 1f / 0.85f;
 
 		service.RefreshCastle(new List<IBuildingState> { building.Object, neighbor.Object });
 
@@ -69,6 +70,20 @@ public class AdjacencyServiceTests
 		service.RefreshCastle(all);
 
 		building.Verify(b => b.SetWorkSpeedMultiplier(It.Is<float>(v => System.Math.Abs(v - 1f) < 0.0001f)), Times.Once);
+	}
+
+	[Fact]
+	public void RefreshCastle_HordeBuildingWithBurrow_RateIncreases()
+	{
+		Mock<IBuildingRepository> repo = CreateRepo(FactionDef.HordeId);
+		Mock<IBuildingState> building = CreateBuilding(5, 5);
+		Mock<IBuildingState> burrow = CreateBuilding(0, 0, HordeCoreRules.BurrowTypeId);
+		AdjacencyService service = new(repo.Object, new CombineRules());
+		float expected = 1f / 0.76f;
+
+		service.RefreshCastle(new List<IBuildingState> { building.Object, burrow.Object });
+
+		building.Verify(b => b.SetWorkSpeedMultiplier(It.Is<float>(v => System.Math.Abs(v - expected) < 0.0001f)), Times.Once);
 	}
 
 	[Fact]

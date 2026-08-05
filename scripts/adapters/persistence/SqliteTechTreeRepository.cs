@@ -82,19 +82,42 @@ public class SqliteTechTreeRepository : ITechTreeRepository
             cmd.ExecuteNonQuery();
         }
 
-        cmd.CommandText = "SELECT COUNT(*) FROM tech_tree_nodes";
-        long nodeCount = (long)cmd.ExecuteScalar();
-        if (nodeCount == 0)
-        {
-            MigrateFromBuildingDefs(connection);
-        }
-
         MigrateRaceIdToFactionId(connection);
         MigrateCombineRecipesPK(connection);
         MigrateBuildingDefsFactionId(connection);
+        MigrateRaceColumns(connection);
         MigrateValueColumns(connection);
         MigrateUpgradeRecipes(connection);
+
+        cmd.CommandText = "SELECT COUNT(*) FROM tech_tree_nodes";
+        long nodeCount = (long)cmd.ExecuteScalar();
+        if (nodeCount == 0)
+            MigrateFromBuildingDefs(connection);
+
         BackfillValues(connection);
+    }
+
+    private static void MigrateRaceColumns(SqliteConnection connection)
+    {
+        using SqliteCommand cmd = connection.CreateCommand();
+        AddRaceIdColumn(cmd, "tech_tree_nodes");
+        AddRaceIdColumn(cmd, "building_defs");
+        cmd.CommandText = "SELECT COUNT(*) FROM pragma_table_info('tech_tree_nodes') WHERE name = 'is_core'";
+        long hasIsCore = (long)cmd.ExecuteScalar();
+        if (hasIsCore > 0)
+            return;
+        cmd.CommandText = "ALTER TABLE tech_tree_nodes ADD COLUMN is_core INTEGER NOT NULL DEFAULT 0";
+        cmd.ExecuteNonQuery();
+    }
+
+    private static void AddRaceIdColumn(SqliteCommand cmd, string table)
+    {
+        cmd.CommandText = $"SELECT COUNT(*) FROM pragma_table_info('{table}') WHERE name = 'race_id'";
+        long hasRaceId = (long)cmd.ExecuteScalar();
+        if (hasRaceId > 0)
+            return;
+        cmd.CommandText = $"ALTER TABLE {table} ADD COLUMN race_id TEXT NOT NULL DEFAULT ''";
+        cmd.ExecuteNonQuery();
     }
 
     private static void MigrateRaceIdToFactionId(SqliteConnection connection)
@@ -140,11 +163,12 @@ public class SqliteTechTreeRepository : ITechTreeRepository
             return;
 
         cmd.CommandText = @"
-            INSERT OR IGNORE INTO tech_tree_nodes (type_id, faction_id, tier, col, shop_available, gold_cost, shop_weight, display_name, unit_type_id, max_health, spawn_interval)
+            INSERT OR IGNORE INTO tech_tree_nodes (type_id, faction_id, tier, col, shop_available, gold_cost, shop_weight, display_name, unit_type_id, max_health, spawn_interval, race_id)
             SELECT b.type_id, 'alliance', b.combine_tier + 1, 0,
                    CASE WHEN s.id IS NOT NULL THEN 1 ELSE 0 END,
                    s.cost, s.weight,
-                   b.display_name, b.unit_type_id, b.max_health, COALESCE(b.spawn_interval, 10.0)
+                   b.display_name, b.unit_type_id, b.max_health, COALESCE(b.spawn_interval, 10.0),
+                   COALESCE(b.race_id, '')
             FROM building_defs b
             LEFT JOIN shop_catalog s ON s.building_type = b.type_id
             WHERE b.is_core = 0";
@@ -175,7 +199,7 @@ public class SqliteTechTreeRepository : ITechTreeRepository
         List<TechTreeNode> nodes = new();
         using SqliteConnection connection = OpenConnection();
         using SqliteCommand cmd = connection.CreateCommand();
-        cmd.CommandText = "SELECT type_id, faction_id, tier, col, shop_available, gold_cost, shop_weight, display_name, unit_type_id, max_health, spawn_interval, value FROM tech_tree_nodes WHERE faction_id = @factionId ORDER BY tier, col";
+        cmd.CommandText = "SELECT type_id, faction_id, tier, col, shop_available, gold_cost, shop_weight, display_name, unit_type_id, max_health, spawn_interval, value, race_id, is_core FROM tech_tree_nodes WHERE faction_id = @factionId ORDER BY tier, col";
         cmd.Parameters.AddWithValue("@factionId", factionId);
         using SqliteDataReader reader = cmd.ExecuteReader();
         while (reader.Read())
@@ -193,7 +217,9 @@ public class SqliteTechTreeRepository : ITechTreeRepository
                 UnitTypeId = reader.IsDBNull(8) ? null : reader.GetString(8),
                 MaxHealth = reader.GetInt32(9),
                 SpawnInterval = reader.GetFloat(10),
-                Value = reader.IsDBNull(11) ? 0 : reader.GetInt32(11)
+                Value = reader.IsDBNull(11) ? 0 : reader.GetInt32(11),
+                RaceId = reader.IsDBNull(12) ? "" : reader.GetString(12),
+                IsCore = reader.GetInt32(13) != 0
             });
         }
         return nodes;
@@ -278,8 +304,8 @@ public class SqliteTechTreeRepository : ITechTreeRepository
         GD.Print($"[SaveNodes] 清空派系旧节点数据: DELETE FROM tech_tree_nodes WHERE faction_id = '{factionId}'");
         cmd.ExecuteNonQuery();
 
-        cmd.CommandText = @"INSERT INTO tech_tree_nodes (type_id, faction_id, tier, col, shop_available, gold_cost, shop_weight, display_name, unit_type_id, max_health, spawn_interval, value)
-            VALUES (@typeId, @factionId, @tier, @col, @shopAvail, @goldCost, @shopWeight, @displayName, @unitTypeId, @maxHealth, @spawnInterval, @value)";
+        cmd.CommandText = @"INSERT INTO tech_tree_nodes (type_id, faction_id, tier, col, shop_available, gold_cost, shop_weight, display_name, unit_type_id, max_health, spawn_interval, value, race_id, is_core)
+            VALUES (@typeId, @factionId, @tier, @col, @shopAvail, @goldCost, @shopWeight, @displayName, @unitTypeId, @maxHealth, @spawnInterval, @value, @raceId, @isCore)";
 
         foreach (TechTreeNode node in nodes)
         {
@@ -296,6 +322,8 @@ public class SqliteTechTreeRepository : ITechTreeRepository
             cmd.Parameters.AddWithValue("@maxHealth", node.MaxHealth);
             cmd.Parameters.AddWithValue("@spawnInterval", node.SpawnInterval);
             cmd.Parameters.AddWithValue("@value", node.Value > 0 ? node.Value : node.GoldCost);
+            cmd.Parameters.AddWithValue("@raceId", string.IsNullOrEmpty(node.RaceId) ? "" : node.RaceId);
+            cmd.Parameters.AddWithValue("@isCore", node.IsCore ? 1 : 0);
             cmd.ExecuteNonQuery();
 
             GD.Print($"[SaveNodes] 写入节点 [{node.DisplayName}]: INSERT INTO tech_tree_nodes (type_id, faction_id, tier, col, shop_available, gold_cost, shop_weight, display_name, unit_type_id, max_health, spawn_interval, value) VALUES ('{node.TypeId}', '{factionId}', {node.Tier}, {node.Col}, {(node.ShopAvailable ? 1 : 0)}, {(node.ShopAvailable ? node.GoldCost.ToString() : "NULL")}, {(node.ShopAvailable ? node.ShopWeight.ToString() : "NULL")}, '{node.DisplayName}', '{node.UnitTypeId ?? "NULL"}', {node.MaxHealth}, {node.SpawnInterval}, {node.Value})");
@@ -406,10 +434,10 @@ public class SqliteTechTreeRepository : ITechTreeRepository
         using SqliteCommand cmd = connection.CreateCommand();
 
         cmd.CommandText = @"
-            INSERT OR REPLACE INTO building_defs (type_id, display_name, max_health, spawn_interval, main_cell_x, main_cell_y, spawn_cell_x, spawn_cell_y, unit_type_id, combine_tier, is_core, faction_id, footprint_json, collision_width, collision_height, production_rate, value)
+            INSERT OR REPLACE INTO building_defs (type_id, display_name, max_health, spawn_interval, main_cell_x, main_cell_y, spawn_cell_x, spawn_cell_y, unit_type_id, combine_tier, is_core, faction_id, race_id, footprint_json, collision_width, collision_height, production_rate, value)
             SELECT n.type_id, n.display_name, n.max_health, n.spawn_interval,
                    0, 0, 1, 1,
-                   n.unit_type_id, n.tier - 1, 0, @factionId,
+                   n.unit_type_id, n.tier - 1, n.is_core, @factionId, COALESCE(n.race_id, ''),
                    COALESCE(b.footprint_json, '[[0,0],[1,0],[0,1],[1,1]]'),
                    COALESCE(b.collision_width, 188),
                    COALESCE(b.collision_height, 188),

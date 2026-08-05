@@ -87,7 +87,7 @@ public partial class InitManager : Node
 
         foreach (BuildingSaveEntry entry in data.Buildings)
         {
-            if (entry.TypeId == "CastleHeart")
+            if (entry.TypeId == "CastleHeart" || GameManager.Get<IBuildingRepository>().IsCoreBuilding(entry.TypeId))
                 continue;
 
             Building building = AdapterRegistry.Resolve<BuildingSystem>().CreateBuilding(entry.TypeId);
@@ -98,6 +98,18 @@ public partial class InitManager : Node
             building.ApplySnapshotState(entry.Health, false, false);
             building.BindToGrid(playerCastle, entry.AnchorGridX, entry.AnchorGridY);
             playerCastle.PlaceBuilding(building, entry.AnchorGridX, entry.AnchorGridY, entry.TypeId);
+        }
+
+        foreach (BuildingSaveEntry entry in data.Buildings)
+        {
+            if (entry.TypeId == "CastleHeart")
+                continue;
+            if (GameManager.Get<IBuildingRepository>().IsCoreBuilding(entry.TypeId)
+                && entry.TypeId != playerCastle.Heart.TypeId)
+            {
+                playerCastle.ReplaceHeart(entry.TypeId, entry.Health);
+                break;
+            }
         }
 
         shopService.TrySpendGold(shopService.Gold);

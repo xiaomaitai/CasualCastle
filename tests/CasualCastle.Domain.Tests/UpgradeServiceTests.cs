@@ -23,6 +23,8 @@ public class UpgradeServiceTests
 		repo.Setup(r => r.GetValue("OrcCamp")).Returns(sourceValue);
 		repo.Setup(r => r.GetValue("OrcFortress")).Returns(resultValue);
 		repo.Setup(r => r.IsCoreBuilding(It.IsAny<string>())).Returns(false);
+		repo.Setup(r => r.GetFactionId(It.IsAny<string>())).Returns("alliance");
+		repo.Setup(r => r.GetCombineTier("OrcFortress")).Returns(1);
 		return repo;
 	}
 
@@ -119,5 +121,27 @@ public class UpgradeServiceTests
 		IBuildingState upgraded = service.TryUpgrade(source.Object, "OrcFortress", 0.5f, cost => true, factory.Object);
 
 		Assert.Same(result.Object, upgraded);
+	}
+
+	[Fact]
+	public void TryUpgrade_HordeCoreWithoutBurrows_ReturnsNull()
+	{
+		UpgradeRules rules = new();
+		rules.LoadRecipes(new List<UpgradeRecipe>
+		{
+			new() { SourceTypeId = "HordeCoreL1", ResultTypeId = "HordeCoreL2" }
+		});
+		Mock<IBuildingRepository> repo = new();
+		repo.Setup(r => r.GetValue("HordeCoreL1")).Returns(0);
+		repo.Setup(r => r.GetValue("HordeCoreL2")).Returns(20);
+		Mock<IBuildingState> source = CreateSource();
+		source.SetupGet(s => s.TypeId).Returns("HordeCoreL1");
+		Mock<IUpgradeBuildingFactory> factory = new();
+		UpgradeService service = new(rules, repo.Object);
+
+		IBuildingState upgraded = service.TryUpgrade(source.Object, "HordeCoreL2", 0.5f, cost => true, factory.Object, int.MaxValue, 0);
+
+		Assert.Null(upgraded);
+		factory.Verify(f => f.Create(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<float>()), Times.Never);
 	}
 }

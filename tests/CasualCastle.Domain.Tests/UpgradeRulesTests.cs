@@ -23,7 +23,21 @@ public class UpgradeRulesTests
 		repo.Setup(r => r.GetValue("OrcCamp")).Returns(sourceValue);
 		repo.Setup(r => r.GetValue("OrcFortress")).Returns(resultValue);
 		repo.Setup(r => r.IsCoreBuilding(It.IsAny<string>())).Returns(false);
+		repo.Setup(r => r.GetFactionId(It.IsAny<string>())).Returns("alliance");
+		repo.Setup(r => r.GetCombineTier("OrcFortress")).Returns(1);
 		return repo;
+	}
+
+	private static UpgradeRules CreateRulesWithCoreRecipe()
+	{
+		UpgradeRules rules = new();
+		rules.LoadRecipes(new List<UpgradeRecipe>
+		{
+			new() { SourceTypeId = "OrcCamp", ResultTypeId = "OrcFortress" },
+			new() { SourceTypeId = "HordeCoreL1", ResultTypeId = "HordeCoreL2" },
+			new() { SourceTypeId = "HordeCoreL2", ResultTypeId = "HordeCoreL3" }
+		});
+		return rules;
 	}
 
 	private static Mock<IBuildingState> CreateSource(bool isPlayerOwned, bool isDestroyed, string typeId = "OrcCamp")
@@ -104,16 +118,46 @@ public class UpgradeRulesTests
 	}
 
 	[Fact]
-	public void CanUpgrade_CoreBuilding_ReturnsFalse()
+	public void CanUpgrade_HordeCoreLevel_RequiresBurrowCount()
+	{
+		UpgradeRules rules = CreateRulesWithCoreRecipe();
+		Mock<IBuildingRepository> repo = CreateRepo(3, 7);
+		Mock<IBuildingState> source = CreateSource(true, false, "HordeCoreL1");
+
+		bool withoutBurrow = rules.CanUpgrade(source.Object, repo.Object, int.MaxValue, 0);
+		bool withBurrow = rules.CanUpgrade(source.Object, repo.Object, int.MaxValue, 1);
+
+		Assert.False(withoutBurrow);
+		Assert.True(withBurrow);
+	}
+
+	[Fact]
+	public void CanUpgrade_HordeCoreLevelTwo_RequiresThreeBurrows()
+	{
+		UpgradeRules rules = CreateRulesWithCoreRecipe();
+		Mock<IBuildingRepository> repo = CreateRepo(3, 7);
+		Mock<IBuildingState> source = CreateSource(true, false, "HordeCoreL2");
+
+		bool withTwoBurrows = rules.CanUpgrade(source.Object, repo.Object, int.MaxValue, 2);
+		bool withThreeBurrows = rules.CanUpgrade(source.Object, repo.Object, int.MaxValue, 3);
+
+		Assert.False(withTwoBurrows);
+		Assert.True(withThreeBurrows);
+	}
+
+	[Fact]
+	public void CanUpgrade_HordeBuilding_RequiresCoreLevel()
 	{
 		UpgradeRules rules = CreateRules();
 		Mock<IBuildingRepository> repo = CreateRepo(3, 7);
-		repo.Setup(r => r.IsCoreBuilding(It.IsAny<string>())).Returns(true);
+		repo.Setup(r => r.GetFactionId("OrcCamp")).Returns(FactionDef.HordeId);
 		Mock<IBuildingState> source = CreateSource(true, false);
 
-		bool canUpgrade = rules.CanUpgrade(source.Object, repo.Object);
+		bool withLevelOneCore = rules.CanUpgrade(source.Object, repo.Object, 1, 0);
+		bool withLevelTwoCore = rules.CanUpgrade(source.Object, repo.Object, 2, 0);
 
-		Assert.False(canUpgrade);
+		Assert.False(withLevelOneCore);
+		Assert.True(withLevelTwoCore);
 	}
 
 	[Fact]
