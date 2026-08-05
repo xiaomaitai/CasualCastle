@@ -1,7 +1,9 @@
 // 开发者模式专属：局内运行时信息面板，按分组显示可选实时数据。
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Building;
+using CasualCastle.Domain.History;
 using Godot;
+using System.Collections.Generic;
 
 namespace CasualCastle.Adapters.Godot.Dev;
 
@@ -119,13 +121,13 @@ public sealed class RuntimeInfoPanelController
 		int playerHand = SumHandValue();
 		int playerGold = GetGold();
 		int enemyPlaced = SumPlacedValue(gm.EnemyCastle);
+		(int enemyHand, int enemyGold) = GetEnemyEconomy(gm);
 		return string.Join("\n",
 			"【财富】",
 			$"玩家 财富值：{playerPlaced + playerHand + playerGold}（手牌 {playerHand} / 存款 {playerGold}）",
 			$"玩家 已放置财富值：{playerPlaced}",
-			$"敌方 财富值：{enemyPlaced}",
-			$"敌方 已放置财富值：{enemyPlaced}",
-			"敌方无手牌与存款经济");
+			$"敌方 财富值：{enemyPlaced + enemyHand + enemyGold}（手牌 {enemyHand} / 存款 {enemyGold}）",
+			$"敌方 已放置财富值：{enemyPlaced}");
 	}
 
 	private static int SumPlacedValue(Castle castle)
@@ -154,5 +156,26 @@ public sealed class RuntimeInfoPanelController
 	{
 		Shop shop = AdapterRegistry.Resolve<Shop>();
 		return shop == null ? 0 : shop.Gold;
+	}
+
+	private static (int handValue, int gold) GetEnemyEconomy(GameManager gm)
+	{
+		BattleReportSystem reportSystem = AdapterRegistry.Resolve<BattleReportSystem>();
+		if (reportSystem == null)
+			return (0, 0);
+		int nightIndex = gm.IsDay ? gm.CurrentNightIndex + 1 : gm.CurrentNightIndex;
+		CastleSnapshot snapshot = reportSystem.GetSelectedPhaseSnapshot(nightIndex, BattlePhase.Day);
+		if (snapshot == null)
+			return (0, 0);
+		return (SumCardValue(snapshot.HandCards), snapshot.Gold);
+	}
+
+	private static int SumCardValue(IEnumerable<CardSnapshot> cards)
+	{
+		BuildingSystem buildingSystem = AdapterRegistry.Resolve<BuildingSystem>();
+		int total = 0;
+		foreach (CardSnapshot card in cards)
+			total += buildingSystem.GetValue(card.BuildingType);
+		return total;
 	}
 }

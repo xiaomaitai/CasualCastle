@@ -151,6 +151,29 @@ public class BattleReportServiceTests
 	}
 
 	[Fact]
+	public void CapturePhaseSnapshot_StoresGoldAndHandCards()
+	{
+		BattleReportService service = CreateService(out FakeReportRepository _);
+		service.StartMatch("");
+		List<CardData> cards = new()
+		{
+			new CardData { BuildingType = "Barracks", Cost = 3 },
+		};
+
+		service.CapturePhaseSnapshot(new[]
+		{
+			new BuildingSnapshot { TypeId = "Barracks", AnchorGridX = 1, AnchorGridY = 1, Health = 100 },
+		}, 1, BattlePhase.Day, 25, cards);
+
+		BattleReport saved = service.SaveCurrentReportDaily("report name");
+
+		Assert.Equal(25, saved.Nights[0].Gold);
+		CardSnapshot card = Assert.Single(saved.Nights[0].HandCards);
+		Assert.Equal("Barracks", card.BuildingType);
+		Assert.Equal(3, card.Cost);
+	}
+
+	[Fact]
 	public void GetSelectedPhaseSnapshot_ReturnsOnlyMatchingPhase()
 	{
 		BattleReportService service = CreateService(out FakeReportRepository _);
@@ -188,7 +211,7 @@ public class BattleReportServiceTests
 		service.CapturePhaseSnapshot(new[]
 		{
 			new BuildingSnapshot { TypeId = "Barracks", AnchorGridX = 1, AnchorGridY = 1, Health = 100 },
-		}, nightIndex, phase);
+		}, nightIndex, phase, 0, new List<CardData>());
 	}
 }
 

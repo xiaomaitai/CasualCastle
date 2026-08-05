@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using CasualCastle.Domain.Building;
 using CasualCastle.Domain.History;
 using Xunit;
 
@@ -15,7 +16,7 @@ public class ReportBuilderTests
 			new BuildingSnapshot { TypeId = "Barracks", AnchorGridX = 2, AnchorGridY = 3, Health = 80 },
 		};
 
-		CastleSnapshot snapshot = ReportBuilder.CaptureSnapshot(source, 1, BattlePhase.Day, typeId => typeId == "CastleHeart");
+		CastleSnapshot snapshot = ReportBuilder.CaptureSnapshot(source, 1, BattlePhase.Day, typeId => typeId == "CastleHeart", 0, new List<CardData>());
 
 		Assert.Single(snapshot.Buildings);
 		Assert.Equal("Barracks", snapshot.Buildings[0].TypeId);
@@ -35,7 +36,7 @@ public class ReportBuilderTests
 			},
 		};
 
-		CastleSnapshot snapshot = ReportBuilder.CaptureSnapshot(source, 2, BattlePhase.Night, _ => false);
+		CastleSnapshot snapshot = ReportBuilder.CaptureSnapshot(source, 2, BattlePhase.Night, _ => false, 0, new List<CardData>());
 
 		Assert.Single(snapshot.Buildings);
 		BuildingSnapshot building = snapshot.Buildings[0];
@@ -95,5 +96,39 @@ public class ReportBuilderTests
 		Assert.Equal(source.Phase, clone.Phase);
 		Assert.Single(clone.Buildings);
 		Assert.NotSame(source.Buildings[0], clone.Buildings[0]);
+	}
+
+	[Fact]
+	public void CaptureSnapshot_RecordsGoldAndHandCards()
+	{
+		List<CardData> cards = new()
+		{
+			new CardData { BuildingType = "Barracks", Cost = 3 },
+			new CardData { BuildingType = "Stable", Cost = 5 },
+		};
+
+		CastleSnapshot snapshot = ReportBuilder.CaptureSnapshot(
+			new List<BuildingSnapshot>(), 1, BattlePhase.Day, _ => false, 25, cards);
+
+		Assert.Equal(25, snapshot.Gold);
+		Assert.Equal(2, snapshot.HandCards.Count);
+		Assert.Equal("Barracks", snapshot.HandCards[0].BuildingType);
+		Assert.Equal(3, snapshot.HandCards[0].Cost);
+		Assert.Equal("Stable", snapshot.HandCards[1].BuildingType);
+	}
+
+	[Fact]
+	public void CloneSnapshot_DeepCopiesHandCards()
+	{
+		CastleSnapshot source = new() { NightIndex = 1, Phase = BattlePhase.Day, Gold = 30 };
+		source.HandCards.Add(new CardSnapshot { BuildingType = "Stable", Cost = 5 });
+
+		CastleSnapshot clone = ReportBuilder.CloneSnapshot(source);
+
+		Assert.Equal(30, clone.Gold);
+		CardSnapshot card = Assert.Single(clone.HandCards);
+		Assert.NotSame(source.HandCards[0], card);
+		Assert.Equal("Stable", card.BuildingType);
+		Assert.Equal(5, card.Cost);
 	}
 }

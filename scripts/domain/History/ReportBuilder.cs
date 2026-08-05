@@ -1,3 +1,4 @@
+using CasualCastle.Domain.Building;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,12 +9,14 @@ public static class ReportBuilder
 {
     public static CastleSnapshot CaptureSnapshot(
         IEnumerable<BuildingSnapshot> sourceBuildings, int nightIndex, BattlePhase phase,
-        System.Func<string, bool> isCoreBuilding)
+        System.Func<string, bool> isCoreBuilding, int gold, IEnumerable<CardData> handCards)
     {
         CastleSnapshot snapshot = new()
         {
             NightIndex = nightIndex,
             Phase = phase,
+            Gold = gold,
+            HandCards = handCards.Select(CreateCardSnapshot).ToList(),
         };
 
         foreach (BuildingSnapshot building in sourceBuildings)
@@ -49,6 +52,10 @@ public static class ReportBuilder
             Buildings = source.Buildings
                 .Select(CloneBuildingSnapshot)
                 .ToList(),
+            Gold = source.Gold,
+            HandCards = source.HandCards
+                .Select(CloneCardSnapshot)
+                .ToList(),
         };
     }
 
@@ -62,6 +69,24 @@ public static class ReportBuilder
             Health = source.Health,
             IsManuallyPaused = source.IsManuallyPaused,
             IsCombineProhibited = source.IsCombineProhibited,
+        };
+    }
+
+    public static CardSnapshot CreateCardSnapshot(CardData card)
+    {
+        return new CardSnapshot
+        {
+            BuildingType = card.BuildingType,
+            Cost = card.Cost,
+        };
+    }
+
+    public static CardSnapshot CloneCardSnapshot(CardSnapshot source)
+    {
+        return new CardSnapshot
+        {
+            BuildingType = source.BuildingType,
+            Cost = source.Cost,
         };
     }
 }

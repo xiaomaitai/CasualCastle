@@ -19,11 +19,19 @@ public class BuildingSnapshot
 	public bool IsCombineProhibited { get; set; }
 }
 
+public class CardSnapshot
+{
+	public string BuildingType { get; set; } = "";
+	public int Cost { get; set; }
+}
+
 public class CastleSnapshot
 {
 	public int NightIndex { get; set; }
 	public BattlePhase Phase { get; set; }
 	public List<BuildingSnapshot> Buildings { get; set; } = new();
+	public int Gold { get; set; }
+	public List<CardSnapshot> HandCards { get; set; } = new();
 }
 
 public class BattleReport

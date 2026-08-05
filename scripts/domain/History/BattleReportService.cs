@@ -33,13 +33,14 @@ public class BattleReportService
     }
 
     public void CapturePhaseSnapshot(
-        IEnumerable<BuildingSnapshot> buildingSnapshots, int nightIndex, BattlePhase phase)
+        IEnumerable<BuildingSnapshot> buildingSnapshots, int nightIndex, BattlePhase phase,
+        int gold, IEnumerable<CardData> handCards)
     {
         if (nightIndex <= 0)
             return;
 
         CastleSnapshot snapshot = ReportBuilder.CaptureSnapshot(
-            buildingSnapshots, nightIndex, phase, _buildingRepo.IsCoreBuilding);
+            buildingSnapshots, nightIndex, phase, _buildingRepo.IsCoreBuilding, gold, handCards);
 
         _currentReport.Nights.RemoveAll(s => s.NightIndex == nightIndex && s.Phase == phase);
         _currentReport.Nights.Add(snapshot);

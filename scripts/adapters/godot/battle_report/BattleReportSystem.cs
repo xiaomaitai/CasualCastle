@@ -47,7 +47,19 @@ public partial class BattleReportSystem : Node
                 IsCombineProhibited = b.IsCombineProhibited,
             });
 
-        _service.CapturePhaseSnapshot(snapshots, nightIndex, phase);
+        (int gold, IReadOnlyList<CardData> handCards) = CapturePlayerEconomy();
+        _service.CapturePhaseSnapshot(snapshots, nightIndex, phase, gold, handCards);
+    }
+
+    private static (int gold, IReadOnlyList<CardData> handCards) CapturePlayerEconomy()
+    {
+        Shop shop = AdapterRegistry.Resolve<Shop>();
+        Hand hand = AdapterRegistry.Resolve<Hand>();
+        int gold = shop == null ? 0 : shop.Gold;
+        IReadOnlyList<CardData> handCards = hand == null
+            ? System.Array.Empty<CardData>()
+            : hand.Cards;
+        return (gold, handCards);
     }
 
     public void DiscardCurrentReport()

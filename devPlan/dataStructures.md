@@ -79,11 +79,19 @@ public class BuildingSnapshot
 
 public enum BattlePhase { Day, Night, Combine }
 
+public class CardSnapshot
+{
+	public string BuildingType;         // 手牌对应建筑类型
+	public int Cost;                    // 购买价格（= 建筑价值）
+}
+
 public class CastleSnapshot
 {
 	public int NightIndex;              // 第几个昼夜循环
 	public BattlePhase Phase;           // 阶段：白天 / 夜晚 / 合成
 	public List<BuildingSnapshot> Buildings;
+	public int Gold;                    // 快照时玩家金币（存款）
+	public List<CardSnapshot> HandCards; // 快照时玩家手牌
 }
 
 public class BattleReport
