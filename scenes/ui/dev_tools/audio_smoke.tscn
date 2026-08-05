@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://6lvukp1fu762i"]
+[gd_scene format=3 uid="uid://omvuaofdl60e"]
 
 [ext_resource type="Script" path="res://scripts/adapters/godot/dev/AudioSmoke.cs" id="1"]
 

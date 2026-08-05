@@ -19,8 +19,12 @@ Kenney 授权说明：https://kenney.nl/assets/（各包 License.txt 均为 CC0�
 | sfx_repair.ogg | repair | Impact Sounds | impactMetal_light_000.ogg |
 | sfx_combine.ogg | combine | Digital Audio | phaseJump1.ogg |
 | sfx_upgrade.ogg | upgrade | Digital Audio | powerUp7.ogg |
-| sfx_melee_attack.ogg | melee_attack | Impact Sounds | impactPunch_medium_000.ogg |
-| sfx_projectile_launch.ogg | projectile_launch | RPG Audio | knifeSlice2.ogg |
+| sfx_melee_attack.ogg | melee_attack（钝击/兜底） | Impact Sounds | impactPunch_medium_000.ogg |
+| sfx_melee_slash.ogg | melee_slash | RPG Audio | knifeSlice.ogg |
+| sfx_melee_pierce.ogg | melee_pierce | RPG Audio | drawKnife2.ogg |
+| sfx_projectile_launch.ogg | projectile_launch（其他远程/兜底） | RPG Audio | knifeSlice2.ogg |
+| sfx_launch_arrow.ogg | launch_arrow | RPG Audio | clothBelt.ogg |
+| sfx_launch_magic.ogg | launch_magic | Digital Audio | phaserUp1.ogg |
 | sfx_projectile_hit.ogg | projectile_hit | Impact Sounds | impactGeneric_light_001.ogg |
 | sfx_hit.ogg | hit（钝击/兜底） | Impact Sounds | impactPunch_heavy_000.ogg |
 | sfx_hit_slash.ogg | hit_slash | Impact Sounds | impactMetal_light_000.ogg |

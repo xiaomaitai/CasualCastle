@@ -17,7 +17,11 @@ public static class SfxEvents
 	public const string Combine = "combine";
 	public const string Upgrade = "upgrade";
 	public const string MeleeAttack = "melee_attack";
+	public const string MeleeSlash = "melee_slash";
+	public const string MeleePierce = "melee_pierce";
 	public const string ProjectileLaunch = "projectile_launch";
+	public const string LaunchArrow = "launch_arrow";
+	public const string LaunchMagic = "launch_magic";
 	public const string ProjectileHit = "projectile_hit";
 	public const string Hit = "hit";
 	public const string HitSlash = "hit_slash";

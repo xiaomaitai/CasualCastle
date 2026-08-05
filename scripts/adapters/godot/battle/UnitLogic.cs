@@ -296,6 +296,32 @@ public partial class UnitLogic : Node2D
 			_tactical.PropagateRetaliation(_unit, attacker);
 	}
 
+	private string GetAttackSfxEvent()
+	{
+		if (AttackType == AttackType.Melee)
+		{
+			switch (DamageType)
+			{
+				case DamageType.Slash:
+					return SfxEvents.MeleeSlash;
+				case DamageType.Pierce:
+					return SfxEvents.MeleePierce;
+				default:
+					return SfxEvents.MeleeAttack;
+			}
+		}
+
+		switch (DamageType)
+		{
+			case DamageType.Pierce:
+				return SfxEvents.LaunchArrow;
+			case DamageType.Magic:
+				return SfxEvents.LaunchMagic;
+			default:
+				return SfxEvents.ProjectileLaunch;
+		}
+	}
+
 	private static string GetHitSfxEvent(IUnitHandle attacker)
 	{
 		if (attacker == null)
@@ -359,7 +385,7 @@ public partial class UnitLogic : Node2D
 		if (root == null)
 			return;
 
-		Sfx.Play(AttackType == AttackType.Melee ? SfxEvents.MeleeAttack : SfxEvents.ProjectileLaunch);
+		Sfx.Play(GetAttackSfxEvent());
 		Projectile projectile = new Projectile();
 		root.AddChild(projectile);
 		projectile.PlayHitSound = AttackType == AttackType.Ranged;
