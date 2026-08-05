@@ -8,9 +8,8 @@ public class StatModifierConfig
 {
 	public StatModifierTrigger Trigger { get; set; }
 	public float TriggerParam { get; set; }
+	public string RaceRequirement { get; set; }
 	public Dictionary<string, float> Modifiers { get; set; }
-	public Dictionary<string, float> StepBonuses { get; set; }
-	public Dictionary<string, float> StepCaps { get; set; }
 
 	public float GetMultiplier(string key)
 	{
@@ -26,19 +25,15 @@ public class StatModifierConfig
 		JsonElement root = JsonDocument.Parse(json).RootElement;
 		StatModifierConfig config = new()
 		{
-			Modifiers = new Dictionary<string, float>(),
-			StepBonuses = new Dictionary<string, float>(),
-			StepCaps = new Dictionary<string, float>()
+			Modifiers = new Dictionary<string, float>()
 		};
 
-		bool hasTriggerParam = false;
 		if (root.TryGetProperty("trigger", out JsonElement triggerElem))
 		{
-			string trigger = triggerElem.GetString();
-			config.Trigger = trigger switch
+			config.Trigger = triggerElem.GetString() switch
 			{
 				"low_health" => StatModifierTrigger.LowHealth,
-				"low_health_step" => StatModifierTrigger.LowHealthStep,
+				"on_damaged" => StatModifierTrigger.OnDamaged,
 				"target_isolated" => StatModifierTrigger.TargetIsolated,
 				"nearby_diverse" => StatModifierTrigger.NearbyDiverse,
 				_ => StatModifierTrigger.Always
@@ -46,18 +41,9 @@ public class StatModifierConfig
 		}
 
 		if (root.TryGetProperty("trigger_param", out JsonElement paramElem))
-		{
 			config.TriggerParam = paramElem.GetSingle();
-			hasTriggerParam = true;
-		}
-
-		if (config.Trigger == StatModifierTrigger.LowHealthStep)
-		{
-			int tier = root.TryGetProperty("tier", out JsonElement tierElem) ? tierElem.GetInt32() : 1;
-			ApplyFuryTierDefaults(config, tier);
-			if (hasTriggerParam)
-				config.TriggerParam = root.GetProperty("trigger_param").GetSingle();
-		}
+		if (root.TryGetProperty("race", out JsonElement raceElem))
+			config.RaceRequirement = raceElem.GetString();
 
 		if (root.TryGetProperty("modifiers", out JsonElement modsElem))
 		{
@@ -65,39 +51,29 @@ public class StatModifierConfig
 				config.Modifiers[prop.Name] = prop.Value.GetSingle();
 		}
 
-		if (root.TryGetProperty("step_bonuses", out JsonElement stepBonusesElem))
-		{
-			foreach (JsonProperty prop in stepBonusesElem.EnumerateObject())
-				config.StepBonuses[prop.Name] = prop.Value.GetSingle();
-		}
-
-		if (root.TryGetProperty("step_caps", out JsonElement stepCapsElem))
-		{
-			foreach (JsonProperty prop in stepCapsElem.EnumerateObject())
-				config.StepCaps[prop.Name] = prop.Value.GetSingle();
-		}
-
 		return config;
 	}
+}
 
-	private static void ApplyFuryTierDefaults(StatModifierConfig config, int tier)
+public class AuraConfig
+{
+	public AuraTarget Target { get; set; }
+	public float Range { get; set; }
+
+	public static AuraConfig Parse(string json)
 	{
-		if (tier >= 2)
+		JsonElement root = JsonDocument.Parse(json).RootElement;
+		return new AuraConfig
 		{
-			config.TriggerParam = GameRules.FuryLowHealthStepT2;
-			config.Modifiers["attack_damage_mult"] = 1f;
-			config.Modifiers["attack_speed_mult"] = 1f;
-			config.StepBonuses["attack_damage_mult"] = GameRules.FuryAttackBonusPerStepT2;
-			config.StepBonuses["attack_speed_mult"] = GameRules.FuryAttackSpeedBonusPerStepT2;
-			config.StepCaps["attack_damage_mult"] = GameRules.FuryAttackMultiplierCapT2;
-			config.StepCaps["attack_speed_mult"] = GameRules.FuryAttackSpeedMultiplierCapT2;
-			return;
-		}
-
-		config.TriggerParam = GameRules.FuryLowHealthStepT1;
-		config.Modifiers["attack_damage_mult"] = 1f;
-		config.StepBonuses["attack_damage_mult"] = GameRules.FuryAttackBonusPerStepT1;
-		config.StepCaps["attack_damage_mult"] = GameRules.FuryAttackMultiplierCapT1;
+			Target = root.GetProperty("target").GetString() switch
+			{
+				"nearby_enemies" => AuraTarget.NearbyEnemies,
+				"all_allies" => AuraTarget.AllAllies,
+				"all_enemies" => AuraTarget.AllEnemies,
+				_ => AuraTarget.NearbyAllies
+			},
+			Range = root.GetProperty("range").GetSingle()
+		};
 	}
 }
 
@@ -165,28 +141,6 @@ public class OnHealConfig
 		}
 
 		return config;
-	}
-}
-
-public class AuraConfig
-{
-	public AuraTarget Target { get; set; }
-	public float Range { get; set; }
-
-	public static AuraConfig Parse(string json)
-	{
-		JsonElement root = JsonDocument.Parse(json).RootElement;
-		return new AuraConfig
-		{
-			Target = root.GetProperty("target").GetString() switch
-			{
-				"nearby_enemies" => AuraTarget.NearbyEnemies,
-				"all_allies" => AuraTarget.AllAllies,
-				"all_enemies" => AuraTarget.AllEnemies,
-				_ => AuraTarget.NearbyAllies
-			},
-			Range = root.GetProperty("range").GetSingle()
-		};
 	}
 }
 

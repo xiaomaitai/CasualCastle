@@ -79,7 +79,7 @@ public sealed class AttributePanelController
 		_subLabel.Text = (unit.IsPlayerUnit ? "我方" : "敌方")
 			+ " · " + RaceName(state.Race)
 			+ (state.IsStealthed ? " · 隐身中" : "");
-		_statsLabel.Text = BuildUnitStats(state) + BuildFuryAuraLine(unit);
+		_statsLabel.Text = BuildUnitStats(state) + BuildFuryLine(unit);
 
 		ClearSkillsRow();
 		foreach (SkillDef skill in state.Skills.All)
@@ -164,11 +164,19 @@ public sealed class AttributePanelController
 		return building.CanWork ? "工作中" : "停止工作";
 	}
 
-	private static string BuildFuryAuraLine(UnitLogic unit)
+	private static string BuildFuryLine(UnitLogic unit)
 	{
 		string line = "";
-		if (unit.FuryDamageMultiplier > 1.01f)
-			line += $"狂怒 攻击 +{Mathf.RoundToInt((unit.FuryDamageMultiplier - 1f) * 100f)}%\n";
+		if (unit.IsFurious)
+		{
+			line += "狂怒中\n";
+			if (unit.FuryDamageMultiplier > 1.01f)
+				line += $"狂怒 攻击 +{Mathf.RoundToInt((unit.FuryDamageMultiplier - 1f) * 100f)}%\n";
+			if (unit.FuryAttackSpeedMultiplier > 1.01f)
+				line += $"狂怒 攻速 +{Mathf.RoundToInt((unit.FuryAttackSpeedMultiplier - 1f) * 100f)}%\n";
+			if (unit.FuryMoveSpeedMultiplier > 1.01f)
+				line += $"狂怒 移速 +{Mathf.RoundToInt((unit.FuryMoveSpeedMultiplier - 1f) * 100f)}%\n";
+		}
 		if (unit.AuraAttackMultiplier > 1.01f)
 			line += $"共鸣 攻击 +{Mathf.RoundToInt((unit.AuraAttackMultiplier - 1f) * 100f)}%\n";
 		return line;
@@ -299,6 +307,7 @@ public sealed class AttributePanelController
 			"Dwarf" => "矮人",
 			"Halfling" => "半身人",
 			"Dragonborn" => "龙裔",
+			"Orc" => "兽人",
 			_ => race,
 		};
 	}

@@ -25,6 +25,7 @@ public interface IUnitState
 	string Race { get; }
 	bool IsStealthed { get; }
 	bool CanDetectStealth { get; }
+	bool IsFurious { get; }
 	float HealAmount { get; }
 	float HealRange { get; }
 	float HealInterval { get; }

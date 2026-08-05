@@ -44,6 +44,8 @@ public class SkillService
 			}
 
 			ctx.CurrentHpRatio = unit.MaxHealth > 0 ? (float)unit.Health / unit.MaxHealth : 0f;
+			ctx.Race = unit.Race;
+			ctx.IsFurious = unit.IsFurious;
 			ctx.NearbyAllyRaces = nearbyRaces;
 
 			bool isolated = true;

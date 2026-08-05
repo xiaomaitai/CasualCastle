@@ -361,8 +361,6 @@ INSERT INTO unit_skills VALUES('Inquisitor','grace_burn_t1');
 INSERT INTO unit_skills VALUES('Punisher','grace_burn_t2');
 INSERT INTO unit_skills VALUES('OrcWarrior','orc_rage_t1');
 INSERT INTO unit_skills VALUES('OrcBerserker','orc_rage_t2');
-INSERT INTO unit_skills VALUES('OrcWarrior','orc_rage_aura');
-INSERT INTO unit_skills VALUES('OrcBerserker','orc_rage_aura');
 CREATE TABLE IF NOT EXISTS "skill_defs" (
     id TEXT PRIMARY KEY,
     display_name TEXT NOT NULL,
@@ -378,9 +376,8 @@ INSERT INTO skill_defs VALUES('grace_shield','恩典·护盾','on_heal','{"effec
 INSERT INTO skill_defs VALUES('grace_cooldown','恩典·冷却祝福','on_heal','{"effects":[{"type":"cooldown_reduction","value":1.0}]}','受到治疗时技能冷却减少 1 秒');
 INSERT INTO skill_defs VALUES('grace_burn_t1','恩典·灼烧','on_heal','{"effects":[{"type":"burn","value":15,"range":120}]}','受到治疗时灼烧周围 120 范围内敌人，造成 15 点伤害');
 INSERT INTO skill_defs VALUES('grace_burn_t2','恩典·灼烧','on_heal','{"effects":[{"type":"burn","value":25,"range":120}]}','受到治疗时灼烧周围 120 范围内敌人，造成 25 点伤害');
-INSERT INTO skill_defs VALUES('orc_rage_t1','狂怒','stat_modifier','{"trigger":"low_health_step","tier":1}','每损失 20% 生命，攻击力 +10%（最高 +40%）');
-INSERT INTO skill_defs VALUES('orc_rage_t2','狂暴','stat_modifier','{"trigger":"low_health_step","tier":2}','每损失 15% 生命，攻击力 +12%（最高 +48%），攻速 +8%（最高 +32%）');
-INSERT INTO skill_defs VALUES('orc_rage_aura','狂怒共鸣','aura','{"target":"nearby_allies","range":150}','周围友方部落单位攻击力 +10%，同种族光环不叠加');
+INSERT INTO skill_defs VALUES('orc_rage_t1','狂怒','stat_modifier','{"trigger":"on_damaged","race":"Orc","modifiers":{"attack_damage_mult":1.3,"move_speed_mult":1.15}}','受到伤害后进入狂怒状态（永久）：攻击力 +30%，移动速度 +15%（仅兽人）');
+INSERT INTO skill_defs VALUES('orc_rage_t2','狂暴','stat_modifier','{"trigger":"on_damaged","race":"Orc","modifiers":{"attack_damage_mult":1.15,"attack_speed_mult":1.3,"move_speed_mult":1.15}}','受到伤害后进入狂暴状态（永久）：攻击力 +15%，攻击速度 +30%，移动速度 +15%（仅兽人）');
 CREATE TABLE upgrade_recipes (
     source_type_id TEXT NOT NULL,
     result_type_id TEXT NOT NULL,

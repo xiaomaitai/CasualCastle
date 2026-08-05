@@ -31,7 +31,14 @@ public partial class UnitLogic : Node2D
 	public float FuryDamageMultiplier => _unit != null
 		? _unit.Skills.GetStatMultiplier("attack_damage_mult", _unit.GameCtx)
 		: 1f;
+	public float FuryAttackSpeedMultiplier => _unit != null
+		? _unit.Skills.GetStatMultiplier("attack_speed_mult", _unit.GameCtx)
+		: 1f;
+	public float FuryMoveSpeedMultiplier => _unit != null
+		? _unit.Skills.GetStatMultiplier("move_speed_mult", _unit.GameCtx)
+		: 1f;
 	public float AuraAttackMultiplier => _unit?.GameCtx.AuraAttackMultiplier ?? 1f;
+	public bool IsFurious => _unit?.IsFurious ?? false;
 
 	private bool _statsPending;
 	private NavigationAgent2D _navigationAgent;
@@ -167,8 +174,8 @@ public partial class UnitLogic : Node2D
 			buffs.Add("隐身");
 		if (_unit != null && _unit.ShieldHealth > 0)
 			buffs.Add("护盾");
-		if (FuryDamageMultiplier > 1.01f)
-			buffs.Add($"狂怒 +{Mathf.RoundToInt((FuryDamageMultiplier - 1f) * 100f)}%");
+		if (IsFurious)
+			buffs.Add("狂怒");
 		if (AuraAttackMultiplier > 1.01f)
 			buffs.Add($"共鸣 +{Mathf.RoundToInt((AuraAttackMultiplier - 1f) * 100f)}%");
 		_visual?.SetBuffs(buffs.ToArray());

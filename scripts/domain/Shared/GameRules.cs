@@ -22,14 +22,6 @@ public static class GameRules
 	public const int HordeAdjacencyMaxEmptyCells = 4;
 	public const float AuraRangeRadius = 150f;
 	public const float AuraAttackBonusMultiplier = 1.10f;
-	public const float FuryLowHealthStepT1 = 0.20f;
-	public const float FuryAttackBonusPerStepT1 = 0.10f;
-	public const float FuryAttackMultiplierCapT1 = 1.40f;
-	public const float FuryLowHealthStepT2 = 0.15f;
-	public const float FuryAttackBonusPerStepT2 = 0.12f;
-	public const float FuryAttackMultiplierCapT2 = 1.48f;
-	public const float FuryAttackSpeedBonusPerStepT2 = 0.08f;
-	public const float FuryAttackSpeedMultiplierCapT2 = 1.32f;
 
 	public static readonly float[] DodgeChanceByAllyRaceCount = { 0f, 0f, 0.10f, 0.20f, 0.30f, 0.35f, 0.40f, 0.40f };
 }

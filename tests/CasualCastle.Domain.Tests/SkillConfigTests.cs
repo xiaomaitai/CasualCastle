@@ -64,6 +64,23 @@ public class SkillConfigTests
 	}
 
 	[Fact]
+	public void StatModifierConfig_Parse_OnDamaged_ReturnsCorrectConfig()
+	{
+		StatModifierConfig cfg = StatModifierConfig.Parse("{\"trigger\":\"on_damaged\",\"race\":\"Orc\",\"modifiers\":{\"attack_damage_mult\":1.3,\"move_speed_mult\":1.15}}");
+		Assert.Equal(StatModifierTrigger.OnDamaged, cfg.Trigger);
+		Assert.Equal("Orc", cfg.RaceRequirement);
+		Assert.Equal(1.3f, cfg.GetMultiplier("attack_damage_mult"));
+		Assert.Equal(1.15f, cfg.GetMultiplier("move_speed_mult"));
+	}
+
+	[Fact]
+	public void StatModifierConfig_Parse_NoRace_UsesNullRequirement()
+	{
+		StatModifierConfig cfg = StatModifierConfig.Parse("{\"trigger\":\"on_damaged\",\"modifiers\":{\"attack_damage_mult\":1.3}}");
+		Assert.Null(cfg.RaceRequirement);
+	}
+
+	[Fact]
 	public void AuraConfig_Parse_NearbyAllies_ReturnsCorrectConfig()
 	{
 		AuraConfig cfg = AuraConfig.Parse("{\"target\": \"nearby_enemies\", \"range\": 200}");

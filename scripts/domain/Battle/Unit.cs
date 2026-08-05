@@ -29,6 +29,7 @@ public class Unit : IUnitHandle
 	public ArmorType ArmorType { get; set; }
 	public int ArmorValue { get; set; }
 	public string Race { get; set; }
+	public bool IsFurious { get; private set; }
 	public bool IsStealthed { get; private set; }
 	public bool CanDetectStealth { get; set; }
 	public float HealAmount { get; set; }
@@ -182,12 +183,13 @@ public class Unit : IUnitHandle
 
 	public float GetCurrentSpeed()
 	{
+		float speedMult = Skills.GetStatMultiplier("move_speed_mult", GameCtx);
 		if (!IsStealthed)
-			return Speed;
+			return Speed * speedMult;
 		SpecialConfig stealth = Skills.GetSpecial(SpecialBehavior.Stealth);
 		if (stealth == null)
-			return Speed;
-		return Speed * stealth.SpeedMult;
+			return Speed * speedMult;
+		return Speed * stealth.SpeedMult * speedMult;
 	}
 
 	public float GetSkillCooldownRemaining(string skillId)
@@ -254,6 +256,8 @@ public class Unit : IUnitHandle
 		}
 
 		Health = CombatRules.ApplyDamage(Health, remaining);
+		if (remaining > 0 && Skills != null && Skills.HasTrigger(StatModifierTrigger.OnDamaged))
+			IsFurious = true;
 
 		if (isAoe && IsStealthed)
 		{
