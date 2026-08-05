@@ -19,6 +19,7 @@ config/icon="res://textures/icon.svg"
 
 GameManager="*res://scripts/adapters/godot/autoload/GameManager.cs"
 DisplaySettingsManager="*res://scripts/adapters/godot/autoload/DisplaySettingsManager.cs"
+AudioManager="*res://scripts/adapters/godot/audio/AudioManager.cs"
 
 [display]
 

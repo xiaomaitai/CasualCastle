@@ -1,3 +1,4 @@
+// 弹体表现：从攻击方飞向目标，命中后播放命中音效并销毁。
 using Godot;
 
 public partial class Projectile : Node2D
@@ -5,6 +6,8 @@ public partial class Projectile : Node2D
 	private Vector2 _targetPos;
 	private float _speed;
 	private Sprite2D _sprite;
+
+	public bool PlayHitSound { get; set; } = true;
 
 	public override void _Ready()
 	{
@@ -32,6 +35,8 @@ public partial class Projectile : Node2D
 
 		if (toTarget.Length() <= step)
 		{
+			if (PlayHitSound)
+				Sfx.Play(SfxEvents.ProjectileHit);
 			QueueFree();
 			return;
 		}

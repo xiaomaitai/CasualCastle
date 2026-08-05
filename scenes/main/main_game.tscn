@@ -2,7 +2,6 @@
 
 [ext_resource type="PackedScene" uid="uid://c8a3s7l4e9012" path="res://prefabs/Castle.tscn" id="2"]
 [ext_resource type="Script" path="res://scripts/adapters/godot/ui/UIManager.cs" id="4"]
-[ext_resource type="Script" path="res://scripts/adapters/godot/audio/BgmPlayer.cs" id="5"]
 [ext_resource type="Script" path="res://scripts/adapters/godot/dev/DevInputLogger.cs" id="6"]
 [ext_resource type="Script" path="res://scripts/adapters/godot/flow/MainGameController.cs" id="10"]
 [ext_resource type="PackedScene" uid="uid://d4settingspanel01" path="res://scenes/ui/settings_panel.tscn" id="13"]
@@ -15,10 +14,6 @@ script = ExtResource("10")
 
 [node name="DevInputLogger" type="Node" parent="."]
 script = ExtResource("6")
-
-[node name="BGM" type="AudioStreamPlayer" parent="."]
-volume_db = -8.0
-script = ExtResource("5")
 
 [node name="InitManager" type="Node" parent="."]
 script = ExtResource("17")

@@ -19,6 +19,8 @@ public partial class DisplaySettingsManager : Node
 	public const float DragSpeedMax = 2.0f;
 	public const float DragSpeedStep = 0.1f;
 	public const float DefaultDragSpeed = 1.0f;
+	public const float DefaultMusicVolume = 1f;
+	public const float DefaultSfxVolume = 0.9f;
 
 	public static readonly Vector2I[] OutputResolutions =
 	{
@@ -30,10 +32,13 @@ public partial class DisplaySettingsManager : Node
 
 	private const string SettingsPath = "user://display_settings.cfg";
 	private const string Section = "display";
+	private const string AudioSection = "audio";
 
 	public DisplayWindowMode WindowMode { get; private set; } = DisplayWindowMode.BorderlessFullscreen;
 	public Vector2I OutputResolution { get; private set; } = new(DesignWidth, DesignHeight);
 	public float CameraDragSpeed { get; private set; } = DefaultDragSpeed;
+	public float MusicVolume { get; private set; } = DefaultMusicVolume;
+	public float SfxVolume { get; private set; } = DefaultSfxVolume;
 
 	public override void _Ready()
 	{
@@ -52,13 +57,22 @@ public partial class DisplaySettingsManager : Node
 		}
 	}
 
-	public void SaveAndApply(DisplayWindowMode mode, Vector2I resolution, float dragSpeed)
+	public void SaveAndApply(DisplayWindowMode mode, Vector2I resolution, float dragSpeed, float musicVolume, float sfxVolume)
 	{
 		WindowMode = mode;
 		OutputResolution = resolution;
 		CameraDragSpeed = Mathf.Clamp(dragSpeed, DragSpeedMin, DragSpeedMax);
+		MusicVolume = musicVolume;
+		SfxVolume = sfxVolume;
 		Save();
 		Apply();
+	}
+
+	public void SetAudioVolumes(float musicVolume, float sfxVolume)
+	{
+		MusicVolume = musicVolume;
+		SfxVolume = sfxVolume;
+		Save();
 	}
 
 	public int FindResolutionIndex(Vector2I resolution)
@@ -87,6 +101,14 @@ public partial class DisplaySettingsManager : Node
 			(float)config.GetValue(Section, "camera_drag_speed", CameraDragSpeed),
 			DragSpeedMin,
 			DragSpeedMax);
+		MusicVolume = Mathf.Clamp(
+			(float)config.GetValue(AudioSection, "music_volume", MusicVolume),
+			0f,
+			1f);
+		SfxVolume = Mathf.Clamp(
+			(float)config.GetValue(AudioSection, "sfx_volume", SfxVolume),
+			0f,
+			1f);
 	}
 
 	private void Save()
@@ -97,6 +119,8 @@ public partial class DisplaySettingsManager : Node
 		config.SetValue(Section, "height", OutputResolution.Y);
 		config.SetValue(Section, "dev_mode", DevModeEnabled);
 		config.SetValue(Section, "camera_drag_speed", CameraDragSpeed);
+		config.SetValue(AudioSection, "music_volume", MusicVolume);
+		config.SetValue(AudioSection, "sfx_volume", SfxVolume);
 		config.Save(SettingsPath);
 	}
 

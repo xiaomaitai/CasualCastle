@@ -290,6 +290,7 @@ public partial class UnitLogic : Node2D
 	{
 		_visual.SetHealth(Health, MaxHealth);
 		_visual?.StartHitFlash();
+		Sfx.Play(SfxEvents.Hit);
 		IUnitHandle attacker = _eventRelay.LastAttacker;
 		if (attacker != null && attacker.IsAlive)
 			_tactical.PropagateRetaliation(_unit, attacker);
@@ -300,6 +301,7 @@ public partial class UnitLogic : Node2D
 		_isDead = true;
 		_visual?.UpdateSleepVisual(false, false);
 		_lifecycle?.PlayDeathAnimation(_body);
+		Sfx.Play(SfxEvents.UnitDeath);
 		_corpseService?.ScheduleCorpseRemoval(_unit);
 	}
 
@@ -315,6 +317,7 @@ public partial class UnitLogic : Node2D
 		Projectile projectile = new Projectile();
 		root.AddChild(projectile);
 		projectile.SetModulate(new Color(0.5f, 1f, 0.6f));
+		projectile.PlayHitSound = false;
 
 		Vector2 fromPos = _body.GlobalPosition;
 		Vector2 toPos = new Vector2(
@@ -338,8 +341,10 @@ public partial class UnitLogic : Node2D
 		if (root == null)
 			return;
 
+		Sfx.Play(AttackType == AttackType.Melee ? SfxEvents.MeleeAttack : SfxEvents.ProjectileLaunch);
 		Projectile projectile = new Projectile();
 		root.AddChild(projectile);
+		projectile.PlayHitSound = AttackType == AttackType.Ranged;
 
 		Vector2 fromPos = _body.GlobalPosition;
 		float targetPixelX = GameCoordinatesAdapter.GameUnitsToPixels(_eventRelay.LastAttackTargetX);

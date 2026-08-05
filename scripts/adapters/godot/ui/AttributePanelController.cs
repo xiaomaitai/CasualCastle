@@ -309,6 +309,8 @@ public sealed class AttributePanelController
 		if (upgraded == null)
 			return;
 
+		Sfx.Play(SfxEvents.Upgrade);
+
 		_currentBuilding = null;
 		_pendingUpgrade = null;
 		_upgradeButton.Visible = false;

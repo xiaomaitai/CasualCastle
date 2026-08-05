@@ -30,7 +30,11 @@ public class NightOrchestrator
 			gm.IsCombine,
 			gm.CurrentState == GameManager.GameState.Playing,
 			factory,
-			result => _adjacencyService.RefreshCastle(playerCastle.GetBuildingStates()));
+			result =>
+			{
+				_adjacencyService.RefreshCastle(playerCastle.GetBuildingStates());
+				Sfx.Play(SfxEvents.Combine);
+			});
 	}
 
 	public void ApplyReplaySnapshot(GameManager gm, int nightIndex, BattlePhase phase)

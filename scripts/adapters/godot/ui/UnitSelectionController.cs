@@ -60,6 +60,7 @@ public sealed class UnitSelectionController
 			ClearSelection();
 			_selectedUnit = picked;
 			_selectedUnit.SetSelected(true);
+			Sfx.Play(SfxEvents.UnitSelect);
 			return true;
 		}
 
@@ -70,6 +71,7 @@ public sealed class UnitSelectionController
 				return true;
 			ClearSelection();
 			_selectedBuilding = pickedBuilding;
+			Sfx.Play(SfxEvents.BuildingSelect);
 			return true;
 		}
 

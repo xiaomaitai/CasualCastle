@@ -125,11 +125,16 @@ public class SqliteTechTreeRepository : ITechTreeRepository
         using SqliteCommand cmd = connection.CreateCommand();
         cmd.CommandText = "SELECT COUNT(*) FROM pragma_table_info('tech_tree_nodes') WHERE name = 'race_id'";
         long hasRaceIdCol = (long)cmd.ExecuteScalar();
-        if (hasRaceIdCol > 0)
-        {
-            cmd.CommandText = "ALTER TABLE tech_tree_nodes RENAME COLUMN race_id TO faction_id";
-            cmd.ExecuteNonQuery();
-        }
+        if (hasRaceIdCol == 0)
+            return;
+
+        cmd.CommandText = "SELECT COUNT(*) FROM pragma_table_info('tech_tree_nodes') WHERE name = 'faction_id'";
+        long hasFactionIdCol = (long)cmd.ExecuteScalar();
+        if (hasFactionIdCol > 0)
+            return;
+
+        cmd.CommandText = "ALTER TABLE tech_tree_nodes RENAME COLUMN race_id TO faction_id";
+        cmd.ExecuteNonQuery();
     }
 
     private static void MigrateBuildingDefsFactionId(SqliteConnection connection)

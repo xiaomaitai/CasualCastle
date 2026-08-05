@@ -56,6 +56,8 @@ public partial class TitleScreen : Control
 
 		ISaveRepository saveRepo = GameManager.Get<ISaveRepository>();
 		_continueButton.Disabled = !saveRepo.HasSave(0);
+	UiSfx.Bind(this);
+	AudioManager.Instance?.PlayTitleMusic();
 	}
 
 	public override void _ExitTree()
@@ -87,6 +89,7 @@ public partial class TitleScreen : Control
 		_exitButton.Disabled = true;
 		_reportOption.Disabled = true;
 		_factionOption.Disabled = true;
+		Sfx.Play(SfxEvents.UiStart);
 		_startButton.Text = "加载中...";
 		AdapterRegistry.Resolve<GameManager>().PendingLoadSlot = -1;
 		ApplySelectedFaction();

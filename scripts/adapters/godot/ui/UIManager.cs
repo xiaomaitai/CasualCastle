@@ -198,6 +198,7 @@ public partial class UIManager : Node2D
         _pauseMenuUi = new PauseMenuUiController(uiRoot, GoToTitle, OpenSettings);
         _gameOverUi = new GameOverUiController(uiRoot, GoToTitle);
 
+        UiSfx.Bind(uiRoot);
         _pauseMenuUi.OpenChanged += OnPauseMenuOpenChanged;
         _settingsUi.OpenChanged += OnSettingsOpenChanged;
 

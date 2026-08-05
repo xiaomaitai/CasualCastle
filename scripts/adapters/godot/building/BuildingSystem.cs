@@ -36,6 +36,8 @@ public partial class BuildingSystem : Node
     {
         List<IBuildingState> buildingStates = castle.GetBuildingStates();
         _adjacencyService.RefreshCastle(buildingStates);
+        if (castle.IsPlayerCastle)
+            Sfx.Play(SfxEvents.Place);
         PlayAdjacencyPulses(castle, placedBuilding, buildingStates);
     }
 

@@ -31,7 +31,7 @@ CasualCastle/
 │       │   ├── flow/      TitleScreen, MainGameController
 │       │   ├── core/      GameConfig, GameCoordinatesAdapter
 │       │   ├── dev/       DevInputLogger（需 DevMode 才生效）
-│       │   └── audio/     BgmPlayer
+│       │   └── audio/     AudioManager
 │       └── persistence/   BattleReportStorage（实现 IBattleReportRepository）
 │
 ├── devPlan/design/                                  # 系统设计文档

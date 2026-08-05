@@ -219,11 +219,35 @@ UI 元素使用**屏幕像素**，放在 `CanvasLayer` 下。
 
 ## 6. 音频
 
-| 格式 | 说明 |
-|------|------|
-| `.ogg` | Godot 推荐，循环播放 |
+音频采用统一 AudioManager 管线（v0.6），需求清单见 `devPlan/design/audioRequirements.md`，大纲见 `devPlan/outline/c09AudioPlan.md`。
 
-当前：`feel_good_island_loop.ogg`
+| 类别 | 格式 | 说明 |
+|------|------|------|
+| BGM | `.ogg`（Vorbis，44.1kHz 立体声） | 曲目池轮播，播完静默 3~6 秒切下一首 |
+| SFX | `.ogg`（Vorbis） | 25 个事件，每事件 1 个基础音效 |
+
+### BGM 曲目池（15 首）
+
+| 池 | 文件 | 数量 |
+|----|------|------|
+| 标题 | `bgm_title_1..3.ogg` | 3 |
+| 联盟·白天 | `bgm_alliance_day_1..3.ogg` | 3 |
+| 联盟·夜晚 | `bgm_alliance_night_1..2.ogg` | 2 |
+| 部落·白天 | `bgm_horde_day_1..3.ogg` | 3 |
+| 部落·夜晚 | `bgm_horde_night_1..2.ogg` | 2 |
+| 结算 | `bgm_result_1..2.ogg` | 2 |
+
+曲目路径集中登记在 `AudioManager` 曲目池表，场景内不硬编码。
+
+### SFX 事件（25 个）
+
+命名 `sfx_<事件>.ogg`，对应 `audioRequirements.md` 的 S1–S25：
+
+`button_hover`、`button_click`、`ui_start`、`slider_change`、`unit_select`、`building_select`、`shop_open`、`shop_close`、`buy`、`coin_change`、`place`、`place_cancel`、`repair`、`combine`、`upgrade`、`melee_attack`、`projectile_launch`、`projectile_hit`、`hit`、`unit_death`、`building_hit`、`building_destroy`、`phase_change`、`victory`、`defeat`
+
+### 素材来源与许可
+
+BGM 15 首来自 OpenGameArt（CC0）；SFX 25 个来自 Kenney（CC0）。每个素材的来源与许可登记在 `assets/audio/bgm/CREDITS.txt` 与 `assets/audio/sfx/CREDITS.txt`。新增素材必须先更新需求清单与 CREDITS，再运行 `godot-import` skill 导入。
 
 ---
 

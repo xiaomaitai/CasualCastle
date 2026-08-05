@@ -20,6 +20,7 @@ public sealed class ShopUiController
     private readonly BuildingSystem _buildingSystem;
 
     private bool _gameOver;
+    private bool _ready;
     private bool _dragging;
     private int _dragSlotIndex = -1;
 
@@ -63,6 +64,7 @@ public sealed class ShopUiController
         UpdateGoldDisplay(_shop.Gold);
         UpdateShopButtonAvailability(_shop.IsShopAvailable);
         RefreshOffers();
+        _ready = true;
     }
 
     public void Dispose()
@@ -108,8 +110,8 @@ public sealed class ShopUiController
         {
             if (mouseButton.ButtonIndex == MouseButton.Left)
             {
-                TryCompleteDrag(mouseButton.GlobalPosition);
-                CancelDrag();
+                bool placed = TryCompleteDrag(mouseButton.GlobalPosition);
+                CancelDrag(!placed);
                 return true;
             }
 
@@ -123,7 +125,7 @@ public sealed class ShopUiController
         return false;
     }
 
-    public bool CancelDrag()
+    public bool CancelDrag(bool playFeedback = true)
     {
         if (!_dragging)
             return false;
@@ -131,6 +133,8 @@ public sealed class ShopUiController
         _dragging = false;
         _dragSlotIndex = -1;
         _gameManager.PlayerCastle.ClearPlacementPreview();
+        if (playFeedback)
+            Sfx.Play(SfxEvents.PlaceCancel);
         return true;
     }
 
@@ -144,6 +148,7 @@ public sealed class ShopUiController
         CancelDrag();
         UpdateShopButtonAvailability(_shop.IsShopAvailable);
         OpenChanged?.Invoke(IsOpen);
+        Sfx.Play(SfxEvents.ShopClose);
         return true;
     }
 
@@ -157,6 +162,7 @@ public sealed class ShopUiController
         UpdateShopButtonAvailability(_shop.IsShopAvailable);
         RefreshOffers();
         OpenChanged?.Invoke(IsOpen);
+        Sfx.Play(SfxEvents.ShopOpen);
     }
 
     private void OnShopButtonPressed()
@@ -176,7 +182,8 @@ public sealed class ShopUiController
 
     private void OnBuyButtonPressed(int slotIndex)
     {
-        _shop.TryPurchase(slotIndex);
+        if (_shop.TryPurchase(slotIndex))
+            Sfx.Play(SfxEvents.Buy);
     }
 
     private void OnOfferGuiInput(int slotIndex, InputEvent @event)
@@ -197,16 +204,16 @@ public sealed class ShopUiController
         _dragSlotIndex = slotIndex;
     }
 
-    private void TryCompleteDrag(Vector2 screenPosition)
+    private bool TryCompleteDrag(Vector2 screenPosition)
     {
         Castle playerCastle = _gameManager.PlayerCastle;
         if (playerCastle == null || _dragSlotIndex < 0)
-            return;
+            return false;
 
         if (!playerCastle.TryGetGridFromScreenPoint(screenPosition, out int gridX, out int gridY))
-            return;
+            return false;
 
-        _shop.TryPlaceOfferDirect(_dragSlotIndex, gridX, gridY);
+        return _shop.TryPlaceOfferDirect(_dragSlotIndex, gridX, gridY);
     }
 
     private void UpdateDragPreview()
@@ -232,6 +239,8 @@ public sealed class ShopUiController
     {
         _shopGoldLabel.Text = $"当前金币：{gold}";
         RefreshOffers();
+        if (_ready)
+            Sfx.Play(SfxEvents.CoinChange);
     }
 
     private void UpdateShopButtonAvailability(bool available)

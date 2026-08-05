@@ -59,7 +59,7 @@ CasualCastle/
 │       │   ├── flow/          TitleScreen, MainGameController, NightOrchestrator
 │       │   ├── core/          GameConfig, GameCoordinatesAdapter
 │       │   ├── dev/           DevInputLogger
-│       │   └── audio/         BgmPlayer
+│       │   └── audio/         AudioManager, Sfx, UiSfx
 │       └── persistence/
 │           ├── GameDataLoader.cs, BattleReportStorage.cs
 │           ├── SqliteUnitRepository.cs, SqliteBuildingRepository.cs

@@ -94,8 +94,8 @@ public sealed class HandUiController
             {
                 if (_dragging)
                 {
-                    TryCompleteDrag(mouseButton.GlobalPosition);
-                    CancelDrag();
+                    bool placed = TryCompleteDrag(mouseButton.GlobalPosition);
+                    CancelDrag(!placed);
                     return true;
                 }
 
@@ -119,7 +119,7 @@ public sealed class HandUiController
         return false;
     }
 
-    public bool CancelDrag()
+    public bool CancelDrag(bool playFeedback = true)
     {
         if (!_dragging && _pendingHandIndex < 0)
             return false;
@@ -130,6 +130,8 @@ public sealed class HandUiController
         _gameManager.PlayerCastle.ClearPlacementPreview();
         RefreshHighlight();
         UpdatePlacementHint();
+        if (playFeedback)
+            Sfx.Play(SfxEvents.PlaceCancel);
         return true;
     }
 
@@ -217,16 +219,16 @@ public sealed class HandUiController
         UpdatePlacementHint();
     }
 
-    private void TryCompleteDrag(Vector2 screenPosition)
+    private bool TryCompleteDrag(Vector2 screenPosition)
     {
         Castle playerCastle = _gameManager.PlayerCastle;
         if (playerCastle == null || _dragHandIndex < 0)
-            return;
+            return false;
 
         if (!playerCastle.TryGetGridFromScreenPoint(screenPosition, out int gridX, out int gridY))
-            return;
+            return false;
 
-        _hand.TryPlaceAtIndex(_dragHandIndex, gridX, gridY);
+        return _hand.TryPlaceAtIndex(_dragHandIndex, gridX, gridY);
     }
 
     private void RefreshDisplay()

@@ -216,6 +216,7 @@ public sealed class BuildingManageUiController
 		if (!building.IsDamaged)
 			return;
 
-		building.TryRepair();
+		if (building.TryRepair())
+			Sfx.Play(SfxEvents.Repair);
 	}
 }

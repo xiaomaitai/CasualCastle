@@ -185,6 +185,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		Health = Mathf.Max(0, Health - amount);
 		EmitSignal(SignalName.HealthChanged, Health, MaxHealth);
 		UpdateDamageVisual();
+		Sfx.Play(SfxEvents.BuildingHit);
 
 		if (BuildingSys.IsCoreBuilding(TypeId) && CastleRef != null)
 			_gameManager?.OnCastleHeartHealthChanged(CastleRef.IsPlayerCastle, Health, MaxHealth);
@@ -197,6 +198,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	private void OnDestroyed()
 	{
+		Sfx.Play(SfxEvents.BuildingDestroy);
 		if (TypeId != "CastleHeart" && CastleRef != null)
 			CastleRef.ReleaseBuildingFootprint(this);
 

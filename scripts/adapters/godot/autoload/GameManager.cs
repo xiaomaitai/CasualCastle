@@ -214,6 +214,7 @@ public partial class GameManager : Node2D, IGameState
             : GameRules.DayDurationSeconds;
 
         EmitSignal(SignalName.PhaseChanged, (int)phase);
+        Sfx.Play(SfxEvents.PhaseChange);
         GD.Print($"Phase: {phase}");
     }
 
@@ -249,6 +250,7 @@ public partial class GameManager : Node2D, IGameState
         SetProcess(false);
         EmitSignal(SignalName.GameStateChanged, (int)CurrentState);
         GD.Print(playerWon ? "Player Wins!" : "Enemy Wins!");
+        Sfx.Play(playerWon ? SfxEvents.Victory : SfxEvents.Defeat);
 
         int slot = 0;
         Get<IGameSessionService>().DeleteSave(slot);

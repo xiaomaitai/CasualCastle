@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://b8t7l3e5s0c1n"]
 
 [ext_resource type="Script" path="res://scripts/adapters/godot/flow/TitleScreen.cs" id="1"]
-[ext_resource type="Script" path="res://scripts/adapters/godot/audio/BgmPlayer.cs" id="2"]
 [ext_resource type="PackedScene" uid="uid://d4settingspanel01" path="res://scenes/ui/settings_panel.tscn" id="3"]
 
 [node name="TitleScreen" type="Control"]
@@ -21,10 +20,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.12, 0.22, 0.1, 1)
-
-[node name="BGM" type="AudioStreamPlayer" parent="."]
-volume_db = -8.0
-script = ExtResource("2")
 
 [node name="UI" type="VBoxContainer" parent="."]
 layout_mode = 1

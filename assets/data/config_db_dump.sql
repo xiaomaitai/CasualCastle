@@ -334,7 +334,7 @@ INSERT INTO tech_tree_nodes VALUES('HolyWall','alliance',4,0,0,NULL,NULL,0,'圣�
 INSERT INTO tech_tree_nodes VALUES('HeavenPunishmentTower','alliance',4,2,0,NULL,NULL,0,'天罚塔','DragonRiderCommander',350,12.0,30,'',0);
 INSERT INTO tech_tree_nodes VALUES('ShadowSanctum','alliance',4,4,0,NULL,NULL,0,'暗影圣所','ShadowLord',250,8.0,16,'',0);
 INSERT INTO tech_tree_nodes VALUES('RoyalCourt','alliance',5,2,0,NULL,NULL,0,'王庭','King',800,30.0,60,'',0);
-INSERT INTO tech_tree_nodes VALUES('HordeCoreL1','horde',1,0,0,NULL,NULL,0,'部落大厅·1级',NULL,800,0.0,0,'',1);
+INSERT INTO tech_tree_nodes VALUES('HordeCoreL1','horde',1,0,0,NULL,NULL,0,'部落大厅·1级',NULL,800,0.0,NULL,'',1);
 INSERT INTO tech_tree_nodes VALUES('HordeCoreL2','horde',2,0,0,NULL,NULL,0,'部落大厅·2级',NULL,1000,0.0,20,'',1);
 INSERT INTO tech_tree_nodes VALUES('HordeCoreL3','horde',3,0,0,NULL,NULL,0,'部落大厅·3级',NULL,1200,0.0,60,'',1);
 INSERT INTO tech_tree_nodes VALUES('HordeCoreL4','horde',4,0,0,NULL,NULL,0,'部落大厅·4级',NULL,1400,0.0,150,'',1);
