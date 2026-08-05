@@ -547,7 +547,8 @@ BGM 采用**曲目池轮播**：播放完一首 → 静默 3~6 秒 → 播下一
 ### E5 素材与导入
 
 - BGM 15 首 `.ogg`：标题 3 / 联盟白天 3 / 联盟夜晚 2 / 部落白天 3 / 部落夜晚 2 / 结算 2
-- SFX 音效包 25 个事件：优先免费 CC0 素材库（如 Kenney），缺失事件再用 AI 生成
+- 素材来源策略：优先从网上查找免费素材（CC0 / Public Domain 优先，如 Kenney、OpenGameArt、Freesound），实在没有合适素材再用 AI 定制；每个素材记录来源与许可
+- SFX 音效包 25 个事件：从免费素材中挑选，缺口再 AI 定制
 - 目录规范：`assets/audio/bgm/`、`assets/audio/sfx/`；命名 `bgm_<池>_<序号>.ogg`（如 `bgm_alliance_day_1.ogg`）、`sfx_<事件>.ogg`
 - 新增素材后运行 `godot-import` skill 无头导入并提交 `.import`/`.uid` 侧车文件
 - 同步扩展 `devPlan/design/assetSpecs.md` 音频章节

@@ -138,15 +138,17 @@ E0 是 v0.6 的第一步：先确定"有哪些场景、要几个 BGM、几个音
 
 | 类别 | 数量 | 格式 | 来源 | 目录 |
 |------|------|------|------|------|
-| 标题 BGM | 3 | .ogg | AI 生成或免费素材 | `assets/audio/bgm/` |
+| 标题 BGM | 3 | .ogg | 免费素材优先 | `assets/audio/bgm/` |
 | 联盟白天 BGM | 3 | .ogg | 同上 | `assets/audio/bgm/` |
 | 联盟夜晚 BGM | 2 | .ogg | 同上 | `assets/audio/bgm/` |
 | 部落白天 BGM | 3 | .ogg | 同上 | `assets/audio/bgm/` |
 | 部落夜晚 BGM | 2 | .ogg | 同上 | `assets/audio/bgm/` |
 | 结算 BGM | 2 | .ogg | 同上 | `assets/audio/bgm/` |
-| SFX 音效包 | 25 个事件 | .ogg/.wav | 优先 CC0 素材库（Kenney 等），缺口 AI 生成 | `assets/audio/sfx/` |
+| SFX 音效包 | 25 个事件 | .ogg/.wav | 免费素材优先，缺口 AI 定制 | `assets/audio/sfx/` |
 
 - 命名：`bgm_<池>_<序号>.ogg`（如 `bgm_alliance_day_1.ogg`）、`sfx_<事件>.ogg`
+- 素材来源策略：优先从网上查找免费素材（CC0 / Public Domain 优先，如 Kenney、OpenGameArt、Freesound），实在没有合适素材再用 AI 定制
+- 每个素材记录来源与许可，随 E5 落地登记
 - 采购范围严格按 E0 清单，不随意增加
 - 新增素材后执行 `godot-import` skill 无头导入，提交 `.import`/`.uid` 侧车文件
 - 素材规格章节同步扩展 `devPlan/design/assetSpecs.md`
