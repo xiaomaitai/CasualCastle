@@ -290,10 +290,28 @@ public partial class UnitLogic : Node2D
 	{
 		_visual.SetHealth(Health, MaxHealth);
 		_visual?.StartHitFlash();
-		Sfx.Play(SfxEvents.Hit);
+		Sfx.Play(GetHitSfxEvent(_eventRelay.LastAttacker));
 		IUnitHandle attacker = _eventRelay.LastAttacker;
 		if (attacker != null && attacker.IsAlive)
 			_tactical.PropagateRetaliation(_unit, attacker);
+	}
+
+	private static string GetHitSfxEvent(IUnitHandle attacker)
+	{
+		if (attacker == null)
+			return SfxEvents.Hit;
+
+		switch (attacker.DamageType)
+		{
+			case DamageType.Slash:
+				return SfxEvents.HitSlash;
+			case DamageType.Pierce:
+				return SfxEvents.HitPierce;
+			case DamageType.Magic:
+				return SfxEvents.HitMagic;
+			default:
+				return SfxEvents.Hit;
+		}
 	}
 
 	private void OnDied()

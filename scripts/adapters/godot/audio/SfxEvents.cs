@@ -20,6 +20,9 @@ public static class SfxEvents
 	public const string ProjectileLaunch = "projectile_launch";
 	public const string ProjectileHit = "projectile_hit";
 	public const string Hit = "hit";
+	public const string HitSlash = "hit_slash";
+	public const string HitPierce = "hit_pierce";
+	public const string HitMagic = "hit_magic";
 	public const string UnitDeath = "unit_death";
 	public const string BuildingHit = "building_hit";
 	public const string BuildingDestroy = "building_destroy";
