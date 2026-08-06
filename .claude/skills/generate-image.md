@@ -52,16 +52,11 @@ print(sig)
 
 | 模型名称                 | LoRAId                           | 模型       | 模型描述                     |
 | ------------------------ | -------------------------------- | ---------- | ---------------------------- |
-| 简单线条-精致可爱二次元  | 491c449be47b41299bf0e9bae3e5cdba | F.1        | 底模，适合简洁线条二次元风格 |
 | 平面游戏图标模型         | 39bfe441fd8641e78dbb57069b215fb3 | Qwen-Image | 适合平面化游戏图标           |
 | 扁平卡通游戏图标         | 265c08134df245bcba2f6968701bdde8 | Qwen-Image | 适合扁平卡通风格图标         |
-| 萌系Q版-可爱的粗线条画风 | b8262976e7d84e51b680053f500a86dd | F.1        | 适合Q版萌系粗线条角色/道具   |
-| 粗描边卡通游戏道具设计   | a6939b5467de47a980de12aac988a557 | F.1        | 适合粗描边卡通道具/图标      |
 
 | **适用方向**  | **模板名称**                                                 | templateUuid                     | **备注**                                                     |
 | ------------- | ------------------------------------------------------------ | -------------------------------- | ------------------------------------------------------------ |
-| F.1文生图     | [F.1文生图 - 自定义完整参数](https://liblibai.feishu.cn/wiki/UAMVw67NcifQHukf8fpccgS5n6d#share-M89EdQ0ucoAR6HxyQyecrF98noh) | 6f7c4652458d4802969f8d089cf5b91f | Checkpoint默认为官方模型可用模型范围：基础算法F.1支持additional network |
-| F.1图生图     | [F.1图生图 - 自定义完整参数](https://liblibai.feishu.cn/wiki/UAMVw67NcifQHukf8fpccgS5n6d#share-MbQ6dEVDvortZPxaPvOcBQQ9nAh) | 63b72710c9574457ba303d9d9b8df8bd | Checkpoint默认为官方模型可用模型范围：基础算法F.1支持additional network |
 | 1.5和XL文生图 | [1.5和XL文生图 - 自定义完整参数](https://liblibai.feishu.cn/wiki/UAMVw67NcifQHukf8fpccgS5n6d#share-T6mBdy2NZo28r7xTXETcDxTEnAg) | e10adc3949ba59abbe56e057f20f883e | 可用模型范围：基础算法1.5，基础算法XL支持additional network，高分辨率修复和controlnet可通过自由拼接参数实现各类的文生图诉求 |
 | 1.5和XL图生图 | [1.5和XL图生图 - 自定义完整参数](https://liblibai.feishu.cn/wiki/UAMVw67NcifQHukf8fpccgS5n6d#share-OsUddwS7zoIxNvxPM8EcGpUXnkc) | 9c7d531dc75f476aa833b3d452b8f7ad | 可用模型范围：基础算法1.5，基础算法XL支持additional network和controlnet可通过自由拼接参数实现各类的图生图和蒙版重绘诉求 |
 | 局部重绘      | [Controlnet局部重绘](https://liblibai.feishu.cn/wiki/UAMVw67NcifQHukf8fpccgS5n6d#share-P2seddEU6opN2hxPyZKcfFpPneb) | b689de89e8c9407a874acd415b3aa126 | 提取自文生图完整参数支持additional network和controlnet不支持高分辨率修复（hiresfix） |
@@ -133,7 +128,7 @@ curl -s -X POST "https://openapi.liblibai.cloud/api/generate/webui/text2img?Acce
 
 | 字段 | 类型 | 必需 | 说明 |
 |------|------|------|------|
-| checkPointId | string | 否(模板) | 底模 modelVersionUUID。F.1 不使用；**Qwen-Image 必传**（默认 `75e0be0c93b34dd8baeec9c968013e0c`） |
+| checkPointId | string | 否(模板) | 底模 modelVersionUUID；**Qwen-Image 必传**（默认 `75e0be0c93b34dd8baeec9c968013e0c`） |
 | prompt | string | 是 | 正向提示词（英文） |
 | negativePrompt | string | 否 | 负向提示词 |
 | sampler | int | 是 | 采样方法枚举（15 = DPM++ 2M SDE Karras） |
@@ -304,7 +299,7 @@ curl -s -X POST "https://openapi.liblibai.cloud/api/model/version/get?AccessKey=
 |------|------|
 | versionName | 版本名称 |
 | modelName | 模型名称 |
-| baseAlgoName | 底模算法（F.1 / Qwen-Image 等） |
+| baseAlgoName | 底模算法（Qwen-Image 等） |
 | commercialUse | 1=可商用，0=不可商用 |
 | modelUrl | 模型详情页链接 |
 
