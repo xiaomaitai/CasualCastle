@@ -104,30 +104,84 @@ Unit (Area2D)
 
 ---
 
-## 2. 建筑
+## 2. 建筑主图
 
-建筑尺寸由 `BuildingDefinitions` 的 `Footprint` 定义（格数 × 100 unit/格）。
+建筑主图 = 战场内建筑显示用的完整建筑精灵图。最终形态必须是 RGBA 透明图。**图内不画底座、地面或阴影**，图像底边即建筑与地面的接触线；放置后脚下泥土地基消失，建筑直接"站"在格子上。
 
-### 显示体
+### 目录与命名
 
-| 建筑 | 占地 | 显示体（unit） | 说明 |
-|------|------|--------------|------|
-| 城堡之心 | 2×2 格 | 200 × 200 | 核心建筑 |
-| 兵营 / 狼穴 | 1×1 格 | 100 × 100 | 单格 |
-| 靶场 | 2×1 格 | 200 × 100 | 双格横排 |
-| 马厩 | L 形 4 格 | 200 × 300 | 按 footprint 外接矩形 |
+- 目录：`assets/art/buildings/`
+- 命名：`{typeId}_{taskId}.png`（与单位卡牌、技能图标同模式，taskId 为 `asset_gen_tasks.id`）
+- 引用：`building_defs.texture_path` 登记具体文件；重新生成后更新路径
+
+### 尺寸分级
+
+不同占地面积的建筑**需要不同画布规格**：占地越大，画布分辨率要求越高；高大地标（城堡/王庭/高阶核心）需要更高分辨率保证细节。
+
+| 占地 | 适用建筑 | 画布 | 横向铺满比例 |
+|------|---------|------|---------------|
+| 1×1 | 地洞等单格建筑 | 512×512 | 建筑主体占画布宽 ≈ 96% |
+| 2×2 标准 | 绝大多数建筑（51 座） | 768×768 | 建筑主体占画布宽 ≈ 96% |
+| 2×2 高地标 | 城堡之心、王庭、部落核心 L4/L5 等 | 1024×1024 | 建筑主体占画布宽 ≈ 96% |
+
+- 生成分辨率 = 最终分辨率，不缩放（768/1024 已高于显示需求，支持摄像机放大的高清表现）
+- 建筑主体**横向铺满画布**（左右留 ≤2% 边距），**底边贴画布下缘**，不得悬空留白
+- 等比缩放：scale = 占地像素宽 ÷ 画布宽；锚点 = 图像底边中点，对齐占地中心
+
+### 视角（固定关键词）
+
+提示词固定使用 `orthographic 3/4 top-down`（正交 3/4 俯视）：建筑对称构图、完整可见，适配正方形格子；**不是等距菱形格（isometric diamond）**、不是透视视角、不是平视。建筑主体从底边向上延伸，完整建筑不能出画布。
+
+### 风格规范
+
+- 提示词必须包含：`flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors`
+- 背景：**纯白背景**（便于 remove-bg 抠图），主体完整
+- 禁止：底座/地面/平台/阴影/投影（建筑底边直接落地）
+
+### 提示词模板（联盟基准，F0 定稿）
+
+```
+A minimalist {building} for an RTS game, perfectly centered inside a square footprint, designed to fit naturally into a square grid tile.
+
+3/4 top-down view (NOT isometric diamond grid), symmetrical composition, entire building fully visible.
+
+Cute stylized cartoon illustration, flat 2D vector style, bold thick black outlines, clean cel shading, simplified geometric shapes, minimal details, highly readable game asset.
+
+{distinct features}.
+
+Balanced proportions, compact building, square silhouette, optimized as a strategy game building icon.
+
+Pure white background.
+```
+
+负向提示词：`isometric diamond tile, rotated building, perspective view, realistic, painterly, 3D render, sketch, watercolor, heavy textures, photorealistic, cluttered details, shadows outside object, background scenery, people, trees, mountains, text, logo, watermark`
+
+风格约束：固定关键词 `orthographic 3/4 top-down`；不画底座/地面/阴影；纯白背景；参考图可作构图与造型基准（如 `assets/art/references/马厩.png`）。
+
+### 种族风格微调
+
+风格三要素（flat 2D 粗描边）、视角与无底座规则全局不变，**材质、装饰、配色按种族微调**：
+
+| 种族/线 | 风格词 |
+|---------|--------|
+| 联盟 | medieval stone and wood, banners, blue and gold accents |
+| 部落·兽人 | rough timber and bone, spikes, dark red and black |
+| 部落·哥布林 | ramshackle hut, gears and scrap metal, green |
+| 部落·半人马 | leather tent, feathers and hide, ochre |
+| 部落·半人鹿 | forest shrine, vines and leaves, nature green |
+| 部落·蜥蜴人 | swamp mud mound, bones and teeth, teal and brown |
+| 部落核心 | camp fortress upgrade levels, campfire to stone walls |
+
+（亡灵、地下城等后续派系接入时再补充）
 
 ### 碰撞体
 
-建筑碰撞体为矩形，略小于占地尺寸（缩进 10 unit/边）：
+建筑碰撞体为矩形，略小于占地尺寸（按 footprint 计算，每边缩进格间隙 14 unit 的一半）。碰撞体不受建筑主图影响，逻辑保持不变。
 
-| 建筑 | 占地（unit） | 碰撞体（unit） |
-|------|------------|--------------|
-| 单格（兵营等） | 100 × 100 | 80 × 80 |
-| 双格（靶场） | 200 × 100 | 180 × 80 |
-| L 形（马厩） | 按 footprint | 按格分别缩进 |
+### 管线
 
-碰撞体略小于占地，避免邻接建筑碰撞重叠，同时保证单位能检测到建筑阻挡。
+生图（RGB 纯白底）→ 用户筛选 → remove-bg 抠图（nodeId=17，RGBA 原地替换）→ godot-import 导入 → 登记 texture_path
+- 参考图：submit 传 --image-url <url>、batch 传 image_infos（字符串或 URL 列表）附带参考图构图/造型基准；参考图需公网 URL
 
 ---
 
@@ -348,8 +402,9 @@ process/fix_alpha_border=true
 | Medium 单位 | 512×512 | 256×256 | 同上 |
 | Large 单位 | 512×512 | 384×384 | 384 > 256 无需缩放 |
 | Huge 单位 | 512×512 | 512×512 | 不缩放 |
-| 建筑（1格） | 512×512 | 256×256 | 100×100 unit ≈ 48×48px，但 sprite 用大尺寸 |
-| 建筑（2×2格） | 768×768 | 512×512 | 核心建筑 |
+| 建筑主图（1×1 占地） | 512×512 | 不缩放 | 底座宽 ≈ 200px |
+| 建筑主图（2×2 占地标准） | 768×768 | 不缩放 | 底座宽 ≈ 350~420px |
+| 建筑主图（2×2 高地标） | 1024×1024 | 不缩放 | 底座宽 ≈ 460~560px |
 | 卡牌图标 | 512×512 | 256×256 | 先生成大图 |
 | UI 小图标 | 512×512 | 128×128 或 64×64 | 同上 |
 

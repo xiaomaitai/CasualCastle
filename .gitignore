@@ -30,3 +30,4 @@ obj/
 bin/
 tests/CasualCastle.Domain.Tests/bin/
 tests/CasualCastle.Domain.Tests/obj/
+__pycache__/

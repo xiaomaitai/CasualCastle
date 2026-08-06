@@ -125,6 +125,8 @@ def cmd_submit(args):
         "randnSource": 0,
         "seed": -1,
     }
+    if args.image_url:
+        generate_params["imageInfos"] = [{"imageUrl": args.image_url}]
     payload = {"templateUuid": args.template, "generateParams": generate_params}
     result = request("/api/generate/webui/text2img", payload)
     if result.get("code") != 0:
@@ -217,6 +219,13 @@ def cmd_batch(args):
         }
         if spec.get("additional_network"):
             generate_params["additionalNetwork"] = spec["additional_network"]
+        image_infos = spec.get("image_infos")
+        if isinstance(image_infos, str):
+            image_infos = [{"imageUrl": image_infos}]
+        elif isinstance(image_infos, list) and image_infos and isinstance(image_infos[0], str):
+            image_infos = [{"imageUrl": url} for url in image_infos]
+        if image_infos:
+            generate_params["imageInfos"] = image_infos
         payload = {"templateUuid": template, "generateParams": generate_params}
         for retry in range(args.submit_retries + 1):
             try:
@@ -327,6 +336,7 @@ def main():
     p_submit.add_argument("--steps", type=int, default=30)
     p_submit.add_argument("--cfg", type=float, default=4.0)
     p_submit.add_argument("--clip-skip", type=int, default=2)
+    p_submit.add_argument("--image-url", default="")
     p_submit.set_defaults(func=cmd_submit)
 
     p_status = sub.add_parser("status")
