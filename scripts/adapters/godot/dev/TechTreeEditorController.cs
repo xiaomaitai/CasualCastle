@@ -188,10 +188,39 @@ public class TechTreeEditorController
 		_factionNameLabel.Text = faction.DisplayName;
 		_nodes = _repo.LoadNodes(faction.Id);
 		_edges = LoadCanvasEdges(faction.Id);
-		GD.Print($"[TechTreeEditor] 加载完成: factionId={faction.Id}, nodes={_nodes.Count}, edges={_edges.Count}");
+		int reflowedCount = ReflowOverlappingNodes();
+		GD.Print($"[TechTreeEditor] 加载完成: factionId={faction.Id}, nodes={_nodes.Count}, edges={_edges.Count}, 重叠重排={reflowedCount}");
 		LayoutCards();
 		RefreshLibrary();
-		ShowStatus($"已加载 {_nodes.Count} 个节点，{_edges.Count} 条连线");
+		string reflowSuffix = reflowedCount > 0 ? $"（自动重排 {reflowedCount} 个重叠卡片）" : "";
+		ShowStatus($"已加载 {_nodes.Count} 个节点，{_edges.Count} 条连线{reflowSuffix}");
+	}
+
+	private int ReflowOverlappingNodes()
+	{
+		int reflowedCount = 0;
+		foreach (IGrouping<int, TechTreeNode> tierGroup in _nodes.GroupBy(n => n.Tier))
+		{
+			List<int> usedCols = new();
+			foreach (TechTreeNode node in tierGroup.OrderBy(n => n.Col).ThenBy(n => n.TypeId))
+			{
+				if (usedCols.Contains(node.Col))
+				{
+					node.Col = GetNextFreeColumn(usedCols, node.Col);
+					reflowedCount++;
+				}
+				usedCols.Add(node.Col);
+			}
+		}
+		return reflowedCount;
+	}
+
+	private static int GetNextFreeColumn(List<int> usedCols, int startCol)
+	{
+		int nextCol = startCol;
+		while (usedCols.Contains(nextCol))
+			nextCol++;
+		return nextCol;
 	}
 
 	private void LayoutCards()
