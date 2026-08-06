@@ -98,8 +98,8 @@ public class TechTreeEditorController
 		{
 			if (_dragPreview != null && GodotObject.IsInstanceValid(_dragPreview))
 			{
-				Vector2 localPos = _cardCanvas.GetLocalMousePosition();
-				_dragPreview.Position = localPos - _dragOffset;
+				Vector2 globalPos = _cardCanvas.GetGlobalMousePosition();
+				_dragPreview.GlobalPosition = globalPos - _dragOffset;
 			}
 		}
 		else if (_dragMode == DragMode.CreateConnection)
@@ -362,7 +362,7 @@ public class TechTreeEditorController
 				_dragMode = DragMode.MoveCard;
 				_dragSource = card;
 				_dragActive = true;
-				_dragOffset = _cardCanvas.GetLocalMousePosition() - card.Position;
+				_dragOffset = _cardCanvas.GetGlobalMousePosition() - card.GlobalPosition;
 				CreateDragPreview(card);
 				return;
 			}
@@ -441,7 +441,7 @@ public class TechTreeEditorController
 		float canvasHeight = _cardCanvas.Size.Y;
 		float rowHeight = canvasHeight / 5;
 		int newTier = Math.Clamp(5 - (int)(localPos.Y / rowHeight), 1, 5);
-		int newCol = Math.Max(0, (int)Math.Round((localPos.X - _dragOffset.X - 10) / ColSpacing));
+		int newCol = Math.Max(0, (int)Math.Round((_cardCanvas.GetGlobalMousePosition().X - _dragOffset.X - _cardCanvas.GlobalPosition.X - 10) / ColSpacing));
 
 		TechTreeNode node = _nodes.Find(n => n.TypeId == _dragSource.GetMeta("type_id").AsString());
 		if (node != null)
@@ -601,8 +601,8 @@ public class TechTreeEditorController
 		TechTreeEdge toDelete = null;
 		foreach (TechTreeEdge edge in _edges)
 		{
-			Vector2 fromCenter = GetCardBottomCenter(edge.FromTypeId, rowHeight);
-			Vector2 toCenter = GetCardTopCenter(edge.ToTypeId, rowHeight);
+			Vector2 fromCenter = GetCardCenter(edge.FromTypeId, rowHeight);
+			Vector2 toCenter = GetCardCenter(edge.ToTypeId, rowHeight);
 			if (fromCenter == Vector2.Zero || toCenter == Vector2.Zero)
 				continue;
 
@@ -831,25 +831,15 @@ public class TechTreeEditorController
 		return minDist;
 	}
 
-	private Vector2 GetCardCenter(string typeId, float rowHeight, float yOffset)
+	private Vector2 GetCardCenter(string typeId, float rowHeight)
 	{
 		TechTreeNode node = _nodes.Find(n => n.TypeId == typeId);
 		if (node == null)
 			return Vector2.Zero;
 
 		float x = node.Col * ColSpacing + 10 + CardWidth / 2;
-		float y = (4 - (node.Tier - 1)) * rowHeight + rowHeight / 2 + yOffset;
+		float y = (4 - (node.Tier - 1)) * rowHeight + rowHeight / 2;
 		return new Vector2(x, y);
-	}
-
-	private Vector2 GetCardBottomCenter(string typeId, float rowHeight)
-	{
-		return GetCardCenter(typeId, rowHeight, CardHeight / 2);
-	}
-
-	private Vector2 GetCardTopCenter(string typeId, float rowHeight)
-	{
-		return GetCardCenter(typeId, rowHeight, -CardHeight / 2);
 	}
 
 	private static Vector2 CubicBezier(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3, float t)
@@ -937,8 +927,8 @@ public class TechTreeEditorController
 
 		foreach (TechTreeEdge edge in _edges)
 		{
-			Vector2 fromCenter = GetCardBottomCenter(edge.FromTypeId, rowHeight);
-			Vector2 toCenter = GetCardTopCenter(edge.ToTypeId, rowHeight);
+			Vector2 fromCenter = GetCardCenter(edge.FromTypeId, rowHeight);
+			Vector2 toCenter = GetCardCenter(edge.ToTypeId, rowHeight);
 
 			if (fromCenter == Vector2.Zero || toCenter == Vector2.Zero)
 				continue;
@@ -958,12 +948,11 @@ public class TechTreeEditorController
 				_cardCanvas.DrawLine(p1, p2, lineColor, 2);
 			}
 
-			DrawArrowHead(toCenter, c2, lineColor);
 		}
 
 		if (_dragMode == DragMode.CreateConnection && _dragSource != null)
 		{
-			Vector2 from = _dragSource.Position + new Vector2(CardWidth / 2, CardHeight);
+			Vector2 from = _dragSource.Position + new Vector2(CardWidth / 2, CardHeight / 2);
 			Vector2 to = _cardCanvas.GetLocalMousePosition();
 			_cardCanvas.DrawLine(from, to, new Color(1f, 1f, 0f), 2);
 		}
@@ -999,18 +988,6 @@ public class TechTreeEditorController
 			return;
 		}
 		label.Text = $"升级费用: {nodeValue - sourceNode.Value}（{sourceNode.Value} → {nodeValue}）";
-	}
-
-	private void DrawArrowHead(Vector2 to, Vector2 control, Color color)
-	{
-		Vector2 dir = (to - control).Normalized();
-		Vector2 perpendicular = new(-dir.Y, dir.X);
-		float arrowSize = 8;
-		Vector2 p1 = to - dir * arrowSize + perpendicular * (arrowSize * 0.5f);
-		Vector2 p2 = to - dir * arrowSize - perpendicular * (arrowSize * 0.5f);
-
-		_cardCanvas.DrawLine(to, p1, color, 2);
-		_cardCanvas.DrawLine(to, p2, color, 2);
 	}
 
 	private async void ShowStatus(string message)
