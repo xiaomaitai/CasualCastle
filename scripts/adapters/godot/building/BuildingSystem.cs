@@ -151,7 +151,8 @@ public partial class BuildingSystem : Node
                 if (texture != null)
                 {
                     sprite.Texture = texture;
-                    sprite.Scale = new Vector2(pixelW / texture.GetWidth(), pixelH / texture.GetHeight());
+                    float uniformScale = Mathf.Min(pixelW / texture.GetWidth(), pixelH / texture.GetHeight());
+                    sprite.Scale = new Vector2(uniformScale, uniformScale);
                 }
             }
             sprite.Modulate = new Color(visualData.SpriteModulateR, visualData.SpriteModulateG, visualData.SpriteModulateB, visualData.SpriteModulateA);

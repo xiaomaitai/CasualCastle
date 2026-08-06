@@ -34,6 +34,22 @@ assets/
 └── shaders/            # 着色器 (.gdshader)
 ```
 
+
+## 素材阶段命名（后缀规范）
+
+游戏素材按处理阶段落盘，**后缀语义固定，后续不再变更**。各阶段文件同时保留、不原地覆盖；游戏只引用最终阶段文件。
+
+| 阶段 | 后缀 | 格式 | 说明 |
+|------|------|------|------|
+| 源图 | `{TypeId}_{taskId}.png` | RGB 纯白底 | AI 生图产物（taskId 为 `asset_gen_tasks.id`），保留原分辨率，仅存档/回溯，不直接用于游戏 |
+| 抠图 | `{TypeId}_{taskId}_cut.png` | RGBA 透明 | remove-bg 产物（nodeId=17），保留原分辨率 |
+| 游戏纹理 | `{TypeId}_{taskId}_game.png` | RGBA 透明 | 裁掉透明边距 + 按长边等比缩放的最终纹理，游戏实际引用 |
+
+- 游戏纹理生成：`python tools/build_game_texture.py assets/art/buildings/{TypeId}_{taskId}_cut.png --long-edge <目标长边>`
+- 目标长边见"尺寸决策表"：2×2 建筑 512、1×1 建筑 256
+- 无抠图需求的素材（单位主图、技能图标等）直接使用源图，无 `_cut`/`_game` 阶段
+- 阶段文件变更后需重新导入（godot-import）并同步 `building_defs.texture_path` / `asset_gen_tasks.local_path`
+
 ---
 
 ## 1. 单位/单位
@@ -111,22 +127,22 @@ Unit (Area2D)
 ### 目录与命名
 
 - 目录：`assets/art/buildings/`
-- 命名：`{typeId}_{taskId}.png`（与单位卡牌、技能图标同模式，taskId 为 `asset_gen_tasks.id`）
-- 引用：`building_defs.texture_path` 登记具体文件；重新生成后更新路径
+- 命名：按"素材阶段命名"规范，源图 `{typeId}_{taskId}.png`、抠图 `{typeId}_{taskId}_cut.png`、游戏纹理 `{typeId}_{taskId}_game.png`
+- 引用：`building_defs.texture_path` 登记**游戏纹理**（`_game.png`）；重新生成后更新路径
 
 ### 尺寸分级
 
 不同占地面积的建筑**需要不同画布规格**：占地越大，画布分辨率要求越高；高大地标（城堡/王庭/高阶核心）需要更高分辨率保证细节。
 
-| 占地 | 适用建筑 | 画布 | 横向铺满比例 |
-|------|---------|------|---------------|
-| 1×1 | 地洞等单格建筑 | 512×512 | 建筑主体占画布宽 ≈ 96% |
-| 2×2 标准 | 绝大多数建筑（51 座） | 768×768 | 建筑主体占画布宽 ≈ 96% |
-| 2×2 高地标 | 城堡之心、王庭、部落核心 L4/L5 等 | 1024×1024 | 建筑主体占画布宽 ≈ 96% |
+| 占地 | 适用建筑 | 源图画布 | 游戏纹理长边 | 横向铺满比例 |
+|------|---------|----------|--------------|---------------|
+| 1×1 | 地洞等单格建筑 | 512×512 | 256 | 建筑主体占画布宽 ≈ 96% |
+| 2×2 标准 | 绝大多数建筑（51 座） | 768×768 | 512 | 建筑主体占画布宽 ≈ 96% |
+| 2×2 高地标 | 城堡之心、王庭、部落核心 L4/L5 等 | 1024×1024 | 512 | 建筑主体占画布宽 ≈ 96% |
 
-- 生成分辨率 = 最终分辨率，不缩放（768/1024 已高于显示需求，支持摄像机放大的高清表现）
+- 源图分辨率 = 生成分辨率，作为存档 master 不缩放；**游戏纹理**由 `tools/build_game_texture.py` 裁边 + 按长边等比缩放（512 支持约 2.5× 摄像机放大）
 - 建筑主体**横向铺满画布**（左右留 ≤2% 边距），**底边贴画布下缘**，不得悬空留白
-- 等比缩放：scale = 占地像素宽 ÷ 画布宽；锚点 = 图像底边中点，对齐占地中心
+- 运行时等比缩放：`BuildingSystem.ApplyVisual` 按碰撞尺寸与纹理长边统一缩放，保持宽高比不拉伸；锚点 = 图像底边中点，对齐占地中心
 
 ### 视角（固定关键词）
 
@@ -180,7 +196,7 @@ Pure white background.
 
 ### 管线
 
-生图（RGB 纯白底）→ 用户筛选 → remove-bg 抠图（nodeId=17，RGBA 原地替换）→ godot-import 导入 → 登记 texture_path
+生图（RGB 纯白底，`_{taskId}.png`）→ 用户筛选 → remove-bg 抠图（nodeId=17，输出 `_{taskId}_cut.png`）→ 后处理生成游戏纹理（`tools/build_game_texture.py`，`_{taskId}_game.png`）→ godot-import 导入 → 登记 texture_path（`_game.png`）
 - 参考图：submit 传 --image-url <url>、batch 传 image_infos（字符串或 URL 列表）附带参考图构图/造型基准；参考图需公网 URL
 
 ---
@@ -361,7 +377,7 @@ process/fix_alpha_border=true
 - 输入图片必须是公网 URL（若原图来自 Liblib.art 生图，URL 记录在 `asset_gen_tasks` 表中）
 - 输出多张图中，**取 nodeId=17**（硬边 RGBA 抠图），适合游戏 sprite
 - 验证输出为 RGBA 且透明像素占比 > 5%
-- **抠图结果直接替换原文件**（原地覆盖，保持同一路径和文件名）
+- **抠图结果保存为 `{TypeId}_{taskId}_cut.png`**，不覆盖源图
 - **技能图标不参与抠图**：按技能图标规格直接生成 RGB PNG 使用，不执行 remove-bg
 
 **参考：** `$CODEX_HOME/skills/remove-bg`
@@ -373,7 +389,7 @@ process/fix_alpha_border=true
                               ↓
                     用户人工筛选后
                               ↓
-                   [阶段二] 抠图 → RGBA PNG → 原地替换原文件
+                   [阶段二] 抠图 → RGBA PNG（_cut.png）
 ```
 
 **典型对话示例：**
@@ -387,11 +403,11 @@ process/fix_alpha_border=true
 
 > （用户玩了一段时间后……）
 >
-> 用户：把 werewolf.png 抠个图
+> 用户：把马厩抠个图
 >
 > Claude：
-> 1. 从 `asset_gen_tasks` 表查 werewolf.png 的生图 URL
-> 2. 调用抠图 API → 下载 nodeId=17 RGBA → **原地替换** `assets/art/units/werewolf.png`
+> 1. 从 `asset_gen_tasks` 表查马厩源图的生图 URL
+> 2. 调用抠图 API → 下载 nodeId=17 RGBA → 保存为 `Stable_{taskId}_cut.png`
 > 3. 验证透明像素占比，告知完成
 
 ### 尺寸决策表
@@ -402,9 +418,9 @@ process/fix_alpha_border=true
 | Medium 单位 | 512×512 | 256×256 | 同上 |
 | Large 单位 | 512×512 | 384×384 | 384 > 256 无需缩放 |
 | Huge 单位 | 512×512 | 512×512 | 不缩放 |
-| 建筑主图（1×1 占地） | 512×512 | 不缩放 | 底座宽 ≈ 200px |
-| 建筑主图（2×2 占地标准） | 768×768 | 不缩放 | 底座宽 ≈ 350~420px |
-| 建筑主图（2×2 高地标） | 1024×1024 | 不缩放 | 底座宽 ≈ 460~560px |
+| 建筑主图（1×1 占地） | 512×512 | 游戏纹理长边 256 | 底座宽 ≈ 200px |
+| 建筑主图（2×2 占地标准） | 768×768 | 游戏纹理长边 512 | 底座宽 ≈ 350~420px |
+| 建筑主图（2×2 高地标） | 1024×1024 | 游戏纹理长边 512 | 底座宽 ≈ 460~560px |
 | 卡牌图标 | 512×512 | 256×256 | 先生成大图 |
 | UI 小图标 | 512×512 | 128×128 或 64×64 | 同上 |
 
