@@ -5,15 +5,7 @@ public partial class CameraController : Camera2D
 	private const float DragThreshold = 8f;
 	private const float EdgeScrollMargin = 48f;
 	private const float EdgeScrollSpeed = 700f;
-
-	[Export]
-	public float MinZoom = 0.5f;
-
-	[Export]
-	public float MaxZoom = 2.0f;
-
-	[Export]
-	public float ZoomStep = 0.1f;
+	private const float WheelScrollStep = 300f;
 
 	[Export]
 	public Rect2 Boundary = BattlefieldMetrics.WorldRect;
@@ -59,12 +51,13 @@ public partial class CameraController : Camera2D
 
 	public override void _Input(InputEvent @event)
 	{
-		if (@event is InputEventMouseButton wheelEvent)
+		if (@event is InputEventMouseButton wheelEvent && wheelEvent.Pressed)
 		{
-			if (wheelEvent.ButtonIndex == MouseButton.WheelUp && wheelEvent.Pressed)
-				ZoomIn();
-			if (wheelEvent.ButtonIndex == MouseButton.WheelDown && wheelEvent.Pressed)
-				ZoomOut();
+			if (wheelEvent.ButtonIndex == MouseButton.WheelUp)
+				Position += Vector2.Left * WheelScrollStep;
+			if (wheelEvent.ButtonIndex == MouseButton.WheelDown)
+				Position += Vector2.Right * WheelScrollStep;
+			ClampToBoundary();
 		}
 
 		if (@event is InputEventKey keyEvent && keyEvent.Pressed && !keyEvent.Echo && keyEvent.Keycode == Key.Home)
@@ -101,7 +94,7 @@ public partial class CameraController : Camera2D
 
 		Vector2 screenDelta = currentScreenPosition - _dragStartScreenPosition;
 		_dragStartScreenPosition = currentScreenPosition;
-		Position -= screenDelta / Zoom * DisplaySettingsManager.Instance.CameraDragSpeed;
+		Position -= new Vector2(screenDelta.X / Zoom.X * DisplaySettingsManager.Instance.CameraDragSpeed, 0f);
 		ClampToBoundary();
 	}
 
@@ -118,35 +111,12 @@ public partial class CameraController : Camera2D
 			direction.X = -1f;
 		else if (mousePosition.X > viewportSize.X - EdgeScrollMargin)
 			direction.X = 1f;
-		if (mousePosition.Y < EdgeScrollMargin)
-			direction.Y = -1f;
-		else if (mousePosition.Y > viewportSize.Y - EdgeScrollMargin)
-			direction.Y = 1f;
 		return direction;
-	}
-
-	private void ZoomIn()
-	{
-		Vector2 newZoom = Zoom + new Vector2(ZoomStep, ZoomStep);
-		if (newZoom.X > MaxZoom)
-			newZoom = new Vector2(MaxZoom, MaxZoom);
-		Zoom = newZoom;
-		ClampToBoundary();
-	}
-
-	private void ZoomOut()
-	{
-		Vector2 newZoom = Zoom - new Vector2(ZoomStep, ZoomStep);
-		if (newZoom.X < MinZoom)
-			newZoom = new Vector2(MinZoom, MinZoom);
-		Zoom = newZoom;
-		ClampToBoundary();
 	}
 
 	private void ResetView()
 	{
-		Position = Boundary.GetCenter();
-		Zoom = Vector2.One;
+		Position = new Vector2(Boundary.GetCenter().X, Position.Y);
 	}
 
 	private void ClampToBoundary()
@@ -154,12 +124,6 @@ public partial class CameraController : Camera2D
 		Vector2 halfViewportSize = GetViewportRect().Size / 2.0f / Zoom;
 		float left = Boundary.Position.X + halfViewportSize.X;
 		float right = Boundary.End.X - halfViewportSize.X;
-		float top = Boundary.Position.Y + halfViewportSize.Y;
-		float bottom = Boundary.End.Y - halfViewportSize.Y;
-
-		Vector2 clampedPosition = Position;
-		clampedPosition.X = Mathf.Clamp(clampedPosition.X, left, right);
-		clampedPosition.Y = Mathf.Clamp(clampedPosition.Y, top, bottom);
-		Position = clampedPosition;
+		Position = new Vector2(Mathf.Clamp(Position.X, left, right), Position.Y);
 	}
 }

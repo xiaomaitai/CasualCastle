@@ -342,7 +342,7 @@ PixelsPerCell = UnitsPerCell = 100，游戏坐标与像素 1:1 对应。
 - **战场** 保持平面网格（2D 俯视坐标），寻路、碰撞、占地判定均在平面上进行
 - **角色** 以纸片精灵（billboard sprite）渲染：碰撞体（圆形）位于脚下地面层，显示体（Sprite2D）向上偏移（-Y），形成立体纵深感
 - **建筑** 同样为纸片渲染，碰撞体（矩形）贴合地面占地
-- **摄像机** 当前为固定视角；未来支持缩放和滚动（见 `devPlan/outline/c08RenderPerspective.md`）
+- **摄像机** 当前为固定视角；支持左右平移（见 `devPlan/outline/c08RenderPerspective.md`）
 
 **实现要点：**
 
