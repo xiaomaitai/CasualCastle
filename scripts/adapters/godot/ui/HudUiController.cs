@@ -103,16 +103,16 @@ public sealed class HudUiController
 	{
 		GameManager gm = AdapterRegistry.Resolve<GameManager>();
 		_phaseLabel.Text = gm.IsDay ? "白天" : gm.IsCombine ? "合成" : "夜晚";
-		if (gm.IsDay || gm.IsCombine)
+		if (gm.IsDay)
 		{
 			_phaseTimerLabel.Text = FormatTime(gm.PhaseTimeRemaining);
 			_newDayButton.Visible = false;
-			_skipPhaseButton.Visible = gm.IsDay && DisplaySettingsManager.DevModeEnabled;
+			_skipPhaseButton.Visible = DisplaySettingsManager.DevModeEnabled;
 		}
 		else
 		{
 			_phaseTimerLabel.Text = "";
-			_newDayButton.Visible = true;
+			_newDayButton.Visible = gm.IsNight;
 			_skipPhaseButton.Visible = false;
 		}
 	}

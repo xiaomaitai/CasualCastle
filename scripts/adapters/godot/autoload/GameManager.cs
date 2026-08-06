@@ -75,6 +75,7 @@ public partial class GameManager : Node2D, IGameState
 
     private BattleReportSystem BattleReportSystem => _battleReportSystem ??= AdapterRegistry.Resolve<BattleReportSystem>();
     private BattleReportSystem _battleReportSystem;
+    private float _phaseTimerHoldRemaining;
 
     public override void _Ready()
     {
@@ -90,6 +91,12 @@ public partial class GameManager : Node2D, IGameState
     public override void _Process(double delta)
     {
         if (CurrentState != GameState.Playing || IsPaused) return;
+
+        if (CurrentPhase == GamePhase.Day && _phaseTimerHoldRemaining > 0f)
+        {
+            _phaseTimerHoldRemaining -= (float)delta;
+            return;
+        }
 
         if (CurrentPhase == GamePhase.Day || CurrentPhase == GamePhase.Combine)
         {
@@ -212,6 +219,9 @@ public partial class GameManager : Node2D, IGameState
         PhaseTimeRemaining = phase == GamePhase.Combine
             ? GameRules.CombineDurationSeconds
             : GameRules.DayDurationSeconds;
+        _phaseTimerHoldRemaining = phase == GamePhase.Day
+            ? GameRules.DayStartTimerHoldSeconds
+            : 0f;
 
         EmitSignal(SignalName.PhaseChanged, (int)phase);
         Sfx.Play(SfxEvents.PhaseChange);
