@@ -135,7 +135,7 @@ def main():
         print(f"attempt={attempt} generateStatus={last}", flush=True)
         if last == 5:
             for image in data.get("images") or []:
-                if image.get("nodeId") == 17:
+                if str(image.get("nodeId")) == "17":
                     image_url = image.get("imageUrl")
                     break
             break
