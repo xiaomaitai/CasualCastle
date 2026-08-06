@@ -77,8 +77,21 @@ public class SkillSet
 		foreach (KeyValuePair<string, StatModifierConfig> kv in _statModCache)
 		{
 			StatModifierConfig cfg = kv.Value;
-			if (!IsTriggerMet(cfg, ctx))
+			if (!IsTriggerMet(cfg, ctx) || !cfg.Modifiers.ContainsKey(key))
 				continue;
+
+			if (cfg.Trigger == StatModifierTrigger.NearbyRaceCount)
+			{
+				int count = 0;
+				if (ctx.NearbyRaceCounts != null && !string.IsNullOrEmpty(cfg.RaceRequirement))
+					ctx.NearbyRaceCounts.TryGetValue(cfg.RaceRequirement, out count);
+				float multiplier = 1f + System.Math.Min(count, cfg.CountCap) * cfg.CountBonus;
+				if (key == "dodge_chance")
+					result += multiplier - 1f;
+				else
+					result *= multiplier;
+				continue;
+			}
 
 			if (cfg.Modifiers.TryGetValue(key, out float val))
 			{
@@ -101,14 +114,10 @@ public class SkillSet
 		return _auraCache.Count > 0;
 	}
 
-	public float GetAuraRange()
+	public IEnumerable<AuraConfig> GetAuraConfigs()
 	{
 		foreach (AuraConfig cfg in _auraCache.Values)
-		{
-			if (cfg.Range > 0f)
-				return cfg.Range;
-		}
-		return GameRules.AuraRangeRadius;
+			yield return cfg;
 	}
 
 	public float GetDodgeChance(GameContext ctx)
@@ -152,6 +161,7 @@ public class SkillSet
 			StatModifierTrigger.OnDamaged => ctx.IsFurious,
 			StatModifierTrigger.TargetIsolated => ctx.TargetIsIsolated,
 			StatModifierTrigger.NearbyDiverse => true,
+			StatModifierTrigger.NearbyRaceCount => true,
 			_ => false
 		};
 	}

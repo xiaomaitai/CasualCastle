@@ -103,8 +103,9 @@ public sealed class AttributePanelController
 		_nameLabel.Text = UnitDisplayName.Get(state.TypeId);
 		_subLabel.Text = (unit.IsPlayerUnit ? "我方" : "敌方")
 			+ " · " + RaceName(state.Race)
-			+ (state.IsStealthed ? " · 隐身中" : "");
-		_statsLabel.Text = BuildUnitStats(state) + BuildFuryLine(unit);
+			+ (state.IsStealthed ? " · 隐身中" : "")
+			+ (state.IsAmbushing ? " · 伏击中" : "");
+		_statsLabel.Text = BuildUnitStats(state) + BuildBonusLine(unit);
 
 		ClearSkillsRow();
 		foreach (SkillDef skill in state.Skills.All)
@@ -156,7 +157,7 @@ public sealed class AttributePanelController
 		return $"生命 {state.Health}/{state.MaxHealth}   伤害 {state.Damage}\n"
 			+ $"速度 {state.Speed:0}   射程 {state.AttackRange:0}   冷却 {state.AttackCooldown:0.0}s\n"
 			+ $"视野 {state.VisionRange:0}   攻击 {attack}·{DamageName(state.DamageType)}\n"
-			+ $"护甲 {ArmorName(state.ArmorType)} {state.ArmorValue}   费用 {state.UnitCost}   状态 {status}\n"
+			+ $"护甲 {ArmorName(state.ArmorType)} {state.EffectiveArmorValue}   费用 {state.UnitCost}   状态 {status}\n"
 			+ shieldLine + healLine;
 	}
 
@@ -189,7 +190,7 @@ public sealed class AttributePanelController
 		return building.CanWork ? "工作中" : "停止工作";
 	}
 
-	private static string BuildFuryLine(UnitLogic unit)
+	private static string BuildBonusLine(UnitLogic unit)
 	{
 		string line = "";
 		if (unit.IsFurious)
@@ -202,8 +203,16 @@ public sealed class AttributePanelController
 			if (unit.FuryMoveSpeedMultiplier > 1.01f)
 				line += $"狂怒 移速 +{Mathf.RoundToInt((unit.FuryMoveSpeedMultiplier - 1f) * 100f)}%\n";
 		}
-		if (unit.AuraAttackMultiplier > 1.01f)
-			line += $"共鸣 攻击 +{Mathf.RoundToInt((unit.AuraAttackMultiplier - 1f) * 100f)}%\n";
+		if (unit.AuraAttackSpeedMultiplier > 1.01f)
+			line += $"攻速光环 +{Mathf.RoundToInt((unit.AuraAttackSpeedMultiplier - 1f) * 100f)}%\n";
+		if (unit.AuraMoveSpeedMultiplier > 1.01f)
+			line += $"移速光环 +{Mathf.RoundToInt((unit.AuraMoveSpeedMultiplier - 1f) * 100f)}%\n";
+		if (unit.AuraRegenPerSecond > 0f)
+			line += "回血光环\n";
+		if (unit.AuraExecuteDamageMultiplier > 1.01f)
+			line += $"斩杀光环 +{Mathf.RoundToInt((unit.AuraExecuteDamageMultiplier - 1f) * 100f)}%\n";
+		if (unit.AuraArmorBonus > 0)
+			line += $"护甲光环 +{unit.AuraArmorBonus}\n";
 		return line;
 	}
 
@@ -388,6 +397,10 @@ public sealed class AttributePanelController
 			"Halfling" => "半身人",
 			"Dragonborn" => "龙裔",
 			"Orc" => "兽人",
+			"Goblin" => "哥布林",
+			"Centaur" => "半人马",
+			"Staglur" => "半人鹿",
+			"Lizard" => "蜥蜴人",
 			_ => race,
 		};
 	}

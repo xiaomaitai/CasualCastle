@@ -161,6 +161,28 @@ public class UpgradeRulesTests
 	}
 
 	[Fact]
+	public void CanUpgrade_NewRaceHordeBuilding_RequiresCoreLevel()
+	{
+		UpgradeRules rules = new();
+		rules.LoadRecipes(new List<UpgradeRecipe>
+		{
+			new() { SourceTypeId = "GoblinHut", ResultTypeId = "GoblinWorkshop" }
+		});
+		Mock<IBuildingRepository> repo = new();
+		repo.Setup(r => r.GetValue("GoblinHut")).Returns(2);
+		repo.Setup(r => r.GetValue("GoblinWorkshop")).Returns(5);
+		repo.Setup(r => r.GetFactionId("GoblinHut")).Returns(FactionDef.HordeId);
+		repo.Setup(r => r.GetCombineTier("GoblinWorkshop")).Returns(1);
+		Mock<IBuildingState> source = CreateSource(true, false, "GoblinHut");
+
+		bool withLevelOneCore = rules.CanUpgrade(source.Object, repo.Object, 1, 0);
+		bool withLevelTwoCore = rules.CanUpgrade(source.Object, repo.Object, 2, 0);
+
+		Assert.False(withLevelOneCore);
+		Assert.True(withLevelTwoCore);
+	}
+
+	[Fact]
 	public void CanUpgrade_NoRecipe_ReturnsFalse()
 	{
 		UpgradeRules rules = CreateRules();

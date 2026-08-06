@@ -322,6 +322,20 @@ internal sealed class FakeTacticalQueries : ITacticalQueries
 		return found;
 	}
 
+	public IReadOnlyList<IUnitHandle> FindEnemiesNearPoint(IUnitHandle unit, float centerX, float centerY, float radius)
+	{
+		List<IUnitHandle> found = new();
+		float radiusSq = radius * radius;
+		foreach (IUnitHandle enemy in Enemies)
+		{
+			float dx = enemy.GameX - centerX;
+			float dy = enemy.GameY - centerY;
+			if (dx * dx + dy * dy <= radiusSq)
+				found.Add(enemy);
+		}
+		return found;
+	}
+
 	public IUnitHandle FindNearestInjuredAlly(IUnitHandle unit, float range)
 	{
 		return null;

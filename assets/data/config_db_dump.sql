@@ -141,6 +141,14 @@ INSERT INTO unit_stats VALUES('Inquisitor',1,1,1,4,140,45,55.0,170.0,2.0,0,42866
 INSERT INTO unit_stats VALUES('Punisher',1,1,1,4,180,65,60.0,190.0,1.8,0,4286632191,320.0,3800,'Human',100,0,0.0,0.0,0.0);
 INSERT INTO unit_stats VALUES('OrcWarrior',2,0,2,4,360,40,45.0,45.0,1.6,0,4283337530,200.0,2800,'Orc',70,0,0.0,0.0,0.0);
 INSERT INTO unit_stats VALUES('OrcBerserker',2,0,2,4,480,60,55.0,45.0,1.3,0,4288359712,210.0,3800,'Orc',90,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('GoblinSlinger',0,1,1,1,35,8,95.0,200.0,1.0,0,4283804228,280.0,1800,'Goblin',15,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('GoblinDemolitionist',0,1,1,1,50,14,95.0,190.0,1.2,0,4286041190,280.0,2600,'Goblin',25,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('CentaurHunter',1,0,0,2,130,20,150.0,40.0,1.0,0,4292721544,260.0,2600,'Centaur',45,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('CentaurRaider',1,0,0,2,165,28,150.0,40.0,0.9,0,4291598660,270.0,3400,'Centaur',60,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('StaglurDruid',0,0,4,1,75,0,70.0,0.0,10.0,0,4284931447,220.0,2600,'Staglur',30,0,20.0,120.0,2.5);
+INSERT INTO unit_stats VALUES('StaglurArchdruid',0,0,4,1,100,0,70.0,0.0,10.0,0,4282694485,240.0,3600,'Staglur',45,0,28.0,170.0,1.8);
+INSERT INTO unit_stats VALUES('LizardHunter',1,0,1,2,120,18,120.0,40.0,1.1,0,4282694570,240.0,2600,'Lizard',45,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('LizardStalker',1,0,1,2,150,24,120.0,40.0,1.0,0,4280453222,250.0,3400,'Lizard',60,1,0.0,0.0,0.0);
 CREATE TABLE building_defs (
     type_id           TEXT PRIMARY KEY,
     display_name      TEXT    NOT NULL,
@@ -170,14 +178,6 @@ INSERT INTO building_defs VALUES('MageTower','术士高塔',160,14.0,0,0,1,0,'Dr
 INSERT INTO building_defs VALUES('DragonfireTower','龙火塔',230,12.0,0,0,1,0,'DragonbornArchmage',0,1,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'alliance',100.0,'res://assets/art/placeholders/test_image.png',0.9,0.3,0.15,1.0,'',10,'');
 INSERT INTO building_defs VALUES('Inn','酒馆',120,NULL,0,0,1,0,NULL,0,0,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'alliance',0.0,'res://assets/art/placeholders/test_image.png',0.85,0.6,0.25,1.0,'',2,'');
 INSERT INTO building_defs VALUES('AdventurerGuild','冒险者公会',200,NULL,0,0,1,0,NULL,0,1,0,'[[0,0],[0,1],[1,0],[1,1]]',200,200,'alliance',0.0,'res://assets/art/placeholders/test_image.png',0.8,0.5,0.2,1.0,'',6,'');
-INSERT INTO building_defs VALUES('HordeCoreL1','部落大厅·1级',800,0.0,0,0,1,1,NULL,0,0,1,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',0.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',0,'');
-INSERT INTO building_defs VALUES('OrcCamp','兽人营地',260,9.0,0,0,1,1,'OrcWarrior',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',3,'Orc');
-INSERT INTO building_defs VALUES('Burrow','地洞',150,0.0,0,0,1,1,NULL,0,0,0,'[[0,0]]',94,94,'horde',0.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',2,'Burrow');
-INSERT INTO building_defs VALUES('HordeCoreL2','部落大厅·2级',1000,0.0,0,0,1,1,NULL,0,1,1,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',0.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',20,'');
-INSERT INTO building_defs VALUES('OrcFortress','兽人要塞',400,7.0,0,0,1,1,'OrcBerserker',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',7,'Orc');
-INSERT INTO building_defs VALUES('HordeCoreL3','部落大厅·3级',1200,0.0,0,0,1,1,NULL,0,2,1,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',0.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',60,'');
-INSERT INTO building_defs VALUES('HordeCoreL4','部落大厅·4级',1400,0.0,0,0,1,1,NULL,0,3,1,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',0.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',150,'');
-INSERT INTO building_defs VALUES('HordeCoreL5','部落大厅·5级',1600,0.0,0,0,1,1,NULL,0,4,1,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',0.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',300,'');
 INSERT INTO building_defs VALUES('Barracks','兵营',200,8.0,0,0,1,1,'Spearman',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',3,'');
 INSERT INTO building_defs VALUES('ShieldCamp','盾营',250,12.0,0,0,1,1,'ShieldBearer',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',3,'');
 INSERT INTO building_defs VALUES('ArcheryRange','靶场',150,10.0,0,0,1,1,'Archer',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',4,'');
@@ -202,6 +202,22 @@ INSERT INTO building_defs VALUES('HolyWall','圣壁',500,14.0,0,0,1,1,'HolyShiel
 INSERT INTO building_defs VALUES('HeavenPunishmentTower','天罚塔',350,12.0,0,0,1,1,'DragonRiderCommander',0,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',30,'');
 INSERT INTO building_defs VALUES('ShadowSanctum','暗影圣所',250,8.0,0,0,1,1,'ShadowLord',0,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',16,'');
 INSERT INTO building_defs VALUES('RoyalCourt','王庭',800,30.0,0,0,1,1,'King',0,4,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'alliance',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',60,'');
+INSERT INTO building_defs VALUES('HordeCoreL1','部落大厅·1级',800,0.0,0,0,1,1,NULL,0,0,1,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',0.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',0,'');
+INSERT INTO building_defs VALUES('OrcCamp','兽人营地',260,9.0,0,0,1,1,'OrcWarrior',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',3,'Orc');
+INSERT INTO building_defs VALUES('Burrow','地洞',150,0.0,0,0,1,1,NULL,0,0,0,'[[0,0]]',94,94,'horde',0.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',2,'Burrow');
+INSERT INTO building_defs VALUES('HordeCoreL2','部落大厅·2级',1000,0.0,0,0,1,1,NULL,0,1,1,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',0.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',20,'');
+INSERT INTO building_defs VALUES('OrcFortress','兽人要塞',400,7.0,0,0,1,1,'OrcBerserker',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',7,'Orc');
+INSERT INTO building_defs VALUES('HordeCoreL3','部落大厅·3级',1200,0.0,0,0,1,1,NULL,0,2,1,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',0.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',60,'');
+INSERT INTO building_defs VALUES('HordeCoreL4','部落大厅·4级',1400,0.0,0,0,1,1,NULL,0,3,1,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',0.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',150,'');
+INSERT INTO building_defs VALUES('HordeCoreL5','部落大厅·5级',1600,0.0,0,0,1,1,NULL,0,4,1,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',0.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',300,'');
+INSERT INTO building_defs VALUES('GoblinHut','哥布林窝棚',120,4.5,0,0,1,1,'GoblinSlinger',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',2,'Goblin');
+INSERT INTO building_defs VALUES('GoblinWorkshop','哥布林工坊',190,5.5,0,0,1,1,'GoblinDemolitionist',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',5,'Goblin');
+INSERT INTO building_defs VALUES('CentaurTent','半人马营帐',220,10.0,0,0,1,1,'CentaurHunter',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',4,'Centaur');
+INSERT INTO building_defs VALUES('CentaurWarFormation','半人马战阵',330,9.0,0,0,1,1,'CentaurRaider',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',9,'Centaur');
+INSERT INTO building_defs VALUES('StaglurSacredGrove','半人鹿圣林',170,8.0,0,0,1,1,'StaglurDruid',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',3,'Staglur');
+INSERT INTO building_defs VALUES('StaglurAncientTree','半人鹿古树',260,7.0,0,0,1,1,'StaglurArchdruid',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',7,'Staglur');
+INSERT INTO building_defs VALUES('LizardNest','蜥蜴人巢穴',200,9.0,0,0,1,1,'LizardHunter',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',3,'Lizard');
+INSERT INTO building_defs VALUES('LizardHuntingGrounds','蜥蜴人猎场',300,8.0,0,0,1,1,'LizardStalker',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',7,'Lizard');
 CREATE TABLE damage_matrix (
     damage_type INTEGER NOT NULL,
     armor_type  INTEGER NOT NULL,
@@ -269,8 +285,6 @@ INSERT INTO shop_catalog VALUES('WarriorGuild','战士公会',4,'WarriorGuild',1
 INSERT INTO shop_catalog VALUES('ThiefGuild','盗贼行会',2,'ThiefGuild',10);
 INSERT INTO shop_catalog VALUES('MageTower','术士高塔',5,'MageTower',6);
 INSERT INTO shop_catalog VALUES('Inn','酒馆',2,'Inn',14);
-INSERT INTO shop_catalog VALUES('OrcCamp','兽人营地',3,'OrcCamp',12);
-INSERT INTO shop_catalog VALUES('Burrow','地洞',2,'Burrow',10);
 INSERT INTO shop_catalog VALUES('Barracks','兵营',3,'Barracks',14);
 INSERT INTO shop_catalog VALUES('ShieldCamp','盾营',3,'ShieldCamp',10);
 INSERT INTO shop_catalog VALUES('ArcheryRange','靶场',4,'ArcheryRange',12);
@@ -285,6 +299,12 @@ INSERT INTO shop_catalog VALUES('Ranch','牧场',8,'Ranch',6);
 INSERT INTO shop_catalog VALUES('RoyalArmory','皇家军营',10,'RoyalArmory',4);
 INSERT INTO shop_catalog VALUES('RoyalBulwark','皇家壁垒',10,'RoyalBulwark',4);
 INSERT INTO shop_catalog VALUES('RoyalStable','皇家马场',12,'RoyalStable',4);
+INSERT INTO shop_catalog VALUES('OrcCamp','兽人营地',3,'OrcCamp',12);
+INSERT INTO shop_catalog VALUES('Burrow','地洞',2,'Burrow',10);
+INSERT INTO shop_catalog VALUES('GoblinHut','哥布林窝棚',2,'GoblinHut',14);
+INSERT INTO shop_catalog VALUES('CentaurTent','半人马营帐',4,'CentaurTent',10);
+INSERT INTO shop_catalog VALUES('StaglurSacredGrove','半人鹿圣林',3,'StaglurSacredGrove',10);
+INSERT INTO shop_catalog VALUES('LizardNest','蜥蜴人巢穴',3,'LizardNest',10);
 CREATE TABLE IF NOT EXISTS "faction_defs" (
     id TEXT PRIMARY KEY,
     display_name TEXT NOT NULL,
@@ -308,14 +328,6 @@ CREATE TABLE tech_tree_nodes (
     max_health INTEGER NOT NULL DEFAULT 200,
     spawn_interval REAL NOT NULL DEFAULT 10.0
 , value INTEGER, race_id TEXT NOT NULL DEFAULT '', is_core INTEGER NOT NULL DEFAULT 0);
-INSERT INTO tech_tree_nodes VALUES('HordeCoreL1','horde',1,0,0,NULL,NULL,0,'部落大厅·1级',NULL,800,0.0,0,'',1);
-INSERT INTO tech_tree_nodes VALUES('OrcCamp','horde',1,1,1,3,12,0,'兽人营地','OrcWarrior',260,9.0,3,'Orc',0);
-INSERT INTO tech_tree_nodes VALUES('Burrow','horde',1,3,1,2,10,0,'地洞',NULL,150,0.0,2,'Burrow',0);
-INSERT INTO tech_tree_nodes VALUES('HordeCoreL2','horde',2,0,0,NULL,NULL,0,'部落大厅·2级',NULL,1000,0.0,20,'',1);
-INSERT INTO tech_tree_nodes VALUES('OrcFortress','horde',2,1,0,NULL,NULL,0,'兽人要塞','OrcBerserker',400,7.0,7,'Orc',0);
-INSERT INTO tech_tree_nodes VALUES('HordeCoreL3','horde',3,0,0,NULL,NULL,0,'部落大厅·3级',NULL,1200,0.0,60,'',1);
-INSERT INTO tech_tree_nodes VALUES('HordeCoreL4','horde',4,0,0,NULL,NULL,0,'部落大厅·4级',NULL,1400,0.0,150,'',1);
-INSERT INTO tech_tree_nodes VALUES('HordeCoreL5','horde',5,0,0,NULL,NULL,0,'部落大厅·5级',NULL,1600,0.0,300,'',1);
 INSERT INTO tech_tree_nodes VALUES('Barracks','alliance',1,0,1,3,14,0,'兵营','Spearman',200,8.0,3,'',0);
 INSERT INTO tech_tree_nodes VALUES('ShieldCamp','alliance',1,1,1,3,10,0,'盾营','ShieldBearer',250,12.0,3,'',0);
 INSERT INTO tech_tree_nodes VALUES('ArcheryRange','alliance',1,2,1,4,12,0,'靶场','Archer',150,10.0,4,'',0);
@@ -340,6 +352,22 @@ INSERT INTO tech_tree_nodes VALUES('HolyWall','alliance',4,0,0,NULL,NULL,0,'圣�
 INSERT INTO tech_tree_nodes VALUES('HeavenPunishmentTower','alliance',4,2,0,NULL,NULL,0,'天罚塔','DragonRiderCommander',350,12.0,30,'',0);
 INSERT INTO tech_tree_nodes VALUES('ShadowSanctum','alliance',4,4,0,NULL,NULL,0,'暗影圣所','ShadowLord',250,8.0,16,'',0);
 INSERT INTO tech_tree_nodes VALUES('RoyalCourt','alliance',5,2,0,NULL,NULL,0,'王庭','King',800,30.0,60,'',0);
+INSERT INTO tech_tree_nodes VALUES('HordeCoreL1','horde',1,0,0,NULL,NULL,0,'部落大厅·1级',NULL,800,0.0,0,'',1);
+INSERT INTO tech_tree_nodes VALUES('OrcCamp','horde',1,1,1,3,12,0,'兽人营地','OrcWarrior',260,9.0,3,'Orc',0);
+INSERT INTO tech_tree_nodes VALUES('Burrow','horde',1,3,1,2,10,0,'地洞',NULL,150,0.0,2,'Burrow',0);
+INSERT INTO tech_tree_nodes VALUES('HordeCoreL2','horde',2,0,0,NULL,NULL,0,'部落大厅·2级',NULL,1000,0.0,20,'',1);
+INSERT INTO tech_tree_nodes VALUES('OrcFortress','horde',2,1,0,NULL,NULL,0,'兽人要塞','OrcBerserker',400,7.0,7,'Orc',0);
+INSERT INTO tech_tree_nodes VALUES('HordeCoreL3','horde',3,0,0,NULL,NULL,0,'部落大厅·3级',NULL,1200,0.0,60,'',1);
+INSERT INTO tech_tree_nodes VALUES('HordeCoreL4','horde',4,0,0,NULL,NULL,0,'部落大厅·4级',NULL,1400,0.0,150,'',1);
+INSERT INTO tech_tree_nodes VALUES('HordeCoreL5','horde',5,0,0,NULL,NULL,0,'部落大厅·5级',NULL,1600,0.0,300,'',1);
+INSERT INTO tech_tree_nodes VALUES('GoblinHut','horde',1,2,1,2,14,0,'哥布林窝棚','GoblinSlinger',120,4.5,2,'Goblin',0);
+INSERT INTO tech_tree_nodes VALUES('GoblinWorkshop','horde',2,2,0,NULL,NULL,0,'哥布林工坊','GoblinDemolitionist',190,5.5,5,'Goblin',0);
+INSERT INTO tech_tree_nodes VALUES('CentaurTent','horde',1,4,1,4,10,0,'半人马营帐','CentaurHunter',220,10.0,4,'Centaur',0);
+INSERT INTO tech_tree_nodes VALUES('CentaurWarFormation','horde',2,4,0,NULL,NULL,0,'半人马战阵','CentaurRaider',330,9.0,9,'Centaur',0);
+INSERT INTO tech_tree_nodes VALUES('StaglurSacredGrove','horde',1,5,1,3,10,0,'半人鹿圣林','StaglurDruid',170,8.0,3,'Staglur',0);
+INSERT INTO tech_tree_nodes VALUES('StaglurAncientTree','horde',2,5,0,NULL,NULL,0,'半人鹿古树','StaglurArchdruid',260,7.0,7,'Staglur',0);
+INSERT INTO tech_tree_nodes VALUES('LizardNest','horde',1,6,1,3,10,0,'蜥蜴人巢穴','LizardHunter',200,9.0,3,'Lizard',0);
+INSERT INTO tech_tree_nodes VALUES('LizardHuntingGrounds','horde',2,6,0,NULL,NULL,0,'蜥蜴人猎场','LizardStalker',300,8.0,7,'Lizard',0);
 CREATE TABLE IF NOT EXISTS "combine_recipes" (
                 main_type_id TEXT NOT NULL,
                 material_type_id TEXT NOT NULL,
@@ -374,6 +402,25 @@ INSERT INTO unit_skills VALUES('Inquisitor','grace_burn_t1');
 INSERT INTO unit_skills VALUES('Punisher','grace_burn_t2');
 INSERT INTO unit_skills VALUES('OrcWarrior','orc_rage_t1');
 INSERT INTO unit_skills VALUES('OrcBerserker','orc_rage_t2');
+INSERT INTO unit_skills VALUES('GoblinSlinger','goblin_swarm_t1');
+INSERT INTO unit_skills VALUES('GoblinSlinger','goblin_swarm_aura');
+INSERT INTO unit_skills VALUES('GoblinDemolitionist','goblin_swarm_t2');
+INSERT INTO unit_skills VALUES('GoblinDemolitionist','goblin_swarm_aura');
+INSERT INTO unit_skills VALUES('GoblinDemolitionist','goblin_explosion');
+INSERT INTO unit_skills VALUES('CentaurHunter','centaur_kiting');
+INSERT INTO unit_skills VALUES('CentaurHunter','centaur_hoof_aura');
+INSERT INTO unit_skills VALUES('CentaurRaider','centaur_kiting');
+INSERT INTO unit_skills VALUES('CentaurRaider','centaur_hoof_aura');
+INSERT INTO unit_skills VALUES('CentaurRaider','centaur_slow_strike');
+INSERT INTO unit_skills VALUES('StaglurDruid','staglur_wild_heart');
+INSERT INTO unit_skills VALUES('StaglurDruid','staglur_regen_aura');
+INSERT INTO unit_skills VALUES('StaglurArchdruid','staglur_wild_heart');
+INSERT INTO unit_skills VALUES('StaglurArchdruid','staglur_regen_aura');
+INSERT INTO unit_skills VALUES('StaglurArchdruid','staglur_armor_aura');
+INSERT INTO unit_skills VALUES('LizardHunter','lizard_ambush_t1');
+INSERT INTO unit_skills VALUES('LizardHunter','lizard_mark_aura');
+INSERT INTO unit_skills VALUES('LizardStalker','lizard_ambush_t2');
+INSERT INTO unit_skills VALUES('LizardStalker','lizard_mark_aura');
 CREATE TABLE IF NOT EXISTS "skill_defs" (
     id TEXT PRIMARY KEY,
     display_name TEXT NOT NULL,
@@ -391,16 +438,24 @@ INSERT INTO skill_defs VALUES('grace_burn_t1','恩典·灼烧','on_heal','{"effe
 INSERT INTO skill_defs VALUES('grace_burn_t2','恩典·灼烧','on_heal','{"effects":[{"type":"burn","value":25,"range":120}]}','受到治疗时灼烧周围 120 范围内敌人，造成 25 点伤害');
 INSERT INTO skill_defs VALUES('orc_rage_t1','狂怒','stat_modifier','{"trigger":"on_damaged","race":"Orc","modifiers":{"attack_damage_mult":1.3,"move_speed_mult":1.15}}','受到伤害后进入狂怒状态（永久）：攻击力 +30%，移动速度 +15%（仅兽人）');
 INSERT INTO skill_defs VALUES('orc_rage_t2','狂暴','stat_modifier','{"trigger":"on_damaged","race":"Orc","modifiers":{"attack_damage_mult":1.15,"attack_speed_mult":1.3,"move_speed_mult":1.15}}','受到伤害后进入狂暴状态（永久）：攻击力 +15%，攻击速度 +30%，移动速度 +15%（仅兽人）');
+INSERT INTO skill_defs VALUES('goblin_swarm_t1','蜂群','stat_modifier','{"trigger":"nearby_race_count","race":"Goblin","count_bonus":0.06,"count_cap":5,"modifiers":{"attack_speed_mult":1.0}}','周围每有一个友方哥布林单位，攻击速度 +6%（最多 +30%）');
+INSERT INTO skill_defs VALUES('goblin_swarm_t2','蜂群','stat_modifier','{"trigger":"nearby_race_count","race":"Goblin","count_bonus":0.06,"count_cap":6,"modifiers":{"attack_speed_mult":1.0}}','周围每有一个友方哥布林单位，攻击速度 +6%（最多 +36%）');
+INSERT INTO skill_defs VALUES('centaur_kiting','游击','special','{"behavior":"kiting","param":2.0,"speed_mult":1.3}','攻击后移动速度 +30%，持续 2 秒（不可叠加，可刷新）');
+INSERT INTO skill_defs VALUES('staglur_wild_heart','荒野之心','special','{"behavior":"regen","param":3.0}','脱离战斗 3 秒后每秒恢复 2% 最大生命值');
+INSERT INTO skill_defs VALUES('lizard_ambush_t1','伏击','special','{"behavior":"ambush","param":2.0,"damage_mult":2.0}','脱离战斗 2 秒后进入伏击状态，首次攻击伤害翻倍');
+INSERT INTO skill_defs VALUES('lizard_ambush_t2','伏击','special','{"behavior":"ambush","param":2.0,"damage_mult":2.5}','脱离战斗 2 秒后进入伏击状态，首次攻击伤害 +150%');
+INSERT INTO skill_defs VALUES('goblin_explosion','爆炸箭','on_hit','{"effects":[{"type":"explosion","value":12,"range":80}]}','攻击附带小范围爆炸，对目标周围敌人造成 12 点伤害');
+INSERT INTO skill_defs VALUES('centaur_slow_strike','减速打击','on_hit','{"effects":[{"type":"slow","value":0.2,"duration":1.5}]}','攻击命中使目标移动速度 -20%，持续 1.5 秒');
+INSERT INTO skill_defs VALUES('goblin_swarm_aura','蜂群协调','aura','{"target":"nearby_allies","range":150,"race":"Goblin","bonus_type":"attack_speed","value":0.12}','周围友方部落单位攻击速度 +12%（同族光环不叠加）');
+INSERT INTO skill_defs VALUES('centaur_hoof_aura','疾风之蹄','aura','{"target":"nearby_allies","range":150,"race":"Centaur","bonus_type":"move_speed","value":0.10}','周围友方部落单位移动速度 +10%（同族光环不叠加）');
+INSERT INTO skill_defs VALUES('staglur_regen_aura','荒野复苏','aura','{"target":"nearby_allies","range":150,"race":"Staglur","bonus_type":"regen","value":0.008}','周围友方部落单位每秒恢复 0.8% 最大生命值（同族光环不叠加）');
+INSERT INTO skill_defs VALUES('staglur_armor_aura','古树护甲','aura','{"target":"nearby_allies","range":150,"race":"Staglur","bonus_type":"armor","value":8}','周围友方部落单位护甲 +8（同族光环不叠加）');
+INSERT INTO skill_defs VALUES('lizard_mark_aura','猎手印记','aura','{"target":"nearby_allies","range":150,"race":"Lizard","bonus_type":"execute","value":0.20}','对生命值低于 30% 的敌人伤害 +20%（同族光环不叠加）');
 CREATE TABLE upgrade_recipes (
     source_type_id TEXT NOT NULL,
     result_type_id TEXT NOT NULL,
     PRIMARY KEY (source_type_id, result_type_id)
 );
-INSERT INTO upgrade_recipes VALUES('OrcCamp','OrcFortress');
-INSERT INTO upgrade_recipes VALUES('HordeCoreL1','HordeCoreL2');
-INSERT INTO upgrade_recipes VALUES('HordeCoreL2','HordeCoreL3');
-INSERT INTO upgrade_recipes VALUES('HordeCoreL3','HordeCoreL4');
-INSERT INTO upgrade_recipes VALUES('HordeCoreL4','HordeCoreL5');
 INSERT INTO upgrade_recipes VALUES('ShieldCamp','Bulwark');
 INSERT INTO upgrade_recipes VALUES('ArcheryRange','CrossbowTower');
 INSERT INTO upgrade_recipes VALUES('Stable','Ranch');
@@ -412,6 +467,15 @@ INSERT INTO upgrade_recipes VALUES('Ranch','RoyalRanger');
 INSERT INTO upgrade_recipes VALUES('Ranch','RoyalStable');
 INSERT INTO upgrade_recipes VALUES('RoyalArcheryRange','HeavenPunishmentTower');
 INSERT INTO upgrade_recipes VALUES('RoyalRanger','ShadowSanctum');
+INSERT INTO upgrade_recipes VALUES('HordeCoreL1','HordeCoreL2');
+INSERT INTO upgrade_recipes VALUES('OrcCamp','OrcFortress');
+INSERT INTO upgrade_recipes VALUES('HordeCoreL2','HordeCoreL3');
+INSERT INTO upgrade_recipes VALUES('HordeCoreL3','HordeCoreL4');
+INSERT INTO upgrade_recipes VALUES('HordeCoreL4','HordeCoreL5');
+INSERT INTO upgrade_recipes VALUES('GoblinHut','GoblinWorkshop');
+INSERT INTO upgrade_recipes VALUES('CentaurTent','CentaurWarFormation');
+INSERT INTO upgrade_recipes VALUES('StaglurSacredGrove','StaglurAncientTree');
+INSERT INTO upgrade_recipes VALUES('LizardNest','LizardHuntingGrounds');
 PRAGMA writable_schema=ON;
 CREATE TABLE IF NOT EXISTS sqlite_sequence(name,seq);
 DELETE FROM sqlite_sequence;

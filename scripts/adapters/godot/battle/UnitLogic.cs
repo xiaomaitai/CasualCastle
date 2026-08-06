@@ -37,7 +37,11 @@ public partial class UnitLogic : Node2D
 	public float FuryMoveSpeedMultiplier => _unit != null
 		? _unit.Skills.GetStatMultiplier("move_speed_mult", _unit.GameCtx)
 		: 1f;
-	public float AuraAttackMultiplier => _unit?.GameCtx.AuraAttackMultiplier ?? 1f;
+	public float AuraAttackSpeedMultiplier => _unit?.GameCtx.AuraAttackSpeedMultiplier ?? 1f;
+	public float AuraMoveSpeedMultiplier => _unit?.GameCtx.AuraMoveSpeedMultiplier ?? 1f;
+	public float AuraRegenPerSecond => _unit?.GameCtx.AuraRegenPerSecond ?? 0f;
+	public float AuraExecuteDamageMultiplier => _unit?.GameCtx.AuraExecuteDamageMultiplier ?? 1f;
+	public int AuraArmorBonus => _unit?.GameCtx.AuraArmorBonus ?? 0;
 	public bool IsFurious => _unit?.IsFurious ?? false;
 
 	private bool _statsPending;
@@ -176,8 +180,18 @@ public partial class UnitLogic : Node2D
 			buffs.Add("护盾");
 		if (IsFurious)
 			buffs.Add("狂怒");
-		if (AuraAttackMultiplier > 1.01f)
-			buffs.Add($"共鸣 +{Mathf.RoundToInt((AuraAttackMultiplier - 1f) * 100f)}%");
+		if (_unit != null && _unit.IsAmbushing)
+			buffs.Add("伏击");
+		if (AuraAttackSpeedMultiplier > 1.01f)
+			buffs.Add($"攻速光环 +{Mathf.RoundToInt((AuraAttackSpeedMultiplier - 1f) * 100f)}%");
+		if (AuraMoveSpeedMultiplier > 1.01f)
+			buffs.Add($"移速光环 +{Mathf.RoundToInt((AuraMoveSpeedMultiplier - 1f) * 100f)}%");
+		if (AuraRegenPerSecond > 0f)
+			buffs.Add("回血光环");
+		if (AuraExecuteDamageMultiplier > 1.01f)
+			buffs.Add("斩杀光环");
+		if (AuraArmorBonus > 0)
+			buffs.Add($"护甲光环 +{AuraArmorBonus}");
 		_visual?.SetBuffs(buffs.ToArray());
 	}
 

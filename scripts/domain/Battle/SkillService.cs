@@ -25,6 +25,7 @@ public class SkillService
 
 			GameContext ctx = new();
 			HashSet<string> nearbyRaces = new() { unit.Race };
+			Dictionary<string, int> raceCounts = new();
 
 			for (int j = 0; j < allUnits.Count; j++)
 			{
@@ -39,7 +40,11 @@ public class SkillService
 				if (dx * dx + dy * dy <= nearbyRadiusSq)
 				{
 					if (!string.IsNullOrEmpty(other.Race))
+					{
 						nearbyRaces.Add(other.Race);
+						raceCounts.TryGetValue(other.Race, out int count);
+						raceCounts[other.Race] = count + 1;
+					}
 				}
 			}
 
@@ -47,6 +52,7 @@ public class SkillService
 			ctx.Race = unit.Race;
 			ctx.IsFurious = unit.IsFurious;
 			ctx.NearbyAllyRaces = nearbyRaces;
+			ctx.NearbyRaceCounts = raceCounts;
 
 			bool isolated = true;
 			IUnitHandle target = unit.TargetEnemy;
@@ -68,7 +74,12 @@ public class SkillService
 				}
 			}
 			ctx.TargetIsIsolated = isolated && target != null && target.IsAlive;
-			ctx.AuraAttackMultiplier = _auraService.CalculateAttackMultiplier(unit, allUnits);
+			AuraEffects aura = _auraService.CalculateEffects(unit, allUnits);
+			ctx.AuraAttackSpeedMultiplier = aura.AttackSpeedMultiplier;
+			ctx.AuraMoveSpeedMultiplier = aura.MoveSpeedMultiplier;
+			ctx.AuraRegenPerSecond = aura.RegenPerSecond;
+			ctx.AuraExecuteDamageMultiplier = aura.ExecuteDamageMultiplier;
+			ctx.AuraArmorBonus = aura.ArmorBonus;
 
 			unit.SetGameContext(ctx);
 		}

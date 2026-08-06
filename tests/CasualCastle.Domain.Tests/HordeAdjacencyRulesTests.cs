@@ -95,6 +95,25 @@ public class HordeAdjacencyRulesTests
 	}
 
 	[Fact]
+	public void CountAdjacencyBonusCells_NewRaceT1AndT2_SameRaceCountsAsBonus()
+	{
+		Dictionary<string, string> races = new() { ["GoblinHut"] = "Goblin", ["GoblinWorkshop"] = "Goblin" };
+		Mock<IBuildingRepository> repo = CreateRepo(SingleCell, races);
+		Mock<IAdjacencyBuilding> source = CreateBuilding("GoblinHut", 5, 5);
+		List<IAdjacencyBuilding> all = new()
+		{
+			source.Object,
+			CreateBuilding("GoblinWorkshop", 5, 4).Object,
+			CreateBuilding("Neighbor", 5, 6).Object,
+			CreateBuilding("Neighbor", 4, 5).Object
+		};
+
+		int count = HordeAdjacencyRules.CountAdjacencyBonusCells(source.Object, all, repo.Object);
+
+		Assert.Equal(2, count);
+	}
+
+	[Fact]
 	public void CountAdjacencyBonusCells_BurrowNeighbor_CountsAsBonus()
 	{
 		Mock<IBuildingRepository> repo = CreateRepo(SingleCell);

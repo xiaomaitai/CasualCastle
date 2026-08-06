@@ -28,8 +28,10 @@ public class Unit : IUnitHandle
 	public AttackType AttackType { get; set; }
 	public ArmorType ArmorType { get; set; }
 	public int ArmorValue { get; set; }
+	public int EffectiveArmorValue => ArmorValue + GameCtx.AuraArmorBonus;
 	public string Race { get; set; }
 	public bool IsFurious { get; private set; }
+	public bool IsAmbushing { get; private set; }
 	public bool IsStealthed { get; private set; }
 	public bool CanDetectStealth { get; set; }
 	public float HealAmount { get; set; }
@@ -50,6 +52,12 @@ public class Unit : IUnitHandle
 	private DamageMatrix _damageMatrix;
 	private readonly System.Random _rng = new();
 	private readonly Dictionary<string, float> _skillCooldowns = new();
+	private float _kiteTimer;
+	private float _slowRemaining;
+	private float _slowFactor;
+	private float _timeSinceLastCombat;
+	private float _auraRegenAccumulator;
+	private float _wildHeartAccumulator;
 
 	public string TargetDescription
 	{
@@ -183,7 +191,15 @@ public class Unit : IUnitHandle
 
 	public float GetCurrentSpeed()
 	{
-		float speedMult = Skills.GetStatMultiplier("move_speed_mult", GameCtx);
+		float speedMult = Skills.GetStatMultiplier("move_speed_mult", GameCtx) * GameCtx.AuraMoveSpeedMultiplier;
+		if (_kiteTimer > 0f)
+		{
+			SpecialConfig kiting = Skills.GetSpecial(SpecialBehavior.Kiting);
+			if (kiting != null)
+				speedMult *= kiting.SpeedMult;
+		}
+		if (_slowRemaining > 0f)
+			speedMult *= 1f - _slowFactor;
 		if (!IsStealthed)
 			return Speed * speedMult;
 		SpecialConfig stealth = Skills.GetSpecial(SpecialBehavior.Stealth);
@@ -239,6 +255,9 @@ public class Unit : IUnitHandle
 	{
 		if (!IsAlive)
 			return;
+
+		_timeSinceLastCombat = 0f;
+		IsAmbushing = false;
 
 		if (Skills != null && GameCtx != null)
 		{
@@ -332,11 +351,12 @@ public class Unit : IUnitHandle
 			return;
 
 		TickSkillCooldowns(dt);
+		TickCombatStateTimers(dt);
 
 		float effectiveAttackCooldown = AttackCooldown;
 		if (Skills != null)
 		{
-			float speedMult = Skills.GetStatMultiplier("attack_speed_mult", GameCtx);
+			float speedMult = Skills.GetStatMultiplier("attack_speed_mult", GameCtx) * GameCtx.AuraAttackSpeedMultiplier;
 			if (speedMult != 1f)
 				effectiveAttackCooldown = AttackCooldown / speedMult;
 		}
@@ -420,16 +440,29 @@ public class Unit : IUnitHandle
 
 		IsStealthed = false;
 		StartStealthCooldown();
+		_timeSinceLastCombat = 0f;
 
 		int effectiveDamage = Damage;
+		float executeMultiplier = 1f;
+		if (TargetEnemy.MaxHealth > 0 && TargetEnemy.Health / (float)TargetEnemy.MaxHealth <= GameRules.WildCovenantExecuteThreshold)
+			executeMultiplier = GameCtx.AuraExecuteDamageMultiplier;
 		if (Skills != null)
 		{
 			float dmgMult = Skills.GetStatMultiplier("attack_damage_mult", GameCtx);
 			effectiveDamage = (int)(Damage * dmgMult);
+			SpecialConfig ambush = Skills.GetSpecial(SpecialBehavior.Ambush);
+			if (IsAmbushing && ambush != null)
+			{
+				effectiveDamage = (int)(effectiveDamage * ambush.DamageMult);
+				IsAmbushing = false;
+			}
+			SpecialConfig kiting = Skills.GetSpecial(SpecialBehavior.Kiting);
+			if (kiting != null)
+				_kiteTimer = kiting.Param;
 		}
-		if (GameCtx.AuraAttackMultiplier != 1f)
-			effectiveDamage = (int)(effectiveDamage * GameCtx.AuraAttackMultiplier);
-		int finalDamage = CombatRules.CalculateDamage(effectiveDamage, DamageType, TargetEnemy.ArmorType, TargetEnemy.ArmorValue, _damageMatrix);
+		if (executeMultiplier != 1f)
+			effectiveDamage = (int)(effectiveDamage * executeMultiplier);
+		int finalDamage = CombatRules.CalculateDamage(effectiveDamage, DamageType, TargetEnemy.ArmorType, TargetEnemy.EffectiveArmorValue, _damageMatrix);
 		TargetEnemy.TakeDamage(finalDamage, this, GameX, GameY);
 
 		if (Skills != null)
@@ -437,7 +470,9 @@ public class Unit : IUnitHandle
 			foreach (OnHitEffect effect in Skills.GetOnHitEffects())
 			{
 				if (effect.Type == "slow" && TargetEnemy is IUnitHandle targetHandle)
-					ApplySlow(targetHandle, effect.Value, effect.Duration);
+					targetHandle.ApplySlow(effect.Value, effect.Duration);
+				else if (effect.Type == "explosion")
+					ApplyExplosion(effect.Value, effect.Range);
 			}
 		}
 
@@ -465,7 +500,77 @@ public class Unit : IUnitHandle
 		GameY += dy;
 	}
 
-	private static void ApplySlow(IUnitHandle target, float slowValue, float duration)
+	public void ApplySlow(float slowValue, float duration)
 	{
+		if (slowValue <= 0f || duration <= 0f)
+			return;
+		_slowFactor = slowValue;
+		_slowRemaining = duration;
+	}
+
+	private void TickCombatStateTimers(float dt)
+	{
+		if (_kiteTimer > 0f)
+			_kiteTimer -= dt;
+		if (_slowRemaining > 0f)
+			_slowRemaining -= dt;
+		_timeSinceLastCombat += dt;
+		UpdateAmbushState();
+		ApplyWildHeartRegen(dt);
+		ApplyAuraRegen(dt);
+	}
+
+	private void UpdateAmbushState()
+	{
+		SpecialConfig ambush = Skills != null ? Skills.GetSpecial(SpecialBehavior.Ambush) : null;
+		if (ambush != null && _timeSinceLastCombat >= ambush.Param)
+			IsAmbushing = true;
+	}
+
+	private void ApplyWildHeartRegen(float dt)
+	{
+		SpecialConfig regen = Skills != null ? Skills.GetSpecial(SpecialBehavior.Regen) : null;
+		if (regen == null || _timeSinceLastCombat < regen.Param)
+			return;
+		if (Health >= MaxHealth)
+		{
+			_wildHeartAccumulator = 0f;
+			return;
+		}
+		_wildHeartAccumulator += MaxHealth * GameRules.WildHeartRegenPercentPerSecond * dt;
+		int amount = (int)_wildHeartAccumulator;
+		if (amount <= 0)
+			return;
+		_wildHeartAccumulator -= amount;
+		Heal(amount);
+	}
+
+	private void ApplyAuraRegen(float dt)
+	{
+		if (GameCtx.AuraRegenPerSecond <= 0f)
+			return;
+		if (Health >= MaxHealth)
+		{
+			_auraRegenAccumulator = 0f;
+			return;
+		}
+		_auraRegenAccumulator += MaxHealth * GameCtx.AuraRegenPerSecond * dt;
+		int amount = (int)_auraRegenAccumulator;
+		if (amount <= 0)
+			return;
+		_auraRegenAccumulator -= amount;
+		Heal(amount);
+	}
+
+	private void ApplyExplosion(float damage, float range)
+	{
+		if (Tactical == null || damage <= 0f || range <= 0f)
+			return;
+		foreach (IUnitHandle enemy in Tactical.FindEnemiesNearPoint(this, TargetEnemy.GameX, TargetEnemy.GameY, range))
+		{
+			if (enemy == TargetEnemy)
+				continue;
+			enemy.TakeDamage((int)damage, this, GameX, GameY);
+		}
 	}
 }

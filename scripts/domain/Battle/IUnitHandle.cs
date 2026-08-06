@@ -7,6 +7,7 @@ public interface IUnitHandle : IUnitState
 	void SetEnemyTarget(IUnitHandle target);
 	void SetStealth(bool stealthed);
 	void ApplyPush(float dx, float dy);
+	void ApplySlow(float slowValue, float duration);
 	void SetBuildingTarget(IBuildingTarget building);
 	void ClearBuildingTarget();
 	void SetGameContext(GameContext ctx);

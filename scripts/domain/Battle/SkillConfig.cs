@@ -9,6 +9,8 @@ public class StatModifierConfig
 	public StatModifierTrigger Trigger { get; set; }
 	public float TriggerParam { get; set; }
 	public string RaceRequirement { get; set; }
+	public float CountBonus { get; set; }
+	public int CountCap { get; set; }
 	public Dictionary<string, float> Modifiers { get; set; }
 
 	public float GetMultiplier(string key)
@@ -36,6 +38,7 @@ public class StatModifierConfig
 				"on_damaged" => StatModifierTrigger.OnDamaged,
 				"target_isolated" => StatModifierTrigger.TargetIsolated,
 				"nearby_diverse" => StatModifierTrigger.NearbyDiverse,
+				"nearby_race_count" => StatModifierTrigger.NearbyRaceCount,
 				_ => StatModifierTrigger.Always
 			};
 		}
@@ -44,6 +47,10 @@ public class StatModifierConfig
 			config.TriggerParam = paramElem.GetSingle();
 		if (root.TryGetProperty("race", out JsonElement raceElem))
 			config.RaceRequirement = raceElem.GetString();
+		if (root.TryGetProperty("count_bonus", out JsonElement countBonusElem))
+			config.CountBonus = countBonusElem.GetSingle();
+		if (root.TryGetProperty("count_cap", out JsonElement countCapElem))
+			config.CountCap = countCapElem.GetInt32();
 
 		if (root.TryGetProperty("modifiers", out JsonElement modsElem))
 		{
@@ -59,6 +66,9 @@ public class AuraConfig
 {
 	public AuraTarget Target { get; set; }
 	public float Range { get; set; }
+	public string Race { get; set; }
+	public string BonusType { get; set; }
+	public float Value { get; set; }
 
 	public static AuraConfig Parse(string json)
 	{
@@ -72,7 +82,10 @@ public class AuraConfig
 				"all_enemies" => AuraTarget.AllEnemies,
 				_ => AuraTarget.NearbyAllies
 			},
-			Range = root.GetProperty("range").GetSingle()
+			Range = root.GetProperty("range").GetSingle(),
+			Race = root.TryGetProperty("race", out JsonElement auraRace) ? auraRace.GetString() : "",
+			BonusType = root.TryGetProperty("bonus_type", out JsonElement bonusType) ? bonusType.GetString() : "",
+			Value = root.TryGetProperty("value", out JsonElement auraValue) ? auraValue.GetSingle() : 0f
 		};
 	}
 }
@@ -82,6 +95,7 @@ public class OnHitEffect
 	public string Type { get; set; }
 	public float Value { get; set; }
 	public float Duration { get; set; }
+	public float Range { get; set; }
 }
 
 public class OnHitConfig
@@ -100,8 +114,9 @@ public class OnHitConfig
 				config.Effects.Add(new OnHitEffect
 				{
 					Type = effectElem.GetProperty("type").GetString(),
-					Value = effectElem.GetProperty("value").GetSingle(),
-					Duration = effectElem.GetProperty("duration").GetSingle()
+					Value = effectElem.TryGetProperty("value", out JsonElement hitValue) ? hitValue.GetSingle() : 0f,
+					Duration = effectElem.TryGetProperty("duration", out JsonElement hitDuration) ? hitDuration.GetSingle() : 0f,
+					Range = effectElem.TryGetProperty("range", out JsonElement hitRange) ? hitRange.GetSingle() : 0f
 				});
 			}
 		}
@@ -150,6 +165,7 @@ public class SpecialConfig
 	public SpecialBehavior Behavior { get; set; }
 	public float Param { get; set; }
 	public float SpeedMult { get; set; }
+	public float DamageMult { get; set; }
 	public float Cooldown { get; set; }
 
 	public static SpecialConfig Parse(string json)
@@ -164,10 +180,13 @@ public class SpecialConfig
 				"charge" => SpecialBehavior.Charge,
 				"no_battle_report" => SpecialBehavior.NoBattleReport,
 				"summon" => SpecialBehavior.Summon,
+				"regen" => SpecialBehavior.Regen,
+				"ambush" => SpecialBehavior.Ambush,
 				_ => SpecialBehavior.Stealth
 			},
 			Param = root.TryGetProperty("param", out JsonElement p) ? p.GetSingle() : 0f,
 			SpeedMult = root.TryGetProperty("speed_mult", out JsonElement s) ? s.GetSingle() : GameRules.StealthSpeedMult,
+			DamageMult = root.TryGetProperty("damage_mult", out JsonElement d) ? d.GetSingle() : 1f,
 			Cooldown = root.TryGetProperty("cooldown", out JsonElement c) ? c.GetSingle() : 0f
 		};
 	}

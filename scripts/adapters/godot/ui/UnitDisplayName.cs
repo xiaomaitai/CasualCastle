@@ -37,6 +37,16 @@ public static class UnitDisplayName
 			"Archbishop" => "大主教",
 			"Inquisitor" => "审判官",
 			"Punisher" => "惩戒者",
+			"OrcWarrior" => "兽人战士",
+			"OrcBerserker" => "兽人狂战士",
+			"GoblinSlinger" => "哥布林投石手",
+			"GoblinDemolitionist" => "哥布林爆破兵",
+			"CentaurHunter" => "半人马猎手",
+			"CentaurRaider" => "半人马掠袭者",
+			"StaglurDruid" => "半人鹿德鲁伊",
+			"StaglurArchdruid" => "半人鹿大德鲁伊",
+			"LizardHunter" => "蜥蜴人猎手",
+			"LizardStalker" => "蜥蜴人潜伏者",
 			_ => typeId,
 		};
 	}

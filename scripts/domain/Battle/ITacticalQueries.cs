@@ -9,5 +9,6 @@ public interface ITacticalQueries
 	IBuildingTarget FindOverlappingBuilding(IUnitHandle unit);
 	bool HasEnemyOnBuilding(IBuildingRef building);
 	IReadOnlyList<IUnitHandle> FindEnemiesNear(IUnitHandle center, float radius);
+	IReadOnlyList<IUnitHandle> FindEnemiesNearPoint(IUnitHandle unit, float centerX, float centerY, float radius);
 	IUnitHandle FindNearestInjuredAlly(IUnitHandle unit, float range);
 }

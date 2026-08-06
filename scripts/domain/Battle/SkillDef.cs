@@ -15,7 +15,8 @@ public enum StatModifierTrigger
 	LowHealth,
 	OnDamaged,
 	TargetIsolated,
-	NearbyDiverse
+	NearbyDiverse,
+	NearbyRaceCount
 }
 
 public enum AuraTarget
@@ -33,7 +34,9 @@ public enum SpecialBehavior
 	Sweep,
 	Charge,
 	NoBattleReport,
-	Summon
+	Summon,
+	Regen,
+	Ambush
 }
 
 public class SkillDef

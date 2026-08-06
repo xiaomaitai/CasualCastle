@@ -20,12 +20,14 @@ public interface IUnitState
 	UnitState State { get; }
 	ArmorType ArmorType { get; }
 	int ArmorValue { get; }
+	int EffectiveArmorValue { get; }
 	DamageType DamageType { get; }
 	AttackType AttackType { get; }
 	string Race { get; }
 	bool IsStealthed { get; }
 	bool CanDetectStealth { get; }
 	bool IsFurious { get; }
+	bool IsAmbushing { get; }
 	float HealAmount { get; }
 	float HealRange { get; }
 	float HealInterval { get; }

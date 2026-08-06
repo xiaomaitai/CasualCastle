@@ -114,6 +114,24 @@ public class TacticalQueryService : ITacticalQueries
 		return found;
 	}
 
+	public IReadOnlyList<IUnitHandle> FindEnemiesNearPoint(IUnitHandle unit, float centerX, float centerY, float radius)
+	{
+		List<IUnitHandle> found = new();
+		float radiusSq = radius * radius;
+		foreach (IUnitHandle candidate in _repo.AllUnits)
+		{
+			if (!candidate.IsAlive || candidate.IsPlayerUnit == unit.IsPlayerUnit)
+				continue;
+			if (candidate.IsStealthed && !unit.CanDetectStealth)
+				continue;
+			float dx = candidate.GameX - centerX;
+			float dy = candidate.GameY - centerY;
+			if (dx * dx + dy * dy <= radiusSq)
+				found.Add(candidate);
+		}
+		return found;
+	}
+
 	public IUnitHandle FindNearestInjuredAlly(IUnitHandle unit, float range)
 	{
 		IUnitHandle best = null;

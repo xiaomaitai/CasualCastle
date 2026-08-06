@@ -8,6 +8,11 @@ public class GameContext
 	public string Race;
 	public bool IsFurious;
 	public HashSet<string> NearbyAllyRaces;
+	public Dictionary<string, int> NearbyRaceCounts;
 	public bool TargetIsIsolated;
-	public float AuraAttackMultiplier = 1f;
+	public float AuraAttackSpeedMultiplier = 1f;
+	public float AuraMoveSpeedMultiplier = 1f;
+	public float AuraRegenPerSecond;
+	public float AuraExecuteDamageMultiplier = 1f;
+	public int AuraArmorBonus;
 }

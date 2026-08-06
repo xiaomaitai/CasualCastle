@@ -5,33 +5,57 @@ namespace CasualCastle.Domain.Battle;
 
 public class AuraService
 {
-	public float CalculateAttackMultiplier(IUnitHandle unit, IReadOnlyList<IUnitHandle> allUnits)
+	public AuraEffects CalculateEffects(IUnitHandle unit, IReadOnlyList<IUnitHandle> allUnits)
 	{
-		HashSet<string> auraRaces = new();
+		AuraEffects result = new();
+		if (!HordeRaces.IsHordeRace(unit.Race) || unit.Skills == null)
+			return result;
+		HashSet<(string bonusType, string race)> applied = new();
 		foreach (IUnitHandle other in allUnits)
 		{
-			if (!IsAuraEmitterWithinRange(unit, other))
+			if (!other.IsAlive || other.IsPlayerUnit != unit.IsPlayerUnit)
 				continue;
-			if (!string.IsNullOrEmpty(other.Race))
-				auraRaces.Add(other.Race);
+			if (other.Skills == null || !other.Skills.HasAura())
+				continue;
+			foreach (AuraConfig cfg in other.Skills.GetAuraConfigs())
+			{
+				if (string.IsNullOrEmpty(cfg.BonusType) || !IsWithinRange(unit, other, cfg.Range))
+					continue;
+				if (!applied.Add((cfg.BonusType, other.Race)))
+					continue;
+				Apply(result, cfg.BonusType, cfg.Value);
+			}
 		}
-
-		float multiplier = 1f;
-		foreach (string race in auraRaces)
-			multiplier *= GameRules.AuraAttackBonusMultiplier;
-		return multiplier;
+		return result;
 	}
 
-	private static bool IsAuraEmitterWithinRange(IUnitHandle unit, IUnitHandle other)
+	private static bool IsWithinRange(IUnitHandle unit, IUnitHandle other, float range)
 	{
-		if (other == unit || !other.IsAlive || other.IsPlayerUnit != unit.IsPlayerUnit)
-			return false;
-		if (other.Skills == null || !other.Skills.HasAura())
-			return false;
-
-		float range = other.Skills.GetAuraRange();
+		float radius = range > 0f ? range : GameRules.AuraRangeRadius;
 		float dx = unit.GameX - other.GameX;
 		float dy = unit.GameY - other.GameY;
-		return dx * dx + dy * dy <= range * range;
+		return dx * dx + dy * dy <= radius * radius;
+	}
+
+	private static void Apply(AuraEffects result, string bonusType, float value)
+	{
+		switch (bonusType)
+		{
+			case "attack_speed":
+				result.AttackSpeedMultiplier *= 1f + value;
+				break;
+			case "move_speed":
+				result.MoveSpeedMultiplier *= 1f + value;
+				break;
+			case "regen":
+				result.RegenPerSecond += value;
+				break;
+			case "execute":
+				result.ExecuteDamageMultiplier *= 1f + value;
+				break;
+			case "armor":
+				result.ArmorBonus += (int)value;
+				break;
+		}
 	}
 }
