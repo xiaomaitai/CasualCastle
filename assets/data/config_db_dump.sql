@@ -420,16 +420,16 @@ INSERT INTO tech_tree_nodes VALUES('StaglurSacredGrove','horde',1,5,1,3,10,0,'�
 INSERT INTO tech_tree_nodes VALUES('StaglurAncientTree','horde',2,5,0,NULL,NULL,0,'半人鹿古树','StaglurArchdruid',260,7.0,7,'Staglur',0);
 INSERT INTO tech_tree_nodes VALUES('LizardNest','horde',1,6,1,3,10,0,'蜥蜴人巢穴','LizardHunter',200,9.0,3,'Lizard',0);
 INSERT INTO tech_tree_nodes VALUES('LizardHuntingGrounds','horde',2,6,0,NULL,NULL,0,'蜥蜴人猎场','LizardStalker',300,8.0,7,'Lizard',0);
-INSERT INTO tech_tree_nodes VALUES('RangerGuild','alliance',1,8,1,3,12,0,'????','ElfRanger',180,9.0,3,'',0);
-INSERT INTO tech_tree_nodes VALUES('WindSanctum','alliance',2,8,0,NULL,NULL,0,'????','ElfSharpshooter',260,7.0,7,'',0);
-INSERT INTO tech_tree_nodes VALUES('WarriorGuild','alliance',1,9,1,4,10,0,'????','DwarfWarrior',250,12.0,4,'',0);
-INSERT INTO tech_tree_nodes VALUES('MountainFort','alliance',2,9,0,NULL,NULL,0,'????','DwarfBerserker',360,10.0,9,'',0);
-INSERT INTO tech_tree_nodes VALUES('ThiefGuild','alliance',1,10,1,2,10,0,'????','HalflingThief',140,7.0,2,'',0);
-INSERT INTO tech_tree_nodes VALUES('ShadowGuild','alliance',2,10,0,NULL,NULL,0,'????','HalflingAssassin',200,5.0,5,'',0);
-INSERT INTO tech_tree_nodes VALUES('MageTower','alliance',1,11,1,5,6,0,'????','DragonbornMage',160,14.0,5,'',0);
-INSERT INTO tech_tree_nodes VALUES('DragonfireTower','alliance',2,11,0,NULL,NULL,0,'???','DragonbornArchmage',230,12.0,10,'',0);
-INSERT INTO tech_tree_nodes VALUES('Inn','alliance',1,12,1,2,14,0,'??',NULL,120,10.0,2,'',0);
-INSERT INTO tech_tree_nodes VALUES('AdventurerGuild','alliance',2,12,0,NULL,NULL,0,'?????',NULL,200,10.0,6,'',0);
+INSERT INTO tech_tree_nodes VALUES('RangerGuild','alliance',1,8,1,3,12,0,'游侠公会','ElfRanger',180,9.0,3,'',0);
+INSERT INTO tech_tree_nodes VALUES('WindSanctum','alliance',2,8,0,NULL,NULL,0,'风行圣殿','ElfSharpshooter',260,7.0,7,'',0);
+INSERT INTO tech_tree_nodes VALUES('WarriorGuild','alliance',1,9,1,4,10,0,'战士公会','DwarfWarrior',250,12.0,4,'',0);
+INSERT INTO tech_tree_nodes VALUES('MountainFort','alliance',2,9,0,NULL,NULL,0,'山丘要塞','DwarfBerserker',360,10.0,9,'',0);
+INSERT INTO tech_tree_nodes VALUES('ThiefGuild','alliance',1,10,1,2,10,0,'盗贼行会','HalflingThief',140,7.0,2,'',0);
+INSERT INTO tech_tree_nodes VALUES('ShadowGuild','alliance',2,10,0,NULL,NULL,0,'暗影公会','HalflingAssassin',200,5.0,5,'',0);
+INSERT INTO tech_tree_nodes VALUES('MageTower','alliance',1,11,1,5,6,0,'术士高塔','DragonbornMage',160,14.0,5,'',0);
+INSERT INTO tech_tree_nodes VALUES('DragonfireTower','alliance',2,11,0,NULL,NULL,0,'龙火塔','DragonbornArchmage',230,12.0,10,'',0);
+INSERT INTO tech_tree_nodes VALUES('Inn','alliance',1,12,1,2,14,0,'酒馆',NULL,120,10.0,2,'',0);
+INSERT INTO tech_tree_nodes VALUES('AdventurerGuild','alliance',2,12,0,NULL,NULL,0,'冒险者公会',NULL,200,10.0,6,'',0);
 CREATE TABLE IF NOT EXISTS "combine_recipes" (
                 main_type_id TEXT NOT NULL,
                 material_type_id TEXT NOT NULL,

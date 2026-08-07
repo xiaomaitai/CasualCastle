@@ -81,6 +81,7 @@ public partial class UIManager : Node2D
         _buildingInfoUi?.Process();
         _unitInfoUi?.Process();
         _unitSelection?.Process();
+        EnsureTavernBubble();
         _tavernBubble?.Process(_unitSelection.SelectedBuilding, _tavernParty);
         _attributePanel?.Process();
     }
@@ -183,15 +184,26 @@ public partial class UIManager : Node2D
             return;
         }
 
-        if (_unitSelection?.HandleInput(@event) == true)
+        EnsureTavernBubble();
         if (_tavernBubble?.HandleInput(@event, _tavernParty) == true)
         {
             GetViewport().SetInputAsHandled();
             return;
         }
+
+        if (_unitSelection?.HandleInput(@event) == true)
         {
             GetViewport().SetInputAsHandled();
+            return;
         }
+    }
+
+    private void EnsureTavernBubble()
+    {
+        if (GodotObject.IsInstanceValid(_tavernBubble))
+            return;
+        _tavernBubble = new TavernBubble();
+        GetParent()?.GetNodeOrNull<Node2D>("Battlefield")?.AddChild(_tavernBubble);
     }
 
     private void InitializeUI()
