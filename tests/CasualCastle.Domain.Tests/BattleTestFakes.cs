@@ -51,6 +51,7 @@ internal sealed class FakeUnitRepository : IFieldUnitRepository
 
 internal sealed class FakeBuilding : IBuildingRef
 {
+	public string TypeId { get; init; } = "Inn";
 	public bool IsDestroyed { get; init; }
 	public bool IsCore { get; init; }
 	public bool IsEnemyOfUnit { get; init; }

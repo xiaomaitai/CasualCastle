@@ -285,6 +285,15 @@ public partial class UnitLogic : Node2D
 
 	private Vector2 SelectTarget()
 	{
+			IBuildingRef tavern = _unit.AssignedTavern;
+			if (tavern != null)
+			{
+				(float centerX, float centerY) = TavernPartyService.GetTavernStandTarget(_unit, tavern);
+			return new Vector2(
+				GameCoordinatesAdapter.GameUnitsToPixels(centerX),
+				GameCoordinatesAdapter.GameUnitsToPixels(centerY));
+			}
+
 		GameManager gm = AdapterRegistry.Resolve<GameManager>();
 		Castle targetCastle = IsPlayerUnit ? gm?.EnemyCastle : gm?.PlayerCastle;
 
@@ -360,6 +369,8 @@ public partial class UnitLogic : Node2D
 		_visual?.UpdateSleepVisual(false, false);
 		_lifecycle?.PlayDeathAnimation(_body);
 		Sfx.Play(SfxEvents.UnitDeath);
+		TavernPartyService tavernParty = GameManager.Get<TavernPartyService>();
+		tavernParty?.RemoveOnDeath(_unit);
 		_corpseService?.ScheduleCorpseRemoval(_unit);
 	}
 

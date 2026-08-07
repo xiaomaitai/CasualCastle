@@ -335,7 +335,7 @@ public sealed class AttributePanelController
 		_skillIcons.Clear();
 	}
 
-	private static Texture2D LoadUnitPortrait(string typeId)
+	public static Texture2D LoadUnitPortrait(string typeId)
 	{
 		using DirAccess dir = DirAccess.Open("res://assets/art/cards/");
 		if (dir == null)
@@ -352,7 +352,7 @@ public sealed class AttributePanelController
 		return null;
 	}
 
-	private static Texture2D LoadPlaceholder()
+	public static Texture2D LoadPlaceholder()
 	{
 		return GD.Load<Texture2D>(PlaceholderTexture);
 	}

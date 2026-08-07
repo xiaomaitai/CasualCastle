@@ -1,6 +1,7 @@
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Adapters.Godot.Dev;
 using CasualCastle.Domain.Building;
+using CasualCastle.Domain.Battle;
 using Godot;
 
 public partial class UIManager : Node2D
@@ -20,6 +21,8 @@ public partial class UIManager : Node2D
     private RuntimeInfoPanelController _runtimeInfoPanel;
     private UnitInfoUiController _unitInfoUi;
     private UnitSelectionController _unitSelection;
+    private TavernBubble _tavernBubble;
+    private TavernPartyService _tavernParty;
     private AttributePanelController _attributePanel;
     private GameOverUiController _gameOverUi;
     private SettingsUiController _settingsUi;
@@ -78,6 +81,7 @@ public partial class UIManager : Node2D
         _buildingInfoUi?.Process();
         _unitInfoUi?.Process();
         _unitSelection?.Process();
+        _tavernBubble?.Process(_unitSelection.SelectedBuilding, _tavernParty);
         _attributePanel?.Process();
     }
 
@@ -180,6 +184,11 @@ public partial class UIManager : Node2D
         }
 
         if (_unitSelection?.HandleInput(@event) == true)
+        if (_tavernBubble?.HandleInput(@event, _tavernParty) == true)
+        {
+            GetViewport().SetInputAsHandled();
+            return;
+        }
         {
             GetViewport().SetInputAsHandled();
         }
@@ -198,6 +207,9 @@ public partial class UIManager : Node2D
         _buildingInfoUi = new BuildingInfoUiController(this, uiRoot);
         _unitInfoUi = new UnitInfoUiController(this, uiRoot);
         _unitSelection = new UnitSelectionController(this);
+        _tavernParty = GameManager.Get<TavernPartyService>();
+        _tavernBubble = new TavernBubble();
+        GetParent()?.GetNodeOrNull<Node2D>("Battlefield")?.AddChild(_tavernBubble);
         _attributePanel = new AttributePanelController(this, uiRoot, _unitSelection);
         ButtonGroup toolGroup = new ButtonGroup();
         _buildingManageUi = new BuildingManageUiController(this, uiRoot, toolGroup);

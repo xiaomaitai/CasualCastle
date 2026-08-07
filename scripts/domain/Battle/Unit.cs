@@ -45,6 +45,7 @@ public class Unit : IUnitHandle
 	public IUnitHandle TargetEnemy { get; set; }
 	public IUnitHandle HealTarget { get; set; }
 	public IBuildingTarget TargetBuilding { get; set; }
+	public IBuildingRef AssignedTavern { get; set; }
 	public UnitState State { get; set; }
 
 	private float _attackTimer;
@@ -307,6 +308,13 @@ public class Unit : IUnitHandle
 		if (!IsAlive)
 			return;
 
+		if (AssignedTavern != null && TavernPartyService.IsNearTavern(this, AssignedTavern))
+		{
+			State = UnitState.Waiting;
+			TargetEnemy = null;
+			return;
+		}
+
 		if (HealAmount > 0f && HealRange > 0f)
 		{
 			TargetEnemy = null;
@@ -392,6 +400,11 @@ public class Unit : IUnitHandle
 			case UnitState.Marching:
 				TargetEnemy = null;
 				NavPort.SetTarget(marchTargetGameX, marchTargetGameY);
+				break;
+
+			case UnitState.Waiting:
+				TargetEnemy = null;
+				NavPort.SetTarget(GameX, GameY);
 				break;
 		}
 	}

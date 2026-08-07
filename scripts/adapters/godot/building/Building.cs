@@ -340,6 +340,9 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	public override void _ExitTree()
 	{
+		TavernPartyService tavernParty = GameManager.Get<TavernPartyService>();
+		tavernParty?.ReleaseTavern(this);
+
 		IFieldUnitRepository fieldRepo = GameManager.Get<IFieldUnitRepository>();
 		fieldRepo?.UnregisterBuilding(this);
 
@@ -448,7 +451,18 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 				_battlefield, CastleRef, shell,
 				BuildingSys.GetFootprint(TypeId), GridX, GridY, _spawnCount);
 			_spawnCount++;
+			if (_isPlayerBuilding)
+				AssignToTavern(unit);
 		}
+	}
+
+	private void AssignToTavern(UnitLogic unit)
+	{
+		TavernPartyService tavernParty = GameManager.Get<TavernPartyService>();
+		IFieldUnitRepository fieldRepo = GameManager.Get<IFieldUnitRepository>();
+		if (tavernParty == null || fieldRepo == null)
+			return;
+		tavernParty.TryAssignTavern(unit.Handle, fieldRepo.AllBuildings);
 	}
 
 	protected void BeginWork(float workRequired)

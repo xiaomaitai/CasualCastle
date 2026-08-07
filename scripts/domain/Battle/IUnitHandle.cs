@@ -11,4 +11,5 @@ public interface IUnitHandle : IUnitState
 	void SetBuildingTarget(IBuildingTarget building);
 	void ClearBuildingTarget();
 	void SetGameContext(GameContext ctx);
+	IBuildingRef AssignedTavern { get; set; }
 }
