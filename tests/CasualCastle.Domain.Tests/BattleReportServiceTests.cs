@@ -194,6 +194,68 @@ public class BattleReportServiceTests
 		Assert.Null(service.GetSelectedPhaseSnapshot(3, BattlePhase.Day));
 	}
 
+	[Fact]
+	public void IsNecromancerReport_ReportWithUndeadBuilding_ReturnsTrue()
+	{
+		FakeReportRepository repository = new();
+		BattleReport report = CreateReportWithBuilding("Tomb");
+		repository.Reports.Add(report);
+
+		BattleReportService service = CreateServiceWithFactions(repository);
+
+		Assert.True(service.IsNecromancerReport(report.ReportId));
+	}
+
+	[Fact]
+	public void IsNecromancerReport_ReportWithoutUndeadBuilding_ReturnsFalse()
+	{
+		FakeReportRepository repository = new();
+		BattleReport report = CreateReportWithBuilding("Barracks");
+		repository.Reports.Add(report);
+
+		BattleReportService service = CreateServiceWithFactions(repository);
+
+		Assert.False(service.IsNecromancerReport(report.ReportId));
+	}
+
+	[Fact]
+	public void IsNecromancerReport_UnknownReportId_ReturnsFalse()
+	{
+		BattleReportService service = CreateService(out FakeReportRepository _);
+
+		Assert.False(service.IsNecromancerReport("missing"));
+	}
+
+	private static BattleReport CreateReportWithBuilding(string typeId)
+	{
+		return new BattleReport
+		{
+			ReportId = "report-1",
+			DisplayName = "report",
+			SavedAtUnix = 1,
+			Nights = new List<CastleSnapshot>
+			{
+				new CastleSnapshot
+				{
+					NightIndex = 1,
+					Phase = BattlePhase.Day,
+					Buildings = new List<BuildingSnapshot>
+					{
+						new BuildingSnapshot { TypeId = typeId, AnchorGridX = 1, AnchorGridY = 1, Health = 100 },
+					},
+				},
+			},
+		};
+	}
+
+	private static BattleReportService CreateServiceWithFactions(FakeReportRepository repository)
+	{
+		Mock<IBuildingRepository> buildingRepo = new();
+		buildingRepo.Setup(r => r.GetFactionId("Tomb")).Returns(FactionDef.NecromancerId);
+		buildingRepo.Setup(r => r.GetFactionId("Barracks")).Returns("alliance");
+		return new BattleReportService(repository, buildingRepo.Object);
+	}
+
 	private static BattleReportService CreateService(out FakeReportRepository repository)
 	{
 		repository = new FakeReportRepository();

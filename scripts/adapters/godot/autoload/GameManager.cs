@@ -50,7 +50,7 @@ public partial class GameManager : Node2D, IGameState
     public bool IsDay => CurrentPhase == GamePhase.Day;
     public bool IsNight => CurrentPhase == GamePhase.Night;
     public bool IsCombine => CurrentPhase == GamePhase.Combine;
-    public bool IsDayNightInverted => SelectedFaction == FactionDef.NecromancerId;
+    public bool IsDayNightInverted => SelectedFaction == FactionDef.NecromancerId || _pendingEnemyIsNecromancer;
     public bool IsPaused { get; private set; }
     public float PhaseTimeRemaining { get; private set; }
     public int CurrentNightIndex { get; set; }
@@ -77,6 +77,7 @@ public partial class GameManager : Node2D, IGameState
     private BattleReportSystem BattleReportSystem => _battleReportSystem ??= AdapterRegistry.Resolve<BattleReportSystem>();
     private BattleReportSystem _battleReportSystem;
     private float _phaseTimerHoldRemaining;
+    private bool _pendingEnemyIsNecromancer;
 
     public override void _Ready()
     {
@@ -178,6 +179,7 @@ public partial class GameManager : Node2D, IGameState
     public void SetPendingReplayReportId(string reportId)
     {
         PendingReplayReportId = reportId ?? "";
+        _pendingEnemyIsNecromancer = Get<BattleReportService>()?.IsNecromancerReport(PendingReplayReportId) ?? false;
     }
 
     public void SetSelectedFaction(string factionId)

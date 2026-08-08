@@ -129,6 +129,16 @@ public class BattleReportService
         return _savedReports.FirstOrDefault(r => r.ReportId == reportId);
     }
 
+    public bool IsNecromancerReport(string reportId)
+    {
+        if (string.IsNullOrWhiteSpace(reportId))
+            return false;
+        BattleReport report = LoadReport(reportId);
+        if (report == null)
+            return false;
+        return report.Nights.Any(s => s.Buildings.Any(b => _buildingRepo.GetFactionId(b.TypeId) == FactionDef.NecromancerId));
+    }
+
     public CastleSnapshot GetSelectedPhaseSnapshot(int nightIndex, BattlePhase phase)
     {
         if (nightIndex <= 0 || string.IsNullOrWhiteSpace(_selectedReportId))
