@@ -13,6 +13,8 @@ public class SaveData
 	public List<CardSaveEntry> HandCards { get; set; } = new();
 	public string PendingReplayReportId { get; set; } = "";
 	public string SaveTime { get; set; } = "";
+	public int RitualStudyCompletionCount { get; set; }
+	public List<string> LearnedRitualIds { get; set; } = new();
 }
 
 public class BuildingSaveEntry
@@ -30,4 +32,5 @@ public class CardSaveEntry
 	public int Cost { get; set; }
 	public string BuildingType { get; set; } = "";
 	public int Weight { get; set; }
+	public bool IsPlaceable { get; set; } = true;
 }

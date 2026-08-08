@@ -185,7 +185,7 @@ public partial class NecromancerBattleSmoke : Node
 			_failures.Add($"法术栏手牌切换错误 handVisible={handPanel.Visible} 期望={_spellBarExpectVisible}");
 		if (spellBar.Visible != _spellBarExpectVisible)
 			_failures.Add($"法术栏显示错误 spellBarVisible={spellBar.Visible} 期望={_spellBarExpectVisible}");
-		if (_spellBarExpectVisible && slots.GetChildCount() != 3)
+		if (_spellBarExpectVisible && slots.GetChildCount() != 1)
 			_failures.Add($"法术栏槽位数量错误 count={slots.GetChildCount()}");
 	}
 
@@ -318,7 +318,7 @@ public partial class NecromancerBattleSmoke : Node
 		if (_elapsed - _stepStartedAt < NightSpawnWait)
 			return;
 		CheckNightSpawns();
-		StartRitual(RitualRules.BlackMagicChargeId);
+		StartStudyRitual("DarkMagicBook_BlackMagicCharge", RitualRules.BlackMagicChargeId);
 		_stepStartedAt = _elapsed;
 		_step = SmokeStep.WaitFirstRitual;
 	}
@@ -328,7 +328,7 @@ public partial class NecromancerBattleSmoke : Node
 		if (_playerCastle.Heart == null || _playerCastle.Heart.TypeId != "RitualCircleL2")
 			return;
 		UpgradeTierTwoBuildings();
-		StartRitual(RitualRules.UndeadSummonId);
+		StartStudyRitual("DarkMagicBook_UndeadSummon", RitualRules.UndeadSummonId);
 		_stepStartedAt = _elapsed;
 		_step = SmokeStep.WaitSecondRitual;
 	}
@@ -367,18 +367,28 @@ public partial class NecromancerBattleSmoke : Node
 		FindBuilding("BlightField")?.SetWorkSpeedMultiplier(WorkSpeedBoost);
 	}
 
-	private void StartRitual(string ritualId)
+	private void StartStudyRitual(string bookCardId, string ritualId)
 	{
 		BlackMagicService blackMagic = GameManager.Get<BlackMagicService>();
-		if (ritualId == RitualRules.BlackMagicChargeId)
-			blackMagic.Add(20);
-		if (_playerCastle.Heart == null || !_playerCastle.Heart.TryStartRitual(ritualId))
+		RitualService ritualService = GameManager.Get<RitualService>();
+		blackMagic.Add(DarkMagicStudyRules.GetCost(ritualService.StudyCompletionCount));
+		AdapterRegistry.Resolve<Hand>().TryAddCard(new CardData
 		{
-			_failures.Add($"仪式无法开始 {ritualId}");
+			Id = bookCardId,
+			Name = "冒烟测试魔法书",
+			Cost = 4,
+			BuildingType = bookCardId,
+			Weight = 1,
+			FactionId = FactionDef.NecromancerId,
+			IsPlaceable = false,
+		});
+		if (_playerCastle.Heart == null || !_playerCastle.Heart.TryStartRitual(RitualRules.DarkMagicStudyId))
+		{
+			_failures.Add($"研习仪式无法开始 {ritualId}");
 			ReportAndQuit();
 			return;
 		}
-		GD.Print($"SMOKE: ritual {ritualId} started");
+		GD.Print($"SMOKE: study ritual started ({ritualId})");
 	}
 
 	private void UpgradeTierTwoBuildings()

@@ -14,7 +14,8 @@ public class CardDataTests
 			Name = "Test Card",
 			Cost = 50,
 			BuildingType = "Barracks",
-			Weight = 3
+			Weight = 3,
+			IsPlaceable = false
 		};
 		CardData clone = original.Clone();
 
@@ -23,6 +24,7 @@ public class CardDataTests
 		Assert.Equal(original.Cost, clone.Cost);
 		Assert.Equal(original.BuildingType, clone.BuildingType);
 		Assert.Equal(original.Weight, clone.Weight);
+		Assert.Equal(original.IsPlaceable, clone.IsPlaceable);
 		Assert.NotSame(original, clone);
 	}
 }

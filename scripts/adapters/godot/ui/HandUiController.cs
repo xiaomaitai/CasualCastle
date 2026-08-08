@@ -17,6 +17,7 @@ public sealed class HandUiController
 	private readonly Shop _shop;
 	private readonly GameManager _gameManager;
 	private readonly BuildingSystem _buildingSystem;
+	private readonly ShopUiController _shopUi;
 
 	private bool _inputBlocked;
 	private bool _dragging;
@@ -29,13 +30,14 @@ public sealed class HandUiController
 	public bool IsDragging => _dragging;
 	public bool IsPlacementActive => _dragging || _hand.HasSelection;
 
-	public HandUiController(Node owner, CanvasLayer uiRoot, Hand handService)
+	public HandUiController(Node owner, CanvasLayer uiRoot, Hand handService, ShopUiController shopUi)
 	{
 		_owner = owner;
 		_hand = handService;
 		_shop = AdapterRegistry.Resolve<Shop>();
 		_gameManager = AdapterRegistry.Resolve<GameManager>();
 		_buildingSystem = AdapterRegistry.Resolve<BuildingSystem>();
+		_shopUi = shopUi;
 		_placementHintLabel = uiRoot.GetNode<Label>("PlacementHintLabel");
 
 		for (int i = 0; i < MaxHandSize; i++)
@@ -78,6 +80,14 @@ public sealed class HandUiController
 	{
 		UpdatePendingDrag();
 		UpdatePlacementPreview();
+		UpdateSellDropHighlight();
+	}
+
+	private void UpdateSellDropHighlight()
+	{
+		bool overPanel = _dragging && _shopUi != null && _shopUi.IsOpen
+			&& _shopUi.IsPointInPanel(_owner.GetViewport().GetMousePosition());
+		_shopUi?.SetSellHighlight(overPanel);
 	}
 
 	public bool TryHandleEscape()
@@ -123,6 +133,7 @@ public sealed class HandUiController
 
 	public bool CancelDrag(bool playFeedback = true)
 	{
+		_shopUi?.SetSellHighlight(false);
 		if (!_dragging && _pendingHandIndex < 0)
 			return false;
 
@@ -227,6 +238,9 @@ public sealed class HandUiController
 		if (playerCastle == null || _dragHandIndex < 0)
 			return false;
 
+		if (_shopUi != null && _shopUi.IsOpen && _shopUi.IsPointInPanel(screenPosition))
+			return _shop.TrySellHandCard(_dragHandIndex);
+
 		if (!playerCastle.TryGetGridFromScreenPoint(screenPosition, out int gridX, out int gridY))
 			return false;
 
@@ -266,7 +280,7 @@ public sealed class HandUiController
 
 	private void UpdatePlacementHint()
 	{
-		_placementHintLabel.Visible = (_selectedIndex >= 0 || _dragging) && !_inputBlocked;
+		_placementHintLabel.Visible = (_selectedIndex >= 0 || _dragging) && !_inputBlocked && IsPlacementCardPlaceable();
 	}
 
 	private void RefreshHighlight()
@@ -287,7 +301,8 @@ public sealed class HandUiController
 			return;
 
 		bool showPreview = !_inputBlocked
-			&& (_dragging || _hand.HasSelection);
+			&& (_dragging || _hand.HasSelection)
+			&& IsPlacementCardPlaceable();
 		if (!showPreview)
 		{
 			playerCastle.ClearPlacementPreview();
@@ -304,6 +319,14 @@ public sealed class HandUiController
 		string buildingType = GetPreviewBuildingType();
 		bool valid = _buildingSystem.CanPlace(playerCastle, buildingType, gridX, gridY);
 		playerCastle.SetPlacementPreview(true, gridX, gridY, valid, buildingType);
+	}
+
+	private bool IsPlacementCardPlaceable()
+	{
+		CardData card = _dragging && _dragHandIndex >= 0 && _dragHandIndex < _hand.Cards.Count
+			? _hand.Cards[_dragHandIndex]
+			: _hand.SelectedCard;
+		return card != null && card.IsPlaceable;
 	}
 
 	private string GetPreviewBuildingType()

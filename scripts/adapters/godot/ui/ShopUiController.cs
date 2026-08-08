@@ -30,6 +30,16 @@ public sealed class ShopUiController
 	public bool IsDragging => _dragging;
 	public event Action<bool> OpenChanged;
 
+	public bool IsPointInPanel(Vector2 screenPoint)
+	{
+		return _panel.GetGlobalRect().HasPoint(screenPoint);
+	}
+
+	public void SetSellHighlight(bool active)
+	{
+		_panel.Modulate = active ? new Color(1f, 1f, 0.75f) : Colors.White;
+	}
+
 	public ShopUiController(Node owner, CanvasLayer uiRoot, Shop shopService)
 	{
 		_owner = owner;
@@ -199,7 +209,7 @@ public sealed class ShopUiController
 			return;
 
 		CardData offer = _shop.GetOffer(slotIndex);
-		if (offer == null || !_shop.CanAfford(offer.Cost))
+		if (offer == null || !_shop.CanAfford(offer.Cost) || !offer.IsPlaceable)
 			return;
 
 		_dragging = true;

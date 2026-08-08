@@ -1,4 +1,4 @@
-// 仪式规则：仪式目录与宿主判定
+// 仪式规则：仪式目录、宿主判定与研习仪式
 using CasualCastle.Domain.Shared;
 using System.Collections.Generic;
 
@@ -6,6 +6,7 @@ namespace CasualCastle.Domain.Building;
 
 public static class RitualRules
 {
+	public const string DarkMagicStudyId = "dark_magic_study";
 	public const string BlackMagicChargeId = "black_magic_charge";
 	public const string UndeadSummonId = "undead_summon";
 	public const string BoneReinforceId = "bone_reinforce";
@@ -14,6 +15,17 @@ public static class RitualRules
 
 	private static readonly RitualDef[] AllRituals =
 	{
+		new()
+		{
+			Id = DarkMagicStudyId,
+			DisplayName = "黑魔法研习",
+			RequiredCoreLevel = 1,
+			CostType = RitualCostType.BlackMagic,
+			CostAmount = DarkMagicStudyRules.BaseCost,
+			DurationSeconds = DarkMagicStudyRules.DurationSeconds,
+			BasicReward = new RitualReward(),
+			CoreReward = new RitualReward { CoreLevelUp = true }
+		},
 		new()
 		{
 			Id = BlackMagicChargeId,
@@ -52,6 +64,11 @@ public static class RitualRules
 	public static IReadOnlyList<RitualDef> GetAll()
 	{
 		return AllRituals;
+	}
+
+	public static bool IsStudyRitual(string ritualId)
+	{
+		return ritualId == DarkMagicStudyId;
 	}
 
 	public static RitualDef Get(string ritualId)

@@ -154,7 +154,7 @@ public partial class NecromancerSmoke : Node
 			_failures.Add("仪式宿主判定错误");
 		if (RitualRules.CanHostRitual("Tomb"))
 			_failures.Add("普通建筑不应可举行仪式");
-		if (RitualRules.GetAll().Count != 3)
+		if (RitualRules.GetAll().Count != 4)
 			_failures.Add("仪式定义数量错误");
 		GD.Print("SMOKE: ritual rules ok");
 	}
@@ -162,6 +162,7 @@ public partial class NecromancerSmoke : Node
 	private void CheckRitualService()
 	{
 		CheckRitualPrerequisites();
+		CheckDarkMagicStudy();
 		CheckRitualRewards();
 		GD.Print("SMOKE: ritual service ok");
 	}
@@ -171,6 +172,7 @@ public partial class NecromancerSmoke : Node
 		RitualService service = GameManager.Get<RitualService>();
 		bool goldSpent = false;
 		bool magicSpent = false;
+		service.Learn(RitualRules.BoneReinforceId);
 		ActiveRitual blocked = service.TryStartRitual(RitualRules.BoneReinforceId, true, 1,
 			_ => goldSpent = true, _ => magicSpent = true);
 		if (blocked != null || goldSpent || magicSpent)
@@ -181,6 +183,7 @@ public partial class NecromancerSmoke : Node
 	private void CheckBlackMagicCharge()
 	{
 		RitualService service = GameManager.Get<RitualService>();
+		service.Learn(RitualRules.BlackMagicChargeId);
 		ActiveRitual ritual = service.TryStartRitual(RitualRules.BlackMagicChargeId, true, 1,
 			_ => true, _ => true);
 		if (ritual == null)
@@ -195,9 +198,26 @@ public partial class NecromancerSmoke : Node
 		if (reward.GoldAmount != 30)
 			_failures.Add("黑魔法充能奖励错误");
 	}
+	private void CheckDarkMagicStudy()
+	{
+		RitualService service = GameManager.Get<RitualService>();
+		ActiveRitual ritual = service.TryStartRitual(RitualRules.DarkMagicStudyId, true, 1,
+			_ => true, _ => true, "book_smoke", RitualRules.UndeadSummonId);
+		if (ritual == null)
+		{
+			_failures.Add("黑魔法研习无法开始");
+			return;
+		}
+		RitualReward reward = service.Complete(ritual);
+		if (reward.LearnedRitualId != RitualRules.UndeadSummonId || !service.IsLearned(RitualRules.UndeadSummonId))
+			_failures.Add("黑魔法研习未习得仪式");
+		if (service.StudyCompletionCount != 1)
+			_failures.Add("黑魔法研习完成次数错误");
+	}
 	private void CheckRitualRewards()
 	{
 		RitualService service = GameManager.Get<RitualService>();
+		service.Learn(RitualRules.UndeadSummonId);
 		ActiveRitual summon = service.TryStartRitual(RitualRules.UndeadSummonId, true, 1, _ => true, _ => true);
 		RitualReward coreReward = service.GetReward(summon);
 		if (coreReward.SummonCount != 5 || coreReward.SummonUnitTypeId != "Skeleton")

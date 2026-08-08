@@ -91,10 +91,41 @@ public class Hand
 
 	public bool TryPlaceCard(CardData card, int gridX, int gridY)
 	{
-		if (card == null)
+		if (card == null || !card.IsPlaceable)
 			return false;
 
 		return _placement.TryPlace(card.BuildingType, gridX, gridY);
+	}
+
+	public bool TryRemoveAtIndex(int index, out CardData removed)
+	{
+		if (index < 0 || index >= _player.HandCards.Count)
+		{
+			removed = null;
+			return false;
+		}
+
+		removed = _player.HandCards[index];
+		_player.RemoveHandCard(index);
+		if (_player.SelectedHandIndex == index)
+			_player.SelectedHandIndex = -1;
+		else if (_player.SelectedHandIndex > index)
+			_player.SelectedHandIndex--;
+
+		HandChanged?.Invoke();
+		SelectionChanged?.Invoke(_player.SelectedHandIndex);
+		return true;
+	}
+
+	public bool TryRemoveCardById(string cardId)
+	{
+		for (int i = 0; i < _player.HandCards.Count; i++)
+		{
+			if (_player.HandCards[i].Id != cardId)
+				continue;
+			return TryRemoveAtIndex(i, out _);
+		}
+		return false;
 	}
 
 	public void ResetHand()

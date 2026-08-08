@@ -127,6 +127,7 @@ public partial class InitManager : Node
 				Cost = card.Cost,
 				BuildingType = card.BuildingType,
 				Weight = card.Weight,
+				IsPlaceable = card.IsPlaceable,
 			});
 		}
 
@@ -135,6 +136,9 @@ public partial class InitManager : Node
 			gm.SetPendingReplayReportId(data.PendingReplayReportId);
 
 		shopService.SetFaction(data.FactionId);
+		RitualService ritualService = GameManager.Get<RitualService>();
+		if (ritualService != null)
+			ritualService.Restore(data.RitualStudyCompletionCount, data.LearnedRitualIds);
 		GameManager.Get<AdjacencyService>().RefreshCastle(playerCastle.GetBuildingStates());
 	}
 }

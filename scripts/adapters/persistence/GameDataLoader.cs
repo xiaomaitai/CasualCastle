@@ -1,4 +1,4 @@
-// 配置数据加载：伤害矩阵、商店目录与组合配方
+// 配置数据加载：伤害矩阵、商店目录、组合配方与黑暗魔法书
 using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
 using Microsoft.Data.Sqlite;
@@ -26,6 +26,7 @@ public static class GameDataLoader
 		DamageMatrix = LoadDamageMatrix(cmd);
 		ShopCatalog = LoadShopCatalog(cmd);
 		CombineRules = LoadCombineRecipes(cmd);
+		LoadDarkMagicBooks(cmd);
 	}
 
 	private static DamageMatrix LoadDamageMatrix(SqliteCommand cmd)
@@ -40,12 +41,19 @@ public static class GameDataLoader
 
 	private static List<CardData> LoadShopCatalog(SqliteCommand cmd)
 	{
+		List<CardData> catalog = new();
+		LoadBuildingCards(cmd, catalog);
+		LoadItemCards(cmd, catalog);
+		return catalog;
+	}
+
+	private static void LoadBuildingCards(SqliteCommand cmd, List<CardData> catalog)
+	{
 		cmd.CommandText = @"
 			SELECT s.id, s.name, COALESCE(b.value, s.cost), s.building_type, s.weight, COALESCE(b.faction_id, 'alliance')
 			FROM shop_catalog s
 			LEFT JOIN building_defs b ON b.type_id = s.building_type";
 		using SqliteDataReader reader = cmd.ExecuteReader();
-		List<CardData> catalog = new();
 		while (reader.Read())
 		{
 			catalog.Add(new CardData
@@ -58,7 +66,35 @@ public static class GameDataLoader
 				FactionId = reader.GetString(5),
 			});
 		}
-		return catalog;
+	}
+
+	private static void LoadItemCards(SqliteCommand cmd, List<CardData> catalog)
+	{
+		cmd.CommandText = "SELECT id, name, cost, weight, faction_id FROM item_catalog";
+		using SqliteDataReader reader = cmd.ExecuteReader();
+		while (reader.Read())
+		{
+			catalog.Add(new CardData
+			{
+				Id = reader.GetString(0),
+				Name = reader.GetString(1),
+				Cost = reader.GetInt32(2),
+				BuildingType = reader.GetString(0),
+				Weight = reader.GetInt32(3),
+				FactionId = reader.GetString(4),
+				IsPlaceable = false,
+			});
+		}
+	}
+
+	private static void LoadDarkMagicBooks(SqliteCommand cmd)
+	{
+		cmd.CommandText = "SELECT item_id, ritual_id FROM dark_magic_books";
+		using SqliteDataReader reader = cmd.ExecuteReader();
+		List<KeyValuePair<string, string>> entries = new();
+		while (reader.Read())
+			entries.Add(new KeyValuePair<string, string>(reader.GetString(0), reader.GetString(1)));
+		DarkMagicBookRules.Load(entries);
 	}
 
 	private static CombineRules LoadCombineRecipes(SqliteCommand cmd)

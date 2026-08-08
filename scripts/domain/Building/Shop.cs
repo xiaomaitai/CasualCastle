@@ -92,6 +92,15 @@ public class Shop
 		return true;
 	}
 
+	public bool TrySellHandCard(int handIndex)
+	{
+		if (!_hand.TryRemoveAtIndex(handIndex, out CardData card))
+			return false;
+
+		AddGold(SellRules.GetSellPrice(card.Cost));
+		return true;
+	}
+
 	public bool TryPlaceOfferDirect(int slotIndex, int gridX, int gridY)
 	{
 		if (!_player.IsShopAvailable)

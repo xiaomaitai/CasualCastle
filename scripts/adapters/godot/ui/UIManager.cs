@@ -13,6 +13,7 @@ public partial class UIManager : Node2D
 
 	private HudUiController _hudUi;
 	private ShopUiController _shopUi;
+	private BuildingSellController _buildingSell;
 	private HandUiController _handUi;
 	private BuildingInfoUiController _buildingInfoUi;
 	private BuildingManageUiController _buildingManageUi;
@@ -74,6 +75,7 @@ public partial class UIManager : Node2D
 		_runtimeInfoPanel?.Process();
 		_shopUi?.Process();
 		_buildingManageUi?.Process();
+		_buildingSell?.Process();
 		if (_shopUi?.IsDragging != true)
 			_handUi?.Process();
 
@@ -175,6 +177,12 @@ public partial class UIManager : Node2D
 			return;
 		}
 
+		if (_buildingSell?.HandleInput(@event) == true)
+		{
+			GetViewport().SetInputAsHandled();
+			return;
+		}
+
 		if (_handUi?.HandleInput(@event) == true)
 		{
 			GetViewport().SetInputAsHandled();
@@ -218,7 +226,9 @@ public partial class UIManager : Node2D
 		Shop shopService = AdapterRegistry.Resolve<Shop>();
 		_shopUi = new ShopUiController(this, uiRoot, shopService);
 		Hand handService = AdapterRegistry.Resolve<Hand>();
-		_handUi = new HandUiController(this, uiRoot, handService);
+		_handUi = new HandUiController(this, uiRoot, handService, _shopUi);
+		Castle playerCastle = GetParent().GetNode<Castle>("Battlefield/PlayerSide/PlayerCastle");
+		_buildingSell = new BuildingSellController(this, playerCastle, shopService, _shopUi);
 		_buildingInfoUi = new BuildingInfoUiController(this, uiRoot);
 		_unitInfoUi = new UnitInfoUiController(this, uiRoot);
 		_unitSelection = new UnitSelectionController(this);
@@ -253,6 +263,7 @@ public partial class UIManager : Node2D
 
 		_hudUi.SetGameOverVisible(show);
 		_shopUi.SetGameOver(show);
+		_buildingSell?.SetInputBlocked(_gameOver);
 		_handUi.SetInputBlocked(_gameOver);
 		_unitSelection.SetInputBlocked(_gameOver);
 		_spellBarUi?.SetInputBlocked(_gameOver);
@@ -269,6 +280,7 @@ public partial class UIManager : Node2D
 	{
 		bool blocked = _pauseMenuUi?.IsOpen == true || _settingsUi?.IsOpen == true || _gameOver;
 		_handUi?.SetInputBlocked(blocked);
+		_buildingSell?.SetInputBlocked(blocked);
 		_spellBarUi?.SetInputBlocked(blocked);
 	}
 

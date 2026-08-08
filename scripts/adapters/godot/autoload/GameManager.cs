@@ -127,6 +127,7 @@ public partial class GameManager : Node2D, IGameState
 		{
 			Get<BlackMagicService>()?.Reset();
 			UndeadFactionBuffs.Reset();
+			Get<RitualService>()?.Reset();
 		}
 
 		_phaseMachine.StartMatch();
@@ -284,7 +285,15 @@ public partial class GameManager : Node2D, IGameState
 				Cost = c.Cost,
 				BuildingType = c.BuildingType,
 				Weight = c.Weight,
+				IsPlaceable = c.IsPlaceable,
 			});
+		}
+
+		RitualService ritualService = Get<RitualService>();
+		if (ritualService != null)
+		{
+			data.RitualStudyCompletionCount = ritualService.StudyCompletionCount;
+			data.LearnedRitualIds.AddRange(ritualService.GetLearnedRitualIds());
 		}
 
 		Get<IGameSessionService>().SaveGame(data);

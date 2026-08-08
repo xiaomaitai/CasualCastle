@@ -567,16 +567,35 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		int coreLevel = RitualCircleRules.GetCoreLevel(CastleRef.GetBuildingStates());
 		bool isCoreHosted = RitualRules.IsRitualCircleHost(TypeId);
 		BlackMagicService blackMagic = GameManager.Get<BlackMagicService>();
+		CardData book = null;
+		if (RitualRules.IsStudyRitual(ritualId))
+			book = FindUnlearnedBook();
 		_activeRitual = _ritualService.TryStartRitual(
 			ritualId, isCoreHosted, coreLevel,
 			_shop.TrySpendGold,
-			amount => blackMagic != null && blackMagic.TrySpend(amount));
+			amount => blackMagic != null && blackMagic.TrySpend(amount),
+			book?.Id, book == null ? null : DarkMagicBookRules.GetRitualId(book.Id));
 		if (_activeRitual == null)
 			return false;
 
 		UpdateWorkCycle();
 		UpdateStateIcon();
 		return true;
+	}
+
+	private CardData FindUnlearnedBook()
+	{
+		Hand hand = AdapterRegistry.Resolve<Hand>();
+		if (hand == null)
+			return null;
+
+		foreach (CardData card in hand.Cards)
+		{
+			string ritualId = DarkMagicBookRules.GetRitualId(card.Id);
+			if (ritualId != null && !_ritualService.IsLearned(ritualId))
+				return card;
+		}
+		return null;
 	}
 
 	private void TickRitual(float delta)
@@ -593,11 +612,11 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	private void CompleteRitual()
 	{
-		RitualReward reward = _ritualService.GetReward(_activeRitual);
+		RitualReward reward = _ritualService.Complete(_activeRitual);
 		ApplyRitualReward(reward);
 		bool isCoreHosted = RitualRules.IsRitualCircleHost(TypeId);
 		_activeRitual = null;
-		if (isCoreHosted)
+		if (reward.CoreLevelUp && isCoreHosted)
 			CallDeferred(nameof(UpgradeCircleAfterRitual));
 		else
 			UpdateWorkCycle();
@@ -613,6 +632,16 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 			SpawnUnitType(reward.SummonUnitTypeId, reward.SummonCount);
 		if (reward.UndeadMaxHealthBonus > 0)
 			ApplyUndeadHealthBonus(reward.UndeadMaxHealthBonus);
+		if (!string.IsNullOrEmpty(reward.LearnedRitualId))
+			RemoveStudyBookFromHand();
+	}
+
+	private void RemoveStudyBookFromHand()
+	{
+		Hand hand = AdapterRegistry.Resolve<Hand>();
+		if (hand == null || _activeRitual == null)
+			return;
+		hand.TryRemoveCardById(_activeRitual.BookCardId);
 	}
 
 	private void ApplyUndeadHealthBonus(int amount)

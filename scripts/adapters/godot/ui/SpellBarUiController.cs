@@ -78,7 +78,10 @@ public sealed class SpellBarUiController
 			return;
 		}
 
-		IReadOnlyList<RitualDef> defs = RitualRules.GetAll();
+		RitualService ritualService = GameManager.Get<RitualService>();
+		if (ritualService == null)
+			return;
+		IReadOnlyList<RitualDef> defs = ritualService.GetAvailableRituals();
 		for (int i = 0; i < defs.Count; i++)
 		{
 			RitualDef def = defs[i];
@@ -127,7 +130,10 @@ public sealed class SpellBarUiController
 
 	private void RefreshAvailability(Building building)
 	{
-		IReadOnlyList<RitualDef> defs = RitualRules.GetAll();
+		RitualService ritualService = GameManager.Get<RitualService>();
+		if (ritualService == null)
+			return;
+		IReadOnlyList<RitualDef> defs = ritualService.GetAvailableRituals();
 		if (_slotButtons.Count != defs.Count)
 			return;
 		for (int i = 0; i < _slotButtons.Count; i++)
@@ -175,17 +181,45 @@ public sealed class SpellBarUiController
 	{
 		if (building.GetCastle() == null)
 			return false;
+		RitualService ritualService = GameManager.Get<RitualService>();
+		BlackMagicService blackMagic = GameManager.Get<BlackMagicService>();
+		if (RitualRules.IsStudyRitual(def.Id))
+		{
+			if (ritualService == null || blackMagic == null || !HasUnlearnedBook(ritualService))
+				return false;
+			return blackMagic.Value >= DarkMagicStudyRules.GetCost(ritualService.StudyCompletionCount);
+		}
+
 		int coreLevel = RitualCircleRules.GetCoreLevel(building.GetCastle().GetBuildingStates());
 		if (coreLevel < def.RequiredCoreLevel)
 			return false;
 		if (def.CostType == RitualCostType.Gold)
 			return AdapterRegistry.Resolve<Shop>().CanAfford(def.CostAmount);
-		BlackMagicService blackMagic = GameManager.Get<BlackMagicService>();
 		return blackMagic != null && blackMagic.Value >= def.CostAmount;
+	}
+
+	private static bool HasUnlearnedBook(RitualService ritualService)
+	{
+		Hand hand = AdapterRegistry.Resolve<Hand>();
+		if (hand == null)
+			return false;
+		foreach (CardData card in hand.Cards)
+		{
+			string ritualId = DarkMagicBookRules.GetRitualId(card.Id);
+			if (ritualId != null && !ritualService.IsLearned(ritualId))
+				return true;
+		}
+		return false;
 	}
 
 	private static string GetCostText(RitualDef def)
 	{
+		if (RitualRules.IsStudyRitual(def.Id))
+		{
+			RitualService ritualService = GameManager.Get<RitualService>();
+			int studyCost = ritualService == null ? def.CostAmount : DarkMagicStudyRules.GetCost(ritualService.StudyCompletionCount);
+			return studyCost + " 黑魔法·需魔法书·" + def.DurationSeconds.ToString("0") + "s";
+		}
 		string cost = def.CostType == RitualCostType.Gold ? $"{def.CostAmount} 金币" : $"{def.CostAmount} 黑魔法";
 		return cost + "·" + def.DurationSeconds.ToString("0") + "s";
 	}
