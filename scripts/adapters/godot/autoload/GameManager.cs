@@ -287,6 +287,7 @@ public partial class GameManager : Node2D, IGameState
 				Weight = c.Weight,
 				IsPlaceable = c.IsPlaceable,
 				ItemType = c.ItemType,
+				Attributes = new Dictionary<string, string>(c.Attributes),
 			});
 		}
 

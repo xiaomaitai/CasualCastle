@@ -76,18 +76,40 @@ public partial class InitManager : Node
 			LoadSaveIntoGame(gm, shopService, hand);
 	}
 
-	private static string ResolveItemType(CardSaveEntry card)
+	private static CardData CreateRestoredCard(CardSaveEntry card)
 	{
-		if (!string.IsNullOrEmpty(card.ItemType))
-			return card.ItemType;
-		if (card.IsPlaceable)
-			return "";
+		CardData restored = new()
+		{
+			Id = card.Id,
+			Name = card.Name,
+			Cost = card.Cost,
+			BuildingType = card.BuildingType,
+			Weight = card.Weight,
+			ItemType = card.ItemType,
+			Attributes = new Dictionary<string, string>(card.Attributes),
+		};
+		if (string.IsNullOrEmpty(restored.ItemType) && !card.IsPlaceable)
+			CopyItemFromCatalog(restored);
+		return restored;
+	}
+
+	private static void CopyItemFromCatalog(CardData restored)
+	{
+		CardData catalogCard = FindCatalogCard(restored.Id);
+		if (catalogCard == null)
+			return;
+		restored.ItemType = catalogCard.ItemType;
+		restored.Attributes = new Dictionary<string, string>(catalogCard.Attributes);
+	}
+
+	private static CardData FindCatalogCard(string cardId)
+	{
 		foreach (CardData catalogCard in GameDataLoader.ShopCatalog)
 		{
-			if (catalogCard.Id == card.Id)
-				return catalogCard.ItemType;
+			if (catalogCard.Id == cardId)
+				return catalogCard;
 		}
-		return "";
+		return null;
 	}
 
 	private void LoadSaveIntoGame(GameManager gm, Shop shopService, Hand hand)
@@ -134,17 +156,7 @@ public partial class InitManager : Node
 
 		hand.ResetHand();
 		foreach (CardSaveEntry card in data.HandCards)
-		{
-			hand.TryAddCard(new CardData
-			{
-				Id = card.Id,
-				Name = card.Name,
-				Cost = card.Cost,
-				BuildingType = card.BuildingType,
-				Weight = card.Weight,
-				ItemType = ResolveItemType(card),
-			});
-		}
+			hand.TryAddCard(CreateRestoredCard(card));
 
 		gm.SetNightIndex(data.CurrentNightIndex);
 		if (!string.IsNullOrEmpty(data.PendingReplayReportId))

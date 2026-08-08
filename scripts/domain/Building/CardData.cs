@@ -1,5 +1,6 @@
 // 卡牌数据
 using CasualCastle.Domain.Shared;
+using System.Collections.Generic;
 
 namespace CasualCastle.Domain.Building;
 
@@ -12,6 +13,7 @@ public class CardData
 	public int Weight { get; set; } = 1;
 	public string FactionId { get; set; } = "";
 	public string ItemType { get; set; } = "";
+	public Dictionary<string, string> Attributes { get; set; } = new();
 	public bool IsPlaceable => string.IsNullOrEmpty(ItemType);
 
 	public CardData Clone()
@@ -25,6 +27,7 @@ public class CardData
 			Weight = Weight,
 			FactionId = FactionId,
 			ItemType = ItemType,
+			Attributes = new Dictionary<string, string>(Attributes),
 		};
 	}
 }

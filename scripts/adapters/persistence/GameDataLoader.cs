@@ -1,8 +1,9 @@
-// 配置数据加载：伤害矩阵、商店目录、组合配方与黑暗魔法书
+// 配置数据加载：伤害矩阵、商店目录、组合配方与物品属性
 using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
 using Microsoft.Data.Sqlite;
 using System.Collections.Generic;
+using System.Text.Json;
 
 using GodotProjectSettings = Godot.ProjectSettings;
 
@@ -26,7 +27,6 @@ public static class GameDataLoader
 		DamageMatrix = LoadDamageMatrix(cmd);
 		ShopCatalog = LoadShopCatalog(cmd);
 		CombineRules = LoadCombineRecipes(cmd);
-		LoadDarkMagicBooks(cmd);
 	}
 
 	private static DamageMatrix LoadDamageMatrix(SqliteCommand cmd)
@@ -70,7 +70,7 @@ public static class GameDataLoader
 
 	private static void LoadItemCards(SqliteCommand cmd, List<CardData> catalog)
 	{
-		cmd.CommandText = "SELECT id, name, cost, weight, faction_id, item_type FROM item_catalog";
+		cmd.CommandText = "SELECT id, name, cost, weight, faction_id, item_type, attributes FROM item_catalog";
 		using SqliteDataReader reader = cmd.ExecuteReader();
 		while (reader.Read())
 		{
@@ -83,18 +83,16 @@ public static class GameDataLoader
 				Weight = reader.GetInt32(3),
 				FactionId = reader.GetString(4),
 				ItemType = reader.GetString(5),
+				Attributes = ParseAttributes(reader.GetString(6)),
 			});
 		}
 	}
 
-	private static void LoadDarkMagicBooks(SqliteCommand cmd)
+	private static Dictionary<string, string> ParseAttributes(string json)
 	{
-		cmd.CommandText = "SELECT item_id, ritual_id FROM dark_magic_books";
-		using SqliteDataReader reader = cmd.ExecuteReader();
-		List<KeyValuePair<string, string>> entries = new();
-		while (reader.Read())
-			entries.Add(new KeyValuePair<string, string>(reader.GetString(0), reader.GetString(1)));
-		DarkMagicBookRules.Load(entries);
+		if (string.IsNullOrEmpty(json))
+			return new();
+		return JsonSerializer.Deserialize<Dictionary<string, string>>(json) ?? new();
 	}
 
 	private static CombineRules LoadCombineRecipes(SqliteCommand cmd)

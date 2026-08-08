@@ -20,13 +20,14 @@ public class CardData
 	public int Weight;          // 卡池权重
 	public string FactionId;    // 派系 ID（alliance / horde / necromancer 等），空 = 中立
 	public string ItemType;     // 物品类型 ID（如 dark_magic_book）；空 = 建筑卡
+	public Dictionary<string,string> Attributes; // 物品类型专属键值对（来自 item_catalog.attributes JSON 列）
 	public bool IsPlaceable;    // 派生：ItemType 为空时可放置
 }
 ```
 
 建筑卡目录存 `shop_catalog`（LEFT JOIN `building_defs`），以 `tech_tree_nodes.type_id` 为权威 ID；建筑卡 ID 与建筑 `type_id` 一致，同一建筑不允许出现多条卡池记录。
 
-物品卡目录存 `item_catalog`（含 `item_type` 列），类型专属数据放独立表（如 `dark_magic_books` 记录魔法书对应的仪式），由类型规则类加载（如 `DarkMagicBookRules`）。**新增派系物品**的步骤：`item_catalog` 加一行（新 `item_type`）→ 建类型专属数据表 → 新建规则类按 `ItemType` 处理。商店过滤、手牌持有、不可放置、卖出、存档等通用管线全部按 `ItemType` 派生，无需改动。
+物品卡目录存 `item_catalog`（含 `item_type` 与 `attributes` 列）：`attributes` 为 JSON 键值对，存放该物品类型的专属数据（如魔法书用 `{"ritual_id": "undead_summon"}` 记载仪式）。**新增派系物品**只需：`item_catalog` 加一行（新 `item_type` + `attributes`）→ 新建规则类按 `ItemType`/`Attributes` 处理。商店过滤、手牌持有、不可放置、卖出、存档等通用管线全部按 `ItemType` 派生，无需改动。
 
 ---
 

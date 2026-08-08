@@ -381,6 +381,10 @@ public partial class NecromancerBattleSmoke : Node
 			Weight = 1,
 			FactionId = FactionDef.NecromancerId,
 			ItemType = ShopItemTypes.DarkMagicBook,
+			Attributes = new Dictionary<string, string>
+			{
+				{ DarkMagicBookRules.RitualAttributeKey, ritualId }
+			},
 		});
 		if (_playerCastle.Heart == null || !_playerCastle.Heart.TryStartRitual(RitualRules.DarkMagicStudyId))
 		{

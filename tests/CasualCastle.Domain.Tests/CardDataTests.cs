@@ -15,7 +15,8 @@ public class CardDataTests
 			Cost = 50,
 			BuildingType = "Barracks",
 			Weight = 3,
-			ItemType = ShopItemTypes.DarkMagicBook
+			ItemType = ShopItemTypes.DarkMagicBook,
+			Attributes = new() { { "ritual_id", "undead_summon" } }
 		};
 		CardData clone = original.Clone();
 
@@ -25,6 +26,7 @@ public class CardDataTests
 		Assert.Equal(original.BuildingType, clone.BuildingType);
 		Assert.Equal(original.Weight, clone.Weight);
 		Assert.Equal(original.ItemType, clone.ItemType);
+		Assert.Equal(original.Attributes["ritual_id"], clone.Attributes["ritual_id"]);
 		Assert.False(clone.IsPlaceable);
 		Assert.NotSame(original, clone);
 	}

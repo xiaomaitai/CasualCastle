@@ -34,4 +34,5 @@ public class CardSaveEntry
 	public int Weight { get; set; }
 	public bool IsPlaceable { get; set; } = true;
 	public string ItemType { get; set; } = "";
+	public Dictionary<string, string> Attributes { get; set; } = new();
 }
