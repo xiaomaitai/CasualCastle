@@ -1,3 +1,4 @@
+// 单位显示名工具
 public static class UnitDisplayName
 {
 	public static string Get(string typeId)

@@ -1,3 +1,4 @@
+// 伤害类型枚举
 namespace CasualCastle.Domain.Battle;
 
 public enum DamageType

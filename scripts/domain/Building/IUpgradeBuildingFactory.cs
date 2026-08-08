@@ -1,3 +1,4 @@
+// 升级建筑工厂端口
 namespace CasualCastle.Domain.Building;
 
 public interface IUpgradeBuildingFactory

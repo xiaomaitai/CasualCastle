@@ -1,3 +1,4 @@
+// 作弊开关状态：加速产兵等调试选项
 using System;
 
 public static class CheatState

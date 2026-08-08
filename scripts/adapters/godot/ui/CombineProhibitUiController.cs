@@ -1,3 +1,4 @@
+// 禁止组合标记 UI
 using CasualCastle.Adapters.Godot;
 using Godot;
 

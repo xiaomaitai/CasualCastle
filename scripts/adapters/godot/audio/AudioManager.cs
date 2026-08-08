@@ -1,6 +1,7 @@
 // 音频管理器：统一接管 BGM 曲目池轮播、SFX 事件播放与 Music/SFX 总线音量。
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Building;
+using CasualCastle.Domain.Shared;
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -329,7 +330,7 @@ public partial class AudioManager : Node
 			tween.Kill();
 	}
 
-	private void OnGamePhaseChanged(GameManager.GamePhase phase)
+	private void OnGamePhaseChanged(MatchPhase phase)
 	{
 		if (_gameManager != null && _gameManager.CurrentState == GameManager.GameState.GameOver)
 			return;

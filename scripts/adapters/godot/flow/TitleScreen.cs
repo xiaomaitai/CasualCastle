@@ -1,3 +1,4 @@
+// 标题场景：开始、继续、设置与战报选择
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Building;
 using CasualCastle.Domain.History;
@@ -195,7 +196,7 @@ public partial class TitleScreen : Control
 	{
 		Variant metadata = _factionOption.GetItemMetadata(_factionOption.Selected);
 		string factionId = metadata.VariantType == Variant.Type.Nil
-			? "alliance"
+			? FactionIds.Alliance
 			: metadata.AsString();
 		AdapterRegistry.Resolve<Shop>()?.SetFaction(factionId);
 		AdapterRegistry.Resolve<GameManager>()?.SetSelectedFaction(factionId);

@@ -1,3 +1,4 @@
+// 亡灵阵营增益：全局生命上限加成
 namespace CasualCastle.Domain.Battle;
 
 public static class UndeadFactionBuffs

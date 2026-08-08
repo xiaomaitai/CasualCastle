@@ -1,3 +1,4 @@
+// 配置数据加载：伤害矩阵、商店目录与组合配方
 using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
 using Microsoft.Data.Sqlite;

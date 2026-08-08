@@ -1,3 +1,4 @@
+// 伤害矩阵编辑器逻辑
 using System.Collections.Generic;
 using CasualCastle.Domain.Battle;
 using Godot;

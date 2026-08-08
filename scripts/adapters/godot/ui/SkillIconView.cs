@@ -1,3 +1,4 @@
+// 技能图标视图
 using CasualCastle.Domain.Battle;
 using Godot;
 

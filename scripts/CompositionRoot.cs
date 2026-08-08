@@ -1,3 +1,4 @@
+// DI 组合根：构建 MS DI 容器并注册领域模块与适配器
 using System.Collections.Generic;
 using CasualCastle.Adapters.Godot.Battle;
 using CasualCastle.Adapters.Godot.Flow;

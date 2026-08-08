@@ -1,3 +1,4 @@
+// 建筑配置仓库：SQLite 读取建筑定义与视觉数据
 using System.Collections.Generic;
 using CasualCastle.Domain.Building;
 using CasualCastle.Domain.Shared;

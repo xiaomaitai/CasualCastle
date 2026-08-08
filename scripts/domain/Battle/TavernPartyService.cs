@@ -1,12 +1,14 @@
 // 酒馆组队服务：冒险者集结、种族槽位、满员出发、弹出与释放
 using System.Collections.Generic;
 
+using CasualCastle.Domain.Shared;
+
 namespace CasualCastle.Domain.Battle;
 
 public sealed class TavernPartyService
 {
-	public const string InnTypeId = "Inn";
-	public const string AdventurerGuildTypeId = "AdventurerGuild";
+	public const string InnTypeId = BuildingTypeIds.Inn;
+	public const string AdventurerGuildTypeId = BuildingTypeIds.AdventurerGuild;
 	public const int InnPartyLimit = 4;
 	public const int AdventurerGuildPartyLimit = 6;
 	public const float StandRadius = 40f;

@@ -1,3 +1,4 @@
+// 建筑模块 DI 注册
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CasualCastle.Domain.Building;

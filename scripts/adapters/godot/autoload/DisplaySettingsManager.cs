@@ -1,3 +1,4 @@
+// 显示设置管理：分辨率、窗口模式与开发者模式开关
 using CasualCastle.Adapters.Godot;
 using Godot;
 using System;

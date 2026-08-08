@@ -1,6 +1,8 @@
+// HUD UI：血条、金币、阶段与跳过按钮
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
+using CasualCastle.Domain.Shared;
 using Godot;
 using System;
 
@@ -90,7 +92,7 @@ public sealed class HudUiController
 		AdapterRegistry.Resolve<GameManager>().AdvancePhase();
 	}
 
-	private void OnPhaseChanged(GameManager.GamePhase phase)
+	private void OnPhaseChanged(MatchPhase phase)
 	{
 		UpdatePhaseDisplay();
 	}

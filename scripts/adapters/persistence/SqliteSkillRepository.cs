@@ -1,3 +1,4 @@
+// 技能配置仓库：SQLite 读取技能定义
 using System.Collections.Generic;
 using CasualCastle.Domain.Battle;
 using Microsoft.Data.Sqlite;

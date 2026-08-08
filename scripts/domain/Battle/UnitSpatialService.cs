@@ -1,9 +1,10 @@
+// 空间推挤服务：单位互斥与建筑避让
 using System;
 using System.Collections.Generic;
 
 namespace CasualCastle.Domain.Battle;
 
-public class UnitSpatialService : ICombatUseCase
+public class UnitSpatialService : IUnitSpatialService
 {
 	private const float PushForce = 500f;
 	private const float UnitClearance = 4f;

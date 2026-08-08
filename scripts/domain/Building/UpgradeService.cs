@@ -1,3 +1,4 @@
+// 升级服务：校验并执行建筑升级
 using System;
 
 namespace CasualCastle.Domain.Building;

@@ -1,3 +1,4 @@
+// 部落邻接规则：边界加成格计数
 using CasualCastle.Domain.Shared;
 using System.Collections.Generic;
 using System.Linq;

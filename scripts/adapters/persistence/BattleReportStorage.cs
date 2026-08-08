@@ -1,3 +1,4 @@
+// 战报持久化：JSON 读写用户目录战报
 using CasualCastle.Domain.History;
 using Godot;
 using System;
@@ -42,10 +43,6 @@ public class BattleReportStorage : IBattleReportRepository
 		file.StoreString(json);
 	}
 
-	public string BuildDefaultName(DateTimeOffset now)
-	{
-		return $"战报 {now:yyyy-MM-dd HH:mm:ss}";
-	}
 
 	private static void EnsureDirectory()
 	{

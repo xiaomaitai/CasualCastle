@@ -1,11 +1,14 @@
+// 部落核心规则：等级判定与升级门槛
 using System.Collections.Generic;
+
+using CasualCastle.Domain.Shared;
 
 namespace CasualCastle.Domain.Building;
 
 public static class HordeCoreRules
 {
-	public const string BurrowTypeId = "Burrow";
-	public const string CoreTypePrefix = "HordeCoreL";
+	public const string BurrowTypeId = BuildingTypeIds.Burrow;
+	public const string CoreTypePrefix = BuildingTypeIds.HordeCorePrefix;
 	public static readonly string[] CoreLevelTypeIds = { "HordeCoreL1", "HordeCoreL2", "HordeCoreL3", "HordeCoreL4", "HordeCoreL5" };
 	private static readonly int[] UpgradeBurrowRequirements = { 1, 3, 10, 30 };
 

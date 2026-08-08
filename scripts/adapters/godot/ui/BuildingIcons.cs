@@ -1,3 +1,4 @@
+// 建筑图标资源
 using Godot;
 
 public static class BuildingIcons

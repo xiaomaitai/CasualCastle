@@ -1,3 +1,4 @@
+// 网格坐标规则：格子中心与出生点
 using System.Collections.Generic;
 
 namespace CasualCastle.Domain.Shared;
@@ -11,6 +12,7 @@ public static class GameCoordinateRules
 	public const int CellBlockInset = CellGapSize / 2;
 
 	public const int UnitSpawnCornerInset = 3;
+	public const int UnitSpawnSpreadCount = 3;
 	public const int UnitSpawnSpreadStepX = 3;
 	public const int UnitSpawnSpreadStepY = 3;
 
@@ -63,7 +65,7 @@ public static class GameCoordinateRules
 		int blockLeft = minGridX * UnitsPerCell + CellBlockInset;
 		int blockBottom = maxGridY * UnitsPerCell + CellBlockInset + CellBlockSize;
 
-		int spreadIndex = spawnIndex % 3;
+		int spreadIndex = spawnIndex % UnitSpawnSpreadCount;
 		int spreadX = spreadIndex * UnitSpawnSpreadStepX;
 		int spreadY = spreadIndex * UnitSpawnSpreadStepY;
 

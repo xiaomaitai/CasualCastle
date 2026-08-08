@@ -1,6 +1,7 @@
 // 临时诊断脚本：驱动完整阶段循环，观察逻辑阶段与计时
 using System.Collections.Generic;
 using CasualCastle.Adapters.Godot;
+using CasualCastle.Domain.Shared;
 using Godot;
 
 public partial class PhaseCycleProbe : Node
@@ -28,19 +29,19 @@ public partial class PhaseCycleProbe : Node
 			GD.Print($"PROBE t={_elapsed:F0} phase={gm.CurrentPhase} timer={gm.PhaseTimeRemaining:F1} night={gm.CurrentNightIndex}");
 		}
 
-		if (gm.CurrentPhase == GameManager.GamePhase.Shop && !_advancedShop)
+		if (gm.CurrentPhase == MatchPhase.Shop && !_advancedShop)
 		{
 			_advancedShop = true;
 			GD.Print("PROBE advance from shop");
 			gm.AdvancePhase();
 		}
-		else if (gm.CurrentPhase == GameManager.GamePhase.Combine && !_advancedCombine)
+		else if (gm.CurrentPhase == MatchPhase.Combine && !_advancedCombine)
 		{
 			_advancedCombine = true;
 			GD.Print("PROBE advance from combine");
 			gm.AdvancePhase();
 		}
-		else if (gm.CurrentPhase == GameManager.GamePhase.Combat && _advancedCombine && _elapsed > 70f)
+		else if (gm.CurrentPhase == MatchPhase.Combat && _advancedCombine && _elapsed > 70f)
 		{
 			GD.Print("PROBE full cycle ok");
 			GetTree().Quit(0);

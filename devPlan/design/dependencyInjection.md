@@ -101,15 +101,13 @@ public static ServiceProvider Build()
     ServiceCollection services = new ServiceCollection();
 
     services.AddSingleton<IReadOnlyList<CardData>>(_ => GameDataLoader.ShopCatalog);
-    services.AddDomainShared();
     services.AddDomainBuilding();
     services.AddDomainBattle();
     services.AddDomainHistory();
 
-    // 跨层桥接：IGameState 委托到 AdapterRegistry
-    services.AddSingleton<IGameState>(_ =>
-        AdapterRegistry.Resolve<IGameState>()
-        ?? throw new InvalidOperationException("IGameState not registered"));
+    // IGameState 桥接：GameStateProvider 持有当前游戏实例
+    services.AddSingleton<GameStateProvider>();
+    services.AddSingleton<IGameState>(sp => sp.GetRequiredService<GameStateProvider>().Current);
 
     services.AddSingleton<IFieldUnitRepository, FieldUnitRepository>();
     services.AddSingleton<IBattleReportRepository, BattleReportStorage>();
@@ -137,10 +135,10 @@ GameManager.Services.GetService<IBattleReportRepository>();
 | `IReadOnlyList<CardData>` | `GameDataLoader.ShopCatalog`（工厂委托） | Singleton |
 | `ShopRules` | `ShopRules` | Singleton |
 | `AdjacencyService` | `AdjacencyService` | Singleton |
-| `ICombatUseCase` | `UnitSpatialService` | Singleton |
+| `IUnitSpatialService` | `UnitSpatialService` | Singleton |
 | `IReplayUseCase` | `ReplayService` | Singleton |
 | `IFieldUnitRepository` | `FieldUnitRepository` | Singleton |
-| `IGameState` | `GameManager`（通过 AdapterRegistry 桥接） | Singleton（工厂委托） |
+| `IGameState` | `GameManager`（通过 GameStateProvider 桥接） | Singleton（工厂委托） |
 | `IBattleReportRepository` | `BattleReportStorage` | Singleton |
 | `IUnitRepository` | `SqliteUnitRepository` | Singleton |
 | `IBuildingRepository` | `SqliteBuildingRepository` | Singleton |
@@ -188,7 +186,7 @@ public static class AdapterRegistry
 | 系统 | 注册类型 | 注册时机 | 解析的依赖 |
 |------|---------|---------|-----------|
 | `GameManager` | `GameManager`, `IGameState` | `_Ready()` | MS DI |
-| `BattleManager` | `BattleManager` | `_Ready()` | `IFieldUnitRepository`, `ICombatUseCase` (MS DI) |
+| `BattleManager` | `BattleManager` | `_Ready()` | `IFieldUnitRepository`, `IUnitSpatialService` (MS DI) |
 | `DisplaySettingsManager` | `DisplaySettingsManager` | `_Ready()` | — |
 | `BuildingSystem` | `BuildingSystem` | `_Ready()` | `IBuildingRepository` (MS DI) |
 | `BattleReportSystem` | `BattleReportSystem` | `_Ready()` | `BattleReportService` (MS DI) |
@@ -208,7 +206,7 @@ public static class BattleModule
 {
     public static IServiceCollection AddDomainBattle(this IServiceCollection services)
     {
-        services.AddSingleton<ICombatUseCase, UnitSpatialService>();
+        services.AddSingleton<IUnitSpatialService, UnitSpatialService>();
         return services;
     }
 }
@@ -216,9 +214,9 @@ public static class BattleModule
 
 | 模块 | 扩展方法 | 注册内容 |
 |------|---------|---------|
-| Shared | `AddDomainShared()` | 暂无 |
+| Shared | （无模块注册） | — |
 | Building | `AddDomainBuilding()` | `ShopRules`, `AdjacencyService` |
-| Battle | `AddDomainBattle()` | `ICombatUseCase → UnitSpatialService` |
+| Battle | `AddDomainBattle()` | `IUnitSpatialService → UnitSpatialService` |
 | History | `AddDomainHistory()` | `BattleReportService`, `IReplayUseCase → ReplayService` |
 
 ---
@@ -227,12 +225,11 @@ public static class BattleModule
 
 ### 7.1 IGameState 桥接
 
-`IGameState` 定义在 `Domain.Battle`，实现方是 Godot Autoload `GameManager`。由于 MS DI 构建时 AdapterRegistry 已就绪，使用**工厂委托**模式桥接：
+`IGameState` 定义在 `Domain.Battle`，实现方是 Godot Autoload `GameManager`。MS DI 通过 `GameStateProvider` 间接持有当前实例：
 
 ```csharp
-services.AddSingleton<IGameState>(_ =>
-    AdapterRegistry.Resolve<IGameState>()
-    ?? throw new InvalidOperationException("IGameState not registered"));
+services.AddSingleton<GameStateProvider>();
+services.AddSingleton<IGameState>(sp => sp.GetRequiredService<GameStateProvider>().Current);
 ```
 
 这保证了 domain 层代码通过 `IGameState` 接口获取游戏状态，而不依赖 Godot 类型。
@@ -288,7 +285,7 @@ domain 聚合
 │  (零依赖，无 Godot)                        │
 ├──────────────────────────────────────────┤
 │  Domain.Building  → Shared                │
-│  Domain.Battle    → Shared, Building      │
+│  Domain.Battle    → Shared                │
 │  Domain.History   → Shared, Building      │
 │  (零 Godot，只依赖下层 domain)              │
 ├──────────────────────────────────────────┤
@@ -322,8 +319,8 @@ domain 聚合
 在对应 Domain 模块的 `AddDomain*` 方法中注册：
 
 ```csharp
-// 例：在 SharedModule.cs 中
-public static IServiceCollection AddDomainShared(this IServiceCollection services)
+// 例：在 BuildingModule.cs 中
+public static IServiceCollection AddDomainBuilding(this IServiceCollection services)
 {
     services.AddSingleton<ISomeService, SomeServiceImpl>();
     return services;
@@ -363,7 +360,7 @@ public static IServiceCollection AddDomainShared(this IServiceCollection service
 | `scripts/CompositionRoot.cs` | MS DI 容器构建 |
 | `scripts/adapters/godot/autoload/AdapterRegistry.cs` | 服务定位器实现 |
 | `scripts/adapters/godot/autoload/GameManager.cs` | DI 根节点，`ServiceProvider` 持有者 |
-| `scripts/domain/Shared/SharedModule.cs` | Shared 模块注册 |
+| `scripts/domain/Building/BuildingModule.cs` | Building 模块注册 |
 | `scripts/domain/Building/BuildingModule.cs` | Building 模块注册 |
 | `scripts/domain/Battle/BattleModule.cs` | Battle 模块注册 |
 | `scripts/domain/History/HistoryModule.cs` | History 模块注册 |

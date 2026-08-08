@@ -1,4 +1,4 @@
-// 管理城堡建筑网格、放置状态与地面显示。
+// 城堡核心：网格占用、放置校验与建筑查询
 using CasualCastle.Domain.Shared;
 using CasualCastle.Domain.Building;
 using CasualCastle.Adapters.Godot;
@@ -7,15 +7,6 @@ using System.Collections.Generic;
 
 public partial class Castle : Node2D
 {
-	private static readonly string[] CellTexturePaths = {
-		"res://assets/art/tiles/cell_dirt_01.png",
-		"res://assets/art/tiles/cell_dirt_02.png",
-		"res://assets/art/tiles/cell_dirt_03.png",
-		"res://assets/art/tiles/cell_dirt_04.png",
-	};
-	private static readonly Color ValidPreviewColor = new Color(0.2f, 0.85f, 0.35f, 0.35f);
-	private static readonly Color InvalidPreviewColor = new Color(0.9f, 0.2f, 0.2f, 0.35f);
-
 	[Export]
 	public bool IsPlayerCastle;
 
@@ -46,23 +37,27 @@ public partial class Castle : Node2D
 	public int SecondBarracksGridY = -1;
 
 	public Building Heart { get; private set; }
+
 	public bool IsAlive => Heart != null && Heart.Health > 0;
 
-	private ProgressBar _healthBar;
 	private OccupancyGrid _occupancy;
+
 	private bool _showPlacementPreview;
+
 	private int _previewGridX;
+
 	private int _previewGridY;
+
 	private bool _previewValid;
+
 	private IReadOnlyList<Vector2I> _previewFootprint;
-	private CastleHighlightOverlay _highlightOverlay;
+
 	private BuildingSystem _buildingSystem;
-	private Texture2D[] _cellTextures;
 
 	public override void _Ready()
 	{
 		_buildingSystem = AdapterRegistry.Resolve<BuildingSystem>();
-		_previewFootprint = _buildingSystem.GetFootprint("Barracks");
+		_previewFootprint = _buildingSystem.GetFootprint(BuildingTypeIds.Barracks);
 		_occupancy = new OccupancyGrid(GridColumns, GridRows);
 		_healthBar = GetNodeOrNull<ProgressBar>("HealthBar");
 		LoadCellTextures();
@@ -70,23 +65,6 @@ public partial class Castle : Node2D
 		SetupCastleHeart();
 		SetupBarracks();
 		UpdateHealthBar();
-	}
-
-	private void LoadCellTextures()
-	{
-		_cellTextures = new Texture2D[CellTexturePaths.Length];
-		for (int index = 0; index < CellTexturePaths.Length; index++)
-			_cellTextures[index] = GD.Load<Texture2D>(CellTexturePaths[index]);
-	}
-
-	private void SetupHighlightOverlay()
-	{
-		_highlightOverlay = new CastleHighlightOverlay
-		{
-			ZIndex = 15,
-		};
-		_highlightOverlay.Bind(this);
-		AddChild(_highlightOverlay);
 	}
 
 	public Vector2 GetCellCenter(int gridX, int gridY) =>
@@ -152,21 +130,6 @@ public partial class Castle : Node2D
 		return states;
 	}
 
-	public void SetPlacementPreview(bool show, int gridX, int gridY, bool valid, string buildingType = "Barracks")
-	{
-		_showPlacementPreview = show;
-		_previewGridX = gridX;
-		_previewGridY = gridY;
-		_previewValid = valid;
-		_previewFootprint = _buildingSystem.GetFootprint(buildingType);
-		QueueRedraw();
-	}
-
-	public void ClearPlacementPreview()
-	{
-		SetPlacementPreview(false, 0, 0, false);
-	}
-
 	public bool TryGetBuildingAtGlobalPoint(Vector2 globalPoint, out Building building)
 	{
 		building = null;
@@ -188,19 +151,9 @@ public partial class Castle : Node2D
 		return false;
 	}
 
-	public void SetAdjacencyHighlightBuildings(IEnumerable<Building> buildings)
-	{
-		_highlightOverlay?.SetBuildings(buildings);
-	}
-
-	public void ClearAdjacencyHighlight()
-	{
-		_highlightOverlay?.ClearHighlights();
-	}
-
 	public bool PlaceBuilding(Building building, int gridX, int gridY)
 	{
-		return PlaceBuilding(building, gridX, gridY, "Barracks");
+		return PlaceBuilding(building, gridX, gridY, BuildingTypeIds.Barracks);
 	}
 
 	public bool PlaceBuilding(Building building, int anchorX, int anchorY, string buildingType)
@@ -283,120 +236,4 @@ public partial class Castle : Node2D
 		return false;
 	}
 
-	private void SetupCastleHeart()
-	{
-		string heartTypeId = GameManager.Instance != null && GameManager.Instance.SelectedFaction == FactionDef.HordeId
-			? HordeCoreRules.CoreLevelTypeIds[0]
-			: GameManager.Instance != null && GameManager.Instance.SelectedFaction == FactionDef.NecromancerId
-				? RitualCircleRules.CoreLevelTypeIds[0]
-				: "CastleHeart";
-		Building heart = _buildingSystem.CreateBuilding(heartTypeId);
-		if (heart == null)
-			return;
-
-		heart.BindToGrid(this, CastleHeartGridX, CastleHeartGridY);
-		PlaceBuilding(heart, CastleHeartGridX, CastleHeartGridY, heartTypeId);
-		Heart = heart;
-		heart.HealthChanged += OnHeartHealthChanged;
-	}
-
-	public void ReplaceHeart(string typeId, int health)
-	{
-		if (Heart == null)
-			return;
-
-		Building oldHeart = Heart;
-		ReleaseBuildingFootprint(oldHeart);
-		oldHeart.GetParent()?.RemoveChild(oldHeart);
-		oldHeart.QueueFree();
-
-		Building heart = _buildingSystem.CreateBuilding(typeId);
-		if (heart == null)
-			return;
-
-		heart.BindToGrid(this, CastleHeartGridX, CastleHeartGridY);
-		PlaceBuilding(heart, CastleHeartGridX, CastleHeartGridY, typeId);
-		heart.ApplySnapshotState(health, false, false);
-		Heart = heart;
-		heart.HealthChanged += OnHeartHealthChanged;
-	}
-
-	private void SetupBarracks()
-	{
-		if (!IsPlayerCastle)
-			return;
-
-		PlaceInitialBarracks(BarracksGridX, BarracksGridY);
-		if (SecondBarracksGridX >= 0 && SecondBarracksGridY >= 0)
-			PlaceInitialBarracks(SecondBarracksGridX, SecondBarracksGridY);
-	}
-
-	private void PlaceInitialBarracks(int gridX, int gridY)
-	{
-		Building building = _buildingSystem.CreateBuilding("Barracks");
-		if (building == null)
-			return;
-
-		building.BindToGrid(this, gridX, gridY);
-		PlaceBuilding(building, gridX, gridY);
-	}
-
-	private void OnHeartHealthChanged(int health, int maxHealth)
-	{
-		UpdateHealthBar();
-	}
-
-	private void UpdateHealthBar()
-	{
-		if (_healthBar == null || Heart == null)
-			return;
-
-		_healthBar.MaxValue = Heart.MaxHealth;
-		_healthBar.Value = Heart.Health;
-	}
-
-	public override void _Draw()
-	{
-		DrawCellTextures();
-		DrawPlacementPreview();
-	}
-
-	private void DrawCellTextures()
-	{
-		Vector2 cellPixelSize = GameCoordinatesAdapter.ToLocalPixels(
-			GameCoordinateRules.UnitsPerCell,
-			GameCoordinateRules.UnitsPerCell);
-		for (int row = 0; row < GridRows; row++)
-			for (int col = 0; col < GridColumns; col++)
-			{
-				Vector2 position = GameCoordinatesAdapter.ToLocalPixels(GameCoordinateRules.CellCorner(col, row));
-				Texture2D texture = _cellTextures[(col + row) % _cellTextures.Length];
-				DrawTextureRect(texture, new Rect2(position, cellPixelSize), false);
-			}
-	}
-
-	private void DrawPlacementPreview()
-	{
-		if (!_showPlacementPreview)
-			return;
-
-		Color previewColor = _previewValid ? ValidPreviewColor : InvalidPreviewColor;
-		Vector2 cellPixelSize = GameCoordinatesAdapter.ToLocalPixels(
-			GameCoordinateRules.UnitsPerCell,
-			GameCoordinateRules.UnitsPerCell);
-
-		foreach (Vector2I offset in _previewFootprint)
-			DrawPreviewCell(offset, cellPixelSize, previewColor);
-	}
-
-	private void DrawPreviewCell(Vector2I offset, Vector2 cellPixelSize, Color previewColor)
-	{
-		int col = _previewGridX + offset.X;
-		int row = _previewGridY + offset.Y;
-		if (!IsInBounds(col, row))
-			return;
-
-		Vector2 previewPos = GameCoordinatesAdapter.ToLocalPixels(GameCoordinateRules.CellCorner(col, row));
-		DrawRect(new Rect2(previewPos, cellPixelSize), previewColor);
-	}
 }

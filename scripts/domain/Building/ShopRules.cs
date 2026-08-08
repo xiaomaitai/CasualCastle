@@ -1,3 +1,4 @@
+// 商店规则：卡池过滤与权重抽取
 using System;
 using System.Collections.Generic;
 

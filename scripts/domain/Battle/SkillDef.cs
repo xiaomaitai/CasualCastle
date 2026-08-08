@@ -1,3 +1,4 @@
+// 技能定义：类型与配置 JSON
 namespace CasualCastle.Domain.Battle;
 
 public enum SkillType

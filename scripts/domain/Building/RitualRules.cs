@@ -1,3 +1,5 @@
+// 仪式规则：仪式目录与宿主判定
+using CasualCastle.Domain.Shared;
 using System.Collections.Generic;
 
 namespace CasualCastle.Domain.Building;
@@ -7,8 +9,8 @@ public static class RitualRules
 	public const string BlackMagicChargeId = "black_magic_charge";
 	public const string UndeadSummonId = "undead_summon";
 	public const string BoneReinforceId = "bone_reinforce";
-	public const string AltarHostTypeId = "DarkAltar";
-	public const string RitualCircleTypePrefix = "RitualCircleL";
+	public const string AltarHostTypeId = BuildingTypeIds.DarkAltar;
+	public const string RitualCircleTypePrefix = BuildingTypeIds.RitualCirclePrefix;
 
 	private static readonly RitualDef[] AllRituals =
 	{

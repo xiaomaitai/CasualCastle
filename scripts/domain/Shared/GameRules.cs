@@ -1,3 +1,4 @@
+// 全局游戏常量
 namespace CasualCastle.Domain.Shared;
 
 public static class GameRules
@@ -12,9 +13,6 @@ public static class GameRules
 	public const float SkillNearbyAllyRadius = 150f;
 	public const float SkillTargetIsolatedRadius = 120f;
 
-	public const float ProjectileSpeedMelee = 600f;
-	public const float ProjectileSpeedRanged = 400f;
-	public const float HealProjectileSpeed = 300f;
 	public const float StealthSpeedMult = 0.85f;
 	public const float GraceShieldMult = 1.5f;
 	public const float GraceCooldownReduction = 1.0f;

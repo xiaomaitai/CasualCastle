@@ -1,3 +1,4 @@
+// 卡牌美术视图：卡面纹理与选中高亮
 using Godot;
 
 public partial class CardArtView : Node2D

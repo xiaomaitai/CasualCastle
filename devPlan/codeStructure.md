@@ -10,10 +10,11 @@
 CasualCastle/
 ├── scripts/
 │   ├── domain/                                     # 核心域层（4 个 C# 项目，零 Godot）
-│   │   ├── Shared/                                 # Shared.csproj — 坐标、常量
+│   │   ├── Shared/                                 # Shared.csproj — 坐标、常量、阶段状态机
 │   │   │   ├── GameVector2.cs, GridCellOffset.cs
 │   │   │   ├── GameCoordinateRules.cs, GameRules.cs
-│   │   │   └── SharedModule.cs
+│   │   │   ├── MatchPhaseMachine.cs, FactionIds.cs, BuildingTypeIds.cs
+│   │   │   └── SaveModels.cs, IGameSessionService.cs, ISaveRepository.cs
 │   │   ├── Building/                               # Building.csproj → Shared
 │   │   │   ├── CardData.cs, CombineRecipe.cs
 │   │   │   ├── BuildingDefinitions.cs, OccupancyGrid.cs, Player.cs
@@ -22,15 +23,15 @@ CasualCastle/
 │   │   │   ├── IBuildingState.cs, IBuildingPlacement.cs
 │   │   │   ├── IBuildingRepository.cs, ICombineBuildingFactory.cs
 │   │   │   └── BuildingModule.cs
-│   │   ├── Battle/                                 # Battle.csproj → Shared, Building
-│   │   │   ├── Unit.cs, UnitState.cs, UnitStats.cs, UnitSize.cs
+│   │   ├── Battle/                                 # Battle.csproj → Shared
+│   │   │   ├── Unit.cs, Unit.Combat.cs, Unit.Skills.cs, Unit.Status.cs
+│   │   │   ├── UnitState.cs, UnitStats.cs, UnitSize.cs
 │   │   │   ├── CombatRules.cs, DamageMatrix.cs, DamageType.cs, AttackType.cs, ArmorType.cs
-│   │   │   ├── UnitSpatialService.cs
-│   │   │   ├── IUnitService.cs, UnitService.cs
+│   │   │   ├── UnitSpatialService.cs, IUnitSpatialService.cs
 │   │   │   ├── IFieldUnitRepository.cs, IUnitRepository.cs
 │   │   │   ├── IGameState.cs, INavigationPort.cs, IUnitEventPort.cs
 │   │   │   ├── IBuildingRef.cs, IBuildingTarget.cs
-│   │   │   ├── UnitRegistry.cs
+│   │   │   ├── SkillEffectTypes.cs
 │   │   │   └── BattleModule.cs
 │   │   └── History/                                # History.csproj → Shared, Building
 │   │       ├── BattleReportModels.cs, IBattleReportRepository.cs
@@ -97,7 +98,7 @@ domain 项目零 `using Godot`，单向无循环。
 
 ```
 第一层：MS DI (ServiceProvider)
-  ├── 纯 C# 领域服务：ShopRules, AdjacencyService, UnitSpatialService (ICombatUseCase)
+  ├── 纯 C# 领域服务：ShopRules, AdjacencyService, UnitSpatialService (IUnitSpatialService)
   ├── BattleReportService, ReplayService (IReplayUseCase)
   ├── 出站 Port 实现：IFieldUnitRepository→FieldUnitRepository
   ├── 持久化：IBattleReportRepository, IUnitRepository, IBuildingRepository
@@ -151,7 +152,7 @@ domain 项目零 `using Godot`，单向无循环。
 
 | 类 | 子域 | 注册方式 |
 |----|------|---------|
-| `UnitSpatialService` | Battle | MS DI Singleton（通过 ICombatUseCase） |
+| `UnitSpatialService` | Battle | MS DI Singleton（通过 IUnitSpatialService） |
 | `UnitService` | Battle | 手动 new（每个单位实例，通过 UnitLogic） |
 | `AdjacencyService` | Building | MS DI Singleton |
 | `ShopRules` | Building | MS DI Singleton |
@@ -196,8 +197,7 @@ domain 项目零 `using Godot`，单向无循环。
 | 端口 | 定义位置 | 实现方 | 类型 |
 |------|----------|--------|------|
 | `IGameState` | Domain.Battle | GameManager | 入站 |
-| `IUnitService` | Domain.Battle | UnitService | 入站 |
-| `ICombatUseCase` | Domain.Battle | UnitSpatialService | 入站 |
+| `IUnitSpatialService` | Domain.Battle | UnitSpatialService | 领域服务 |
 | `IFieldUnitRepository` | Domain.Battle | FieldUnitRepository | 出站 |
 | `IUnitRepository` | Domain.Battle | SqliteUnitRepository | 出站 |
 | `INavigationPort` | Domain.Battle | NavigationPortAdapter | 出站 |

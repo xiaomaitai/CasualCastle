@@ -6,9 +6,9 @@
 CasualCastle/
 ├── scripts/
 │   ├── domain/                                     # 核心域层（4 个 C# 项目，零 Godot）
-│   │   ├── Shared/       Shared.csproj             # 坐标、常量
+│   │   ├── Shared/       Shared.csproj             # 坐标、常量、阶段状态机
 │   │   ├── Building/     Building.csproj → Shared  # 建筑、邻接、商店、手牌、组合
-│   │   ├── Battle/       Battle.csproj → Shared, Building  # 战斗、昼夜
+│   │   ├── Battle/       Battle.csproj → Shared          # 战斗、昼夜
 │   │   └── History/      History.csproj → Shared, Building # 战报、回放
 │   │
 │   ├── CompositionRoot.cs                          # MS DI 容器构建入口
@@ -56,7 +56,7 @@ Godot 管理节点生命周期（场景树实例化、`_Ready`/`_ExitTree`），
 ```
 第一层：MS DI (ServiceProvider)
   ├── 纯 C# 服务：IBattleReportRepository → BattleReportStorage
-  └── IGameState（工厂委托到 AdapterRegistry）
+  └── IGameState（通过 GameStateProvider 桥接）
 
 第二层：AdapterRegistry（轻量服务定位器）
   ├── GameManager（同时注册 IGameState）

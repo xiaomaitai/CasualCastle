@@ -1,3 +1,4 @@
+// 单位生成工具：出生点计算与战场放置
 using CasualCastle.Domain.Shared;
 using CasualCastle.Adapters.Godot;
 using Godot;

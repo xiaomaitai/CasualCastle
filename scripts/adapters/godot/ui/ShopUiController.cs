@@ -1,266 +1,268 @@
+// 商店 UI：购买与直接放置
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Building;
+using CasualCastle.Domain.Shared;
 using Godot;
 using System;
 
 public sealed class ShopUiController
 {
-    private readonly Node _owner;
-    private readonly Button _shopButton;
-    private readonly Panel _panel;
-    private readonly Label _shopGoldLabel;
-    private readonly Button _closeButton;
-    private readonly Button _refreshButton;
-    private readonly Button[] _buyButtons = new Button[Shop.OfferCount];
-    private readonly Label[] _offerLabels = new Label[Shop.OfferCount];
-    private readonly Control.GuiInputEventHandler[] _offerGuiInputHandlers = new Control.GuiInputEventHandler[Shop.OfferCount];
+	private readonly Node _owner;
+	private readonly Button _shopButton;
+	private readonly Panel _panel;
+	private readonly Label _shopGoldLabel;
+	private readonly Button _closeButton;
+	private readonly Button _refreshButton;
+	private readonly Button[] _buyButtons = new Button[Shop.OfferCount];
+	private readonly Label[] _offerLabels = new Label[Shop.OfferCount];
+	private readonly Control.GuiInputEventHandler[] _offerGuiInputHandlers = new Control.GuiInputEventHandler[Shop.OfferCount];
 
-    private readonly Shop _shop;
-    private readonly GameManager _gameManager;
-    private readonly BuildingSystem _buildingSystem;
+	private readonly Shop _shop;
+	private readonly GameManager _gameManager;
+	private readonly BuildingSystem _buildingSystem;
 
-    private bool _gameOver;
-    private bool _ready;
-    private bool _dragging;
-    private int _dragSlotIndex = -1;
+	private bool _gameOver;
+	private bool _ready;
+	private bool _dragging;
+	private int _dragSlotIndex = -1;
 
-    public bool IsOpen { get; private set; }
-    public bool IsDragging => _dragging;
-    public event Action<bool> OpenChanged;
+	public bool IsOpen { get; private set; }
+	public bool IsDragging => _dragging;
+	public event Action<bool> OpenChanged;
 
-    public ShopUiController(Node owner, CanvasLayer uiRoot, Shop shopService)
-    {
-        _owner = owner;
-        _shop = shopService;
-        _gameManager = AdapterRegistry.Resolve<GameManager>();
-        _buildingSystem = AdapterRegistry.Resolve<BuildingSystem>();
-        _shopButton = uiRoot.GetNode<Button>("ShopButton");
-        _panel = uiRoot.GetNode<Panel>("ShopPanel");
-        _shopGoldLabel = uiRoot.GetNode<Label>("ShopPanel/ShopGoldLabel");
-        _closeButton = uiRoot.GetNode<Button>("ShopPanel/ShopCloseButton");
-        _refreshButton = uiRoot.GetNode<Button>("ShopPanel/ShopRefreshButton");
+	public ShopUiController(Node owner, CanvasLayer uiRoot, Shop shopService)
+	{
+		_owner = owner;
+		_shop = shopService;
+		_gameManager = AdapterRegistry.Resolve<GameManager>();
+		_buildingSystem = AdapterRegistry.Resolve<BuildingSystem>();
+		_shopButton = uiRoot.GetNode<Button>("ShopButton");
+		_panel = uiRoot.GetNode<Panel>("ShopPanel");
+		_shopGoldLabel = uiRoot.GetNode<Label>("ShopPanel/ShopGoldLabel");
+		_closeButton = uiRoot.GetNode<Button>("ShopPanel/ShopCloseButton");
+		_refreshButton = uiRoot.GetNode<Button>("ShopPanel/ShopRefreshButton");
 
-        for (int i = 0; i < Shop.OfferCount; i++)
-        {
-            _offerLabels[i] = uiRoot.GetNode<Label>($"ShopPanel/OfferSlot{i + 1}/OfferLabel");
-            _buyButtons[i] = uiRoot.GetNode<Button>($"ShopPanel/OfferSlot{i + 1}/BuyButton");
-            _offerLabels[i].MouseFilter = Control.MouseFilterEnum.Stop;
+		for (int i = 0; i < Shop.OfferCount; i++)
+		{
+			_offerLabels[i] = uiRoot.GetNode<Label>($"ShopPanel/OfferSlot{i + 1}/OfferLabel");
+			_buyButtons[i] = uiRoot.GetNode<Button>($"ShopPanel/OfferSlot{i + 1}/BuyButton");
+			_offerLabels[i].MouseFilter = Control.MouseFilterEnum.Stop;
 
-            int slotIndex = i;
-            _buyButtons[i].Pressed += () => OnBuyButtonPressed(slotIndex);
-            _offerGuiInputHandlers[i] = inputEvent => OnOfferGuiInput(slotIndex, inputEvent);
-            _offerLabels[i].GuiInput += _offerGuiInputHandlers[i];
-        }
+			int slotIndex = i;
+			_buyButtons[i].Pressed += () => OnBuyButtonPressed(slotIndex);
+			_offerGuiInputHandlers[i] = inputEvent => OnOfferGuiInput(slotIndex, inputEvent);
+			_offerLabels[i].GuiInput += _offerGuiInputHandlers[i];
+		}
 
-        _shopButton.Pressed += OnShopButtonPressed;
-        _closeButton.Pressed += OnClosePressed;
-        _refreshButton.Pressed += OnRefreshPressed;
+		_shopButton.Pressed += OnShopButtonPressed;
+		_closeButton.Pressed += OnClosePressed;
+		_refreshButton.Pressed += OnRefreshPressed;
 
-        _shop.GoldChanged += UpdateGoldDisplay;
-        _shop.ShopAvailabilityChanged += UpdateShopButtonAvailability;
-        _shop.ShopOpenRequested += Open;
-        _shop.ShopOffersChanged += RefreshOffers;
+		_shop.GoldChanged += UpdateGoldDisplay;
+		_shop.ShopAvailabilityChanged += UpdateShopButtonAvailability;
+		_shop.ShopOpenRequested += Open;
+		_shop.ShopOffersChanged += RefreshOffers;
 
-        UpdateGoldDisplay(_shop.Gold);
-        UpdateShopButtonAvailability(_shop.IsShopAvailable);
-        RefreshOffers();
-        _ready = true;
-    }
+		UpdateGoldDisplay(_shop.Gold);
+		UpdateShopButtonAvailability(_shop.IsShopAvailable);
+		RefreshOffers();
+		_ready = true;
+	}
 
-    public void Dispose()
-    {
-        _shopButton.Pressed -= OnShopButtonPressed;
-        _closeButton.Pressed -= OnClosePressed;
-        _refreshButton.Pressed -= OnRefreshPressed;
+	public void Dispose()
+	{
+		_shopButton.Pressed -= OnShopButtonPressed;
+		_closeButton.Pressed -= OnClosePressed;
+		_refreshButton.Pressed -= OnRefreshPressed;
 
-        for (int i = 0; i < Shop.OfferCount; i++)
-            _offerLabels[i].GuiInput -= _offerGuiInputHandlers[i];
+		for (int i = 0; i < Shop.OfferCount; i++)
+			_offerLabels[i].GuiInput -= _offerGuiInputHandlers[i];
 
-        _shop.GoldChanged -= UpdateGoldDisplay;
-        _shop.ShopAvailabilityChanged -= UpdateShopButtonAvailability;
-        _shop.ShopOpenRequested -= Open;
-        _shop.ShopOffersChanged -= RefreshOffers;
-    }
+		_shop.GoldChanged -= UpdateGoldDisplay;
+		_shop.ShopAvailabilityChanged -= UpdateShopButtonAvailability;
+		_shop.ShopOpenRequested -= Open;
+		_shop.ShopOffersChanged -= RefreshOffers;
+	}
 
-    public void SetGameOver(bool gameOver)
-    {
-        _gameOver = gameOver;
+	public void SetGameOver(bool gameOver)
+	{
+		_gameOver = gameOver;
 
-        if (_gameOver)
-            Close();
+		if (_gameOver)
+			Close();
 
-        CancelDrag();
-        UpdateShopButtonAvailability(_shop.IsShopAvailable);
-    }
+		CancelDrag();
+		UpdateShopButtonAvailability(_shop.IsShopAvailable);
+	}
 
-    public void Process()
-    {
-        if (!_dragging)
-            return;
+	public void Process()
+	{
+		if (!_dragging)
+			return;
 
-        UpdateDragPreview();
-    }
+		UpdateDragPreview();
+	}
 
-    public bool HandleInput(InputEvent @event)
-    {
-        if (!_dragging)
-            return false;
+	public bool HandleInput(InputEvent @event)
+	{
+		if (!_dragging)
+			return false;
 
-        if (@event is InputEventMouseButton mouseButton && !mouseButton.Pressed)
-        {
-            if (mouseButton.ButtonIndex == MouseButton.Left)
-            {
-                bool placed = TryCompleteDrag(mouseButton.GlobalPosition);
-                CancelDrag(!placed);
-                return true;
-            }
+		if (@event is InputEventMouseButton mouseButton && !mouseButton.Pressed)
+		{
+			if (mouseButton.ButtonIndex == MouseButton.Left)
+			{
+				bool placed = TryCompleteDrag(mouseButton.GlobalPosition);
+				CancelDrag(!placed);
+				return true;
+			}
 
-            if (mouseButton.ButtonIndex == MouseButton.Right)
-            {
-                CancelDrag();
-                return true;
-            }
-        }
+			if (mouseButton.ButtonIndex == MouseButton.Right)
+			{
+				CancelDrag();
+				return true;
+			}
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    public bool CancelDrag(bool playFeedback = true)
-    {
-        if (!_dragging)
-            return false;
+	public bool CancelDrag(bool playFeedback = true)
+	{
+		if (!_dragging)
+			return false;
 
-        _dragging = false;
-        _dragSlotIndex = -1;
-        _gameManager.PlayerCastle.ClearPlacementPreview();
-        if (playFeedback)
-            Sfx.Play(SfxEvents.PlaceCancel);
-        return true;
-    }
+		_dragging = false;
+		_dragSlotIndex = -1;
+		_gameManager.PlayerCastle.ClearPlacementPreview();
+		if (playFeedback)
+			Sfx.Play(SfxEvents.PlaceCancel);
+		return true;
+	}
 
-    public bool Close()
-    {
-        if (!IsOpen)
-            return false;
+	public bool Close()
+	{
+		if (!IsOpen)
+			return false;
 
-        IsOpen = false;
-        _panel.Visible = false;
-        CancelDrag();
-        UpdateShopButtonAvailability(_shop.IsShopAvailable);
-        OpenChanged?.Invoke(IsOpen);
-        Sfx.Play(SfxEvents.ShopClose);
-        return true;
-    }
+		IsOpen = false;
+		_panel.Visible = false;
+		CancelDrag();
+		UpdateShopButtonAvailability(_shop.IsShopAvailable);
+		OpenChanged?.Invoke(IsOpen);
+		Sfx.Play(SfxEvents.ShopClose);
+		return true;
+	}
 
-    private void Open()
-    {
-        if (IsOpen || _gameOver)
-            return;
+	private void Open()
+	{
+		if (IsOpen || _gameOver)
+			return;
 
-        IsOpen = true;
-        _panel.Visible = true;
-        UpdateShopButtonAvailability(_shop.IsShopAvailable);
-        RefreshOffers();
-        OpenChanged?.Invoke(IsOpen);
-        Sfx.Play(SfxEvents.ShopOpen);
-    }
+		IsOpen = true;
+		_panel.Visible = true;
+		UpdateShopButtonAvailability(_shop.IsShopAvailable);
+		RefreshOffers();
+		OpenChanged?.Invoke(IsOpen);
+		Sfx.Play(SfxEvents.ShopOpen);
+	}
 
-    private void OnShopButtonPressed()
-    {
-        _shop.RequestOpenShop();
-    }
+	private void OnShopButtonPressed()
+	{
+		_shop.RequestOpenShop();
+	}
 
-    private void OnRefreshPressed()
-    {
-        _shop.RefreshOffers();
-    }
+	private void OnRefreshPressed()
+	{
+		_shop.RefreshOffers();
+	}
 
-    private void OnClosePressed()
-    {
-        Close();
-    }
+	private void OnClosePressed()
+	{
+		Close();
+	}
 
-    private void OnBuyButtonPressed(int slotIndex)
-    {
-        if (_shop.TryPurchase(slotIndex))
-            Sfx.Play(SfxEvents.Buy);
-    }
+	private void OnBuyButtonPressed(int slotIndex)
+	{
+		if (_shop.TryPurchase(slotIndex))
+			Sfx.Play(SfxEvents.Buy);
+	}
 
-    private void OnOfferGuiInput(int slotIndex, InputEvent @event)
-    {
-        if (@event is not InputEventMouseButton mouseButton
-            || !mouseButton.Pressed
-            || mouseButton.ButtonIndex != MouseButton.Left)
-            return;
+	private void OnOfferGuiInput(int slotIndex, InputEvent @event)
+	{
+		if (@event is not InputEventMouseButton mouseButton
+			|| !mouseButton.Pressed
+			|| mouseButton.ButtonIndex != MouseButton.Left)
+			return;
 
-        if (_gameOver || !_shop.IsShopAvailable)
-            return;
+		if (_gameOver || !_shop.IsShopAvailable)
+			return;
 
-        CardData offer = _shop.GetOffer(slotIndex);
-        if (offer == null || !_shop.CanAfford(offer.Cost))
-            return;
+		CardData offer = _shop.GetOffer(slotIndex);
+		if (offer == null || !_shop.CanAfford(offer.Cost))
+			return;
 
-        _dragging = true;
-        _dragSlotIndex = slotIndex;
-    }
+		_dragging = true;
+		_dragSlotIndex = slotIndex;
+	}
 
-    private bool TryCompleteDrag(Vector2 screenPosition)
-    {
-        Castle playerCastle = _gameManager.PlayerCastle;
-        if (playerCastle == null || _dragSlotIndex < 0)
-            return false;
+	private bool TryCompleteDrag(Vector2 screenPosition)
+	{
+		Castle playerCastle = _gameManager.PlayerCastle;
+		if (playerCastle == null || _dragSlotIndex < 0)
+			return false;
 
-        if (!playerCastle.TryGetGridFromScreenPoint(screenPosition, out int gridX, out int gridY))
-            return false;
+		if (!playerCastle.TryGetGridFromScreenPoint(screenPosition, out int gridX, out int gridY))
+			return false;
 
-        return _shop.TryPlaceOfferDirect(_dragSlotIndex, gridX, gridY);
-    }
+		return _shop.TryPlaceOfferDirect(_dragSlotIndex, gridX, gridY);
+	}
 
-    private void UpdateDragPreview()
-    {
-        Castle playerCastle = _gameManager.PlayerCastle;
-        if (playerCastle == null)
-            return;
+	private void UpdateDragPreview()
+	{
+		Castle playerCastle = _gameManager.PlayerCastle;
+		if (playerCastle == null)
+			return;
 
-        Vector2 mouseScreen = _owner.GetViewport().GetMousePosition();
-        if (!playerCastle.TryGetGridFromScreenPoint(mouseScreen, out int gridX, out int gridY))
-        {
-            playerCastle.ClearPlacementPreview();
-            return;
-        }
+		Vector2 mouseScreen = _owner.GetViewport().GetMousePosition();
+		if (!playerCastle.TryGetGridFromScreenPoint(mouseScreen, out int gridX, out int gridY))
+		{
+			playerCastle.ClearPlacementPreview();
+			return;
+		}
 
-        CardData offer = _shop.GetOffer(_dragSlotIndex);
-        string buildingType = offer?.BuildingType ?? "Barracks";
-        bool valid = _buildingSystem.CanPlace(playerCastle, buildingType, gridX, gridY);
-        playerCastle.SetPlacementPreview(true, gridX, gridY, valid, buildingType);
-    }
+		CardData offer = _shop.GetOffer(_dragSlotIndex);
+		string buildingType = offer?.BuildingType ?? BuildingTypeIds.Barracks;
+		bool valid = _buildingSystem.CanPlace(playerCastle, buildingType, gridX, gridY);
+		playerCastle.SetPlacementPreview(true, gridX, gridY, valid, buildingType);
+	}
 
-    private void UpdateGoldDisplay(int gold)
-    {
-        _shopGoldLabel.Text = $"当前金币：{gold}";
-        RefreshOffers();
-        if (_ready)
-            Sfx.Play(SfxEvents.CoinChange);
-    }
+	private void UpdateGoldDisplay(int gold)
+	{
+		_shopGoldLabel.Text = $"当前金币：{gold}";
+		RefreshOffers();
+		if (_ready)
+			Sfx.Play(SfxEvents.CoinChange);
+	}
 
-    private void UpdateShopButtonAvailability(bool available)
-    {
-        _shopButton.Disabled = _gameOver || !available || IsOpen;
-        _shopButton.Text = "商店";
-    }
+	private void UpdateShopButtonAvailability(bool available)
+	{
+		_shopButton.Disabled = _gameOver || !available || IsOpen;
+		_shopButton.Text = "商店";
+	}
 
-    private void RefreshOffers()
-    {
-        for (int i = 0; i < Shop.OfferCount; i++)
-        {
-            CardData offer = _shop.GetOffer(i);
-            _offerLabels[i].Text = offer == null
-                ? "暂无商品"
-                : $"{offer.Name}  费用：{offer.Cost}";
+	private void RefreshOffers()
+	{
+		for (int i = 0; i < Shop.OfferCount; i++)
+		{
+			CardData offer = _shop.GetOffer(i);
+			_offerLabels[i].Text = offer == null
+				? "暂无商品"
+				: $"{offer.Name}  费用：{offer.Cost}";
 
-            bool canBuy = offer != null && _shop.CanAfford(offer.Cost);
-            _buyButtons[i].Disabled = offer == null || !canBuy;
-            _buyButtons[i].Text = canBuy ? "购买" : "金币不足";
-        }
-    }
+			bool canBuy = offer != null && _shop.CanAfford(offer.Cost);
+			_buyButtons[i].Disabled = offer == null || !canBuy;
+			_buyButtons[i].Text = canBuy ? "购买" : "金币不足";
+		}
+	}
 }

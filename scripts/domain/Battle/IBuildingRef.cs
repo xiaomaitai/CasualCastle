@@ -1,3 +1,4 @@
+// 建筑引用端口：供战斗查询建筑边界与阵营
 namespace CasualCastle.Domain.Battle;
 
 public interface IBuildingRef

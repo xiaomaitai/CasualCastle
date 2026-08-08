@@ -1,3 +1,4 @@
+// 战术查询端口：索敌、建筑重叠与范围查询
 using System.Collections.Generic;
 
 namespace CasualCastle.Domain.Battle;

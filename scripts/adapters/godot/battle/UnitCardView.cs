@@ -1,3 +1,4 @@
+// 单位卡牌视图：单位信息卡面
 using Godot;
 using System;
 using System.Collections.Generic;

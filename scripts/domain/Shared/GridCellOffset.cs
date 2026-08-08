@@ -1,3 +1,4 @@
+// 网格偏移值类型
 namespace CasualCastle.Domain.Shared;
 
 public readonly struct GridCellOffset

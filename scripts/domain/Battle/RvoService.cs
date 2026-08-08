@@ -1,3 +1,4 @@
+// RVO 配置服务：导航代理参数计算
 namespace CasualCastle.Domain.Battle;
 
 public class RvoService : IRvoService

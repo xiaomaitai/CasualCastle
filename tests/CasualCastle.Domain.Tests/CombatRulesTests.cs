@@ -102,30 +102,4 @@ public class CombatRulesTests
 		int result = CombatRules.ApplyDamage(10, 50);
 		Assert.Equal(0, result);
 	}
-
-	[Fact]
-	public void CanAttack_WhenTimerAtZero_ReturnsTrue()
-	{
-		Assert.True(CombatRules.CanAttack(0f));
-	}
-
-	[Fact]
-	public void CanAttack_WhenTimerPositive_ReturnsFalse()
-	{
-		Assert.False(CombatRules.CanAttack(0.5f));
-	}
-
-	[Fact]
-	public void TickCooldown_PositiveTimer_DecrementsByDelta()
-	{
-		float result = CombatRules.TickCooldown(0.5f, 0.2f);
-		Assert.Equal(0.3f, result, 4);
-	}
-
-	[Fact]
-	public void ResetCooldown_ReturnsCooldownDuration()
-	{
-		float result = CombatRules.ResetCooldown(1.5f);
-		Assert.Equal(1.5f, result);
-	}
 }

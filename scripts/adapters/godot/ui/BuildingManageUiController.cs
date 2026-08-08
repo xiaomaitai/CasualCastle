@@ -1,3 +1,4 @@
+// 建筑管理 UI：暂停、修复与禁止组合
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Building;
 using Godot;

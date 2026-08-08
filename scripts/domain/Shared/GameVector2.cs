@@ -1,3 +1,4 @@
+// 游戏整型坐标值类型
 namespace CasualCastle.Domain.Shared;
 
 public readonly struct GameVector2

@@ -1,3 +1,4 @@
+// 回放目标适配：将战报快照镜像放置到敌方城堡
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Building;
 using CasualCastle.Domain.History;
@@ -7,54 +8,54 @@ using System.Collections.Generic;
 
 public class ReplayTarget : IReplayTarget
 {
-    private readonly Castle _castle;
+	private readonly Castle _castle;
 
-    public int GridColumns => _castle.GridColumns;
+	public int GridColumns => _castle.GridColumns;
 
-    public ReplayTarget(Castle castle)
-    {
-        _castle = castle;
-    }
+	public ReplayTarget(Castle castle)
+	{
+		_castle = castle;
+	}
 
-    public void ClearNonCoreBuildings()
-    {
-        _castle.ClearNonCoreBuildings();
-    }
+	public void ClearNonCoreBuildings()
+	{
+		_castle.ClearNonCoreBuildings();
+	}
 
-    public bool TryPlaceMirrored(BuildingSnapshot snapshot)
-    {
-        IReadOnlyList<GridCellOffset> domainFootprint = GameManager.Get<IBuildingRepository>().GetFootprint(snapshot.TypeId);
-        (int mirrorX, int mirrorY) = MirrorRules.MirrorAnchor(
-            snapshot.AnchorGridX, snapshot.AnchorGridY,
-            domainFootprint, _castle.GridColumns);
+	public bool TryPlaceMirrored(BuildingSnapshot snapshot)
+	{
+		IReadOnlyList<GridCellOffset> domainFootprint = GameManager.Get<IBuildingRepository>().GetFootprint(snapshot.TypeId);
+		(int mirrorX, int mirrorY) = MirrorRules.MirrorAnchor(
+			snapshot.AnchorGridX, snapshot.AnchorGridY,
+			domainFootprint, _castle.GridColumns);
 
-        IReadOnlyList<Vector2I> footprint = AdapterRegistry.Resolve<BuildingSystem>().GetFootprint(snapshot.TypeId);
-        if (IsBlockedByPlayerUnit(mirrorX, mirrorY, footprint))
-            return false;
+		IReadOnlyList<Vector2I> footprint = AdapterRegistry.Resolve<BuildingSystem>().GetFootprint(snapshot.TypeId);
+		if (IsBlockedByPlayerUnit(mirrorX, mirrorY, footprint))
+			return false;
 
-        Building building = AdapterRegistry.Resolve<BuildingSystem>().CreateBuilding(snapshot.TypeId);
-        if (building == null)
-            return false;
+		Building building = AdapterRegistry.Resolve<BuildingSystem>().CreateBuilding(snapshot.TypeId);
+		if (building == null)
+			return false;
 
-        building.BindToGrid(_castle, mirrorX, mirrorY);
-        if (!_castle.PlaceBuilding(building, mirrorX, mirrorY, snapshot.TypeId))
-        {
-            building.QueueFree();
-            return false;
-        }
+		building.BindToGrid(_castle, mirrorX, mirrorY);
+		if (!_castle.PlaceBuilding(building, mirrorX, mirrorY, snapshot.TypeId))
+		{
+			building.QueueFree();
+			return false;
+		}
 
-        building.ApplySnapshotState(
-            snapshot.Health,
-            snapshot.IsManuallyPaused,
-            snapshot.IsCombineProhibited);
-        return true;
-    }
+		building.ApplySnapshotState(
+			snapshot.Health,
+			snapshot.IsManuallyPaused,
+			snapshot.IsCombineProhibited);
+		return true;
+	}
 
-    private bool IsBlockedByPlayerUnit(int anchorX, int anchorY, IReadOnlyList<Vector2I> footprint)
-    {
-        List<Vector2I> occupiedCells = new();
-        foreach (Vector2I offset in footprint)
-            occupiedCells.Add(new Vector2I(anchorX + offset.X, anchorY + offset.Y));
-        return _castle.IsAnyCellOccupiedByPlayerUnit(occupiedCells);
-    }
+	private bool IsBlockedByPlayerUnit(int anchorX, int anchorY, IReadOnlyList<Vector2I> footprint)
+	{
+		List<Vector2I> occupiedCells = new();
+		foreach (Vector2I offset in footprint)
+			occupiedCells.Add(new Vector2I(anchorX + offset.X, anchorY + offset.Y));
+		return _castle.IsAnyCellOccupiedByPlayerUnit(occupiedCells);
+	}
 }

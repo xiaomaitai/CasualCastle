@@ -1,3 +1,4 @@
+// 技能配置解析：JSON 配置转领域配置对象
 using System.Collections.Generic;
 using System.Text.Json;
 using CasualCastle.Domain.Shared;

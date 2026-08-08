@@ -1,3 +1,4 @@
+// 建筑状态图标：暂停与禁止组合标记
 using Godot;
 
 public partial class BuildingStateIcon : Node2D

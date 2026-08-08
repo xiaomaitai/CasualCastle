@@ -1,3 +1,4 @@
+// 单位状态端口：只读属性查询
 namespace CasualCastle.Domain.Battle;
 
 public interface IUnitState

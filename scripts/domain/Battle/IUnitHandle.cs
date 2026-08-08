@@ -1,3 +1,4 @@
+// 单位句柄端口：战斗交互接口
 namespace CasualCastle.Domain.Battle;
 
 public interface IUnitHandle : IUnitState

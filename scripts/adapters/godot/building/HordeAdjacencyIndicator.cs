@@ -1,3 +1,4 @@
+// 部落邻接指示器：加成格计数显示
 using CasualCastle.Domain.Shared;
 using Godot;
 

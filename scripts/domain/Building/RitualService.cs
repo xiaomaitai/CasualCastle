@@ -1,3 +1,4 @@
+// 仪式服务：开始、计时与奖励
 using System;
 
 namespace CasualCastle.Domain.Building;

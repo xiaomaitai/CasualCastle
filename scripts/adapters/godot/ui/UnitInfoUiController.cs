@@ -1,3 +1,4 @@
+// 单位信息 UI
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
 using Godot;

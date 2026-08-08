@@ -1,3 +1,4 @@
+// 伤害矩阵编辑器场景控制器
 using CasualCastle.Adapters.Godot.Dev;
 using Godot;
 

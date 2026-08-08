@@ -1,3 +1,4 @@
+// 摄像机控制：跟随战场与缩放
 using Godot;
 
 public partial class CameraController : Camera2D

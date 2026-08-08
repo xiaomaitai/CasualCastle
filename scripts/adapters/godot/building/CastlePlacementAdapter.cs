@@ -1,26 +1,27 @@
+// 建筑放置适配：实现领域 IBuildingPlacement 端口
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Building;
 
 public class CastlePlacementAdapter : IBuildingPlacement
 {
-    private readonly BuildingSystem _buildingSystem;
+	private readonly BuildingSystem _buildingSystem;
 
-    public bool IsPlayerSide => true;
+	public bool IsPlayerSide => true;
 
-    public CastlePlacementAdapter(BuildingSystem buildingSystem)
-    {
-        _buildingSystem = buildingSystem;
-    }
+	public CastlePlacementAdapter(BuildingSystem buildingSystem)
+	{
+		_buildingSystem = buildingSystem;
+	}
 
-    private Castle PlayerCastle => AdapterRegistry.Resolve<GameManager>().PlayerCastle;
+	private Castle PlayerCastle => AdapterRegistry.Resolve<GameManager>().PlayerCastle;
 
-    public bool CanPlace(string buildingType, int gridX, int gridY)
-    {
-        return _buildingSystem.CanPlace(PlayerCastle, buildingType, gridX, gridY);
-    }
+	public bool CanPlace(string buildingType, int gridX, int gridY)
+	{
+		return _buildingSystem.CanPlace(PlayerCastle, buildingType, gridX, gridY);
+	}
 
-    public bool TryPlace(string buildingType, int gridX, int gridY)
-    {
-        return _buildingSystem.TryPlace(PlayerCastle, buildingType, gridX, gridY);
-    }
+	public bool TryPlace(string buildingType, int gridX, int gridY)
+	{
+		return _buildingSystem.TryPlace(PlayerCastle, buildingType, gridX, gridY);
+	}
 }

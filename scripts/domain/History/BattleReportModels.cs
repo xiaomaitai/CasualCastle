@@ -1,3 +1,4 @@
+// 战报数据模型
 using System.Collections.Generic;
 
 namespace CasualCastle.Domain.History;

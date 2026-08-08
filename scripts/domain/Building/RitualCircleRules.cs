@@ -1,11 +1,12 @@
 // 仪式之环核心规则：等级判定、升级门槛与核心升级配方
+using CasualCastle.Domain.Shared;
 using System.Collections.Generic;
 
 namespace CasualCastle.Domain.Building;
 
 public static class RitualCircleRules
 {
-	public const string CoreTypePrefix = "RitualCircleL";
+	public const string CoreTypePrefix = BuildingTypeIds.RitualCirclePrefix;
 	public static readonly string[] CoreLevelTypeIds = { "RitualCircleL1", "RitualCircleL2", "RitualCircleL3", "RitualCircleL4", "RitualCircleL5" };
 
 	public static int GetLevel(string typeId)

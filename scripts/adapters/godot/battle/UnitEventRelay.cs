@@ -1,3 +1,4 @@
+// 单位事件中继：领域端口事件转 Godot 信号
 using CasualCastle.Domain.Battle;
 using Godot;
 

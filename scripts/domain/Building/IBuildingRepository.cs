@@ -1,3 +1,4 @@
+// 建筑配置仓库端口
 using CasualCastle.Domain.Shared;
 using System.Collections.Generic;
 

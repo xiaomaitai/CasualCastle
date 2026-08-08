@@ -1,3 +1,4 @@
+// 单位配置仓库：SQLite 读取单位属性
 using System.Collections.Generic;
 using CasualCastle.Domain.Battle;
 using Microsoft.Data.Sqlite;

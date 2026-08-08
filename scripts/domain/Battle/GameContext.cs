@@ -1,3 +1,4 @@
+// 技能上下文：触发条件与光环加成快照
 using System.Collections.Generic;
 
 namespace CasualCastle.Domain.Battle;

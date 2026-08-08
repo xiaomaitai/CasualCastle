@@ -1,3 +1,4 @@
+// 建筑放置端口
 namespace CasualCastle.Domain.Building;
 
 public interface IBuildingPlacement

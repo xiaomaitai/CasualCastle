@@ -1,3 +1,4 @@
+// 战斗管理：每帧推进潜行、技能上下文与空间推挤
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
 using Godot;
@@ -22,7 +23,7 @@ public partial class BattleManager : Node
 	public override void _Process(double delta)
 	{
 		IFieldUnitRepository fieldRepo = GameManager.Get<IFieldUnitRepository>();
-		ICombatUseCase combatUseCase = GameManager.Get<ICombatUseCase>();
+		IUnitSpatialService combatUseCase = GameManager.Get<IUnitSpatialService>();
 		if (fieldRepo != null && combatUseCase != null)
 		{
 			if (_stealthService != null)

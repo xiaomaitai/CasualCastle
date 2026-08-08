@@ -1,3 +1,4 @@
+// 治疗规则：治疗量与上限钳制
 using System;
 
 namespace CasualCastle.Domain.Battle;

@@ -1,3 +1,4 @@
+// 建筑定义数据
 using CasualCastle.Domain.Shared;
 
 namespace CasualCastle.Domain.Building;

@@ -1,3 +1,4 @@
+// 科技树连线数据
 namespace CasualCastle.Adapters.Godot.Dev;
 
 public class TechTreeEdge

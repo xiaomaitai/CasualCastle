@@ -1,3 +1,4 @@
+// 单位事件端口：受击、死亡与攻击通知
 namespace CasualCastle.Domain.Battle;
 
 public interface IUnitEventPort

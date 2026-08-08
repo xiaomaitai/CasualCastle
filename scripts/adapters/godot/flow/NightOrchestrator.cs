@@ -1,3 +1,4 @@
+// 夜晚编排：合成结算与敌方复刻应用
 using CasualCastle.Domain.Building;
 using CasualCastle.Domain.History;
 using CasualCastle.Adapters.Godot;

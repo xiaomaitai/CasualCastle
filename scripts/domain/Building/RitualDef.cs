@@ -1,3 +1,4 @@
+// 仪式定义与奖励数据
 namespace CasualCastle.Domain.Building;
 
 public enum RitualCostType

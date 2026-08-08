@@ -1,3 +1,4 @@
+// 血条视图：单位血量显示
 using Godot;
 
 public partial class HealthBarView : Node2D

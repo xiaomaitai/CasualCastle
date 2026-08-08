@@ -1,3 +1,4 @@
+// 伤害矩阵：攻防类型倍率与护甲减伤
 using System.Collections.Generic;
 
 namespace CasualCastle.Domain.Battle;

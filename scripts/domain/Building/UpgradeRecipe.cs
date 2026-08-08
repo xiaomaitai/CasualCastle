@@ -1,3 +1,4 @@
+// 升级配方数据
 namespace CasualCastle.Domain.Building;
 
 public class UpgradeRecipe

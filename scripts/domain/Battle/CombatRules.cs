@@ -1,3 +1,4 @@
+// 战斗规则：伤害计算与血量扣减
 namespace CasualCastle.Domain.Battle;
 
 public static class CombatRules
@@ -17,22 +18,5 @@ public static class CombatRules
 		if (damage <= 0 || currentHealth <= 0)
 			return currentHealth;
 		return System.Math.Max(0, currentHealth - damage);
-	}
-
-	public static bool CanAttack(float attackTimer)
-	{
-		return attackTimer <= 0f;
-	}
-
-	public static float TickCooldown(float currentTimer, float delta)
-	{
-		if (currentTimer <= 0f)
-			return 0f;
-		return currentTimer - delta;
-	}
-
-	public static float ResetCooldown(float cooldownDuration)
-	{
-		return cooldownDuration;
 	}
 }

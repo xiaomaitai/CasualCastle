@@ -1,3 +1,4 @@
+// 导航端口适配：Godot NavigationAgent 桥接
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
 using Godot;

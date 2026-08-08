@@ -1,3 +1,4 @@
+// 光环服务：计算单位收到的光环加成
 using System.Collections.Generic;
 using CasualCastle.Domain.Shared;
 
@@ -60,22 +61,22 @@ public class AuraService
 	{
 		switch (bonusType)
 		{
-			case "attack_speed":
+			case AuraBonusTypes.AttackSpeed:
 				result.AttackSpeedMultiplier *= 1f + value;
 				break;
-			case "move_speed":
+			case AuraBonusTypes.MoveSpeed:
 				result.MoveSpeedMultiplier *= 1f + value;
 				break;
-			case "attack_damage":
+			case AuraBonusTypes.AttackDamage:
 				result.AttackDamageMultiplier *= 1f + value;
 				break;
-			case "regen":
+			case AuraBonusTypes.Regen:
 				result.RegenPerSecond += value;
 				break;
-			case "execute":
+			case AuraBonusTypes.Execute:
 				result.ExecuteDamageMultiplier *= 1f + value;
 				break;
-			case "armor":
+			case AuraBonusTypes.Armor:
 				result.ArmorBonus += (int)value;
 				break;
 		}

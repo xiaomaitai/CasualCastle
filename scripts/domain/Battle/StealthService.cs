@@ -1,3 +1,4 @@
+// 潜行服务：隐身状态与检测更新
 namespace CasualCastle.Domain.Battle;
 
 public class StealthService

@@ -1,3 +1,4 @@
+// 单位选择控制：点击拾取与属性面板联动
 using CasualCastle.Adapters.Godot;
 using Godot;
 

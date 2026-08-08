@@ -1,3 +1,4 @@
+// 战场单位仓库：登记/注销双方单位与建筑
 using System.Collections.Generic;
 using CasualCastle.Domain.Battle;
 

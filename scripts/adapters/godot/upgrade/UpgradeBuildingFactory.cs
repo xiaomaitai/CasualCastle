@@ -1,3 +1,4 @@
+// 升级建筑工厂：按配方生成升级建筑
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Building;
 using Godot;

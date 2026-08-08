@@ -1,3 +1,4 @@
+// 建筑视觉数据：贴图路径、调色与材质
 public class BuildingVisualData
 {
 	public string TexturePath { get; init; }

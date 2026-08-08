@@ -1,3 +1,4 @@
+// 单位属性面板：技能与增益展示
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
