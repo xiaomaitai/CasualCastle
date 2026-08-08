@@ -3,6 +3,8 @@ using Godot;
 
 public partial class Projectile : Node2D
 {
+	private const float SpriteScale = 1.5f;
+	private const float MinDirectionLength = 0.01f;
 	private Vector2 _targetPos;
 	private float _speed;
 	private Sprite2D _sprite;
@@ -21,10 +23,10 @@ public partial class Projectile : Node2D
 		_targetPos = to;
 		_speed = speed;
 		_sprite.Texture = texture;
-		_sprite.Scale = Vector2.One * 1.5f;
+		_sprite.Scale = Vector2.One * SpriteScale;
 
 		Vector2 dir = to - from;
-		if (dir.Length() > 0.01f)
+		if (dir.Length() > MinDirectionLength)
 			_sprite.Rotation = dir.Angle();
 	}
 

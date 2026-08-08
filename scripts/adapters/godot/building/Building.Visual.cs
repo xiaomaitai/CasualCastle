@@ -9,6 +9,7 @@ using System.Linq;
 
 public partial class Building : Area2D
 {
+	private const float WorkBrightenAmount = 0.35f;
 	private void TryApplyVisual()
 	{
 		Sprite2D sprite = _sprite ?? GetNodeOrNull<Sprite2D>("View/Sprite");
@@ -116,7 +117,7 @@ public partial class Building : Area2D
 
 		Shader shader = GD.Load<Shader>("res://assets/shaders/building_work.gdshader");
 		_workMaterial = new ShaderMaterial { Shader = shader };
-		_workMaterial.SetShaderParameter("brighten", 0.35f);
+		_workMaterial.SetShaderParameter("brighten", WorkBrightenAmount);
 	}
 
 	private void CancelJumpTween()

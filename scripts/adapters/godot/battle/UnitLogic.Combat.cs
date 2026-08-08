@@ -9,6 +9,12 @@ using Godot;
 
 public partial class UnitLogic
 {
+	private const float MinMoveDirectionLength = 0.001f;
+	private const float FlipThresholdSpeed = 0.1f;
+	private const float SmallDisplaySize = 60f;
+	private const float MediumDisplaySize = 90f;
+	private const float LargeDisplaySize = 120f;
+	private const float HugeDisplaySize = 180f;
 	public override void _PhysicsProcess(double delta)
 	{
 		if (!IsAlive) return;
@@ -50,7 +56,7 @@ public partial class UnitLogic
 		Vector2 nextPathPos = _navigationAgent.GetNextPathPosition();
 		Vector2 direction = nextPathPos - currentPixelPos;
 		float pixelSpeed = GameCoordinatesAdapter.GameUnitsToPixels(_unit.GetCurrentSpeed());
-		Vector2 desiredVelocity = direction.Length() > 0.001f
+		Vector2 desiredVelocity = direction.Length() > MinMoveDirectionLength
 			? direction.Normalized() * pixelSpeed
 			: Vector2.Zero;
 		_navigationAgent.Velocity = desiredVelocity;
@@ -58,7 +64,7 @@ public partial class UnitLogic
 		Vector2 moveVelocity = _safeVelocity != Vector2.Zero ? _safeVelocity : desiredVelocity;
 		_body.GlobalPosition += moveVelocity * dt;
 
-		if (Mathf.Abs(moveVelocity.X) > 0.1f)
+		if (Mathf.Abs(moveVelocity.X) > FlipThresholdSpeed)
 			_visual.SetFlipH(moveVelocity.X < 0);
 
 		_unit.SetPosition(
@@ -268,11 +274,11 @@ public partial class UnitLogic
 	{
 		switch (size)
 		{
-			case UnitSize.Small: return 60f;
-			case UnitSize.Medium: return 90f;
-			case UnitSize.Large: return 120f;
-			case UnitSize.Huge: return 180f;
-			default: return 90f;
+			case UnitSize.Small: return SmallDisplaySize;
+			case UnitSize.Medium: return MediumDisplaySize;
+			case UnitSize.Large: return LargeDisplaySize;
+			case UnitSize.Huge: return HugeDisplaySize;
+			default: return MediumDisplaySize;
 		}
 	}
 

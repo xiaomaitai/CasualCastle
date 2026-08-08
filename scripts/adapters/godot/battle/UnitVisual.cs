@@ -3,6 +3,7 @@ using Godot;
 
 public class UnitVisual
 {
+	private const float HitFlashDurationSeconds = 0.1f;
 	private UnitCardView _card;
 	private Node2D _body;
 	private Color _portraitTint = Colors.White;
@@ -25,7 +26,7 @@ public class UnitVisual
 
 	public void StartHitFlash()
 	{
-		_hitFlashTimer = 0.1f;
+		_hitFlashTimer = HitFlashDurationSeconds;
 		_card.SetPortraitTint(Colors.White);
 		_card.SetStatus(UnitCardStatus.Hit);
 	}
