@@ -43,6 +43,35 @@ public class UnitBehaviorTests
 	}
 
 	[Fact]
+	public void UpdateBehavior_AuraAttackDamageMultiplier_ScalesDamage()
+	{
+		Unit target = UnitTestFactory.CreateUnit(AttackType.Melee, false);
+		Unit self = UnitTestFactory.CreateUnit(AttackType.Melee, true);
+		target.SetPosition(120, 0);
+		self.SetPosition(0, 0);
+		self.SetEnemyTarget(target);
+		self.UpdateTargeting(target);
+		self.GameCtx.AuraAttackDamageMultiplier = 1.2f;
+
+		self.UpdateBehavior(2f, 0, 0);
+
+		Assert.Equal(100 - (int)(20 * 1.2f), target.Health);
+	}
+
+	[Fact]
+	public void AddMaxHealthBonus_IncreasesMaxAndCurrentHealth()
+	{
+		Unit unit = UnitTestFactory.CreateUnit(AttackType.Melee, true);
+		int maxBefore = unit.MaxHealth;
+		int healthBefore = unit.Health;
+
+		unit.AddMaxHealthBonus(10);
+
+		Assert.Equal(maxBefore + 10, unit.MaxHealth);
+		Assert.Equal(healthBefore + 10, unit.Health);
+	}
+
+	[Fact]
 	public void UpdateBehavior_FightingInAttackRange_DealsDamage()
 	{
 		Unit target = UnitTestFactory.CreateUnit(AttackType.Melee, false);

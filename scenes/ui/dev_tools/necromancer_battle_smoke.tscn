@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://0lfq5yqlir70"]
+
+[ext_resource type="Script" path="res://scripts/adapters/godot/dev/NecromancerBattleSmoke.cs" id="1"]
+
+[node name="NecromancerBattleSmoke" type="Node"]
+script = ExtResource("1")

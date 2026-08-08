@@ -150,6 +150,11 @@ INSERT INTO asset_gen_tasks VALUES(132,'9a865ae4db104901b2069f64b29a912d','compl
 INSERT INTO asset_gen_tasks VALUES(133,'9329998a86894192b753500933db25ca','completed','A poison strike game skill icon, fanged green venom vial with dripping toxin, centered composition, complete icon design with decorative emblem background, thick gold frame, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors','white background, plain solid color background, transparency',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/b8e7cc6b4cc67b14cdc57495f790f9aecafb88ca40d37cf1d1b9ed7e175e0d0d.png','assets/art/skills\zombie_poison_133.png','2026-08-08T09:29:08Z','2026-08-08T09:29:56Z',NULL);
 INSERT INTO asset_gen_tasks VALUES(134,'59d4297cd40f4b06a084c2078228d434','completed','A plague venom game skill icon, toxic green gas cloud with a skull emblem, centered composition, complete icon design with decorative emblem background, thick gold frame, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors','white background, plain solid color background, transparency',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/f9ec631f6dbd86de892875c08e9cd32c283553a84ca2fe38443b429085535707.png','assets/art/skills\plague_poison_134.png','2026-08-08T09:29:17Z','2026-08-08T09:29:56Z',NULL);
 INSERT INTO asset_gen_tasks VALUES(135,'84ec8ab176d24b24bf7a6625954667fe','completed','A toxic miasma burst game skill icon, erupting green poison cloud with drifting bones, centered composition, complete icon design with decorative emblem background, thick gold frame, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors','white background, plain solid color background, transparency',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/cbea9a3747e42ee2604e1a08e81221c6ad563bedbeb53e19795cd75561f4efa8.png','assets/art/skills\plague_burst_135.png','2026-08-08T09:30:14Z','2026-08-08T09:30:53Z',NULL);
+INSERT INTO asset_gen_tasks VALUES(136,'5128d099519648ec9f201c2e70b2cfbb','completed','A medieval death knight unit, skeletal knight in black plate armor with glowing red eyes, wielding a rune-etched greatsword, facing right, full body character, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors, game character icon','',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/5716b4aecea89a5017676acb23f7b81424d6c9c600a2b750ebfce8c886b71b1b.png','assets/art/cards\DeathKnight_136.png','2026-08-08T14:25:03Z','2026-08-08T14:25:59Z',NULL);
+INSERT INTO asset_gen_tasks VALUES(137,'7c439f895c93477eb0a2ad69ac4fdd32','completed','A dark mage unit, hooded human sorcerer in dark purple robes holding a glowing shadow orb, facing right, full body character, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors, game character icon','',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/beb314e3c1c915a836d9ef20adf4e83ab1b5e6cd10fa93613b0bf8a2ee577339.png','assets/art/cards\DarkMage_137.png','2026-08-08T14:25:11Z','2026-08-08T14:25:59Z',NULL);
+INSERT INTO asset_gen_tasks VALUES(138,'c9c3d58e89fc434aa76af3b0d45dcae5','completed','A fanatical battle aura game skill icon, purple flaming war banner with a skull emblem, centered composition, complete icon design with decorative emblem background, thick gold frame, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors','white background, plain solid color background, transparency',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/35b443d9e86ecd7eeffa3ac5e0fef7cf873cea2193d7c148f5d949bed976d8f7.png','assets/art/skills\fanatical_aura_138.png','2026-08-08T14:25:20Z','2026-08-08T14:26:00Z',NULL);
+INSERT INTO asset_gen_tasks VALUES(139,'d530b88694574abea4dae3a1511dc099','completed','A shadow curse game skill icon, dark purple cursed eye with wispy tendrils, centered composition, complete icon design with decorative emblem background, thick gold frame, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors','white background, plain solid color background, transparency',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/116fcd988b4f7f75fb742b44c255e476be96252fe313a67fc0eaeeb9aa3e4d98.png','assets/art/skills\shadow_curse_139.png','2026-08-08T14:26:00Z','2026-08-08T14:26:47Z',NULL);
+INSERT INTO asset_gen_tasks VALUES(140,'d13d98fee54f4d3797fc36464c61b40d','completed','A shadow nova game skill icon, purple arcane explosion radiating spikes of darkness, centered composition, complete icon design with decorative emblem background, thick gold frame, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors','white background, plain solid color background, transparency',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/e74d674d457480ab0ce6b0f8f3a892a71904e2c79ae3b2aeb79ad362ca3b274d.png','assets/art/skills\shadow_nova_140.png','2026-08-08T14:26:09Z','2026-08-08T14:26:48Z',NULL);
 CREATE TABLE unit_stats (
     type_id          TEXT PRIMARY KEY,
     size             INTEGER NOT NULL,
@@ -212,6 +217,8 @@ INSERT INTO unit_stats VALUES('Skeleton',0,0,0,2,25,8,70.0,40.0,1.2,1,4290295992
 INSERT INTO unit_stats VALUES('Zombie',1,0,2,4,110,14,45.0,40.0,1.6,1,4286356540,180.0,1600,'Undead',40,0,0.0,0.0,0.0);
 INSERT INTO unit_stats VALUES('SkeletonWarrior',0,0,0,2,45,12,75.0,40.0,0.9,1,4292401352,190.0,2200,'Undead',10,0,0.0,0.0,0.0);
 INSERT INTO unit_stats VALUES('PlagueZombie',1,0,2,4,150,16,45.0,40.0,1.5,1,4284119594,190.0,2600,'Undead',50,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('DeathKnight',2,0,2,4,320,26,65.0,40.0,1.1,1,0,220.0,4200,'Undead',60,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('DarkMage',1,1,7,1,90,12,60.0,220.0,1.8,1,0,240.0,3000,'Human',10,0,0.0,0.0,0.0);
 CREATE TABLE building_defs (
     type_id           TEXT PRIMARY KEY,
     display_name      TEXT    NOT NULL,
@@ -290,6 +297,9 @@ INSERT INTO building_defs VALUES('RitualCircleL2','仪式之环·2级',1000,0.0,
 INSERT INTO building_defs VALUES('RitualCircleL3','仪式之环·3级',1200,0.0,0,0,1,1,NULL,1,0,1,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'necromancer',0.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',60,'');
 INSERT INTO building_defs VALUES('RitualCircleL4','仪式之环·4级',1400,0.0,0,0,1,1,NULL,1,0,1,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'necromancer',0.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',150,'');
 INSERT INTO building_defs VALUES('RitualCircleL5','仪式之环·5级',1600,0.0,0,0,1,1,NULL,1,0,1,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'necromancer',0.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',300,'');
+INSERT INTO building_defs VALUES('DeathTemple','死亡圣殿',400,6.0,0,0,1,1,'DeathKnight',1,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'necromancer',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',12,'Undead');
+INSERT INTO building_defs VALUES('DarkAltar','黑暗祭坛',200,7.0,0,0,1,1,'DarkMage',1,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'necromancer',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',3,'Human');
+INSERT INTO building_defs VALUES('DarkMageTower','暗黑法师塔',320,6.0,0,0,1,1,'DarkMage',1,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'necromancer',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',8,'Human');
 CREATE TABLE damage_matrix (
     damage_type INTEGER NOT NULL,
     armor_type  INTEGER NOT NULL,
@@ -345,6 +355,13 @@ INSERT INTO damage_matrix VALUES(6,3,1.0);
 INSERT INTO damage_matrix VALUES(6,4,1.5);
 INSERT INTO damage_matrix VALUES(6,5,1.5);
 INSERT INTO damage_matrix VALUES(6,6,1.0);
+INSERT INTO damage_matrix VALUES(7,0,1.5);
+INSERT INTO damage_matrix VALUES(7,1,0.7);
+INSERT INTO damage_matrix VALUES(7,2,1.0);
+INSERT INTO damage_matrix VALUES(7,3,1.0);
+INSERT INTO damage_matrix VALUES(7,4,1.5);
+INSERT INTO damage_matrix VALUES(7,5,0.7);
+INSERT INTO damage_matrix VALUES(7,6,0.1);
 CREATE TABLE shop_catalog (
     id            TEXT PRIMARY KEY,
     name          TEXT    NOT NULL,
@@ -379,6 +396,7 @@ INSERT INTO shop_catalog VALUES('StaglurSacredGrove','半人鹿圣林',3,'Staglu
 INSERT INTO shop_catalog VALUES('LizardNest','蜥蜴人巢穴',3,'LizardNest',10);
 INSERT INTO shop_catalog VALUES('Tomb','墓穴',2,'Tomb',14);
 INSERT INTO shop_catalog VALUES('BlightField','腐化之地',2,'BlightField',10);
+INSERT INTO shop_catalog VALUES('DarkAltar','黑暗祭坛',3,'DarkAltar',8);
 CREATE TABLE IF NOT EXISTS "faction_defs" (
     id TEXT PRIMARY KEY,
     display_name TEXT NOT NULL,
@@ -461,6 +479,9 @@ INSERT INTO tech_tree_nodes VALUES('BlightMarsh','necromancer',2,2,0,NULL,NULL,0
 INSERT INTO tech_tree_nodes VALUES('RitualCircleL3','necromancer',3,0,0,NULL,NULL,0,'仪式之环·3级',NULL,1200,0.0,60,'',1);
 INSERT INTO tech_tree_nodes VALUES('RitualCircleL4','necromancer',4,0,0,NULL,NULL,0,'仪式之环·4级',NULL,1400,0.0,150,'',1);
 INSERT INTO tech_tree_nodes VALUES('RitualCircleL5','necromancer',5,0,0,NULL,NULL,0,'仪式之环·5级',NULL,1600,0.0,300,'',1);
+INSERT INTO tech_tree_nodes VALUES('DeathTemple','necromancer',3,1,0,NULL,NULL,0,'死亡圣殿','DeathKnight',400,6.0,12,'Undead',0);
+INSERT INTO tech_tree_nodes VALUES('DarkAltar','necromancer',1,3,1,3,8,0,'黑暗祭坛','DarkMage',200,7.0,3,'Human',0);
+INSERT INTO tech_tree_nodes VALUES('DarkMageTower','necromancer',2,3,0,NULL,NULL,0,'暗黑法师塔','DarkMage',320,6.0,8,'Human',0);
 CREATE TABLE IF NOT EXISTS "combine_recipes" (
                 main_type_id TEXT NOT NULL,
                 material_type_id TEXT NOT NULL,
@@ -470,6 +491,7 @@ CREATE TABLE IF NOT EXISTS "combine_recipes" (
             );
 INSERT INTO combine_recipes VALUES('RoyalBulwark','RoyalArmory',1,'HolyWall');
 INSERT INTO combine_recipes VALUES('HolyWall','HeavenPunishmentTower',1,'RoyalCourt');
+INSERT INTO combine_recipes VALUES('Necropolis','BlightMarsh',1,'DeathTemple');
 CREATE TABLE unit_skills (
     unit_type_id TEXT NOT NULL,
     skill_id TEXT NOT NULL,
@@ -517,6 +539,9 @@ INSERT INTO unit_skills VALUES('LizardStalker','lizard_mark_aura');
 INSERT INTO unit_skills VALUES('Zombie','zombie_poison');
 INSERT INTO unit_skills VALUES('PlagueZombie','plague_poison');
 INSERT INTO unit_skills VALUES('PlagueZombie','plague_burst');
+INSERT INTO unit_skills VALUES('DeathKnight','fanatical_aura');
+INSERT INTO unit_skills VALUES('DarkMage','shadow_curse');
+INSERT INTO unit_skills VALUES('DarkMage','shadow_nova');
 CREATE TABLE IF NOT EXISTS "skill_defs" (
     id TEXT PRIMARY KEY,
     display_name TEXT NOT NULL,
@@ -550,6 +575,9 @@ INSERT INTO skill_defs VALUES('lizard_mark_aura','猎手印记','aura','{"target
 INSERT INTO skill_defs VALUES('zombie_poison','毒击','on_hit','{"effects":[{"type":"poison","value":3,"duration":3}]}','攻击使目标中毒：每秒 3 伤害，持续 3 秒');
 INSERT INTO skill_defs VALUES('plague_poison','剧毒打击','on_hit','{"effects":[{"type":"poison","value":4,"duration":3}]}','攻击使目标中毒：每秒 4 伤害，持续 3 秒');
 INSERT INTO skill_defs VALUES('plague_burst','死亡毒云','special','{"behavior":"plague_burst","param":80,"damage_mult":20}','死亡时对周围 80 范围敌人造成 20 点伤害');
+INSERT INTO skill_defs VALUES('fanatical_aura','狂热光环','aura','{"target":"nearby_allies","range":150,"race":"Undead","effects":[{"bonus_type":"attack_damage","value":0.20},{"bonus_type":"move_speed","value":0.15}]}','周围友军亡灵攻击力+20%、移动速度+15%');
+INSERT INTO skill_defs VALUES('shadow_curse','暗影诅咒','special','{"behavior":"curse","param":4.0,"cost":20,"value":0.25}','单体诅咒：目标减速并降低输出（占位）');
+INSERT INTO skill_defs VALUES('shadow_nova','暗影新星','special','{"behavior":"shadow_nova","param":120,"cost":40,"value":30,"cooldown":6.0}','对周围 120 范围敌人造成 30 暗影伤害');
 CREATE TABLE upgrade_recipes (
     source_type_id TEXT NOT NULL,
     result_type_id TEXT NOT NULL,
@@ -586,9 +614,10 @@ INSERT INTO upgrade_recipes VALUES('RitualCircleL1','RitualCircleL2');
 INSERT INTO upgrade_recipes VALUES('RitualCircleL2','RitualCircleL3');
 INSERT INTO upgrade_recipes VALUES('RitualCircleL3','RitualCircleL4');
 INSERT INTO upgrade_recipes VALUES('RitualCircleL4','RitualCircleL5');
+INSERT INTO upgrade_recipes VALUES('DarkAltar','DarkMageTower');
 PRAGMA writable_schema=ON;
 CREATE TABLE IF NOT EXISTS sqlite_sequence(name,seq);
 DELETE FROM sqlite_sequence;
-INSERT INTO sqlite_sequence VALUES('asset_gen_tasks',135);
+INSERT INTO sqlite_sequence VALUES('asset_gen_tasks',140);
 PRAGMA writable_schema=OFF;
 COMMIT;

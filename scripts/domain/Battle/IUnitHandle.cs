@@ -8,6 +8,8 @@ public interface IUnitHandle : IUnitState
 	void SetStealth(bool stealthed);
 	void ApplyPush(float dx, float dy);
 	void ApplySlow(float slowValue, float duration);
+	void ApplyCurse(float factor, float duration);
+	void AddMaxHealthBonus(int amount);
 	void SetBuildingTarget(IBuildingTarget building);
 	void ClearBuildingTarget();
 	void SetGameContext(GameContext ctx);

@@ -40,6 +40,7 @@ public partial class UnitLogic : Node2D
 		: 1f;
 	public float AuraAttackSpeedMultiplier => _unit?.GameCtx.AuraAttackSpeedMultiplier ?? 1f;
 	public float AuraMoveSpeedMultiplier => _unit?.GameCtx.AuraMoveSpeedMultiplier ?? 1f;
+	public float AuraAttackDamageMultiplier => _unit?.GameCtx.AuraAttackDamageMultiplier ?? 1f;
 	public float AuraRegenPerSecond => _unit?.GameCtx.AuraRegenPerSecond ?? 0f;
 	public float AuraExecuteDamageMultiplier => _unit?.GameCtx.AuraExecuteDamageMultiplier ?? 1f;
 	public int AuraArmorBonus => _unit?.GameCtx.AuraArmorBonus ?? 0;
@@ -75,6 +76,7 @@ public partial class UnitLogic : Node2D
 			_unit.Initialize(stats, IsPlayerUnit);
 			_unit.SetDamageMatrix(GameManager.Get<DamageMatrix>());
 			_unit.Tactical = _tactical;
+			_unit.BlackMagic = GameManager.Get<BlackMagicService>();
 			ISkillRepository skillRepo = GameManager.Get<ISkillRepository>();
 		IReadOnlyList<SkillDef> skills = skillRepo.GetByUnitType(stats.TypeId);
 		foreach (SkillDef skill in skills)
@@ -105,6 +107,11 @@ public partial class UnitLogic : Node2D
 	public void SetTarget(UnitLogic target)
 	{
 		_unit?.SetEnemyTarget(target?.Handle);
+	}
+
+	public void RefreshHealthVisual()
+	{
+		_visual?.SetHealth(Health, MaxHealth);
 	}
 
 	public override void _Ready()
@@ -195,6 +202,8 @@ public partial class UnitLogic : Node2D
 			buffs.Add($"攻速光环 +{Mathf.RoundToInt((AuraAttackSpeedMultiplier - 1f) * 100f)}%");
 		if (AuraMoveSpeedMultiplier > 1.01f)
 			buffs.Add($"移速光环 +{Mathf.RoundToInt((AuraMoveSpeedMultiplier - 1f) * 100f)}%");
+		if (AuraAttackDamageMultiplier > 1.01f)
+			buffs.Add($"攻击光环 +{Mathf.RoundToInt((AuraAttackDamageMultiplier - 1f) * 100f)}%");
 		if (AuraRegenPerSecond > 0f)
 			buffs.Add("回血光环");
 		if (AuraExecuteDamageMultiplier > 1.01f)
@@ -348,6 +357,7 @@ public partial class UnitLogic : Node2D
 			case DamageType.Pierce:
 				return SfxEvents.LaunchArrow;
 			case DamageType.Magic:
+			case DamageType.Shadow:
 				return SfxEvents.LaunchMagic;
 			default:
 				return SfxEvents.ProjectileLaunch;
@@ -366,6 +376,7 @@ public partial class UnitLogic : Node2D
 			case DamageType.Pierce:
 				return SfxEvents.HitPierce;
 			case DamageType.Magic:
+			case DamageType.Shadow:
 				return SfxEvents.HitMagic;
 			default:
 				return SfxEvents.Hit;
@@ -445,7 +456,7 @@ public partial class UnitLogic : Node2D
 	{
 		if (AttackType == AttackType.Ranged)
 		{
-			if (DamageType == DamageType.Magic)
+			if (DamageType == DamageType.Magic || DamageType == DamageType.Shadow)
 				return "res://assets/art/projectiles/magic_ball.png";
 			return "res://assets/art/projectiles/arrow.png";
 		}

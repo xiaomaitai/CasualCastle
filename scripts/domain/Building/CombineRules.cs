@@ -87,7 +87,7 @@ public class CombineRules
 
     public CombineGroup FindBestCombinableGroup(
         IReadOnlyList<IBuildingState> buildings, HashSet<IBuildingState> used,
-        IBuildingRepository buildingRepo)
+        IBuildingRepository buildingRepo, int coreLevel = int.MaxValue)
     {
         List<IBuildingState> ordered = buildings
             .Where(b => !used.Contains(b))
@@ -103,6 +103,8 @@ public class CombineRules
             foreach (CombineRecipe recipe in _recipes)
             {
                 if (main.TypeId != recipe.MainTypeId)
+                    continue;
+                if (!IsCoreLevelSatisfied(recipe, buildingRepo, coreLevel))
                     continue;
 
                 List<IBuildingState> materials = PickMaterials(main, recipe, ordered, used, buildingRepo);
@@ -132,6 +134,13 @@ public class CombineRules
         }
 
         return false;
+    }
+
+    private static bool IsCoreLevelSatisfied(CombineRecipe recipe, IBuildingRepository buildingRepo, int coreLevel)
+    {
+        if (buildingRepo.GetFactionId(recipe.ResultTypeId) != FactionDef.NecromancerId)
+            return true;
+        return coreLevel >= RitualCircleRules.GetRequiredCoreLevel(recipe.ResultTypeId, buildingRepo);
     }
 
     private List<IBuildingState> PickMaterials(

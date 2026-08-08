@@ -36,6 +36,8 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 	private GameManager _gameManager;
 	private Shop _shop;
 	private AdjacencyService _adjacencyService;
+	private RitualService _ritualService;
+	private ActiveRitual _activeRitual;
 	private BuildingSystem _buildingSystemBacking;
 	private BuildingSystem BuildingSys => _buildingSystemBacking ??= AdapterRegistry.Resolve<BuildingSystem>();
 
@@ -49,6 +51,10 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 	public bool IsCombineProhibited { get; private set; }
 	public bool IsDestroyed => Health <= 0;
 	public bool IsOperational => Health > 0 && !IsManuallyPaused;
+	public bool IsRitualInProgress => _activeRitual != null;
+	public string ActiveRitualId => _activeRitual?.RitualId;
+	public float RitualRemainingSeconds => _activeRitual?.RemainingSeconds ?? 0f;
+	public float RitualTotalSeconds => _activeRitual?.TotalSeconds ?? 0f;
 	public bool ContributesToAdjacency => !IsDestroyed;
 	public bool IsDamaged => Health < MaxHealth;
 	public string DisplayName => BuildingSys.GetDisplayName(TypeId);
@@ -276,6 +282,8 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	public bool CanRepair()
 	{
+		if (IsRitualInProgress)
+			return false;
 		bool isPlayerOwned = CastleRef != null && CastleRef.IsPlayerCastle;
 		bool isPlaying = _gameManager?.CurrentState == GameManager.GameState.Playing;
 		bool isNight = _gameManager != null && _gameManager.IsNight;
@@ -293,12 +301,98 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	public int GetRepairCost() => RepairRules.GetRepairCost(MaxHealth, Health, GameRules.RepairGoldPerHealth);
 
+	public bool TryStartRitual(string ritualId)
+	{
+		if (_ritualService == null || _activeRitual != null || CastleRef == null)
+			return false;
+		if (!RitualRules.CanHostRitual(TypeId) || !IsPlayerOwned)
+			return false;
+
+		int coreLevel = RitualCircleRules.GetCoreLevel(CastleRef.GetBuildingStates());
+		bool isCoreHosted = RitualRules.IsRitualCircleHost(TypeId);
+		BlackMagicService blackMagic = GameManager.Get<BlackMagicService>();
+		_activeRitual = _ritualService.TryStartRitual(
+			ritualId, isCoreHosted, coreLevel,
+			_shop.TrySpendGold,
+			amount => blackMagic != null && blackMagic.TrySpend(amount));
+		if (_activeRitual == null)
+			return false;
+
+		UpdateWorkCycle();
+		UpdateStateIcon();
+		return true;
+	}
+
+	private void TickRitual(float delta)
+	{
+		if (_activeRitual == null || _gameManager == null || _gameManager.CurrentState != GameManager.GameState.Playing)
+			return;
+
+		_ritualService.Tick(_activeRitual, delta);
+		if (_activeRitual.IsComplete)
+			CompleteRitual();
+	}
+
+	private void CompleteRitual()
+	{
+		RitualReward reward = _ritualService.GetReward(_activeRitual);
+		ApplyRitualReward(reward);
+		bool isCoreHosted = RitualRules.IsRitualCircleHost(TypeId);
+		_activeRitual = null;
+		if (isCoreHosted)
+			CallDeferred(nameof(UpgradeCircleAfterRitual));
+		else
+			UpdateWorkCycle();
+	}
+
+	private void ApplyRitualReward(RitualReward reward)
+	{
+		if (reward == null)
+			return;
+		if (reward.GoldAmount > 0 && _shop != null)
+			_shop.AddGold(reward.GoldAmount);
+		if (!string.IsNullOrEmpty(reward.SummonUnitTypeId) && reward.SummonCount > 0)
+			SpawnUnitType(reward.SummonUnitTypeId, reward.SummonCount);
+		if (reward.UndeadMaxHealthBonus > 0)
+			ApplyUndeadHealthBonus(reward.UndeadMaxHealthBonus);
+	}
+
+	private void ApplyUndeadHealthBonus(int amount)
+	{
+		UndeadFactionBuffs.AddUndeadMaxHealthBonus(amount);
+		IFieldUnitRepository fieldRepo = GameManager.Get<IFieldUnitRepository>();
+		if (fieldRepo == null)
+			return;
+		foreach (IUnitHandle unit in fieldRepo.AllUnits)
+		{
+			if (!unit.IsAlive || unit.IsPlayerUnit != _isPlayerBuilding || !UndeadRules.IsUndead(unit.Race))
+				continue;
+			unit.AddMaxHealthBonus(amount);
+			if (unit is UnitLogic logic)
+				logic.RefreshHealthVisual();
+		}
+	}
+
+	private void UpgradeCircleAfterRitual()
+	{
+		string nextTypeId = RitualCircleRules.GetNextLevelTypeId(TypeId);
+		if (nextTypeId == null)
+		{
+			UpdateWorkCycle();
+			return;
+		}
+
+		CastleRef.ReplaceHeart(nextTypeId, Health);
+		Sfx.Play(SfxEvents.Upgrade);
+	}
+
 	public bool CanWork
 	{
 		get
 		{
 			IGameState state = AdapterRegistry.Resolve<IGameState>();
-			return IsOperational && (BuildingSys.GetHasNightCombat(TypeId) ? state.IsNight : state.IsDay);
+			return IsOperational && !IsRitualInProgress
+				&& (BuildingSys.GetHasNightCombat(TypeId) ? state.IsNight : state.IsDay);
 		}
 	}
 
@@ -310,6 +404,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		_gameManager = AdapterRegistry.Resolve<GameManager>();
 		_shop = AdapterRegistry.Resolve<Shop>();
 		_adjacencyService = GameManager.Get<AdjacencyService>();
+		_ritualService = GameManager.Get<RitualService>();
 		
 
 		_sprite = GetNodeOrNull<Sprite2D>("View/Sprite");
@@ -343,6 +438,12 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 				_battlefield = GetTree().Root.GetNodeOrNull<Node2D>("MainGame/Battlefield");
 			UpdateWorkCycle();
 		}
+		else if (RitualRules.CanHostRitual(TypeId))
+		{
+			_battlefield = _gameManager?.Battlefield;
+			if (_battlefield == null)
+				_battlefield = GetTree().Root.GetNodeOrNull<Node2D>("MainGame/Battlefield");
+		}
 	}
 
 	public override void _ExitTree()
@@ -369,6 +470,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	public override void _Process(double delta)
 	{
+		TickRitual((float)delta);
 		if (!_workActive || _workPaused || !CanWork)
 			return;
 
@@ -454,6 +556,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 			UnitLogic unit = shell.GetNode<UnitLogic>("Logic");
 			unit.IsPlayerUnit = _isPlayerBuilding;
 			BuildingSys.ApplyUnitSpawnStats(TypeId, unit);
+			ApplyFactionBuff(unit);
 			UnitSpawn.PlaceUnit(
 				_battlefield, CastleRef, shell,
 				BuildingSys.GetFootprint(TypeId), GridX, GridY, _spawnCount);
@@ -461,6 +564,40 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 			if (_isPlayerBuilding)
 				AssignToTavern(unit);
 		}
+	}
+
+	private void SpawnUnitType(string unitTypeId, int count)
+	{
+		if (_battlefield == null || CastleRef == null || count <= 0 || string.IsNullOrEmpty(unitTypeId))
+			return;
+		if (_gameManager?.CurrentState == GameManager.GameState.GameOver)
+			return;
+
+		PackedScene unitScene = GD.Load<PackedScene>("res://prefabs/Unit.tscn");
+		if (unitScene == null)
+			return;
+
+		IUnitRepository unitRepo = GameManager.Get<IUnitRepository>();
+		for (int i = 0; i < count; i++)
+		{
+			Unit shell = unitScene.Instantiate<Unit>();
+			UnitLogic unit = shell.GetNode<UnitLogic>("Logic");
+			unit.IsPlayerUnit = _isPlayerBuilding;
+			unit.InitializeFromStats(unitRepo.Get(unitTypeId));
+			ApplyFactionBuff(unit);
+			UnitSpawn.PlaceUnit(
+				_battlefield, CastleRef, shell,
+				BuildingSys.GetFootprint(TypeId), GridX, GridY, _spawnCount);
+			_spawnCount++;
+			if (_isPlayerBuilding)
+				AssignToTavern(unit);
+		}
+	}
+
+	private static void ApplyFactionBuff(UnitLogic unit)
+	{
+		if (unit.Handle != null && UndeadRules.IsUndead(unit.Handle.Race) && UndeadFactionBuffs.MaxHealthBonus > 0)
+			unit.Handle.AddMaxHealthBonus(UndeadFactionBuffs.MaxHealthBonus);
 	}
 
 	private void AssignToTavern(UnitLogic unit)

@@ -141,6 +141,15 @@ public partial class SkillIconView : Control
 			case "grace_burn_t2":
 				DrawGraceBurnGlyph();
 				break;
+			case "fanatical_aura":
+				DrawFanaticalAuraGlyph();
+				break;
+			case "shadow_curse":
+				DrawShadowCurseGlyph();
+				break;
+			case "shadow_nova":
+				DrawShadowNovaGlyph();
+				break;
 			default:
 				DrawFallbackGlyph();
 				break;
@@ -268,6 +277,35 @@ public partial class SkillIconView : Control
 		DrawArc(new Vector2(28, 28), 11f, 0f, Mathf.Tau, 32, new Color(0.3f, 0.55f, 0.8f, 1f), 2f);
 		DrawCircle(new Vector2(28, 28), 4f, Pupil);
 		DrawLine(new Vector2(16, 16), new Vector2(40, 40), SlashRed, 3f);
+	}
+
+	private void DrawFanaticalAuraGlyph()
+	{
+		Color purple = new(0.72f, 0.45f, 0.95f, 1f);
+		DrawCircle(new Vector2(28, 28), 11f, new Color(0.5f, 0.3f, 0.8f, 1f));
+		DrawArc(new Vector2(28, 28), 18f, 0f, Mathf.Tau, 32, purple, 3f);
+		DrawArc(new Vector2(28, 28), 24f, 0f, Mathf.Tau, 32, new Color(purple.R, purple.G, purple.B, 0.7f), 2f);
+	}
+
+	private void DrawShadowCurseGlyph()
+	{
+		DrawCircle(new Vector2(28, 24), 9f, new Color(0.55f, 0.35f, 0.85f, 1f));
+		DrawRect(new Rect2(24, 33, 8, 7), new Color(0.4f, 0.25f, 0.65f, 1f));
+		DrawCircle(new Vector2(25, 22), 2.5f, RacePurple);
+		DrawCircle(new Vector2(31, 22), 2.5f, RacePurple);
+		DrawArc(new Vector2(28, 24), 15f, Mathf.Pi * 0.15f, Mathf.Pi * 0.85f, 16, RacePurple, 2f);
+	}
+
+	private void DrawShadowNovaGlyph()
+	{
+		Color purple = new(0.72f, 0.45f, 0.95f, 1f);
+		for (int i = 0; i < 8; i++)
+		{
+			float angle = i * Mathf.Pi / 4f;
+			Vector2 dir = new(Mathf.Cos(angle), Mathf.Sin(angle));
+			DrawLine(new Vector2(28, 28) + dir * 8f, new Vector2(28, 28) + dir * 22f, purple, 3f);
+		}
+		DrawCircle(new Vector2(28, 28), 8f, new Color(0.5f, 0.3f, 0.8f, 1f));
 	}
 
 	private void DrawFallbackGlyph()

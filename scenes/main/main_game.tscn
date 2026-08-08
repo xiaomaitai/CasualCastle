@@ -280,13 +280,13 @@ visible = false
 offset_left = 24
 offset_top = 828
 offset_right = 456
-offset_bottom = 1070
+offset_bottom = 1130
 mouse_filter = 2
 
 [node name="AttributeBackground" type="ColorRect" parent="UI/AttributePanel"]
 layout_mode = 0
 offset_right = 432
-offset_bottom = 242
+offset_bottom = 302
 mouse_filter = 2
 color = Color(0.1, 0.14, 0.2, 0.92)
 

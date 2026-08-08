@@ -1,0 +1,74 @@
+using System.Collections.Generic;
+
+namespace CasualCastle.Domain.Building;
+
+public static class RitualRules
+{
+	public const string BlackMagicChargeId = "black_magic_charge";
+	public const string UndeadSummonId = "undead_summon";
+	public const string BoneReinforceId = "bone_reinforce";
+	public const string AltarHostTypeId = "DarkAltar";
+	public const string RitualCircleTypePrefix = "RitualCircleL";
+
+	private static readonly RitualDef[] AllRituals =
+	{
+		new()
+		{
+			Id = BlackMagicChargeId,
+			DisplayName = "黑魔法充能",
+			RequiredCoreLevel = 1,
+			CostType = RitualCostType.BlackMagic,
+			CostAmount = 20,
+			DurationSeconds = 10f,
+			BasicReward = new RitualReward { GoldAmount = 30 },
+			CoreReward = new RitualReward { GoldAmount = 30 }
+		},
+		new()
+		{
+			Id = UndeadSummonId,
+			DisplayName = "亡灵召唤",
+			RequiredCoreLevel = 1,
+			CostType = RitualCostType.Gold,
+			CostAmount = 30,
+			DurationSeconds = 10f,
+			BasicReward = new RitualReward { SummonUnitTypeId = "Skeleton", SummonCount = 3 },
+			CoreReward = new RitualReward { SummonUnitTypeId = "Skeleton", SummonCount = 5 }
+		},
+		new()
+		{
+			Id = BoneReinforceId,
+			DisplayName = "骸骨强化",
+			RequiredCoreLevel = 2,
+			CostType = RitualCostType.BlackMagic,
+			CostAmount = 60,
+			DurationSeconds = 20f,
+			BasicReward = new RitualReward { SummonUnitTypeId = "Zombie", SummonCount = 1 },
+			CoreReward = new RitualReward { UndeadMaxHealthBonus = 10 }
+		}
+	};
+
+	public static IReadOnlyList<RitualDef> GetAll()
+	{
+		return AllRituals;
+	}
+
+	public static RitualDef Get(string ritualId)
+	{
+		foreach (RitualDef ritual in AllRituals)
+		{
+			if (ritual.Id == ritualId)
+				return ritual;
+		}
+		return null;
+	}
+
+	public static bool CanHostRitual(string typeId)
+	{
+		return typeId == AltarHostTypeId || IsRitualCircleHost(typeId);
+	}
+
+	public static bool IsRitualCircleHost(string typeId)
+	{
+		return typeId != null && typeId.StartsWith(RitualCircleTypePrefix);
+	}
+}

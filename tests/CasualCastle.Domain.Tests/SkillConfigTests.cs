@@ -96,6 +96,28 @@ public class SkillConfigTests
 	}
 
 	[Fact]
+	public void AuraConfig_Parse_MultiEffect_ReturnsBothEffects()
+	{
+		AuraConfig cfg = AuraConfig.Parse("{\"target\":\"nearby_allies\",\"range\":150,\"race\":\"Undead\",\"effects\":[{\"bonus_type\":\"attack_damage\",\"value\":0.20},{\"bonus_type\":\"move_speed\",\"value\":0.15}]}");
+
+		Assert.Equal(2, cfg.Effects.Count);
+		Assert.Equal("attack_damage", cfg.Effects[0].BonusType);
+		Assert.Equal(0.20f, cfg.Effects[0].Value, 4);
+		Assert.Equal("move_speed", cfg.Effects[1].BonusType);
+		Assert.Equal(0.15f, cfg.Effects[1].Value, 4);
+	}
+
+	[Fact]
+	public void AuraConfig_Parse_SingleEffect_BackwardCompatible()
+	{
+		AuraConfig cfg = AuraConfig.Parse("{\"target\":\"nearby_allies\",\"range\":150,\"race\":\"Goblin\",\"bonus_type\":\"attack_speed\",\"value\":0.12}");
+
+		Assert.Single(cfg.Effects);
+		Assert.Equal("attack_speed", cfg.Effects[0].BonusType);
+		Assert.Equal(0.12f, cfg.Effects[0].Value, 4);
+	}
+
+	[Fact]
 	public void SpecialConfig_Parse_BehaviorKiting_ReturnsCorrectConfig()
 	{
 		SpecialConfig cfg = SpecialConfig.Parse("{\"behavior\": \"kiting\", \"param\": 100}");
@@ -139,5 +161,28 @@ public class SkillConfigTests
 	{
 		SpecialConfig cfg = SpecialConfig.Parse("{\"behavior\": \"stealth\", \"param\": 180}");
 		Assert.Equal(0f, cfg.Cooldown);
+	}
+
+	[Fact]
+	public void SpecialConfig_Parse_Curse_ReturnsCostAndValue()
+	{
+		SpecialConfig cfg = SpecialConfig.Parse("{\"behavior\":\"curse\",\"param\":4.0,\"cost\":20,\"value\":0.25}");
+
+		Assert.Equal(SpecialBehavior.Curse, cfg.Behavior);
+		Assert.Equal(4f, cfg.Param);
+		Assert.Equal(20, cfg.Cost);
+		Assert.Equal(0.25f, cfg.Value, 4);
+	}
+
+	[Fact]
+	public void SpecialConfig_Parse_ShadowNova_ReturnsCostAndValue()
+	{
+		SpecialConfig cfg = SpecialConfig.Parse("{\"behavior\":\"shadow_nova\",\"param\":120,\"cost\":40,\"value\":30,\"cooldown\":6.0}");
+
+		Assert.Equal(SpecialBehavior.ShadowNova, cfg.Behavior);
+		Assert.Equal(120f, cfg.Param);
+		Assert.Equal(40, cfg.Cost);
+		Assert.Equal(30f, cfg.Value, 4);
+		Assert.Equal(6f, cfg.Cooldown);
 	}
 }

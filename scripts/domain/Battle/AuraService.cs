@@ -8,7 +8,7 @@ public class AuraService
 	public AuraEffects CalculateEffects(IUnitHandle unit, IReadOnlyList<IUnitHandle> allUnits)
 	{
 		AuraEffects result = new();
-		if (!HordeRaces.IsHordeRace(unit.Race) || unit.Skills == null)
+		if (unit.Skills == null || !IsAuraEligibleRace(unit.Race))
 			return result;
 		HashSet<(string bonusType, string race)> applied = new();
 		foreach (IUnitHandle other in allUnits)
@@ -19,14 +19,33 @@ public class AuraService
 				continue;
 			foreach (AuraConfig cfg in other.Skills.GetAuraConfigs())
 			{
-				if (string.IsNullOrEmpty(cfg.BonusType) || !IsWithinRange(unit, other, cfg.Range))
+				if (!IsReceiverEligible(unit.Race, cfg.Race) || !IsWithinRange(unit, other, cfg.Range))
 					continue;
-				if (!applied.Add((cfg.BonusType, other.Race)))
-					continue;
-				Apply(result, cfg.BonusType, cfg.Value);
+				foreach (AuraEffectConfig effect in cfg.Effects)
+				{
+					if (string.IsNullOrEmpty(effect.BonusType))
+						continue;
+					if (!applied.Add((effect.BonusType, other.Race)))
+						continue;
+					Apply(result, effect.BonusType, effect.Value);
+				}
 			}
 		}
 		return result;
+	}
+
+	private static bool IsAuraEligibleRace(string race)
+	{
+		return HordeRaces.IsHordeRace(race) || UndeadRules.IsUndead(race);
+	}
+
+	private static bool IsReceiverEligible(string receiverRace, string auraRace)
+	{
+		if (HordeRaces.IsHordeRace(receiverRace))
+			return HordeRaces.IsHordeRace(auraRace);
+		if (UndeadRules.IsUndead(receiverRace))
+			return UndeadRules.IsUndead(auraRace);
+		return false;
 	}
 
 	private static bool IsWithinRange(IUnitHandle unit, IUnitHandle other, float range)
@@ -46,6 +65,9 @@ public class AuraService
 				break;
 			case "move_speed":
 				result.MoveSpeedMultiplier *= 1f + value;
+				break;
+			case "attack_damage":
+				result.AttackDamageMultiplier *= 1f + value;
 				break;
 			case "regen":
 				result.RegenPerSecond += value;

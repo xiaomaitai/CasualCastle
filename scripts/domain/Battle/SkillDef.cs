@@ -37,7 +37,9 @@ public enum SpecialBehavior
 	Summon,
 	Regen,
 	Ambush,
-	PlagueBurst
+	PlagueBurst,
+	Curse,
+	ShadowNova
 }
 public class SkillDef
 {

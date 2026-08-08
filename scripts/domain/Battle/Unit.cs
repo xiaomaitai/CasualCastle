@@ -40,6 +40,7 @@ public class Unit : IUnitHandle
 	public float HealInterval { get; set; }
 	public int ShieldHealth { get; private set; }
 	public ITacticalQueries Tactical { get; set; }
+	public BlackMagicService BlackMagic { get; set; }
 	public SkillSet Skills { get; private set; }
 	public GameContext GameCtx { get; set; } = new();
 
@@ -57,6 +58,8 @@ public class Unit : IUnitHandle
 	private float _kiteTimer;
 	private float _slowRemaining;
 	private float _slowFactor;
+	private float _curseRemaining;
+	private float _curseFactor;
 	private float _poisonDamagePerSecond;
 	private float _poisonRemaining;
 	private float _poisonAccumulator;
@@ -153,6 +156,14 @@ public class Unit : IUnitHandle
 		if (amount <= 0)
 			return;
 		ShieldHealth = System.Math.Min(MaxHealth, ShieldHealth + amount);
+	}
+
+	public void AddMaxHealthBonus(int amount)
+	{
+		if (amount <= 0)
+			return;
+		MaxHealth += amount;
+		Health += amount;
 	}
 
 	private void ApplyGraceEffects(int healed)
@@ -390,7 +401,7 @@ public class Unit : IUnitHandle
 			case UnitState.Sieging:
 				if (_attackTimer <= 0 && TargetBuilding != null && !TargetBuilding.IsDestroyed)
 				{
-					TargetBuilding.TakeDamage(Damage);
+					TargetBuilding.TakeDamage((int)(Damage * GameCtx.AuraAttackDamageMultiplier * GetCurseDamageFactor()));
 					_attackTimer = AttackCooldown;
 				}
 				else
@@ -461,6 +472,12 @@ public class Unit : IUnitHandle
 		StartStealthCooldown();
 		_timeSinceLastCombat = 0f;
 
+		if (Skills != null && TryCastSpell())
+		{
+			_attackTimer = effectiveAttackCooldown;
+			return;
+		}
+
 		int effectiveDamage = Damage;
 		float executeMultiplier = 1f;
 		if (TargetEnemy.MaxHealth > 0 && TargetEnemy.Health / (float)TargetEnemy.MaxHealth <= GameRules.WildCovenantExecuteThreshold)
@@ -479,6 +496,7 @@ public class Unit : IUnitHandle
 			if (kiting != null)
 				_kiteTimer = kiting.Param;
 		}
+		effectiveDamage = (int)(effectiveDamage * GameCtx.AuraAttackDamageMultiplier * GetCurseDamageFactor());
 		if (executeMultiplier != 1f)
 			effectiveDamage = (int)(effectiveDamage * executeMultiplier);
 		int finalDamage = CombatRules.CalculateDamage(effectiveDamage, DamageType, TargetEnemy.ArmorType, TargetEnemy.EffectiveArmorValue, _damageMatrix);
@@ -507,6 +525,45 @@ public class Unit : IUnitHandle
 		SpecialConfig stealth = Skills.GetSpecial(SpecialBehavior.Stealth);
 		if (stealth != null)
 			StartSkillCooldown(stealth.SkillId);
+	}
+
+	private bool TryCastSpell()
+	{
+		if (BlackMagic == null || TargetEnemy == null || !TargetEnemy.IsAlive)
+			return false;
+		SpecialConfig nova = Skills.GetSpecial(SpecialBehavior.ShadowNova);
+		if (nova != null && CanCastSpell(nova) && Tactical != null
+			&& Tactical.FindEnemiesNearPoint(this, TargetEnemy.GameX, TargetEnemy.GameY, nova.Param).Count > 1)
+			return CastNova(nova);
+		SpecialConfig curse = Skills.GetSpecial(SpecialBehavior.Curse);
+		if (curse != null && CanCastSpell(curse))
+			return CastCurse(curse);
+		return false;
+	}
+
+	private bool CanCastSpell(SpecialConfig cfg)
+	{
+		return cfg.Cost > 0 && BlackMagic.Value >= cfg.Cost && GetSkillCooldownRemaining(cfg.SkillId) <= 0f;
+	}
+
+	private bool CastCurse(SpecialConfig cfg)
+	{
+		BlackMagic.TrySpend(cfg.Cost);
+		StartSkillCooldown(cfg.SkillId);
+		TargetEnemy.ApplySlow(cfg.Value, cfg.Param);
+		TargetEnemy.ApplyCurse(cfg.Value, cfg.Param);
+		EventPort?.OnAttack(TargetEnemy, TargetEnemy.GameX, TargetEnemy.GameY);
+		return true;
+	}
+
+	private bool CastNova(SpecialConfig cfg)
+	{
+		BlackMagic.TrySpend(cfg.Cost);
+		StartSkillCooldown(cfg.SkillId);
+		foreach (IUnitHandle enemy in Tactical.FindEnemiesNearPoint(this, TargetEnemy.GameX, TargetEnemy.GameY, cfg.Param))
+			enemy.TakeDamage((int)cfg.Value, this, GameX, GameY);
+		EventPort?.OnAttack(TargetEnemy, TargetEnemy.GameX, TargetEnemy.GameY);
+		return true;
 	}
 
 	private float EdgeDistanceTo(IUnitHandle target)
@@ -539,12 +596,27 @@ public class Unit : IUnitHandle
 		_poisonAccumulator = 0f;
 	}
 
+	public void ApplyCurse(float factor, float duration)
+	{
+		if (factor <= 0f || duration <= 0f)
+			return;
+		_curseFactor = factor;
+		_curseRemaining = duration;
+	}
+
+	private float GetCurseDamageFactor()
+	{
+		return _curseRemaining > 0f ? 1f - _curseFactor : 1f;
+	}
+
 	private void TickCombatStateTimers(float dt)
 	{
 		if (_kiteTimer > 0f)
 			_kiteTimer -= dt;
 		if (_slowRemaining > 0f)
 			_slowRemaining -= dt;
+		if (_curseRemaining > 0f)
+			_curseRemaining -= dt;
 		TickPoison(dt);
 		_timeSinceLastCombat += dt;
 		UpdateAmbushState();

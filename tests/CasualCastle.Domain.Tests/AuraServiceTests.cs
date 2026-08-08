@@ -39,6 +39,25 @@ public class AuraServiceTests
 		return unit;
 	}
 
+	private static Unit CreateUndeadUnit(bool isPlayerUnit)
+	{
+		Unit unit = UnitTestFactory.CreateUnit(AttackType.Melee, isPlayerUnit);
+		unit.Race = "Undead";
+		return unit;
+	}
+
+	private static SkillDef CreateFanaticalAuraSkill()
+	{
+		string json = "{\"target\":\"nearby_allies\",\"range\":150,\"race\":\"Undead\",\"effects\":[{\"bonus_type\":\"attack_damage\",\"value\":0.20},{\"bonus_type\":\"move_speed\",\"value\":0.15}]}";
+		return new SkillDef
+		{
+			Id = "fanatical_aura",
+			DisplayName = "狂热光环",
+			Type = SkillType.Aura,
+			ConfigJson = json
+		};
+	}
+
 	[Fact]
 	public void SameRaceAura_NotStacked()
 	{
@@ -172,6 +191,80 @@ public class AuraServiceTests
 		AuraEffects effects = service.CalculateEffects(receiver, new List<IUnitHandle> { receiver, lizard });
 
 		Assert.Equal(1.20f, effects.ExecuteDamageMultiplier, 4);
+	}
+
+	[Fact]
+	public void UndeadAura_MultiEffect_AppliesAttackDamageAndMoveSpeed()
+	{
+		Unit receiver = CreateUndeadUnit(true);
+		Unit emitter = CreateUndeadUnit(true);
+		emitter.Skills.Add(CreateFanaticalAuraSkill());
+		emitter.SetPosition(30, 0);
+		AuraService service = new();
+
+		AuraEffects effects = service.CalculateEffects(receiver, new List<IUnitHandle> { receiver, emitter });
+
+		Assert.Equal(1.20f, effects.AttackDamageMultiplier, 4);
+		Assert.Equal(1.15f, effects.MoveSpeedMultiplier, 4);
+	}
+
+	[Fact]
+	public void UndeadAura_NonUndeadReceiver_NoEffect()
+	{
+		Unit receiver = UnitTestFactory.CreateUnit(AttackType.Melee, true);
+		receiver.Race = "Human";
+		Unit emitter = CreateUndeadUnit(true);
+		emitter.Skills.Add(CreateFanaticalAuraSkill());
+		emitter.SetPosition(30, 0);
+		AuraService service = new();
+
+		AuraEffects effects = service.CalculateEffects(receiver, new List<IUnitHandle> { receiver, emitter });
+
+		Assert.Equal(1f, effects.AttackDamageMultiplier, 4);
+		Assert.Equal(1f, effects.MoveSpeedMultiplier, 4);
+	}
+
+	[Fact]
+	public void UndeadAura_UndeadReceiver_IgnoresHordeAura()
+	{
+		Unit receiver = CreateUndeadUnit(true);
+		Unit goblin = CreateEmitter("Goblin", "attack_speed", 0.12f, true);
+		goblin.SetPosition(30, 0);
+		AuraService service = new();
+
+		AuraEffects effects = service.CalculateEffects(receiver, new List<IUnitHandle> { receiver, goblin });
+
+		Assert.Equal(1f, effects.AttackSpeedMultiplier, 4);
+	}
+
+	[Fact]
+	public void UndeadAura_HordeReceiver_NoEffect()
+	{
+		Unit receiver = CreateHordeUnit(true);
+		Unit emitter = CreateUndeadUnit(true);
+		emitter.Skills.Add(CreateFanaticalAuraSkill());
+		emitter.SetPosition(30, 0);
+		AuraService service = new();
+
+		AuraEffects effects = service.CalculateEffects(receiver, new List<IUnitHandle> { receiver, emitter });
+
+		Assert.Equal(1f, effects.AttackDamageMultiplier, 4);
+		Assert.Equal(1f, effects.MoveSpeedMultiplier, 4);
+	}
+
+	[Fact]
+	public void UndeadAura_DeadEmitter_NoEffect()
+	{
+		Unit receiver = CreateUndeadUnit(true);
+		Unit emitter = CreateUndeadUnit(true);
+		emitter.Skills.Add(CreateFanaticalAuraSkill());
+		emitter.IsAlive = false;
+		emitter.SetPosition(30, 0);
+		AuraService service = new();
+
+		AuraEffects effects = service.CalculateEffects(receiver, new List<IUnitHandle> { receiver, emitter });
+
+		Assert.Equal(1f, effects.AttackDamageMultiplier, 4);
 	}
 
 	[Fact]

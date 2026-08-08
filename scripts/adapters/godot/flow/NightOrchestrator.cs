@@ -24,6 +24,9 @@ public class NightOrchestrator
 			return;
 
 		CombineBuildingFactory factory = new CombineBuildingFactory(playerCastle);
+		int coreLevel = gm.SelectedFaction == FactionDef.NecromancerId
+			? RitualCircleRules.GetCoreLevel(playerCastle.GetBuildingStates())
+			: int.MaxValue;
 		_combineService.ResolveCombines(
 			playerCastle.GetBuildingStates(),
 			true,
@@ -34,7 +37,8 @@ public class NightOrchestrator
 			{
 				_adjacencyService.RefreshCastle(playerCastle.GetBuildingStates());
 				Sfx.Play(SfxEvents.Combine);
-			});
+			},
+			coreLevel);
 	}
 
 	public void ApplyReplaySnapshot(GameManager gm, int nightIndex, BattlePhase phase)

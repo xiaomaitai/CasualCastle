@@ -67,6 +67,26 @@ public class RitualCircleRulesTests
 	}
 
 	[Fact]
+	public void GetNextLevelTypeId_ReturnsAdjacentLevel()
+	{
+		Assert.Equal("RitualCircleL2", RitualCircleRules.GetNextLevelTypeId("RitualCircleL1"));
+		Assert.Equal("RitualCircleL3", RitualCircleRules.GetNextLevelTypeId("RitualCircleL2"));
+	}
+
+	[Fact]
+	public void GetNextLevelTypeId_MaxLevel_ReturnsNull()
+	{
+		Assert.Null(RitualCircleRules.GetNextLevelTypeId("RitualCircleL5"));
+	}
+
+	[Fact]
+	public void GetNextLevelTypeId_NonCore_ReturnsNull()
+	{
+		Assert.Null(RitualCircleRules.GetNextLevelTypeId("Tomb"));
+		Assert.Null(RitualCircleRules.GetNextLevelTypeId(null));
+	}
+
+	[Fact]
 	public void CreateUpgradeRecipes_ReturnsFourEdges()
 	{
 		List<UpgradeRecipe> recipes = RitualCircleRules.CreateUpgradeRecipes();

@@ -11,6 +11,7 @@ public static class BuildingModule
 		services.AddSingleton<ICombineUseCase, CombineService>();
 		services.AddSingleton<UpgradeRules>();
 		services.AddSingleton<IUpgradeUseCase, UpgradeService>();
+		services.AddSingleton<RitualService>();
 		return services;
 	}
 }

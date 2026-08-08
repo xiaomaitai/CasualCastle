@@ -62,18 +62,23 @@ public class StatModifierConfig
 	}
 }
 
+public class AuraEffectConfig
+{
+	public string BonusType { get; set; }
+	public float Value { get; set; }
+}
+
 public class AuraConfig
 {
 	public AuraTarget Target { get; set; }
 	public float Range { get; set; }
 	public string Race { get; set; }
-	public string BonusType { get; set; }
-	public float Value { get; set; }
+	public List<AuraEffectConfig> Effects { get; set; }
 
 	public static AuraConfig Parse(string json)
 	{
 		JsonElement root = JsonDocument.Parse(json).RootElement;
-		return new AuraConfig
+		AuraConfig config = new()
 		{
 			Target = root.GetProperty("target").GetString() switch
 			{
@@ -84,9 +89,30 @@ public class AuraConfig
 			},
 			Range = root.GetProperty("range").GetSingle(),
 			Race = root.TryGetProperty("race", out JsonElement auraRace) ? auraRace.GetString() : "",
-			BonusType = root.TryGetProperty("bonus_type", out JsonElement bonusType) ? bonusType.GetString() : "",
-			Value = root.TryGetProperty("value", out JsonElement auraValue) ? auraValue.GetSingle() : 0f
+			Effects = new List<AuraEffectConfig>()
 		};
+
+		if (root.TryGetProperty("effects", out JsonElement effectsElem))
+		{
+			foreach (JsonElement effectElem in effectsElem.EnumerateArray())
+			{
+				config.Effects.Add(new AuraEffectConfig
+				{
+					BonusType = effectElem.GetProperty("bonus_type").GetString(),
+					Value = effectElem.TryGetProperty("value", out JsonElement effectValue) ? effectValue.GetSingle() : 0f
+				});
+			}
+		}
+		else
+		{
+			config.Effects.Add(new AuraEffectConfig
+			{
+				BonusType = root.TryGetProperty("bonus_type", out JsonElement bonusType) ? bonusType.GetString() : "",
+				Value = root.TryGetProperty("value", out JsonElement auraValue) ? auraValue.GetSingle() : 0f
+			});
+		}
+
+		return config;
 	}
 }
 
@@ -167,6 +193,8 @@ public class SpecialConfig
 	public float SpeedMult { get; set; }
 	public float DamageMult { get; set; }
 	public float Cooldown { get; set; }
+	public int Cost { get; set; }
+	public float Value { get; set; }
 
 	public static SpecialConfig Parse(string json)
 	{
@@ -183,12 +211,16 @@ public class SpecialConfig
 				"regen" => SpecialBehavior.Regen,
 				"ambush" => SpecialBehavior.Ambush,
 				"plague_burst" => SpecialBehavior.PlagueBurst,
+				"curse" => SpecialBehavior.Curse,
+				"shadow_nova" => SpecialBehavior.ShadowNova,
 				_ => SpecialBehavior.Stealth
 			},
 			Param = root.TryGetProperty("param", out JsonElement p) ? p.GetSingle() : 0f,
 			SpeedMult = root.TryGetProperty("speed_mult", out JsonElement s) ? s.GetSingle() : GameRules.StealthSpeedMult,
 			DamageMult = root.TryGetProperty("damage_mult", out JsonElement d) ? d.GetSingle() : 1f,
-			Cooldown = root.TryGetProperty("cooldown", out JsonElement c) ? c.GetSingle() : 0f
+			Cooldown = root.TryGetProperty("cooldown", out JsonElement c) ? c.GetSingle() : 0f,
+			Cost = root.TryGetProperty("cost", out JsonElement cost) ? cost.GetInt32() : 0,
+			Value = root.TryGetProperty("value", out JsonElement value) ? value.GetSingle() : 0f
 		};
 	}
 }

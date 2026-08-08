@@ -12,6 +12,7 @@ public class GameContext
 	public bool TargetIsIsolated;
 	public float AuraAttackSpeedMultiplier = 1f;
 	public float AuraMoveSpeedMultiplier = 1f;
+	public float AuraAttackDamageMultiplier = 1f;
 	public float AuraRegenPerSecond;
 	public float AuraExecuteDamageMultiplier = 1f;
 	public int AuraArmorBonus;

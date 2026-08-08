@@ -89,4 +89,61 @@ public class CombineValueTests
 		Assert.Equal(9, repo.Object.GetValue(combined.TypeId));
 		Assert.NotEqual(5 + 2, repo.Object.GetValue(combined.TypeId));
 	}
+
+	private static CombineRules CreateNecromancerCombineRules()
+	{
+		CombineRules rules = new();
+		rules.LoadRecipes(new List<CombineRecipe>
+		{
+			new() { MainTypeId = "Necropolis", MaterialTypeId = "BlightMarsh", MaterialCount = 1, ResultTypeId = "DeathTemple" }
+		});
+		return rules;
+	}
+
+	private static Mock<IBuildingRepository> CreateNecromancerRepo()
+	{
+		Mock<IBuildingRepository> repo = new();
+		repo.Setup(r => r.GetFactionId("DeathTemple")).Returns(FactionDef.NecromancerId);
+		repo.Setup(r => r.GetCombineTier("DeathTemple")).Returns(2);
+		repo.Setup(r => r.GetFootprint(It.IsAny<string>())).Returns(SingleCell);
+		repo.Setup(r => r.GetCombineTier(It.IsAny<string>())).Returns(1);
+		repo.Setup(r => r.IsCoreBuilding(It.IsAny<string>())).Returns(false);
+		return repo;
+	}
+
+	[Fact]
+	public void ResolveCombines_NecromancerRecipe_CoreLevelInsufficient_NoCombine()
+	{
+		Mock<IBuildingRepository> repo = CreateNecromancerRepo();
+		Mock<IBuildingState> main = CreateBuilding("Necropolis", 4, 4);
+		Mock<IBuildingState> material = CreateBuilding("BlightMarsh", 4, 5);
+		List<IBuildingState> buildings = new() { main.Object, material.Object };
+		Mock<ICombineBuildingFactory> factory = new();
+		CombineService service = new(repo.Object, CreateNecromancerCombineRules());
+		IBuildingState combined = null;
+
+		service.ResolveCombines(buildings, true, true, true, factory.Object, r => combined = r, 2);
+
+		Assert.Null(combined);
+		Assert.Equal(2, buildings.Count);
+	}
+
+	[Fact]
+	public void ResolveCombines_NecromancerRecipe_CoreLevelSufficient_Combines()
+	{
+		Mock<IBuildingRepository> repo = CreateNecromancerRepo();
+		Mock<IBuildingState> main = CreateBuilding("Necropolis", 4, 4);
+		Mock<IBuildingState> material = CreateBuilding("BlightMarsh", 4, 5);
+		List<IBuildingState> buildings = new() { main.Object, material.Object };
+		Mock<IBuildingState> result = CreateBuilding("DeathTemple", 4, 4);
+		Mock<ICombineBuildingFactory> factory = new();
+		factory.Setup(f => f.Create("DeathTemple", 4, 4)).Returns(result.Object);
+		CombineService service = new(repo.Object, CreateNecromancerCombineRules());
+		IBuildingState combined = null;
+
+		service.ResolveCombines(buildings, true, true, true, factory.Object, r => combined = r, 3);
+
+		Assert.Same(result.Object, combined);
+		Assert.Single(buildings);
+	}
 }

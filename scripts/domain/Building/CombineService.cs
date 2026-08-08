@@ -15,7 +15,7 @@ public class CombineService : ICombineUseCase
 		_combineRules = combineRules;
 	}
 
-	public void ResolveCombines(List<IBuildingState> buildings, bool isPlayerSide, bool isCombinePhase, bool isPlaying, ICombineBuildingFactory factory, Action<IBuildingState> onCombineCompleted)
+	public void ResolveCombines(List<IBuildingState> buildings, bool isPlayerSide, bool isCombinePhase, bool isPlaying, ICombineBuildingFactory factory, Action<IBuildingState> onCombineCompleted, int coreLevel = int.MaxValue)
 	{
 		if (!isPlayerSide || !isPlaying || !isCombinePhase)
 			return;
@@ -24,7 +24,7 @@ public class CombineService : ICombineUseCase
 
 		while (true)
 		{
-			CombineGroup group = _combineRules.FindBestCombinableGroup(buildings, used, _buildingRepo);
+			CombineGroup group = _combineRules.FindBestCombinableGroup(buildings, used, _buildingRepo, coreLevel);
 			if (group == null)
 				break;
 

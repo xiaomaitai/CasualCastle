@@ -22,6 +22,14 @@ public static class RitualCircleRules
 		return level > 0 && GetLevel(resultTypeId) == level + 1;
 	}
 
+	public static string GetNextLevelTypeId(string typeId)
+	{
+		int level = GetLevel(typeId);
+		if (level <= 0 || level >= CoreLevelTypeIds.Length)
+			return null;
+		return CoreLevelTypeIds[level];
+	}
+
 	public static int GetRequiredCoreLevel(string resultTypeId, IBuildingRepository buildingRepo)
 	{
 		return buildingRepo.GetCombineTier(resultTypeId) + 1;

@@ -130,7 +130,10 @@ public partial class GameManager : Node2D, IGameState
         BattleReportSystem?.StartMatch(PendingReplayReportId);
 
         if (SelectedFaction == FactionDef.NecromancerId)
+        {
             Get<BlackMagicService>()?.Reset();
+            UndeadFactionBuffs.Reset();
+        }
 
         BeginPhase(GamePhase.Day);
         SetProcess(true);
