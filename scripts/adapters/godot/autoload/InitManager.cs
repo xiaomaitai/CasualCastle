@@ -34,8 +34,8 @@ public partial class InitManager : Node
 
         gm.PhaseChanged += phase =>
         {
-            shopService.SetShopAvailable(phase == GameManager.GamePhase.Day || phase == GameManager.GamePhase.Night);
-            if (phase == GameManager.GamePhase.Night)
+            shopService.SetShopAvailable(phase == GameManager.GamePhase.Combat || phase == GameManager.GamePhase.Shop);
+            if (phase == GameManager.GamePhase.Shop)
             {
                 shopService.RequestOpenShop();
             }
@@ -43,9 +43,9 @@ public partial class InitManager : Node
             {
                 _nightOrchestrator.ResolveNightCombines(gm);
             }
-            if (phase == GameManager.GamePhase.Day)
+            if (phase == GameManager.GamePhase.Combat)
                 _nightOrchestrator.ApplyReplaySnapshot(gm, gm.CurrentNightIndex + 1, BattlePhase.Day);
-            if (phase == GameManager.GamePhase.Day && gm.CurrentNightIndex >= 1)
+            if (phase == GameManager.GamePhase.Combat && gm.CurrentNightIndex >= 1)
             {
                 try
                 {

@@ -101,7 +101,7 @@ public partial class NecromancerBattleSmoke : Node
 
 	private void WaitNight()
 	{
-		if (!AdapterRegistry.Resolve<IGameState>().IsNight)
+		if (!AdapterRegistry.Resolve<IGameState>().IsCombat)
 			return;
 		_nightObserved = true;
 		_stepStartedAt = _elapsed;

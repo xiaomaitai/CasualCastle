@@ -163,7 +163,7 @@ public sealed class RuntimeInfoPanelController
 		BattleReportSystem reportSystem = AdapterRegistry.Resolve<BattleReportSystem>();
 		if (reportSystem == null)
 			return (0, 0);
-		int nightIndex = gm.IsDay ? gm.CurrentNightIndex + 1 : gm.CurrentNightIndex;
+		int nightIndex = gm.IsCombat ? gm.CurrentNightIndex + 1 : gm.CurrentNightIndex;
 		CastleSnapshot snapshot = reportSystem.GetSelectedPhaseSnapshot(nightIndex, BattlePhase.Day);
 		if (snapshot == null)
 			return (0, 0);

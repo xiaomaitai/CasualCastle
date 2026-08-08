@@ -123,9 +123,9 @@ public class Shop
         ShopOpenRequested?.Invoke();
     }
 
-    public bool IsRepairAvailable(bool isPlaying, bool isNight)
+    public bool IsRepairAvailable(bool isPlaying, bool isShopPhase)
     {
-        return isPlaying && isNight;
+        return isPlaying && isShopPhase;
     }
 
     private void RefreshOfferSlot(int slotIndex)

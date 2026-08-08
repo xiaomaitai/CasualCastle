@@ -1,4 +1,4 @@
-// 临时诊断脚本：驱动完整昼夜循环，观察阶段与计时
+// 临时诊断脚本：驱动完整阶段循环，观察逻辑阶段与计时
 using System.Collections.Generic;
 using CasualCastle.Adapters.Godot;
 using Godot;
@@ -7,7 +7,7 @@ public partial class PhaseCycleProbe : Node
 {
 	private float _elapsed;
 	private float _lastLog;
-	private bool _advancedNight;
+	private bool _advancedShop;
 	private bool _advancedCombine;
 
 	public override void _Ready()
@@ -28,10 +28,10 @@ public partial class PhaseCycleProbe : Node
 			GD.Print($"PROBE t={_elapsed:F0} phase={gm.CurrentPhase} timer={gm.PhaseTimeRemaining:F1} night={gm.CurrentNightIndex}");
 		}
 
-		if (gm.CurrentPhase == GameManager.GamePhase.Night && !_advancedNight)
+		if (gm.CurrentPhase == GameManager.GamePhase.Shop && !_advancedShop)
 		{
-			_advancedNight = true;
-			GD.Print("PROBE advance from night");
+			_advancedShop = true;
+			GD.Print("PROBE advance from shop");
 			gm.AdvancePhase();
 		}
 		else if (gm.CurrentPhase == GameManager.GamePhase.Combine && !_advancedCombine)
@@ -40,7 +40,7 @@ public partial class PhaseCycleProbe : Node
 			GD.Print("PROBE advance from combine");
 			gm.AdvancePhase();
 		}
-		else if (gm.CurrentPhase == GameManager.GamePhase.Day && _advancedCombine && _elapsed > 70f)
+		else if (gm.CurrentPhase == GameManager.GamePhase.Combat && _advancedCombine && _elapsed > 70f)
 		{
 			GD.Print("PROBE full cycle ok");
 			GetTree().Quit(0);

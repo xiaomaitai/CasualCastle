@@ -68,7 +68,7 @@ public class BattleReportService
         _currentReport = new BattleReport();
     }
 
-    public BattleReport SaveCurrentReportDaily(string displayName)
+    public BattleReport SaveCurrentReportDaily(string displayName, string factionId)
     {
         if (_currentReport.Nights.Count == 0)
             return null;
@@ -76,7 +76,7 @@ public class BattleReportService
         BattleReport report = _savedReports.FirstOrDefault(r => r.ReportId == _inProgressReportId);
         if (report == null)
         {
-            report = ReportBuilder.CreateReport(_currentReport.Nights, displayName);
+            report = ReportBuilder.CreateReport(_currentReport.Nights, displayName, factionId);
             _inProgressReportId = report.ReportId;
             _savedReports.Add(report);
         }
@@ -84,19 +84,20 @@ public class BattleReportService
         {
             report.SavedAtUnix = DateTimeOffset.Now.ToUnixTimeSeconds();
             report.Nights = _currentReport.Nights.Select(ReportBuilder.CloneSnapshot).ToList();
+            report.FactionId = factionId;
         }
 
         PersistSavedReports();
         return report;
     }
 
-    public BattleReport SaveCurrentReport(string displayName, string defaultName)
+    public BattleReport SaveCurrentReport(string displayName, string defaultName, string factionId)
     {
         if (_currentReport.Nights.Count == 0)
             return null;
 
         string name = string.IsNullOrWhiteSpace(displayName) ? defaultName : displayName;
-        BattleReport toSave = ReportBuilder.CreateReport(_currentReport.Nights, name);
+        BattleReport toSave = ReportBuilder.CreateReport(_currentReport.Nights, name, factionId);
 
         BattleReport existing = _savedReports.FirstOrDefault(r => r.ReportId == _inProgressReportId);
         if (existing == null)
@@ -108,6 +109,7 @@ public class BattleReportService
             existing.DisplayName = toSave.DisplayName;
             existing.SavedAtUnix = toSave.SavedAtUnix;
             existing.Nights = toSave.Nights;
+            existing.FactionId = toSave.FactionId;
         }
 
         _inProgressReportId = "";
@@ -131,12 +133,7 @@ public class BattleReportService
 
     public bool IsNecromancerReport(string reportId)
     {
-        if (string.IsNullOrWhiteSpace(reportId))
-            return false;
-        BattleReport report = LoadReport(reportId);
-        if (report == null)
-            return false;
-        return report.Nights.Any(s => s.Buildings.Any(b => _buildingRepo.GetFactionId(b.TypeId) == FactionDef.NecromancerId));
+        return LoadReport(reportId)?.FactionId == FactionDef.NecromancerId;
     }
 
     public CastleSnapshot GetSelectedPhaseSnapshot(int nightIndex, BattlePhase phase)

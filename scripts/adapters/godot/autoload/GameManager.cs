@@ -15,8 +15,7 @@ public partial class GameManager : Node2D, IGameState
     public static T Get<T>() where T : class => Services.GetService<T>();
 
     bool IGameState.IsPlaying => CurrentState == GameState.Playing;
-    bool IGameState.IsDay => IsDayNightInverted ? IsNight : IsDay;
-    bool IGameState.IsNight => IsDayNightInverted ? IsDay : IsNight;
+    bool IGameState.IsCombat => IsCombat;
     bool IGameState.IsPaused => IsPaused;
     int IGameState.CurrentNightIndex => CurrentNightIndex;
 
@@ -40,17 +39,24 @@ public partial class GameManager : Node2D, IGameState
 
     public enum GamePhase
     {
-        Day,
-        Night,
-        Combine
+        Combat,
+        Combine,
+        Shop
     }
 
     public GameState CurrentState { get; private set; } = GameState.Playing;
-    public GamePhase CurrentPhase { get; private set; } = GamePhase.Day;
-    public bool IsDay => CurrentPhase == GamePhase.Day;
-    public bool IsNight => CurrentPhase == GamePhase.Night;
+    public GamePhase CurrentPhase { get; private set; } = GamePhase.Combat;
+    public bool IsCombat => CurrentPhase == GamePhase.Combat;
+    public bool IsShop => CurrentPhase == GamePhase.Shop;
     public bool IsCombine => CurrentPhase == GamePhase.Combine;
-    public bool IsDayNightInverted => SelectedFaction == FactionDef.NecromancerId || _pendingEnemyIsNecromancer;
+    public bool IsUndeadBattle => SelectedFaction == FactionDef.NecromancerId || _pendingEnemyIsNecromancer;
+    public bool IsNightDisplayed => CurrentPhase switch
+    {
+        GamePhase.Combat => IsUndeadBattle,
+        GamePhase.Shop => !IsUndeadBattle,
+        _ => IsUndeadBattle,
+    };
+    public bool IsDayDisplayed => !IsNightDisplayed;
     public bool IsPaused { get; private set; }
     public float PhaseTimeRemaining { get; private set; }
     public int CurrentNightIndex { get; set; }
@@ -94,13 +100,13 @@ public partial class GameManager : Node2D, IGameState
     {
         if (CurrentState != GameState.Playing || IsPaused) return;
 
-        if (CurrentPhase == GamePhase.Day && _phaseTimerHoldRemaining > 0f)
+        if (CurrentPhase == GamePhase.Combat && _phaseTimerHoldRemaining > 0f)
         {
             _phaseTimerHoldRemaining -= (float)delta;
             return;
         }
 
-        if (CurrentPhase == GamePhase.Day || CurrentPhase == GamePhase.Combine)
+        if (CurrentPhase == GamePhase.Combat || CurrentPhase == GamePhase.Combine)
         {
             PhaseTimeRemaining -= (float)delta;
             if (PhaseTimeRemaining <= 0f)
@@ -137,7 +143,7 @@ public partial class GameManager : Node2D, IGameState
             UndeadFactionBuffs.Reset();
         }
 
-        BeginPhase(GamePhase.Day);
+        BeginPhase(GamePhase.Combat);
         SetProcess(true);
     }
 
@@ -201,25 +207,25 @@ public partial class GameManager : Node2D, IGameState
         if (CurrentState != GameState.Playing) return;
         GamePhase nextPhase = CurrentPhase switch
         {
-            GamePhase.Day => GamePhase.Night,
-            GamePhase.Night => GamePhase.Combine,
-            _ => GamePhase.Day,
+            GamePhase.Combat => GamePhase.Shop,
+            GamePhase.Shop => GamePhase.Combine,
+            _ => GamePhase.Combat,
         };
         BeginPhase(nextPhase);
     }
 
     private void BeginPhase(GamePhase phase)
     {
-        if (phase == GamePhase.Night && CurrentPhase == GamePhase.Day)
+        if (phase == GamePhase.Shop && CurrentPhase == GamePhase.Combat)
         {
             CurrentNightIndex++;
             BattleReportSystem?.CapturePhaseSnapshot(_playerCastle, CurrentNightIndex, BattlePhase.Day);
         }
-        else if (phase == GamePhase.Combine && CurrentPhase == GamePhase.Night)
+        else if (phase == GamePhase.Combine && CurrentPhase == GamePhase.Shop)
         {
             BattleReportSystem?.CapturePhaseSnapshot(_playerCastle, CurrentNightIndex, BattlePhase.Night);
         }
-        else if (phase == GamePhase.Day && CurrentPhase == GamePhase.Combine)
+        else if (phase == GamePhase.Combat && CurrentPhase == GamePhase.Combine)
         {
             BattleReportSystem?.CapturePhaseSnapshot(_playerCastle, CurrentNightIndex, BattlePhase.Combine);
         }
@@ -227,9 +233,9 @@ public partial class GameManager : Node2D, IGameState
         CurrentPhase = phase;
         PhaseTimeRemaining = phase == GamePhase.Combine
             ? GameRules.CombineDurationSeconds
-            : GameRules.DayDurationSeconds;
-        _phaseTimerHoldRemaining = phase == GamePhase.Day
-            ? GameRules.DayStartTimerHoldSeconds
+            : phase == GamePhase.Combat ? GameRules.CombatDurationSeconds : 0f;
+        _phaseTimerHoldRemaining = phase == GamePhase.Combat
+            ? GameRules.CombatStartTimerHoldSeconds
             : 0f;
 
         EmitSignal(SignalName.PhaseChanged, (int)phase);

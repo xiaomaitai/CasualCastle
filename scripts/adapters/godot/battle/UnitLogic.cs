@@ -164,8 +164,7 @@ public partial class UnitLogic : Node2D
 		get
 		{
 			IGameState state = AdapterRegistry.Resolve<IGameState>();
-			bool isNightUnit = _unit != null && _unit.HasNightCombat;
-			return isNightUnit ? state.IsNight : state.IsDay;
+			return state.IsCombat;
 		}
 	}
 

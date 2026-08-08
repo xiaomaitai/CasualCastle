@@ -57,11 +57,12 @@ public class ReportBuilderTests
 			new CastleSnapshot { NightIndex = 1 },
 		};
 
-		BattleReport report = ReportBuilder.CreateReport(nights, "Test Report");
+		BattleReport report = ReportBuilder.CreateReport(nights, "Test Report", FactionDef.NecromancerId);
 
 		Assert.NotNull(report.ReportId);
 		Assert.NotEmpty(report.ReportId);
 		Assert.Equal("Test Report", report.DisplayName);
+		Assert.Equal(FactionDef.NecromancerId, report.FactionId);
 		Assert.Single(report.Nights);
 		Assert.Equal(1, report.Nights[0].NightIndex);
 		Assert.True(report.SavedAtUnix > 0);

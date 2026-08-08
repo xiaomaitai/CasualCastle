@@ -15,11 +15,12 @@ public class BattleReportServiceTests
 		BattleReportService service = CreateService(out FakeReportRepository repository);
 		CapturePhase(service, 1, BattlePhase.Day);
 
-		BattleReport saved = service.SaveCurrentReportDaily("progress name");
+		BattleReport saved = service.SaveCurrentReportDaily("progress name", "alliance");
 
 		Assert.Single(repository.Reports);
 		Assert.Same(saved, repository.Reports[0]);
 		Assert.True(service.HasCurrentSnapshots);
+		Assert.Equal("alliance", saved.FactionId);
 		Assert.Single(saved.Nights);
 		Assert.Equal(1, saved.Nights[0].NightIndex);
 		Assert.Equal(BattlePhase.Day, saved.Nights[0].Phase);
@@ -31,10 +32,10 @@ public class BattleReportServiceTests
 		BattleReportService service = CreateService(out FakeReportRepository repository);
 		CapturePhase(service, 1, BattlePhase.Day);
 		CapturePhase(service, 1, BattlePhase.Night);
-		BattleReport first = service.SaveCurrentReportDaily("progress name");
+		BattleReport first = service.SaveCurrentReportDaily("progress name", "alliance");
 		CapturePhase(service, 2, BattlePhase.Day);
 
-		BattleReport second = service.SaveCurrentReportDaily("progress name");
+		BattleReport second = service.SaveCurrentReportDaily("progress name", "alliance");
 
 		Assert.Single(repository.Reports);
 		Assert.Equal(first.ReportId, second.ReportId);
@@ -47,7 +48,7 @@ public class BattleReportServiceTests
 	{
 		BattleReportService service = CreateService(out FakeReportRepository repository);
 
-		BattleReport saved = service.SaveCurrentReportDaily("progress name");
+		BattleReport saved = service.SaveCurrentReportDaily("progress name", "alliance");
 
 		Assert.Null(saved);
 		Assert.Empty(repository.Reports);
@@ -60,7 +61,7 @@ public class BattleReportServiceTests
 		service.StartMatch("reference-report");
 		CapturePhase(service, 1, BattlePhase.Day);
 
-		service.SaveCurrentReportDaily("progress name");
+		service.SaveCurrentReportDaily("progress name", "alliance");
 
 		Assert.Equal("reference-report", service.SelectedReportId);
 	}
@@ -71,10 +72,10 @@ public class BattleReportServiceTests
 		BattleReportService service = CreateService(out FakeReportRepository repository);
 		CapturePhase(service, 1, BattlePhase.Day);
 		CapturePhase(service, 1, BattlePhase.Night);
-		service.SaveCurrentReportDaily("progress name");
+		service.SaveCurrentReportDaily("progress name", "alliance");
 		CapturePhase(service, 1, BattlePhase.Combine);
 
-		BattleReport saved = service.SaveCurrentReport("", "final name");
+		BattleReport saved = service.SaveCurrentReport("", "final name", "alliance");
 
 		Assert.Single(repository.Reports);
 		Assert.Equal("final name", saved.DisplayName);
@@ -88,7 +89,7 @@ public class BattleReportServiceTests
 		BattleReportService service = CreateService(out FakeReportRepository repository);
 		CapturePhase(service, 1, BattlePhase.Night);
 
-		BattleReport saved = service.SaveCurrentReport("", "final name");
+		BattleReport saved = service.SaveCurrentReport("", "final name", "alliance");
 
 		Assert.Single(repository.Reports);
 		Assert.Same(saved, repository.Reports[0]);
@@ -101,7 +102,7 @@ public class BattleReportServiceTests
 		service.StartMatch("reference-report");
 		CapturePhase(service, 1, BattlePhase.Day);
 
-		service.SaveCurrentReport("", "final name");
+		service.SaveCurrentReport("", "final name", "alliance");
 
 		Assert.Equal("reference-report", service.SelectedReportId);
 	}
@@ -111,7 +112,7 @@ public class BattleReportServiceTests
 	{
 		BattleReportService service = CreateService(out FakeReportRepository repository);
 		CapturePhase(service, 1, BattlePhase.Day);
-		service.SaveCurrentReportDaily("progress name");
+		service.SaveCurrentReportDaily("progress name", "alliance");
 
 		service.DiscardCurrentReport();
 
@@ -128,7 +129,7 @@ public class BattleReportServiceTests
 		CapturePhase(service, 1, BattlePhase.Night);
 		CapturePhase(service, 1, BattlePhase.Combine);
 
-		BattleReport saved = service.SaveCurrentReportDaily("report name");
+		BattleReport saved = service.SaveCurrentReportDaily("report name", "alliance");
 
 		Assert.Equal(3, saved.Nights.Count);
 		Assert.All(saved.Nights, s => Assert.Equal(1, s.NightIndex));
@@ -145,7 +146,7 @@ public class BattleReportServiceTests
 		CapturePhase(service, 1, BattlePhase.Night);
 		CapturePhase(service, 1, BattlePhase.Day);
 
-		BattleReport saved = service.SaveCurrentReportDaily("report name");
+		BattleReport saved = service.SaveCurrentReportDaily("report name", "alliance");
 
 		Assert.Equal(2, saved.Nights.Count);
 	}
@@ -165,7 +166,7 @@ public class BattleReportServiceTests
 			new BuildingSnapshot { TypeId = "Barracks", AnchorGridX = 1, AnchorGridY = 1, Health = 100 },
 		}, 1, BattlePhase.Day, 25, cards);
 
-		BattleReport saved = service.SaveCurrentReportDaily("report name");
+		BattleReport saved = service.SaveCurrentReportDaily("report name", "alliance");
 
 		Assert.Equal(25, saved.Nights[0].Gold);
 		CardSnapshot card = Assert.Single(saved.Nights[0].HandCards);
@@ -182,7 +183,7 @@ public class BattleReportServiceTests
 		CapturePhase(service, 1, BattlePhase.Night);
 		CapturePhase(service, 1, BattlePhase.Combine);
 		CapturePhase(service, 2, BattlePhase.Day);
-		BattleReport saved = service.SaveCurrentReportDaily("report name");
+		BattleReport saved = service.SaveCurrentReportDaily("report name", "alliance");
 
 		service.StartMatch(saved.ReportId);
 
@@ -195,27 +196,19 @@ public class BattleReportServiceTests
 	}
 
 	[Fact]
-	public void IsNecromancerReport_ReportWithUndeadBuilding_ReturnsTrue()
+	public void IsNecromancerReport_ReportWithNecromancerFaction_ReturnsTrue()
 	{
-		FakeReportRepository repository = new();
-		BattleReport report = CreateReportWithBuilding("Tomb");
-		repository.Reports.Add(report);
+		BattleReportService service = CreateServiceWithReport(out FakeReportRepository _, CreateReportWithFaction(FactionDef.NecromancerId));
 
-		BattleReportService service = CreateServiceWithFactions(repository);
-
-		Assert.True(service.IsNecromancerReport(report.ReportId));
+		Assert.True(service.IsNecromancerReport("report-1"));
 	}
 
 	[Fact]
-	public void IsNecromancerReport_ReportWithoutUndeadBuilding_ReturnsFalse()
+	public void IsNecromancerReport_ReportWithAllianceFaction_ReturnsFalse()
 	{
-		FakeReportRepository repository = new();
-		BattleReport report = CreateReportWithBuilding("Barracks");
-		repository.Reports.Add(report);
+		BattleReportService service = CreateServiceWithReport(out FakeReportRepository _, CreateReportWithFaction("alliance"));
 
-		BattleReportService service = CreateServiceWithFactions(repository);
-
-		Assert.False(service.IsNecromancerReport(report.ReportId));
+		Assert.False(service.IsNecromancerReport("report-1"));
 	}
 
 	[Fact]
@@ -226,33 +219,31 @@ public class BattleReportServiceTests
 		Assert.False(service.IsNecromancerReport("missing"));
 	}
 
-	private static BattleReport CreateReportWithBuilding(string typeId)
+	private static BattleReport CreateReportWithFaction(string factionId)
 	{
 		return new BattleReport
 		{
 			ReportId = "report-1",
 			DisplayName = "report",
 			SavedAtUnix = 1,
+			FactionId = factionId,
 			Nights = new List<CastleSnapshot>
 			{
-				new CastleSnapshot
-				{
-					NightIndex = 1,
-					Phase = BattlePhase.Day,
-					Buildings = new List<BuildingSnapshot>
-					{
-						new BuildingSnapshot { TypeId = typeId, AnchorGridX = 1, AnchorGridY = 1, Health = 100 },
-					},
-				},
+				new CastleSnapshot { NightIndex = 1 },
 			},
 		};
 	}
 
-	private static BattleReportService CreateServiceWithFactions(FakeReportRepository repository)
+	private static BattleReportService CreateServiceWithReport(out FakeReportRepository repository, BattleReport report)
 	{
+		repository = new FakeReportRepository();
+		repository.Reports.Add(report);
 		Mock<IBuildingRepository> buildingRepo = new();
-		buildingRepo.Setup(r => r.GetFactionId("Tomb")).Returns(FactionDef.NecromancerId);
-		buildingRepo.Setup(r => r.GetFactionId("Barracks")).Returns("alliance");
+		buildingRepo.Setup(r => r.Get(It.IsAny<string>())).Returns(new BuildingData
+		{
+			TypeId = "Barracks",
+			IsCore = false,
+		});
 		return new BattleReportService(repository, buildingRepo.Object);
 	}
 

@@ -74,12 +74,17 @@ public partial class BattleReportSystem : Node
 
     public BattleReport SaveCurrentReport()
     {
-        return _service.SaveCurrentReport("", DateTimeOffset.Now.ToString("yyyy-MM-dd HH:mm"));
+        return _service.SaveCurrentReport("", DateTimeOffset.Now.ToString("yyyy-MM-dd HH:mm"), GetCurrentFactionId());
     }
 
     public BattleReport SaveCurrentReportDaily()
     {
-        return _service.SaveCurrentReportDaily(DateTimeOffset.Now.ToString("yyyy-MM-dd HH:mm"));
+        return _service.SaveCurrentReportDaily(DateTimeOffset.Now.ToString("yyyy-MM-dd HH:mm"), GetCurrentFactionId());
+    }
+
+    private static string GetCurrentFactionId()
+    {
+        return AdapterRegistry.Resolve<GameManager>()?.SelectedFaction ?? "alliance";
     }
 
     public CastleSnapshot GetSelectedPhaseSnapshot(int nightIndex, BattlePhase phase)

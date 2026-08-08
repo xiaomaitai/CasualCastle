@@ -38,6 +38,7 @@ public class BattleReport
 {
 	public string ReportId { get; set; } = "";
 	public string DisplayName { get; set; } = "";
+	public string FactionId { get; set; } = "";
 	public long SavedAtUnix { get; set; }
 	public List<CastleSnapshot> Nights { get; set; } = new();
 }

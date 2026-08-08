@@ -98,6 +98,7 @@ public class BattleReport
 {
 	public string ReportId;
 	public string DisplayName;          // 可选，默认时间戳
+	public string FactionId;           // 对局派系（alliance / horde / necromancer）
 	public long SavedAtUnix;            // 保存时间
 	public List<CastleSnapshot> Nights;
 }

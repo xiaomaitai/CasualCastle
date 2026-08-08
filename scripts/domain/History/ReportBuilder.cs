@@ -31,13 +31,14 @@ public static class ReportBuilder
     }
 
     public static BattleReport CreateReport(
-        IReadOnlyList<CastleSnapshot> nights, string displayName)
+        IReadOnlyList<CastleSnapshot> nights, string displayName, string factionId)
     {
         DateTimeOffset now = DateTimeOffset.Now;
         return new BattleReport
         {
             ReportId = Guid.NewGuid().ToString("N"),
             DisplayName = displayName,
+            FactionId = factionId,
             SavedAtUnix = now.ToUnixTimeSeconds(),
             Nights = nights.Select(CloneSnapshot).ToList(),
         };

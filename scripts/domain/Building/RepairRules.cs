@@ -3,7 +3,7 @@ namespace CasualCastle.Domain.Building;
 public static class RepairRules
 {
     public static bool CanRepair(int health, int maxHealth, bool isCore, bool isPlayerOwned,
-        bool hasEnemyOnTop, bool isPlaying, bool isNight)
+        bool hasEnemyOnTop, bool isPlaying, bool isShopPhase)
     {
         if (health >= maxHealth)
             return false;
@@ -15,7 +15,7 @@ public static class RepairRules
             return false;
         if (!isPlaying)
             return false;
-        if (!isNight)
+        if (!isShopPhase)
             return false;
         return true;
     }

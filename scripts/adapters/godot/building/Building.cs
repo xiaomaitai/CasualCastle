@@ -286,9 +286,9 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 			return false;
 		bool isPlayerOwned = CastleRef != null && CastleRef.IsPlayerCastle;
 		bool isPlaying = _gameManager?.CurrentState == GameManager.GameState.Playing;
-		bool isNight = _gameManager != null && _gameManager.IsNight;
+		bool isShopPhase = _gameManager != null && _gameManager.IsShop;
 		return RepairRules.CanRepair(Health, MaxHealth, BuildingSys.IsCoreBuilding(TypeId),
-			isPlayerOwned, HasEnemyOnTop, isPlaying, isNight);
+			isPlayerOwned, HasEnemyOnTop, isPlaying, isShopPhase);
 	}
 
 	private void Repair()
@@ -392,7 +392,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		{
 			IGameState state = AdapterRegistry.Resolve<IGameState>();
 			return IsOperational && !IsRitualInProgress
-				&& (BuildingSys.GetHasNightCombat(TypeId) ? state.IsNight : state.IsDay);
+				&& state.IsCombat;
 		}
 	}
 
