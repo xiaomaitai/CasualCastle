@@ -142,10 +142,12 @@ public partial class AudioManager : Node
 			return;
 
 		bool isHorde = _gameManager.SelectedFaction == FactionDef.HordeId;
-		bool isNight = _gameManager.CurrentPhase != GameManager.GamePhase.Day;
+		bool inverted = _gameManager.SelectedFaction == FactionDef.NecromancerId;
+		bool isNightPhase = _gameManager.CurrentPhase != GameManager.GamePhase.Day;
+		bool isNightMusic = inverted ? !isNightPhase : isNightPhase;
 		string poolKey = isHorde
-			? isNight ? HordeNightPool : HordeDayPool
-			: isNight ? AllianceNightPool : AllianceDayPool;
+			? isNightMusic ? HordeNightPool : HordeDayPool
+			: isNightMusic ? AllianceNightPool : AllianceDayPool;
 		PlayPool(poolKey);
 	}
 

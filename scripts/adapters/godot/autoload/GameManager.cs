@@ -15,8 +15,8 @@ public partial class GameManager : Node2D, IGameState
     public static T Get<T>() where T : class => Services.GetService<T>();
 
     bool IGameState.IsPlaying => CurrentState == GameState.Playing;
-    bool IGameState.IsDay => IsDay;
-    bool IGameState.IsNight => IsNight;
+    bool IGameState.IsDay => IsDayNightInverted ? IsNight : IsDay;
+    bool IGameState.IsNight => IsDayNightInverted ? IsDay : IsNight;
     bool IGameState.IsPaused => IsPaused;
     int IGameState.CurrentNightIndex => CurrentNightIndex;
 
@@ -50,6 +50,7 @@ public partial class GameManager : Node2D, IGameState
     public bool IsDay => CurrentPhase == GamePhase.Day;
     public bool IsNight => CurrentPhase == GamePhase.Night;
     public bool IsCombine => CurrentPhase == GamePhase.Combine;
+    public bool IsDayNightInverted => SelectedFaction == FactionDef.NecromancerId;
     public bool IsPaused { get; private set; }
     public float PhaseTimeRemaining { get; private set; }
     public int CurrentNightIndex { get; set; }
@@ -193,13 +194,6 @@ public partial class GameManager : Node2D, IGameState
         SetProcess(!paused);
     }
 
-    private float GetDayDurationSeconds()
-    {
-        return SelectedFaction == FactionDef.NecromancerId
-            ? GameRules.NightFactionDayDurationSeconds
-            : GameRules.DayDurationSeconds;
-    }
-
     public void AdvancePhase()
     {
         if (CurrentState != GameState.Playing) return;
@@ -231,8 +225,8 @@ public partial class GameManager : Node2D, IGameState
         CurrentPhase = phase;
         PhaseTimeRemaining = phase == GamePhase.Combine
             ? GameRules.CombineDurationSeconds
-            : GetDayDurationSeconds();
-        _phaseTimerHoldRemaining = phase == GamePhase.Day && SelectedFaction != FactionDef.NecromancerId
+            : GameRules.DayDurationSeconds;
+        _phaseTimerHoldRemaining = phase == GamePhase.Day
             ? GameRules.DayStartTimerHoldSeconds
             : 0f;
 

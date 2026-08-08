@@ -27,6 +27,7 @@ public sealed class HudUiController
 		_blackMagicLabel = uiRoot.GetNode<Label>("BlackMagicLabel");
 
 		_newDayButton.Pressed += OnNewDayPressed;
+		_newDayButton.Text = AdapterRegistry.Resolve<GameManager>().IsDayNightInverted ? "进入夜晚" : "新的一天";
 		_skipPhaseButton.Pressed += OnSkipPhasePressed;
 		_newDayButton.Visible = false;
 		_skipPhaseButton.Visible = false;
@@ -122,7 +123,9 @@ public sealed class HudUiController
 	private void UpdatePhaseDisplay()
 	{
 		GameManager gm = AdapterRegistry.Resolve<GameManager>();
-		_phaseLabel.Text = gm.IsDay ? "白天" : gm.IsCombine ? "合成" : "夜晚";
+		bool inverted = gm.IsDayNightInverted;
+		string phaseName = gm.IsCombine ? "合成" : inverted ? (gm.IsDay ? "夜晚" : "白天") : (gm.IsDay ? "白天" : "夜晚");
+		_phaseLabel.Text = phaseName;
 		if (gm.IsDay)
 		{
 			_phaseTimerLabel.Text = FormatTime(gm.PhaseTimeRemaining);

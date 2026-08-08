@@ -3,7 +3,6 @@ namespace CasualCastle.Domain.Shared;
 public static class GameRules
 {
 	public const float DayDurationSeconds = 60f;
-	public const float NightFactionDayDurationSeconds = 1f;
 	public const float CombineDurationSeconds = 1f;
 	public const float DayStartTimerHoldSeconds = 1f;
 	public const int InitialGold = 3000;
