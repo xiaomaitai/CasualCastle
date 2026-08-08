@@ -21,16 +21,6 @@ public sealed class AttributePanelController
 	private readonly List<SkillIconView> _skillIcons = new();
 	private readonly TextureRect _burrowIconRect;
 	private readonly Label _burrowProgressLabel;
-	private readonly VBoxContainer _ritualBox;
-	private readonly Label _ritualStatusLabel;
-	private readonly List<RitualButtonEntry> _ritualButtons = new();
-	private bool _ritualShowingProgress;
-
-	private sealed class RitualButtonEntry
-	{
-		public Button Button;
-		public RitualDef Def;
-	}
 	private UnitLogic _currentUnit;
 	private Building _currentBuilding;
 	private UpgradeRecipe _pendingUpgrade;
@@ -70,23 +60,6 @@ public sealed class AttributePanelController
 		_burrowProgressLabel.AddThemeFontSizeOverride("font_size", 18);
 		_burrowProgressLabel.Visible = false;
 		_panel.AddChild(_burrowProgressLabel);
-
-		_ritualBox = new VBoxContainer
-		{
-			Position = new Vector2(16, 244),
-			CustomMinimumSize = new Vector2(424, 56),
-			MouseFilter = Control.MouseFilterEnum.Pass,
-		};
-		_panel.AddChild(_ritualBox);
-
-		_ritualStatusLabel = new Label
-		{
-			MouseFilter = Control.MouseFilterEnum.Ignore,
-			Text = "举行仪式：",
-		};
-		_ritualStatusLabel.AddThemeFontSizeOverride("font_size", 17);
-		_ritualBox.AddChild(_ritualStatusLabel);
-		_ritualBox.Visible = false;
 	}
 
 	public void Process()
@@ -107,8 +80,6 @@ public sealed class AttributePanelController
 		{
 			if (_currentBuilding != building)
 				RebuildBuildingPanel(building);
-			else
-				UpdateRitualStatus(building);
 			_panel.Visible = true;
 			return;
 		}
@@ -119,7 +90,6 @@ public sealed class AttributePanelController
 		_pendingUpgrade = null;
 		_upgradeButton.Visible = false;
 		HideBurrowProgress();
-		HideRitualPanel();
 		ClearSkillsRow();
 	}
 
@@ -128,7 +98,6 @@ public sealed class AttributePanelController
 		_currentUnit = unit;
 		_currentBuilding = null;
 		HideBurrowProgress();
-		HideRitualPanel();
 		IUnitState state = unit.Handle;
 
 		_portraitRect.Texture = LoadUnitPortrait(state.TypeId) ?? LoadPlaceholder();
@@ -163,7 +132,6 @@ public sealed class AttributePanelController
 		_skillsLabel.Visible = false;
 		ClearSkillsRow();
 		RefreshUpgradeButton(building);
-		RefreshRitualPanel(building);
 	}
 
 	private void RefreshUnitCooldowns(UnitLogic unit)
@@ -352,111 +320,6 @@ public sealed class AttributePanelController
 	{
 		_burrowIconRect.Visible = false;
 		_burrowProgressLabel.Visible = false;
-	}
-
-	private void RefreshRitualPanel(Building building)
-	{
-		HideRitualPanel();
-		if (building == null || !building.IsPlayerOwned || !RitualRules.CanHostRitual(building.TypeId))
-			return;
-
-		_ritualBox.Visible = true;
-		if (building.IsRitualInProgress)
-		{
-			_ritualShowingProgress = true;
-			_ritualStatusLabel.Text = "仪式中：" + GetRitualProgressText(building);
-			return;
-		}
-
-		_ritualStatusLabel.Text = "举行仪式：";
-		HBoxContainer row = new HBoxContainer
-		{
-			MouseFilter = Control.MouseFilterEnum.Ignore,
-		};
-		_ritualBox.AddChild(row);
-		foreach (RitualDef def in RitualRules.GetAll())
-		{
-			Button button = new Button
-			{
-				Text = $"{def.DisplayName} {GetRitualCostText(def)}",
-				Disabled = !IsRitualAvailable(building, def),
-			};
-			button.AddThemeFontSizeOverride("font_size", 15);
-			string ritualId = def.Id;
-			button.Pressed += () => TryStartRitual(building, ritualId);
-			row.AddChild(button);
-			_ritualButtons.Add(new RitualButtonEntry { Button = button, Def = def });
-		}
-	}
-
-	private void UpdateRitualStatus(Building building)
-	{
-		if (!_ritualBox.Visible || building == null)
-			return;
-		bool inProgress = building.IsRitualInProgress;
-		if (inProgress != _ritualShowingProgress)
-		{
-			RefreshRitualPanel(building);
-			return;
-		}
-		if (inProgress)
-		{
-			_ritualStatusLabel.Text = "仪式中：" + GetRitualProgressText(building);
-			return;
-		}
-		foreach (RitualButtonEntry entry in _ritualButtons)
-			entry.Button.Disabled = !IsRitualAvailable(building, entry.Def);
-	}
-
-	private void TryStartRitual(Building building, string ritualId)
-	{
-		if (building == null || !GodotObject.IsInstanceValid(building))
-			return;
-		if (!building.TryStartRitual(ritualId))
-			return;
-
-		Sfx.Play(SfxEvents.Upgrade);
-		RefreshRitualPanel(building);
-	}
-
-	private void HideRitualPanel()
-	{
-		_ritualBox.Visible = false;
-		_ritualShowingProgress = false;
-		foreach (Node child in _ritualBox.GetChildren())
-		{
-			if (child == _ritualStatusLabel)
-				continue;
-			_ritualBox.RemoveChild(child);
-			child.QueueFree();
-		}
-		_ritualButtons.Clear();
-	}
-
-	private static string GetRitualProgressText(Building building)
-	{
-		RitualDef def = RitualRules.Get(building.ActiveRitualId);
-		string name = def?.DisplayName ?? building.ActiveRitualId;
-		return $"{name} {Mathf.CeilToInt(building.RitualRemainingSeconds)}s / {Mathf.CeilToInt(building.RitualTotalSeconds)}s";
-	}
-
-	private static string GetRitualCostText(RitualDef def)
-	{
-		string cost = def.CostType == RitualCostType.Gold ? $"{def.CostAmount} 金币" : $"{def.CostAmount} 黑魔法";
-		return $"{cost}·{def.DurationSeconds:0}s";
-	}
-
-	private static bool IsRitualAvailable(Building building, RitualDef def)
-	{
-		if (building.GetCastle() == null)
-			return false;
-		int coreLevel = RitualCircleRules.GetCoreLevel(building.GetCastle().GetBuildingStates());
-		if (coreLevel < def.RequiredCoreLevel)
-			return false;
-		if (def.CostType == RitualCostType.Gold)
-			return AdapterRegistry.Resolve<Shop>().CanAfford(def.CostAmount);
-		BlackMagicService blackMagic = GameManager.Get<BlackMagicService>();
-		return blackMagic != null && blackMagic.Value >= def.CostAmount;
 	}
 
 	private void OnUpgradePressed()

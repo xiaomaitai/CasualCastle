@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
+using CasualCastle.Domain.Shared;
 using Godot;
 
 public partial class NecromancerBattleSmoke : Node
@@ -15,6 +16,7 @@ public partial class NecromancerBattleSmoke : Node
 
 	private enum SmokeStep
 	{
+		CheckSpellBarUi,
 		WaitNight,
 		WaitSpawns,
 		WaitFirstRitual,
@@ -26,10 +28,25 @@ public partial class NecromancerBattleSmoke : Node
 	private Castle _playerCastle;
 	private Building _tomb;
 	private Building _darkAltar;
-	private SmokeStep _step = SmokeStep.WaitNight;
+	private readonly List<Building> _spellBarTargets = new();
+	private bool _spellBarExpectVisible;
+	private bool _spellBarExpectSelected;
+	private int _spellBarTargetIndex = -1;
+	private int _spellBarSettleFrames;
+	private Vector2 _inputScale = Vector2.One;
+	private bool _inputScaleReady;
+	private SmokeStep _step = SmokeStep.CheckSpellBarUi;
 	private float _elapsed;
 	private float _stepStartedAt;
 	private bool _nightObserved;
+
+	public override void _Input(InputEvent @event)
+	{
+		if (_inputScaleReady || @event is not InputEventMouseButton mouse || !mouse.Pressed)
+			return;
+		_inputScale = mouse.GlobalPosition / Vector2.One;
+		_inputScaleReady = true;
+	}
 
 	public override void _Ready()
 	{
@@ -56,6 +73,9 @@ public partial class NecromancerBattleSmoke : Node
 	{
 		switch (_step)
 		{
+			case SmokeStep.CheckSpellBarUi:
+				CheckSpellBarUi();
+				break;
 			case SmokeStep.WaitNight:
 				WaitNight();
 				break;
@@ -99,6 +119,111 @@ public partial class NecromancerBattleSmoke : Node
 		return FindBuilding(typeId);
 	}
 
+	private void CheckSpellBarUi()
+	{
+		if (_spellBarTargetIndex < 0)
+		{
+			_spellBarTargets.Add(_darkAltar);
+			_spellBarTargets.Add(_playerCastle.Heart);
+			_spellBarTargets.Add(_tomb);
+			_spellBarTargets.Add(null);
+			_spellBarTargetIndex = 0;
+			ApplySpellBarTarget();
+			return;
+		}
+
+		if (_spellBarSettleFrames > 0)
+		{
+			_spellBarSettleFrames--;
+			return;
+		}
+
+		VerifySpellBarState();
+		_spellBarTargetIndex++;
+		if (_spellBarTargetIndex >= _spellBarTargets.Count)
+		{
+			GD.Print("SMOKE: spell bar ui ok");
+			_stepStartedAt = _elapsed;
+			_step = SmokeStep.WaitNight;
+			return;
+		}
+		ApplySpellBarTarget();
+	}
+
+	private void ApplySpellBarTarget()
+	{
+		Building target = _spellBarTargets[_spellBarTargetIndex];
+		_spellBarExpectVisible = target != null
+			&& target.IsPlayerOwned
+			&& BuildingActionRules.CanUseSpellBar(target.TypeId);
+		_spellBarExpectSelected = target != null;
+		_spellBarSettleFrames = 4;
+		Vector2 screenPoint = target == null
+			? GetEmptyScreenPoint()
+			: GetViewport().GetCanvasTransform() * target.GlobalPosition;
+		PushBattlefieldClick(screenPoint);
+	}
+
+	private void VerifySpellBarState()
+	{
+		Control handPanel = GetNode<Control>("MainGame/UI/HandPanel");
+		Control spellBar = GetNode<Control>("MainGame/UI/SpellBarPanel");
+		HBoxContainer slots = GetNode<HBoxContainer>("MainGame/UI/SpellBarPanel/SpellSlots");
+		Control attributePanel = GetNode<Control>("MainGame/UI/AttributePanel");
+		if (attributePanel.Visible != _spellBarExpectSelected)
+			_failures.Add($"选中切换错误 attributeVisible={attributePanel.Visible} 期望={_spellBarExpectSelected}");
+		if (handPanel.Visible == _spellBarExpectVisible)
+			_failures.Add($"法术栏手牌切换错误 handVisible={handPanel.Visible} 期望={_spellBarExpectVisible}");
+		if (spellBar.Visible != _spellBarExpectVisible)
+			_failures.Add($"法术栏显示错误 spellBarVisible={spellBar.Visible} 期望={_spellBarExpectVisible}");
+		if (_spellBarExpectVisible && slots.GetChildCount() != 3)
+			_failures.Add($"法术栏槽位数量错误 count={slots.GetChildCount()}");
+	}
+
+	private Vector2 GetEmptyScreenPoint()
+	{
+		Vector2 world = _playerCastle.GlobalPosition + _playerCastle.GetCellCenter(6, 6);
+		return GetViewport().GetCanvasTransform() * world;
+	}
+
+	private void PushBattlefieldClick(Vector2 screenPoint)
+	{
+		if (!_inputScaleReady)
+		{
+			InputEventMouseButton probe = new()
+			{
+				ButtonIndex = MouseButton.Left,
+				Pressed = true,
+				Position = Vector2.One,
+				GlobalPosition = Vector2.One,
+			};
+			GetViewport().PushInput(probe);
+		}
+		Vector2 inputPosition = screenPoint / _inputScale;
+		InputEventMouseMotion motion = new()
+		{
+			Position = inputPosition,
+			GlobalPosition = screenPoint,
+		};
+		GetViewport().PushInput(motion);
+		InputEventMouseButton click = new()
+		{
+			ButtonIndex = MouseButton.Left,
+			Pressed = true,
+			Position = inputPosition,
+			GlobalPosition = screenPoint,
+		};
+		GetViewport().PushInput(click);
+		InputEventMouseButton release = new()
+		{
+			ButtonIndex = MouseButton.Left,
+			Pressed = false,
+			Position = inputPosition,
+			GlobalPosition = screenPoint,
+		};
+		GetViewport().PushInput(release);
+	}
+
 	private void WaitNight()
 	{
 		if (!AdapterRegistry.Resolve<IGameState>().IsCombat)
@@ -140,6 +265,14 @@ public partial class NecromancerBattleSmoke : Node
 
 	private void VerifyCombine()
 	{
+		if (AdapterRegistry.Resolve<GameManager>().CurrentPhase != MatchPhase.Combine)
+		{
+			if (_elapsed - _stepStartedAt < CombineCheckDelay)
+				return;
+			AdapterRegistry.Resolve<GameManager>().AdvancePhase();
+			_stepStartedAt = _elapsed;
+			return;
+		}
 		if (_elapsed - _stepStartedAt < CombineCheckDelay)
 			return;
 		if (FindBuilding("DeathTemple") == null)

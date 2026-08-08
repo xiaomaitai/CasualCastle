@@ -225,6 +225,20 @@ layout_mode = 2
 disabled = true
 text = "空"
 
+[node name="SpellBarPanel" type="ScrollContainer" parent="UI"]
+visible = false
+offset_left = 460.5
+offset_top = 907.5
+offset_right = 1459.5
+offset_bottom = 1042.5
+horizontal_scroll_mode = 1
+vertical_scroll_mode = 0
+
+[node name="SpellSlots" type="HBoxContainer" parent="UI/SpellBarPanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 18
+
 [node name="PlacementHintLabel" type="Label" parent="UI"]
 visible = false
 offset_left = 690

@@ -22,6 +22,7 @@ public partial class UIManager : Node2D
 	private RuntimeInfoPanelController _runtimeInfoPanel;
 	private UnitInfoUiController _unitInfoUi;
 	private UnitSelectionController _unitSelection;
+	private SpellBarUiController _spellBarUi;
 	private TavernBubble _tavernBubble;
 	private TavernPartyService _tavernParty;
 	private AttributePanelController _attributePanel;
@@ -82,6 +83,7 @@ public partial class UIManager : Node2D
 		_buildingInfoUi?.Process();
 		_unitInfoUi?.Process();
 		_unitSelection?.Process();
+		_spellBarUi?.Process();
 		EnsureTavernBubble();
 		_tavernBubble?.Process(_unitSelection.SelectedBuilding, _tavernParty);
 		_attributePanel?.Process();
@@ -220,6 +222,7 @@ public partial class UIManager : Node2D
 		_buildingInfoUi = new BuildingInfoUiController(this, uiRoot);
 		_unitInfoUi = new UnitInfoUiController(this, uiRoot);
 		_unitSelection = new UnitSelectionController(this);
+		_spellBarUi = new SpellBarUiController(uiRoot, _unitSelection);
 		_tavernParty = GameManager.Get<TavernPartyService>();
 		_tavernBubble = new TavernBubble();
 		GetParent()?.GetNodeOrNull<Node2D>("Battlefield")?.AddChild(_tavernBubble);
@@ -252,6 +255,7 @@ public partial class UIManager : Node2D
 		_shopUi.SetGameOver(show);
 		_handUi.SetInputBlocked(_gameOver);
 		_unitSelection.SetInputBlocked(_gameOver);
+		_spellBarUi?.SetInputBlocked(_gameOver);
 		_buildingInfoUi.SetInputBlocked(_gameOver);
 		_buildingManageUi.SetGameOver(_gameOver);
 		_combineProhibitUi.SetGameOver(_gameOver);
@@ -263,7 +267,9 @@ public partial class UIManager : Node2D
 
 	private void UpdateHandInputBlocked()
 	{
-		_handUi?.SetInputBlocked(_pauseMenuUi?.IsOpen == true || _settingsUi?.IsOpen == true || _gameOver);
+		bool blocked = _pauseMenuUi?.IsOpen == true || _settingsUi?.IsOpen == true || _gameOver;
+		_handUi?.SetInputBlocked(blocked);
+		_spellBarUi?.SetInputBlocked(blocked);
 	}
 
 	private void OpenSettings()
