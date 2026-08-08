@@ -11,7 +11,8 @@ public class CardData
 	public string BuildingType { get; set; } = BuildingTypeIds.Barracks;
 	public int Weight { get; set; } = 1;
 	public string FactionId { get; set; } = "";
-	public bool IsPlaceable { get; set; } = true;
+	public string ItemType { get; set; } = "";
+	public bool IsPlaceable => string.IsNullOrEmpty(ItemType);
 
 	public CardData Clone()
 	{
@@ -23,7 +24,7 @@ public class CardData
 			BuildingType = BuildingType,
 			Weight = Weight,
 			FactionId = FactionId,
-			IsPlaceable = IsPlaceable,
+			ItemType = ItemType,
 		};
 	}
 }

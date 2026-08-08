@@ -85,6 +85,23 @@ public class ShopRulesTests
 	}
 
 	[Fact]
+	public void SetFaction_ItemCards_FilterByFaction()
+	{
+		CardData[] catalog = new[]
+		{
+			new CardData { Id = "horde_item", Name = "H", Cost = 4, BuildingType = "", Weight = 1, FactionId = "horde", ItemType = "horde_totem" },
+			new CardData { Id = "alliance_item", Name = "A", Cost = 4, BuildingType = "", Weight = 1, FactionId = "alliance", ItemType = "scroll" },
+			new CardData { Id = "neutral_item", Name = "N", Cost = 4, BuildingType = "", Weight = 1, FactionId = "", ItemType = "relic" },
+		};
+		ShopRules rules = new(catalog);
+		rules.SetFaction("horde");
+
+		CardData[] offers = rules.GenerateOffers(new Random(42));
+
+		Assert.All(offers, card => Assert.True(card.Id == "horde_item" || card.Id == "neutral_item"));
+	}
+
+	[Fact]
 	public void SetFaction_Empty_KeepsFullCatalog()
 	{
 		CardData[] catalog = new[]

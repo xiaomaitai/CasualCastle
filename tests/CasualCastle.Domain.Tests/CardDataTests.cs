@@ -15,7 +15,7 @@ public class CardDataTests
 			Cost = 50,
 			BuildingType = "Barracks",
 			Weight = 3,
-			IsPlaceable = false
+			ItemType = ShopItemTypes.DarkMagicBook
 		};
 		CardData clone = original.Clone();
 
@@ -24,7 +24,23 @@ public class CardDataTests
 		Assert.Equal(original.Cost, clone.Cost);
 		Assert.Equal(original.BuildingType, clone.BuildingType);
 		Assert.Equal(original.Weight, clone.Weight);
-		Assert.Equal(original.IsPlaceable, clone.IsPlaceable);
+		Assert.Equal(original.ItemType, clone.ItemType);
+		Assert.False(clone.IsPlaceable);
 		Assert.NotSame(original, clone);
+	}
+	[Fact]
+	public void IsPlaceable_BuildingCard_ReturnsTrue()
+	{
+		CardData card = new() { Id = "tomb", BuildingType = "Tomb" };
+
+		Assert.True(card.IsPlaceable);
+	}
+
+	[Fact]
+	public void IsPlaceable_ItemCard_ReturnsFalse()
+	{
+		CardData card = new() { Id = "book", ItemType = ShopItemTypes.DarkMagicBook };
+
+		Assert.False(card.IsPlaceable);
 	}
 }

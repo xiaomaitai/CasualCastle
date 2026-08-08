@@ -70,7 +70,7 @@ public static class GameDataLoader
 
 	private static void LoadItemCards(SqliteCommand cmd, List<CardData> catalog)
 	{
-		cmd.CommandText = "SELECT id, name, cost, weight, faction_id FROM item_catalog";
+		cmd.CommandText = "SELECT id, name, cost, weight, faction_id, item_type FROM item_catalog";
 		using SqliteDataReader reader = cmd.ExecuteReader();
 		while (reader.Read())
 		{
@@ -79,10 +79,10 @@ public static class GameDataLoader
 				Id = reader.GetString(0),
 				Name = reader.GetString(1),
 				Cost = reader.GetInt32(2),
-				BuildingType = reader.GetString(0),
+				BuildingType = "",
 				Weight = reader.GetInt32(3),
 				FactionId = reader.GetString(4),
-				IsPlaceable = false,
+				ItemType = reader.GetString(5),
 			});
 		}
 	}

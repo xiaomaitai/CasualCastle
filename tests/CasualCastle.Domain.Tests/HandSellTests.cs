@@ -31,7 +31,7 @@ public class HandSellTests
 	public void TryPlaceAtIndex_NonPlaceableCard_ReturnsFalseAndKeepsCard()
 	{
 		Hand hand = CreateHand(out FakeBuildingPlacement placement);
-		hand.TryAddCard(new CardData { Id = "book", Cost = 4, BuildingType = "DarkMagicBook", IsPlaceable = false });
+		hand.TryAddCard(new CardData { Id = "book", Cost = 4, BuildingType = "DarkMagicBook", ItemType = ShopItemTypes.DarkMagicBook });
 
 		bool placed = hand.TryPlaceAtIndex(0, 1, 1);
 
@@ -57,7 +57,7 @@ public class HandSellTests
 	public void TryRemoveAtIndex_RemovesCardAndFiresEvent()
 	{
 		Hand hand = CreateHand(out _);
-		hand.TryAddCard(new CardData { Id = "book", Cost = 4, IsPlaceable = false });
+		hand.TryAddCard(new CardData { Id = "book", Cost = 4, ItemType = ShopItemTypes.DarkMagicBook });
 		int changes = 0;
 		hand.HandChanged += () => changes++;
 
@@ -73,7 +73,7 @@ public class HandSellTests
 	public void TryRemoveCardById_RemovesMatchingCard()
 	{
 		Hand hand = CreateHand(out _);
-		hand.TryAddCard(new CardData { Id = "book", Cost = 4, IsPlaceable = false });
+		hand.TryAddCard(new CardData { Id = "book", Cost = 4, ItemType = ShopItemTypes.DarkMagicBook });
 		hand.TryAddCard(new CardData { Id = "tomb", Cost = 2 });
 
 		bool removed = hand.TryRemoveCardById("book");
@@ -89,11 +89,11 @@ public class HandSellTests
 		Hand hand = CreateHand(out _);
 		CardData[] catalog = new[]
 		{
-			new CardData { Id = "book", Name = "黑暗魔法书", Cost = 5, BuildingType = "DarkMagicBook", IsPlaceable = false },
+			new CardData { Id = "book", Name = "黑暗魔法书", Cost = 5, BuildingType = "DarkMagicBook", ItemType = ShopItemTypes.DarkMagicBook },
 		};
 		Player player = new Player();
 		Shop shop = new Shop(hand, new ShopRules(catalog), player);
-		hand.TryAddCard(new CardData { Id = "book", Name = "黑暗魔法书", Cost = 5, BuildingType = "DarkMagicBook", IsPlaceable = false });
+		hand.TryAddCard(new CardData { Id = "book", Name = "黑暗魔法书", Cost = 5, BuildingType = "DarkMagicBook", ItemType = ShopItemTypes.DarkMagicBook });
 		int goldBefore = shop.Gold;
 
 		bool sold = shop.TrySellHandCard(0);

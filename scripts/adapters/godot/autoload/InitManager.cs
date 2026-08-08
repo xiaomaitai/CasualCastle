@@ -1,5 +1,6 @@
 // 场景初始化：组装系统节点与纯 C# 服务
 using CasualCastle.Adapters.Godot;
+using CasualCastle.Adapters.Persistence;
 using CasualCastle.Domain.Building;
 using CasualCastle.Domain.History;
 using CasualCastle.Domain.Shared;
@@ -75,6 +76,20 @@ public partial class InitManager : Node
 			LoadSaveIntoGame(gm, shopService, hand);
 	}
 
+	private static string ResolveItemType(CardSaveEntry card)
+	{
+		if (!string.IsNullOrEmpty(card.ItemType))
+			return card.ItemType;
+		if (card.IsPlaceable)
+			return "";
+		foreach (CardData catalogCard in GameDataLoader.ShopCatalog)
+		{
+			if (catalogCard.Id == card.Id)
+				return catalogCard.ItemType;
+		}
+		return "";
+	}
+
 	private void LoadSaveIntoGame(GameManager gm, Shop shopService, Hand hand)
 	{
 		SaveData data = gm.LoadSaveData(gm.PendingLoadSlot);
@@ -127,7 +142,7 @@ public partial class InitManager : Node
 				Cost = card.Cost,
 				BuildingType = card.BuildingType,
 				Weight = card.Weight,
-				IsPlaceable = card.IsPlaceable,
+				ItemType = ResolveItemType(card),
 			});
 		}
 

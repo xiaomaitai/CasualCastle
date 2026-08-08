@@ -205,7 +205,7 @@ public sealed class SpellBarUiController
 			return false;
 		foreach (CardData card in hand.Cards)
 		{
-			string ritualId = DarkMagicBookRules.GetRitualId(card.Id);
+			string ritualId = DarkMagicBookRules.GetRitualId(card);
 			if (ritualId != null && !ritualService.IsLearned(ritualId))
 				return true;
 		}

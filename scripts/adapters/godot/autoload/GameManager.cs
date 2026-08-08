@@ -286,6 +286,7 @@ public partial class GameManager : Node2D, IGameState
 				BuildingType = c.BuildingType,
 				Weight = c.Weight,
 				IsPlaceable = c.IsPlaceable,
+				ItemType = c.ItemType,
 			});
 		}
 

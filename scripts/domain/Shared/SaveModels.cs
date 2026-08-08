@@ -33,4 +33,5 @@ public class CardSaveEntry
 	public string BuildingType { get; set; } = "";
 	public int Weight { get; set; }
 	public bool IsPlaceable { get; set; } = true;
+	public string ItemType { get; set; } = "";
 }

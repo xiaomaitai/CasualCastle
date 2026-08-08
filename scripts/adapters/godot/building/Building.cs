@@ -574,7 +574,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 			ritualId, isCoreHosted, coreLevel,
 			_shop.TrySpendGold,
 			amount => blackMagic != null && blackMagic.TrySpend(amount),
-			book?.Id, book == null ? null : DarkMagicBookRules.GetRitualId(book.Id));
+			book?.Id, book == null ? null : DarkMagicBookRules.GetRitualId(book));
 		if (_activeRitual == null)
 			return false;
 
@@ -591,7 +591,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 		foreach (CardData card in hand.Cards)
 		{
-			string ritualId = DarkMagicBookRules.GetRitualId(card.Id);
+			string ritualId = DarkMagicBookRules.GetRitualId(card);
 			if (ritualId != null && !_ritualService.IsLearned(ritualId))
 				return card;
 		}
