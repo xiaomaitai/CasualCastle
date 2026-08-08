@@ -133,6 +133,7 @@ public partial class GameManager : Node2D, IGameState
         CurrentNightIndex = 0;
 
         CurrentState = GameState.Playing;
+        EmitSignal(SignalName.GameStateChanged, (int)CurrentState);
         IsPaused = false;
         SyncHeartHealthFromCastles();
         BattleReportSystem?.StartMatch(PendingReplayReportId);
