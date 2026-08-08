@@ -335,6 +335,7 @@ public partial class GameManager : Node2D, IGameState
     public void RestartGame()
     {
         CurrentState = GameState.Playing;
+        EmitSignal(SignalName.GameStateChanged, (int)CurrentState);
         SetProcess(true);
     }
 }
