@@ -185,9 +185,7 @@ public sealed class AttributePanelController
 			return "手动暂停";
 		if (building.IsCombineProhibited)
 			return "已禁止组合";
-		if (GameManager.Instance?.IsNight == true)
-			return "夜晚休眠";
-		return building.CanWork ? "工作中" : "停止工作";
+		return building.CanWork ? "工作中" : "休眠";
 	}
 
 	private static string BuildBonusLine(UnitLogic unit)
@@ -226,6 +224,12 @@ public sealed class AttributePanelController
 			return;
 		}
 
+		if (RitualCircleRules.GetLevel(building.TypeId) >= RitualCircleRules.CoreLevelTypeIds.Length)
+		{
+			_upgradeButton.Visible = false;
+			return;
+		}
+
 		if (HordeCoreRules.GetLevel(building.TypeId) >= HordeCoreRules.CoreLevelTypeIds.Length)
 		{
 			ShowBurrowCount(HordeCoreRules.CountBurrows(building.GetCastle().GetBuildingStates()));
@@ -250,7 +254,8 @@ public sealed class AttributePanelController
 
 		IBuildingRepository repo = GameManager.Get<IBuildingRepository>();
 		List<IBuildingState> states = building.GetCastle().GetBuildingStates();
-		int coreLevel = HordeCoreRules.GetCoreLevel(states);
+		bool isNecromancer = repo.GetFactionId(building.TypeId) == FactionDef.NecromancerId;
+		int coreLevel = isNecromancer ? RitualCircleRules.GetCoreLevel(states) : HordeCoreRules.GetCoreLevel(states);
 		int burrowCount = HordeCoreRules.CountBurrows(states);
 		string blockReason = "";
 		bool upgradeBlocked = false;
@@ -263,6 +268,15 @@ public sealed class AttributePanelController
 		else if (repo.GetFactionId(building.TypeId) == FactionDef.HordeId)
 		{
 			int required = HordeCoreRules.GetRequiredCoreLevel(recipe.ResultTypeId, repo);
+			if (coreLevel < required)
+			{
+				blockReason = $"（需核心 {required} 级）";
+				upgradeBlocked = true;
+			}
+		}
+		else if (isNecromancer)
+		{
+			int required = RitualCircleRules.GetRequiredCoreLevel(recipe.ResultTypeId, repo);
 			if (coreLevel < required)
 			{
 				blockReason = $"（需核心 {required} 级）";
@@ -314,7 +328,10 @@ public sealed class AttributePanelController
 		IBuildingState upgraded = useCase.TryUpgrade(
 			building, _pendingUpgrade.ResultTypeId, healthRatio,
 			AdapterRegistry.Resolve<Shop>().TrySpendGold, factory,
-			HordeCoreRules.GetCoreLevel(states), HordeCoreRules.CountBurrows(states));
+			GameManager.Get<IBuildingRepository>().GetFactionId(building.TypeId) == FactionDef.NecromancerId
+				? RitualCircleRules.GetCoreLevel(states)
+				: HordeCoreRules.GetCoreLevel(states),
+			HordeCoreRules.CountBurrows(states));
 		if (upgraded == null)
 			return;
 
@@ -401,6 +418,7 @@ public sealed class AttributePanelController
 			"Centaur" => "半人马",
 			"Staglur" => "半人鹿",
 			"Lizard" => "蜥蜴人",
+			"Undead" => "亡灵",
 			_ => race,
 		};
 	}

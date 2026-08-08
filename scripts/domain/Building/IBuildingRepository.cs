@@ -18,6 +18,7 @@ public interface IBuildingRepository
 
 	int GetCombineTier(string typeId) => Get(typeId).CombineTier;
 	bool IsCoreBuilding(string typeId) => Get(typeId).IsCore;
+	bool GetHasNightCombat(string typeId) => Get(typeId).HasNightCombat;
 	int GetCollisionWidth(string typeId) => Get(typeId).CollisionWidth;
 	int GetCollisionHeight(string typeId) => Get(typeId).CollisionHeight;
 	int GetValue(string typeId) => Get(typeId).Value;

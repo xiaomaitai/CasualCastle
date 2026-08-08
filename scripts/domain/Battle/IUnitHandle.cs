@@ -12,4 +12,5 @@ public interface IUnitHandle : IUnitState
 	void ClearBuildingTarget();
 	void SetGameContext(GameContext ctx);
 	IBuildingRef AssignedTavern { get; set; }
+	void ApplyPoison(float damagePerSecond, float duration);
 }

@@ -19,42 +19,43 @@ public class SqliteBuildingRepository : IBuildingRepository, IBuildingVisualRepo
 		EnsureValueColumn(connection);
 		EnsureRaceIdColumn(connection);
 		using SqliteCommand cmd = connection.CreateCommand();
-		cmd.CommandText = "SELECT type_id, display_name, max_health, spawn_interval, main_cell_x, main_cell_y, spawn_cell_x, spawn_cell_y, unit_type_id, combine_tier, is_core, footprint_json, collision_width, collision_height, faction_id, production_rate, texture_path, sprite_modulate_r, sprite_modulate_g, sprite_modulate_b, sprite_modulate_a, material_path, value, race_id FROM building_defs";
+		cmd.CommandText = "SELECT type_id, display_name, max_health, spawn_interval, main_cell_x, main_cell_y, spawn_cell_x, spawn_cell_y, unit_type_id, has_night_combat, combine_tier, is_core, footprint_json, collision_width, collision_height, faction_id, production_rate, texture_path, sprite_modulate_r, sprite_modulate_g, sprite_modulate_b, sprite_modulate_a, material_path, value, race_id FROM building_defs";
 		using SqliteDataReader reader = cmd.ExecuteReader();
 		while (reader.Read())
 		{
 			string typeId = reader.GetString(0);
-			string footprintJson = reader.GetString(11);
+			string footprintJson = reader.GetString(12);
 			List<GridCellOffset> offsets = ParseFootprint(footprintJson);
 
 			_cache[typeId] = new BuildingData
 			{
 				TypeId = typeId,
-				FactionId = reader.GetString(14),
-				RaceId = reader.IsDBNull(23) ? "" : reader.GetString(23),
+				FactionId = reader.GetString(15),
+				RaceId = reader.IsDBNull(24) ? "" : reader.GetString(24),
 				DisplayName = reader.GetString(1),
 				MaxHealth = reader.GetInt32(2),
 				SpawnInterval = reader.IsDBNull(3) ? 0 : reader.GetFloat(3),
 				MainCellOffset = new(reader.GetInt32(4), reader.GetInt32(5)),
 				SpawnCellOffset = new(reader.GetInt32(6), reader.GetInt32(7)),
 				UnitTypeId = reader.IsDBNull(8) ? null : reader.GetString(8),
-				CombineTier = reader.GetInt32(9),
-				IsCore = reader.GetInt32(10) != 0,
+				HasNightCombat = reader.GetInt32(9) != 0,
+				CombineTier = reader.GetInt32(10),
+				IsCore = reader.GetInt32(11) != 0,
 				Footprint = offsets.ToArray(),
-				CollisionWidth = reader.GetInt32(12),
-				CollisionHeight = reader.GetInt32(13),
-				ProductionRate = reader.IsDBNull(15) ? 0 : reader.GetFloat(15),
-				Value = reader.IsDBNull(22) ? 0 : reader.GetInt32(22),
+				CollisionWidth = reader.GetInt32(13),
+				CollisionHeight = reader.GetInt32(14),
+				ProductionRate = reader.IsDBNull(16) ? 0 : reader.GetFloat(16),
+				Value = reader.IsDBNull(23) ? 0 : reader.GetInt32(23),
 			};
 
 			_visualCache[typeId] = new BuildingVisualData
 			{
-				TexturePath = reader.GetString(16),
-				SpriteModulateR = reader.GetFloat(17),
-				SpriteModulateG = reader.GetFloat(18),
-				SpriteModulateB = reader.GetFloat(19),
-				SpriteModulateA = reader.GetFloat(20),
-				MaterialPath = reader.GetString(21),
+				TexturePath = reader.GetString(17),
+				SpriteModulateR = reader.GetFloat(18),
+				SpriteModulateG = reader.GetFloat(19),
+				SpriteModulateB = reader.GetFloat(20),
+				SpriteModulateA = reader.GetFloat(21),
+				MaterialPath = reader.GetString(22),
 			};
 		}
 	}

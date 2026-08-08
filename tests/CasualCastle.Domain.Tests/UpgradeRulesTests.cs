@@ -193,4 +193,45 @@ public class UpgradeRulesTests
 
 		Assert.False(canUpgrade);
 	}
+
+	[Fact]
+	public void CanUpgrade_NecromancerBuilding_RequiresRitualCircleLevel()
+	{
+		UpgradeRules rules = new();
+		rules.LoadRecipes(new List<UpgradeRecipe>
+		{
+			new() { SourceTypeId = "Tomb", ResultTypeId = "Necropolis" }
+		});
+		Mock<IBuildingRepository> repo = new();
+		repo.Setup(r => r.GetValue("Tomb")).Returns(2);
+		repo.Setup(r => r.GetValue("Necropolis")).Returns(5);
+		repo.Setup(r => r.GetFactionId("Tomb")).Returns(FactionDef.NecromancerId);
+		repo.Setup(r => r.GetCombineTier("Necropolis")).Returns(1);
+		Mock<IBuildingState> source = CreateSource(true, false, "Tomb");
+
+		bool withLevelOneCore = rules.CanUpgrade(source.Object, repo.Object, 1, 0);
+		bool withLevelTwoCore = rules.CanUpgrade(source.Object, repo.Object, 2, 0);
+
+		Assert.False(withLevelOneCore);
+		Assert.True(withLevelTwoCore);
+	}
+
+	[Fact]
+	public void CanUpgrade_RitualCircleCoreUpgrade_NoCoreLevelGate()
+	{
+		UpgradeRules rules = new();
+		rules.LoadRecipes(new List<UpgradeRecipe>
+		{
+			new() { SourceTypeId = "RitualCircleL1", ResultTypeId = "RitualCircleL2" }
+		});
+		Mock<IBuildingRepository> repo = new();
+		repo.Setup(r => r.GetValue("RitualCircleL1")).Returns(0);
+		repo.Setup(r => r.GetValue("RitualCircleL2")).Returns(20);
+		repo.Setup(r => r.GetFactionId("RitualCircleL1")).Returns(FactionDef.NecromancerId);
+		Mock<IBuildingState> source = CreateSource(true, false, "RitualCircleL1");
+
+		bool canUpgrade = rules.CanUpgrade(source.Object, repo.Object, 0, 0);
+
+		Assert.True(canUpgrade);
+	}
 }

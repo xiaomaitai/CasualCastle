@@ -129,6 +129,9 @@ public partial class GameManager : Node2D, IGameState
         SyncHeartHealthFromCastles();
         BattleReportSystem?.StartMatch(PendingReplayReportId);
 
+        if (SelectedFaction == FactionDef.NecromancerId)
+            Get<BlackMagicService>()?.Reset();
+
         BeginPhase(GamePhase.Day);
         SetProcess(true);
     }
@@ -187,6 +190,13 @@ public partial class GameManager : Node2D, IGameState
         SetProcess(!paused);
     }
 
+    private float GetDayDurationSeconds()
+    {
+        return SelectedFaction == FactionDef.NecromancerId
+            ? GameRules.NightFactionDayDurationSeconds
+            : GameRules.DayDurationSeconds;
+    }
+
     public void AdvancePhase()
     {
         if (CurrentState != GameState.Playing) return;
@@ -218,8 +228,8 @@ public partial class GameManager : Node2D, IGameState
         CurrentPhase = phase;
         PhaseTimeRemaining = phase == GamePhase.Combine
             ? GameRules.CombineDurationSeconds
-            : GameRules.DayDurationSeconds;
-        _phaseTimerHoldRemaining = phase == GamePhase.Day
+            : GetDayDurationSeconds();
+        _phaseTimerHoldRemaining = phase == GamePhase.Day && SelectedFaction != FactionDef.NecromancerId
             ? GameRules.DayStartTimerHoldSeconds
             : 0f;
 

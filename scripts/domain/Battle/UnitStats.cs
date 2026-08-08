@@ -26,6 +26,7 @@ public class UnitStats
 	public int UnitCost { get; init; }
 	public string Race { get; init; }
 	public bool CanDetectStealth { get; init; }
+	public bool HasNightCombat { get; init; }
 	public float HealAmount { get; init; }
 	public float HealRange { get; init; }
 	public float HealInterval { get; init; }

@@ -143,6 +143,13 @@ INSERT INTO asset_gen_tasks VALUES(125,'6d55cda5558d4f349cd8cec1e7bf99c7','compl
 INSERT INTO asset_gen_tasks VALUES(126,'f63721c4df074e8281aa1855dc1acbed','completed',unistr('A minimalist horse stable for an RTS game, perfectly centered inside a square footprint, designed to fit naturally into a square grid tile.\u000a\u000a3/4 top-down view, symmetrical composition, entire building fully visible.\u000a\u000aCute stylized cartoon illustration, flat 2D vector style, bold thick black outlines, clean cel shading, simplified geometric shapes, minimal details, highly readable game asset.\u000a\u000aWooden stable with a blue gabled roof, cream walls, open barn entrance, wooden fences, hay bales, two small horses standing inside fenced paddocks, tidy farm appearance.\u000a\u000aBalanced proportions, compact building, square silhouette, optimized as a strategy game building icon.\u000a\u000aPure white background.'),'',768,768,1,0,30,0.0,-1,'5d7e67009b344550bc1aa6ccbfa1d7f4','',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/4dd388588e012bb10dfea1a50b4c282a6cc8fa5a8e68b47c961a6746a042fd77.png','assets/art/buildings/Stable_star3_ref_126.png','2026-08-06T17:41:58Z','2026-08-06T17:42:48Z',NULL);
 INSERT INTO asset_gen_tasks VALUES(127,'0cf3933b354946fca8d25e8e42bc8d72','completed',unistr('A minimalist horse stable for an RTS game, perfectly centered inside a square footprint, designed to fit naturally into a square grid tile.\u000a\u000a3/4 top-down view, symmetrical composition, entire building fully visible.\u000a\u000aCute stylized cartoon illustration, flat 2D vector style, bold thick black outlines, clean cel shading, simplified geometric shapes, minimal details, highly readable game asset.\u000a\u000aWooden stable with a blue gabled roof, cream walls, open barn entrance, wooden fences, hay bales, two small horses standing inside fenced paddocks, tidy farm appearance.\u000a\u000aBalanced proportions, compact building, square silhouette, optimized as a strategy game building icon.\u000a\u000aPure white background.'),'isometric diamond tile, rotated building, perspective view, realistic, painterly, 3D render, sketch, watercolor, heavy textures, photorealistic, cluttered details, shadows outside object, background scenery, people, trees, mountains, text, logo, watermark',768,768,1,1,30,4.0,-1,'e10adc3949ba59abbe56e057f20f883e','0ea388c7eb854be3ba3c6f65aac6bfd3',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/eef57ec2db5a969444ffaa6f74d3e6fe006cd2029d85fa11a508529206b7b5b9.png','assets/art/buildings/Stable_xl_ref_127.png','2026-08-06T17:42:00Z','2026-08-06T17:42:48Z',NULL);
 INSERT INTO asset_gen_tasks VALUES(128,'3f7064541b604eef9974351460665520','completed','remove_bg',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'4df2efa0f18d46dc9758803e478eb51c',NULL,5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/06fb4980876528c7c571f37f3d361e94798dfbedda90cd706079f8f74713583a.png','assets/art/buildings/Stable_128_cut.png','2026-08-06T17:50:04Z','2026-08-06T17:51:28Z','generateStatus=5');
+INSERT INTO asset_gen_tasks VALUES(129,'868c1f9a868c4673a439bee1a14bb5c5','completed','A medieval skeleton soldier unit, wielding a rusty short sword and holding a small cracked wooden shield, facing right, full body character, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors, game character icon','',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/acba96aa00f07ac4d316d4f72fc0324502d829a2fdf27ee7708943cf3dd7d5ab.png','assets/art/cards\Skeleton_129.png','2026-08-08T09:28:02Z','2026-08-08T09:28:59Z',NULL);
+INSERT INTO asset_gen_tasks VALUES(130,'9a817643e3c3434593f76b0bdb1c4643','completed','A medieval zombie unit, shambling corpse with torn rags and outstretched arms, facing right, full body character, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors, game character icon','',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/83eec3b1dd74af2115d762e099adda5faba92f5fed85931f3a52293aea283dbb.png','assets/art/cards\Zombie_130.png','2026-08-08T09:28:11Z','2026-08-08T09:28:59Z',NULL);
+INSERT INTO asset_gen_tasks VALUES(131,'510a64260af64db5a434d077b341e644','completed','A medieval skeleton warrior unit, wearing battered iron armor and helm, wielding a longsword, facing right, full body character, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors, game character icon','',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/cc19903aa3fd43d4c826a3887babd1357650d9c92a719734f693bda0a482120d.png','assets/art/cards\SkeletonWarrior_131.png','2026-08-08T09:28:20Z','2026-08-08T09:28:59Z',NULL);
+INSERT INTO asset_gen_tasks VALUES(132,'9a865ae4db104901b2069f64b29a912d','completed','A medieval plague zombie unit, bloated green corpse with boils and torn robes, face wrapped in bandages, facing right, full body character, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors, game character icon','',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/0da1fa084b6f813f473d1de6eca48d4178257ff95955369525e0eb623716378c.png','assets/art/cards\PlagueZombie_132.png','2026-08-08T09:29:00Z','2026-08-08T09:29:55Z',NULL);
+INSERT INTO asset_gen_tasks VALUES(133,'9329998a86894192b753500933db25ca','completed','A poison strike game skill icon, fanged green venom vial with dripping toxin, centered composition, complete icon design with decorative emblem background, thick gold frame, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors','white background, plain solid color background, transparency',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/b8e7cc6b4cc67b14cdc57495f790f9aecafb88ca40d37cf1d1b9ed7e175e0d0d.png','assets/art/skills\zombie_poison_133.png','2026-08-08T09:29:08Z','2026-08-08T09:29:56Z',NULL);
+INSERT INTO asset_gen_tasks VALUES(134,'59d4297cd40f4b06a084c2078228d434','completed','A plague venom game skill icon, toxic green gas cloud with a skull emblem, centered composition, complete icon design with decorative emblem background, thick gold frame, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors','white background, plain solid color background, transparency',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/f9ec631f6dbd86de892875c08e9cd32c283553a84ca2fe38443b429085535707.png','assets/art/skills\plague_poison_134.png','2026-08-08T09:29:17Z','2026-08-08T09:29:56Z',NULL);
+INSERT INTO asset_gen_tasks VALUES(135,'84ec8ab176d24b24bf7a6625954667fe','completed','A toxic miasma burst game skill icon, erupting green poison cloud with drifting bones, centered composition, complete icon design with decorative emblem background, thick gold frame, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors','white background, plain solid color background, transparency',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/cbea9a3747e42ee2604e1a08e81221c6ad563bedbeb53e19795cd75561f4efa8.png','assets/art/skills\plague_burst_135.png','2026-08-08T09:30:14Z','2026-08-08T09:30:53Z',NULL);
 CREATE TABLE unit_stats (
     type_id          TEXT PRIMARY KEY,
     size             INTEGER NOT NULL,
@@ -201,6 +208,10 @@ INSERT INTO unit_stats VALUES('StaglurDruid',0,0,4,1,75,0,70.0,0.0,10.0,0,428493
 INSERT INTO unit_stats VALUES('StaglurArchdruid',0,0,4,1,100,0,70.0,0.0,10.0,0,4282694485,240.0,3600,'Staglur',45,0,28.0,170.0,1.8);
 INSERT INTO unit_stats VALUES('LizardHunter',1,0,1,2,120,18,120.0,40.0,1.1,0,4282694570,240.0,2600,'Lizard',45,0,0.0,0.0,0.0);
 INSERT INTO unit_stats VALUES('LizardStalker',1,0,1,2,150,24,120.0,40.0,1.0,0,4280453222,250.0,3400,'Lizard',60,1,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('Skeleton',0,0,0,2,25,8,70.0,40.0,1.2,1,4290295992,180.0,1400,'Undead',5,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('Zombie',1,0,2,4,110,14,45.0,40.0,1.6,1,4286356540,180.0,1600,'Undead',40,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('SkeletonWarrior',0,0,0,2,45,12,75.0,40.0,0.9,1,4292401352,190.0,2200,'Undead',10,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('PlagueZombie',1,0,2,4,150,16,45.0,40.0,1.5,1,4284119594,190.0,2600,'Undead',50,0,0.0,0.0,0.0);
 CREATE TABLE building_defs (
     type_id           TEXT PRIMARY KEY,
     display_name      TEXT    NOT NULL,
@@ -270,6 +281,15 @@ INSERT INTO building_defs VALUES('StaglurSacredGrove','半人鹿圣林',170,8.0,
 INSERT INTO building_defs VALUES('StaglurAncientTree','半人鹿古树',260,7.0,0,0,1,1,'StaglurArchdruid',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',7,'Staglur');
 INSERT INTO building_defs VALUES('LizardNest','蜥蜴人巢穴',200,9.0,0,0,1,1,'LizardHunter',0,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',3,'Lizard');
 INSERT INTO building_defs VALUES('LizardHuntingGrounds','蜥蜴人猎场',300,8.0,0,0,1,1,'LizardStalker',0,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'horde',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',7,'Lizard');
+INSERT INTO building_defs VALUES('Tomb','墓穴',140,6.0,0,0,1,1,'Skeleton',1,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'necromancer',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',2,'Undead');
+INSERT INTO building_defs VALUES('BlightField','腐化之地',180,8.0,0,0,1,1,'Zombie',1,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'necromancer',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',2,'Undead');
+INSERT INTO building_defs VALUES('Necropolis','大墓地',240,5.0,0,0,1,1,'SkeletonWarrior',1,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'necromancer',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',5,'Undead');
+INSERT INTO building_defs VALUES('BlightMarsh','腐化沼泽',280,7.0,0,0,1,1,'PlagueZombie',1,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'necromancer',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',5,'Undead');
+INSERT INTO building_defs VALUES('RitualCircleL1','仪式之环·1级',800,0.0,0,0,1,1,NULL,1,0,1,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'necromancer',0.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',0,'');
+INSERT INTO building_defs VALUES('RitualCircleL2','仪式之环·2级',1000,0.0,0,0,1,1,NULL,1,0,1,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'necromancer',0.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',20,'');
+INSERT INTO building_defs VALUES('RitualCircleL3','仪式之环·3级',1200,0.0,0,0,1,1,NULL,1,0,1,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'necromancer',0.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',60,'');
+INSERT INTO building_defs VALUES('RitualCircleL4','仪式之环·4级',1400,0.0,0,0,1,1,NULL,1,0,1,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'necromancer',0.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',150,'');
+INSERT INTO building_defs VALUES('RitualCircleL5','仪式之环·5级',1600,0.0,0,0,1,1,NULL,1,0,1,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'necromancer',0.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',300,'');
 CREATE TABLE damage_matrix (
     damage_type INTEGER NOT NULL,
     armor_type  INTEGER NOT NULL,
@@ -357,6 +377,8 @@ INSERT INTO shop_catalog VALUES('GoblinHut','哥布林窝棚',2,'GoblinHut',14);
 INSERT INTO shop_catalog VALUES('CentaurTent','半人马营帐',4,'CentaurTent',10);
 INSERT INTO shop_catalog VALUES('StaglurSacredGrove','半人鹿圣林',3,'StaglurSacredGrove',10);
 INSERT INTO shop_catalog VALUES('LizardNest','蜥蜴人巢穴',3,'LizardNest',10);
+INSERT INTO shop_catalog VALUES('Tomb','墓穴',2,'Tomb',14);
+INSERT INTO shop_catalog VALUES('BlightField','腐化之地',2,'BlightField',10);
 CREATE TABLE IF NOT EXISTS "faction_defs" (
     id TEXT PRIMARY KEY,
     display_name TEXT NOT NULL,
@@ -430,6 +452,15 @@ INSERT INTO tech_tree_nodes VALUES('MageTower','alliance',1,11,1,5,6,0,'术士�
 INSERT INTO tech_tree_nodes VALUES('DragonfireTower','alliance',2,11,0,NULL,NULL,0,'龙火塔','DragonbornArchmage',230,12.0,10,'',0);
 INSERT INTO tech_tree_nodes VALUES('Inn','alliance',1,12,1,2,14,0,'酒馆',NULL,120,10.0,2,'',0);
 INSERT INTO tech_tree_nodes VALUES('AdventurerGuild','alliance',2,12,0,NULL,NULL,0,'冒险者公会',NULL,200,10.0,6,'',0);
+INSERT INTO tech_tree_nodes VALUES('RitualCircleL1','necromancer',1,0,0,NULL,NULL,0,'仪式之环·1级',NULL,800,0.0,NULL,'',1);
+INSERT INTO tech_tree_nodes VALUES('Tomb','necromancer',1,1,1,2,14,0,'墓穴','Skeleton',140,6.0,2,'Undead',0);
+INSERT INTO tech_tree_nodes VALUES('BlightField','necromancer',1,2,1,2,10,0,'腐化之地','Zombie',180,8.0,2,'Undead',0);
+INSERT INTO tech_tree_nodes VALUES('RitualCircleL2','necromancer',2,0,0,NULL,NULL,0,'仪式之环·2级',NULL,1000,0.0,20,'',1);
+INSERT INTO tech_tree_nodes VALUES('Necropolis','necromancer',2,1,0,NULL,NULL,0,'大墓地','SkeletonWarrior',240,5.0,5,'Undead',0);
+INSERT INTO tech_tree_nodes VALUES('BlightMarsh','necromancer',2,2,0,NULL,NULL,0,'腐化沼泽','PlagueZombie',280,7.0,5,'Undead',0);
+INSERT INTO tech_tree_nodes VALUES('RitualCircleL3','necromancer',3,0,0,NULL,NULL,0,'仪式之环·3级',NULL,1200,0.0,60,'',1);
+INSERT INTO tech_tree_nodes VALUES('RitualCircleL4','necromancer',4,0,0,NULL,NULL,0,'仪式之环·4级',NULL,1400,0.0,150,'',1);
+INSERT INTO tech_tree_nodes VALUES('RitualCircleL5','necromancer',5,0,0,NULL,NULL,0,'仪式之环·5级',NULL,1600,0.0,300,'',1);
 CREATE TABLE IF NOT EXISTS "combine_recipes" (
                 main_type_id TEXT NOT NULL,
                 material_type_id TEXT NOT NULL,
@@ -483,6 +514,9 @@ INSERT INTO unit_skills VALUES('LizardHunter','lizard_ambush_t1');
 INSERT INTO unit_skills VALUES('LizardHunter','lizard_mark_aura');
 INSERT INTO unit_skills VALUES('LizardStalker','lizard_ambush_t2');
 INSERT INTO unit_skills VALUES('LizardStalker','lizard_mark_aura');
+INSERT INTO unit_skills VALUES('Zombie','zombie_poison');
+INSERT INTO unit_skills VALUES('PlagueZombie','plague_poison');
+INSERT INTO unit_skills VALUES('PlagueZombie','plague_burst');
 CREATE TABLE IF NOT EXISTS "skill_defs" (
     id TEXT PRIMARY KEY,
     display_name TEXT NOT NULL,
@@ -513,6 +547,9 @@ INSERT INTO skill_defs VALUES('centaur_hoof_aura','疾风之蹄','aura','{"targe
 INSERT INTO skill_defs VALUES('staglur_regen_aura','荒野复苏','aura','{"target":"nearby_allies","range":150,"race":"Staglur","bonus_type":"regen","value":0.008}','周围友方部落单位每秒恢复 0.8% 最大生命值（同族光环不叠加）');
 INSERT INTO skill_defs VALUES('staglur_armor_aura','古树护甲','aura','{"target":"nearby_allies","range":150,"race":"Staglur","bonus_type":"armor","value":8}','周围友方部落单位护甲 +8（同族光环不叠加）');
 INSERT INTO skill_defs VALUES('lizard_mark_aura','猎手印记','aura','{"target":"nearby_allies","range":150,"race":"Lizard","bonus_type":"execute","value":0.20}','对生命值低于 30% 的敌人伤害 +20%（同族光环不叠加）');
+INSERT INTO skill_defs VALUES('zombie_poison','毒击','on_hit','{"effects":[{"type":"poison","value":3,"duration":3}]}','攻击使目标中毒：每秒 3 伤害，持续 3 秒');
+INSERT INTO skill_defs VALUES('plague_poison','剧毒打击','on_hit','{"effects":[{"type":"poison","value":4,"duration":3}]}','攻击使目标中毒：每秒 4 伤害，持续 3 秒');
+INSERT INTO skill_defs VALUES('plague_burst','死亡毒云','special','{"behavior":"plague_burst","param":80,"damage_mult":20}','死亡时对周围 80 范围敌人造成 20 点伤害');
 CREATE TABLE upgrade_recipes (
     source_type_id TEXT NOT NULL,
     result_type_id TEXT NOT NULL,
@@ -543,9 +580,15 @@ INSERT INTO upgrade_recipes VALUES('RangerGuild','WindSanctum');
 INSERT INTO upgrade_recipes VALUES('WarriorGuild','MountainFort');
 INSERT INTO upgrade_recipes VALUES('ThiefGuild','ShadowGuild');
 INSERT INTO upgrade_recipes VALUES('MageTower','DragonfireTower');
+INSERT INTO upgrade_recipes VALUES('Tomb','Necropolis');
+INSERT INTO upgrade_recipes VALUES('BlightField','BlightMarsh');
+INSERT INTO upgrade_recipes VALUES('RitualCircleL1','RitualCircleL2');
+INSERT INTO upgrade_recipes VALUES('RitualCircleL2','RitualCircleL3');
+INSERT INTO upgrade_recipes VALUES('RitualCircleL3','RitualCircleL4');
+INSERT INTO upgrade_recipes VALUES('RitualCircleL4','RitualCircleL5');
 PRAGMA writable_schema=ON;
 CREATE TABLE IF NOT EXISTS sqlite_sequence(name,seq);
 DELETE FROM sqlite_sequence;
-INSERT INTO sqlite_sequence VALUES('asset_gen_tasks',128);
+INSERT INTO sqlite_sequence VALUES('asset_gen_tasks',135);
 PRAGMA writable_schema=OFF;
 COMMIT;

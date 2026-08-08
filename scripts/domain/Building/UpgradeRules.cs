@@ -41,8 +41,14 @@ public class UpgradeRules
 		if (HordeCoreRules.IsCoreUpgrade(building.TypeId, recipe.ResultTypeId))
 			return burrowCount >= HordeCoreRules.GetUpgradeBurrowRequirement(HordeCoreRules.GetLevel(building.TypeId));
 
+		if (RitualCircleRules.IsCoreUpgrade(building.TypeId, recipe.ResultTypeId))
+			return true;
+
 		if (buildingRepo.GetFactionId(building.TypeId) == FactionDef.HordeId)
 			return coreLevel >= HordeCoreRules.GetRequiredCoreLevel(recipe.ResultTypeId, buildingRepo);
+
+		if (buildingRepo.GetFactionId(building.TypeId) == FactionDef.NecromancerId)
+			return coreLevel >= RitualCircleRules.GetRequiredCoreLevel(recipe.ResultTypeId, buildingRepo);
 
 		return true;
 	}

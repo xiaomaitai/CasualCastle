@@ -81,6 +81,7 @@ public partial class BuildingSystem : Node
     public float GetSpawnInterval(string buildingType) => _buildingRepo.GetSpawnInterval(buildingType);
     public float GetProductionRate(string buildingType) => _buildingRepo.GetProductionRate(buildingType);
     public string GetFactionId(string buildingType) => _buildingRepo.GetFactionId(buildingType);
+    public bool GetHasNightCombat(string buildingType) => _buildingRepo.GetHasNightCombat(buildingType);
     public int GetValue(string buildingType) => _buildingRepo.GetValue(buildingType);
 
     public int GetUnitCost(string buildingType)
@@ -115,6 +116,7 @@ public partial class BuildingSystem : Node
         foreach (FactionDef faction in repo.LoadFactions())
             edges.AddRange(repo.LoadUpgradeEdges(faction.Id));
         edges.AddRange(HordeCoreRules.CreateUpgradeRecipes());
+        edges.AddRange(RitualCircleRules.CreateUpgradeRecipes());
         rules.LoadRecipes(edges);
     }
 

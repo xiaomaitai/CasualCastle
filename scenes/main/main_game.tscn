@@ -86,6 +86,15 @@ offset_bottom = 70.5
 theme_override_font_sizes/font_size = 33
 text = "金币：30"
 
+[node name="BlackMagicLabel" type="Label" parent="UI"]
+visible = false
+offset_left = 420
+offset_top = 90
+offset_right = 630
+offset_bottom = 130.5
+theme_override_font_sizes/font_size = 27
+text = "黑魔法：0"
+
 [node name="PhasePanel" type="VBoxContainer" parent="UI"]
 offset_left = 810
 offset_top = 18

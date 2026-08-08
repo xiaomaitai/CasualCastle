@@ -30,6 +30,7 @@ public partial class InitManager : Node
 
         Shop shopService = new Shop(hand, GameManager.Get<ShopRules>(), player);
         AdapterRegistry.Register<Shop>(shopService);
+        shopService.SetFaction(gm.SelectedFaction);
 
         gm.PhaseChanged += phase =>
         {

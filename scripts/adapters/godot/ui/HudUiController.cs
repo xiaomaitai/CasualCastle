@@ -1,4 +1,5 @@
 using CasualCastle.Adapters.Godot;
+using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
 using Godot;
 using System;
@@ -12,6 +13,7 @@ public sealed class HudUiController
 	private readonly Button _newDayButton;
 	private readonly Button _skipPhaseButton;
 	private readonly Label _goldLabel;
+	private readonly Label _blackMagicLabel;
 
 	public HudUiController(CanvasLayer uiRoot)
 	{
@@ -22,6 +24,7 @@ public sealed class HudUiController
 		_newDayButton = uiRoot.GetNode<Button>("PhasePanel/NewDayButton");
 		_skipPhaseButton = uiRoot.GetNode<Button>("PhasePanel/SkipPhaseButton");
 		_goldLabel = uiRoot.GetNode<Label>("GoldLabel");
+		_blackMagicLabel = uiRoot.GetNode<Label>("BlackMagicLabel");
 
 		_newDayButton.Pressed += OnNewDayPressed;
 		_skipPhaseButton.Pressed += OnSkipPhasePressed;
@@ -41,6 +44,12 @@ public sealed class HudUiController
 			AdapterRegistry.Resolve<Shop>().GoldChanged += UpdateGoldDisplay;
 			UpdateGoldDisplay(AdapterRegistry.Resolve<Shop>().Gold);
 		}
+		BlackMagicService blackMagic = GameManager.Get<BlackMagicService>();
+		if (blackMagic != null)
+		{
+			blackMagic.ValueChanged += UpdateBlackMagicDisplay;
+			UpdateBlackMagicDisplay(blackMagic.Value);
+		}
 	}
 
 	public void Dispose()
@@ -54,6 +63,9 @@ public sealed class HudUiController
 
 		if (AdapterRegistry.Resolve<Shop>() != null)
 			AdapterRegistry.Resolve<Shop>().GoldChanged -= UpdateGoldDisplay;
+		BlackMagicService blackMagic = GameManager.Get<BlackMagicService>();
+		if (blackMagic != null)
+			blackMagic.ValueChanged -= UpdateBlackMagicDisplay;
 	}
 
 	public void Process()
@@ -97,6 +109,14 @@ public sealed class HudUiController
 	private void UpdateGoldDisplay(int gold)
 	{
 		_goldLabel.Text = $"金币：{gold}";
+	}
+
+	private void UpdateBlackMagicDisplay(int value)
+	{
+		Shop shop = AdapterRegistry.Resolve<Shop>();
+		bool isNecromancer = shop != null && shop.FactionId == FactionDef.NecromancerId;
+		_blackMagicLabel.Visible = isNecromancer;
+		_blackMagicLabel.Text = $"黑魔法：{value}";
 	}
 
 	private void UpdatePhaseDisplay()

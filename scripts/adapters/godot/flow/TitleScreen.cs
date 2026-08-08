@@ -53,6 +53,7 @@ public partial class TitleScreen : Control
 
 		_settingsUi = new SettingsUiController(GetNode<Control>("SettingsPanel"));
 		BuildReportOptions();
+		BuildFactionOptions();
 
 		ISaveRepository saveRepo = GameManager.Get<ISaveRepository>();
 		_continueButton.Disabled = !saveRepo.HasSave(0);
@@ -178,11 +179,24 @@ public partial class TitleScreen : Control
 		AdapterRegistry.Resolve<GameManager>().SetPendingReplayReportId(reportId);
 	}
 
+	private void BuildFactionOptions()
+	{
+		_factionOption.Clear();
+		List<FactionDef> factions = GameManager.Get<ITechTreeRepository>()?.LoadFactions() ?? new();
+		for (int i = 0; i < factions.Count; i++)
+		{
+			_factionOption.AddItem(factions[i].DisplayName, i);
+			_factionOption.SetItemMetadata(i, factions[i].Id);
+		}
+		_factionOption.Selected = 0;
+	}
+
 	private void ApplySelectedFaction()
 	{
-		string factionId = _factionOption.GetItemId(_factionOption.Selected) == 1
-			? FactionDef.HordeId
-			: "alliance";
+		Variant metadata = _factionOption.GetItemMetadata(_factionOption.Selected);
+		string factionId = metadata.VariantType == Variant.Type.Nil
+			? "alliance"
+			: metadata.AsString();
 		AdapterRegistry.Resolve<Shop>()?.SetFaction(factionId);
 		AdapterRegistry.Resolve<GameManager>()?.SetSelectedFaction(factionId);
 	}

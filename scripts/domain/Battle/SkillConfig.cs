@@ -182,6 +182,7 @@ public class SpecialConfig
 				"summon" => SpecialBehavior.Summon,
 				"regen" => SpecialBehavior.Regen,
 				"ambush" => SpecialBehavior.Ambush,
+				"plague_burst" => SpecialBehavior.PlagueBurst,
 				_ => SpecialBehavior.Stealth
 			},
 			Param = root.TryGetProperty("param", out JsonElement p) ? p.GetSingle() : 0f,

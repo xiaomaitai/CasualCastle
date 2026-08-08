@@ -293,7 +293,14 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	public int GetRepairCost() => RepairRules.GetRepairCost(MaxHealth, Health, GameRules.RepairGoldPerHealth);
 
-	public bool CanWork => IsOperational && AdapterRegistry.Resolve<IGameState>().IsDay;
+	public bool CanWork
+	{
+		get
+		{
+			IGameState state = AdapterRegistry.Resolve<IGameState>();
+			return IsOperational && (BuildingSys.GetHasNightCombat(TypeId) ? state.IsNight : state.IsDay);
+		}
+	}
 
 	public override void _Ready()
 	{

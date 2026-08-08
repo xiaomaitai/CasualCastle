@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
+using CasualCastle.Domain.Building;
 using CasualCastle.Domain.Shared;
 using Godot;
 
@@ -151,13 +152,21 @@ public partial class UnitLogic : Node2D
 		UpdateSleepVisual();
 	}
 
-	private bool IsActive => AdapterRegistry.Resolve<IGameState>().IsDay;
+	private bool IsActive
+	{
+		get
+		{
+			IGameState state = AdapterRegistry.Resolve<IGameState>();
+			bool isNightUnit = _unit != null && _unit.HasNightCombat;
+			return isNightUnit ? state.IsNight : state.IsDay;
+		}
+	}
 
     private bool IsSleeping =>
         IsAlive
         && AdapterRegistry.Resolve<GameManager>()?.CurrentState == GameManager.GameState.Playing
-        && (AdapterRegistry.Resolve<GameManager>().IsNight || AdapterRegistry.Resolve<GameManager>().IsCombine)
-        && !AdapterRegistry.Resolve<GameManager>().IsPaused;
+        && !AdapterRegistry.Resolve<GameManager>().IsPaused
+        && !IsActive;
 
 	private void UpdateSleepVisual()
 	{
@@ -366,6 +375,9 @@ public partial class UnitLogic : Node2D
 	private void OnDied()
 	{
 		_isDead = true;
+		Shop shop = AdapterRegistry.Resolve<Shop>();
+		if (shop != null && shop.FactionId == FactionDef.NecromancerId)
+			GameManager.Get<BlackMagicService>()?.OnUnitDied(IsPlayerUnit, _unit?.Race);
 		_visual?.UpdateSleepVisual(false, false);
 		_lifecycle?.PlayDeathAnimation(_body);
 		Sfx.Play(SfxEvents.UnitDeath);

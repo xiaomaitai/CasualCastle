@@ -47,6 +47,10 @@ public static class UnitDisplayName
 			"StaglurArchdruid" => "半人鹿大德鲁伊",
 			"LizardHunter" => "蜥蜴人猎手",
 			"LizardStalker" => "蜥蜴人潜伏者",
+			"Skeleton" => "骷髅兵",
+			"Zombie" => "僵尸",
+			"SkeletonWarrior" => "骷髅战士",
+			"PlagueZombie" => "瘟疫僵尸",
 			_ => typeId,
 		};
 	}

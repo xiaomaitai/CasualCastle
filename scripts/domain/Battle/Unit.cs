@@ -34,6 +34,7 @@ public class Unit : IUnitHandle
 	public bool IsAmbushing { get; private set; }
 	public bool IsStealthed { get; private set; }
 	public bool CanDetectStealth { get; set; }
+	public bool HasNightCombat { get; set; }
 	public float HealAmount { get; set; }
 	public float HealRange { get; set; }
 	public float HealInterval { get; set; }
@@ -56,6 +57,9 @@ public class Unit : IUnitHandle
 	private float _kiteTimer;
 	private float _slowRemaining;
 	private float _slowFactor;
+	private float _poisonDamagePerSecond;
+	private float _poisonRemaining;
+	private float _poisonAccumulator;
 	private float _timeSinceLastCombat;
 	private float _auraRegenAccumulator;
 	private float _wildHeartAccumulator;
@@ -96,6 +100,7 @@ public class Unit : IUnitHandle
 		ArmorValue = stats.ArmorValue;
 		Race = stats.Race;
 		CanDetectStealth = stats.CanDetectStealth;
+		HasNightCombat = stats.HasNightCombat;
 		HealAmount = stats.HealAmount;
 		HealRange = stats.HealRange;
 		HealInterval = stats.HealInterval;
@@ -290,6 +295,7 @@ public class Unit : IUnitHandle
 		if (Health <= 0)
 		{
 			IsAlive = false;
+			TriggerPlagueBurst();
 			EventPort?.OnDied();
 			return;
 		}
@@ -476,6 +482,7 @@ public class Unit : IUnitHandle
 		if (executeMultiplier != 1f)
 			effectiveDamage = (int)(effectiveDamage * executeMultiplier);
 		int finalDamage = CombatRules.CalculateDamage(effectiveDamage, DamageType, TargetEnemy.ArmorType, TargetEnemy.EffectiveArmorValue, _damageMatrix);
+		finalDamage = UndeadRules.ApplyDispelMultiplier(finalDamage, DamageType, TargetEnemy.Race);
 		TargetEnemy.TakeDamage(finalDamage, this, GameX, GameY);
 
 		if (Skills != null)
@@ -484,6 +491,8 @@ public class Unit : IUnitHandle
 			{
 				if (effect.Type == "slow" && TargetEnemy is IUnitHandle targetHandle)
 					targetHandle.ApplySlow(effect.Value, effect.Duration);
+				else if (effect.Type == "poison" && TargetEnemy is IUnitHandle poisonTarget)
+					poisonTarget.ApplyPoison(effect.Value, effect.Duration);
 				else if (effect.Type == "explosion")
 					ApplyExplosion(effect.Value, effect.Range);
 			}
@@ -521,12 +530,22 @@ public class Unit : IUnitHandle
 		_slowRemaining = duration;
 	}
 
+	public void ApplyPoison(float damagePerSecond, float duration)
+	{
+		if (damagePerSecond <= 0f || duration <= 0f)
+			return;
+		_poisonDamagePerSecond = damagePerSecond;
+		_poisonRemaining = duration;
+		_poisonAccumulator = 0f;
+	}
+
 	private void TickCombatStateTimers(float dt)
 	{
 		if (_kiteTimer > 0f)
 			_kiteTimer -= dt;
 		if (_slowRemaining > 0f)
 			_slowRemaining -= dt;
+		TickPoison(dt);
 		_timeSinceLastCombat += dt;
 		UpdateAmbushState();
 		ApplyWildHeartRegen(dt);
@@ -585,5 +604,36 @@ public class Unit : IUnitHandle
 				continue;
 			enemy.TakeDamage((int)damage, this, GameX, GameY);
 		}
+	}
+
+	private void TickPoison(float dt)
+	{
+		if (_poisonRemaining <= 0f)
+			return;
+		_poisonRemaining -= dt;
+		_poisonAccumulator += _poisonDamagePerSecond * dt;
+		int poisonDamage = (int)_poisonAccumulator;
+		if (poisonDamage > 0)
+		{
+			_poisonAccumulator -= poisonDamage;
+			TakeDamage(poisonDamage, null, GameX, GameY);
+		}
+		if (_poisonRemaining <= 0f)
+		{
+			_poisonDamagePerSecond = 0f;
+			_poisonAccumulator = 0f;
+		}
+	}
+
+	private void TriggerPlagueBurst()
+	{
+		SpecialConfig burst = Skills != null ? Skills.GetSpecial(SpecialBehavior.PlagueBurst) : null;
+		if (burst == null || Tactical == null)
+			return;
+		int damage = (int)burst.DamageMult;
+		if (damage <= 0 || burst.Param <= 0f)
+			return;
+		foreach (IUnitHandle enemy in Tactical.FindEnemiesNear(this, burst.Param))
+			enemy.TakeDamage(damage, this, GameX, GameY);
 	}
 }

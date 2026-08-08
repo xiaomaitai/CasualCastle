@@ -104,9 +104,7 @@ public sealed class BuildingInfoUiController
             return "手动暂停";
         if (building.IsCombineProhibited)
             return "已禁止组合";
-        if (GameManager.Instance?.IsNight == true)
-            return "夜晚休眠";
-        return building.CanWork ? "工作中" : "停止工作";
+        return building.CanWork ? "工作中" : "休眠";
     }
 
     private void UpdateHighlights(Building hovered)

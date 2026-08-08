@@ -13,6 +13,7 @@ public static class BattleModule
 		services.AddSingleton<AuraService>();
 		services.AddSingleton<ITacticalQueries, TacticalQueryService>();
 		services.AddSingleton<CorpseService>();
+		services.AddSingleton<BlackMagicService>();
 		return services;
 	}
 }

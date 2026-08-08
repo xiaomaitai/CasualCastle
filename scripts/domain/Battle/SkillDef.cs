@@ -36,9 +36,9 @@ public enum SpecialBehavior
 	NoBattleReport,
 	Summon,
 	Regen,
-	Ambush
+	Ambush,
+	PlagueBurst
 }
-
 public class SkillDef
 {
 	public string Id { get; init; }
