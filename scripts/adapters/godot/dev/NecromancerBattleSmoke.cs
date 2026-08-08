@@ -11,6 +11,8 @@ public partial class NecromancerBattleSmoke : Node
 	private const string MainGameScene = "res://scenes/main/main_game.tscn";
 	private const float NightSpawnWait = 4f;
 	private const float CombineCheckDelay = 0.5f;
+	private const float RitualTickWait = 1.2f;
+	private const float RitualPauseWait = 0.8f;
 	private const float TotalTimeout = 60f;
 	private const float WorkSpeedBoost = 10f;
 
@@ -21,7 +23,8 @@ public partial class NecromancerBattleSmoke : Node
 		WaitSpawns,
 		WaitFirstRitual,
 		WaitSecondRitual,
-		VerifyCombine
+		VerifyCombine,
+		CheckRitualPhaseGate
 	}
 
 	private readonly List<string> _failures = new();
@@ -33,6 +36,9 @@ public partial class NecromancerBattleSmoke : Node
 	private bool _spellBarExpectSelected;
 	private int _spellBarTargetIndex = -1;
 	private int _spellBarSettleFrames;
+	private int _ritualGateStep;
+	private float _ritualRemainingAtStart;
+	private float _ritualRemainingAtCombatEnd;
 	private Vector2 _inputScale = Vector2.One;
 	private bool _inputScaleReady;
 	private SmokeStep _step = SmokeStep.CheckSpellBarUi;
@@ -90,6 +96,9 @@ public partial class NecromancerBattleSmoke : Node
 				break;
 			case SmokeStep.VerifyCombine:
 				VerifyCombine();
+				break;
+			case SmokeStep.CheckRitualPhaseGate:
+				CheckRitualPhaseGate();
 				break;
 		}
 	}
@@ -224,6 +233,76 @@ public partial class NecromancerBattleSmoke : Node
 		GetViewport().PushInput(release);
 	}
 
+	private void CheckRitualPhaseGate()
+	{
+		switch (_ritualGateStep)
+		{
+			case 0:
+				StartRitualPhaseCheck();
+				break;
+			case 1:
+				VerifyRitualTicksInCombat();
+				break;
+			case 2:
+				VerifyRitualFrozenInShop();
+				break;
+			case 3:
+				VerifyRitualFrozenInCombine();
+				break;
+		}
+	}
+
+	private void StartRitualPhaseCheck()
+	{
+		GameManager.Get<BlackMagicService>().Add(20);
+		if (_darkAltar == null || !_darkAltar.TryStartRitual(RitualRules.BlackMagicChargeId))
+		{
+			_failures.Add("阶段门控检查无法开始仪式");
+			ReportAndQuit();
+			return;
+		}
+		_ritualRemainingAtStart = _darkAltar.RitualRemainingSeconds;
+		AdapterRegistry.Resolve<GameManager>().AdvancePhase();
+		_ritualGateStep = 1;
+		_stepStartedAt = _elapsed;
+	}
+
+	private void VerifyRitualTicksInCombat()
+	{
+		if (_elapsed - _stepStartedAt < RitualTickWait)
+			return;
+		if (!(_darkAltar.RitualRemainingSeconds < _ritualRemainingAtStart))
+			_failures.Add("战斗阶段仪式未读条");
+		_ritualRemainingAtCombatEnd = _darkAltar.RitualRemainingSeconds;
+		AdapterRegistry.Resolve<GameManager>().AdvancePhase();
+		_ritualGateStep = 2;
+		_stepStartedAt = _elapsed;
+	}
+
+	private void VerifyRitualFrozenInShop()
+	{
+		if (_elapsed - _stepStartedAt < RitualPauseWait)
+			return;
+		if (_darkAltar.RitualRemainingSeconds != _ritualRemainingAtCombatEnd)
+			_failures.Add("商店阶段仪式不应读条");
+		AdapterRegistry.Resolve<GameManager>().AdvancePhase();
+		_ritualGateStep = 3;
+		_stepStartedAt = _elapsed;
+	}
+
+	private void VerifyRitualFrozenInCombine()
+	{
+		if (_elapsed - _stepStartedAt < RitualPauseWait)
+			return;
+		if (_darkAltar.RitualRemainingSeconds != _ritualRemainingAtCombatEnd)
+		{
+			_failures.Add("组合阶段仪式不应读条");
+			ReportAndQuit();
+			return;
+		}
+		GD.Print("SMOKE: ritual phase gate ok");
+		ReportAndQuit();
+	}
 	private void WaitNight()
 	{
 		if (!AdapterRegistry.Resolve<IGameState>().IsCombat)
@@ -277,7 +356,8 @@ public partial class NecromancerBattleSmoke : Node
 			return;
 		if (FindBuilding("DeathTemple") == null)
 			_failures.Add("组合阶段未生成死亡圣殿");
-		ReportAndQuit();
+		_stepStartedAt = _elapsed;
+		_step = SmokeStep.CheckRitualPhaseGate;
 	}
 
 	private void EnableFastProduction()

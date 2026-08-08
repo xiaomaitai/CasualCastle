@@ -581,7 +581,9 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	private void TickRitual(float delta)
 	{
-		if (_activeRitual == null || _gameManager == null || _gameManager.CurrentState != GameManager.GameState.Playing)
+		if (_activeRitual == null || _gameManager == null
+			|| _gameManager.CurrentState != GameManager.GameState.Playing
+			|| !_gameManager.IsCombat)
 			return;
 
 		_ritualService.Tick(_activeRitual, delta);
