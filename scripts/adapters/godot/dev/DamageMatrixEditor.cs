@@ -145,7 +145,7 @@ public sealed class DamageMatrixEditor
 			{
 				float value = dm.GetMultiplier(DamageTypes[row], ArmorTypes[col]);
 				if (_cells.TryGetValue((row, col), out LineEdit cell))
-					cell.Text = value.ToString("F1");
+					cell.Text = DamageMatrix.MultiplierToPercent(value).ToString();
 			}
 		}
 	}
@@ -165,13 +165,13 @@ public sealed class DamageMatrixEditor
 			for (int col = 0; col < ArmorTypes.Length; col++)
 			{
 				string text = _cells[(row, col)].Text;
-				float value = ParseFloat(text);
+				int percent = ParsePercent(text);
 
 				cmd.CommandText = "INSERT INTO damage_matrix (damage_type, armor_type, multiplier) VALUES (@d, @a, @m)";
 				cmd.Parameters.Clear();
 				cmd.Parameters.AddWithValue("@d", (int)DamageTypes[row]);
 				cmd.Parameters.AddWithValue("@a", (int)ArmorTypes[col]);
-				cmd.Parameters.AddWithValue("@m", value);
+				cmd.Parameters.AddWithValue("@m", percent);
 				cmd.ExecuteNonQuery();
 			}
 		}
@@ -181,8 +181,8 @@ public sealed class DamageMatrixEditor
 		{
 			for (int col = 0; col < ArmorTypes.Length; col++)
 			{
-				float value = ParseFloat(_cells[(row, col)].Text);
-				dm.Set(DamageTypes[row], ArmorTypes[col], value);
+				int percent = ParsePercent(_cells[(row, col)].Text);
+				dm.Set(DamageTypes[row], ArmorTypes[col], DamageMatrix.PercentToMultiplier(percent));
 			}
 		}
 
@@ -194,11 +194,11 @@ public sealed class DamageMatrixEditor
 		_root.GetTree().ChangeSceneToFile(DevToolsMenuScene);
 	}
 
-	private static float ParseFloat(string text)
+	private static int ParsePercent(string text)
 	{
-		if (float.TryParse(text, out float result))
+		if (int.TryParse(text, out int result))
 			return result;
-		return 1.0f;
+		return DamageMatrix.PercentScale;
 	}
 
 	private async void ShowStatus(string message)

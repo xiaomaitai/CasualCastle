@@ -35,7 +35,7 @@ public static class GameDataLoader
 		using SqliteDataReader reader = cmd.ExecuteReader();
 		DamageMatrix dm = new DamageMatrix();
 		while (reader.Read())
-			dm.Set((DamageType)reader.GetInt32(0), (ArmorType)reader.GetInt32(1), reader.GetFloat(2));
+			dm.Set((DamageType)reader.GetInt32(0), (ArmorType)reader.GetInt32(1), DamageMatrix.PercentToMultiplier(reader.GetInt32(2)));
 		return dm;
 	}
 
