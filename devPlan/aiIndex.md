@@ -1,0 +1,194 @@
+# CasualCastle 项目索引（AI 专用导航）
+
+本文件是项目唯一导航入口，供 AI agent 快速定位文档、代码、场景、素材、测试与工具，避免全盘扫描文件系统。规则与约定见根目录 `AGENTS.md`。
+
+使用方式：先按需求找到对应小节，只打开 1~2 个关键文件；不确定术语时先读 `devPlan/concepts.md`。
+
+## 0. 速查（按需求）
+
+| 我想… | 去这里 |
+|---|---|
+| 了解术语/游戏规则 | `devPlan/concepts.md` |
+| 查看当前任务/验收项 | `devPlan/tmp/currentTasks.md` |
+| 查看架构 backlog | `devPlan/tmp/todo.md` |
+| 查看里程碑进度 | `devPlan/outline/c05Milestones.md` |
+| 找某个功能模块的代码 | 本文件 §2.4 功能模块对照表 |
+| 找场景/预制体 | 本文件 §3 |
+| 找素材（卡图/建筑/音频） | 本文件 §4 |
+| 找单元测试 | 本文件 §5 |
+| 找开发工具脚本 | 本文件 §6 |
+| 查实际游戏数值 | `assets/data/config.db` |
+
+## 1. 文档导航（devPlan/）
+
+### 总纲与运行时结构
+
+| 文档 | 内容 | 何时读 |
+|---|---|---|
+| `devPlan/concepts.md` | 术语与核心规则总纲：阶段循环、地块/城堡/建筑/单位、隐身、组合、战报、建筑卡、战场、伤害类型与元素、坐标系统、碰撞层、2.5D 渲染 | 任何任务开始前 |
+| `devPlan/codeStructure.md` | 当前运行时代码结构：三层目录、依赖方向、双层 DI、系统清单、端口接口表、主要运行链路 | 定位代码或理解系统关系 |
+| `devPlan/dataStructures.md` | 核心 C# 数据结构：卡牌、建筑、组合配方、战报快照、单位、科技树 | 涉及数据结构时；实际数值以 config.db 为准 |
+| `devPlan/cloudEnvironment.md` | 云环境构建/测试/导入/运行命令 | 需要跑构建、测试或游戏时 |
+
+### 里程碑与大纲（devPlan/outline/）
+
+| 文档 | 内容 |
+|---|---|
+| `c01Overview.md` | 完整版玩法循环概述 |
+| `c02FullFeatureList.md` | 功能清单与验收状态 |
+| `c03ProjectArchitecture.md` | 项目架构（六边形 + DDD） |
+| `c04DataStructureDesign.md` | 数据结构设计（早期参考） |
+| `c05Milestones.md` | 里程碑状态表 |
+| `c06TechStack.md` | 技术栈与数据存储约定 |
+| `c08RenderPerspective.md` | 2.5D 渲染视角原理 |
+| `c09AudioPlan.md` | 音频阶段计划 |
+| `c10BuildingArtPlan.md` | 建筑美术阶段计划 |
+| `*.png` | 界面线框：title、mainBattle、placement、nightShop、pause、gameOver、sceneFlow、battlefieldUi |
+
+### 系统设计（devPlan/design/）
+
+| 文档 | 内容 |
+|---|---|
+| `battleSystem.md` | 战斗系统核心规则 |
+| `combineSystem.md` | 组合 + 升级（科技树入边判定） |
+| `battleReport.md` | 战报录制与存储（M6） |
+| `replayAi.md` | 敌方镜像复刻 AI（M6） |
+| `uiDesign.md` | 界面布局与百分比坐标约定 |
+| `unitCardDesign.md` | 单位卡牌 UI 设计 |
+| `dependencyInjection.md` | 双层 DI 设计 |
+| `nodeStructure.md` | 实体节点 Logic/View/Effects 三层结构 |
+| `rtsPushApart.md` | 单位推开系统 |
+| `assetSpecs.md` | 素材尺寸规格（以游戏单位定义） |
+| `audioRequirements.md` | 音频需求清单（v0.6 采购/实现唯一依据） |
+| `audioSmokeTest.md` | 音频冒烟测试说明 |
+| `devTools.md` | 开发者工具说明 |
+| `factions/allianceFaction.md`、`dungeonFaction.md`、`hordeFaction.md`、`necromancerFaction.md` | 四大派系设计 |
+
+### 施工进度（devPlan/tmp/）
+
+| 文档 | 内容 |
+|---|---|
+| `currentTasks.md` | 当前任务的细化步骤与验收项（全部完成则清空） |
+| `todo.md` | 长期架构 backlog |
+
+## 2. 代码导航（scripts/）
+
+结构：`domain/`（纯 C# 业务规则，零 Godot）→ `adapters/godot/`（Godot 节点）与 `adapters/persistence/`（存储）。`scripts/domain/` 下每个子目录是独立 C# 项目；`scripts/CompositionRoot.cs` 构建 MS DI 容器。
+
+### 2.1 domain — 核心域（改动必须带单测）
+
+| 目录 | 职责 | 关键文件 |
+|---|---|---|
+| `domain/Shared/` | 坐标、常量、阶段状态机、存档模型 | `GameVector2.cs`、`GameCoordinateRules.cs`、`GameRules.cs`、`BuildingTypeIds.cs`、`FactionIds.cs`、`MatchPhaseMachine.cs`、`SaveModels.cs` |
+| `domain/Building/` | 建筑、卡牌、手牌、商店、组合、升级、仪式、邻接、科技树 | `BuildingData.cs`、`OccupancyGrid.cs`、`CardRules.cs`、`Hand.cs`、`ShopRules.cs`、`CombineService.cs`、`UpgradeService.cs`、`RitualService.cs`、`AdjacencyService.cs`、`TechTreeNode.cs` |
+| `domain/Battle/` | 战斗、单位、技能、光环、隐身、尸体、RVO 推开、黑魔法 | `CombatRules.cs`、`Unit.cs`、`UnitState.cs`、`UnitStats.cs`、`SkillService.cs`、`AuraService.cs`、`StealthService.cs`、`CorpseService.cs`、`RvoService.cs`、`BlackMagicService.cs` |
+| `domain/History/` | 战报、回放、镜像复刻 | `BattleReportService.cs`、`ReportBuilder.cs`、`ReplayService.cs`、`MirrorRules.cs` |
+
+端口接口（`I*` 文件）按子域散落在上述目录中，如 `IFieldUnitRepository.cs`、`IBuildingPlacement.cs`、`IBattleReportRepository.cs`。
+
+### 2.2 adapters/godot — Godot 适配层
+
+| 目录 | 职责 | 关键文件 |
+|---|---|---|
+| `autoload/` | 常驻节点：DI 根、阶段、初始化、显示设置 | `GameManager.cs`、`InitManager.cs`、`DisplaySettingsManager.cs`、`AdapterRegistry.cs` |
+| `building/` | 城堡/建筑/放置/状态表现 | `Castle.cs`、`Building.cs`、`BuildingSystem.cs`、`CastlePlacementAdapter.cs` |
+| `battle/` | 战场单位逻辑与表现、导航、弹道 | `Unit.cs`、`UnitLogic.cs`、`UnitLifecycle.cs`、`UnitVisual.cs`、`UnitSpawn.cs`、`BattleManager.cs`、`NavigationPortAdapter.cs`、`FieldUnitRepository.cs`、`Projectile.cs` |
+| `battlefield/` | 战场地块 | `BattlefieldTileMap.cs` |
+| `battle_report/` | 战报快照/缓存/持久化 | `BattleReportSystem.cs` |
+| `combine/` | 组合结果实例化 | `CombineBuildingFactory.cs` |
+| `upgrade/` | 升级结果实例化 | `UpgradeBuildingFactory.cs` |
+| `replay/` | 敌方复刻目标 | `ReplayTarget.cs` |
+| `ui/` | UIManager 与各面板控制器 | `UIManager.cs`、`HudUiController.cs`、`ShopUiController.cs`、`HandUiController.cs`、`BuildingManageUiController.cs`、`PauseMenuUiController.cs`、`GameOverUiController.cs`、`SettingsUiController.cs` |
+| `flow/` | 场景流程与夜晚编排 | `TitleScreen.cs`、`MainGameController.cs`、`NightOrchestrator.cs`、`GameSessionService.cs`、`CameraController.cs` |
+| `core/` | 战场尺寸换算 | `BattlefieldMetrics.cs` |
+| `audio/` | 音频总线、BGM/SFX | `AudioManager.cs`、`Sfx.cs`、`SfxEvents.cs`、`UiSfx.cs` |
+| `dev/` | 开发者工具（不走单测） | `DevToolsMenu.cs`、`TechTreeEditorController.cs`、`DamageMatrixEditor.cs`、`AudioSmoke.cs`、`RuntimeInfoPanelController.cs` |
+| `cheat/` | 作弊状态 | `CheatState.cs` |
+
+### 2.3 adapters/persistence — 存储
+
+| 文件 | 职责 |
+|---|---|
+| `SqliteBuildingRepository.cs`、`SqliteUnitRepository.cs`、`SqliteSkillRepository.cs`、`SqliteTechTreeRepository.cs` | 读写 `assets/data/config.db` |
+| `SaveStorage.cs` | 存档文件 |
+| `BattleReportStorage.cs` | 战报文件持久化 |
+| `GameDataLoader.cs` | 数据加载 |
+
+### 2.4 功能模块对照表（需求 → domain 规则 → adapter 实现）
+
+| 功能 | 领域规则 | 适配实现 |
+|---|---|---|
+| 战斗 | `domain/Battle/CombatRules.cs`、`Unit.cs`、`UnitState.cs` | `adapters/godot/battle/UnitLogic.cs`、`BattleManager.cs` |
+| 技能/光环 | `domain/Battle/SkillService.cs`、`AuraService.cs` | `adapters/godot/ui/SkillIconView.cs` |
+| 隐身 | `domain/Battle/StealthService.cs` | `adapters/godot/battle/UnitLogic.cs` |
+| 建筑放置 | `domain/Building/OccupancyGrid.cs`、`BuildingData.cs` | `adapters/godot/building/Castle.cs`、`CastlePlacementAdapter.cs`、`BuildingSystem.cs` |
+| 商店 | `domain/Building/Shop.cs`、`ShopRules.cs` | `adapters/godot/ui/ShopUiController.cs` |
+| 手牌/打出 | `domain/Building/Hand.cs`、`CardRules.cs` | `adapters/godot/ui/HandUiController.cs` |
+| 组合 | `domain/Building/CombineService.cs`、`CombineRules.cs` | `adapters/godot/combine/CombineBuildingFactory.cs`、`ui/CombineProhibitUiController.cs` |
+| 升级 | `domain/Building/UpgradeService.cs`、`UpgradeRules.cs` | `adapters/godot/upgrade/UpgradeBuildingFactory.cs` |
+| 战报 | `domain/History/BattleReportService.cs`、`ReportBuilder.cs` | `adapters/godot/battle_report/BattleReportSystem.cs` |
+| 敌方复刻 | `domain/History/ReplayService.cs`、`MirrorRules.cs` | `adapters/godot/replay/ReplayTarget.cs` |
+| 阶段循环 | `domain/Shared/MatchPhaseMachine.cs` | `adapters/godot/autoload/GameManager.cs`、`flow/NightOrchestrator.cs` |
+| 存档 | `domain/Shared/SaveModels.cs`、`ISaveRepository.cs` | `adapters/persistence/SaveStorage.cs` |
+| 音频 | — | `adapters/godot/audio/AudioManager.cs`、`Sfx.cs` |
+
+## 3. 场景与预制体（scenes/、prefabs/）
+
+| 路径 | 用途 |
+|---|---|
+| `scenes/ui/title_screen.tscn` | 标题界面（`project.godot` 主场景） |
+| `scenes/main/main_game.tscn` | 主战场场景，系统挂载点 |
+| `scenes/ui/settings_panel.tscn` | 设置面板 |
+| `scenes/dev/tech_tree_editor.tscn` | 科技树编辑器 |
+| `scenes/ui/dev_tools/*.tscn` | 开发者工具场景（audio_smoke、damage_matrix_editor、dev_tools_menu、runtime_info_panel、necromancer_smoke、phase_cycle_probe 等） |
+| `prefabs/Building.tscn`、`Castle.tscn`、`Unit.tscn`、`UnitCard.tscn`、`HealthBar.tscn`、`CardArt.tscn` | 动态实体预制体 |
+
+## 4. 素材与数据（assets/）
+
+| 路径 | 内容与命名 |
+|---|---|
+| `assets/art/cards/` | 单位卡图 `{Name}_{id}.png`（如 `Archer_24.png`）；`card_base`/`card_art_frame`/`card_art_mask` 为卡面框架 |
+| `assets/art/buildings/` | 建筑图：`{Name}_128_cut.png`（裁边透明原图）与 `{Name}_128_game.png`（游戏用） |
+| `assets/art/units/` | 单位立绘 |
+| `assets/art/skills/` | 技能图标 `{skill_name}_{id}.png` |
+| `assets/art/projectiles/` | 弹道：arrow、spear、sword、magic_ball |
+| `assets/art/tiles/` | 地块贴图 `cell_dirt_01..04`、`kenney_medieval_rts` 图集 |
+| `assets/art/placeholders/` | 占位图 `test_image.png` |
+| `assets/art/references/` | 美术参考图 |
+| `assets/audio/bgm/` | BGM：`bgm_{派系}_{day|night}_{n}.ogg`、`bgm_title_*`、`bgm_result_*` |
+| `assets/audio/sfx/` | SFX：`sfx_{事件}.ogg` |
+| `assets/data/config.db` | 权威游戏数据（SQLite：建筑、单位、技能、商店、科技树、配方、物品）；`config_db_dump.sql` 由 pre-commit 自动生成，勿手改 |
+| `assets/shaders/` | 建筑工作/邻接脉冲 shader |
+| `assets/dev/` | shader 预览场景 |
+
+素材规格见 `devPlan/design/assetSpecs.md`；新素材产出或变更后须用 `tools/godot_import.py` 生成 `.import`/`.uid`。
+
+## 5. 测试（tests/CasualCastle.Domain.Tests/）
+
+- 单测文件按被测类命名（`{Xxx}Tests.cs`），`BattleTestFakes.cs` 为公共测试替身
+- 运行：`dotnet test tests/CasualCastle.Domain.Tests/CasualCastle.Domain.Tests.csproj`
+- 约定：domain 改动必须带单测；bug 修复写 `RealBug` 测试；测试文件零注释
+
+## 6. 工具（tools/）
+
+| 脚本 | 用途 |
+|---|---|
+| `tools/liblib_gen.py` | AI 生图（Liblib.art） |
+| `tools/liblib_remove_bg.py` | 抠图（ComfyUI 去背景） |
+| `tools/godot_import.py` | Godot 无头导入，生成 `.import`/`.uid` |
+| `tools/build_game_texture.py` | 建筑贴图裁边/缩放构建 |
+| `tools/check_uids.py` | 校验 `.uid` 文件 |
+
+## 7. 入口与运行链路
+
+- 启动：`project.godot` → `scenes/ui/title_screen.tscn` → `scenes/main/main_game.tscn`
+- Autoload：`GameManager`、`DisplaySettingsManager`、`AudioManager`
+- 主要链路：白天产兵战斗 → 夜晚组合 → 敌方复刻 → 商店 → 阶段循环；任一方城堡血量归零 → 结算（保存战报）
+- 构建/测试/导入/运行命令见 `devPlan/cloudEnvironment.md`
+
+## 8. 使用提示
+
+- 找规则：先读 `devPlan/concepts.md` 定位术语，再读对应 design 文档
+- 找代码：用 §2.4 对照表定位 domain 与 adapter，只打开关键文件，避免整目录扫描
+- 文档与实际数据冲突时，以 `assets/data/config.db` 为准
+- `_deprecated/` 内容除非用户主动要求，不读取

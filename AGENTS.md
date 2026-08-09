@@ -10,16 +10,15 @@ Godot **4.6** + **C# / .NET** 的 2.5D RTS 项目（斜视角纸片人，类皇�
 
 项目采用**六边形架构（Hexagonal Architecture）**与 **DDD（领域驱动设计）** 规范开发，代码按三层放在 `scripts/`：
 
-> 详细项目结构与模块依赖见 `devPlan/codeStructure.md` 和 `devPlan/outline/c03ProjectArchitecture.md`。
+> 项目所有文档、代码、素材、测试与工具的具体位置见 `devPlan/aiIndex.md`（AI 项目索引）。
 
 | 目录 | 层级 | 用途 |
 | --- | --- | --- |
-| `domain/` | 核心域 | 纯 C# 业务规则（coordinates、card、combine、core、night、battle），零 Godot |
-| `ports/` | 端口 | 接口契约（IBattleReportRepository、BattleReportModels） |
+| `domain/` | 核心域 | 纯 C# 业务规则（Shared、Building、Battle、History 四个子项目），零 Godot；端口接口契约也在此 |
 | `adapters/godot/` | Godot 适配 | 所有 Godot 节点和场景脚本（autoload、building、battle、ui、flow 等） |
-| `adapters/persistence/` | 持久化 | 文件 IO（BattleReportStorage） |
+| `adapters/persistence/` | 持久化 | SQLite 与文件 IO（BattleReportStorage、Sqlite*Repository） |
 
-场景：`scenes/`；预制体：`prefabs/`；资源：`resources/`、`assets/`。
+场景：`scenes/`；预制体：`prefabs/`；素材：`assets/`。
 
 新代码按三层归属放入对应目录；`GameManager` 是 Autoload；系统挂在 `main_game.tscn`，通过端口接口通信。
 
@@ -32,8 +31,8 @@ Godot **4.6** + **C# / .NET** 的 2.5D RTS 项目（斜视角纸片人，类皇�
 - 只用 **C#**，不用 GDScript
 - 脚本 `PascalCase.cs`，场景 `snake_case.tscn`，预制体 `[ComponentName].tscn`
 - 系统间用 **Godot 信号** 通信；脚本保持单一职责
-- 共享常量放 `scripts/core/`
-- 核心域项目 `CasualCastle.Domain/` 禁止引用 Godot 类型（使用端口与适配器模式）
+- 共享常量放 `scripts/domain/Shared/`
+- `scripts/domain/` 各子项目禁止引用 Godot 类型（使用端口与适配器模式）
 - UI 场景在 `scenes/ui/`，逻辑在 `scripts/adapters/godot/ui/` 或 `scripts/adapters/godot/flow/`
 - 每个代码文件开头写一行注释说明文件用途，除此之外不写任何注释（包括 XML 文档注释、行注释、块注释）
 - 禁止使用魔术数字，统一用命名常量
@@ -56,22 +55,7 @@ Godot **4.6** + **C# / .NET** 的 2.5D RTS 项目（斜视角纸片人，类皇�
 
 **不要在本文件维护里程碑或当前任务。**
 
-
-| 需要了解     | 读取                                          |
-| -------- | ------------------------------------------- |
-| 架构 backlog   | `devPlan/tmp/todo.md`                           |
-| 当前任务、验收项 | `devPlan/tmp/currentTasks.md`                   |
-| 里程碑与路线图  | `devPlan/outline/`                          |
-| 模块设计与依赖  | `devPlan/outline/c05ProjectArchitecture.md` |
-| 组合 / AI 规则 | `devPlan/design/combineSystem.md`、`devPlan/design/battleReport.md`、`devPlan/design/replayAi.md` |
-| UI 设计 | `devPlan/design/uiDesign.md` |
-| 素材规格 | `devPlan/design/assetSpecs.md` |
-| 依赖注入 | `devPlan/design/dependencyInjection.md` |
-| 运行时代码结构  | `devPlan/codeStructure.md`                  |
-| 数据结构     | `devPlan/dataStructures.md`                 |
-
-
-涉及计划、优先级、阶段状态时，**先读 `devPlan/`**。
+所有文档、代码、素材、测试与工具的定位入口统一见 **`devPlan/aiIndex.md`**（AI 项目索引）；涉及计划、优先级、阶段状态时先查该索引，再按需打开对应文档。
 
 ## 临时任务文件（`devPlan/tmp/`）
 
