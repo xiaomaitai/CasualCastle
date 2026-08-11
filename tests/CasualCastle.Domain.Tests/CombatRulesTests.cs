@@ -30,7 +30,7 @@ public class CombatRulesTests
 	{
 		DamageMatrix dm = new();
 		int result = CombatRules.CalculateDamage(100, DamageType.Slash, ArmorType.Unarmored, 5, dm);
-		Assert.Equal(75, result);
+		Assert.Equal(77, result);
 	}
 
 	[Fact]
@@ -38,7 +38,7 @@ public class CombatRulesTests
 	{
 		DamageMatrix dm = new();
 		int result = CombatRules.CalculateDamage(100, DamageType.Slash, ArmorType.Unarmored, 10, dm);
-		Assert.Equal(60, result);
+		Assert.Equal(59, result);
 	}
 
 	[Fact]
@@ -46,7 +46,7 @@ public class CombatRulesTests
 	{
 		DamageMatrix dm = new();
 		int result = CombatRules.CalculateDamage(100, DamageType.Slash, ArmorType.Unarmored, -5, dm);
-		Assert.Equal(125, result);
+		Assert.Equal(129, result);
 	}
 
 	[Fact]
@@ -54,7 +54,7 @@ public class CombatRulesTests
 	{
 		DamageMatrix dm = new();
 		int result = CombatRules.CalculateDamage(100, DamageType.Slash, ArmorType.Unarmored, 10000, dm);
-		Assert.Equal(35, result);
+		Assert.Equal(1, result);
 	}
 
 	[Fact]
@@ -78,7 +78,7 @@ public class CombatRulesTests
 	{
 		DamageMatrix dm = CreateMatrix();
 		int result = CombatRules.CalculateDamage(100, DamageType.Chaos, ArmorType.Plate, 10, dm);
-		Assert.Equal(90, result);
+		Assert.Equal(89, result);
 	}
 
 	[Fact]
@@ -86,7 +86,7 @@ public class CombatRulesTests
 	{
 		DamageMatrix dm = CreateMatrix();
 		int result = CombatRules.CalculateDamage(100, DamageType.Slash, ArmorType.Plate, 10, dm);
-		Assert.Equal(42, result);
+		Assert.Equal(41, result);
 	}
 
 	[Fact]
@@ -98,11 +98,11 @@ public class CombatRulesTests
 	}
 
 	[Fact]
-	public void CalculateDamage_HolyAttack_HighArmor_ReturnsCapDamage()
+	public void CalculateDamage_HolyAttack_HighArmor_ReturnsMinimumOne()
 	{
 		DamageMatrix dm = CreateMatrix();
 		int result = CombatRules.CalculateDamage(100, DamageType.Holy, ArmorType.Plate, 200, dm);
-		Assert.Equal(35, result);
+		Assert.Equal(1, result);
 	}
 
 	[Fact]

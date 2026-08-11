@@ -5,11 +5,8 @@ namespace CasualCastle.Domain.Battle;
 
 public class DamageMatrix
 {
-	public const int ArmorSegmentCount = 6;
+	public const double ArmorDamageTakenMultiplier = 0.95;
 	public const int PercentScale = 100;
-
-	private static readonly int[] ArmorSegmentEnds = { 5, 10, 15, 20, 25, 30 };
-	private static readonly double[] ArmorSegmentSlopes = { 0.05, 0.03, 0.02, 0.015, 0.01, 0.005 };
 
 	private readonly Dictionary<(DamageType, ArmorType), float> _matrix = new();
 
@@ -37,23 +34,6 @@ public class DamageMatrix
 
 	public static double CalculateReduction(int armorValue)
 	{
-		long magnitude = armorValue < 0 ? -(long)armorValue : armorValue;
-		double reduction = 0.0;
-		long previousEnd = 0;
-		for (int i = 0; i < ArmorSegmentCount; i++)
-		{
-			long end = ArmorSegmentEnds[i];
-			double slope = ArmorSegmentSlopes[i];
-			if (magnitude <= end)
-			{
-				reduction += slope * (magnitude - previousEnd);
-				break;
-			}
-			reduction += slope * (end - previousEnd);
-			previousEnd = end;
-		}
-		if (armorValue < 0)
-			return -reduction;
-		return reduction;
+		return 1.0 - System.Math.Pow(ArmorDamageTakenMultiplier, armorValue);
 	}
 }
