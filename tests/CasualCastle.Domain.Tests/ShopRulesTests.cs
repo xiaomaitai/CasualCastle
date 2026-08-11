@@ -37,20 +37,6 @@ public class ShopRulesTests
 	}
 
 	[Fact]
-	public void RefreshOfferSlot_ReturnsCardFromCatalog()
-	{
-		CardData[] catalog = new[]
-		{
-			new CardData { Id = "a", Name = "A", Cost = 10, BuildingType = "Barracks", Weight = 1 },
-		};
-		ShopRules rules = new(catalog);
-		CardData card = rules.RefreshOfferSlot(new Random(42));
-
-		Assert.NotNull(card);
-		Assert.Equal("a", card.Id);
-	}
-
-	[Fact]
 	public void SetFaction_Horde_OnlyOffersHordeAndNeutralCards()
 	{
 		CardData[] catalog = new[]

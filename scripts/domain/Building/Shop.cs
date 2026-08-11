@@ -85,7 +85,7 @@ public class Shop
 			return false;
 
 		TrySpendGold(offer.Cost);
-		RefreshOfferSlot(slotIndex);
+		EmptyOfferSlot(slotIndex);
 		return true;
 	}
 
@@ -111,7 +111,7 @@ public class Shop
 			return false;
 
 		TrySpendGold(offer.Cost);
-		RefreshOfferSlot(slotIndex);
+		EmptyOfferSlot(slotIndex);
 		return true;
 	}
 
@@ -131,9 +131,9 @@ public class Shop
 	}
 
 
-	private void RefreshOfferSlot(int slotIndex)
+	private void EmptyOfferSlot(int slotIndex)
 	{
-		_player.ShopOffers[slotIndex] = _shopRules.RefreshOfferSlot(_random);
+		_player.ShopOffers[slotIndex] = null;
 		ShopOffersChanged?.Invoke();
 	}
 }

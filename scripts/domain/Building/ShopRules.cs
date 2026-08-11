@@ -43,11 +43,6 @@ public class ShopRules
 		return offers;
 	}
 
-	public CardData RefreshOfferSlot(Random random)
-	{
-		return PickWeighted(random);
-	}
-
 	private CardData PickWeighted(Random random)
 	{
 		int roll = random.Next(_totalWeight);

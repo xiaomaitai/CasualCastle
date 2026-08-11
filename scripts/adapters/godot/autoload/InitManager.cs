@@ -39,6 +39,7 @@ public partial class InitManager : Node
 			shopService.SetShopAvailable(phase == MatchPhase.Combat || phase == MatchPhase.Shop);
 			if (phase == MatchPhase.Shop)
 			{
+				shopService.RefreshOffers();
 				shopService.RequestOpenShop();
 			}
 			if (phase == MatchPhase.Combine)
