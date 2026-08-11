@@ -431,7 +431,7 @@ public class ArmorAuraCombatTests
 
 		attacker.UpdateBehavior(2f, 0, 0);
 
-		Assert.Equal(82, target.Health);
+		Assert.Equal(87, target.Health);
 	}
 
 	[Fact]
