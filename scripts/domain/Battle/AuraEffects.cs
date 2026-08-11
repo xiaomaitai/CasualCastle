@@ -9,4 +9,6 @@ public class AuraEffects
 	public float RegenPerSecond;
 	public float ExecuteDamageMultiplier = 1f;
 	public int ArmorBonus;
+	public float LifestealFraction;
+	public float DispelResistFraction;
 }

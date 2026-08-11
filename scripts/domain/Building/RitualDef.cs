@@ -13,6 +13,7 @@ public class RitualReward
 	public string SummonUnitTypeId;
 	public int SummonCount;
 	public int UndeadMaxHealthBonus;
+	public float UndeadDamageMultiplier;
 	public string LearnedRitualId;
 	public bool CoreLevelUp;
 }

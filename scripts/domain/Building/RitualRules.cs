@@ -10,6 +10,8 @@ public static class RitualRules
 	public const string BlackMagicChargeId = "black_magic_charge";
 	public const string UndeadSummonId = "undead_summon";
 	public const string BoneReinforceId = "bone_reinforce";
+	public const string DeathAngelSummonId = "death_angel_summon";
+	public const string NecromancyStudyId = "necromancy_study";
 	public const string AltarHostTypeId = BuildingTypeIds.DarkAltar;
 	public const string RitualCircleTypePrefix = BuildingTypeIds.RitualCirclePrefix;
 
@@ -58,6 +60,28 @@ public static class RitualRules
 			DurationSeconds = 20f,
 			BasicReward = new RitualReward { SummonUnitTypeId = "Zombie", SummonCount = 1 },
 			CoreReward = new RitualReward { UndeadMaxHealthBonus = 10 }
+		},
+		new()
+		{
+			Id = DeathAngelSummonId,
+			DisplayName = "死亡天使降临",
+			RequiredCoreLevel = 3,
+			CostType = RitualCostType.BlackMagic,
+			CostAmount = 80,
+			DurationSeconds = 25f,
+			BasicReward = new RitualReward { SummonUnitTypeId = "SkeletonWarrior", SummonCount = 2 },
+			CoreReward = new RitualReward { SummonUnitTypeId = "DeathAngel", SummonCount = 1 }
+		},
+		new()
+		{
+			Id = NecromancyStudyId,
+			DisplayName = "亡灵巫术研习",
+			RequiredCoreLevel = 4,
+			CostType = RitualCostType.BlackMagic,
+			CostAmount = 100,
+			DurationSeconds = 30f,
+			BasicReward = new RitualReward { SummonUnitTypeId = "BloodKnight", SummonCount = 1 },
+			CoreReward = new RitualReward { UndeadDamageMultiplier = 0.10f }
 		}
 	};
 

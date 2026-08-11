@@ -25,10 +25,13 @@ public static class UndeadRules
 		return !NonLivingRaces.Contains(race);
 	}
 
-	public static int ApplyDispelMultiplier(int damage, DamageType damageType, string targetRace)
+	public static int ApplyDispelMultiplier(int damage, DamageType damageType, string targetRace, float resistFraction = 0f)
 	{
 		if (damageType == DamageType.Holy && IsUndead(targetRace))
-			return (int)(damage * DispelDamageMultiplier);
+		{
+			float multiplier = 1f + (DispelDamageMultiplier - 1f) * (1f - resistFraction);
+			return (int)(damage * multiplier);
+		}
 		return damage;
 	}
 }

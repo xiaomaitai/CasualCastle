@@ -17,6 +17,10 @@ public partial class NecromancerSmoke : Node
 		CheckRitualRules();
 		CheckRitualService();
 		CheckCombineGate();
+		CheckV05Data();
+		CheckV05Auras();
+		CheckV05Rituals();
+		CheckV05Gates();
 		ReportAndQuit();
 	}
 
@@ -154,7 +158,7 @@ public partial class NecromancerSmoke : Node
 			_failures.Add("仪式宿主判定错误");
 		if (RitualRules.CanHostRitual("Tomb"))
 			_failures.Add("普通建筑不应可举行仪式");
-		if (RitualRules.GetAll().Count != 4)
+		if (RitualRules.GetAll().Count != 6)
 			_failures.Add("仪式定义数量错误");
 		GD.Print("SMOKE: ritual rules ok");
 	}
@@ -262,6 +266,196 @@ public partial class NecromancerSmoke : Node
 		if (factory.CreatedCount != 1 || factory.LastCreated.TypeId != "DeathTemple")
 			_failures.Add("核心 Lv3 应组合出死亡圣殿");
 	}
+	private void CheckV05Data()
+	{
+		CheckBloodAltarData();
+		CheckV05Units();
+		CheckV05Skills();
+		GD.Print("SMOKE: v0.5 data ok");
+	}
+
+	private void CheckBloodAltarData()
+	{
+		IBuildingRepository buildings = GameManager.Get<IBuildingRepository>();
+		BuildingData altar = buildings.Get("BloodAltar");
+		BuildingData sanctum = buildings.Get("NecromancySanctum");
+		BuildingData gate = buildings.Get("DeathGate");
+		if (altar.Value != 28 || altar.CombineTier != 3 || altar.UnitTypeId != "BloodKnight")
+			_failures.Add("BloodAltar 数据不符");
+		if (sanctum.Value != 65 || sanctum.CombineTier != 4 || sanctum.UnitTypeId != "NecromancyInstructor")
+			_failures.Add("NecromancySanctum 数据不符");
+		if (gate.Value != 80 || gate.CombineTier != 4 || gate.UnitTypeId != "DeathLord")
+			_failures.Add("DeathGate 数据不符");
+	}
+
+	private void CheckV05Units()
+	{
+		IUnitRepository units = GameManager.Get<IUnitRepository>();
+		UnitStats knight = units.Get("BloodKnight");
+		if (knight.Race != "Undead" || !knight.HasNightCombat || knight.Damage != 32 || knight.Health != 620)
+			_failures.Add("BloodKnight 数据不符");
+		UnitStats instructor = units.Get("NecromancyInstructor");
+		if (instructor.Race != "Undead" || instructor.Damage != 38 || instructor.Health != 780)
+			_failures.Add("NecromancyInstructor 数据不符");
+		UnitStats lord = units.Get("DeathLord");
+		if (lord.Race != "Undead" || lord.Damage != 45 || lord.Health != 950)
+			_failures.Add("DeathLord 数据不符");
+		UnitStats angel = units.Get("DeathAngel");
+		if (angel.Race != "Undead" || angel.DamageType != DamageType.Pierce || angel.Damage != 42 || angel.Health != 700)
+			_failures.Add("DeathAngel 数据不符");
+	}
+
+	private void CheckV05Skills()
+	{
+		ISkillRepository skills = GameManager.Get<ISkillRepository>();
+		if (!HasSkill(skills.GetByUnitType("BloodKnight"), "lifesteal_aura"))
+			_failures.Add("BloodKnight 缺少吸血光环");
+		if (!HasSkill(skills.GetByUnitType("NecromancyInstructor"), "anti_magic_shield"))
+			_failures.Add("NecromancyInstructor 缺少反魔法护罩");
+		if (!HasSkill(skills.GetByUnitType("DeathLord"), "stability_aura"))
+			_failures.Add("DeathLord 缺少稳定光环");
+	}
+
+	private void CheckV05Auras()
+	{
+		CheckLifestealAura();
+		CheckDispelResistAuras();
+		GD.Print("SMOKE: v0.5 auras ok");
+	}
+
+	private void CheckLifestealAura()
+	{
+		CasualCastle.Domain.Battle.Unit knight = CreateUnit(GameManager.Get<IUnitRepository>().Get("BloodKnight"), true);
+		AddSkills(knight, GameManager.Get<ISkillRepository>().GetByUnitType("BloodKnight"));
+		CasualCastle.Domain.Battle.Unit skeleton = CreateUnit(GameManager.Get<IUnitRepository>().Get("Skeleton"), true);
+		knight.SetPosition(0, 0);
+		skeleton.SetPosition(30, 0);
+		AuraService service = GameManager.Get<AuraService>();
+		AuraEffects effects = service.CalculateEffects(skeleton, new List<IUnitHandle> { skeleton, knight });
+		if (effects.LifestealFraction < 0.14f)
+			_failures.Add($"吸血光环加成错误 {effects.LifestealFraction}");
+	}
+
+	private void CheckDispelResistAuras()
+	{
+		CasualCastle.Domain.Battle.Unit shield = CreateUnit(GameManager.Get<IUnitRepository>().Get("NecromancyInstructor"), true);
+		AddSkills(shield, GameManager.Get<ISkillRepository>().GetByUnitType("NecromancyInstructor"));
+		CasualCastle.Domain.Battle.Unit stability = CreateUnit(GameManager.Get<IUnitRepository>().Get("DeathLord"), true);
+		AddSkills(stability, GameManager.Get<ISkillRepository>().GetByUnitType("DeathLord"));
+		CasualCastle.Domain.Battle.Unit skeleton = CreateUnit(GameManager.Get<IUnitRepository>().Get("Skeleton"), true);
+		shield.SetPosition(0, 0);
+		stability.SetPosition(0, 0);
+		skeleton.SetPosition(30, 0);
+		AuraService service = GameManager.Get<AuraService>();
+		AuraEffects shielded = service.CalculateEffects(skeleton, new List<IUnitHandle> { skeleton, shield });
+		AuraEffects immune = service.CalculateEffects(skeleton, new List<IUnitHandle> { skeleton, stability });
+		if (shielded.DispelResistFraction < 0.49f)
+			_failures.Add($"反魔法护罩加成错误 {shielded.DispelResistFraction}");
+		if (immune.DispelResistFraction < 0.99f)
+			_failures.Add($"稳定光环加成错误 {immune.DispelResistFraction}");
+	}
+
+	private void CheckV05Rituals()
+	{
+		CheckDeathAngelRitual();
+		CheckNecromancyStudyRitual();
+		GD.Print("SMOKE: v0.5 rituals ok");
+	}
+
+	private void CheckDeathAngelRitual()
+	{
+		RitualService service = GameManager.Get<RitualService>();
+		service.Learn(RitualRules.DeathAngelSummonId);
+		ActiveRitual blocked = service.TryStartRitual(RitualRules.DeathAngelSummonId, false, 2, _ => true, _ => true);
+		if (blocked != null)
+			_failures.Add("死亡天使降临核心等级前置错误");
+		ActiveRitual ritual = service.TryStartRitual(RitualRules.DeathAngelSummonId, true, 3, _ => true, _ => true);
+		if (ritual == null)
+		{
+			_failures.Add("死亡天使降临无法开始");
+			return;
+		}
+		RitualReward reward = service.GetReward(ritual);
+		if (reward.SummonUnitTypeId != "DeathAngel" || reward.SummonCount != 1)
+			_failures.Add("死亡天使降临核心奖励错误");
+	}
+
+	private void CheckNecromancyStudyRitual()
+	{
+		RitualService service = GameManager.Get<RitualService>();
+		service.Learn(RitualRules.NecromancyStudyId);
+		ActiveRitual blocked = service.TryStartRitual(RitualRules.NecromancyStudyId, false, 3, _ => true, _ => true);
+		if (blocked != null)
+			_failures.Add("亡灵巫术研习核心等级前置错误");
+		ActiveRitual ritual = service.TryStartRitual(RitualRules.NecromancyStudyId, true, 4, _ => true, _ => true);
+		if (ritual == null)
+		{
+			_failures.Add("亡灵巫术研习无法开始");
+			return;
+		}
+		RitualReward reward = service.GetReward(ritual);
+		if (reward.UndeadDamageMultiplier < 0.09f)
+			_failures.Add($"亡灵巫术研习核心奖励错误 {reward.UndeadDamageMultiplier}");
+	}
+
+	private void CheckV05Gates()
+	{
+		CheckBloodAltarCombineGate();
+		CheckSanctumCombineGate();
+		CheckDeathGateUpgradeGate();
+		GD.Print("SMOKE: v0.5 gates ok");
+	}
+
+	private void CheckBloodAltarCombineGate()
+	{
+		CombineService service = GameManager.Get<ICombineUseCase>() as CombineService;
+		if (service == null)
+			return;
+		List<IBuildingState> buildings = new() { new FakeBuildingState("DeathTemple", 4, 4), new FakeBuildingState("DeathTemple", 4, 6) };
+		FakeCombineFactory factory = new();
+		service.ResolveCombines(buildings, true, true, true, factory, _ => { }, 3);
+		if (factory.CreatedCount != 0)
+			_failures.Add("核心 Lv3 不应组合鲜血祭坛");
+		service.ResolveCombines(buildings, true, true, true, factory, _ => { }, 4);
+		if (factory.CreatedCount != 1 || factory.LastCreated.TypeId != "BloodAltar")
+			_failures.Add("核心 Lv4 应组合出鲜血祭坛");
+	}
+
+	private void CheckSanctumCombineGate()
+	{
+		CombineService service = GameManager.Get<ICombineUseCase>() as CombineService;
+		if (service == null)
+			return;
+		List<IBuildingState> buildings = new() { new FakeBuildingState("BloodAltar", 4, 4), new FakeBuildingState("BloodAltar", 4, 6) };
+		FakeCombineFactory factory = new();
+		service.ResolveCombines(buildings, true, true, true, factory, _ => { }, 4);
+		if (factory.CreatedCount != 0)
+			_failures.Add("核心 Lv4 不应组合亡灵巫术禁殿");
+		service.ResolveCombines(buildings, true, true, true, factory, _ => { }, 5);
+		if (factory.CreatedCount != 1 || factory.LastCreated.TypeId != "NecromancySanctum")
+			_failures.Add("核心 Lv5 应组合出亡灵巫术禁殿");
+	}
+
+	private void CheckDeathGateUpgradeGate()
+	{
+		ITechTreeRepository techRepo = GameManager.Get<ITechTreeRepository>();
+		UpgradeRules rules = GameManager.Get<UpgradeRules>();
+		List<UpgradeRecipe> edges = new();
+		foreach (FactionDef faction in techRepo.LoadFactions())
+			edges.AddRange(techRepo.LoadUpgradeEdges(faction.Id));
+		edges.AddRange(RitualCircleRules.CreateUpgradeRecipes());
+		rules.LoadRecipes(edges);
+		IUpgradeUseCase useCase = GameManager.Get<IUpgradeUseCase>();
+		FakeBuildingState source = new("BloodAltar", 4, 4);
+		FakeUpgradeFactory factory = new();
+		IBuildingState blocked = useCase.TryUpgrade(source, "DeathGate", 1f, _ => true, factory, 4);
+		if (blocked != null)
+			_failures.Add("核心 Lv4 不应升级死者之门");
+		IBuildingState upgraded = useCase.TryUpgrade(source, "DeathGate", 1f, _ => true, factory, 5);
+		if (upgraded == null || upgraded.TypeId != "DeathGate")
+			_failures.Add("核心 Lv5 应升级出死者之门");
+	}
+
 	private void ReportAndQuit()
 	{
 		if (_failures.Count == 0)
@@ -450,5 +644,16 @@ internal sealed class FakeCombineFactory : ICombineBuildingFactory
 	public void Destroy(IBuildingState building)
 	{
 		DestroyedCount++;
+	}
+}
+internal sealed class FakeUpgradeFactory : IUpgradeBuildingFactory
+{
+	public IBuildingState Create(string typeId, int anchorX, int anchorY, float healthRatio)
+	{
+		return new FakeBuildingState(typeId, anchorX, anchorY);
+	}
+
+	public void Destroy(IBuildingState building)
+	{
 	}
 }

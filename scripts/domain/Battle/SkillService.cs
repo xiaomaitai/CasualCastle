@@ -82,6 +82,8 @@ public class SkillService
 			ctx.AuraRegenPerSecond = aura.RegenPerSecond;
 			ctx.AuraExecuteDamageMultiplier = aura.ExecuteDamageMultiplier;
 			ctx.AuraArmorBonus = aura.ArmorBonus;
+			ctx.AuraLifestealFraction = aura.LifestealFraction;
+			ctx.AuraDispelResistFraction = aura.DispelResistFraction;
 
 			unit.SetGameContext(ctx);
 		}

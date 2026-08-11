@@ -192,9 +192,9 @@ public class RitualServiceTests
 	}
 
 	[Fact]
-	public void GetAll_ReturnsFourRituals()
+	public void GetAll_ReturnsSixRituals()
 	{
-		Assert.Equal(4, RitualRules.GetAll().Count);
+		Assert.Equal(6, RitualRules.GetAll().Count);
 	}
 
 	[Fact]

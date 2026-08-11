@@ -48,6 +48,7 @@ public partial class Unit : IUnitHandle
 	public int ArmorValue { get; set; }
 
 	public int EffectiveArmorValue => ArmorValue + GameCtx.AuraArmorBonus;
+	public float AuraDispelResistFraction => GameCtx.AuraDispelResistFraction;
 
 	public string Race { get; set; }
 
@@ -360,7 +361,12 @@ public partial class Unit : IUnitHandle
 			case UnitState.Sieging:
 				if (_attackTimer <= 0 && TargetBuilding != null && !TargetBuilding.IsDestroyed)
 				{
-					TargetBuilding.TakeDamage((int)(Damage * GameCtx.AuraAttackDamageMultiplier * GetCurseDamageFactor()));
+					int siegeDamage = (int)(Damage * GameCtx.AuraAttackDamageMultiplier * GetCurseDamageFactor());
+					if (UndeadRules.IsUndead(Race))
+						siegeDamage = (int)(siegeDamage * UndeadFactionBuffs.DamageMultiplier);
+					TargetBuilding.TakeDamage(siegeDamage);
+					if (GameCtx.AuraLifestealFraction > 0f)
+						Heal((int)(siegeDamage * GameCtx.AuraLifestealFraction));
 					_attackTimer = AttackCooldown;
 				}
 				else
@@ -456,11 +462,15 @@ public partial class Unit : IUnitHandle
 				_kiteTimer = kiting.Param;
 		}
 		effectiveDamage = (int)(effectiveDamage * GameCtx.AuraAttackDamageMultiplier * GetCurseDamageFactor());
+		if (UndeadRules.IsUndead(Race))
+			effectiveDamage = (int)(effectiveDamage * UndeadFactionBuffs.DamageMultiplier);
 		if (executeMultiplier != 1f)
 			effectiveDamage = (int)(effectiveDamage * executeMultiplier);
 		int finalDamage = CombatRules.CalculateDamage(effectiveDamage, DamageType, TargetEnemy.ArmorType, TargetEnemy.EffectiveArmorValue, _damageMatrix);
-		finalDamage = UndeadRules.ApplyDispelMultiplier(finalDamage, DamageType, TargetEnemy.Race);
+		finalDamage = UndeadRules.ApplyDispelMultiplier(finalDamage, DamageType, TargetEnemy.Race, TargetEnemy.AuraDispelResistFraction);
 		TargetEnemy.TakeDamage(finalDamage, this, GameX, GameY);
+		if (GameCtx.AuraLifestealFraction > 0f)
+			Heal((int)(finalDamage * GameCtx.AuraLifestealFraction));
 
 		if (Skills != null)
 		{

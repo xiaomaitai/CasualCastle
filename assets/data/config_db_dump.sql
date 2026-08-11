@@ -219,6 +219,10 @@ INSERT INTO unit_stats VALUES('SkeletonWarrior',0,0,0,2,45,12,75.0,40.0,0.9,1,42
 INSERT INTO unit_stats VALUES('PlagueZombie',1,0,2,4,150,16,45.0,40.0,1.5,1,4284119594,190.0,2600,'Undead',8,0,0.0,0.0,0.0);
 INSERT INTO unit_stats VALUES('DeathKnight',2,0,2,4,320,26,65.0,40.0,1.1,1,0,220.0,4200,'Undead',9,0,0.0,0.0,0.0);
 INSERT INTO unit_stats VALUES('DarkMage',1,1,4,1,90,12,60.0,220.0,1.8,1,0,240.0,3000,'Human',2,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('BloodKnight',2,0,2,4,620,32,60.0,40.0,1.3,1,0,240.0,6500,'Undead',15,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('NecromancyInstructor',2,0,2,4,780,38,58.0,40.0,1.4,1,0,240.0,7000,'Undead',17,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('DeathLord',2,0,2,4,950,45,62.0,40.0,1.2,1,0,250.0,8000,'Undead',20,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('DeathAngel',2,0,1,4,700,42,70.0,50.0,1.2,1,0,240.0,7500,'Undead',14,0,0.0,0.0,0.0);
 CREATE TABLE building_defs (
     type_id           TEXT PRIMARY KEY,
     display_name      TEXT    NOT NULL,
@@ -300,6 +304,9 @@ INSERT INTO building_defs VALUES('RitualCircleL5','仪式之环·5级',1600,0.0,
 INSERT INTO building_defs VALUES('DeathTemple','死亡圣殿',400,6.0,0,0,1,1,'DeathKnight',1,2,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'necromancer',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',12,'Undead');
 INSERT INTO building_defs VALUES('DarkAltar','黑暗祭坛',200,7.0,0,0,1,1,'DarkMage',1,0,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'necromancer',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',3,'Human');
 INSERT INTO building_defs VALUES('DarkMageTower','暗黑法师塔',320,6.0,0,0,1,1,'DarkMage',1,1,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'necromancer',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',8,'Human');
+INSERT INTO building_defs VALUES('BloodAltar','????',550,5.5,0,0,1,1,'BloodKnight',1,3,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'necromancer',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',28,'Undead');
+INSERT INTO building_defs VALUES('NecromancySanctum','??????',700,5.0,0,0,1,1,'NecromancyInstructor',1,4,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'necromancer',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',65,'Undead');
+INSERT INTO building_defs VALUES('DeathGate','????',750,8.0,0,0,1,1,'DeathLord',1,4,0,'[[0,0],[1,0],[0,1],[1,1]]',188,188,'necromancer',100.0,'res://assets/art/placeholders/test_image.png',1.0,1.0,1.0,1.0,'',80,'Undead');
 CREATE TABLE shop_catalog (
     id            TEXT PRIMARY KEY,
     name          TEXT    NOT NULL,
@@ -420,6 +427,9 @@ INSERT INTO tech_tree_nodes VALUES('RitualCircleL5','necromancer',5,0,0,NULL,NUL
 INSERT INTO tech_tree_nodes VALUES('DeathTemple','necromancer',3,1,0,NULL,NULL,0,'死亡圣殿','DeathKnight',400,6.0,12,'Undead',0);
 INSERT INTO tech_tree_nodes VALUES('DarkAltar','necromancer',1,3,1,3,8,0,'黑暗祭坛','DarkMage',200,7.0,3,'Human',0);
 INSERT INTO tech_tree_nodes VALUES('DarkMageTower','necromancer',2,3,0,NULL,NULL,0,'暗黑法师塔','DarkMage',320,6.0,8,'Human',0);
+INSERT INTO tech_tree_nodes VALUES('BloodAltar','necromancer',4,1,0,NULL,NULL,0,'????','BloodKnight',550,5.5,28,'Undead',0);
+INSERT INTO tech_tree_nodes VALUES('NecromancySanctum','necromancer',5,1,0,NULL,NULL,0,'??????','NecromancyInstructor',700,5.0,65,'Undead',0);
+INSERT INTO tech_tree_nodes VALUES('DeathGate','necromancer',5,2,0,NULL,NULL,0,'????','DeathLord',750,8.0,80,'Undead',0);
 CREATE TABLE IF NOT EXISTS "combine_recipes" (
                 main_type_id TEXT NOT NULL,
                 material_type_id TEXT NOT NULL,
@@ -480,6 +490,9 @@ INSERT INTO unit_skills VALUES('PlagueZombie','plague_burst');
 INSERT INTO unit_skills VALUES('DeathKnight','fanatical_aura');
 INSERT INTO unit_skills VALUES('DarkMage','shadow_curse');
 INSERT INTO unit_skills VALUES('DarkMage','shadow_nova');
+INSERT INTO unit_skills VALUES('BloodKnight','lifesteal_aura');
+INSERT INTO unit_skills VALUES('NecromancyInstructor','anti_magic_shield');
+INSERT INTO unit_skills VALUES('DeathLord','stability_aura');
 CREATE TABLE IF NOT EXISTS "skill_defs" (
     id TEXT PRIMARY KEY,
     display_name TEXT NOT NULL,
@@ -516,6 +529,9 @@ INSERT INTO skill_defs VALUES('plague_burst','死亡毒云','special','{"behavio
 INSERT INTO skill_defs VALUES('fanatical_aura','狂热光环','aura','{"target":"nearby_allies","range":150,"race":"Undead","effects":[{"bonus_type":"attack_damage","value":0.20},{"bonus_type":"move_speed","value":0.15}]}','周围友军亡灵攻击力+20%、移动速度+15%');
 INSERT INTO skill_defs VALUES('shadow_curse','暗影诅咒','special','{"behavior":"curse","param":4.0,"cost":20,"value":0.25}','单体诅咒：目标减速并降低输出（占位）');
 INSERT INTO skill_defs VALUES('shadow_nova','暗影新星','special','{"behavior":"shadow_nova","param":120,"cost":40,"value":30,"cooldown":6.0}','对周围 120 范围敌人造成 30 魔法伤害（暗影元素）');
+INSERT INTO skill_defs VALUES('lifesteal_aura','????','aura','{"target":"nearby_allies","range":150,"race":"Undead","effects":[{"bonus_type":"lifesteal","value":0.15}]}','???????????????? 15%');
+INSERT INTO skill_defs VALUES('anti_magic_shield','?????','aura','{"target":"nearby_allies","range":150,"race":"Undead","effects":[{"bonus_type":"dispel_resist","value":0.50}]}','???????????? -50%');
+INSERT INTO skill_defs VALUES('stability_aura','????','aura','{"target":"nearby_allies","range":180,"race":"Undead","effects":[{"bonus_type":"dispel_resist","value":1.00}]}','???????????');
 CREATE TABLE upgrade_recipes (
     source_type_id TEXT NOT NULL,
     result_type_id TEXT NOT NULL,
@@ -553,10 +569,15 @@ INSERT INTO upgrade_recipes VALUES('RitualCircleL2','RitualCircleL3');
 INSERT INTO upgrade_recipes VALUES('RitualCircleL3','RitualCircleL4');
 INSERT INTO upgrade_recipes VALUES('RitualCircleL4','RitualCircleL5');
 INSERT INTO upgrade_recipes VALUES('DarkAltar','DarkMageTower');
+INSERT INTO upgrade_recipes VALUES('BloodAltar','DeathGate');
+INSERT INTO upgrade_recipes VALUES('DeathTemple','BloodAltar');
+INSERT INTO upgrade_recipes VALUES('BloodAltar','NecromancySanctum');
 CREATE TABLE item_catalog (id TEXT PRIMARY KEY, name TEXT NOT NULL, cost INTEGER NOT NULL, weight INTEGER NOT NULL DEFAULT 1, faction_id TEXT NOT NULL DEFAULT '', item_type TEXT NOT NULL DEFAULT '', attributes TEXT NOT NULL DEFAULT '');
 INSERT INTO item_catalog VALUES('DarkMagicBook_BlackMagicCharge','黑魔法充能之书',4,6,'necromancer','dark_magic_book','{"ritual_id": "black_magic_charge"}');
 INSERT INTO item_catalog VALUES('DarkMagicBook_UndeadSummon','亡灵召唤之书',4,6,'necromancer','dark_magic_book','{"ritual_id": "undead_summon"}');
 INSERT INTO item_catalog VALUES('DarkMagicBook_BoneReinforce','骸骨强化之书',4,6,'necromancer','dark_magic_book','{"ritual_id": "bone_reinforce"}');
+INSERT INTO item_catalog VALUES('DarkMagicBook_DeathAngel','??????',4,4,'necromancer','dark_magic_book','{"ritual_id": "death_angel_summon"}');
+INSERT INTO item_catalog VALUES('DarkMagicBook_NecromancyStudy','????????',4,3,'necromancer','dark_magic_book','{"ritual_id": "necromancy_study"}');
 CREATE TABLE IF NOT EXISTS "damage_matrix" (damage_type INTEGER NOT NULL, armor_type INTEGER NOT NULL, multiplier INTEGER NOT NULL, PRIMARY KEY (damage_type, armor_type));
 INSERT INTO damage_matrix VALUES(0,0,150);
 INSERT INTO damage_matrix VALUES(0,1,150);

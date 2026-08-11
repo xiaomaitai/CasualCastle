@@ -79,6 +79,12 @@ public class AuraService
 			case AuraBonusTypes.Armor:
 				result.ArmorBonus += (int)value;
 				break;
+			case AuraBonusTypes.Lifesteal:
+				result.LifestealFraction += value;
+				break;
+			case AuraBonusTypes.DispelResist:
+				result.DispelResistFraction = System.Math.Min(1f, result.DispelResistFraction + value);
+				break;
 		}
 	}
 }

@@ -17,4 +17,6 @@ public class GameContext
 	public float AuraRegenPerSecond;
 	public float AuraExecuteDamageMultiplier = 1f;
 	public int AuraArmorBonus;
+	public float AuraLifestealFraction;
+	public float AuraDispelResistFraction;
 }

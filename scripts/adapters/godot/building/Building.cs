@@ -632,6 +632,8 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 			SpawnUnitType(reward.SummonUnitTypeId, reward.SummonCount);
 		if (reward.UndeadMaxHealthBonus > 0)
 			ApplyUndeadHealthBonus(reward.UndeadMaxHealthBonus);
+		if (reward.UndeadDamageMultiplier > 0f)
+			UndeadFactionBuffs.AddUndeadDamageMultiplier(reward.UndeadDamageMultiplier);
 		if (!string.IsNullOrEmpty(reward.LearnedRitualId))
 			RemoveStudyBookFromHand();
 	}

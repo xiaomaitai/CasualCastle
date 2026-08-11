@@ -22,6 +22,7 @@ public interface IUnitState
 	ArmorType ArmorType { get; }
 	int ArmorValue { get; }
 	int EffectiveArmorValue { get; }
+	float AuraDispelResistFraction { get; }
 	DamageType DamageType { get; }
 	AttackType AttackType { get; }
 	string Race { get; }

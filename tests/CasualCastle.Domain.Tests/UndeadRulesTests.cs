@@ -50,6 +50,22 @@ public class UndeadRulesTests
 	}
 
 	[Fact]
+	public void ApplyDispelMultiplier_HalfResist_ReducesDispelBonus()
+	{
+		int result = UndeadRules.ApplyDispelMultiplier(10, DamageType.Holy, "Undead", 0.50f);
+
+		Assert.Equal(15, result);
+	}
+
+	[Fact]
+	public void ApplyDispelMultiplier_FullResist_RemovesDispelBonus()
+	{
+		int result = UndeadRules.ApplyDispelMultiplier(10, DamageType.Holy, "Undead", 1f);
+
+		Assert.Equal(10, result);
+	}
+
+	[Fact]
 	public void ApplyDispelMultiplier_SlashVsUndead_Unchanged()
 	{
 		int result = UndeadRules.ApplyDispelMultiplier(10, DamageType.Slash, "Undead");
