@@ -9,7 +9,7 @@
 [ext_resource type="Script" path="res://scripts/adapters/godot/battlefield/BattlefieldTileMap.cs" id="20"]
 [ext_resource type="Script" path="res://scripts/adapters/godot/flow/CameraController.cs" id="21"]
 [ext_resource type="Script" path="res://scripts/adapters/godot/ui/BuildingActionRing.cs" id="22"]
-[ext_resource type="Script" path="res://scripts/adapters/godot/ui/DashedFrame.cs" id="23"]
+[ext_resource type="Script" path="res://scripts/adapters/godot/ui/OfferFrame.cs" id="23"]
 
 [node name="MainGame" type="Node2D" unique_id=1]
 script = ExtResource("10")
@@ -436,10 +436,10 @@ text = "购买"
 [node name="OfferFrame1" type="Control" parent="UI/ShopPanel"]
 layout_mode = 0
 mouse_filter = 2
-offset_left = 24
-offset_top = 147
-offset_right = 628.5
-offset_bottom = 237
+offset_left = 18
+offset_top = 144
+offset_right = 634.5
+offset_bottom = 240
 script = ExtResource("23")
 
 [node name="OfferSlot2" type="HBoxContainer" parent="UI/ShopPanel"]
@@ -464,10 +464,10 @@ text = "购买"
 [node name="OfferFrame2" type="Control" parent="UI/ShopPanel"]
 layout_mode = 0
 mouse_filter = 2
-offset_left = 24
-offset_top = 255
-offset_right = 628.5
-offset_bottom = 345
+offset_left = 18
+offset_top = 252
+offset_right = 634.5
+offset_bottom = 348
 script = ExtResource("23")
 
 [node name="OfferSlot3" type="HBoxContainer" parent="UI/ShopPanel"]
@@ -492,10 +492,10 @@ text = "购买"
 [node name="OfferFrame3" type="Control" parent="UI/ShopPanel"]
 layout_mode = 0
 mouse_filter = 2
-offset_left = 24
-offset_top = 363
-offset_right = 628.5
-offset_bottom = 453
+offset_left = 18
+offset_top = 360
+offset_right = 634.5
+offset_bottom = 456
 script = ExtResource("23")
 
 [node name="OfferSlot4" type="HBoxContainer" parent="UI/ShopPanel"]
@@ -520,10 +520,10 @@ text = "购买"
 [node name="OfferFrame4" type="Control" parent="UI/ShopPanel"]
 layout_mode = 0
 mouse_filter = 2
-offset_left = 24
-offset_top = 471
-offset_right = 628.5
-offset_bottom = 561
+offset_left = 18
+offset_top = 468
+offset_right = 634.5
+offset_bottom = 564
 script = ExtResource("23")
 
 [node name="OfferSlot5" type="HBoxContainer" parent="UI/ShopPanel"]
@@ -548,10 +548,10 @@ text = "购买"
 [node name="OfferFrame5" type="Control" parent="UI/ShopPanel"]
 layout_mode = 0
 mouse_filter = 2
-offset_left = 24
-offset_top = 579
-offset_right = 628.5
-offset_bottom = 669
+offset_left = 18
+offset_top = 576
+offset_right = 634.5
+offset_bottom = 672
 script = ExtResource("23")
 
 [node name="ShopRefreshButton" type="Button" parent="UI/ShopPanel"]
