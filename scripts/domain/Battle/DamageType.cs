@@ -9,6 +9,5 @@ public enum DamageType
 	Siege,
 	Magic,
 	Holy,
-	Chaos,
-	Shadow
+	Chaos
 }

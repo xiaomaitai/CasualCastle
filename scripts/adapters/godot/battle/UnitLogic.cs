@@ -349,7 +349,6 @@ public partial class UnitLogic : Node2D
 			case DamageType.Pierce:
 				return SfxEvents.LaunchArrow;
 			case DamageType.Magic:
-			case DamageType.Shadow:
 				return SfxEvents.LaunchMagic;
 			default:
 				return SfxEvents.ProjectileLaunch;
@@ -368,7 +367,6 @@ public partial class UnitLogic : Node2D
 			case DamageType.Pierce:
 				return SfxEvents.HitPierce;
 			case DamageType.Magic:
-			case DamageType.Shadow:
 				return SfxEvents.HitMagic;
 			default:
 				return SfxEvents.Hit;
@@ -448,7 +446,7 @@ public partial class UnitLogic : Node2D
 	{
 		if (AttackType == AttackType.Ranged)
 		{
-			if (DamageType == DamageType.Magic || DamageType == DamageType.Shadow)
+			if (DamageType == DamageType.Magic)
 				return "res://assets/art/projectiles/magic_ball.png";
 			return "res://assets/art/projectiles/arrow.png";
 		}

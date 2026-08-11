@@ -4,7 +4,7 @@ Godot **4.6** + **C# / .NET** 的 2.5D RTS 项目（斜视角纸片人，类皇�
 
 ## 术语
 
-游戏术语（地块、城堡、建筑卡、战场等）以 `devPlan/concepts.md` 为准。
+游戏术语（地块、城堡、建筑卡、战场等）以 `devPlan/concepts/general.md` 为准。
 
 ## 架构与目录归属
 

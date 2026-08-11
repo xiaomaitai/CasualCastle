@@ -218,7 +218,7 @@ INSERT INTO unit_stats VALUES('Zombie',1,0,2,4,110,14,45.0,40.0,1.6,1,4286356540
 INSERT INTO unit_stats VALUES('SkeletonWarrior',0,0,0,2,45,12,75.0,40.0,0.9,1,4292401352,190.0,2200,'Undead',10,0,0.0,0.0,0.0);
 INSERT INTO unit_stats VALUES('PlagueZombie',1,0,2,4,150,16,45.0,40.0,1.5,1,4284119594,190.0,2600,'Undead',50,0,0.0,0.0,0.0);
 INSERT INTO unit_stats VALUES('DeathKnight',2,0,2,4,320,26,65.0,40.0,1.1,1,0,220.0,4200,'Undead',60,0,0.0,0.0,0.0);
-INSERT INTO unit_stats VALUES('DarkMage',1,1,7,1,90,12,60.0,220.0,1.8,1,0,240.0,3000,'Human',10,0,0.0,0.0,0.0);
+INSERT INTO unit_stats VALUES('DarkMage',1,1,4,1,90,12,60.0,220.0,1.8,1,0,240.0,3000,'Human',10,0,0.0,0.0,0.0);
 CREATE TABLE building_defs (
     type_id           TEXT PRIMARY KEY,
     display_name      TEXT    NOT NULL,
@@ -515,7 +515,7 @@ INSERT INTO skill_defs VALUES('plague_poison','剧毒打击','on_hit','{"effects
 INSERT INTO skill_defs VALUES('plague_burst','死亡毒云','special','{"behavior":"plague_burst","param":80,"damage_mult":20}','死亡时对周围 80 范围敌人造成 20 点伤害');
 INSERT INTO skill_defs VALUES('fanatical_aura','狂热光环','aura','{"target":"nearby_allies","range":150,"race":"Undead","effects":[{"bonus_type":"attack_damage","value":0.20},{"bonus_type":"move_speed","value":0.15}]}','周围友军亡灵攻击力+20%、移动速度+15%');
 INSERT INTO skill_defs VALUES('shadow_curse','暗影诅咒','special','{"behavior":"curse","param":4.0,"cost":20,"value":0.25}','单体诅咒：目标减速并降低输出（占位）');
-INSERT INTO skill_defs VALUES('shadow_nova','暗影新星','special','{"behavior":"shadow_nova","param":120,"cost":40,"value":30,"cooldown":6.0}','对周围 120 范围敌人造成 30 暗影伤害');
+INSERT INTO skill_defs VALUES('shadow_nova','暗影新星','special','{"behavior":"shadow_nova","param":120,"cost":40,"value":30,"cooldown":6.0}','对周围 120 范围敌人造成 30 魔法伤害（暗影元素）');
 CREATE TABLE upgrade_recipes (
     source_type_id TEXT NOT NULL,
     result_type_id TEXT NOT NULL,
@@ -607,13 +607,6 @@ INSERT INTO damage_matrix VALUES(6,3,100);
 INSERT INTO damage_matrix VALUES(6,4,150);
 INSERT INTO damage_matrix VALUES(6,5,150);
 INSERT INTO damage_matrix VALUES(6,6,100);
-INSERT INTO damage_matrix VALUES(7,0,150);
-INSERT INTO damage_matrix VALUES(7,1,70);
-INSERT INTO damage_matrix VALUES(7,2,100);
-INSERT INTO damage_matrix VALUES(7,3,100);
-INSERT INTO damage_matrix VALUES(7,4,150);
-INSERT INTO damage_matrix VALUES(7,5,70);
-INSERT INTO damage_matrix VALUES(7,6,10);
 PRAGMA writable_schema=ON;
 CREATE TABLE IF NOT EXISTS sqlite_sequence(name,seq);
 DELETE FROM sqlite_sequence;

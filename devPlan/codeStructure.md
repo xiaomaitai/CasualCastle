@@ -1,6 +1,6 @@
 # 代码结构文档 — CasualCastle
 
-本文档记录当前运行时代码结构。概念定义见 `devPlan/concepts.md`。
+本文档记录当前运行时代码结构。概念定义见 `devPlan/concepts/general.md`。
 
 ---
 

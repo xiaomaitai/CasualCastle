@@ -1,6 +1,6 @@
 # 数据结构设计 — CasualCastle
 
-卡牌、建筑、单位等核心运行时/配置数据的 C# 结构。概念定义见 `concepts.md`，开发顺序与系统划分见 `outline/`。
+卡牌、建筑、单位等核心运行时/配置数据的 C# 结构。概念定义见 `concepts/general.md`，开发顺序与系统划分见 `outline/`。
 
 > 本文档为早期设计参考。所有实际游戏数据以 `assets/data/config.db` 为准；文档与数据库不一致时以数据库为准。
 

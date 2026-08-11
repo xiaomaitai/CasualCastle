@@ -1,6 +1,6 @@
 # 进阶系统设计 — M5（组合 + 升级）
 
-进阶系统包含**组合**与**升级**两种建筑强化方式，由高级建筑的**入边数量**自动判定，不再存在"同类建筑双融合"（两座同类合成一座）的旧规则。概念入口见 `devPlan/concepts.md`；架构归属见 `devPlan/outline/c05ProjectArchitecture.md`。
+进阶系统包含**组合**与**升级**两种建筑强化方式，由高级建筑的**入边数量**自动判定，不再存在"同类建筑双融合"（两座同类合成一座）的旧规则。概念入口见 `devPlan/concepts/general.md`；架构归属见 `devPlan/outline/c05ProjectArchitecture.md`。
 
 ## 统一判定规则
 
@@ -24,7 +24,7 @@
 
 ## 组合（Combine）
 
-合成阶段（夜晚结束后、下一天白天开始前）将满足配方、且与**主体建筑**四向邻接的材料建筑，自动合并为一座强化建筑。概念入口见 `devPlan/concepts.md`；架构归属见 `devPlan/outline/c05ProjectArchitecture.md`。
+合成阶段（夜晚结束后、下一天白天开始前）将满足配方、且与**主体建筑**四向邻接的材料建筑，自动合并为一座强化建筑。概念入口见 `devPlan/concepts/general.md`；架构归属见 `devPlan/outline/c05ProjectArchitecture.md`。
 
 ---
 

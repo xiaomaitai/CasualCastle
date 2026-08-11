@@ -1,6 +1,6 @@
 # 战报系统设计 — M6
 
-战报是 M6 的**核心产出**：记录玩家每个循环三个阶段结束时的城堡快照，永久保存后供敌方「回放式 AI」复刻。概念定义见 `devPlan/concepts.md`；敌方复刻规则见 `devPlan/design/replayAi.md`。
+战报是 M6 的**核心产出**：记录玩家每个循环三个阶段结束时的城堡快照，永久保存后供敌方「回放式 AI」复刻。概念定义见 `devPlan/concepts/general.md`；敌方复刻规则见 `devPlan/design/replayAi.md`。
 
 ---
 

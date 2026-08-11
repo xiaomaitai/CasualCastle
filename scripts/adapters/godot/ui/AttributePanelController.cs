@@ -411,7 +411,6 @@ public sealed class AttributePanelController
 			DamageType.Magic => "魔法",
 			DamageType.Holy => "神圣",
 			DamageType.Chaos => "混沌",
-			DamageType.Shadow => "暗影",
 			_ => damageType.ToString(),
 		};
 	}

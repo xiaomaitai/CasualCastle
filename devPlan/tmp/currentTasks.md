@@ -18,7 +18,7 @@ v0.3 已验收完成（游戏内实测通过，代码提交 f3d1602）。v0.4 �
 ## 三、黑暗魔法线（暗黑法师 + 黑魔法施法）
 
 - [x] 数据层：`DarkAltar`（Shop 3g，权重 8）、`DarkMageTower`（升级 5g，需核心 Lv≥2）、`DarkMage`（race=Human，has_night_combat=1）
-- [x] 技能：暗影诅咒（special，消耗 20 黑魔法）、暗影新星（special，消耗 40 黑魔法，范围 120 内 30 暗影伤害）
+- [x] 技能：暗影诅咒（special，消耗 20 黑魔法）、暗影新星（special，消耗 40 黑魔法，范围 120 内 30 魔法伤害（暗影元素））
 - [x] 施法接入：技能施放时消耗 `BlackMagicService`，不足则不施放
 - [x] 单测：黑魔法不足不施放、消耗与伤害正确
 

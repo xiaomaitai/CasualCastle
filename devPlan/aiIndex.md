@@ -2,13 +2,13 @@
 
 本文件是项目唯一导航入口，供 AI agent 快速定位文档、代码、场景、素材、测试与工具，避免全盘扫描文件系统。规则与约定见根目录 `AGENTS.md`。
 
-使用方式：先按需求找到对应小节，只打开 1~2 个关键文件；不确定术语时先读 `devPlan/concepts.md`。
+使用方式：先按需求找到对应小节，只打开 1~2 个关键文件；不确定术语时先读 `devPlan/concepts/general.md`。
 
 ## 0. 速查（按需求）
 
 | 我想… | 去这里 |
 |---|---|
-| 了解术语/游戏规则 | `devPlan/concepts.md` |
+| 了解术语/游戏规则 | `devPlan/concepts/general.md`（派系概念见同目录各派系文档） |
 | 查看当前任务/验收项 | `devPlan/tmp/currentTasks.md` |
 | 查看架构 backlog | `devPlan/tmp/todo.md` |
 | 查看里程碑进度 | `devPlan/outline/c05Milestones.md` |
@@ -21,11 +21,20 @@
 
 ## 1. 文档导航（devPlan/）
 
+### 概念文档（devPlan/concepts/）
+
+| 文档 | 内容 | 何时读 |
+|---|---|---|
+| `devPlan/concepts/general.md` | 通用概念总纲：术语、阶段循环、地块/城堡/建筑/单位、隐身、组合与升级、战报、建筑卡与物品卡、战场、伤害类型与护甲、伤害元素、碰撞层、坐标系统、2.5D 渲染、派系总览 | 任何任务开始前 |
+| `devPlan/concepts/alliance.md` | 联盟派系概念：王国军/冒险者公会/神殿卫士三流派、组合链、酒馆组队与鱼龙混杂、恩典 | 涉及联盟派系玩法时 |
+| `devPlan/concepts/horde.md` | 部落派系概念：自由建造、空地邻接、五族与荒野盟约、升级规则 | 涉及部落派系玩法时 |
+| `devPlan/concepts/necromancer.md` | 死灵法师派系概念：黑魔法、亡灵海领主光环、黑暗魔法、祭仪与仪式 | 涉及死灵法师玩法时 |
+| `devPlan/concepts/dungeon.md` | 地下城派系概念：魔王宝座、舒适度、经验等级、四邪神流派 | 涉及地下城派系玩法时 |
+
 ### 总纲与运行时结构
 
 | 文档 | 内容 | 何时读 |
 |---|---|---|
-| `devPlan/concepts.md` | 术语与核心规则总纲：阶段循环、地块/城堡/建筑/单位、隐身、组合、战报、建筑卡、战场、伤害类型与元素、坐标系统、碰撞层、2.5D 渲染 | 任何任务开始前 |
 | `devPlan/codeStructure.md` | 当前运行时代码结构：三层目录、依赖方向、双层 DI、系统清单、端口接口表、主要运行链路 | 定位代码或理解系统关系 |
 | `devPlan/dataStructures.md` | 核心 C# 数据结构：卡牌、建筑、组合配方、战报快照、单位、科技树 | 涉及数据结构时；实际数值以 config.db 为准 |
 | `devPlan/cloudEnvironment.md` | 云环境构建/测试/导入/运行命令 | 需要跑构建、测试或游戏时 |
@@ -188,7 +197,7 @@
 
 ## 8. 使用提示
 
-- 找规则：先读 `devPlan/concepts.md` 定位术语，再读对应 design 文档
+- 找规则：先读 `devPlan/concepts/general.md` 定位术语（派系概念见 `devPlan/concepts/` 对应文档），再读对应 design 文档
 - 找代码：用 §2.4 对照表定位 domain 与 adapter，只打开关键文件，避免整目录扫描
 - 文档与实际数据冲突时，以 `assets/data/config.db` 为准
 - `_deprecated/` 内容除非用户主动要求，不读取

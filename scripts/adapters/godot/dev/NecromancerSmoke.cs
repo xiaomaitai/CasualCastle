@@ -71,7 +71,7 @@ public partial class NecromancerSmoke : Node
 	{
 		UnitStats mage = GameManager.Get<IUnitRepository>().Get("DarkMage");
 		if (mage.Race != "Human" || !mage.HasNightCombat || mage.AttackType != AttackType.Ranged
-			|| mage.DamageType != DamageType.Shadow || mage.Damage != 12)
+			|| mage.DamageType != DamageType.Magic || mage.Damage != 12)
 			_failures.Add("DarkMage 数据不符");
 		IReadOnlyList<SkillDef> skills = GameManager.Get<ISkillRepository>().GetByUnitType("DarkMage");
 		if (!HasSkill(skills, "shadow_curse") || !HasSkill(skills, "shadow_nova"))
