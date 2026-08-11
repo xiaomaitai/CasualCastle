@@ -50,18 +50,23 @@ public static class GameDataLoader
 	private static void LoadBuildingCards(SqliteCommand cmd, List<CardData> catalog)
 	{
 		cmd.CommandText = @"
-			SELECT s.id, s.name, COALESCE(b.value, s.cost), s.building_type, s.weight, COALESCE(b.faction_id, 'alliance')
+			SELECT s.id, s.name, COALESCE(b.value, s.cost), s.building_type, s.weight, b.faction_id, b.type_id
 			FROM shop_catalog s
 			LEFT JOIN building_defs b ON b.type_id = s.building_type";
 		using SqliteDataReader reader = cmd.ExecuteReader();
 		while (reader.Read())
 		{
+			string shopId = reader.GetString(0);
+			string buildingType = reader.GetString(3);
+			if (reader.IsDBNull(6))
+				throw new KeyNotFoundException($"商店卡 {shopId} 的建筑类型 {buildingType} 在 building_defs 中不存在");
+
 			catalog.Add(new CardData
 			{
-				Id = reader.GetString(0),
+				Id = shopId,
 				Name = reader.GetString(1),
 				Cost = reader.GetInt32(2),
-				BuildingType = reader.GetString(3),
+				BuildingType = buildingType,
 				Weight = reader.GetInt32(4),
 				FactionId = reader.GetString(5),
 			});
