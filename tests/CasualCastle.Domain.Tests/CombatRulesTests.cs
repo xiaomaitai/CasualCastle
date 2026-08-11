@@ -18,11 +18,43 @@ public class CombatRulesTests
 	}
 
 	[Fact]
-	public void CalculateDamage_Neutral_50PercentReduction()
+	public void CalculateDamage_Neutral_15Armor_50PercentReduction()
 	{
 		DamageMatrix dm = new();
-		int result = CombatRules.CalculateDamage(100, DamageType.Slash, ArmorType.Unarmored, 100, dm);
+		int result = CombatRules.CalculateDamage(100, DamageType.Slash, ArmorType.Unarmored, 15, dm);
 		Assert.Equal(50, result);
+	}
+
+	[Fact]
+	public void CalculateDamage_Neutral_5Armor_25PercentReduction()
+	{
+		DamageMatrix dm = new();
+		int result = CombatRules.CalculateDamage(100, DamageType.Slash, ArmorType.Unarmored, 5, dm);
+		Assert.Equal(75, result);
+	}
+
+	[Fact]
+	public void CalculateDamage_Neutral_10Armor_40PercentReduction()
+	{
+		DamageMatrix dm = new();
+		int result = CombatRules.CalculateDamage(100, DamageType.Slash, ArmorType.Unarmored, 10, dm);
+		Assert.Equal(60, result);
+	}
+
+	[Fact]
+	public void CalculateDamage_Negative5Armor_IncreasesDamage25Percent()
+	{
+		DamageMatrix dm = new();
+		int result = CombatRules.CalculateDamage(100, DamageType.Slash, ArmorType.Unarmored, -5, dm);
+		Assert.Equal(125, result);
+	}
+
+	[Fact]
+	public void CalculateDamage_Negative10Armor_IncreasesDamage40Percent()
+	{
+		DamageMatrix dm = new();
+		int result = CombatRules.CalculateDamage(100, DamageType.Slash, ArmorType.Unarmored, -10, dm);
+		Assert.Equal(140, result);
 	}
 
 	[Fact]
@@ -45,7 +77,7 @@ public class CombatRulesTests
 	public void CalculateDamage_Good_With_Armor()
 	{
 		DamageMatrix dm = CreateMatrix();
-		int result = CombatRules.CalculateDamage(100, DamageType.Chaos, ArmorType.Plate, 100, dm);
+		int result = CombatRules.CalculateDamage(100, DamageType.Chaos, ArmorType.Plate, 15, dm);
 		Assert.Equal(75, result);
 	}
 
@@ -53,7 +85,7 @@ public class CombatRulesTests
 	public void CalculateDamage_Bad_With_Armor()
 	{
 		DamageMatrix dm = CreateMatrix();
-		int result = CombatRules.CalculateDamage(100, DamageType.Slash, ArmorType.Plate, 100, dm);
+		int result = CombatRules.CalculateDamage(100, DamageType.Slash, ArmorType.Plate, 15, dm);
 		Assert.Equal(35, result);
 	}
 
@@ -66,11 +98,11 @@ public class CombatRulesTests
 	}
 
 	[Fact]
-	public void CalculateDamage_HolyAttack_FullDamage()
+	public void CalculateDamage_HolyAttack_WithArmor()
 	{
 		DamageMatrix dm = CreateMatrix();
-		int result = CombatRules.CalculateDamage(100, DamageType.Holy, ArmorType.Plate, 200, dm);
-		Assert.Equal(33, result);
+		int result = CombatRules.CalculateDamage(100, DamageType.Holy, ArmorType.Plate, 15, dm);
+		Assert.Equal(50, result);
 	}
 
 	[Fact]

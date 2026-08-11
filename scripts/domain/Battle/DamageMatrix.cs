@@ -5,7 +5,7 @@ namespace CasualCastle.Domain.Battle;
 
 public class DamageMatrix
 {
-	public const float ArmorK = 100f;
+	public const float ArmorK = 15f;
 	public const int PercentScale = 100;
 
 	private readonly Dictionary<(DamageType, ArmorType), float> _matrix = new();
@@ -34,8 +34,8 @@ public class DamageMatrix
 
 	public static double CalculateReduction(int armorValue)
 	{
-		if (armorValue <= 0)
+		if (armorValue == 0)
 			return 0.0;
-		return (double)armorValue / (armorValue + ArmorK);
+		return (double)armorValue / (System.Math.Abs(armorValue) + ArmorK);
 	}
 }

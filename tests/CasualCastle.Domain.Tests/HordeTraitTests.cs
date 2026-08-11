@@ -422,7 +422,7 @@ public class ArmorAuraCombatTests
 	public void ArmorAura_EffectiveArmor_ReducesIncomingDamage()
 	{
 		Unit target = UnitTestFactory.CreateUnit(AttackType.Melee, false);
-		target.GameCtx.AuraArmorBonus = 8;
+		target.GameCtx.AuraArmorBonus = 1;
 		Unit attacker = UnitTestFactory.CreateUnit(AttackType.Melee, true);
 		target.SetPosition(120, 0);
 		attacker.SetPosition(0, 0);

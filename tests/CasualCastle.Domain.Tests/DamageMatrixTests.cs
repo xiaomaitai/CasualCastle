@@ -35,17 +35,38 @@ public class DamageMatrixTests
 	}
 
 	[Fact]
-	public void CalculateReduction_100Armor_Returns50Percent()
+	public void CalculateReduction_5Armor_Returns25Percent()
 	{
-		double reduction = DamageMatrix.CalculateReduction(100);
-		Assert.Equal(0.5, reduction, 6);
+		double reduction = DamageMatrix.CalculateReduction(5);
+		Assert.Equal(0.25, reduction, 4);
 	}
 
 	[Fact]
-	public void CalculateReduction_200Armor_Returns66Percent()
+	public void CalculateReduction_10Armor_Returns40Percent()
 	{
-		double reduction = DamageMatrix.CalculateReduction(200);
-		Assert.Equal(0.6666666666666666, reduction, 4);
+		double reduction = DamageMatrix.CalculateReduction(10);
+		Assert.Equal(0.4, reduction, 4);
+	}
+
+	[Fact]
+	public void CalculateReduction_15Armor_Returns50Percent()
+	{
+		double reduction = DamageMatrix.CalculateReduction(15);
+		Assert.Equal(0.5, reduction, 4);
+	}
+
+	[Fact]
+	public void CalculateReduction_Negative5Armor_IncreasesDamage25Percent()
+	{
+		double reduction = DamageMatrix.CalculateReduction(-5);
+		Assert.Equal(-0.25, reduction, 4);
+	}
+
+	[Fact]
+	public void CalculateReduction_Negative10Armor_IncreasesDamage40Percent()
+	{
+		double reduction = DamageMatrix.CalculateReduction(-10);
+		Assert.Equal(-0.4, reduction, 4);
 	}
 
 	[Fact]
