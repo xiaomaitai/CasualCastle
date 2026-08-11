@@ -48,7 +48,7 @@ assets/
 - 游戏纹理生成：`python tools/build_game_texture.py assets/art/buildings/{TypeId}_{taskId}_cut.png --long-edge <目标长边>`
 - 目标长边见"尺寸决策表"：2×2 建筑 512、1×1 建筑 256
 - 无抠图需求的素材（单位主图、技能图标等）直接使用源图，无 `_cut`/`_game` 阶段
-- 阶段文件变更后需重新导入（godot-import）并同步 `building_defs.texture_path` / `asset_gen_tasks.local_path`
+- 阶段文件变更后需重新导入（godot-import）并同步 `building_defs.texture_uid` / `asset_gen_tasks.local_path`
 
 ---
 
@@ -128,7 +128,7 @@ Unit (Area2D)
 
 - 目录：`assets/art/buildings/`
 - 命名：按"素材阶段命名"规范，源图 `{typeId}_{taskId}.png`、抠图 `{typeId}_{taskId}_cut.png`、游戏纹理 `{typeId}_{taskId}_game.png`
-- 引用：`building_defs.texture_path` 登记**游戏纹理**（`_game.png`）；重新生成后更新路径
+- 引用：`building_defs.texture_uid` 登记**游戏纹理**（`_game.png`）对应的 Godot 资源 uid；重新生成后更新 uid
 
 ### 尺寸分级
 
@@ -196,7 +196,7 @@ Pure white background.
 
 ### 管线
 
-生图（RGB 纯白底，`_{taskId}.png`）→ 用户筛选 → remove-bg 抠图（nodeId=17，输出 `_{taskId}_cut.png`）→ 后处理生成游戏纹理（`tools/build_game_texture.py`，`_{taskId}_game.png`）→ godot-import 导入 → 登记 texture_path（`_game.png`）
+生图（RGB 纯白底，`_{taskId}.png`）→ 用户筛选 → remove-bg 抠图（nodeId=17，输出 `_{taskId}_cut.png`）→ 后处理生成游戏纹理（`tools/build_game_texture.py`，`_{taskId}_game.png`）→ godot-import 导入 → 登记 texture_uid（`_game.png` 的 Godot 资源 uid）
 - 参考图：submit 传 --image-url <url>、batch 传 image_infos（字符串或 URL 列表）附带参考图构图/造型基准；参考图需公网 URL
 
 ---
@@ -215,13 +215,13 @@ Pure white background.
 
 ### 单位主图
 
-战斗内单位卡牌上显示的兵种肖像图，由 `UnitCardView.LoadPortrait` 按 `res://assets/art/cards/{TypeId}_*.png` 扫描匹配，交 `CardArtView` 按短边填满遮罩显示。
+战斗内单位卡牌上显示的兵种肖像图，由 `UnitCardView.LoadPortrait` 按 `unit_stats.portrait_uid` 精确加载，交 `CardArtView` 按短边填满遮罩显示。
 
 | 属性 | 值 |
 |------|-----|
 | 用途 | 战斗中单位卡牌的兵种肖像 |
 | 存放位置 | `assets/art/cards/{TypeId}_{taskId}.png`（TypeId 与 `unit_stats` 表一致，taskId 为 `asset_gen_tasks.id`） |
-| 加载方式 | `UnitCardView.LoadPortrait` 扫描 `assets/art/cards/{TypeId}_*.png` 匹配加载，`CardArtView` 按短边填满遮罩显示 |
+| 加载方式 | 按 `unit_stats.portrait_uid`（Godot 资源 uid）精确加载，`CardArtView` 按短边填满遮罩显示 |
 | 生图尺寸 | 512×512 |
 | 最终尺寸 | 256×256（缩放后） |
 | 模型 | Qwen-Image（`bf085132c7134622895b783b520b39ff` / `75e0be0c93b34dd8baeec9c968013e0c`） |
@@ -241,7 +241,7 @@ A medieval [unit type] unit, [weapon/gear], facing right, full body character, f
 |------|-----|
 | 用途 | 技能栏/属性面板技能图标（`SkillIconView` 56×56 显示） |
 | 存放位置 | `assets/art/skills/{skillId}_{taskId}.png`（skillId 与 `skill_defs.id` 一致） |
-| 加载方式 | `SkillIconView.LoadSkillIcon` 按 `{skillId}_*.png` 匹配 |
+| 加载方式 | 按 `skill_defs.icon_uid`（Godot 资源 uid）精确加载 |
 | 生图尺寸 | 512×512 |
 | 最终尺寸 | 256×256（缩放后） |
 
@@ -398,10 +398,10 @@ process/fix_alpha_border=true
 
 ```
 需求描述 → [阶段一] 生图 → RGB PNG → 直接可用
-                              ↓
-                    用户人工筛选后
-                              ↓
-                   [阶段二] 抠图 → RGBA PNG（_cut.png）
+							  ↓
+					用户人工筛选后
+							  ↓
+				   [阶段二] 抠图 → RGBA PNG（_cut.png）
 ```
 
 **典型对话示例：**

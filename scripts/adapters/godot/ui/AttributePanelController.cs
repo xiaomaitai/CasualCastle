@@ -1,4 +1,5 @@
 // 单位属性面板：技能与增益展示
+using CasualCastle.Adapters.Persistence;
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
@@ -365,19 +366,11 @@ public sealed class AttributePanelController
 
 	public static Texture2D LoadUnitPortrait(string typeId)
 	{
-		using DirAccess dir = DirAccess.Open("res://assets/art/cards/");
-		if (dir == null)
+		IVisualAssetRepository repository = GameManager.Get<IVisualAssetRepository>();
+		string portraitUid = repository?.GetPortraitUid(typeId) ?? "";
+		if (string.IsNullOrEmpty(portraitUid))
 			return null;
-		string prefix = typeId + "_";
-		dir.ListDirBegin();
-		string fileName = dir.GetNext();
-		while (fileName != "")
-		{
-			if (fileName.StartsWith(prefix) && fileName.EndsWith(".png") && !dir.CurrentIsDir())
-				return GD.Load<Texture2D>($"res://assets/art/cards/{fileName}");
-			fileName = dir.GetNext();
-		}
-		return null;
+		return GD.Load<Texture2D>(portraitUid);
 	}
 
 	public static Texture2D LoadPlaceholder()

@@ -147,10 +147,11 @@ public partial class BuildingSystem : Node
 		if (sprite != null)
 		{
 			BuildingVisualData visualData = _visualRepo.GetVisualData(buildingType);
-			string texturePath = visualData.TexturePath;
-			if (!string.IsNullOrEmpty(texturePath))
+			string textureUid = visualData.TextureUid;
+			string textureRef = !string.IsNullOrEmpty(textureUid) ? textureUid : visualData.TexturePath;
+			if (!string.IsNullOrEmpty(textureRef))
 			{
-				Texture2D texture = GD.Load<Texture2D>(texturePath);
+				Texture2D texture = GD.Load<Texture2D>(textureRef);
 				if (texture != null)
 				{
 					sprite.Texture = texture;

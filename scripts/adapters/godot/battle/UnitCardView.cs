@@ -1,4 +1,5 @@
 // 单位卡牌视图：单位信息卡面
+using CasualCastle.Adapters.Persistence;
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -173,19 +174,11 @@ public partial class UnitCardView : Node2D
 
 	private static Texture2D LoadPortrait(string typeId)
 	{
-		using DirAccess dir = DirAccess.Open("res://assets/art/cards/");
-		if (dir == null)
+		IVisualAssetRepository repository = GameManager.Get<IVisualAssetRepository>();
+		string portraitUid = repository?.GetPortraitUid(typeId) ?? "";
+		if (string.IsNullOrEmpty(portraitUid))
 			return null;
-		string prefix = typeId + "_";
-		dir.ListDirBegin();
-		string fileName = dir.GetNext();
-		while (fileName != "")
-		{
-			if (fileName.StartsWith(prefix) && fileName.EndsWith(".png") && !dir.CurrentIsDir())
-				return GD.Load<Texture2D>($"res://assets/art/cards/{fileName}");
-			fileName = dir.GetNext();
-		}
-		return null;
+		return GD.Load<Texture2D>(portraitUid);
 	}
 
 	private static string GetDisplayName(string typeId)

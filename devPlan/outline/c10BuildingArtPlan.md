@@ -21,13 +21,13 @@
 
 正式名称：**建筑主图**。完整规格见 `devPlan/design/assetSpecs.md` 第 2 章，此处只列关键规则：
 
-- 目录与命名：`assets/art/buildings/{typeId}_{taskId}.png`；`building_defs.texture_path` 登记具体文件
+- 目录与命名：`assets/art/buildings/{typeId}_{taskId}.png`；`building_defs.texture_uid` 登记游戏纹理的 Godot 资源 uid
 - 每座建筑一张独立 RGBA 透明图；**不画底座/地面/阴影**，底边即落地线；不得用颜色滤镜区分建筑
 - 尺寸分级（不同占地不同画布）：1×1：512×512；2×2 标准：768×768；2×2 高地标（城堡之心、王庭、部落核心 L4/L5）：1024×1024；主体横向铺满画布（左右 ≤2% 边距），底边贴画布下缘
 - 视角：固定关键词 orthographic 3/4 top-down（正交 3/4 俯视，非等距菱形格、非透视、非平视）
 - 锚定：底边中点对齐占地中心，等比缩放 scale = 占地像素宽 ÷ 画布宽
 - 风格三要素全局一致（flat 2D、粗描边、扁平色）；**材质/装饰/配色按种族微调**（联盟石木旗帜 / 兽人木骨尖刺 / 哥布林废料棚 / 半人马皮帐 / 半人鹿藤蔓树屋 / 蜥蜴人沼泽泥巢）
-- 管线：generate-image 生图（纯白底 RGB）→ 人工筛选 → remove-bg 抠图（RGBA 原地替换）→ godot-import 导入 → 登记 texture_path
+- 管线：generate-image 生图（纯白底 RGB）→ 人工筛选 → remove-bg 抠图（RGBA 原地替换）→ godot-import 导入 → 登记 texture_uid
 - 导入沿用现有纹理设置（无损、fix_alpha_border）
 
 ### 风格候选（F0）

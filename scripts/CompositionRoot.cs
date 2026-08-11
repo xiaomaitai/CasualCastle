@@ -33,6 +33,7 @@ public static class CompositionRoot
 		services.AddSingleton<IBattleReportRepository, BattleReportStorage>();
 		services.AddSingleton<IUnitRepository, SqliteUnitRepository>();
 		services.AddSingleton<ISkillRepository, SqliteSkillRepository>();
+		services.AddSingleton<IVisualAssetRepository, SqliteVisualAssetRepository>();
 
 		SqliteBuildingRepository buildingRepo = new SqliteBuildingRepository();
 		services.AddSingleton<IBuildingRepository>(buildingRepo);
