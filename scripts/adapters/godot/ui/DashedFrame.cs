@@ -3,10 +3,10 @@ using Godot;
 
 public partial class DashedFrame : Control
 {
-	private const float FrameWidth = 2f;
-	private const float DashLength = 8f;
+	private const float FrameWidth = 1f;
+	private const float DashLength = 5f;
 
-	private static readonly Color FrameColor = new(0.92f, 0.94f, 1f, 0.7f);
+	private static readonly Color FrameColor = new(0.6f, 0.64f, 0.68f, 0.55f);
 
 	public override void _Draw()
 	{

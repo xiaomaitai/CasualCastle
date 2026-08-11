@@ -436,10 +436,10 @@ text = "购买"
 [node name="OfferFrame1" type="Control" parent="UI/ShopPanel"]
 layout_mode = 0
 mouse_filter = 2
-offset_left = 36
-offset_top = 156
-offset_right = 616.5
-offset_bottom = 228
+offset_left = 24
+offset_top = 147
+offset_right = 628.5
+offset_bottom = 237
 script = ExtResource("23")
 
 [node name="OfferSlot2" type="HBoxContainer" parent="UI/ShopPanel"]
@@ -464,10 +464,10 @@ text = "购买"
 [node name="OfferFrame2" type="Control" parent="UI/ShopPanel"]
 layout_mode = 0
 mouse_filter = 2
-offset_left = 36
-offset_top = 264
-offset_right = 616.5
-offset_bottom = 336
+offset_left = 24
+offset_top = 255
+offset_right = 628.5
+offset_bottom = 345
 script = ExtResource("23")
 
 [node name="OfferSlot3" type="HBoxContainer" parent="UI/ShopPanel"]
@@ -492,10 +492,10 @@ text = "购买"
 [node name="OfferFrame3" type="Control" parent="UI/ShopPanel"]
 layout_mode = 0
 mouse_filter = 2
-offset_left = 36
-offset_top = 372
-offset_right = 616.5
-offset_bottom = 444
+offset_left = 24
+offset_top = 363
+offset_right = 628.5
+offset_bottom = 453
 script = ExtResource("23")
 
 [node name="OfferSlot4" type="HBoxContainer" parent="UI/ShopPanel"]
@@ -520,10 +520,10 @@ text = "购买"
 [node name="OfferFrame4" type="Control" parent="UI/ShopPanel"]
 layout_mode = 0
 mouse_filter = 2
-offset_left = 36
-offset_top = 480
-offset_right = 616.5
-offset_bottom = 552
+offset_left = 24
+offset_top = 471
+offset_right = 628.5
+offset_bottom = 561
 script = ExtResource("23")
 
 [node name="OfferSlot5" type="HBoxContainer" parent="UI/ShopPanel"]
@@ -548,10 +548,10 @@ text = "购买"
 [node name="OfferFrame5" type="Control" parent="UI/ShopPanel"]
 layout_mode = 0
 mouse_filter = 2
-offset_left = 36
-offset_top = 588
-offset_right = 616.5
-offset_bottom = 660
+offset_left = 24
+offset_top = 579
+offset_right = 628.5
+offset_bottom = 669
 script = ExtResource("23")
 
 [node name="ShopRefreshButton" type="Button" parent="UI/ShopPanel"]
