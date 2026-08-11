@@ -19,6 +19,7 @@ public sealed class SpellBarUiController
 	private Building _currentBuilding;
 	private bool _inputBlocked;
 	private bool _ritualInProgress;
+	private bool _hiddenByRing;
 
 	public SpellBarUiController(CanvasLayer uiRoot, UnitSelectionController selection)
 	{
@@ -63,6 +64,17 @@ public sealed class SpellBarUiController
 			ClearSlots();
 			RefreshVisibility();
 		}
+	}
+
+	public bool IsHiddenByRing => _hiddenByRing;
+
+	public void SetHiddenByRing(bool hidden)
+	{
+		if (_hiddenByRing == hidden)
+			return;
+
+		_hiddenByRing = hidden;
+		RefreshVisibility();
 	}
 
 	private void RebuildSlots(Building building)
@@ -163,6 +175,7 @@ public sealed class SpellBarUiController
 	private void RefreshVisibility()
 	{
 		bool show = !_inputBlocked
+			&& !_hiddenByRing
 			&& _currentBuilding != null
 			&& GodotObject.IsInstanceValid(_currentBuilding)
 			&& CanShow(_currentBuilding);

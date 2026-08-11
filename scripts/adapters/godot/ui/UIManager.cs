@@ -24,6 +24,7 @@ public partial class UIManager : Node2D
 	private UnitInfoUiController _unitInfoUi;
 	private UnitSelectionController _unitSelection;
 	private SpellBarUiController _spellBarUi;
+	private BuildingActionRingController _buildingActionRing;
 	private TavernBubble _tavernBubble;
 	private TavernPartyService _tavernParty;
 	private AttributePanelController _attributePanel;
@@ -62,6 +63,7 @@ public partial class UIManager : Node2D
 		}
 		if (_settingsUi != null)
 			_settingsUi.OpenChanged -= OnSettingsOpenChanged;
+		_buildingActionRing?.Dispose();
 		_gameOverUi?.Dispose();
 		_settingsUi?.Dispose();
 
@@ -86,6 +88,7 @@ public partial class UIManager : Node2D
 		_unitInfoUi?.Process();
 		_unitSelection?.Process();
 		_spellBarUi?.Process();
+		_buildingActionRing?.Process();
 		EnsureTavernBubble();
 		_tavernBubble?.Process(_unitSelection.SelectedBuilding, _tavernParty);
 		_attributePanel?.Process();
@@ -233,6 +236,7 @@ public partial class UIManager : Node2D
 		_unitInfoUi = new UnitInfoUiController(this, uiRoot);
 		_unitSelection = new UnitSelectionController(this);
 		_spellBarUi = new SpellBarUiController(uiRoot, _unitSelection);
+		_buildingActionRing = new BuildingActionRingController(uiRoot, _unitSelection, _spellBarUi);
 		_tavernParty = GameManager.Get<TavernPartyService>();
 		_tavernBubble = new TavernBubble();
 		GetParent()?.GetNodeOrNull<Node2D>("Battlefield")?.AddChild(_tavernBubble);
@@ -269,6 +273,7 @@ public partial class UIManager : Node2D
 		_spellBarUi?.SetInputBlocked(_gameOver);
 		_buildingInfoUi.SetInputBlocked(_gameOver);
 		_buildingManageUi.SetGameOver(_gameOver);
+		_buildingActionRing?.SetGameOver(_gameOver);
 		_combineProhibitUi.SetGameOver(_gameOver);
 		_cheatMenu.SetGameOver(_gameOver);
 		_runtimeInfoPanel?.SetGameOver(_gameOver);
@@ -282,6 +287,7 @@ public partial class UIManager : Node2D
 		_handUi?.SetInputBlocked(blocked);
 		_buildingSell?.SetInputBlocked(blocked);
 		_spellBarUi?.SetInputBlocked(blocked);
+		_buildingActionRing?.SetInputBlocked(blocked);
 	}
 
 	private void OpenSettings()

@@ -11,6 +11,9 @@ public static class BuildingIcons
 	private static Texture2D _repairBlocked;
 	private static Texture2D _combineProhibit;
 	private static Texture2D _burrow;
+	private static Texture2D _sell;
+	private static Texture2D _upgrade;
+	private static Texture2D _ritual;
 
 	public static Vector2I IconSize => new(Width, Height);
 	public static Vector2 CursorHotspot => new(Width * 0.5f, Height * 0.5f);
@@ -20,6 +23,9 @@ public static class BuildingIcons
 	public static Texture2D RepairBlocked => _repairBlocked ??= CreateRepairBlockedIcon();
 	public static Texture2D CombineProhibit => _combineProhibit ??= CreateCombineProhibitIcon();
 	public static Texture2D Burrow => _burrow ??= CreateBurrowIcon();
+	public static Texture2D Sell => _sell ??= CreateSellIcon();
+	public static Texture2D Upgrade => _upgrade ??= CreateUpgradeIcon();
+	public static Texture2D Ritual => _ritual ??= CreateRitualIcon();
 
 	private static Texture2D CreatePauseIcon()
 	{
@@ -59,6 +65,41 @@ public static class BuildingIcons
 		Color hole = new(0.12f, 0.08f, 0.05f, 1f);
 		FillEllipse(image, 24, 27, 15, 13, rim);
 		FillEllipse(image, 24, 25, 11, 9, hole);
+		return ToTexture(image);
+	}
+
+	private static Texture2D CreateSellIcon()
+	{
+		Image image = CreateCanvas();
+		Color arrow = new(0.72f, 0.24f, 0.16f, 1f);
+		Color rim = new(0.85f, 0.62f, 0.12f, 1f);
+		Color face = new(0.98f, 0.82f, 0.3f, 1f);
+		DrawLine(image, 14, 3, 20, 9, 3, arrow);
+		DrawLine(image, 26, 3, 20, 9, 3, arrow);
+		FillRect(image, 19, 9, 3, 8, arrow);
+		FillEllipse(image, 24, 19, 14, 12, rim);
+		FillEllipse(image, 24, 18, 11, 9, face);
+		FillEllipse(image, 24, 17, 6, 5, new Color(1f, 0.92f, 0.55f, 1f));
+		return ToTexture(image);
+	}
+
+	private static Texture2D CreateUpgradeIcon()
+	{
+		Image image = CreateCanvas();
+		Color green = new(0.35f, 0.9f, 0.45f, 1f);
+		DrawLine(image, 12, 20, 24, 8, 4, green);
+		DrawLine(image, 36, 20, 24, 8, 4, green);
+		FillRect(image, 22, 8, 4, 18, green);
+		return ToTexture(image);
+	}
+
+	private static Texture2D CreateRitualIcon()
+	{
+		Image image = CreateCanvas();
+		Color purple = new(0.68f, 0.35f, 0.95f, 1f);
+		FillEllipse(image, 24, 18, 5, 14, purple);
+		FillEllipse(image, 24, 18, 14, 5, purple);
+		FillEllipse(image, 24, 18, 3, 3, new Color(0.92f, 0.78f, 1f, 1f));
 		return ToTexture(image);
 	}
 

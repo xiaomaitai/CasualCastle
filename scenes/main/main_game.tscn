@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://scripts/adapters/godot/autoload/InitManager.cs" id="17"]
 [ext_resource type="Script" path="res://scripts/adapters/godot/battlefield/BattlefieldTileMap.cs" id="20"]
 [ext_resource type="Script" path="res://scripts/adapters/godot/flow/CameraController.cs" id="21"]
+[ext_resource type="Script" path="res://scripts/adapters/godot/ui/BuildingActionRing.cs" id="22"]
 
 [node name="MainGame" type="Node2D" unique_id=1]
 script = ExtResource("10")
@@ -671,5 +672,10 @@ offset_top = 186
 offset_right = 350
 offset_bottom = 240
 text = "关闭"
+
+[node name="BuildingActionRing" type="Control" parent="UI"]
+visible = false
+mouse_filter = 2
+script = ExtResource("22")
 
 [node name="SettingsPanel" parent="UI" instance=ExtResource("13")]

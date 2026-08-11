@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://dkp2hwtnp203e"]
+
+[ext_resource type="Script" path="res://scripts/adapters/godot/dev/BuildingActionRingSmoke.cs" id="1"]
+
+[node name="BuildingActionRingSmoke" type="Node"]
+script = ExtResource("1")

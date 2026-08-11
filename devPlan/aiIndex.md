@@ -107,7 +107,7 @@
 | `combine/` | 组合结果实例化 | `CombineBuildingFactory.cs` |
 | `upgrade/` | 升级结果实例化 | `UpgradeBuildingFactory.cs` |
 | `replay/` | 敌方复刻目标 | `ReplayTarget.cs` |
-| `ui/` | UIManager 与各面板控制器 | `UIManager.cs`、`HudUiController.cs`、`ShopUiController.cs`、`HandUiController.cs`、`BuildingManageUiController.cs`、`PauseMenuUiController.cs`、`GameOverUiController.cs`、`SettingsUiController.cs` |
+| `ui/` | UIManager 与各面板控制器 | `UIManager.cs`、`HudUiController.cs`、`ShopUiController.cs`、`HandUiController.cs`、`BuildingManageUiController.cs`、`BuildingActionRingController.cs`、`BuildingActionRing.cs`、`PauseMenuUiController.cs`、`GameOverUiController.cs`、`SettingsUiController.cs` |
 | `flow/` | 场景流程与夜晚编排 | `TitleScreen.cs`、`MainGameController.cs`、`NightOrchestrator.cs`、`GameSessionService.cs`、`CameraController.cs` |
 | `core/` | 战场尺寸换算 | `BattlefieldMetrics.cs` |
 | `audio/` | 音频总线、BGM/SFX | `AudioManager.cs`、`Sfx.cs`、`SfxEvents.cs`、`UiSfx.cs` |
@@ -135,6 +135,7 @@
 | 手牌/打出 | `domain/Building/Hand.cs`、`CardRules.cs` | `adapters/godot/ui/HandUiController.cs` |
 | 组合 | `domain/Building/CombineService.cs`、`CombineRules.cs` | `adapters/godot/combine/CombineBuildingFactory.cs`、`ui/CombineProhibitUiController.cs` |
 | 升级 | `domain/Building/UpgradeService.cs`、`UpgradeRules.cs` | `adapters/godot/upgrade/UpgradeBuildingFactory.cs` |
+| 建筑行动环 | `domain/Building/UpgradeRules.cs`、`SellRules.cs`、`BuildingActionRules.cs` | `adapters/godot/ui/BuildingActionRingController.cs` |
 | 战报 | `domain/History/BattleReportService.cs`、`ReportBuilder.cs` | `adapters/godot/battle_report/BattleReportSystem.cs` |
 | 敌方复刻 | `domain/History/ReplayService.cs`、`MirrorRules.cs` | `adapters/godot/replay/ReplayTarget.cs` |
 | 阶段循环 | `domain/Shared/MatchPhaseMachine.cs` | `adapters/godot/autoload/GameManager.cs`、`flow/NightOrchestrator.cs` |
@@ -149,7 +150,7 @@
 | `scenes/main/main_game.tscn` | 主战场场景，系统挂载点 |
 | `scenes/ui/settings_panel.tscn` | 设置面板 |
 | `scenes/dev/tech_tree_editor.tscn` | 科技树编辑器 |
-| `scenes/ui/dev_tools/*.tscn` | 开发者工具场景（audio_smoke、damage_matrix_editor、dev_tools_menu、runtime_info_panel、necromancer_smoke、phase_cycle_probe 等） |
+| `scenes/ui/dev_tools/*.tscn` | 开发者工具场景（audio_smoke、damage_matrix_editor、dev_tools_menu、runtime_info_panel、necromancer_smoke、building_action_ring_smoke、phase_cycle_probe 等） |
 | `prefabs/Building.tscn`、`Castle.tscn`、`Unit.tscn`、`UnitCard.tscn`、`HealthBar.tscn`、`CardArt.tscn` | 动态实体预制体 |
 
 ## 4. 素材与数据（assets/）
