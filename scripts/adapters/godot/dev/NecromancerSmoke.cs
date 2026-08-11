@@ -400,43 +400,14 @@ public partial class NecromancerSmoke : Node
 
 	private void CheckV05Gates()
 	{
-		CheckBloodAltarCombineGate();
-		CheckSanctumCombineGate();
-		CheckDeathGateUpgradeGate();
+		LoadUpgradeRecipesForSmoke();
+		CheckBloodAltarUpgradeGate();
+		CheckSanctumUpgradeGate();
+		CheckDeathGateCombineGate();
 		GD.Print("SMOKE: v0.5 gates ok");
 	}
 
-	private void CheckBloodAltarCombineGate()
-	{
-		CombineService service = GameManager.Get<ICombineUseCase>() as CombineService;
-		if (service == null)
-			return;
-		List<IBuildingState> buildings = new() { new FakeBuildingState("DeathTemple", 4, 4), new FakeBuildingState("DeathTemple", 4, 6) };
-		FakeCombineFactory factory = new();
-		service.ResolveCombines(buildings, true, true, true, factory, _ => { }, 3);
-		if (factory.CreatedCount != 0)
-			_failures.Add("核心 Lv3 不应组合鲜血祭坛");
-		service.ResolveCombines(buildings, true, true, true, factory, _ => { }, 4);
-		if (factory.CreatedCount != 1 || factory.LastCreated.TypeId != "BloodAltar")
-			_failures.Add("核心 Lv4 应组合出鲜血祭坛");
-	}
-
-	private void CheckSanctumCombineGate()
-	{
-		CombineService service = GameManager.Get<ICombineUseCase>() as CombineService;
-		if (service == null)
-			return;
-		List<IBuildingState> buildings = new() { new FakeBuildingState("BloodAltar", 4, 4), new FakeBuildingState("BloodAltar", 4, 6) };
-		FakeCombineFactory factory = new();
-		service.ResolveCombines(buildings, true, true, true, factory, _ => { }, 4);
-		if (factory.CreatedCount != 0)
-			_failures.Add("核心 Lv4 不应组合亡灵巫术禁殿");
-		service.ResolveCombines(buildings, true, true, true, factory, _ => { }, 5);
-		if (factory.CreatedCount != 1 || factory.LastCreated.TypeId != "NecromancySanctum")
-			_failures.Add("核心 Lv5 应组合出亡灵巫术禁殿");
-	}
-
-	private void CheckDeathGateUpgradeGate()
+	private void LoadUpgradeRecipesForSmoke()
 	{
 		ITechTreeRepository techRepo = GameManager.Get<ITechTreeRepository>();
 		UpgradeRules rules = GameManager.Get<UpgradeRules>();
@@ -445,15 +416,47 @@ public partial class NecromancerSmoke : Node
 			edges.AddRange(techRepo.LoadUpgradeEdges(faction.Id));
 		edges.AddRange(RitualCircleRules.CreateUpgradeRecipes());
 		rules.LoadRecipes(edges);
+	}
+
+	private void CheckBloodAltarUpgradeGate()
+	{
+		IUpgradeUseCase useCase = GameManager.Get<IUpgradeUseCase>();
+		FakeBuildingState source = new("DeathTemple", 4, 4);
+		FakeUpgradeFactory factory = new();
+		IBuildingState blocked = useCase.TryUpgrade(source, "BloodAltar", 1f, _ => true, factory, 3);
+		if (blocked != null)
+			_failures.Add("核心 Lv3 不应升级鲜血祭坛");
+		IBuildingState upgraded = useCase.TryUpgrade(source, "BloodAltar", 1f, _ => true, factory, 4);
+		if (upgraded == null || upgraded.TypeId != "BloodAltar")
+			_failures.Add("核心 Lv4 应升级出鲜血祭坛");
+	}
+
+	private void CheckSanctumUpgradeGate()
+	{
 		IUpgradeUseCase useCase = GameManager.Get<IUpgradeUseCase>();
 		FakeBuildingState source = new("BloodAltar", 4, 4);
 		FakeUpgradeFactory factory = new();
-		IBuildingState blocked = useCase.TryUpgrade(source, "DeathGate", 1f, _ => true, factory, 4);
+		IBuildingState blocked = useCase.TryUpgrade(source, "NecromancySanctum", 1f, _ => true, factory, 4);
 		if (blocked != null)
-			_failures.Add("核心 Lv4 不应升级死者之门");
-		IBuildingState upgraded = useCase.TryUpgrade(source, "DeathGate", 1f, _ => true, factory, 5);
-		if (upgraded == null || upgraded.TypeId != "DeathGate")
-			_failures.Add("核心 Lv5 应升级出死者之门");
+			_failures.Add("核心 Lv4 不应升级亡灵巫术禁殿");
+		IBuildingState upgraded = useCase.TryUpgrade(source, "NecromancySanctum", 1f, _ => true, factory, 5);
+		if (upgraded == null || upgraded.TypeId != "NecromancySanctum")
+			_failures.Add("核心 Lv5 应升级出亡灵巫术禁殿");
+	}
+
+	private void CheckDeathGateCombineGate()
+	{
+		CombineService service = GameManager.Get<ICombineUseCase>() as CombineService;
+		if (service == null)
+			return;
+		List<IBuildingState> buildings = new() { new FakeBuildingState("BloodAltar", 4, 4), new FakeBuildingState("DarkAltar", 4, 6) };
+		FakeCombineFactory factory = new();
+		service.ResolveCombines(buildings, true, true, true, factory, _ => { }, 4);
+		if (factory.CreatedCount != 0)
+			_failures.Add("核心 Lv4 不应组合死者之门");
+		service.ResolveCombines(buildings, true, true, true, factory, _ => { }, 5);
+		if (factory.CreatedCount != 1 || factory.LastCreated.TypeId != "DeathGate")
+			_failures.Add("核心 Lv5 应组合出死者之门");
 	}
 
 	private void ReportAndQuit()

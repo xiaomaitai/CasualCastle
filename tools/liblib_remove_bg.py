@@ -10,8 +10,8 @@ import urllib.request
 import uuid
 from datetime import datetime, timezone
 
-ACCESS_KEY = "VDg5YgVfesEiAiM1vRd_DA"
-SECRET_KEY = "CuUdJC4wlAYeNALkHn5vKHjJgbIU0GTn"
+ACCESS_KEY = "3Rfn7KuPr68fErLhWjUvKQ"
+SECRET_KEY = "dIiu4UABfabR04DcEJGp85OSIfYZvuY_"
 BASE_URL = "https://openapi.liblibai.cloud"
 TEMPLATE_UUID = "4df2efa0f18d46dc9758803e478eb51c"
 WORKFLOW_UUID = "574a938681da4e8ba2e1c24d55784edf"

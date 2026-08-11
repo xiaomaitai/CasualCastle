@@ -161,6 +161,8 @@ INSERT INTO asset_gen_tasks VALUES(143,'11cd10817888414a96b5cf8bff50daf8','submi
 INSERT INTO asset_gen_tasks VALUES(144,'596c8c0b0015439ea643b7aa0d2b4d0b','completed','flat 2D anime style game unit portrait, thick bold outlines, no shading, no gradient, simple flat colors, grim death angel with tattered black feathered wings, white bone mask, dark hooded robe, holding a long piercing spear, faint dark divine aura, centered head-and-shoulders composition','',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/559062d4672a4764207f70c0c44e3797d032fc8d7d611bb330bec58182b15983.png','assets/art/cards\DeathAngel_144.png','2026-08-11T10:34:03Z','2026-08-11T10:34:50Z',NULL);
 INSERT INTO asset_gen_tasks VALUES(145,'31828bda9bea4aae81100d56f849379d','completed','game skill icon, centered composition, a blood drop draining into a dark red glowing rune circle, vampiric lifesteal aura, decorative badge background pattern, flat 2D anime style, thick bold outlines, no shading, no gradient, simple flat colors, no white background','',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/8b523182dd8552afaf266e0fd8b249c3408875969dfb8a43020dd7cda1f9e533.png','assets/art/skills\lifesteal_aura_145.png','2026-08-11T10:34:11Z','2026-08-11T10:34:50Z',NULL);
 INSERT INTO asset_gen_tasks VALUES(146,'1d366526d12c4b56b51f239d2f64c477','completed','game skill icon, centered composition, purple arcane shield with shattered runes deflecting golden holy light rays, anti-magic ward, decorative badge background pattern, flat 2D anime style, thick bold outlines, no shading, no gradient, simple flat colors, no white background','',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/b19801b7615a458fae2de746d03c7ea4/4dfbfb4c3d4e6e8ecb411c9a15a76c5247b51fcb7a6dcfaf8d2c7a69addbeb41.png','assets/art/skills\anti_magic_shield_146.png','2026-08-11T10:34:51Z','2026-08-11T10:35:39Z',NULL);
+INSERT INTO asset_gen_tasks VALUES(147,'246736da12fb46f1ae3be54bea88a413','completed','flat 2D anime style game unit portrait, thick bold outlines, no shading, no gradient, simple flat colors, undead commander in black and gold plate armor, glowing green eyes, long dark cloak, ornate staff, commanding presence, fantasy necromancer general, centered head-and-shoulders composition','',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/569a9d216a52457fb36280f3048482c2/ee4d79bd72994c1bfd35b63e5d8b96e87c9dc1576065b1a3df3f0fe3e366b66c.png','assets/art/cards\DeathLord_147.png','2026-08-11T12:42:07Z','2026-08-11T12:43:04Z',NULL);
+INSERT INTO asset_gen_tasks VALUES(148,'860dc5055cd9450d97e96b520f888b1e','completed','game skill icon, centered composition, green and gold rune circle with crossed bones and shield emblem, protective undead ward, decorative badge background pattern, flat 2D anime style, thick bold outlines, no shading, no gradient, simple flat colors, no white background','',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/569a9d216a52457fb36280f3048482c2/f5e0c4e1edb5348cdb8b0e0807fe3a2a7fc790180111485d109c3257f35f1661.png','assets/art/skills\stability_aura_148.png','2026-08-11T12:42:26Z','2026-08-11T12:43:05Z',NULL);
 CREATE TABLE unit_stats (
     type_id          TEXT PRIMARY KEY,
     size             INTEGER NOT NULL,
@@ -446,6 +448,7 @@ CREATE TABLE IF NOT EXISTS "combine_recipes" (
 INSERT INTO combine_recipes VALUES('RoyalBulwark','RoyalArmory',1,'HolyWall');
 INSERT INTO combine_recipes VALUES('HolyWall','HeavenPunishmentTower',1,'RoyalCourt');
 INSERT INTO combine_recipes VALUES('Necropolis','BlightMarsh',1,'DeathTemple');
+INSERT INTO combine_recipes VALUES('BloodAltar','DarkAltar',1,'DeathGate');
 CREATE TABLE unit_skills (
     unit_type_id TEXT NOT NULL,
     skill_id TEXT NOT NULL,
@@ -575,7 +578,6 @@ INSERT INTO upgrade_recipes VALUES('RitualCircleL2','RitualCircleL3');
 INSERT INTO upgrade_recipes VALUES('RitualCircleL3','RitualCircleL4');
 INSERT INTO upgrade_recipes VALUES('RitualCircleL4','RitualCircleL5');
 INSERT INTO upgrade_recipes VALUES('DarkAltar','DarkMageTower');
-INSERT INTO upgrade_recipes VALUES('BloodAltar','DeathGate');
 INSERT INTO upgrade_recipes VALUES('DeathTemple','BloodAltar');
 INSERT INTO upgrade_recipes VALUES('BloodAltar','NecromancySanctum');
 CREATE TABLE item_catalog (id TEXT PRIMARY KEY, name TEXT NOT NULL, cost INTEGER NOT NULL, weight INTEGER NOT NULL DEFAULT 1, faction_id TEXT NOT NULL DEFAULT '', item_type TEXT NOT NULL DEFAULT '', attributes TEXT NOT NULL DEFAULT '');
@@ -637,6 +639,6 @@ INSERT INTO damage_matrix VALUES(6,6,100);
 PRAGMA writable_schema=ON;
 CREATE TABLE IF NOT EXISTS sqlite_sequence(name,seq);
 DELETE FROM sqlite_sequence;
-INSERT INTO sqlite_sequence VALUES('asset_gen_tasks',146);
+INSERT INTO sqlite_sequence VALUES('asset_gen_tasks',148);
 PRAGMA writable_schema=OFF;
 COMMIT;

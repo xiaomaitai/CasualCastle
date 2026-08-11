@@ -16,7 +16,7 @@ v0.4 已验收（无头冒烟实测通过，提交 7588f59）。v0.5 数值以 n
 
 ## 三、T4/T5 建筑与单位（领主线）
 
-- [x] 数据层：BloodAltar（组合：死亡圣殿×2，核心 Lv≥4）、NecromancySanctum（组合：鲜血祭坛×2，核心 Lv≥5）、DeathGate（升级：鲜血祭坛，核心 Lv≥5）
+- [x] 数据层：BloodAltar（升级：死亡圣殿，核心 Lv≥4）、NecromancySanctum（升级：鲜血祭坛，核心 Lv≥5）、DeathGate（组合：鲜血祭坛+黑暗祭坛，核心 Lv≥5）
 - [x] 单位：BloodKnight（吸血光环 15%）、NecromancyInstructor（反魔法护罩 50%）、DeathLord（稳定光环 100% 免疫）
 - [x] 技能定义 + unit_skills 挂接 + 技术树/配方接线
 - [x] 单测：组合门槛、升级门槛、光环数值
@@ -30,8 +30,7 @@ v0.4 已验收（无头冒烟实测通过，提交 7588f59）。v0.5 数值以 n
 
 ## 五、素材与导入
 
-- [x] 5/7 素材已生成并导入：BloodKnight/NecromancyInstructor/DeathAngel 主图 + 吸血/反魔法护罩图标
-- [ ] DeathLord 主图与 stability_aura 图标（Liblib 账号积分不足，待恢复后补生成）
+- [x] 7/7 素材已生成并导入：BloodKnight/NecromancyInstructor/DeathLord/DeathAngel 主图 + 吸血/反魔法护罩/稳定光环图标
 - [x] godot-import 无头导入生成 .import/.uid
 
 ## 六、收尾

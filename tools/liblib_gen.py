@@ -12,8 +12,8 @@ import urllib.request
 import uuid
 from datetime import datetime, timezone
 
-ACCESS_KEY = "VDg5YgVfesEiAiM1vRd_DA"
-SECRET_KEY = "CuUdJC4wlAYeNALkHn5vKHjJgbIU0GTn"
+ACCESS_KEY = "3Rfn7KuPr68fErLhWjUvKQ"
+SECRET_KEY = "dIiu4UABfabR04DcEJGp85OSIfYZvuY_"
 BASE_URL = "https://openapi.liblibai.cloud"
 DEFAULT_TEMPLATE = "bf085132c7134622895b783b520b39ff"
 DEFAULT_CHECKPOINT = "75e0be0c93b34dd8baeec9c968013e0c"

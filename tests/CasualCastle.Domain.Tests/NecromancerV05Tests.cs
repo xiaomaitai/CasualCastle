@@ -51,6 +51,7 @@ public class NecromancerV05Tests
 		Mock<IBuildingRepository> repo = new();
 		Dictionary<string, int> tiers = new()
 		{
+			{ "DarkAltar", 0 },
 			{ "DeathTemple", 2 },
 			{ "BloodAltar", 3 },
 			{ "NecromancySanctum", 4 },
@@ -61,6 +62,21 @@ public class NecromancerV05Tests
 		repo.Setup(r => r.IsCoreBuilding(It.IsAny<string>())).Returns(false);
 		GridCellOffset[] cells = { new(0, 0), new(1, 0), new(0, 1), new(1, 1) };
 		repo.Setup(r => r.GetFootprint(It.IsAny<string>())).Returns(cells);
+		return repo;
+	}
+
+	private static Mock<IBuildingRepository> CreateNecroUpgradeRepo()
+	{
+		Mock<IBuildingRepository> repo = new();
+		Dictionary<string, int> tiers = new()
+		{
+			{ "DeathTemple", 2 },
+			{ "BloodAltar", 3 },
+			{ "NecromancySanctum", 4 },
+			{ "DeathGate", 4 }
+		};
+		repo.Setup(r => r.GetCombineTier(It.IsAny<string>())).Returns<string>(t => tiers.TryGetValue(t, out int value) ? value : 0);
+		repo.Setup(r => r.GetFactionId(It.IsAny<string>())).Returns(FactionDef.NecromancerId);
 		return repo;
 	}
 
@@ -299,46 +315,50 @@ public class NecromancerV05Tests
 	}
 
 	[Fact]
-	public void Combine_DeathTempleToBloodAltar_RequiresCoreLevelFour()
+	public void Upgrade_DeathTempleToBloodAltar_RequiresCoreLevelFour()
 	{
-		Mock<IBuildingRepository> repo = CreateNecroCombineRepo();
-		CombineRules rules = new();
-		rules.LoadRecipes(new List<CombineRecipe>
-		{
-			new() { MainTypeId = "DeathTemple", MaterialTypeId = "DeathTemple", MaterialCount = 1, ResultTypeId = "BloodAltar" }
-		});
-		CombineService service = new(repo.Object, rules);
-		Mock<IBuildingState> main = CreateBuilding("DeathTemple", 4, 4);
-		Mock<IBuildingState> material = CreateBuilding("DeathTemple", 4, 5);
-		Mock<IBuildingState> result = CreateBuilding("BloodAltar", 4, 4);
-		Mock<ICombineBuildingFactory> factory = new();
-		factory.Setup(f => f.Create("BloodAltar", 4, 4)).Returns(result.Object);
-		List<IBuildingState> buildings = new() { main.Object, material.Object };
+		Mock<IBuildingRepository> repo = CreateNecroUpgradeRepo();
+		UpgradeRules rules = new();
+		rules.LoadRecipes(new List<UpgradeRecipe> { new() { SourceTypeId = "DeathTemple", ResultTypeId = "BloodAltar" } });
+		Mock<IBuildingState> source = new();
+		source.SetupGet(s => s.TypeId).Returns("DeathTemple");
+		source.SetupGet(s => s.IsDestroyed).Returns(false);
+		source.SetupGet(s => s.IsPlayerOwned).Returns(true);
 
-		service.ResolveCombines(buildings, true, true, true, factory.Object, _ => { }, 3);
-
-		Assert.Equal(2, buildings.Count);
-
-		service.ResolveCombines(buildings, true, true, true, factory.Object, _ => { }, 4);
-
-		Assert.Single(buildings);
+		Assert.False(rules.CanUpgrade(source.Object, repo.Object, 3, 0));
+		Assert.True(rules.CanUpgrade(source.Object, repo.Object, 4, 0));
 	}
 
 	[Fact]
-	public void Combine_BloodAltarToNecromancySanctum_RequiresCoreLevelFive()
+	public void Upgrade_BloodAltarToNecromancySanctum_RequiresCoreLevelFive()
+	{
+		Mock<IBuildingRepository> repo = CreateNecroUpgradeRepo();
+		UpgradeRules rules = new();
+		rules.LoadRecipes(new List<UpgradeRecipe> { new() { SourceTypeId = "BloodAltar", ResultTypeId = "NecromancySanctum" } });
+		Mock<IBuildingState> source = new();
+		source.SetupGet(s => s.TypeId).Returns("BloodAltar");
+		source.SetupGet(s => s.IsDestroyed).Returns(false);
+		source.SetupGet(s => s.IsPlayerOwned).Returns(true);
+
+		Assert.False(rules.CanUpgrade(source.Object, repo.Object, 4, 0));
+		Assert.True(rules.CanUpgrade(source.Object, repo.Object, 5, 0));
+	}
+
+	[Fact]
+	public void Combine_BloodAltarAndDarkAltarToDeathGate_RequiresCoreLevelFive()
 	{
 		Mock<IBuildingRepository> repo = CreateNecroCombineRepo();
 		CombineRules rules = new();
 		rules.LoadRecipes(new List<CombineRecipe>
 		{
-			new() { MainTypeId = "BloodAltar", MaterialTypeId = "BloodAltar", MaterialCount = 1, ResultTypeId = "NecromancySanctum" }
+			new() { MainTypeId = "BloodAltar", MaterialTypeId = "DarkAltar", MaterialCount = 1, ResultTypeId = "DeathGate" }
 		});
 		CombineService service = new(repo.Object, rules);
 		Mock<IBuildingState> main = CreateBuilding("BloodAltar", 4, 4);
-		Mock<IBuildingState> material = CreateBuilding("BloodAltar", 4, 5);
-		Mock<IBuildingState> result = CreateBuilding("NecromancySanctum", 4, 4);
+		Mock<IBuildingState> material = CreateBuilding("DarkAltar", 4, 5);
+		Mock<IBuildingState> result = CreateBuilding("DeathGate", 4, 4);
 		Mock<ICombineBuildingFactory> factory = new();
-		factory.Setup(f => f.Create("NecromancySanctum", 4, 4)).Returns(result.Object);
+		factory.Setup(f => f.Create("DeathGate", 4, 4)).Returns(result.Object);
 		List<IBuildingState> buildings = new() { main.Object, material.Object };
 
 		service.ResolveCombines(buildings, true, true, true, factory.Object, _ => { }, 4);
@@ -348,22 +368,5 @@ public class NecromancerV05Tests
 		service.ResolveCombines(buildings, true, true, true, factory.Object, _ => { }, 5);
 
 		Assert.Single(buildings);
-	}
-
-	[Fact]
-	public void Upgrade_BloodAltarToDeathGate_RequiresCoreLevelFive()
-	{
-		Mock<IBuildingRepository> repo = new();
-		repo.Setup(r => r.GetFactionId("BloodAltar")).Returns(FactionDef.NecromancerId);
-		repo.Setup(r => r.GetCombineTier("DeathGate")).Returns(4);
-		UpgradeRules rules = new();
-		rules.LoadRecipes(new List<UpgradeRecipe> { new() { SourceTypeId = "BloodAltar", ResultTypeId = "DeathGate" } });
-		Mock<IBuildingState> source = new();
-		source.SetupGet(s => s.TypeId).Returns("BloodAltar");
-		source.SetupGet(s => s.IsDestroyed).Returns(false);
-		source.SetupGet(s => s.IsPlayerOwned).Returns(true);
-
-		Assert.False(rules.CanUpgrade(source.Object, repo.Object, 4, 0));
-		Assert.True(rules.CanUpgrade(source.Object, repo.Object, 5, 0));
 	}
 }
