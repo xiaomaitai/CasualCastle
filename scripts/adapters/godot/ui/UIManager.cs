@@ -128,6 +128,12 @@ public partial class UIManager : Node2D
 				return;
 			}
 
+			if (_buildingActionRing?.TryHandleEscape() == true)
+			{
+				GetViewport().SetInputAsHandled();
+				return;
+			}
+
 			if (_pauseMenuUi?.Close() == true)
 			{
 				GetViewport().SetInputAsHandled();

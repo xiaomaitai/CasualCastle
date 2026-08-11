@@ -28,16 +28,16 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -300.0
-offset_top = -280.0
+offset_top = -310.0
 offset_right = 300.0
-offset_bottom = 280.0
+offset_bottom = 310.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="PanelBackground" type="ColorRect" parent="Panel"]
 layout_mode = 0
 offset_right = 600.0
-offset_bottom = 560.0
+offset_bottom = 620.0
 color = Color(0.12, 0.16, 0.22, 0.96)
 
 [node name="TitleLabel" type="Label" parent="Panel"]
@@ -173,18 +173,34 @@ offset_bottom = 444.0
 theme_override_font_sizes/font_size = 20
 text = "90%"
 
+[node name="ConfirmSellLabel" type="Label" parent="Panel"]
+layout_mode = 0
+offset_left = 48.0
+offset_top = 448.0
+offset_right = 200.0
+offset_bottom = 484.0
+theme_override_font_sizes/font_size = 20
+text = "出售建筑时确认"
+
+[node name="ConfirmSellCheck" type="CheckBox" parent="Panel"]
+layout_mode = 0
+offset_left = 220.0
+offset_top = 444.0
+offset_right = 300.0
+offset_bottom = 488.0
+
 [node name="ApplyButton" type="Button" parent="Panel"]
 layout_mode = 0
 offset_left = 96.0
-offset_top = 476.0
+offset_top = 508.0
 offset_right = 296.0
-offset_bottom = 532.0
+offset_bottom = 564.0
 text = "应用"
 
 [node name="BackButton" type="Button" parent="Panel"]
 layout_mode = 0
 offset_left = 304.0
-offset_top = 476.0
+offset_top = 508.0
 offset_right = 504.0
-offset_bottom = 532.0
+offset_bottom = 564.0
 text = "返回"

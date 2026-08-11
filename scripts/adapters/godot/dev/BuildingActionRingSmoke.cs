@@ -28,6 +28,15 @@ public partial class BuildingActionRingSmoke : Node
 		UpgradeTomb,
 		VerifyUpgrade,
 		VerifyUpgraded,
+		EnableConfirmSell,
+		ClickSellWithConfirm,
+		VerifyConfirmDialog,
+		CancelConfirm,
+		VerifyConfirmCanceled,
+		SellWithConfirm,
+		VerifyConfirmDialogAgain,
+		AcceptConfirm,
+		VerifyConfirmAccepted,
 		SelectDarkAltar,
 		VerifySpecial,
 		ToggleSpecialHidden,
@@ -43,6 +52,9 @@ public partial class BuildingActionRingSmoke : Node
 	private Control _spellBar;
 	private Building _tomb;
 	private Building _darkAltar;
+	private Control _sellConfirmOverlay;
+	private Button _sellConfirmOk;
+	private Button _sellConfirmCancel;
 	private SmokeStep _step;
 	private int _settleFrames;
 	private int _goldBefore;
@@ -66,6 +78,9 @@ public partial class BuildingActionRingSmoke : Node
 		_shop = AdapterRegistry.Resolve<Shop>();
 		_ring = GetNode<BuildingActionRing>("MainGame/UI/BuildingActionRing");
 		_spellBar = GetNode<Control>("MainGame/UI/SpellBarPanel");
+		_sellConfirmOverlay = GetNode<Control>("MainGame/UI/SellConfirmOverlay");
+		_sellConfirmOk = GetNode<Button>("MainGame/UI/SellConfirmOverlay/SellConfirmPanel/ConfirmButton");
+		_sellConfirmCancel = GetNode<Button>("MainGame/UI/SellConfirmOverlay/SellConfirmPanel/CancelButton");
 		PlaceBuildings();
 		_step = SmokeStep.SelectTomb;
 	}
@@ -133,6 +148,36 @@ public partial class BuildingActionRingSmoke : Node
 				break;
 			case SmokeStep.VerifyUpgraded:
 				VerifyUpgraded();
+				break;
+			case SmokeStep.EnableConfirmSell:
+				EnableConfirmSell();
+				break;
+			case SmokeStep.ClickSellWithConfirm:
+				ClickSellWithConfirm();
+				break;
+			case SmokeStep.VerifyConfirmDialog:
+				VerifyConfirmDialog();
+				break;
+			case SmokeStep.CancelConfirm:
+				PushButtonClick(_sellConfirmCancel);
+				Wait(SmokeStep.VerifyConfirmCanceled);
+				break;
+			case SmokeStep.VerifyConfirmCanceled:
+				VerifyConfirmCanceled();
+				break;
+			case SmokeStep.SellWithConfirm:
+				PushButtonClick(GetButton(0));
+				Wait(SmokeStep.VerifyConfirmDialogAgain);
+				break;
+			case SmokeStep.VerifyConfirmDialogAgain:
+				VerifyConfirmDialogAgain();
+				break;
+			case SmokeStep.AcceptConfirm:
+				PushButtonClick(_sellConfirmOk);
+				Wait(SmokeStep.VerifyConfirmAccepted);
+				break;
+			case SmokeStep.VerifyConfirmAccepted:
+				VerifyConfirmAccepted();
 				break;
 			case SmokeStep.SelectDarkAltar:
 				PushBuildingClick(_darkAltar);
@@ -267,6 +312,69 @@ public partial class BuildingActionRingSmoke : Node
 			_failures.Add("升级后 Tomb 仍存在");
 		if (_shop.Gold != _goldBefore - UpgradeCostTomb)
 			_failures.Add($"升级金币错误 before={_goldBefore} after={_shop.Gold}");
+		_step = SmokeStep.EnableConfirmSell;
+	}
+
+	private void EnableConfirmSell()
+	{
+		DisplaySettingsManager.ConfirmSellEnabled = true;
+		BuildingSystem system = AdapterRegistry.Resolve<BuildingSystem>();
+		if (!system.TryPlace(_playerCastle, "Tomb", 4, 0))
+		{
+			_failures.Add("确认出售测试放置 Tomb 失败");
+			ReportAndQuit();
+			return;
+		}
+		_tomb = FindBuilding("Tomb");
+		_goldBefore = _shop.Gold;
+		PushBuildingClick(_tomb);
+		Wait(SmokeStep.ClickSellWithConfirm);
+	}
+
+	private void ClickSellWithConfirm()
+	{
+		PushButtonClick(GetButton(0));
+		Wait(SmokeStep.VerifyConfirmDialog);
+	}
+
+	private void VerifyConfirmDialog()
+	{
+		if (!_sellConfirmOverlay.Visible)
+			_failures.Add("确认出售弹窗未显示");
+		if (FindBuilding("Tomb") == null)
+			_failures.Add("弹窗打开时建筑不应被出售");
+		if (_shop.Gold != _goldBefore)
+			_failures.Add($"弹窗打开时金币不应变化 before={_goldBefore} after={_shop.Gold}");
+		_step = SmokeStep.CancelConfirm;
+	}
+
+	private void VerifyConfirmCanceled()
+	{
+		if (_sellConfirmOverlay.Visible)
+			_failures.Add("取消后弹窗应关闭");
+		if (FindBuilding("Tomb") == null)
+			_failures.Add("取消后建筑仍应存在");
+		if (_shop.Gold != _goldBefore)
+			_failures.Add($"取消后金币不应变化 before={_goldBefore} after={_shop.Gold}");
+		_step = SmokeStep.SellWithConfirm;
+	}
+
+	private void VerifyConfirmDialogAgain()
+	{
+		if (!_sellConfirmOverlay.Visible)
+			_failures.Add("再次点击出售弹窗未显示");
+		_step = SmokeStep.AcceptConfirm;
+	}
+
+	private void VerifyConfirmAccepted()
+	{
+		if (_sellConfirmOverlay.Visible)
+			_failures.Add("确认后弹窗应关闭");
+		if (FindBuilding("Tomb") != null)
+			_failures.Add("确认后建筑应被出售");
+		if (_shop.Gold != _goldBefore + SellPriceTomb)
+			_failures.Add($"确认出售金币错误 before={_goldBefore} after={_shop.Gold}");
+		DisplaySettingsManager.ConfirmSellEnabled = false;
 		_step = SmokeStep.SelectDarkAltar;
 	}
 

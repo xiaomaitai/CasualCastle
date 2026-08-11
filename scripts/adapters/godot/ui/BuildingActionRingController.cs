@@ -26,6 +26,11 @@ public sealed class BuildingActionRingController
 	private Building _currentBuilding;
 	private bool _gameOver;
 	private bool _inputBlocked;
+	private Control _sellConfirmOverlay;
+	private Label _sellConfirmMessage;
+	private Button _sellConfirmOk;
+	private Button _sellConfirmCancel;
+	private Building _pendingSell;
 
 	public BuildingActionRingController(CanvasLayer uiRoot, UnitSelectionController selection, SpellBarUiController spellBarUi)
 	{
@@ -33,12 +38,30 @@ public sealed class BuildingActionRingController
 		_selection = selection;
 		_spellBarUi = spellBarUi;
 		_ring.Visible = false;
+		_sellConfirmOverlay = uiRoot.GetNode<Control>("SellConfirmOverlay");
+		_sellConfirmMessage = uiRoot.GetNode<Label>("SellConfirmOverlay/SellConfirmPanel/MessageLabel");
+		_sellConfirmOk = uiRoot.GetNode<Button>("SellConfirmOverlay/SellConfirmPanel/ConfirmButton");
+		_sellConfirmCancel = uiRoot.GetNode<Button>("SellConfirmOverlay/SellConfirmPanel/CancelButton");
+		_sellConfirmOk.Pressed += ConfirmSell;
+		_sellConfirmCancel.Pressed += CloseSellConfirm;
 	}
 
 	public void Dispose()
 	{
 		ClearButtons();
+		_sellConfirmOk.Pressed -= ConfirmSell;
+		_sellConfirmCancel.Pressed -= CloseSellConfirm;
+		_sellConfirmOverlay.Visible = false;
 		_spellBarUi.SetHiddenByRing(false);
+	}
+
+	public bool TryHandleEscape()
+	{
+		if (!_sellConfirmOverlay.Visible)
+			return false;
+
+		CloseSellConfirm();
+		return true;
 	}
 
 	public void SetGameOver(bool gameOver)
@@ -217,7 +240,7 @@ public sealed class BuildingActionRingController
 		{
 			Kind = SellKind,
 			Icon = BuildingIcons.Sell,
-			Tooltip = $"卖出（返还 {price} 金币）",
+			Tooltip = $"出售（返还 {price} 金币）",
 			Enabled = true,
 		};
 	}
@@ -282,6 +305,45 @@ public sealed class BuildingActionRingController
 	}
 
 	private void TrySell(Building building)
+	{
+		if (building == null || !GodotObject.IsInstanceValid(building) || !CanSell(building))
+			return;
+
+		if (DisplaySettingsManager.ConfirmSellEnabled)
+		{
+			_pendingSell = building;
+			ShowSellConfirm(building);
+			return;
+		}
+
+		SellBuilding(building);
+	}
+
+	private void ShowSellConfirm(Building building)
+	{
+		int price = SellRules.GetSellPrice(GameManager.Get<IBuildingRepository>().GetValue(building.TypeId));
+		_sellConfirmMessage.Text = $"出售「{building.DisplayName}」将返还 {price} 金币，确定出售？";
+		_sellConfirmOverlay.Visible = true;
+		Sfx.Play(SfxEvents.ButtonClick);
+	}
+
+	private void ConfirmSell()
+	{
+		Building building = _pendingSell;
+		CloseSellConfirm();
+		if (building == null || !GodotObject.IsInstanceValid(building))
+			return;
+
+		SellBuilding(building);
+	}
+
+	private void CloseSellConfirm()
+	{
+		_pendingSell = null;
+		_sellConfirmOverlay.Visible = false;
+	}
+
+	private void SellBuilding(Building building)
 	{
 		if (building == null || !GodotObject.IsInstanceValid(building) || !CanSell(building))
 			return;

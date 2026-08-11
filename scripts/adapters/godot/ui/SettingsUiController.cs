@@ -13,6 +13,7 @@ public sealed class SettingsUiController
 	private readonly OptionButton _windowModeOption;
 	private readonly OptionButton _resolutionOption;
 	private readonly CheckBox _devModeCheck;
+	private readonly CheckBox _confirmSellCheck;
 	private readonly HSlider _dragSpeedSlider;
 	private readonly Label _dragSpeedValueLabel;
 	private readonly HSlider _musicVolumeSlider;
@@ -35,6 +36,7 @@ public sealed class SettingsUiController
 		_windowModeOption = root.GetNode<OptionButton>("Panel/WindowModeOption");
 		_resolutionOption = root.GetNode<OptionButton>("Panel/ResolutionOption");
 		_devModeCheck = root.GetNode<CheckBox>("Panel/DevModeCheck");
+		_confirmSellCheck = root.GetNode<CheckBox>("Panel/ConfirmSellCheck");
 		_dragSpeedSlider = root.GetNode<HSlider>("Panel/DragSpeedSlider");
 		_dragSpeedValueLabel = root.GetNode<Label>("Panel/DragSpeedValueLabel");
 		_musicVolumeSlider = root.GetNode<HSlider>("Panel/MusicVolumeSlider");
@@ -114,6 +116,7 @@ public sealed class SettingsUiController
 		_windowModeOption.Select(_windowModeOption.GetItemIndex((int)settings.WindowMode));
 		_resolutionOption.Select(settings.FindResolutionIndex(settings.OutputResolution));
 		_devModeCheck.ButtonPressed = DisplaySettingsManager.DevModeEnabled;
+		_confirmSellCheck.ButtonPressed = DisplaySettingsManager.ConfirmSellEnabled;
 		_dragSpeed = settings.CameraDragSpeed;
 		_dragSpeedSlider.Value = _dragSpeed;
 		_musicVolume = settings.MusicVolume;
@@ -191,6 +194,7 @@ public sealed class SettingsUiController
 		DisplayWindowMode mode = (DisplayWindowMode)_windowModeOption.GetSelectedId();
 		Vector2I resolution = DisplaySettingsManager.OutputResolutions[_resolutionOption.Selected];
 		DisplaySettingsManager.DevModeEnabled = _devModeCheck.ButtonPressed;
+		DisplaySettingsManager.ConfirmSellEnabled = _confirmSellCheck.ButtonPressed;
 		DisplaySettingsManager settings = AdapterRegistry.Resolve<DisplaySettingsManager>();
 		settings.SaveAndApply(mode, resolution, _dragSpeed, _musicVolume, _sfxVolume);
 		AudioManager.Instance?.SetMusicVolume(_musicVolume);

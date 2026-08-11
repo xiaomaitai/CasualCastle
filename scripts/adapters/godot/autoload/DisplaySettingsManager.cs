@@ -13,6 +13,7 @@ public partial class DisplaySettingsManager : Node
 {
 	public static DisplaySettingsManager Instance { get; private set; }
 	public static bool DevModeEnabled { get; set; }
+	public static bool ConfirmSellEnabled { get; set; }
 
 	private const int DesignWidth = 1920;
 	private const int DesignHeight = 1080;
@@ -98,6 +99,7 @@ public partial class DisplaySettingsManager : Node
 		int height = (int)config.GetValue(Section, "height", OutputResolution.Y);
 		OutputResolution = new Vector2I(width, height);
 		DevModeEnabled = (bool)config.GetValue(Section, "dev_mode", false);
+		ConfirmSellEnabled = (bool)config.GetValue(Section, "confirm_sell", false);
 		CameraDragSpeed = Mathf.Clamp(
 			(float)config.GetValue(Section, "camera_drag_speed", CameraDragSpeed),
 			DragSpeedMin,
@@ -119,6 +121,7 @@ public partial class DisplaySettingsManager : Node
 		config.SetValue(Section, "width", OutputResolution.X);
 		config.SetValue(Section, "height", OutputResolution.Y);
 		config.SetValue(Section, "dev_mode", DevModeEnabled);
+		config.SetValue(Section, "confirm_sell", ConfirmSellEnabled);
 		config.SetValue(Section, "camera_drag_speed", CameraDragSpeed);
 		config.SetValue(AudioSection, "music_volume", MusicVolume);
 		config.SetValue(AudioSection, "sfx_volume", SfxVolume);

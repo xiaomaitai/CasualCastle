@@ -678,4 +678,63 @@ visible = false
 mouse_filter = 2
 script = ExtResource("22")
 
+[node name="SellConfirmOverlay" type="ColorRect" parent="UI"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0, 0, 0, 0.45)
+
+[node name="SellConfirmPanel" type="Panel" parent="UI/SellConfirmOverlay"]
+offset_left = 700.0
+offset_top = 410.0
+offset_right = 1220.0
+offset_bottom = 670.0
+
+[node name="PanelBackground" type="ColorRect" parent="UI/SellConfirmOverlay/SellConfirmPanel"]
+layout_mode = 0
+offset_right = 520.0
+offset_bottom = 260.0
+color = Color(0.12, 0.16, 0.22, 0.96)
+
+[node name="TitleLabel" type="Label" parent="UI/SellConfirmOverlay/SellConfirmPanel"]
+layout_mode = 0
+offset_left = 30.0
+offset_top = 24.0
+offset_right = 490.0
+offset_bottom = 76.0
+theme_override_font_sizes/font_size = 32
+text = "出售建筑"
+horizontal_alignment = 1
+
+[node name="MessageLabel" type="Label" parent="UI/SellConfirmOverlay/SellConfirmPanel"]
+layout_mode = 0
+offset_left = 30.0
+offset_top = 92.0
+offset_right = 490.0
+offset_bottom = 160.0
+theme_override_font_sizes/font_size = 24
+text = "确定出售？"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CancelButton" type="Button" parent="UI/SellConfirmOverlay/SellConfirmPanel"]
+layout_mode = 0
+offset_left = 74.0
+offset_top = 186.0
+offset_right = 234.0
+offset_bottom = 240.0
+text = "取消"
+
+[node name="ConfirmButton" type="Button" parent="UI/SellConfirmOverlay/SellConfirmPanel"]
+layout_mode = 0
+offset_left = 286.0
+offset_top = 186.0
+offset_right = 446.0
+offset_bottom = 240.0
+text = "出售"
+
 [node name="SettingsPanel" parent="UI" instance=ExtResource("13")]
