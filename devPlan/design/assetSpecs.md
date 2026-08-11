@@ -247,17 +247,29 @@ A medieval [unit type] unit, [weapon/gear], facing right, full body character, f
 
 **风格要求**：
 
-- 完整图案构图：图标自带装饰背景（徽章/框线/纹理），主体居中，占画面约 60~80%
-- **禁止白底、禁止纯色底再抠成透明图**：背景是图案设计的一部分，成品直接用 RGB PNG，不需要透明通道
-- 风格沿用 `flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors`
+- 全铺满无框方形图：画面内容铺满整张画布（edge to edge），不留白边、无技能框/边框装饰；**提示词中不得出现 `square icon`**（实测会诱导模型画出带留白的方形框）
+- 构图：主体居中，占画面约 60~80%；背景按技能情境即兴发挥（毒雾、魔法能量、暗影等），只作氛围烘托、不喧宾夺主
+- **禁止白底/空背景**；背景是图案设计的一部分，成品直接用 RGB PNG，不需要透明通道
+- 风格沿用定稿示例方向：`2D cartoon fantasy, exaggerated shapes, bold silhouette, thick black outline, vivid colors, high contrast, stylized fantasy RPG game icon, polished cartoon game art, readable at very small size`
 
-**提示词模板：**
+**提示词模板（定稿）：**
 
 ```
-A [skill theme] game skill icon, centered composition, complete icon design with decorative emblem background, thick gold frame, flat 2D, anime style, thick bold outlines, no shading, no gradient, simple flat colors
+2D cartoon fantasy game skill icon, [技能主题与主体描述], [按情境即兴发挥的氛围/背景描述], powerful and aggressive visual impact, exaggerated shapes, bold silhouette, thick black outline, simple but striking composition, vivid colors, high contrast, stylized fantasy RPG game icon, polished cartoon game art, centered composition, frameless full-bleed icon, artwork extends edge to edge, no border, no frame, readable at very small size
 ```
 
-负向提示词：`white background, plain solid color background, transparency`
+**负向提示词：**
+
+- 固定使用：`frame, border, skill icon frame, gold frame, ornate frame, badge, medallion, white background, empty background, text, lettering, logo, watermark, scenery, background objects`
+- 可选（仅无人物技能）：`character, people`——挥砍、变形术、气定神闲等需要人物出现的技能**不得**加入，正向词也不得写 no character，需在主体描述中写清人物动作
+
+**定稿示例（plague_poison / 剧毒打击）：**
+
+```
+2D cartoon fantasy game skill icon, Poisonous Strike, a vicious dark blade slashing diagonally across the center, covered in glowing toxic green venom, bright green poison splashes exploding from the impact point, dripping venom, small poisonous droplets flying outward, dark purple toxic smoke surrounding the blade, powerful and aggressive visual impact, exaggerated shapes, bold silhouette, thick black outline, simple but striking composition, vivid colors, high contrast, stylized fantasy RPG game icon, polished cartoon game art, centered composition, frameless full-bleed icon, artwork extends edge to edge, no border, no frame, readable at very small size
+```
+
+负向提示词：`frame, border, skill icon frame, gold frame, ornate frame, badge, medallion, white background, empty background, character, people, text, lettering, logo, watermark, scenery, background objects`
 
 ---
 
