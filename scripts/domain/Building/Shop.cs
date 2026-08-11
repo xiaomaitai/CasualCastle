@@ -59,9 +59,6 @@ public class Shop
 
 	public void SetFaction(string factionId)
 	{
-		if (_player.FactionId == factionId)
-			return;
-
 		_player.FactionId = factionId;
 		_shopRules.SetFaction(factionId);
 		RefreshOffers();
