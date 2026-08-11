@@ -3,9 +3,9 @@ using Godot;
 
 public partial class OfferFrame : Control
 {
-	private const float FrameWidth = 1f;
+	private const float FrameWidth = 2f;
 
-	private static readonly Color FrameColor = new(0.6f, 0.64f, 0.68f, 0.55f);
+	private static readonly Color FrameColor = new(0.6f, 0.64f, 0.68f, 0.2f);
 
 	public override void _Draw()
 	{
