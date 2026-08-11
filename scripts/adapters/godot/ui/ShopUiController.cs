@@ -15,6 +15,7 @@ public sealed class ShopUiController
 	private readonly Button _refreshButton;
 	private readonly Button[] _buyButtons = new Button[Shop.OfferCount];
 	private readonly Label[] _offerLabels = new Label[Shop.OfferCount];
+	private readonly Control[] _offerFrames = new Control[Shop.OfferCount];
 	private readonly Control.GuiInputEventHandler[] _offerGuiInputHandlers = new Control.GuiInputEventHandler[Shop.OfferCount];
 
 	private readonly Shop _shop;
@@ -56,6 +57,7 @@ public sealed class ShopUiController
 		{
 			_offerLabels[i] = uiRoot.GetNode<Label>($"ShopPanel/OfferSlot{i + 1}/OfferLabel");
 			_buyButtons[i] = uiRoot.GetNode<Button>($"ShopPanel/OfferSlot{i + 1}/BuyButton");
+			_offerFrames[i] = uiRoot.GetNode<Control>($"ShopPanel/OfferFrame{i + 1}");
 			_offerLabels[i].MouseFilter = Control.MouseFilterEnum.Stop;
 
 			int slotIndex = i;
@@ -266,12 +268,14 @@ public sealed class ShopUiController
 		for (int i = 0; i < Shop.OfferCount; i++)
 		{
 			CardData offer = _shop.GetOffer(i);
-			_offerLabels[i].Text = offer == null
-				? "暂无商品"
-				: $"{offer.Name}  费用：{offer.Cost}";
+			_offerFrames[i].Visible = offer != null;
+			_offerLabels[i].Text = offer == null ? "" : $"{offer.Name}  费用：{offer.Cost}";
+			_buyButtons[i].Visible = offer != null;
+			if (offer == null)
+				continue;
 
-			bool canBuy = offer != null && _shop.CanAfford(offer.Cost);
-			_buyButtons[i].Disabled = offer == null || !canBuy;
+			bool canBuy = _shop.CanAfford(offer.Cost);
+			_buyButtons[i].Disabled = !canBuy;
 			_buyButtons[i].Text = canBuy ? "购买" : "金币不足";
 		}
 	}

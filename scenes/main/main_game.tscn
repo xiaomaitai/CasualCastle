@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://scripts/adapters/godot/battlefield/BattlefieldTileMap.cs" id="20"]
 [ext_resource type="Script" path="res://scripts/adapters/godot/flow/CameraController.cs" id="21"]
 [ext_resource type="Script" path="res://scripts/adapters/godot/ui/BuildingActionRing.cs" id="22"]
+[ext_resource type="Script" path="res://scripts/adapters/godot/ui/DashedFrame.cs" id="23"]
 
 [node name="MainGame" type="Node2D" unique_id=1]
 script = ExtResource("10")
@@ -432,6 +433,15 @@ custom_minimum_size = Vector2(144, 60)
 layout_mode = 2
 text = "购买"
 
+[node name="OfferFrame1" type="Control" parent="UI/ShopPanel"]
+layout_mode = 0
+mouse_filter = 2
+offset_left = 36
+offset_top = 156
+offset_right = 616.5
+offset_bottom = 228
+script = ExtResource("23")
+
 [node name="OfferSlot2" type="HBoxContainer" parent="UI/ShopPanel"]
 layout_mode = 0
 offset_left = 36
@@ -450,6 +460,15 @@ text = "强化兵营  费用：15"
 custom_minimum_size = Vector2(144, 60)
 layout_mode = 2
 text = "购买"
+
+[node name="OfferFrame2" type="Control" parent="UI/ShopPanel"]
+layout_mode = 0
+mouse_filter = 2
+offset_left = 36
+offset_top = 264
+offset_right = 616.5
+offset_bottom = 336
+script = ExtResource("23")
 
 [node name="OfferSlot3" type="HBoxContainer" parent="UI/ShopPanel"]
 layout_mode = 0
@@ -470,6 +489,15 @@ custom_minimum_size = Vector2(144, 60)
 layout_mode = 2
 text = "购买"
 
+[node name="OfferFrame3" type="Control" parent="UI/ShopPanel"]
+layout_mode = 0
+mouse_filter = 2
+offset_left = 36
+offset_top = 372
+offset_right = 616.5
+offset_bottom = 444
+script = ExtResource("23")
+
 [node name="OfferSlot4" type="HBoxContainer" parent="UI/ShopPanel"]
 layout_mode = 0
 offset_left = 36
@@ -489,6 +517,15 @@ custom_minimum_size = Vector2(144, 60)
 layout_mode = 2
 text = "购买"
 
+[node name="OfferFrame4" type="Control" parent="UI/ShopPanel"]
+layout_mode = 0
+mouse_filter = 2
+offset_left = 36
+offset_top = 480
+offset_right = 616.5
+offset_bottom = 552
+script = ExtResource("23")
+
 [node name="OfferSlot5" type="HBoxContainer" parent="UI/ShopPanel"]
 layout_mode = 0
 offset_left = 36
@@ -507,6 +544,15 @@ text = "兵营  费用：10"
 custom_minimum_size = Vector2(144, 60)
 layout_mode = 2
 text = "购买"
+
+[node name="OfferFrame5" type="Control" parent="UI/ShopPanel"]
+layout_mode = 0
+mouse_filter = 2
+offset_left = 36
+offset_top = 588
+offset_right = 616.5
+offset_bottom = 660
+script = ExtResource("23")
 
 [node name="ShopRefreshButton" type="Button" parent="UI/ShopPanel"]
 layout_mode = 0
