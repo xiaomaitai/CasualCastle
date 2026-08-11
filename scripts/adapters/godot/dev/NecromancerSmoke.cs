@@ -16,6 +16,7 @@ public partial class NecromancerSmoke : Node
 		CheckSpellCasting();
 		CheckRitualRules();
 		CheckRitualService();
+		CheckNewRituals();
 		CheckCombineGate();
 		CheckV05Data();
 		CheckV05Auras();
@@ -158,7 +159,7 @@ public partial class NecromancerSmoke : Node
 			_failures.Add("仪式宿主判定错误");
 		if (RitualRules.CanHostRitual("Tomb"))
 			_failures.Add("普通建筑不应可举行仪式");
-		if (RitualRules.GetAll().Count != 6)
+		if (RitualRules.GetAll().Count != 11)
 			_failures.Add("仪式定义数量错误");
 		GD.Print("SMOKE: ritual rules ok");
 	}
@@ -166,6 +167,7 @@ public partial class NecromancerSmoke : Node
 	private void CheckRitualService()
 	{
 		CheckRitualPrerequisites();
+		CheckAltarUnlock();
 		CheckDarkMagicStudy();
 		CheckRitualRewards();
 		GD.Print("SMOKE: ritual service ok");
@@ -182,6 +184,23 @@ public partial class NecromancerSmoke : Node
 		if (blocked != null || goldSpent || magicSpent)
 			_failures.Add("骸骨强化核心等级前置错误");
 		CheckBlackMagicCharge();
+	}
+
+	private void CheckAltarUnlock()
+	{
+		RitualService service = GameManager.Get<RitualService>();
+		if (service.IsDarkAltarUnlocked)
+			_failures.Add("初始不应解锁黑暗祭坛");
+		if (RitualRules.CanHostRitual("DarkAltar", false))
+			_failures.Add("未研习邪恶仪式时黑暗祭坛不应主持仪式");
+		if (!RitualRules.CanHostRitual("DarkAltar", true))
+			_failures.Add("研习邪恶仪式后黑暗祭坛应主持仪式");
+		if (!RitualRules.CanHostRitual("RitualCircleL1", false))
+			_failures.Add("仪式之环不应受祭坛解锁影响");
+		service.Learn(RitualRules.EvilRitualId);
+		if (!service.IsDarkAltarUnlocked)
+			_failures.Add("研习邪恶仪式后应解锁黑暗祭坛");
+		GD.Print("SMOKE: altar unlock ok");
 	}
 
 	private void CheckBlackMagicCharge()
@@ -353,6 +372,32 @@ public partial class NecromancerSmoke : Node
 			_failures.Add($"反魔法护罩加成错误 {shielded.DispelResistFraction}");
 		if (immune.DispelResistFraction < 0.99f)
 			_failures.Add($"稳定光环加成错误 {immune.DispelResistFraction}");
+	}
+
+	private void CheckNewRituals()
+	{
+		RitualService service = GameManager.Get<RitualService>();
+		service.Learn(RitualRules.ShadowContractId);
+		ActiveRitual contract = service.TryStartRitual(RitualRules.ShadowContractId, true, 2, _ => true, _ => true);
+		RitualReward contractReward = contract == null ? new RitualReward() : service.GetReward(contract);
+		if (contractReward.BlackMagicAmount != 60)
+			_failures.Add("暗影契约核心奖励错误");
+		service.Learn(RitualRules.UndeadLegionId);
+		ActiveRitual legion = service.TryStartRitual(RitualRules.UndeadLegionId, false, 3, _ => true, _ => true);
+		RitualReward legionReward = legion == null ? new RitualReward() : service.GetReward(legion);
+		if (legionReward.SummonUnitTypeId != "Skeleton" || legionReward.SummonCount != 6)
+			_failures.Add("亡灵军团基本奖励错误");
+		service.Learn(RitualRules.DeathKnightSummonId);
+		ActiveRitual knight = service.TryStartRitual(RitualRules.DeathKnightSummonId, false, 4, _ => true, _ => true);
+		RitualReward knightReward = knight == null ? new RitualReward() : service.GetReward(knight);
+		if (knightReward.SummonUnitTypeId != "DeathKnight")
+			_failures.Add("死亡骑士召唤基本奖励错误");
+		service.Learn(RitualRules.DeadRiteId);
+		ActiveRitual rite = service.TryStartRitual(RitualRules.DeadRiteId, true, 5, _ => true, _ => true);
+		RitualReward riteReward = rite == null ? new RitualReward() : service.GetReward(rite);
+		if (riteReward.SummonUnitTypeId != "DeathLord" || riteReward.UndeadDamageMultiplier < 0.09f)
+			_failures.Add("终焉仪式核心奖励错误");
+		GD.Print("SMOKE: new rituals ok");
 	}
 
 	private void CheckV05Rituals()

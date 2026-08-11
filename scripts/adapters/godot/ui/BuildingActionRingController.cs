@@ -154,7 +154,7 @@ public sealed class BuildingActionRingController
 		if (CanManage(building))
 			actions.Add(BuildPauseAction(building));
 		AddUpgradeActions(actions, building);
-		if (BuildingActionRules.CanUseSpellBar(building.TypeId))
+		if (building.CanUseSpellBar())
 			actions.Add(BuildSpecialAction());
 		return actions;
 	}

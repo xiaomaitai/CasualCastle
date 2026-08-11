@@ -1,4 +1,4 @@
-// 商店规则：卡池过滤与权重抽取
+// 商店规则：卡池过滤、唯一魔法书与权重抽取
 using System;
 using System.Collections.Generic;
 
@@ -10,7 +10,9 @@ public class ShopRules
 
 	private readonly CardData[] _allCatalog;
 	private CardData[] _catalog = System.Array.Empty<CardData>();
-	private int _totalWeight;
+	private Func<string, bool> _isRitualLearned = _ => false;
+	private Func<string, bool> _isBookHeld = _ => false;
+	private Func<int> _getCoreLevel = () => 1;
 
 	public ShopRules(IReadOnlyList<CardData> catalog)
 	{
@@ -18,6 +20,16 @@ public class ShopRules
 		for (int i = 0; i < catalog.Count; i++)
 			_allCatalog[i] = catalog[i];
 		SetFaction("");
+	}
+
+	public void SetAvailability(Func<string, bool> isRitualLearned, Func<string, bool> isBookHeld, Func<int> getCoreLevel)
+	{
+		if (isRitualLearned != null)
+			_isRitualLearned = isRitualLearned;
+		if (isBookHeld != null)
+			_isBookHeld = isBookHeld;
+		if (getCoreLevel != null)
+			_getCoreLevel = getCoreLevel;
 	}
 
 	public void SetFaction(string factionId)
@@ -30,29 +42,57 @@ public class ShopRules
 			filtered.Add(card);
 		}
 		_catalog = filtered.ToArray();
-		_totalWeight = 0;
-		foreach (CardData card in _catalog)
-			_totalWeight += card.Weight;
 	}
 
 	public CardData[] GenerateOffers(Random random)
 	{
 		CardData[] offers = new CardData[OfferCount];
+		HashSet<string> pickedBooks = new();
 		for (int i = 0; i < OfferCount; i++)
-			offers[i] = PickWeighted(random);
+			offers[i] = PickWeighted(random, pickedBooks);
 		return offers;
 	}
 
-	private CardData PickWeighted(Random random)
+	private CardData PickWeighted(Random random, HashSet<string> pickedBooks)
 	{
-		int roll = random.Next(_totalWeight);
-		int cumulative = 0;
-		for (int i = 0; i < _catalog.Length; i++)
+		int totalWeight = 0;
+		foreach (CardData card in _catalog)
 		{
-			cumulative += _catalog[i].Weight;
-			if (roll < cumulative)
-				return _catalog[i];
+			if (IsCardOffered(card, pickedBooks))
+				totalWeight += card.Weight;
 		}
-		return _catalog[_catalog.Length - 1];
+		if (totalWeight <= 0)
+			return null;
+
+		int roll = random.Next(totalWeight);
+		int cumulative = 0;
+		foreach (CardData card in _catalog)
+		{
+			if (!IsCardOffered(card, pickedBooks))
+				continue;
+			cumulative += card.Weight;
+			if (roll >= cumulative)
+				continue;
+			if (DarkMagicBookRules.IsDarkMagicBook(card))
+				pickedBooks.Add(card.Id);
+			return card;
+		}
+		return null;
+	}
+
+	private bool IsCardOffered(CardData card, HashSet<string> pickedBooks)
+	{
+		if (!string.IsNullOrEmpty(card.UnlockRitualId) && !_isRitualLearned(card.UnlockRitualId))
+			return false;
+		if (!DarkMagicBookRules.IsDarkMagicBook(card))
+			return true;
+
+		string ritualId = DarkMagicBookRules.GetRitualId(card);
+		RitualDef def = ritualId == null ? null : RitualRules.Get(ritualId);
+		if (def == null || def.RequiredCoreLevel > _getCoreLevel())
+			return false;
+		if (_isBookHeld(card.Id) || _isRitualLearned(ritualId) || pickedBooks.Contains(card.Id))
+			return false;
+		return true;
 	}
 }

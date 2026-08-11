@@ -30,7 +30,13 @@ public partial class InitManager : Node
 			new CastlePlacementAdapter(buildingSystem), player);
 		AdapterRegistry.Register<Hand>(hand);
 
-		Shop shopService = new Shop(hand, GameManager.Get<ShopRules>(), player);
+		RitualService ritualService = GameManager.Get<RitualService>();
+		ShopRules shopRules = GameManager.Get<ShopRules>();
+		shopRules.SetAvailability(
+			ritualId => ritualService.IsLearned(ritualId),
+			cardId => IsBookHeld(hand, cardId),
+			() => GetCoreLevel(gm));
+		Shop shopService = new Shop(hand, shopRules, player);
 		AdapterRegistry.Register<Shop>(shopService);
 		shopService.SetFaction(gm.SelectedFaction);
 
@@ -75,6 +81,22 @@ public partial class InitManager : Node
 
 		if (gm.PendingLoadSlot >= 0)
 			LoadSaveIntoGame(gm, shopService, hand);
+	}
+
+	private static bool IsBookHeld(Hand hand, string cardId)
+	{
+		foreach (CardData card in hand.Cards)
+		{
+			if (card.Id == cardId && DarkMagicBookRules.IsDarkMagicBook(card))
+				return true;
+		}
+		return false;
+	}
+
+	private static int GetCoreLevel(GameManager gm)
+	{
+		Castle castle = gm.PlayerCastle;
+		return castle == null ? 1 : RitualCircleRules.GetCoreLevel(castle.GetBuildingStates());
 	}
 
 	private static CardData CreateRestoredCard(CardSaveEntry card)
@@ -163,10 +185,10 @@ public partial class InitManager : Node
 		if (!string.IsNullOrEmpty(data.PendingReplayReportId))
 			gm.SetPendingReplayReportId(data.PendingReplayReportId);
 
-		shopService.SetFaction(data.FactionId);
 		RitualService ritualService = GameManager.Get<RitualService>();
 		if (ritualService != null)
 			ritualService.Restore(data.RitualStudyCompletionCount, data.LearnedRitualIds);
+		shopService.SetFaction(data.FactionId);
 		GameManager.Get<AdjacencyService>().RefreshCastle(playerCastle.GetBuildingStates());
 	}
 }

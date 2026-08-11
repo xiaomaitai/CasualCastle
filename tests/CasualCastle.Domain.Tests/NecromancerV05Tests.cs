@@ -249,7 +249,7 @@ public class NecromancerV05Tests
 	[Fact]
 	public void RitualCount_IncludesNewRituals()
 	{
-		Assert.Equal(6, RitualRules.GetAll().Count);
+		Assert.Equal(11, RitualRules.GetAll().Count);
 	}
 
 	[Fact]

@@ -112,6 +112,7 @@ public partial class BuildingActionRingSmoke : Node
 		_darkAltar = system.TryPlace(_playerCastle, "DarkAltar", 0, 2) ? FindBuilding("DarkAltar") : null;
 		if (_darkAltar == null)
 			_failures.Add("DarkAltar 放置失败");
+		GameManager.Get<RitualService>().Learn(RitualRules.EvilRitualId);
 	}
 
 	private void AdvanceStep()

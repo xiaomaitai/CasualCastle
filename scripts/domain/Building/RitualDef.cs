@@ -10,6 +10,7 @@ public enum RitualCostType
 public class RitualReward
 {
 	public int GoldAmount;
+	public int BlackMagicAmount;
 	public string SummonUnitTypeId;
 	public int SummonCount;
 	public int UndeadMaxHealthBonus;

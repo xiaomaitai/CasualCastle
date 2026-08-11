@@ -12,6 +12,11 @@ public static class RitualRules
 	public const string BoneReinforceId = "bone_reinforce";
 	public const string DeathAngelSummonId = "death_angel_summon";
 	public const string NecromancyStudyId = "necromancy_study";
+	public const string EvilRitualId = "evil_ritual";
+	public const string ShadowContractId = "shadow_contract";
+	public const string UndeadLegionId = "undead_legion";
+	public const string DeathKnightSummonId = "death_knight_summon";
+	public const string DeadRiteId = "dead_rite";
 	public const string AltarHostTypeId = BuildingTypeIds.DarkAltar;
 	public const string RitualCircleTypePrefix = BuildingTypeIds.RitualCirclePrefix;
 
@@ -52,6 +57,17 @@ public static class RitualRules
 		},
 		new()
 		{
+			Id = EvilRitualId,
+			DisplayName = "邪恶仪式",
+			RequiredCoreLevel = 1,
+			CostType = RitualCostType.BlackMagic,
+			CostAmount = 30,
+			DurationSeconds = 15f,
+			BasicReward = new RitualReward { SummonUnitTypeId = "DarkMage", SummonCount = 1 },
+			CoreReward = new RitualReward { SummonUnitTypeId = "DarkMage", SummonCount = 2 }
+		},
+		new()
+		{
 			Id = BoneReinforceId,
 			DisplayName = "骸骨强化",
 			RequiredCoreLevel = 2,
@@ -60,6 +76,17 @@ public static class RitualRules
 			DurationSeconds = 20f,
 			BasicReward = new RitualReward { SummonUnitTypeId = "Zombie", SummonCount = 1 },
 			CoreReward = new RitualReward { UndeadMaxHealthBonus = 10 }
+		},
+		new()
+		{
+			Id = ShadowContractId,
+			DisplayName = "暗影契约",
+			RequiredCoreLevel = 2,
+			CostType = RitualCostType.Gold,
+			CostAmount = 40,
+			DurationSeconds = 20f,
+			BasicReward = new RitualReward { BlackMagicAmount = 40 },
+			CoreReward = new RitualReward { BlackMagicAmount = 60 }
 		},
 		new()
 		{
@@ -74,6 +101,17 @@ public static class RitualRules
 		},
 		new()
 		{
+			Id = UndeadLegionId,
+			DisplayName = "亡灵军团",
+			RequiredCoreLevel = 3,
+			CostType = RitualCostType.BlackMagic,
+			CostAmount = 90,
+			DurationSeconds = 25f,
+			BasicReward = new RitualReward { SummonUnitTypeId = "Skeleton", SummonCount = 6 },
+			CoreReward = new RitualReward { SummonUnitTypeId = "SkeletonWarrior", SummonCount = 4 }
+		},
+		new()
+		{
 			Id = NecromancyStudyId,
 			DisplayName = "亡灵巫术研习",
 			RequiredCoreLevel = 4,
@@ -82,6 +120,28 @@ public static class RitualRules
 			DurationSeconds = 30f,
 			BasicReward = new RitualReward { SummonUnitTypeId = "BloodKnight", SummonCount = 1 },
 			CoreReward = new RitualReward { UndeadDamageMultiplier = 0.10f }
+		},
+		new()
+		{
+			Id = DeathKnightSummonId,
+			DisplayName = "死亡骑士召唤",
+			RequiredCoreLevel = 4,
+			CostType = RitualCostType.BlackMagic,
+			CostAmount = 120,
+			DurationSeconds = 30f,
+			BasicReward = new RitualReward { SummonUnitTypeId = "DeathKnight", SummonCount = 1 },
+			CoreReward = new RitualReward { SummonUnitTypeId = "DeathKnight", SummonCount = 2 }
+		},
+		new()
+		{
+			Id = DeadRiteId,
+			DisplayName = "终焉仪式",
+			RequiredCoreLevel = 5,
+			CostType = RitualCostType.BlackMagic,
+			CostAmount = 150,
+			DurationSeconds = 40f,
+			BasicReward = new RitualReward { SummonUnitTypeId = "DeathAngel", SummonCount = 1 },
+			CoreReward = new RitualReward { SummonUnitTypeId = "DeathLord", SummonCount = 1, UndeadDamageMultiplier = 0.10f }
 		}
 	};
 
@@ -108,6 +168,11 @@ public static class RitualRules
 	public static bool CanHostRitual(string typeId)
 	{
 		return typeId == AltarHostTypeId || IsRitualCircleHost(typeId);
+	}
+
+	public static bool CanHostRitual(string typeId, bool isAltarUnlocked)
+	{
+		return typeId == AltarHostTypeId ? isAltarUnlocked : IsRitualCircleHost(typeId);
 	}
 
 	public static bool IsRitualCircleHost(string typeId)

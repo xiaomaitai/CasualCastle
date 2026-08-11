@@ -3,8 +3,8 @@ namespace CasualCastle.Domain.Building;
 
 public static class BuildingActionRules
 {
-	public static bool CanUseSpellBar(string typeId)
+	public static bool CanUseSpellBar(string typeId, bool isAltarUnlocked)
 	{
-		return RitualRules.CanHostRitual(typeId);
+		return RitualRules.CanHostRitual(typeId, isAltarUnlocked);
 	}
 }

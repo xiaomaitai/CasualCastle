@@ -88,6 +88,12 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	public bool IsRitualInProgress => _activeRitual != null;
 
+	public bool CanUseSpellBar()
+	{
+		bool isAltarUnlocked = _ritualService == null || _ritualService.IsDarkAltarUnlocked;
+		return BuildingActionRules.CanUseSpellBar(TypeId, isAltarUnlocked);
+	}
+
 	public string ActiveRitualId => _activeRitual?.RitualId;
 
 	public float RitualRemainingSeconds => _activeRitual?.RemainingSeconds ?? 0f;
@@ -561,7 +567,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 	{
 		if (_ritualService == null || _activeRitual != null || CastleRef == null)
 			return false;
-		if (!RitualRules.CanHostRitual(TypeId) || !IsPlayerOwned)
+		if (!RitualRules.CanHostRitual(TypeId, _ritualService.IsDarkAltarUnlocked) || !IsPlayerOwned)
 			return false;
 
 		int coreLevel = RitualCircleRules.GetCoreLevel(CastleRef.GetBuildingStates());
@@ -628,6 +634,12 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 			return;
 		if (reward.GoldAmount > 0 && _shop != null)
 			_shop.AddGold(reward.GoldAmount);
+		if (reward.BlackMagicAmount > 0)
+		{
+			BlackMagicService blackMagic = GameManager.Get<BlackMagicService>();
+			if (blackMagic != null)
+				blackMagic.Add(reward.BlackMagicAmount);
+		}
 		if (!string.IsNullOrEmpty(reward.SummonUnitTypeId) && reward.SummonCount > 0)
 			SpawnUnitType(reward.SummonUnitTypeId, reward.SummonCount);
 		if (reward.UndeadMaxHealthBonus > 0)

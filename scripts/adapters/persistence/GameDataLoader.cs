@@ -50,7 +50,7 @@ public static class GameDataLoader
 	private static void LoadBuildingCards(SqliteCommand cmd, List<CardData> catalog)
 	{
 		cmd.CommandText = @"
-			SELECT s.id, s.name, COALESCE(b.value, s.cost), s.building_type, s.weight, b.faction_id, b.type_id
+			SELECT s.id, s.name, COALESCE(b.value, s.cost), s.building_type, s.weight, b.faction_id, b.type_id, s.unlock_ritual_id
 			FROM shop_catalog s
 			LEFT JOIN building_defs b ON b.type_id = s.building_type";
 		using SqliteDataReader reader = cmd.ExecuteReader();
@@ -69,6 +69,7 @@ public static class GameDataLoader
 				BuildingType = buildingType,
 				Weight = reader.GetInt32(4),
 				FactionId = reader.GetString(5),
+				UnlockRitualId = reader.IsDBNull(7) ? "" : reader.GetString(7),
 			});
 		}
 	}

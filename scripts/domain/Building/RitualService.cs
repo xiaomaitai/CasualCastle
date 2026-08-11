@@ -44,16 +44,17 @@ public class RitualService
 			return null;
 
 		if (RitualRules.IsStudyRitual(ritualId))
-			return TryStartStudyRitual(def, isCoreHosted, trySpendBlackMagic, bookCardId, bookRitualId);
+			return TryStartStudyRitual(def, isCoreHosted, coreLevel, trySpendBlackMagic, bookCardId, bookRitualId);
 
 		return TryStartLearnedRitual(def, isCoreHosted, trySpendGold, trySpendBlackMagic);
 	}
 
 	private ActiveRitual TryStartStudyRitual(
-		RitualDef def, bool isCoreHosted, Func<int, bool> trySpendBlackMagic,
+		RitualDef def, bool isCoreHosted, int coreLevel, Func<int, bool> trySpendBlackMagic,
 		string bookCardId, string bookRitualId)
 	{
-		if (bookCardId == null || bookRitualId == null || IsLearned(bookRitualId))
+		RitualDef bookDef = bookRitualId == null ? null : RitualRules.Get(bookRitualId);
+		if (bookCardId == null || bookDef == null || bookDef.RequiredCoreLevel > coreLevel || IsLearned(bookRitualId))
 			return null;
 
 		int cost = DarkMagicStudyRules.GetCost(StudyCompletionCount);
@@ -110,6 +111,19 @@ public class RitualService
 		StudyCompletionCount++;
 		return reward;
 	}
+
+	public bool IsBookStudiable(CardData book, int coreLevel)
+	{
+		if (book == null)
+			return false;
+		string ritualId = DarkMagicBookRules.GetRitualId(book);
+		if (ritualId == null || IsLearned(ritualId))
+			return false;
+		RitualDef def = RitualRules.Get(ritualId);
+		return def != null && def.RequiredCoreLevel <= coreLevel;
+	}
+
+	public bool IsDarkAltarUnlocked => IsLearned(RitualRules.EvilRitualId);
 
 	public bool Learn(string ritualId)
 	{

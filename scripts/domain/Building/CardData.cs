@@ -13,6 +13,7 @@ public class CardData
 	public int Weight { get; set; } = 1;
 	public string FactionId { get; set; } = "";
 	public string ItemType { get; set; } = "";
+	public string UnlockRitualId { get; set; } = "";
 	public Dictionary<string, string> Attributes { get; set; } = new();
 	public bool IsPlaceable => string.IsNullOrEmpty(ItemType);
 
@@ -27,6 +28,7 @@ public class CardData
 			Weight = Weight,
 			FactionId = FactionId,
 			ItemType = ItemType,
+			UnlockRitualId = UnlockRitualId,
 			Attributes = new Dictionary<string, string>(Attributes),
 		};
 	}

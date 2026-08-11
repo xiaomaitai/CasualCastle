@@ -321,35 +321,35 @@ CREATE TABLE shop_catalog (
     cost          INTEGER NOT NULL,
     building_type TEXT    NOT NULL,
     weight        INTEGER NOT NULL DEFAULT 1
-);
-INSERT INTO shop_catalog VALUES('RangerGuild','游侠公会',3,'RangerGuild',12);
-INSERT INTO shop_catalog VALUES('WarriorGuild','战士公会',4,'WarriorGuild',10);
-INSERT INTO shop_catalog VALUES('ThiefGuild','盗贼行会',2,'ThiefGuild',10);
-INSERT INTO shop_catalog VALUES('MageTower','术士高塔',5,'MageTower',6);
-INSERT INTO shop_catalog VALUES('Inn','酒馆',2,'Inn',14);
-INSERT INTO shop_catalog VALUES('Barracks','兵营',3,'Barracks',14);
-INSERT INTO shop_catalog VALUES('ShieldCamp','盾营',3,'ShieldCamp',10);
-INSERT INTO shop_catalog VALUES('ArcheryRange','靶场',4,'ArcheryRange',12);
-INSERT INTO shop_catalog VALUES('Stable','马厩',5,'Stable',10);
-INSERT INTO shop_catalog VALUES('ScoutCamp','斥候营',2,'ScoutCamp',8);
-INSERT INTO shop_catalog VALUES('Sanctum','圣所',5,'Sanctum',6);
-INSERT INTO shop_catalog VALUES('HolySpring','圣泉',5,'HolySpring',4);
-INSERT INTO shop_catalog VALUES('Tribunal','裁判所',6,'Tribunal',2);
-INSERT INTO shop_catalog VALUES('Armory','军府',6,'Armory',8);
-INSERT INTO shop_catalog VALUES('Bulwark','壁垒',6,'Bulwark',6);
-INSERT INTO shop_catalog VALUES('Ranch','牧场',8,'Ranch',6);
-INSERT INTO shop_catalog VALUES('RoyalArmory','皇家军营',10,'RoyalArmory',4);
-INSERT INTO shop_catalog VALUES('RoyalBulwark','皇家壁垒',10,'RoyalBulwark',4);
-INSERT INTO shop_catalog VALUES('RoyalStable','皇家马场',12,'RoyalStable',4);
-INSERT INTO shop_catalog VALUES('OrcCamp','兽人营地',3,'OrcCamp',12);
-INSERT INTO shop_catalog VALUES('Burrow','地洞',2,'Burrow',10);
-INSERT INTO shop_catalog VALUES('GoblinHut','哥布林窝棚',2,'GoblinHut',14);
-INSERT INTO shop_catalog VALUES('CentaurTent','半人马营帐',4,'CentaurTent',10);
-INSERT INTO shop_catalog VALUES('StaglurSacredGrove','半人鹿圣林',3,'StaglurSacredGrove',10);
-INSERT INTO shop_catalog VALUES('LizardNest','蜥蜴人巢穴',3,'LizardNest',10);
-INSERT INTO shop_catalog VALUES('Tomb','墓穴',2,'Tomb',14);
-INSERT INTO shop_catalog VALUES('BlightField','腐化之地',2,'BlightField',10);
-INSERT INTO shop_catalog VALUES('DarkAltar','黑暗祭坛',3,'DarkAltar',8);
+, unlock_ritual_id TEXT);
+INSERT INTO shop_catalog VALUES('RangerGuild','游侠公会',3,'RangerGuild',12,NULL);
+INSERT INTO shop_catalog VALUES('WarriorGuild','战士公会',4,'WarriorGuild',10,NULL);
+INSERT INTO shop_catalog VALUES('ThiefGuild','盗贼行会',2,'ThiefGuild',10,NULL);
+INSERT INTO shop_catalog VALUES('MageTower','术士高塔',5,'MageTower',6,NULL);
+INSERT INTO shop_catalog VALUES('Inn','酒馆',2,'Inn',14,NULL);
+INSERT INTO shop_catalog VALUES('Barracks','兵营',3,'Barracks',14,NULL);
+INSERT INTO shop_catalog VALUES('ShieldCamp','盾营',3,'ShieldCamp',10,NULL);
+INSERT INTO shop_catalog VALUES('ArcheryRange','靶场',4,'ArcheryRange',12,NULL);
+INSERT INTO shop_catalog VALUES('Stable','马厩',5,'Stable',10,NULL);
+INSERT INTO shop_catalog VALUES('ScoutCamp','斥候营',2,'ScoutCamp',8,NULL);
+INSERT INTO shop_catalog VALUES('Sanctum','圣所',5,'Sanctum',6,NULL);
+INSERT INTO shop_catalog VALUES('HolySpring','圣泉',5,'HolySpring',4,NULL);
+INSERT INTO shop_catalog VALUES('Tribunal','裁判所',6,'Tribunal',2,NULL);
+INSERT INTO shop_catalog VALUES('Armory','军府',6,'Armory',8,NULL);
+INSERT INTO shop_catalog VALUES('Bulwark','壁垒',6,'Bulwark',6,NULL);
+INSERT INTO shop_catalog VALUES('Ranch','牧场',8,'Ranch',6,NULL);
+INSERT INTO shop_catalog VALUES('RoyalArmory','皇家军营',10,'RoyalArmory',4,NULL);
+INSERT INTO shop_catalog VALUES('RoyalBulwark','皇家壁垒',10,'RoyalBulwark',4,NULL);
+INSERT INTO shop_catalog VALUES('RoyalStable','皇家马场',12,'RoyalStable',4,NULL);
+INSERT INTO shop_catalog VALUES('OrcCamp','兽人营地',3,'OrcCamp',12,NULL);
+INSERT INTO shop_catalog VALUES('Burrow','地洞',2,'Burrow',10,NULL);
+INSERT INTO shop_catalog VALUES('GoblinHut','哥布林窝棚',2,'GoblinHut',14,NULL);
+INSERT INTO shop_catalog VALUES('CentaurTent','半人马营帐',4,'CentaurTent',10,NULL);
+INSERT INTO shop_catalog VALUES('StaglurSacredGrove','半人鹿圣林',3,'StaglurSacredGrove',10,NULL);
+INSERT INTO shop_catalog VALUES('LizardNest','蜥蜴人巢穴',3,'LizardNest',10,NULL);
+INSERT INTO shop_catalog VALUES('Tomb','墓穴',2,'Tomb',14,NULL);
+INSERT INTO shop_catalog VALUES('BlightField','腐化之地',2,'BlightField',10,NULL);
+INSERT INTO shop_catalog VALUES('DarkAltar','黑暗祭坛',3,'DarkAltar',8,'evil_ritual');
 CREATE TABLE IF NOT EXISTS "faction_defs" (
     id TEXT PRIMARY KEY,
     display_name TEXT NOT NULL,
@@ -584,8 +584,13 @@ CREATE TABLE item_catalog (id TEXT PRIMARY KEY, name TEXT NOT NULL, cost INTEGER
 INSERT INTO item_catalog VALUES('DarkMagicBook_BlackMagicCharge','黑魔法充能之书',4,6,'necromancer','dark_magic_book','{"ritual_id": "black_magic_charge"}');
 INSERT INTO item_catalog VALUES('DarkMagicBook_UndeadSummon','亡灵召唤之书',4,6,'necromancer','dark_magic_book','{"ritual_id": "undead_summon"}');
 INSERT INTO item_catalog VALUES('DarkMagicBook_BoneReinforce','骸骨强化之书',4,6,'necromancer','dark_magic_book','{"ritual_id": "bone_reinforce"}');
-INSERT INTO item_catalog VALUES('DarkMagicBook_DeathAngel','??????',4,4,'necromancer','dark_magic_book','{"ritual_id": "death_angel_summon"}');
-INSERT INTO item_catalog VALUES('DarkMagicBook_NecromancyStudy','????????',4,3,'necromancer','dark_magic_book','{"ritual_id": "necromancy_study"}');
+INSERT INTO item_catalog VALUES('DarkMagicBook_DeathAngel','死亡天使之书',4,4,'necromancer','dark_magic_book','{"ritual_id": "death_angel_summon"}');
+INSERT INTO item_catalog VALUES('DarkMagicBook_NecromancyStudy','亡灵巫术秘典之书',4,3,'necromancer','dark_magic_book','{"ritual_id": "necromancy_study"}');
+INSERT INTO item_catalog VALUES('DarkMagicBook_EvilRitual','邪恶仪式之书',4,5,'necromancer','dark_magic_book','{"ritual_id": "evil_ritual"}');
+INSERT INTO item_catalog VALUES('DarkMagicBook_ShadowContract','暗影契约之书',4,4,'necromancer','dark_magic_book','{"ritual_id": "shadow_contract"}');
+INSERT INTO item_catalog VALUES('DarkMagicBook_UndeadLegion','亡灵军团之书',4,3,'necromancer','dark_magic_book','{"ritual_id": "undead_legion"}');
+INSERT INTO item_catalog VALUES('DarkMagicBook_DeathKnight','死亡骑士之书',4,3,'necromancer','dark_magic_book','{"ritual_id": "death_knight_summon"}');
+INSERT INTO item_catalog VALUES('DarkMagicBook_DeadRite','终焉之书',4,2,'necromancer','dark_magic_book','{"ritual_id": "dead_rite"}');
 CREATE TABLE IF NOT EXISTS "damage_matrix" (damage_type INTEGER NOT NULL, armor_type INTEGER NOT NULL, multiplier INTEGER NOT NULL, PRIMARY KEY (damage_type, armor_type));
 INSERT INTO damage_matrix VALUES(0,0,150);
 INSERT INTO damage_matrix VALUES(0,1,150);

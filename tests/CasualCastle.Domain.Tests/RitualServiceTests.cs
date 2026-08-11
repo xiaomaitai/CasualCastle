@@ -192,9 +192,9 @@ public class RitualServiceTests
 	}
 
 	[Fact]
-	public void GetAll_ReturnsSixRituals()
+	public void GetAll_ReturnsElevenRituals()
 	{
-		Assert.Equal(6, RitualRules.GetAll().Count);
+		Assert.Equal(11, RitualRules.GetAll().Count);
 	}
 
 	[Fact]
@@ -343,7 +343,7 @@ public class RitualServiceTests
 	{
 		RitualService service = new();
 		ActiveRitual ritual = service.TryStartRitual(
-			RitualRules.DarkMagicStudyId, true, 1,
+			RitualRules.DarkMagicStudyId, true, 2,
 			_ => true,
 			_ => true,
 			"book_1", RitualRules.BoneReinforceId);
@@ -413,5 +413,87 @@ public class RitualServiceTests
 		Assert.True(service.IsLearned(RitualRules.UndeadSummonId));
 		Assert.True(service.IsLearned(RitualRules.BlackMagicChargeId));
 		Assert.Equal(2, service.GetLearnedRitualIds().Count);
+	}
+
+	[Fact]
+	public void IsDarkAltarUnlocked_Initially_ReturnsFalse()
+	{
+		RitualService service = new();
+
+		Assert.False(service.IsDarkAltarUnlocked);
+	}
+
+	[Fact]
+	public void Learn_EvilRitual_UnlocksDarkAltar()
+	{
+		RitualService service = new();
+
+		Assert.True(service.Learn(RitualRules.EvilRitualId));
+
+		Assert.True(service.IsDarkAltarUnlocked);
+	}
+
+	[Fact]
+	public void TryStartRitual_StudyBookAboveCoreLevel_ReturnsNullWithoutSpend()
+	{
+		RitualService service = new();
+		bool magicSpent = false;
+
+		ActiveRitual ritual = service.TryStartRitual(
+			RitualRules.DarkMagicStudyId, true, 1,
+			_ => true,
+			_ => magicSpent = true,
+			"book_high", RitualRules.DeadRiteId);
+
+		Assert.Null(ritual);
+		Assert.False(magicSpent);
+	}
+
+	[Fact]
+	public void TryStartRitual_StudyBookAtCoreLevel_Starts()
+	{
+		RitualService service = new();
+		bool magicSpent = false;
+
+		ActiveRitual ritual = service.TryStartRitual(
+			RitualRules.DarkMagicStudyId, true, 2,
+			_ => true,
+			_ => magicSpent = true,
+			"book_lv2", RitualRules.BoneReinforceId);
+
+		Assert.NotNull(ritual);
+		Assert.True(magicSpent);
+	}
+
+	[Fact]
+	public void GetReward_ShadowContractCore_ReturnsBlackMagicAmount()
+	{
+		RitualService service = new();
+		service.Learn(RitualRules.ShadowContractId);
+		ActiveRitual ritual = service.TryStartRitual(
+			RitualRules.ShadowContractId, true, 2,
+			_ => true,
+			_ => true);
+
+		RitualReward reward = service.GetReward(ritual);
+
+		Assert.Equal(60, reward.BlackMagicAmount);
+	}
+
+	[Fact]
+	public void GetReward_DeadRiteCore_ReturnsDeathLordAndDamageMultiplier()
+	{
+		RitualService service = new();
+		service.Learn(RitualRules.DeadRiteId);
+		ActiveRitual ritual = service.TryStartRitual(
+			RitualRules.DeadRiteId, true, 5,
+			_ => true,
+			_ => true);
+
+		RitualReward reward = service.GetReward(ritual);
+
+		Assert.Equal("DeathLord", reward.SummonUnitTypeId);
+		Assert.Equal(1, reward.SummonCount);
+		Assert.Equal(0.10f, reward.UndeadDamageMultiplier);
 	}
 }

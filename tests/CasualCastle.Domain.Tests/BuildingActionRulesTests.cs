@@ -14,6 +14,16 @@ public class BuildingActionRulesTests
 	[InlineData(null, false)]
 	public void CanUseSpellBar_RitualHostsOnly(string typeId, bool expected)
 	{
-		Assert.Equal(expected, BuildingActionRules.CanUseSpellBar(typeId));
+		Assert.Equal(expected, BuildingActionRules.CanUseSpellBar(typeId, true));
+	}
+
+	[Theory]
+	[InlineData("DarkAltar", false)]
+	[InlineData("RitualCircleL1", true)]
+	[InlineData("RitualCircleL5", true)]
+	[InlineData("Barracks", false)]
+	public void CanUseSpellBar_AltarLocked_RitualCircleOnly(string typeId, bool expected)
+	{
+		Assert.Equal(expected, BuildingActionRules.CanUseSpellBar(typeId, false));
 	}
 }

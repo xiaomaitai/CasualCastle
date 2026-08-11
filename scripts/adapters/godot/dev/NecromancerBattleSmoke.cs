@@ -59,6 +59,7 @@ public partial class NecromancerBattleSmoke : Node
 		AdapterRegistry.Resolve<GameManager>().SetSelectedFaction(FactionDef.NecromancerId);
 		AddChild(GD.Load<PackedScene>(MainGameScene).Instantiate());
 		_playerCastle = AdapterRegistry.Resolve<GameManager>().PlayerCastle;
+		GameManager.Get<RitualService>().Learn(RitualRules.EvilRitualId);
 		PlaceBuildings();
 	}
 
@@ -162,9 +163,11 @@ public partial class NecromancerBattleSmoke : Node
 	private void ApplySpellBarTarget()
 	{
 		Building target = _spellBarTargets[_spellBarTargetIndex];
+		RitualService ritualService = GameManager.Get<RitualService>();
+		bool isAltarUnlocked = ritualService != null && ritualService.IsDarkAltarUnlocked;
 		_spellBarExpectVisible = target != null
 			&& target.IsPlayerOwned
-			&& BuildingActionRules.CanUseSpellBar(target.TypeId);
+			&& BuildingActionRules.CanUseSpellBar(target.TypeId, isAltarUnlocked);
 		_spellBarExpectSelected = target != null;
 		_spellBarSettleFrames = 4;
 		Vector2 screenPoint = target == null
@@ -185,7 +188,7 @@ public partial class NecromancerBattleSmoke : Node
 			_failures.Add($"法术栏手牌切换错误 handVisible={handPanel.Visible} 期望={_spellBarExpectVisible}");
 		if (spellBar.Visible != _spellBarExpectVisible)
 			_failures.Add($"法术栏显示错误 spellBarVisible={spellBar.Visible} 期望={_spellBarExpectVisible}");
-		if (_spellBarExpectVisible && slots.GetChildCount() != 1)
+		if (_spellBarExpectVisible && slots.GetChildCount() != 2)
 			_failures.Add($"法术栏槽位数量错误 count={slots.GetChildCount()}");
 	}
 

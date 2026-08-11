@@ -187,7 +187,7 @@ public sealed class SpellBarUiController
 	{
 		if (building == null || building.IsDestroyed || !building.IsPlayerOwned)
 			return false;
-		return BuildingActionRules.CanUseSpellBar(building.TypeId);
+		return building.CanUseSpellBar();
 	}
 
 	private static bool IsAvailable(Building building, RitualDef def)
@@ -196,14 +196,14 @@ public sealed class SpellBarUiController
 			return false;
 		RitualService ritualService = GameManager.Get<RitualService>();
 		BlackMagicService blackMagic = GameManager.Get<BlackMagicService>();
+		int coreLevel = RitualCircleRules.GetCoreLevel(building.GetCastle().GetBuildingStates());
 		if (RitualRules.IsStudyRitual(def.Id))
 		{
-			if (ritualService == null || blackMagic == null || !HasUnlearnedBook(ritualService))
+			if (ritualService == null || blackMagic == null || !HasUnlearnedBook(ritualService, coreLevel))
 				return false;
 			return blackMagic.Value >= DarkMagicStudyRules.GetCost(ritualService.StudyCompletionCount);
 		}
 
-		int coreLevel = RitualCircleRules.GetCoreLevel(building.GetCastle().GetBuildingStates());
 		if (coreLevel < def.RequiredCoreLevel)
 			return false;
 		if (def.CostType == RitualCostType.Gold)
@@ -211,15 +211,14 @@ public sealed class SpellBarUiController
 		return blackMagic != null && blackMagic.Value >= def.CostAmount;
 	}
 
-	private static bool HasUnlearnedBook(RitualService ritualService)
+	private static bool HasUnlearnedBook(RitualService ritualService, int coreLevel)
 	{
 		Hand hand = AdapterRegistry.Resolve<Hand>();
 		if (hand == null)
 			return false;
 		foreach (CardData card in hand.Cards)
 		{
-			string ritualId = DarkMagicBookRules.GetRitualId(card);
-			if (ritualId != null && !ritualService.IsLearned(ritualId))
+			if (ritualService.IsBookStudiable(card, coreLevel))
 				return true;
 		}
 		return false;
