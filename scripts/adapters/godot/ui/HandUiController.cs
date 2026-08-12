@@ -44,10 +44,11 @@ public sealed class HandUiController
 		_placementHintLabel = uiRoot.GetNode<Label>("PlacementHintLabel");
 
 		_useItemButton = new Button { Text = "使用经验魔晶", Visible = false };
-		_useItemButton.Position = new Vector2(700f, 850f);
+		_useItemButton.Position = new Vector2(700f, 810f);
 		_useItemButton.Size = new Vector2(180f, 50f);
 		_useItemButton.AddThemeFontSizeOverride("font_size", 22);
 		uiRoot.AddChild(_useItemButton);
+		MedievalUiStyles.ApplyHand(uiRoot, _useItemButton);
 		_useItemButton.Pressed += OnUseItemPressed;
 
 		for (int i = 0; i < MaxHandSize; i++)
@@ -268,13 +269,13 @@ public sealed class HandUiController
 			{
 				CardData card = _hand.Cards[i];
 				button.Visible = true;
-				button.Text = card.Name;
+				button.Text = $"[{i + 1}]\n{card.Name}\n金币 {card.Cost}";
 				button.Disabled = _inputBlocked;
 			}
 			else
 			{
 				button.Visible = true;
-				button.Text = "空";
+				button.Text = $"[{i + 1}]\n空";
 				button.Disabled = true;
 			}
 		}
@@ -318,9 +319,8 @@ public sealed class HandUiController
 		for (int i = 0; i < MaxHandSize; i++)
 		{
 			bool highlighted = i == _selectedIndex || (_dragging && i == _dragHandIndex);
-			_handButtons[i].Modulate = highlighted
-				? new Color(1f, 1f, 0.75f)
-				: Colors.White;
+			MedievalUiStyles.ApplyCardButton(_handButtons[i], highlighted, i < _hand.Cards.Count);
+			_handButtons[i].Modulate = Colors.White;
 		}
 	}
 

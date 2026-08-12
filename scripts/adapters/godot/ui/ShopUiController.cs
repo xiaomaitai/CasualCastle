@@ -52,6 +52,7 @@ public sealed class ShopUiController
 		_shopGoldLabel = uiRoot.GetNode<Label>("ShopPanel/ShopGoldLabel");
 		_closeButton = uiRoot.GetNode<Button>("ShopPanel/ShopCloseButton");
 		_refreshButton = uiRoot.GetNode<Button>("ShopPanel/ShopRefreshButton");
+		MedievalUiStyles.ApplyShop(uiRoot);
 
 		for (int i = 0; i < Shop.OfferCount; i++)
 		{
@@ -269,7 +270,7 @@ public sealed class ShopUiController
 		{
 			CardData offer = _shop.GetOffer(i);
 			_offerFrames[i].Visible = offer != null;
-			_offerLabels[i].Text = offer == null ? "" : $"{offer.Name}  费用：{offer.Cost}";
+			_offerLabels[i].Text = offer == null ? "" : $"{offer.Name}\n金币 {offer.Cost}";
 			_buyButtons[i].Visible = offer != null;
 			if (offer == null)
 				continue;

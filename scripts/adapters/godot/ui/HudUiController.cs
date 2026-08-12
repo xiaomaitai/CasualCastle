@@ -28,6 +28,8 @@ public sealed class HudUiController
 		_goldLabel = uiRoot.GetNode<Label>("GoldLabel");
 		_blackMagicLabel = uiRoot.GetNode<Label>("BlackMagicLabel");
 
+		MedievalUiStyles.ApplyHud(uiRoot);
+
 		_newDayButton.Pressed += OnNewDayPressed;
 		_newDayButton.Text = AdapterRegistry.Resolve<GameManager>().IsUndeadBattle ? "进入夜晚" : "新的一天";
 		_skipPhaseButton.Pressed += OnSkipPhasePressed;

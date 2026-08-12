@@ -65,36 +65,43 @@ SecondBarracksGridY = -1
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=5]
 
+[node name="TopBarBackground" type="Panel" parent="UI"]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 1920.0
+offset_bottom = 88.0
+mouse_filter = 2
+
 [node name="PlayerHealthBar" type="ProgressBar" parent="UI" unique_id=6]
-offset_left = 75
-offset_top = 30
-offset_right = 375
-offset_bottom = 70.5
+offset_left = 32
+offset_top = 18
+offset_right = 332
+offset_bottom = 58
 max_value = 500.0
 value = 500.0
 
 [node name="EnemyHealthBar" type="ProgressBar" parent="UI" unique_id=7]
-offset_left = 1545
-offset_top = 30
-offset_right = 1845
-offset_bottom = 70.5
+offset_left = 1450
+offset_top = 18
+offset_right = 1750
+offset_bottom = 58
 max_value = 500.0
 value = 500.0
 
 [node name="GoldLabel" type="Label" parent="UI"]
-offset_left = 420
-offset_top = 30
-offset_right = 630
-offset_bottom = 70.5
+offset_left = 354
+offset_top = 18
+offset_right = 550
+offset_bottom = 58
 theme_override_font_sizes/font_size = 33
 text = "金币：30"
 
 [node name="BlackMagicLabel" type="Label" parent="UI"]
 visible = false
-offset_left = 420
-offset_top = 90
-offset_right = 630
-offset_bottom = 130.5
+offset_left = 552
+offset_top = 18
+offset_right = 720
+offset_bottom = 58
 theme_override_font_sizes/font_size = 27
 text = "黑魔法：0"
 
@@ -107,12 +114,12 @@ offset_bottom = 30
 theme_override_font_sizes/font_size = 14
 text = ""
 
-[node name="PhasePanel" type="VBoxContainer" parent="UI"]
-offset_left = 810
-offset_top = 18
-offset_right = 1110
-offset_bottom = 138
-theme_override_constants/separation = 6
+[node name="PhasePanel" type="HBoxContainer" parent="UI"]
+offset_left = 730
+offset_top = 14
+offset_right = 1210
+offset_bottom = 74
+theme_override_constants/separation = 12
 alignment = 1
 
 [node name="PhaseLabel" type="Label" parent="UI/PhasePanel"]
@@ -144,10 +151,10 @@ layout_mode = 2
 text = "信息"
 
 [node name="MenuButton" type="Button" parent="UI"]
-offset_left = 1824
-offset_top = 21
-offset_right = 1902
-offset_bottom = 87
+offset_left = 1814
+offset_top = 12
+offset_right = 1896
+offset_bottom = 72
 text = "☰"
 
 [node name="ShopButton" type="Button" parent="UI"]
@@ -158,6 +165,7 @@ offset_bottom = 1014
 text = "商店"
 
 [node name="BuildingPauseToolButton" type="Button" parent="UI"]
+visible = false
 custom_minimum_size = Vector2(72, 54)
 offset_left = 1483.5
 offset_top = 942
@@ -168,6 +176,7 @@ expand_icon = true
 tooltip_text = "暂停建筑"
 
 [node name="BuildingRepairToolButton" type="Button" parent="UI"]
+visible = false
 custom_minimum_size = Vector2(72, 54)
 offset_left = 1567.5
 offset_top = 942
@@ -178,6 +187,7 @@ expand_icon = true
 tooltip_text = "修复建筑（仅夜晚）"
 
 [node name="CombineProhibitToolButton" type="Button" parent="UI"]
+visible = false
 custom_minimum_size = Vector2(72, 54)
 offset_left = 1651.5
 offset_top = 942
@@ -187,10 +197,17 @@ toggle_mode = true
 expand_icon = true
 tooltip_text = "禁止组合"
 
+[node name="HandBackdrop" type="Panel" parent="UI"]
+offset_left = 482.0
+offset_top = 891.0
+offset_right = 1497.0
+offset_bottom = 1059.0
+mouse_filter = 2
+
 [node name="HandPanel" type="HBoxContainer" parent="UI"]
-offset_left = 460.5
+offset_left = 490.0
 offset_top = 907.5
-offset_right = 1459.5
+offset_right = 1489.0
 offset_bottom = 1042.5
 theme_override_constants/separation = 18
 alignment = 1
@@ -239,9 +256,9 @@ text = "空"
 
 [node name="SpellBarPanel" type="ScrollContainer" parent="UI"]
 visible = false
-offset_left = 460.5
+offset_left = 490.0
 offset_top = 907.5
-offset_right = 1459.5
+offset_right = 1489.0
 offset_bottom = 1042.5
 horizontal_scroll_mode = 1
 vertical_scroll_mode = 0

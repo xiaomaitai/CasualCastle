@@ -1,11 +1,11 @@
-// 商店商品框：围绕槽位绘制细灰边框
+// 商店商品框：绘制黑金中世纪商品槽边框
 using Godot;
 
 public partial class OfferFrame : Control
 {
 	private const float FrameWidth = 2f;
 
-	private static readonly Color FrameColor = new(0.6f, 0.64f, 0.68f, 0.2f);
+	private static readonly Color FrameColor = new(0.63f, 0.46f, 0.22f, 0.9f);
 
 	public override void _Draw()
 	{

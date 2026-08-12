@@ -85,8 +85,11 @@ public partial class UIManager : Node2D
 
 		_buildingInfoUi?.SetPlacementActive(
 			_handUi?.IsPlacementActive == true || _shopUi?.IsDragging == true);
-		_buildingInfoUi?.SetPauseOpen(_pauseMenuUi?.IsOpen == true || _settingsUi?.IsOpen == true);
+		_buildingInfoUi?.SetPauseOpen(
+			_pauseMenuUi?.IsOpen == true || _settingsUi?.IsOpen == true || _shopUi?.IsOpen == true);
 		_buildingInfoUi?.Process();
+		_unitInfoUi?.SetSuppressed(
+			_shopUi?.IsOpen == true || _pauseMenuUi?.IsOpen == true || _settingsUi?.IsOpen == true);
 		_unitInfoUi?.Process();
 		_unitSelection?.Process();
 		_spellBarUi?.Process();

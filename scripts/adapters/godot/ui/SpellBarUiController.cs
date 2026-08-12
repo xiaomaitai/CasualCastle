@@ -111,7 +111,7 @@ public sealed class SpellBarUiController
 			Disabled = !IsAvailable(building, def),
 			CustomMinimumSize = new Vector2(SlotWidth, SlotHeight),
 		};
-		button.AddThemeFontSizeOverride("font_size", 16);
+		MedievalUiStyles.ApplyCardButton(button, false, true);
 		string ritualId = def.Id;
 		button.Pressed += () => TryStartRitual(building, ritualId);
 		return button;
@@ -124,7 +124,7 @@ public sealed class SpellBarUiController
 			Disabled = true,
 			CustomMinimumSize = new Vector2(SlotWidth * 1.4f, SlotHeight),
 		};
-		button.AddThemeFontSizeOverride("font_size", 17);
+		MedievalUiStyles.ApplyCardButton(button, false, true);
 		_slotRow.AddChild(button);
 		_slotButtons.Add(button);
 		UpdateProgressText(building);

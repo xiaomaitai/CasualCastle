@@ -9,6 +9,7 @@ public sealed class UnitInfoUiController
 	private readonly Node _owner;
 	private readonly Panel _panel;
 	private readonly Label _label;
+	private bool _suppressed;
 
 	public UnitInfoUiController(Node owner, CanvasLayer uiRoot)
 	{
@@ -36,8 +37,17 @@ public sealed class UnitInfoUiController
 		uiRoot.AddChild(_panel);
 	}
 
+	public void SetSuppressed(bool suppressed)
+	{
+		_suppressed = suppressed;
+		if (_suppressed)
+			_panel.Visible = false;
+	}
+
 	public void Process()
 	{
+		if (_suppressed)
+			return;
 		Vector2 mouseGlobal = _owner.GetViewport().GetMousePosition();
 		UnitLogic unit = PickUnit(mouseGlobal);
 
