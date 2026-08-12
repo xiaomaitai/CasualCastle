@@ -64,6 +64,7 @@
 | `replayAi.md` | 敌方镜像复刻 AI（M6） |
 | `uiDesign.md` | 界面布局与百分比坐标约定 |
 | `unitCardDesign.md` | 单位卡牌 UI 设计 |
+| `attributePanel.md` | 左下角属性面板展示规则与备选属性 |
 | `dependencyInjection.md` | 双层 DI 设计 |
 | `nodeStructure.md` | 实体节点 Logic/View/Effects 三层结构 |
 | `rtsPushApart.md` | 单位推开系统 |

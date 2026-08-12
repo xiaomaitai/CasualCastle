@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://cte2syutdldtw"]
 
-[ext_resource type="Script" path="res://scripts/adapters/godot/dev/TechTreeEditorScene.cs" id="1"]
+[ext_resource type="Script" uid="uid://chh5we6gtagd" path="res://scripts/adapters/godot/dev/TechTreeEditorScene.cs" id="1"]
 
-[node name="TechTreeEditor" type="Control"]
+[node name="TechTreeEditor" type="Control" unique_id=925138072]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,40 +11,40 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1")
 
-[node name="TopBar" type="HBoxContainer" parent="."]
+[node name="TopBar" type="HBoxContainer" parent="." unique_id=104567168]
+custom_minimum_size = Vector2(0, 48)
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 grow_horizontal = 2
-custom_minimum_size = Vector2(0, 48)
 
-[node name="PrevFactionButton" type="Button" parent="TopBar"]
+[node name="PrevFactionButton" type="Button" parent="TopBar" unique_id=824738989]
 layout_mode = 2
 text = "<"
 
-[node name="FactionNameLabel" type="Label" parent="TopBar"]
+[node name="FactionNameLabel" type="Label" parent="TopBar" unique_id=115656449]
+custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 text = "人族"
 horizontal_alignment = 1
-custom_minimum_size = Vector2(80, 0)
 
-[node name="NextFactionButton" type="Button" parent="TopBar"]
+[node name="NextFactionButton" type="Button" parent="TopBar" unique_id=1001623739]
 layout_mode = 2
 text = ">"
 
-[node name="Spacer" type="Control" parent="TopBar"]
+[node name="Spacer" type="Control" parent="TopBar" unique_id=1627958023]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="SaveButton" type="Button" parent="TopBar"]
+[node name="SaveButton" type="Button" parent="TopBar" unique_id=908972237]
 layout_mode = 2
 text = "保存"
 
-[node name="CloseButton" type="Button" parent="TopBar"]
+[node name="CloseButton" type="Button" parent="TopBar" unique_id=95754733]
 layout_mode = 2
 text = "关闭"
 
-[node name="EditorArea" type="HBoxContainer" parent="."]
+[node name="EditorArea" type="HBoxContainer" parent="." unique_id=1437263196]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -54,73 +54,74 @@ offset_bottom = -24.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="LeftLabels" type="VBoxContainer" parent="EditorArea"]
-layout_mode = 2
+[node name="LeftLabels" type="VBoxContainer" parent="EditorArea" unique_id=1082637381]
 custom_minimum_size = Vector2(40, 0)
-
-[node name="T5Label" type="Label" parent="EditorArea/LeftLabels"]
 layout_mode = 2
+
+[node name="T5Label" type="Label" parent="EditorArea/LeftLabels" unique_id=839945510]
+layout_mode = 2
+size_flags_vertical = 3
 text = "T5"
 horizontal_alignment = 1
-size_flags_vertical = 3
 
-[node name="T4Label" type="Label" parent="EditorArea/LeftLabels"]
+[node name="T4Label" type="Label" parent="EditorArea/LeftLabels" unique_id=907068129]
 layout_mode = 2
+size_flags_vertical = 3
 text = "T4"
 horizontal_alignment = 1
-size_flags_vertical = 3
 
-[node name="T3Label" type="Label" parent="EditorArea/LeftLabels"]
+[node name="T3Label" type="Label" parent="EditorArea/LeftLabels" unique_id=1874992272]
 layout_mode = 2
+size_flags_vertical = 3
 text = "T3"
 horizontal_alignment = 1
-size_flags_vertical = 3
 
-[node name="T2Label" type="Label" parent="EditorArea/LeftLabels"]
+[node name="T2Label" type="Label" parent="EditorArea/LeftLabels" unique_id=577623956]
 layout_mode = 2
+size_flags_vertical = 3
 text = "T2"
 horizontal_alignment = 1
-size_flags_vertical = 3
 
-[node name="T1Label" type="Label" parent="EditorArea/LeftLabels"]
+[node name="T1Label" type="Label" parent="EditorArea/LeftLabels" unique_id=1579594065]
 layout_mode = 2
+size_flags_vertical = 3
 text = "T1"
 horizontal_alignment = 1
-size_flags_vertical = 3
 
-[node name="CardCanvas" type="Control" parent="EditorArea"]
+[node name="CardCanvas" type="Control" parent="EditorArea" unique_id=2107688880]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-mouse_filter = 0
 
-[node name="LibraryPanel" type="VBoxContainer" parent="EditorArea"]
-layout_mode = 2
+[node name="LibraryPanel" type="VBoxContainer" parent="EditorArea" unique_id=594347389]
 custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
 
-[node name="LibraryTitle" type="Label" parent="EditorArea/LibraryPanel"]
+[node name="LibraryTitle" type="Label" parent="EditorArea/LibraryPanel" unique_id=650224133]
 layout_mode = 2
 text = "建筑列表"
 horizontal_alignment = 1
 
-[node name="NewBuildingButton" type="Button" parent="EditorArea/LibraryPanel"]
+[node name="NewBuildingButton" type="Button" parent="EditorArea/LibraryPanel" unique_id=100874663]
 layout_mode = 2
 text = "新建建筑"
 
-[node name="LibraryScroll" type="ScrollContainer" parent="EditorArea/LibraryPanel"]
+[node name="LibraryScroll" type="ScrollContainer" parent="EditorArea/LibraryPanel" unique_id=1692371736]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="LibraryList" type="VBoxContainer" parent="EditorArea/LibraryPanel/LibraryScroll"]
+[node name="LibraryList" type="VBoxContainer" parent="EditorArea/LibraryPanel/LibraryScroll" unique_id=734986364]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="StatusBar" type="Label" parent="."]
+[node name="StatusBar" type="Label" parent="." unique_id=616168499]
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
+anchor_right = 1.0
 anchor_bottom = 1.0
 offset_top = -24.0
+grow_horizontal = 2
 grow_vertical = 0
 text = "就绪"
