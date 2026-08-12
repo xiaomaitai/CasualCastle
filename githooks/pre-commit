@@ -8,7 +8,17 @@ if [ ! -f "$DB" ]; then
 fi
 
 echo "[pre-commit] Dumping database to $DUMP ..."
-sqlite3 "$DB" .dump > "$DUMP"
+python - "$DB" "$DUMP" <<'PYEOF'
+import sqlite3
+import sys
+
+source = sys.argv[1]
+target = sys.argv[2]
+con = sqlite3.connect(source)
+with open(target, "w", encoding="utf-8") as output:
+    for line in con.iterdump():
+        output.write(line + "\n")
+PYEOF
 
 git add "$DUMP"
 

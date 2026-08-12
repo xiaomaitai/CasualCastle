@@ -113,6 +113,7 @@ public partial class UnitLogic : Node2D
 			_unit.SetDamageMatrix(GameManager.Get<DamageMatrix>());
 			_unit.Tactical = _tactical;
 			_unit.BlackMagic = GameManager.Get<BlackMagicService>();
+			_unit.Mana = GameManager.Get<ManaService>();
 			ISkillRepository skillRepo = GameManager.Get<ISkillRepository>();
 		IReadOnlyList<SkillDef> skills = skillRepo.GetByUnitType(stats.TypeId);
 		foreach (SkillDef skill in skills)
@@ -138,6 +139,46 @@ public partial class UnitLogic : Node2D
 			_unit.TypeId,
 			GameCoordinatesAdapter.GameUnitsToPixels(DisplaySize));
 		_visual.SetHealth(Health, MaxHealth);
+	}
+
+	public void SetComfort(ComfortService comfort)
+	{
+		if (_unit != null)
+			_unit.Comfort = comfort;
+	}
+
+	public void ConfigureDefender(float patrolCenterX, float patrolCenterY, float patrolRadius)
+	{
+		if (_unit == null)
+			return;
+		_unit.IsDefender = true;
+		_unit.PatrolCenterX = patrolCenterX;
+		_unit.PatrolCenterY = patrolCenterY;
+		_unit.PatrolRadius = patrolRadius;
+	}
+
+	public void SetResting(bool resting)
+	{
+		if (_unit != null)
+			_unit.IsResting = resting;
+	}
+
+	public void ApplyKingSkill(SkillDef skill)
+	{
+		if (_unit != null && skill != null)
+			_unit.Skills.Add(skill);
+	}
+
+	public void RemoveKingSkill(string skillId)
+	{
+		if (_unit != null && !string.IsNullOrEmpty(skillId))
+			_unit.Skills.Remove(skillId);
+	}
+
+	public void SetPatrolRadius(float radius)
+	{
+		if (_unit != null)
+			_unit.PatrolRadius = radius;
 	}
 
 	public void SetTarget(UnitLogic target)
@@ -295,6 +336,13 @@ public partial class UnitLogic : Node2D
 
 	private Vector2 SelectTarget()
 	{
+		if (_unit != null && _unit.IsDefender)
+		{
+			return new Vector2(
+				GameCoordinatesAdapter.GameUnitsToPixels(_unit.PatrolCenterX),
+				GameCoordinatesAdapter.GameUnitsToPixels(_unit.PatrolCenterY));
+		}
+
 			IBuildingRef tavern = _unit.AssignedTavern;
 			if (tavern != null)
 			{
@@ -379,12 +427,57 @@ public partial class UnitLogic : Node2D
 		Shop shop = AdapterRegistry.Resolve<Shop>();
 		if (shop != null && shop.FactionId == FactionDef.NecromancerId)
 			GameManager.Get<BlackMagicService>()?.OnUnitDied(IsPlayerUnit, _unit?.Race);
+		if (shop != null && shop.FactionId == FactionDef.DungeonId)
+			HandleDungeonDeath();
 		_visual?.UpdateSleepVisual(false, false);
 		_lifecycle?.PlayDeathAnimation(_body);
 		Sfx.Play(SfxEvents.UnitDeath);
 		TavernPartyService tavernParty = GameManager.Get<TavernPartyService>();
 		tavernParty?.RemoveOnDeath(_unit);
 		_corpseService?.ScheduleCorpseRemoval(_unit);
+	}
+
+	private void HandleDungeonDeath()
+	{
+		KingExperienceService xp = GameManager.Get<KingExperienceService>();
+		if (xp == null)
+			return;
+		xp.OnUnitDied(IsPlayerUnit);
+		if (IsPlayerUnit)
+			return;
+		if (_unit != null && _unit.UnitCost >= DemonKingRules.BossDropCostThreshold)
+			xp.OnSmallCrystalMined();
+		IUnitHandle killer = _eventRelay?.LastAttacker;
+		if (killer != null && DemonKingRules.IsDemonKing(killer.Race))
+		{
+			xp.OnKingKill();
+			TrySummonBloodletters(killer);
+		}
+	}
+
+	private void TrySummonBloodletters(IUnitHandle killer)
+	{
+		if (killer.Skills == null || !killer.Skills.HasSkill("summon_bloodletter"))
+			return;
+		Node2D battlefield = AdapterRegistry.Resolve<GameManager>()?.Battlefield;
+		if (battlefield == null)
+			return;
+		PackedScene unitScene = GD.Load<PackedScene>("res://prefabs/Unit.tscn");
+		if (unitScene == null)
+			return;
+		IUnitRepository unitRepo = GameManager.Get<IUnitRepository>();
+		float kingX = GameCoordinatesAdapter.GameUnitsToPixels(killer.GameX);
+		float kingY = GameCoordinatesAdapter.GameUnitsToPixels(killer.GameY);
+		for (int i = 0; i < 2; i++)
+		{
+			Unit shell = unitScene.Instantiate<Unit>();
+			UnitLogic logic = shell.GetNode<UnitLogic>("Logic");
+			logic.IsPlayerUnit = true;
+			logic.InitializeFromStats(unitRepo.Get("Bloodletter"));
+			float offsetX = i == 0 ? -50f : 50f;
+			shell.GlobalPosition = new Vector2(kingX + offsetX, kingY + 40f);
+			battlefield.AddChild(shell);
+		}
 	}
 
 	private void OnHealed()

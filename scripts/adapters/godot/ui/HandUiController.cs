@@ -1,5 +1,6 @@
 // 手牌 UI：展示、选择与拖拽放置
 using CasualCastle.Adapters.Godot;
+using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
 using CasualCastle.Domain.Shared;
 using Godot;
@@ -12,6 +13,8 @@ public sealed class HandUiController
 	private readonly Button[] _handButtons = new Button[MaxHandSize];
 	private readonly Control.GuiInputEventHandler[] _handGuiInputHandlers = new Control.GuiInputEventHandler[MaxHandSize];
 	private readonly Label _placementHintLabel;
+
+	private readonly Button _useItemButton;
 
 	private readonly Hand _hand;
 	private readonly Shop _shop;
@@ -40,6 +43,13 @@ public sealed class HandUiController
 		_shopUi = shopUi;
 		_placementHintLabel = uiRoot.GetNode<Label>("PlacementHintLabel");
 
+		_useItemButton = new Button { Text = "使用经验魔晶", Visible = false };
+		_useItemButton.Position = new Vector2(700f, 850f);
+		_useItemButton.Size = new Vector2(180f, 50f);
+		_useItemButton.AddThemeFontSizeOverride("font_size", 22);
+		uiRoot.AddChild(_useItemButton);
+		_useItemButton.Pressed += OnUseItemPressed;
+
 		for (int i = 0; i < MaxHandSize; i++)
 		{
 			_handButtons[i] = uiRoot.GetNode<Button>($"HandPanel/HandSlot{i + 1}");
@@ -61,6 +71,7 @@ public sealed class HandUiController
 
 		_hand.HandChanged -= RefreshDisplay;
 		_hand.SelectionChanged -= OnSelectionChanged;
+		_useItemButton.Pressed -= OnUseItemPressed;
 	}
 
 	public void SetInputBlocked(bool blocked)
@@ -269,6 +280,7 @@ public sealed class HandUiController
 		}
 
 		RefreshHighlight();
+		_useItemButton.Visible = CanUseSelectedCrystal();
 	}
 
 	private void OnSelectionChanged(int selectedIndex)
@@ -276,6 +288,24 @@ public sealed class HandUiController
 		_selectedIndex = selectedIndex;
 		RefreshHighlight();
 		UpdatePlacementHint();
+		_useItemButton.Visible = CanUseSelectedCrystal();
+	}
+
+	private bool CanUseSelectedCrystal()
+	{
+		if (_inputBlocked || !_hand.HasSelection)
+			return false;
+		return _hand.SelectedCard?.ItemType == ShopItemTypes.DungeonCrystal;
+	}
+
+	private void OnUseItemPressed()
+	{
+		CardData card = _hand.SelectedCard;
+		if (card == null || !_hand.TryRemoveCardById(card.Id))
+			return;
+		GameManager.Get<KingExperienceService>()?.OnCrystalUsed();
+		Sfx.Play(SfxEvents.Upgrade);
+		_useItemButton.Visible = false;
 	}
 
 	private void UpdatePlacementHint()

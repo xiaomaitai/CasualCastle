@@ -140,9 +140,13 @@ public class CombineRules
 
 	private static bool IsCoreLevelSatisfied(CombineRecipe recipe, IBuildingRepository buildingRepo, int coreLevel)
 	{
-		if (buildingRepo.GetFactionId(recipe.ResultTypeId) != FactionDef.NecromancerId)
+		if (buildingRepo.GetFactionId(recipe.ResultTypeId) != FactionDef.NecromancerId
+			&& buildingRepo.GetFactionId(recipe.ResultTypeId) != FactionDef.DungeonId)
 			return true;
-		return coreLevel >= RitualCircleRules.GetRequiredCoreLevel(recipe.ResultTypeId, buildingRepo);
+		int required = buildingRepo.GetFactionId(recipe.ResultTypeId) == FactionDef.NecromancerId
+			? RitualCircleRules.GetRequiredCoreLevel(recipe.ResultTypeId, buildingRepo)
+			: DungeonCoreRules.GetRequiredCoreLevel(recipe.ResultTypeId, buildingRepo);
+		return coreLevel >= required;
 	}
 
 	private List<IBuildingState> PickMaterials(

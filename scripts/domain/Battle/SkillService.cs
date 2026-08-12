@@ -79,7 +79,7 @@ public class SkillService
 			ctx.AuraAttackSpeedMultiplier = aura.AttackSpeedMultiplier;
 			ctx.AuraMoveSpeedMultiplier = aura.MoveSpeedMultiplier;
 			ctx.AuraAttackDamageMultiplier = aura.AttackDamageMultiplier;
-			ctx.AuraRegenPerSecond = aura.RegenPerSecond;
+			ctx.AuraRegenPerSecond = aura.RegenPerSecond + DungeonFactionBuffs.GlobalRegenPerSecond;
 			ctx.AuraExecuteDamageMultiplier = aura.ExecuteDamageMultiplier;
 			ctx.AuraArmorBonus = aura.ArmorBonus;
 			ctx.AuraLifestealFraction = aura.LifestealFraction;

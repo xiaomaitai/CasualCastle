@@ -130,6 +130,14 @@ public partial class GameManager : Node2D, IGameState
 			Get<RitualService>()?.Reset();
 		}
 
+		if (SelectedFaction == FactionDef.DungeonId)
+		{
+			Get<ComfortService>()?.Reset();
+			Get<KingExperienceService>()?.Reset();
+			Get<KingSkillSet>()?.Reset();
+			DungeonFactionBuffs.Reset();
+		}
+
 		_phaseMachine.StartMatch();
 		SetProcess(true);
 	}
@@ -296,6 +304,17 @@ public partial class GameManager : Node2D, IGameState
 		{
 			data.RitualStudyCompletionCount = ritualService.StudyCompletionCount;
 			data.LearnedRitualIds.AddRange(ritualService.GetLearnedRitualIds());
+		}
+
+		KingExperienceService kingXp = Get<KingExperienceService>();
+		if (kingXp != null)
+			data.DungeonKingXp = kingXp.GetCumulativeExperience();
+		KingSkillSet kingSkills = Get<KingSkillSet>();
+		if (kingSkills != null)
+		{
+			data.DungeonLearnedSkillIds.AddRange(kingSkills.GetAll());
+			foreach (string skillId in kingSkills.GetAll())
+				data.DungeonLearnedSkillLevels.Add(kingSkills.GetLearnLevel(skillId));
 		}
 
 		Get<IGameSessionService>().SaveGame(data);

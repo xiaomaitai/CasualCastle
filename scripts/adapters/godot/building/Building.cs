@@ -65,6 +65,24 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	private ActiveRitual _activeRitual;
 
+	private TrapService _trapService;
+
+	private CasualCastle.Domain.Battle.Unit _trapSource;
+
+	private float _trapCooldown;
+
+	private float _livingGrowthAccumulator;
+
+	private float _breedAccumulator;
+
+	private float _plagueAccumulator;
+
+	private float _crystalMineAccumulator;
+
+	private float _livingRegenAccumulator;
+
+	private float _boxFuse;
+
 	private BuildingSystem _buildingSystemBacking;
 
 	private BuildingSystem BuildingSys => _buildingSystemBacking ??= AdapterRegistry.Resolve<BuildingSystem>();
@@ -222,7 +240,51 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 	{
 		if (amount <= 0 || Health <= 0)
 			return;
+		if (LivingBuildingRules.IsLivingBuilding(TypeId) && CastleRef != null
+			&& !BuildingSys.IsCoreBuilding(TypeId))
+		{
+			ApplyLivingLinkedDamage(amount);
+			return;
+		}
+		ApplyDamage(amount);
+	}
 
+	private void ApplyLivingLinkedDamage(int amount)
+	{
+		List<IBuildingState> neighbors = GetLivingNeighbors();
+		if (neighbors.Count == 0)
+		{
+			ApplyDamage(amount);
+			return;
+		}
+		int selfShare = amount / 2;
+		int neighborShare = amount - selfShare;
+		ApplyDamage(selfShare);
+		int perNeighbor = neighborShare / neighbors.Count;
+		int remainder = neighborShare - perNeighbor * neighbors.Count;
+		for (int i = 0; i < neighbors.Count; i++)
+		{
+			int share = perNeighbor + (i < remainder ? 1 : 0);
+			if (neighbors[i] is Building neighbor && !neighbor.IsDestroyed)
+				neighbor.ApplyDamage(share);
+		}
+	}
+
+	private List<IBuildingState> GetLivingNeighbors()
+	{
+		List<IBuildingState> result = new();
+		List<IBuildingState> states = CastleRef.GetBuildingStates();
+		List<IAdjacencyBuilding> adjacent = states.OfType<IAdjacencyBuilding>().ToList();
+		foreach (IAdjacencyBuilding neighbor in AdjacentRules.GetAdjacentBuildings(this, adjacent, GameManager.Get<IBuildingRepository>()))
+		{
+			if (neighbor is IBuildingState state && !state.IsDestroyed && LivingBuildingRules.IsLivingBuilding(state.TypeId))
+				result.Add(state);
+		}
+		return result;
+	}
+
+	private void ApplyDamage(int amount)
+	{
 		Health = Mathf.Max(0, Health - amount);
 		EmitSignal(SignalName.HealthChanged, Health, MaxHealth);
 		UpdateDamageVisual();
@@ -247,9 +309,239 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		{
 			RefreshOperationalState();
 			PlayDestructionEffect();
+			if (LivingBuildingRules.IsLivingBuilding(TypeId))
+				ScheduleRegrow();
 		}
 	}
 
+	private void TickTrap(float delta)
+	{
+		if (!TrapRules.IsTrap(TypeId) || !CanWork)
+			return;
+		if (_trapCooldown > 0f)
+		{
+			_trapCooldown -= delta;
+			return;
+		}
+		if (_trapService == null)
+			return;
+
+		EnsureTrapSource();
+		float centerX = GameCoordinatesAdapter.PixelsToGameUnits(GlobalPosition.X);
+		float centerY = GameCoordinatesAdapter.PixelsToGameUnits(GlobalPosition.Y);
+		(float teleportX, float teleportY) = GetTeleportTarget();
+		int hits = _trapService.Trigger(_trapSource, TypeId, centerX, centerY, teleportX, teleportY);
+		if (hits > 0)
+			_trapCooldown = TrapRules.GetConfig(TypeId).Cooldown * DungeonFactionBuffs.TrapCooldownMultiplier;
+	}
+
+	private void EnsureTrapSource()
+	{
+		if (_trapSource != null)
+			return;
+		_trapSource = new CasualCastle.Domain.Battle.Unit(new TrapNavPort());
+		_trapSource.IsPlayerUnit = _isPlayerBuilding;
+	}
+
+	private (float x, float y) GetTeleportTarget()
+	{
+		Castle enemyCastle = _isPlayerBuilding ? _gameManager?.EnemyCastle : _gameManager?.PlayerCastle;
+		if (enemyCastle?.Heart != null)
+		{
+			Vector2 position = enemyCastle.Heart.GlobalPosition;
+			return (GameCoordinatesAdapter.PixelsToGameUnits(position.X), GameCoordinatesAdapter.PixelsToGameUnits(position.Y));
+		}
+		return (GameCoordinatesAdapter.PixelsToGameUnits(GlobalPosition.X), GameCoordinatesAdapter.PixelsToGameUnits(GlobalPosition.Y));
+	}
+
+	private void TickLivingGrowth(float delta)
+	{
+		TickLivingRegen(delta);
+		if (!LivingBuildingRules.IsLivingBuilding(TypeId) || !IsLivingGrowthEligible())
+			return;
+		_livingGrowthAccumulator += delta;
+		float interval = LivingBuildingRules.GetGrowthInterval(TypeId, GetKingLevel());
+		if (_livingGrowthAccumulator < interval)
+			return;
+		_livingGrowthAccumulator = 0f;
+		AutoGrowLiving();
+	}
+
+	private bool IsLivingGrowthEligible()
+	{
+		if (_gameManager == null || _gameManager.CurrentState != GameManager.GameState.Playing || !_gameManager.IsCombat)
+			return false;
+		if (LivingBuildingRules.GetNextInLine(TypeId) == null)
+			return false;
+		return GetKingLevel() >= LivingBuildingRules.GetRequiredKingLevel(TypeId);
+	}
+
+	private int GetKingLevel()
+	{
+		if (CastleRef == null)
+			return 1;
+		return DungeonCoreRules.GetCoreLevel(CastleRef.GetBuildingStates());
+	}
+
+	private void TickTreasureBox(float delta)
+	{
+		if (TypeId != TrapRules.TreasureBox || !CanWork || _trapService == null)
+			return;
+		if (_trapCooldown > 0f)
+		{
+			_trapCooldown -= delta;
+			return;
+		}
+		ITacticalQueries tactical = GameManager.Get<ITacticalQueries>();
+		if (tactical == null)
+			return;
+		EnsureTrapSource();
+		float centerX = GameCoordinatesAdapter.PixelsToGameUnits(GlobalPosition.X);
+		float centerY = GameCoordinatesAdapter.PixelsToGameUnits(GlobalPosition.Y);
+		TrapConfig config = TrapRules.GetConfig(TypeId);
+		foreach (IUnitHandle enemy in tactical.FindEnemiesNearPoint(_trapSource, centerX, centerY, config.AttractRange))
+			_trapService.PullTowards(enemy, centerX, centerY, config.PullSpeed, delta);
+		if (tactical.FindEnemiesNearPoint(_trapSource, centerX, centerY, config.AttractRange).Count == 0)
+			return;
+		_boxFuse += delta;
+		if (_boxFuse < config.FuseSeconds)
+			return;
+		_boxFuse = 0f;
+		_trapService.Trigger(_trapSource, TypeId, centerX, centerY, 0f, 0f);
+		_trapCooldown = config.Cooldown * DungeonFactionBuffs.TrapCooldownMultiplier;
+	}
+
+	private void TickManaProduction(float delta)
+	{
+		if (!_isPlayerBuilding || !ManaBuildingRules.IsManaProducer(TypeId) || !CanWork)
+			return;
+		ManaService mana = GameManager.Get<ManaService>();
+		if (mana == null)
+			return;
+		mana.Add(ManaBuildingRules.GetManaPerSecond(TypeId) * DungeonFactionBuffs.ManaProductionMultiplier * delta);
+	}
+
+	private void TickPlagueSpread(float delta)
+	{
+		if (DungeonFactionBuffs.PlagueSpreadPerSecond <= 0f || !CanWork)
+			return;
+		if (BuildingSys.GetFactionId(TypeId) != FactionDef.DungeonId)
+			return;
+		_plagueAccumulator += DungeonFactionBuffs.PlagueSpreadPerSecond * delta;
+		int damage = (int)_plagueAccumulator;
+		if (damage <= 0)
+			return;
+		_plagueAccumulator -= damage;
+		ITacticalQueries tactical = GameManager.Get<ITacticalQueries>();
+		if (tactical == null)
+			return;
+		EnsureTrapSource();
+		float centerX = GameCoordinatesAdapter.PixelsToGameUnits(GlobalPosition.X);
+		float centerY = GameCoordinatesAdapter.PixelsToGameUnits(GlobalPosition.Y);
+		foreach (IUnitHandle enemy in tactical.FindEnemiesNearPoint(_trapSource, centerX, centerY, DungeonFactionBuffs.PlagueSpreadRange))
+			enemy.TakeDamage(damage, null, centerX, centerY);
+	}
+
+	private void TickCrystalMine(float delta)
+	{
+		if (!_isPlayerBuilding || !CrystalMineRules.IsCrystalMine(TypeId) || !CanWork)
+			return;
+		_crystalMineAccumulator += delta;
+		if (_crystalMineAccumulator < CrystalMineRules.MiningIntervalSeconds)
+			return;
+		_crystalMineAccumulator = 0f;
+		GameManager.Get<KingExperienceService>()?.OnSmallCrystalMined();
+	}
+
+	private void TickLivingRegen(float delta)
+	{
+		if (!_isPlayerBuilding || DungeonFactionBuffs.LivingRegenPerSecond <= 0f || Health >= MaxHealth)
+			return;
+		_livingRegenAccumulator += DungeonFactionBuffs.LivingRegenPerSecond * delta;
+		int heal = (int)_livingRegenAccumulator;
+		if (heal <= 0)
+			return;
+		_livingRegenAccumulator -= heal;
+		Health = Mathf.Min(MaxHealth, Health + heal);
+		EmitSignal(SignalName.HealthChanged, Health, MaxHealth);
+		UpdateDamageVisual();
+	}
+
+	private void TickBreeding(float delta)
+	{
+		if (!DungeonFactionBuffs.AutoBreedEnabled || !LivingBuildingRules.IsLivingBuilding(TypeId) || !CanWork)
+			return;
+		_breedAccumulator += delta;
+		if (_breedAccumulator < LivingBuildingRules.BreedIntervalSeconds)
+			return;
+		_breedAccumulator = 0f;
+		TryBreedFleshNest();
+	}
+
+	private void TryBreedFleshNest()
+	{
+		if (CastleRef == null)
+			return;
+		BuildingSystem system = AdapterRegistry.Resolve<BuildingSystem>();
+		if (system.TryPlaceForCastle(CastleRef, "FleshNest", GridX - 1, GridY))
+			return;
+		if (system.TryPlaceForCastle(CastleRef, "FleshNest", GridX + 1, GridY))
+			return;
+		if (system.TryPlaceForCastle(CastleRef, "FleshNest", GridX, GridY - 1))
+			return;
+		if (system.TryPlaceForCastle(CastleRef, "FleshNest", GridX, GridY + 1))
+			return;
+	}
+
+	private void AutoGrowLiving()
+	{
+		string nextTypeId = LivingBuildingRules.GetNextInLine(TypeId);
+		if (nextTypeId == null || CastleRef == null)
+			return;
+		UpgradeBuildingFactory factory = new(CastleRef);
+		factory.Create(nextTypeId, GridX, GridY, Health / (float)MaxHealth);
+		factory.Destroy(this);
+		_adjacencyService?.RefreshCastle(CastleRef.GetBuildingStates());
+		Sfx.Play(SfxEvents.Upgrade);
+	}
+
+	private void ScheduleRegrow()
+	{
+		Castle castle = CastleRef;
+		string typeId = TypeId;
+		int gridX = GridX;
+		int gridY = GridY;
+		GetTree().CreateTimer(LivingBuildingRules.RegrowDelaySeconds).Timeout += () => LivingBuildingRegrow(castle, typeId, gridX, gridY);
+	}
+
+	private static void LivingBuildingRegrow(Castle castle, string typeId, int gridX, int gridY)
+	{
+		if (castle == null || !GodotObject.IsInstanceValid(castle))
+			return;
+		if (!LivingBuildingRules.HasLivingNeighbor(gridX, gridY, typeId, castle.GetBuildingStates(), GameManager.Get<IBuildingRepository>()))
+			return;
+		Building building = AdapterRegistry.Resolve<BuildingSystem>().CreateBuilding(typeId);
+		if (building == null)
+			return;
+		building.BindToGrid(castle, gridX, gridY);
+		if (!castle.PlaceBuilding(building, gridX, gridY, typeId))
+		{
+			building.QueueFree();
+			return;
+		}
+		Sfx.Play(SfxEvents.Upgrade);
+	}
+
+	private sealed class TrapNavPort : INavigationPort
+	{
+		public void SetTarget(float gameX, float gameY)
+		{
+		}
+
+		public void ConfigureRvo(float radius, float neighborDistance, float timeHorizon)
+		{
+		}
+	}
 	public bool TryRepair()
 	{
 		if (!CanRepair())
@@ -303,6 +595,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		_shop = AdapterRegistry.Resolve<Shop>();
 		_adjacencyService = GameManager.Get<AdjacencyService>();
 		_ritualService = GameManager.Get<RitualService>();
+		_trapService = GameManager.Get<TrapService>();
 		
 
 		_sprite = GetNodeOrNull<Sprite2D>("View/Sprite");
@@ -342,6 +635,10 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 			if (_battlefield == null)
 				_battlefield = GetTree().Root.GetNodeOrNull<Node2D>("MainGame/Battlefield");
 		}
+
+		if (LivingBuildingRules.IsLivingBuilding(TypeId) || TrapRules.IsTrap(TypeId)
+			|| ManaBuildingRules.IsManaProducer(TypeId) || CrystalMineRules.IsCrystalMine(TypeId))
+			SetProcess(true);
 	}
 
 	public override void _ExitTree()
@@ -369,11 +666,18 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	public override void _Process(double delta)
 	{
+		TickTrap((float)delta);
+		TickLivingGrowth((float)delta);
+		TickBreeding((float)delta);
+		TickManaProduction((float)delta);
+		TickPlagueSpread((float)delta);
+		TickCrystalMine((float)delta);
+		TickTreasureBox((float)delta);
 		TickRitual((float)delta);
 		if (!_workActive || _workPaused || !CanWork)
 			return;
 
-		_workDone += (float)delta * _productionRate * _workSpeedMultiplier;
+		_workDone += (float)delta * _productionRate * _workSpeedMultiplier * DungeonFactionBuffs.ProductionSpeedMultiplier;
 		UpdateWorkEffectFromProgress();
 
 		if (_workDone < _workRequired)
@@ -849,6 +1153,10 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		{
 			UpdateWorkCycle();
 		}
+
+		if (IsOperational && (LivingBuildingRules.IsLivingBuilding(TypeId) || TrapRules.IsTrap(TypeId)
+			|| ManaBuildingRules.IsManaProducer(TypeId) || CrystalMineRules.IsCrystalMine(TypeId)))
+			SetProcess(true);
 
 		Castle castle = CastleRef;
 		if (castle != null)

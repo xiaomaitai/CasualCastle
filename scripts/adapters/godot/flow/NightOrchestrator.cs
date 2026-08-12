@@ -27,7 +27,9 @@ public class NightOrchestrator
 		CombineBuildingFactory factory = new CombineBuildingFactory(playerCastle);
 		int coreLevel = gm.SelectedFaction == FactionDef.NecromancerId
 			? RitualCircleRules.GetCoreLevel(playerCastle.GetBuildingStates())
-			: int.MaxValue;
+			: gm.SelectedFaction == FactionDef.DungeonId
+				? DungeonCoreRules.GetCoreLevel(playerCastle.GetBuildingStates())
+				: int.MaxValue;
 		_combineService.ResolveCombines(
 			playerCastle.GetBuildingStates(),
 			true,

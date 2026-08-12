@@ -11,4 +11,5 @@ public static class BuildingTypeIds
 	public const string Burrow = "Burrow";
 	public const string RitualCirclePrefix = "RitualCircleL";
 	public const string HordeCorePrefix = "HordeCoreL";
+	public const string DungeonThronePrefix = "DungeonThroneL";
 }

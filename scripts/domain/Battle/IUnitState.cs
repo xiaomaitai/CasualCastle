@@ -18,6 +18,7 @@ public interface IUnitState
 	float CollisionRadius { get; }
 	float GameX { get; }
 	float GameY { get; }
+	float PatrolRadius { get; }
 	UnitState State { get; }
 	ArmorType ArmorType { get; }
 	int ArmorValue { get; }

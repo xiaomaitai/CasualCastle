@@ -45,11 +45,17 @@ public class UpgradeRules
 		if (RitualCircleRules.IsCoreUpgrade(building.TypeId, recipe.ResultTypeId))
 			return true;
 
+		if (DungeonCoreRules.IsCoreUpgrade(building.TypeId, recipe.ResultTypeId))
+			return false;
+
 		if (buildingRepo.GetFactionId(building.TypeId) == FactionDef.HordeId)
 			return coreLevel >= HordeCoreRules.GetRequiredCoreLevel(recipe.ResultTypeId, buildingRepo);
 
 		if (buildingRepo.GetFactionId(building.TypeId) == FactionDef.NecromancerId)
 			return coreLevel >= RitualCircleRules.GetRequiredCoreLevel(recipe.ResultTypeId, buildingRepo);
+
+		if (buildingRepo.GetFactionId(building.TypeId) == FactionDef.DungeonId)
+			return coreLevel >= DungeonCoreRules.GetRequiredCoreLevel(recipe.ResultTypeId, buildingRepo);
 
 		return true;
 	}

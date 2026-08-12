@@ -1,6 +1,7 @@
 // 场景初始化：组装系统节点与纯 C# 服务
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Adapters.Persistence;
+using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
 using CasualCastle.Domain.History;
 using CasualCastle.Domain.Shared;
@@ -39,6 +40,9 @@ public partial class InitManager : Node
 		Shop shopService = new Shop(hand, shopRules, player);
 		AdapterRegistry.Register<Shop>(shopService);
 		shopService.SetFaction(gm.SelectedFaction);
+
+		if (gm.SelectedFaction == FactionDef.DungeonId)
+			AddChild(new DemonKingController());
 
 		gm.PhaseChanged += phase =>
 		{
@@ -80,7 +84,15 @@ public partial class InitManager : Node
 		};
 
 		if (gm.PendingLoadSlot >= 0)
-			LoadSaveIntoGame(gm, shopService, hand);
+			CallDeferred(nameof(LoadSaveIntoGameDeferred));
+	}
+
+	public void LoadSaveIntoGameDeferred()
+	{
+		LoadSaveIntoGame(
+			AdapterRegistry.Resolve<GameManager>(),
+			AdapterRegistry.Resolve<Shop>(),
+			AdapterRegistry.Resolve<Hand>());
 	}
 
 	private static bool IsBookHeld(Hand hand, string cardId)
@@ -188,6 +200,19 @@ public partial class InitManager : Node
 		RitualService ritualService = GameManager.Get<RitualService>();
 		if (ritualService != null)
 			ritualService.Restore(data.RitualStudyCompletionCount, data.LearnedRitualIds);
+		KingExperienceService kingXp = GameManager.Get<KingExperienceService>();
+		if (kingXp != null)
+			kingXp.Restore(data.DungeonKingXp);
+		KingSkillSet kingSkills = GameManager.Get<KingSkillSet>();
+		if (kingSkills != null)
+		{
+			kingSkills.Reset();
+			for (int i = 0; i < data.DungeonLearnedSkillIds.Count; i++)
+			{
+				int level = i < data.DungeonLearnedSkillLevels.Count ? data.DungeonLearnedSkillLevels[i] : 1;
+				kingSkills.Add(data.DungeonLearnedSkillIds[i], level);
+			}
+		}
 		shopService.SetFaction(data.FactionId);
 		GameManager.Get<AdjacencyService>().RefreshCastle(playerCastle.GetBuildingStates());
 	}

@@ -73,6 +73,9 @@ public partial class Unit : IUnitHandle
 	public ITacticalQueries Tactical { get; set; }
 
 	public BlackMagicService BlackMagic { get; set; }
+	public ComfortService Comfort { get; set; }
+
+	public ManaService Mana { get; set; }
 
 	public SkillSet Skills { get; private set; }
 
@@ -85,6 +88,16 @@ public partial class Unit : IUnitHandle
 	public IBuildingTarget TargetBuilding { get; set; }
 
 	public IBuildingRef AssignedTavern { get; set; }
+
+	public bool IsDefender { get; set; }
+
+	public float PatrolCenterX { get; set; }
+
+	public float PatrolCenterY { get; set; }
+
+	public float PatrolRadius { get; set; }
+
+	public bool IsResting { get; set; }
 
 	public UnitState State { get; set; }
 
@@ -179,6 +192,12 @@ public partial class Unit : IUnitHandle
 		GameY = gameY;
 	}
 
+	public void TeleportTo(float gameX, float gameY)
+	{
+		GameX = gameX;
+		GameY = gameY;
+	}
+
 	public void SetEnemyTarget(IUnitHandle target)
 	{
 		TargetEnemy = target;
@@ -232,6 +251,16 @@ public partial class Unit : IUnitHandle
 	{
 		if (!IsAlive)
 			return;
+
+		if (DemonKingRules.IsDemonKing(Race))
+		{
+			_timeSinceLastCombat = 0f;
+			Comfort?.SpendHit();
+			if (Skills != null && Skills.HasTrigger(StatModifierTrigger.OnDamaged))
+				IsFurious = true;
+			EventPort?.OnDamaged(amount, attacker);
+			return;
+		}
 
 		_timeSinceLastCombat = 0f;
 		IsAmbushing = false;
@@ -292,6 +321,12 @@ public partial class Unit : IUnitHandle
 			return;
 		}
 
+		if (IsDefender)
+		{
+			UpdateDefenderTargeting(nearestEnemy);
+			return;
+		}
+
 		if (HealAmount > 0f && HealRange > 0f)
 		{
 			TargetEnemy = null;
@@ -328,6 +363,42 @@ public partial class Unit : IUnitHandle
 			TargetEnemy = null;
 			State = UnitState.Marching;
 		}
+	}
+
+	private void UpdateDefenderTargeting(IUnitHandle nearestEnemy)
+	{
+		if (IsResting)
+		{
+			TargetEnemy = null;
+			State = UnitState.Marching;
+			return;
+		}
+
+		float dx = GameX - PatrolCenterX;
+		float dy = GameY - PatrolCenterY;
+		float distanceToAnchor = MathF.Sqrt(dx * dx + dy * dy);
+		if (distanceToAnchor > PatrolRadius)
+		{
+			TargetEnemy = null;
+			State = UnitState.Marching;
+			return;
+		}
+
+		if (nearestEnemy != null && nearestEnemy.IsAlive)
+		{
+			float enemyDx = nearestEnemy.GameX - GameX;
+			float enemyDy = nearestEnemy.GameY - GameY;
+			float enemyDistance = MathF.Sqrt(enemyDx * enemyDx + enemyDy * enemyDy);
+			if (enemyDistance <= PatrolRadius)
+			{
+				TargetEnemy = nearestEnemy;
+				State = UnitState.Fighting;
+				return;
+			}
+		}
+
+		TargetEnemy = null;
+		State = UnitState.Waiting;
 	}
 
 	public void UpdateBehavior(float dt, float marchTargetGameX, float marchTargetGameY)
@@ -436,6 +507,8 @@ public partial class Unit : IUnitHandle
 		IsStealthed = false;
 		StartStealthCooldown();
 		_timeSinceLastCombat = 0f;
+		if (DemonKingRules.IsDemonKing(Race))
+			Comfort?.SpendAttack();
 
 		if (Skills != null && TryCastSpell())
 		{
@@ -585,21 +658,41 @@ public partial class Unit : IUnitHandle
 
 	private bool TryCastSpell()
 	{
-		if (BlackMagic == null || TargetEnemy == null || !TargetEnemy.IsAlive)
+		if (TargetEnemy == null || !TargetEnemy.IsAlive)
 			return false;
 		SpecialConfig nova = Skills.GetSpecial(SpecialBehavior.ShadowNova);
-		if (nova != null && CanCastSpell(nova) && Tactical != null
+		if (nova != null && BlackMagic != null && CanCastSpell(nova) && Tactical != null
 			&& Tactical.FindEnemiesNearPoint(this, TargetEnemy.GameX, TargetEnemy.GameY, nova.Param).Count > 1)
 			return CastNova(nova);
 		SpecialConfig curse = Skills.GetSpecial(SpecialBehavior.Curse);
 		if (curse != null && CanCastSpell(curse))
 			return CastCurse(curse);
+		SpecialConfig manaStorm = Skills.GetSpecial(SpecialBehavior.ManaStorm);
+		if (manaStorm != null && CanCastManaStorm(manaStorm) && Tactical != null
+			&& Tactical.FindEnemiesNearPoint(this, TargetEnemy.GameX, TargetEnemy.GameY, manaStorm.Param).Count > 0)
+			return CastManaStorm(manaStorm);
 		return false;
 	}
 
 	private bool CanCastSpell(SpecialConfig cfg)
 	{
 		return cfg.Cost > 0 && BlackMagic.Value >= cfg.Cost && GetSkillCooldownRemaining(cfg.SkillId) <= 0f;
+	}
+
+	private bool CanCastManaStorm(SpecialConfig cfg)
+	{
+		return Mana != null && cfg.Cost > 0 && Mana.Value >= cfg.Cost
+			&& GetSkillCooldownRemaining(cfg.SkillId) <= 0f;
+	}
+
+	private bool CastManaStorm(SpecialConfig cfg)
+	{
+		Mana.TrySpend(cfg.Cost);
+		StartSkillCooldown(cfg.SkillId);
+		foreach (IUnitHandle enemy in Tactical.FindEnemiesNearPoint(this, TargetEnemy.GameX, TargetEnemy.GameY, cfg.Param))
+			enemy.TakeDamage((int)cfg.Value, this, GameX, GameY);
+		EventPort?.OnAttack(TargetEnemy, TargetEnemy.GameX, TargetEnemy.GameY);
+		return true;
 	}
 
 	private bool CastCurse(SpecialConfig cfg)

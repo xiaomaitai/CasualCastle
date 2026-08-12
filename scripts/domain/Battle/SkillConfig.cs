@@ -214,6 +214,7 @@ public class SpecialConfig
 				"plague_burst" => SpecialBehavior.PlagueBurst,
 				"curse" => SpecialBehavior.Curse,
 				"shadow_nova" => SpecialBehavior.ShadowNova,
+				"mana_storm" => SpecialBehavior.ManaStorm,
 				_ => SpecialBehavior.Stealth
 			},
 			Param = root.TryGetProperty("param", out JsonElement p) ? p.GetSingle() : 0f,

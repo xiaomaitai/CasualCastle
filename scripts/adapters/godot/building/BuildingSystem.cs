@@ -118,6 +118,7 @@ public partial class BuildingSystem : Node
 			edges.AddRange(repo.LoadUpgradeEdges(faction.Id));
 		edges.AddRange(HordeCoreRules.CreateUpgradeRecipes());
 		edges.AddRange(RitualCircleRules.CreateUpgradeRecipes());
+		edges.AddRange(DungeonCoreRules.CreateUpgradeRecipes());
 		rules.LoadRecipes(edges);
 	}
 
@@ -193,6 +194,8 @@ public partial class BuildingSystem : Node
 	public bool TryPlaceForCastle(Castle castle, string buildingType, int anchorX, int anchorY)
 	{
 		if (castle == null) return false;
+		if (castle.IsPlayerCastle && TrapRules.IsTrap(buildingType) && CountTraps(castle) >= TrapRules.GetMaxTrapCount(DungeonFactionBuffs.TrapCapDoubled))
+			return false;
 		if (!CanPlace(castle, buildingType, anchorX, anchorY)) return false;
 
 		Building building = InstantiateBuilding();
@@ -209,6 +212,17 @@ public partial class BuildingSystem : Node
 		EmitSignal(SignalName.BuildingPlaced, castle, building, buildingType);
 		OnBuildingPlaced(castle, building);
 		return true;
+	}
+
+	private static int CountTraps(Castle castle)
+	{
+		int count = 0;
+		foreach (Building building in castle.GetBuildings())
+		{
+			if (!building.IsDestroyed && TrapRules.IsTrap(building.TypeId))
+				count++;
+		}
+		return count;
 	}
 
 	public Building CreateBuilding(string buildingType)

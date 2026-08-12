@@ -245,7 +245,9 @@ public partial class Castle : Node2D
 			? HordeCoreRules.CoreLevelTypeIds[0]
 			: GameManager.Instance != null && GameManager.Instance.SelectedFaction == FactionDef.NecromancerId
 				? RitualCircleRules.CoreLevelTypeIds[0]
-				: BuildingTypeIds.CastleHeart;
+				: GameManager.Instance != null && GameManager.Instance.SelectedFaction == FactionDef.DungeonId
+					? DungeonCoreRules.CoreLevelTypeIds[0]
+					: BuildingTypeIds.CastleHeart;
 		Building heart = _buildingSystem.CreateBuilding(heartTypeId);
 		if (heart == null)
 			return;

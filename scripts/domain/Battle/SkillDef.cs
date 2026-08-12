@@ -40,7 +40,8 @@ public enum SpecialBehavior
 	Ambush,
 	PlagueBurst,
 	Curse,
-	ShadowNova
+	ShadowNova,
+	ManaStorm
 }
 public class SkillDef
 {

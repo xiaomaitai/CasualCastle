@@ -242,6 +242,12 @@ public sealed class AttributePanelController
 			return;
 		}
 
+		if (DungeonCoreRules.GetLevel(building.TypeId) > 0)
+		{
+			_upgradeButton.Visible = false;
+			return;
+		}
+
 		if (HordeCoreRules.GetLevel(building.TypeId) >= HordeCoreRules.CoreLevelTypeIds.Length)
 		{
 			ShowBurrowCount(HordeCoreRules.CountBurrows(building.GetCastle().GetBuildingStates()));
@@ -267,7 +273,10 @@ public sealed class AttributePanelController
 		IBuildingRepository repo = GameManager.Get<IBuildingRepository>();
 		List<IBuildingState> states = building.GetCastle().GetBuildingStates();
 		bool isNecromancer = repo.GetFactionId(building.TypeId) == FactionDef.NecromancerId;
-		int coreLevel = isNecromancer ? RitualCircleRules.GetCoreLevel(states) : HordeCoreRules.GetCoreLevel(states);
+		bool isDungeon = repo.GetFactionId(building.TypeId) == FactionDef.DungeonId;
+		int coreLevel = isNecromancer ? RitualCircleRules.GetCoreLevel(states)
+			: isDungeon ? DungeonCoreRules.GetCoreLevel(states)
+			: HordeCoreRules.GetCoreLevel(states);
 		int burrowCount = HordeCoreRules.CountBurrows(states);
 		string blockReason = "";
 		bool upgradeBlocked = false;
@@ -295,12 +304,30 @@ public sealed class AttributePanelController
 				upgradeBlocked = true;
 			}
 		}
+		else if (isDungeon)
+		{
+			int required = DungeonCoreRules.GetRequiredCoreLevel(recipe.ResultTypeId, repo);
+			if (coreLevel < required)
+			{
+				blockReason = $"（需核心 {required} 级）";
+				upgradeBlocked = true;
+			}
+		}
 
 		_pendingUpgrade = recipe;
 		string resultName = AdapterRegistry.Resolve<BuildingSystem>().GetDisplayName(recipe.ResultTypeId);
 		_upgradeButton.Text = $"升级为{resultName}（{cost} 金币）{blockReason}";
 		_upgradeButton.Disabled = upgradeBlocked;
 		_upgradeButton.Visible = true;
+	}
+
+	private static int GetUpgradeCoreLevel(string factionId, List<IBuildingState> states)
+	{
+		if (factionId == FactionDef.NecromancerId)
+			return RitualCircleRules.GetCoreLevel(states);
+		if (factionId == FactionDef.DungeonId)
+			return DungeonCoreRules.GetCoreLevel(states);
+		return HordeCoreRules.GetCoreLevel(states);
 	}
 
 	private void ShowBurrowProgress(int current, int required)
@@ -340,9 +367,7 @@ public sealed class AttributePanelController
 		IBuildingState upgraded = useCase.TryUpgrade(
 			building, _pendingUpgrade.ResultTypeId, healthRatio,
 			AdapterRegistry.Resolve<Shop>().TrySpendGold, factory,
-			GameManager.Get<IBuildingRepository>().GetFactionId(building.TypeId) == FactionDef.NecromancerId
-				? RitualCircleRules.GetCoreLevel(states)
-				: HordeCoreRules.GetCoreLevel(states),
+			GetUpgradeCoreLevel(GameManager.Get<IBuildingRepository>().GetFactionId(building.TypeId), states),
 			HordeCoreRules.CountBurrows(states));
 		if (upgraded == null)
 			return;
@@ -423,6 +448,8 @@ public sealed class AttributePanelController
 			"Staglur" => "半人鹿",
 			"Lizard" => "蜥蜴人",
 			"Undead" => "亡灵",
+			"Demon" => "恶魔",
+			"DemonKing" => "魔王",
 			_ => race,
 		};
 	}

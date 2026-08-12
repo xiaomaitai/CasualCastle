@@ -56,6 +56,10 @@ public class SaveStorage : ISaveRepository
             )";
 		cmd.ExecuteNonQuery();
 
+		SetMeta(cmd, "faction_id", data.FactionId ?? "");
+		SetMeta(cmd, "dungeon_king_xp", data.DungeonKingXp.ToString());
+		SetMeta(cmd, "dungeon_learned_skills", string.Join(",", data.DungeonLearnedSkillIds));
+		SetMeta(cmd, "dungeon_learned_skill_levels", string.Join(",", data.DungeonLearnedSkillLevels));
 		SetMeta(cmd, "gold", data.Gold.ToString());
 		SetMeta(cmd, "current_night_index", data.CurrentNightIndex.ToString());
 		SetMeta(cmd, "pending_replay_report_id", data.PendingReplayReportId ?? "");
@@ -96,10 +100,24 @@ public class SaveStorage : ISaveRepository
 		using SqliteCommand cmd = conn.CreateCommand();
 
 		SaveData data = new SaveData { SlotIndex = slotIndex };
+		data.FactionId = GetMeta(cmd, "faction_id", FactionIds.Alliance);
 		data.Gold = int.Parse(GetMeta(cmd, "gold", "0"));
 		data.CurrentNightIndex = int.Parse(GetMeta(cmd, "current_night_index", "0"));
 		data.PendingReplayReportId = GetMeta(cmd, "pending_replay_report_id", "");
 		data.SaveTime = GetMeta(cmd, "save_time", "");
+		data.DungeonKingXp = int.Parse(GetMeta(cmd, "dungeon_king_xp", "0"));
+		string learnedSkills = GetMeta(cmd, "dungeon_learned_skills", "");
+		if (!string.IsNullOrEmpty(learnedSkills))
+			data.DungeonLearnedSkillIds.AddRange(learnedSkills.Split(","));
+		string skillLevels = GetMeta(cmd, "dungeon_learned_skill_levels", "");
+		if (!string.IsNullOrEmpty(skillLevels))
+		{
+			foreach (string part in skillLevels.Split(","))
+			{
+				if (int.TryParse(part, out int level))
+					data.DungeonLearnedSkillLevels.Add(level);
+			}
+		}
 
 		cmd.CommandText = "SELECT type_id, anchor_grid_x, anchor_grid_y, health FROM buildings";
 		using (SqliteDataReader reader = cmd.ExecuteReader())

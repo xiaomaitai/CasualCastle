@@ -15,6 +15,11 @@ public static class BattleModule
 		services.AddSingleton<ITacticalQueries, TacticalQueryService>();
 		services.AddSingleton<CorpseService>();
 		services.AddSingleton<BlackMagicService>();
+		services.AddSingleton<ComfortService>();
+		services.AddSingleton<KingExperienceService>();
+		services.AddSingleton<KingSkillSet>();
+		services.AddSingleton<TrapService>();
+		services.AddSingleton<ManaService>();
 		return services;
 	}
 }

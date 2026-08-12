@@ -52,6 +52,22 @@ public static class UnitDisplayName
 			"Zombie" => "僵尸",
 			"SkeletonWarrior" => "骷髅战士",
 			"PlagueZombie" => "瘟疫僵尸",
+			"Imp" => "小恶魔",
+			"HellHound" => "地狱犬",
+			"AbyssDemon" => "深渊恶魔",
+			"Succubus" => "魅魔",
+			"DemonMaid" => "恶魔女仆",
+			"Nurgling" => "纳垢虫",
+			"PlagueWarrior" => "纳垢战士",
+			"DemonKing" => "魔王",
+			"DoomGuard" => "毁灭守卫",
+			"DemonScholar" => "恶魔学者",
+			"SuccubusMaid" => "魅魔女仆",
+			"PlagueBehemoth" => "瘟疫巨兽",
+			"Bloodletter" => "恐虐魔卫",
+			"Bard" => "吟游诗人",
+			"PlagueDoctor" => "瘟疫医师",
+
 			_ => typeId,
 		};
 	}

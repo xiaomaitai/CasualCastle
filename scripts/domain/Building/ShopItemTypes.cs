@@ -4,4 +4,5 @@ namespace CasualCastle.Domain.Building;
 public static class ShopItemTypes
 {
 	public const string DarkMagicBook = "dark_magic_book";
+	public const string DungeonCrystal = "dungeon_crystal";
 }

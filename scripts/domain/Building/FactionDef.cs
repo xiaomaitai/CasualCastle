@@ -7,6 +7,7 @@ public class FactionDef
 {
 	public const string HordeId = FactionIds.Horde;
 	public const string NecromancerId = FactionIds.Necromancer;
+	public const string DungeonId = FactionIds.Dungeon;
 
 	public string Id { get; init; }
 	public string DisplayName { get; init; }

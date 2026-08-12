@@ -15,6 +15,9 @@ public class SaveData
 	public string SaveTime { get; set; } = "";
 	public int RitualStudyCompletionCount { get; set; }
 	public List<string> LearnedRitualIds { get; set; } = new();
+	public int DungeonKingXp { get; set; }
+	public List<string> DungeonLearnedSkillIds { get; set; } = new();
+	public List<int> DungeonLearnedSkillLevels { get; set; } = new();
 }
 
 public class BuildingSaveEntry

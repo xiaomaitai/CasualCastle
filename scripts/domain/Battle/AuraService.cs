@@ -37,7 +37,7 @@ public class AuraService
 
 	private static bool IsAuraEligibleRace(string race)
 	{
-		return HordeRaces.IsHordeRace(race) || UndeadRules.IsUndead(race);
+		return HordeRaces.IsHordeRace(race) || UndeadRules.IsUndead(race) || DemonKingRules.IsDemonRace(race);
 	}
 
 	private static bool IsReceiverEligible(string receiverRace, string auraRace)
@@ -46,12 +46,15 @@ public class AuraService
 			return HordeRaces.IsHordeRace(auraRace);
 		if (UndeadRules.IsUndead(receiverRace))
 			return UndeadRules.IsUndead(auraRace);
+		if (DemonKingRules.IsDemonRace(receiverRace))
+			return DemonKingRules.IsDemonRace(auraRace);
 		return false;
 	}
 
 	private static bool IsWithinRange(IUnitHandle unit, IUnitHandle other, float range)
 	{
-		float radius = range > 0f ? range : GameRules.AuraRangeRadius;
+		float baseRadius = range > 0f ? range : GameRules.AuraRangeRadius;
+		float radius = baseRadius * DungeonFactionBuffs.AuraRangeMultiplier;
 		float dx = unit.GameX - other.GameX;
 		float dy = unit.GameY - other.GameY;
 		return dx * dx + dy * dy <= radius * radius;
