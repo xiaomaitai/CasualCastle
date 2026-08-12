@@ -262,6 +262,28 @@ INSERT INTO "asset_gen_tasks" VALUES(184,'fac18eb10dee4c74b44515bb54e49485','com
 INSERT INTO "asset_gen_tasks" VALUES(186,'c1a448680c1f4c34b4d45064e4db3ad3','completed','2D cartoon fantasy game skill icon, a dark purple cursed eye with wispy tendrils spreading to the edges, shadow curse, swirling dark mist filling the entire canvas, powerful and aggressive visual impact, exaggerated shapes, bold silhouette, thick black outline, simple but striking composition, vivid colors, high contrast, stylized fantasy RPG game icon, polished cartoon game art, centered composition, frameless full-bleed icon, artwork extends edge to edge, no border, no frame, full-bleed background, no white margin, readable at very small size','frame, border, skill icon frame, gold frame, ornate frame, badge, medallion, white background, empty background, character, people, text, lettering, logo, watermark, scenery, background objects',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/569a9d216a52457fb36280f3048482c2/d8b6a0154a3c51cbae2438dfb46105cb276c7964daeb629e2c6c5417c8e02897.png','assets/art/skills\shadow_curse_186.png','2026-08-11T17:45:07Z','2026-08-11T17:45:46Z',NULL);
 INSERT INTO "asset_gen_tasks" VALUES(187,'0c194e1e063e42fbab79f1e26ef22f0c','completed','2D cartoon fantasy game skill icon, a giant burning war banner stretched across the whole frame, skull emblem, undead zeal, dark purple flames engulfing the background from edge to edge, powerful and aggressive visual impact, exaggerated shapes, bold silhouette, thick black outline, simple but striking composition, vivid colors, high contrast, stylized fantasy RPG game icon, polished cartoon game art, centered composition, frameless full-bleed icon, artwork extends edge to edge, no border, no frame, full-bleed background, no white margin, readable at very small size','frame, border, skill icon frame, gold frame, ornate frame, badge, medallion, white background, empty background, character, people, text, lettering, logo, watermark, scenery, background objects',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/569a9d216a52457fb36280f3048482c2/e2760c914ece8b183dc0af178eb74d416f568c26c5d957e82b872dc657ca4fc1.png','assets/art/skills\fanatical_aura_187.png','2026-08-11T17:46:19Z','2026-08-11T17:47:37Z',NULL);
 INSERT INTO "asset_gen_tasks" VALUES(188,'cab87f1328214360a9e2f6a735b5f1c9','completed','2D cartoon fantasy game skill icon, a round heraldic emblem divided into four quarters, each quarter showing one adventurer face, an elf, a dwarf, a halfling and a dragonborn, colorful group emblem filling the entire canvas, powerful and aggressive visual impact, exaggerated shapes, bold silhouette, thick black outline, simple but striking composition, vivid colors, high contrast, stylized fantasy RPG game icon, polished cartoon game art, centered composition, frameless full-bleed icon, artwork extends edge to edge, no border, no frame, full-bleed background, no white margin, readable at very small size','frame, border, skill icon frame, gold frame, ornate frame, badge, medallion, white background, empty background, text, lettering, logo, watermark',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/569a9d216a52457fb36280f3048482c2/511be089a22cda0a9fbd57289cec97a0e2080470f11d181280acbcc39c921402.png','assets/art/skills\motley_crew_188.png','2026-08-11T17:46:59Z','2026-08-11T17:47:38Z',NULL);
+CREATE TABLE bgm_defs (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    style TEXT NOT NULL CHECK(style IN ('soothing','stirring')),
+    pool TEXT NOT NULL CHECK(pool IN ('title','alliance_day','alliance_night','horde_day','horde_night','result')),
+    uid TEXT NOT NULL
+);
+INSERT INTO "bgm_defs" VALUES(1,'Menu Music (awesomeness)','soothing','title','uid://c41mt646xpbu8');
+INSERT INTO "bgm_defs" VALUES(2,'Medieval: The Old Tower Inn','soothing','title','uid://cqudr4obokto5');
+INSERT INTO "bgm_defs" VALUES(3,'Shrine','soothing','title','uid://d2syw8xxore53');
+INSERT INTO "bgm_defs" VALUES(4,'Town Theme RPG','soothing','alliance_day','uid://chsar2dmmfc0q');
+INSERT INTO "bgm_defs" VALUES(5,'Happy Adventure (Loop)','stirring','alliance_day','uid://ct8t60wlvm2xd');
+INSERT INTO "bgm_defs" VALUES(6,'Medieval: Minstrel Dance','stirring','alliance_day','uid://cfxcj21ycb0ey');
+INSERT INTO "bgm_defs" VALUES(7,'Mysterious Ambience (song21)','soothing','alliance_night','uid://dklss74xru4s8');
+INSERT INTO "bgm_defs" VALUES(8,'Night Prowler','stirring','alliance_night','uid://bdfcrdm3f2udh');
+INSERT INTO "bgm_defs" VALUES(9,'Battle Theme A','stirring','horde_day','uid://du5tye1wi2s4q');
+INSERT INTO "bgm_defs" VALUES(10,'Fast Fight / Battle Music','stirring','horde_day','uid://cb5eboghb1idq');
+INSERT INTO "bgm_defs" VALUES(11,'Epic Boss Battle (Juhani Junkala)','stirring','horde_day','uid://b0ic72y4tn3lc');
+INSERT INTO "bgm_defs" VALUES(12,'Dark Forest Theme','soothing','horde_night','uid://sq276j057xfl');
+INSERT INTO "bgm_defs" VALUES(13,'Battle RPG Theme (CleytonRX)','stirring','horde_night','uid://bbtxpoo50bmyd');
+INSERT INTO "bgm_defs" VALUES(14,'Determined Pursuit (Epic Orchestra Loop)','stirring','result','uid://6xhi82710m8k');
+INSERT INTO "bgm_defs" VALUES(15,'Lament for a Warrior''s Soul','soothing','result','uid://deysgmsfuub6n');
 CREATE TABLE building_defs (
     type_id           TEXT PRIMARY KEY,
     display_name      TEXT    NOT NULL,

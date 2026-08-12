@@ -1,5 +1,6 @@
 // 音频管理器：统一接管 BGM 曲目池轮播、SFX 事件播放与 Music/SFX 总线音量。
 using CasualCastle.Adapters.Godot;
+using CasualCastle.Adapters.Persistence;
 using CasualCastle.Domain.Building;
 using CasualCastle.Domain.Shared;
 using Godot;
@@ -12,12 +13,6 @@ public partial class AudioManager : Node
 
 	private const string MusicBusName = "Music";
 	private const string SfxBusName = "SFX";
-	private const string TitlePool = "title";
-	private const string AllianceDayPool = "alliance_day";
-	private const string AllianceNightPool = "alliance_night";
-	private const string HordeDayPool = "horde_day";
-	private const string HordeNightPool = "horde_night";
-	private const string ResultPool = "result";
 	private const float BgmBaseVolumeDb = -8f;
 	private const float SfxBaseVolumeDb = -5f;
 	private const float MuteVolumeDb = -60f;
@@ -26,54 +21,7 @@ public partial class AudioManager : Node
 	private const double MaxGapSeconds = 6.0;
 	private const ulong SfxDedupeMs = 50;
 
-	private static readonly string[] TitleTracks =
-	{
-		"res://assets/audio/bgm/bgm_title_1.ogg",
-		"res://assets/audio/bgm/bgm_title_2.ogg",
-		"res://assets/audio/bgm/bgm_title_3.ogg",
-	};
-
-	private static readonly string[] AllianceDayTracks =
-	{
-		"res://assets/audio/bgm/bgm_alliance_day_1.ogg",
-		"res://assets/audio/bgm/bgm_alliance_day_2.ogg",
-		"res://assets/audio/bgm/bgm_alliance_day_3.ogg",
-	};
-
-	private static readonly string[] AllianceNightTracks =
-	{
-		"res://assets/audio/bgm/bgm_alliance_night_1.ogg",
-		"res://assets/audio/bgm/bgm_alliance_night_2.ogg",
-	};
-
-	private static readonly string[] HordeDayTracks =
-	{
-		"res://assets/audio/bgm/bgm_horde_day_1.ogg",
-		"res://assets/audio/bgm/bgm_horde_day_2.ogg",
-		"res://assets/audio/bgm/bgm_horde_day_3.ogg",
-	};
-
-	private static readonly string[] HordeNightTracks =
-	{
-		"res://assets/audio/bgm/bgm_horde_night_1.ogg",
-		"res://assets/audio/bgm/bgm_horde_night_2.ogg",
-	};
-
-	private static readonly string[] ResultTracks =
-	{
-		"res://assets/audio/bgm/bgm_result_1.ogg",
-		"res://assets/audio/bgm/bgm_result_2.ogg",
-	};
-
-	private readonly Dictionary<string, string[]> _bgmPools = new()
-	{
-		[TitlePool] = TitleTracks,
-		[AllianceDayPool] = AllianceDayTracks,
-		[AllianceNightPool] = AllianceNightTracks,
-		[HordeDayPool] = HordeDayTracks,
-		[HordeNightPool] = HordeNightTracks,
-		[ResultPool] = ResultTracks,
-	};
+	private readonly Dictionary<string, List<BgmDef>> _bgmPoolDefs = new();
 
 	private readonly Dictionary<string, AudioStream> _bgmStreams = new();
 	private readonly Dictionary<string, AudioStream> _sfxStreams = new();
@@ -97,6 +45,8 @@ public partial class AudioManager : Node
 		set => _shuffleEnabled = value;
 	}
 
+	public BgmDef CurrentBgm { get; private set; }
+
 	public override void _Ready()
 	{
 		Instance = this;
@@ -114,6 +64,7 @@ public partial class AudioManager : Node
 			_gameManager.GameStateChanged += OnGameStateChanged;
 		}
 
+		BuildBgmPools();
 		ApplyVolumesFromSettings();
 	}
 
@@ -134,7 +85,7 @@ public partial class AudioManager : Node
 
 	public void PlayTitleMusic()
 	{
-		PlayPool(TitlePool);
+		PlayPool(BgmPoolIds.Title);
 	}
 
 	public void UpdateGameplayMusic()
@@ -145,14 +96,14 @@ public partial class AudioManager : Node
 		bool isHorde = _gameManager.SelectedFaction == FactionDef.HordeId;
 		bool isNightMusic = _gameManager.IsNightDisplayed;
 		string poolKey = isHorde
-			? isNightMusic ? HordeNightPool : HordeDayPool
-			: isNightMusic ? AllianceNightPool : AllianceDayPool;
+			? isNightMusic ? BgmPoolIds.HordeNight : BgmPoolIds.HordeDay
+			: isNightMusic ? BgmPoolIds.AllianceNight : BgmPoolIds.AllianceDay;
 		PlayPool(poolKey);
 	}
 
 	public void PlayResultMusic()
 	{
-		PlayPool(ResultPool);
+		PlayPool(BgmPoolIds.Result);
 	}
 
 	public void SetShuffleEnabled(bool enabled)
@@ -270,7 +221,11 @@ public partial class AudioManager : Node
 
 	private int PickNextTrackIndex(string poolKey)
 	{
-		int count = _bgmPools[poolKey].Length;
+		List<BgmDef> tracks = SelectPoolTracks(poolKey);
+		int count = tracks.Count;
+		if (count == 0)
+			return 0;
+
 		if (!_shuffleEnabled)
 			return (_nextTrackIndex + 1) % count;
 
@@ -282,13 +237,47 @@ public partial class AudioManager : Node
 
 	private AudioStream LoadBgmStream(string poolKey, int index)
 	{
-		string path = _bgmPools[poolKey][index];
-		if (_bgmStreams.TryGetValue(path, out AudioStream cached))
-			return cached;
+		List<BgmDef> tracks = SelectPoolTracks(poolKey);
+		if (index < 0 || index >= tracks.Count)
+			return null;
 
-		AudioStream stream = GD.Load<AudioStream>(path);
-		_bgmStreams[path] = stream;
+		BgmDef def = tracks[index];
+		if (_bgmStreams.TryGetValue(def.Uid, out AudioStream cached))
+		{
+			CurrentBgm = def;
+			return cached;
+		}
+
+		AudioStream stream = GD.Load<AudioStream>(def.Uid);
+		if (stream == null)
+			return null;
+
+		_bgmStreams[def.Uid] = stream;
+		CurrentBgm = def;
 		return stream;
+	}
+
+	private List<BgmDef> SelectPoolTracks(string poolKey)
+	{
+		if (!_bgmPoolDefs.TryGetValue(poolKey, out List<BgmDef> poolDefs))
+			return new List<BgmDef>();
+
+		int nightIndex = _gameManager == null ? 0 : _gameManager.CurrentNightIndex;
+		return BgmSelectionRules.SelectTracks(poolDefs, poolKey, nightIndex);
+	}
+
+	private void BuildBgmPools()
+	{
+		foreach (BgmDef def in GameDataLoader.BgmCatalog)
+		{
+			if (!_bgmPoolDefs.TryGetValue(def.Pool, out List<BgmDef> pool))
+			{
+				pool = new List<BgmDef>();
+				_bgmPoolDefs[def.Pool] = pool;
+			}
+
+			pool.Add(def);
+		}
 	}
 
 	private AudioStream LoadSfxStream(string eventName)

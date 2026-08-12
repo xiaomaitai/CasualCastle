@@ -47,6 +47,37 @@
 - 暂停/商店/放置/设置不换池，跟随当前主状态
 - 新增派系（亡灵/地下城等）时，为其新增白天/夜晚曲池并登记清单
 
+### 3.4 BGM 编号、风格与入库
+
+BGM 统一编号 1–15（与 3.2 的 B1–B15 对应），编号、曲名、风格、曲目池与 Godot 资源 uid 登记在 `assets/data/config.db` 的 `bgm_defs` 表（uid 取自各 `.ogg` 的 `.import` 文件，与建筑 `texture_uid` 同机制）；运行时由 `GameDataLoader.BgmCatalog` 加载，`AudioManager` 按 uid 加载曲目并轮播，不硬编码资源路径。
+
+| 编号 | 文件 | 曲名 | 风格 |
+|------|------|------|------|
+| 1 | bgm_title_1.ogg | Menu Music (awesomeness) | 舒缓 |
+| 2 | bgm_title_2.ogg | Medieval: The Old Tower Inn | 舒缓 |
+| 3 | bgm_title_3.ogg | Shrine | 舒缓 |
+| 4 | bgm_alliance_day_1.ogg | Town Theme RPG | 舒缓 |
+| 5 | bgm_alliance_day_2.ogg | Happy Adventure (Loop) | 激昂 |
+| 6 | bgm_alliance_day_3.ogg | Medieval: Minstrel Dance | 激昂 |
+| 7 | bgm_alliance_night_1.ogg | Mysterious Ambience (song21) | 舒缓 |
+| 8 | bgm_alliance_night_2.ogg | Night Prowler | 激昂 |
+| 9 | bgm_horde_day_1.ogg | Battle Theme A | 激昂 |
+| 10 | bgm_horde_day_2.ogg | Fast Fight / Battle Music | 激昂 |
+| 11 | bgm_horde_day_3.ogg | Epic Boss Battle (Juhani Junkala) | 激昂 |
+| 12 | bgm_horde_night_1.ogg | Dark Forest Theme | 舒缓 |
+| 13 | bgm_horde_night_2.ogg | Battle RPG Theme (CleytonRX) | 激昂 |
+| 14 | bgm_result_1.ogg | Determined Pursuit (Epic Orchestra Loop) | 激昂 |
+| 15 | bgm_result_2.ogg | Lament for a Warrior's Soul | 舒缓 |
+
+天规则（仅作用于主战场四池：联盟/部落 × 白天/夜晚）：
+
+- 第一天（`CurrentNightIndex = 0`）：只播舒缓曲目；池内无舒缓曲目时回退整池
+- 第二天起（`CurrentNightIndex ≥ 1`）：只播激昂曲目；池内无激昂曲目时回退整池
+- 标题池与结算池不受天数影响，全部曲目照常轮播
+- 规则实现见 `scripts/domain/Shared/BgmSelectionRules.cs`（含单元测试）
+
+开发者模式（`DisplaySettingsManager.DevModeEnabled`）下，标题与主战场左上角小字显示当前曲目，格式 `BGM {编号} · {曲名}`。
+
 ## 四、SFX 需求（25 个事件）
 
 | 编号 | 事件名 | 归属 | 触发点 | 用途 |

@@ -1,35 +1,18 @@
 // 音频冒烟测试：无头验证 BGM/SFX 资源、音频总线与 AudioManager 运行路径。
 using CasualCastle.Adapters.Godot;
+using CasualCastle.Adapters.Persistence;
+using CasualCastle.Domain.Shared;
 using Godot;
 using System.Collections.Generic;
 
 public partial class AudioSmoke : Node
 {
-	private const string BgmRoot = "res://assets/audio/bgm/";
 	private const string SfxRoot = "res://assets/audio/sfx/";
 	private const string MusicBusName = "Music";
 	private const string SfxBusName = "SFX";
 	private const float CheckVolume = 0.5f;
 	private const float VolumeTolerance = 0.01f;
 
-	private static readonly string[] BgmFiles =
-	{
-		"bgm_title_1.ogg",
-		"bgm_title_2.ogg",
-		"bgm_title_3.ogg",
-		"bgm_alliance_day_1.ogg",
-		"bgm_alliance_day_2.ogg",
-		"bgm_alliance_day_3.ogg",
-		"bgm_alliance_night_1.ogg",
-		"bgm_alliance_night_2.ogg",
-		"bgm_horde_day_1.ogg",
-		"bgm_horde_day_2.ogg",
-		"bgm_horde_day_3.ogg",
-		"bgm_horde_night_1.ogg",
-		"bgm_horde_night_2.ogg",
-		"bgm_result_1.ogg",
-		"bgm_result_2.ogg",
-	};
 
 	private static readonly string[] SfxEventNames =
 	{
@@ -87,10 +70,10 @@ public partial class AudioSmoke : Node
 
 	private void CheckResources()
 	{
-		foreach (string file in BgmFiles)
+		foreach (BgmDef def in GameDataLoader.BgmCatalog)
 		{
-			if (GD.Load<AudioStream>(BgmRoot + file) == null)
-				_failures.Add($"BGM 资源缺失 {file}");
+			if (GD.Load<AudioStream>(def.Uid) == null)
+				_failures.Add($"BGM 资源缺失 {def.Name}（{def.Uid}）");
 		}
 
 		foreach (string eventName in SfxEventNames)

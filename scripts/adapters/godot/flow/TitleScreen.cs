@@ -1,5 +1,6 @@
 // 标题场景：开始、继续、设置与战报选择
 using CasualCastle.Adapters.Godot;
+using CasualCastle.Adapters.Godot.Dev;
 using CasualCastle.Domain.Building;
 using CasualCastle.Domain.History;
 using CasualCastle.Domain.Shared;
@@ -15,6 +16,7 @@ public partial class TitleScreen : Control
 	private const int NoReportItemId = 1;
 
 	private SettingsUiController _settingsUi;
+	private BgmInfoController _bgmInfo;
 	private Button _startButton;
 	private Button _continueButton;
 	private Button _settingsButton;
@@ -60,6 +62,12 @@ public partial class TitleScreen : Control
 		_continueButton.Disabled = !saveRepo.HasSave(0);
 	UiSfx.Bind(this);
 	AudioManager.Instance?.PlayTitleMusic();
+	_bgmInfo = new BgmInfoController(this);
+	}
+
+	public override void _Process(double _)
+	{
+		_bgmInfo?.Process();
 	}
 
 	public override void _ExitTree()

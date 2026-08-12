@@ -88,7 +88,7 @@
 
 | 目录 | 职责 | 关键文件 |
 |---|---|---|
-| `domain/Shared/` | 坐标、常量、阶段状态机、存档模型 | `GameVector2.cs`、`GameCoordinateRules.cs`、`GameRules.cs`、`BuildingTypeIds.cs`、`FactionIds.cs`、`MatchPhaseMachine.cs`、`SaveModels.cs` |
+| `domain/Shared/` | 坐标、常量、阶段状态机、存档模型、BGM 目录与选择规则 | `GameVector2.cs`、`GameCoordinateRules.cs`、`GameRules.cs`、`BuildingTypeIds.cs`、`FactionIds.cs`、`MatchPhaseMachine.cs`、`SaveModels.cs`、`BgmDef.cs`、`BgmSelectionRules.cs` |
 | `domain/Building/` | 建筑、卡牌、手牌、商店、组合、升级、仪式、邻接、科技树 | `BuildingData.cs`、`OccupancyGrid.cs`、`CardRules.cs`、`Hand.cs`、`ShopRules.cs`、`CombineService.cs`、`UpgradeService.cs`、`RitualService.cs`、`AdjacencyService.cs`、`TechTreeNode.cs` |
 | `domain/Battle/` | 战斗、单位、技能、光环、隐身、尸体、RVO 推开、黑魔法 | `CombatRules.cs`、`Unit.cs`、`UnitState.cs`、`UnitStats.cs`、`SkillService.cs`、`AuraService.cs`、`StealthService.cs`、`CorpseService.cs`、`RvoService.cs`、`BlackMagicService.cs` |
 | `domain/History/` | 战报、回放、镜像复刻 | `BattleReportService.cs`、`ReportBuilder.cs`、`ReplayService.cs`、`MirrorRules.cs` |
@@ -165,9 +165,9 @@
 | `assets/art/tiles/` | 地块贴图 `cell_dirt_01..04`、`kenney_medieval_rts` 图集 |
 | `assets/art/placeholders/` | 占位图 `test_image.png` |
 | `assets/art/references/` | 美术参考图 |
-| `assets/audio/bgm/` | BGM：`bgm_{派系}_{day|night}_{n}.ogg`、`bgm_title_*`、`bgm_result_*` |
+| `assets/audio/bgm/` | BGM：`bgm_{派系}_{day|night}_{n}.ogg`、`bgm_title_*`、`bgm_result_*`；编号/曲名/风格（舒缓/激昂）/Godot 资源 uid 入库 `bgm_defs`，按 uid 引用，舒缓曲目仅第一天 |
 | `assets/audio/sfx/` | SFX：`sfx_{事件}.ogg` |
-| `assets/data/config.db` | 权威游戏数据（SQLite：建筑、单位、技能、商店、科技树、配方、物品）；`config_db_dump.sql` 由 pre-commit 自动生成，勿手改 |
+| `assets/data/config.db` | 权威游戏数据（SQLite：建筑、单位、技能、商店、科技树、配方、物品、BGM 目录 `bgm_defs`）；`config_db_dump.sql` 由 pre-commit 自动生成，勿手改 |
 | `assets/shaders/` | 建筑工作/邻接脉冲 shader |
 | `assets/dev/` | shader 预览场景 |
 

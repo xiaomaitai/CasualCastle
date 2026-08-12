@@ -1,22 +1,22 @@
 CasualCastle BGM — 素材来源与许可（v0.6 E5）
 所有曲目均来自 OpenGameArt，许可为 CC0（Public Domain Dedication），可自由商用、修改与再分发，无需署名。
 
-| 文件 | 原曲名 | 作者 | 来源 | 许可 |
-|------|--------|------|------|------|
-| bgm_title_1.ogg | Menu Music (awesomeness) | Tempel | https://opengameart.org/content/menu-music | CC0 |
-| bgm_title_2.ogg | Medieval: The Old Tower Inn | AntumDeluge | https://opengameart.org/content/medieval-the-old-tower-inn | CC0 |
-| bgm_title_3.ogg | Shrine | vestrel00 | https://opengameart.org/content/shrine | CC0 |
-| bgm_alliance_day_1.ogg | Town Theme RPG | Bonsaiheldin | https://opengameart.org/content/town-theme-rpg | CC0 |
-| bgm_alliance_day_2.ogg | Happy Adventure (Loop) | fluffrabbit | https://opengameart.org/content/happy-adventure-loop | CC0 |
-| bgm_alliance_day_3.ogg | Medieval: Minstrel Dance | Ivan Voirol | https://opengameart.org/content/medieval-minstrel-dance | CC0 |
-| bgm_alliance_night_1.ogg | Mysterious Ambience (song21) | Yword | https://opengameart.org/content/mysterious-ambience-song21 | CC0（多许可之一） |
-| bgm_alliance_night_2.ogg | Night Prowler | Snabisch | https://opengameart.org/content/night-prowler | CC0 |
-| bgm_horde_day_1.ogg | Battle Theme A | JaidynReiman | https://opengameart.org/content/battle-theme-a | CC0 |
-| bgm_horde_day_2.ogg | Fast fight / battle music | Bonsaiheldin | https://opengameart.org/content/fast-fight-battle-music | CC0 |
-| bgm_horde_day_3.ogg | Epic Boss Battle (Juhani Junkala) | KaadmY 上传 | https://opengameart.org/content/boss-battle-music | CC0 |
-| bgm_horde_night_1.ogg | Dark Forest Theme | josepharaoh99 | https://opengameart.org/content/dark-forest-theme | CC0 |
-| bgm_horde_night_2.ogg | Battle RPG Theme (CleytonRX) | Ge0 上传 | https://opengameart.org/content/boss-battle-theme | CC0 |
-| bgm_result_1.ogg | Determined Pursuit (epic orchestra loop) | Tozan | https://opengameart.org/content/determined-pursuit-epic-orchestra-loop | CC0 |
-| bgm_result_2.ogg | Lament for a Warrior's Soul | Snabisch | https://opengameart.org/content/fantasy-lament-for-a-warriors-soul | CC0 |
+| 编号 | 文件 | 原曲名 | 作者 | 来源 | 许可 |
+|------|------|--------|------|------|------|
+| 1 | bgm_title_1.ogg | Menu Music (awesomeness) | Tempel | https://opengameart.org/content/menu-music | CC0 |
+| 2 | bgm_title_2.ogg | Medieval: The Old Tower Inn | AntumDeluge | https://opengameart.org/content/medieval-the-old-tower-inn | CC0 |
+| 3 | bgm_title_3.ogg | Shrine | vestrel00 | https://opengameart.org/content/shrine | CC0 |
+| 4 | bgm_alliance_day_1.ogg | Town Theme RPG | Bonsaiheldin | https://opengameart.org/content/town-theme-rpg | CC0 |
+| 5 | bgm_alliance_day_2.ogg | Happy Adventure (Loop) | fluffrabbit | https://opengameart.org/content/happy-adventure-loop | CC0 |
+| 6 | bgm_alliance_day_3.ogg | Medieval: Minstrel Dance | Ivan Voirol | https://opengameart.org/content/medieval-minstrel-dance | CC0 |
+| 7 | bgm_alliance_night_1.ogg | Mysterious Ambience (song21) | Yword | https://opengameart.org/content/mysterious-ambience-song21 | CC0（多许可之一） |
+| 8 | bgm_alliance_night_2.ogg | Night Prowler | Snabisch | https://opengameart.org/content/night-prowler | CC0 |
+| 9 | bgm_horde_day_1.ogg | Battle Theme A | JaidynReiman | https://opengameart.org/content/battle-theme-a | CC0 |
+| 10 | bgm_horde_day_2.ogg | Fast fight / battle music | Bonsaiheldin | https://opengameart.org/content/fast-fight-battle-music | CC0 |
+| 11 | bgm_horde_day_3.ogg | Epic Boss Battle (Juhani Junkala) | KaadmY 上传 | https://opengameart.org/content/boss-battle-music | CC0 |
+| 12 | bgm_horde_night_1.ogg | Dark Forest Theme | josepharaoh99 | https://opengameart.org/content/dark-forest-theme | CC0 |
+| 13 | bgm_horde_night_2.ogg | Battle RPG Theme (CleytonRX) | Ge0 上传 | https://opengameart.org/content/boss-battle-theme | CC0 |
+| 14 | bgm_result_1.ogg | Determined Pursuit (epic orchestra loop) | Tozan | https://opengameart.org/content/determined-pursuit-epic-orchestra-loop | CC0 |
+| 15 | bgm_result_2.ogg | Lament for a Warrior's Soul | Snabisch | https://opengameart.org/content/fantasy-lament-for-a-warriors-soul | CC0 |
 
 说明：源文件经 ffmpeg 转码为 44.1kHz 立体声 OGG Vorbis（q4），未做其他改动。

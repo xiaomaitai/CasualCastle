@@ -1,6 +1,7 @@
 // 配置数据加载：伤害矩阵、商店目录、组合配方与物品属性
 using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
+using CasualCastle.Domain.Shared;
 using Microsoft.Data.Sqlite;
 using System.Collections.Generic;
 using System.Text.Json;
@@ -16,6 +17,7 @@ public static class GameDataLoader
 	public static DamageMatrix DamageMatrix { get; private set; }
 	public static CombineRules CombineRules { get; private set; }
 	public static List<CardData> ShopCatalog { get; private set; }
+	public static List<BgmDef> BgmCatalog { get; private set; }
 
 	public static void Load()
 	{
@@ -27,6 +29,7 @@ public static class GameDataLoader
 		DamageMatrix = LoadDamageMatrix(cmd);
 		ShopCatalog = LoadShopCatalog(cmd);
 		CombineRules = LoadCombineRecipes(cmd);
+		BgmCatalog = LoadBgmCatalog(cmd);
 	}
 
 	private static DamageMatrix LoadDamageMatrix(SqliteCommand cmd)
@@ -119,5 +122,25 @@ public static class GameDataLoader
 		CombineRules rules = new CombineRules();
 		rules.LoadRecipes(recipes);
 		return rules;
+	}
+
+	private static List<BgmDef> LoadBgmCatalog(SqliteCommand cmd)
+	{
+		cmd.CommandText = "SELECT id, name, style, pool, uid FROM bgm_defs ORDER BY id";
+		using SqliteDataReader reader = cmd.ExecuteReader();
+		List<BgmDef> catalog = new();
+		while (reader.Read())
+		{
+			catalog.Add(new BgmDef
+			{
+				Id = reader.GetInt32(0),
+				Name = reader.GetString(1),
+				Style = reader.GetString(2) == "stirring" ? BgmStyle.Stirring : BgmStyle.Soothing,
+				Pool = reader.GetString(3),
+				Uid = reader.GetString(4),
+			});
+		}
+
+		return catalog;
 	}
 }

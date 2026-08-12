@@ -21,6 +21,7 @@ public partial class UIManager : Node2D
 	private PauseMenuUiController _pauseMenuUi;
 	private CheatMenuUiController _cheatMenu;
 	private RuntimeInfoPanelController _runtimeInfoPanel;
+	private BgmInfoController _bgmInfo;
 	private UnitInfoUiController _unitInfoUi;
 	private UnitSelectionController _unitSelection;
 	private SpellBarUiController _spellBarUi;
@@ -75,6 +76,7 @@ public partial class UIManager : Node2D
 	{
 		_hudUi?.Process();
 		_runtimeInfoPanel?.Process();
+		_bgmInfo?.Process();
 		_shopUi?.Process();
 		_buildingManageUi?.Process();
 		_buildingSell?.Process();
@@ -252,6 +254,7 @@ public partial class UIManager : Node2D
 		_combineProhibitUi = new CombineProhibitUiController(this, uiRoot, toolGroup);
 		_cheatMenu = new CheatMenuUiController(uiRoot);
 		_runtimeInfoPanel = new RuntimeInfoPanelController(uiRoot);
+		_bgmInfo = new BgmInfoController(uiRoot);
 		_settingsUi = new SettingsUiController(uiRoot.GetNode<Control>("SettingsPanel"));
 		_pauseMenuUi = new PauseMenuUiController(uiRoot, GoToTitle, OpenSettings);
 		_gameOverUi = new GameOverUiController(uiRoot, GoToTitle);
