@@ -118,6 +118,14 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	public float RitualTotalSeconds => _activeRitual?.TotalSeconds ?? 0f;
 
+	public bool HasProductionCycle => _workRequired > 0f;
+
+	public float ProductionProgress => _workRequired > 0f ? Mathf.Clamp(_workDone / _workRequired, 0f, 1f) : 0f;
+
+	public float EffectiveProductionRate => _productionRate * _workSpeedMultiplier * DungeonFactionBuffs.ProductionSpeedMultiplier;
+
+	public float ProductionSecondsRemaining => EffectiveProductionRate > 0f ? (_workRequired - _workDone) / EffectiveProductionRate : 0f;
+
 	public bool ContributesToAdjacency => !IsDestroyed;
 
 	public bool IsDamaged => Health < MaxHealth;

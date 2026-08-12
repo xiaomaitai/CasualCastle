@@ -248,7 +248,7 @@ public partial class UIManager : Node2D
 		_tavernParty = GameManager.Get<TavernPartyService>();
 		_tavernBubble = new TavernBubble();
 		GetParent()?.GetNodeOrNull<Node2D>("Battlefield")?.AddChild(_tavernBubble);
-		_attributePanel = new AttributePanelController(this, uiRoot, _unitSelection);
+		_attributePanel = new AttributePanelController(uiRoot, _unitSelection);
 		ButtonGroup toolGroup = new ButtonGroup();
 		_buildingManageUi = new BuildingManageUiController(this, uiRoot, toolGroup);
 		_combineProhibitUi = new CombineProhibitUiController(this, uiRoot, toolGroup);

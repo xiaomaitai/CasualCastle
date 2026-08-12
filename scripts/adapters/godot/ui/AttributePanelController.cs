@@ -1,9 +1,10 @@
-// 单位属性面板：生命条、抗性、攻击、护甲、费用与技能展示
+// 左下角属性面板：展示单位与建筑的核心属性和实时进度
 using CasualCastle.Adapters.Persistence;
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
 using Godot;
+using System;
 using System.Collections.Generic;
 
 public sealed class AttributePanelController
@@ -11,207 +12,149 @@ public sealed class AttributePanelController
 	private const string PlaceholderTexture = "res://assets/art/placeholders/test_image.png";
 	private const string HolyElementId = "holy";
 	private const float NeutralMultiplier = 1f;
-	private const float SectionIconX = 14f;
-	private const float ResistanceIconY = 98f;
-	private const float AttackIconY = 120f;
-	private const float ArmorIconY = 142f;
-	private const float CostIconY = 164f;
-	private const string NoResistanceText = "无";
-	private const string NoResistanceTooltip = "无有效抗性";
+	private const float StatRowHeight = 20f;
+	private const float StatColumnWidth = 198f;
 	private const string NoBonusTooltip = "无特殊修正";
-	private static readonly Color HealthFillColor = new(0.24f, 0.72f, 0.34f, 1f);
 
 	private readonly Panel _panel;
 	private readonly TextureRect _portraitRect;
 	private readonly Label _nameLabel;
 	private readonly Label _subLabel;
+	private readonly Label _badgeLabel;
 	private readonly ProgressBar _healthBar;
 	private readonly Label _healthValueLabel;
-	private readonly Label _statsLabel;
-	private readonly StatIconView _resistanceIcon;
-	private readonly Label _resistanceValueLabel;
-	private readonly StatIconView _attackIcon;
-	private readonly Label _attackValueLabel;
-	private readonly Label _attackTypeLabel;
-	private readonly StatIconView _armorIcon;
-	private readonly Label _armorValueLabel;
-	private readonly Label _armorTypeLabel;
-	private readonly StatIconView _costIcon;
-	private readonly Label _costValueLabel;
+	private readonly GridContainer _statsGrid;
+	private readonly Control _bottomArea;
 	private readonly HBoxContainer _skillsRow;
-	private readonly HBoxContainer _elementRow;
+	private readonly VBoxContainer _progressBox;
+	private readonly Label _progressLabel;
+	private readonly ProgressBar _progressBar;
 	private readonly UnitSelectionController _selection;
 	private readonly List<SkillIconView> _skillIcons = new();
 	private UnitLogic _currentUnit;
 	private Building _currentBuilding;
+	private Label _attackLabel;
+	private Label _armorLabel;
+	private Label _shieldLabel;
+	private Label _productionLabel;
+	private bool _shieldEntryVisible;
 
-	public AttributePanelController(Node owner, CanvasLayer uiRoot, UnitSelectionController selection)
+	public AttributePanelController(CanvasLayer uiRoot, UnitSelectionController selection)
 	{
 		_selection = selection;
 		_panel = uiRoot.GetNode<Panel>("AttributePanel");
-		_portraitRect = uiRoot.GetNode<TextureRect>("AttributePanel/PortraitRect");
-		_nameLabel = uiRoot.GetNode<Label>("AttributePanel/NameLabel");
-		_subLabel = uiRoot.GetNode<Label>("AttributePanel/SubLabel");
-		_healthBar = uiRoot.GetNode<ProgressBar>("AttributePanel/HealthBar");
-		_healthValueLabel = uiRoot.GetNode<Label>("AttributePanel/HealthValueLabel");
-		_statsLabel = uiRoot.GetNode<Label>("AttributePanel/StatsLabel");
-		_resistanceValueLabel = uiRoot.GetNode<Label>("AttributePanel/ResistanceValueLabel");
-		_attackValueLabel = uiRoot.GetNode<Label>("AttributePanel/AttackValueLabel");
-		_attackTypeLabel = uiRoot.GetNode<Label>("AttributePanel/AttackTypeLabel");
-		_armorValueLabel = uiRoot.GetNode<Label>("AttributePanel/ArmorValueLabel");
-		_armorTypeLabel = uiRoot.GetNode<Label>("AttributePanel/ArmorTypeLabel");
-		_costValueLabel = uiRoot.GetNode<Label>("AttributePanel/CostValueLabel");
-		_skillsRow = uiRoot.GetNode<HBoxContainer>("AttributePanel/SkillsRow");
-		_elementRow = uiRoot.GetNode<HBoxContainer>("AttributePanel/ElementRow");
-		_resistanceIcon = CreateStatIcon(StatIconView.StatIconKind.Resistance, ResistanceIconY, "抗性");
-		_attackIcon = CreateStatIcon(StatIconView.StatIconKind.Attack, AttackIconY, "攻击");
-		_armorIcon = CreateStatIcon(StatIconView.StatIconKind.Armor, ArmorIconY, "护甲");
-		_costIcon = CreateStatIcon(StatIconView.StatIconKind.Cost, CostIconY, "费用");
-		_healthBar.ShowPercentage = false;
-		StyleBoxFlat fill = new() { BgColor = HealthFillColor };
-		_healthBar.AddThemeStyleboxOverride("fill", fill);
-		_panel.Visible = false;
-	}
-
-	private StatIconView CreateStatIcon(StatIconView.StatIconKind kind, float y, string tooltip)
-	{
-		StatIconView icon = new();
-		icon.Configure(kind);
-		icon.Position = new Vector2(SectionIconX, y);
-		icon.TooltipText = tooltip;
-		_panel.AddChild(icon);
-		return icon;
+		_portraitRect = _panel.GetNode<TextureRect>("Margin/Content/Header/PortraitFrame/PortraitRect");
+		_nameLabel = _panel.GetNode<Label>("Margin/Content/Header/HeaderText/NameLabel");
+		_subLabel = _panel.GetNode<Label>("Margin/Content/Header/HeaderText/SubLabel");
+		_badgeLabel = _panel.GetNode<Label>("Margin/Content/Header/Badge/BadgeLabel");
+		_healthBar = _panel.GetNode<ProgressBar>("Margin/Content/HealthRow/HealthBar");
+		_healthValueLabel = _panel.GetNode<Label>("Margin/Content/HealthRow/HealthValueLabel");
+		_statsGrid = _panel.GetNode<GridContainer>("Margin/Content/StatsGrid");
+		_bottomArea = _panel.GetNode<Control>("Margin/Content/BottomArea");
+		_skillsRow = _bottomArea.GetNode<HBoxContainer>("SkillsRow");
+		_progressBox = _bottomArea.GetNode<VBoxContainer>("ProgressBox");
+		_progressLabel = _progressBox.GetNode<Label>("ProgressLabel");
+		_progressBar = _progressBox.GetNode<ProgressBar>("ProgressBar");
 	}
 
 	public void Process()
 	{
 		UnitLogic unit = _selection.SelectedUnit;
 		Building building = _selection.SelectedBuilding;
-
 		if (unit != null && unit.IsAlive)
 		{
-			if (_currentUnit != unit)
-				RebuildUnitPanel(unit);
-			RefreshUnitCooldowns(unit);
-			UpdateHealth(unit, null);
-			_panel.Visible = true;
+			ShowUnit(unit);
 			return;
 		}
-
 		if (building != null && !building.IsDestroyed)
 		{
-			if (_currentBuilding != building)
-				RebuildBuildingPanel(building);
-			UpdateHealth(null, building);
-			_panel.Visible = true;
+			ShowBuilding(building);
 			return;
 		}
+		Hide();
+	}
 
+	private void ShowUnit(UnitLogic unit)
+	{
+		IUnitState state = unit.Handle;
+		bool hasShield = state.ShieldHealth > 0;
+		if (_currentUnit != unit || _shieldEntryVisible != hasShield)
+			BuildUnit(unit);
+		UpdateUnitHeader(unit, state);
+		UpdateHealth(state.Health, state.MaxHealth);
+		UpdateUnitLiveStats(state);
+		RefreshSkillCooldowns(state);
+		_panel.Visible = true;
+	}
+
+	private void ShowBuilding(Building building)
+	{
+		if (_currentBuilding != building)
+			BuildBuilding(building);
+		UpdateBuildingHeader(building);
+		UpdateHealth(building.Health, building.MaxHealth);
+		UpdateBuildingLiveStats(building);
+		UpdateBuildingProgress(building);
+		_panel.Visible = true;
+	}
+
+	private void Hide()
+	{
 		_panel.Visible = false;
 		_currentUnit = null;
 		_currentBuilding = null;
-		ClearSkillsRow();
+		ClearSkills();
 	}
 
-	private void RebuildUnitPanel(UnitLogic unit)
+	private void BuildUnit(UnitLogic unit)
 	{
+		IUnitState state = unit.Handle;
 		_currentUnit = unit;
 		_currentBuilding = null;
-		IUnitState state = unit.Handle;
-		UpdateHeader(state.TypeId, unit.IsPlayerUnit, state.Race, state.IsStealthed, state.IsAmbushing);
-		ShowUnitSections();
-		UpdateResistanceArea(state);
-		UpdateAttackArea(state);
-		UpdateArmorArea(state);
-		UpdateCostArea(state);
-		UpdateSkills(state);
+		_shieldEntryVisible = state.ShieldHealth > 0;
+		_portraitRect.Texture = LoadUnitPortrait(state.TypeId) ?? LoadPlaceholder();
+		_nameLabel.Text = UnitDisplayName.Get(state.TypeId);
+		_badgeLabel.Text = $"费用 {state.UnitCost}";
+		BuildUnitStats(state);
+		BuildSkills(state);
 	}
 
-	private void UpdateHeader(string typeId, bool isPlayerUnit, string race, bool isStealthed, bool isAmbushing)
+	private void BuildUnitStats(IUnitState state)
 	{
-		_portraitRect.Texture = LoadUnitPortrait(typeId) ?? LoadPlaceholder();
-		_nameLabel.Text = UnitDisplayName.Get(typeId);
-		_subLabel.Text = (isPlayerUnit ? "我方" : "敌方")
-			+ " · " + RaceName(race)
-			+ (isStealthed ? " · 隐身中" : "")
-			+ (isAmbushing ? " · 伏击中" : "");
+		ClearStats();
+		_attackLabel = AddStat(StatIconView.StatIconKind.Attack, BuildAttackText(state), BuildAttackTooltip(state), GetAttackElement(state));
+		_armorLabel = AddStat(StatIconView.StatIconKind.Armor, BuildArmorText(state), BuildArmorTooltip(state));
+		bool healer = state.Damage <= 0 && state.HealAmount > 0f;
+		AddStat(StatIconView.StatIconKind.Cooldown, $"{(healer ? state.HealInterval : state.AttackCooldown):0.##} 秒", healer ? "治疗间隔" : "攻击间隔");
+		AddStat(StatIconView.StatIconKind.Range, $"{(healer ? state.HealRange : state.AttackRange):0}", healer ? "治疗范围" : "攻击射程");
+		AddStat(StatIconView.StatIconKind.Speed, $"{state.Speed:0}", "移动速度");
+		AddStat(StatIconView.StatIconKind.Vision, $"{state.VisionRange:0}", BuildVisionTooltip(state));
+		if (_shieldEntryVisible)
+			_shieldLabel = AddStat(StatIconView.StatIconKind.Shield, state.ShieldHealth.ToString(), "当前护盾值");
 	}
 
-	private void ShowUnitSections()
+	private void UpdateUnitHeader(UnitLogic unit, IUnitState state)
 	{
-		_statsLabel.Visible = false;
-		_resistanceIcon.Visible = true;
-		_resistanceValueLabel.Visible = true;
-		_attackIcon.Visible = true;
-		_attackValueLabel.Visible = true;
-		_attackTypeLabel.Visible = true;
-		_armorIcon.Visible = true;
-		_armorValueLabel.Visible = true;
-		_armorTypeLabel.Visible = true;
-		_costIcon.Visible = true;
-		_costValueLabel.Visible = true;
-		_elementRow.Visible = true;
+		string side = unit.IsPlayerUnit ? "我方" : "敌方";
+		string status = state.IsStealthed ? " · 隐身中" : "";
+		status += state.IsAmbushing ? " · 伏击中" : "";
+		status += state.IsFurious ? " · 狂怒" : "";
+		_subLabel.Text = side + " · " + RaceName(state.Race) + status;
 	}
 
-	private void ShowBuildingSections()
+	private void UpdateUnitLiveStats(IUnitState state)
 	{
-		_statsLabel.Visible = true;
-		_resistanceIcon.Visible = false;
-		_resistanceValueLabel.Visible = false;
-		_attackIcon.Visible = false;
-		_attackValueLabel.Visible = false;
-		_attackTypeLabel.Visible = false;
-		_armorIcon.Visible = false;
-		_armorValueLabel.Visible = false;
-		_armorTypeLabel.Visible = false;
-		_costIcon.Visible = false;
-		_costValueLabel.Visible = false;
-		_elementRow.Visible = false;
+		_attackLabel.Text = BuildAttackText(state);
+		_attackLabel.TooltipText = BuildAttackTooltip(state);
+		_armorLabel.Text = BuildArmorText(state);
+		_armorLabel.TooltipText = BuildArmorTooltip(state);
+		if (_shieldEntryVisible)
+			_shieldLabel.Text = state.ShieldHealth.ToString();
 	}
 
-	private void UpdateHealth(UnitLogic unit, Building building)
+	private void BuildSkills(IUnitState state)
 	{
-		int health = unit != null ? unit.Handle.Health : building.Health;
-		int maxHealth = unit != null ? unit.Handle.MaxHealth : building.MaxHealth;
-		_healthBar.MaxValue = maxHealth;
-		_healthBar.Value = health;
-		_healthValueLabel.Text = $"{health}/{maxHealth}";
-	}
-
-	private void UpdateResistanceArea(IUnitState state)
-	{
-		List<ResistanceEntry> resistances = GetUnitResistances(state);
-		_resistanceValueLabel.Text = BuildResistanceSummary(resistances);
-		string tooltip = BuildResistanceTooltip(resistances);
-		_resistanceIcon.TooltipText = tooltip;
-		_resistanceValueLabel.TooltipText = tooltip;
-	}
-
-	private void UpdateAttackArea(IUnitState state)
-	{
-		_attackValueLabel.Text = state.Damage.ToString();
-		_attackValueLabel.TooltipText = BuildAttackValueTooltip(state);
-		_attackTypeLabel.Text = AttackName(state.AttackType) + "·" + DamageName(state.DamageType);
-		_attackTypeLabel.TooltipText = BuildAttackTypeTooltip(state);
-		UpdateElementRow(GetAttackElements(state));
-	}
-
-	private void UpdateArmorArea(IUnitState state)
-	{
-		_armorValueLabel.Text = state.EffectiveArmorValue.ToString();
-		_armorValueLabel.TooltipText = BuildArmorValueTooltip(state);
-		_armorTypeLabel.Text = ArmorName(state.ArmorType);
-		_armorTypeLabel.TooltipText = BuildArmorTypeTooltip(state);
-	}
-
-	private void UpdateCostArea(IUnitState state)
-	{
-		_costValueLabel.Text = state.UnitCost.ToString();
-	}
-
-	private void UpdateSkills(IUnitState state)
-	{
-		ClearSkillsRow();
+		ClearSkills();
 		foreach (SkillDef skill in state.Skills.All)
 		{
 			SkillIconView icon = new();
@@ -219,160 +162,162 @@ public sealed class AttributePanelController
 			_skillsRow.AddChild(icon);
 			_skillIcons.Add(icon);
 		}
+		_skillsRow.Visible = true;
+		_progressBox.Visible = false;
+		_bottomArea.Visible = state.Skills.All.Count > 0;
 	}
 
-	private void UpdateElementRow(IReadOnlyList<string> elementIds)
+	private void RefreshSkillCooldowns(IUnitState state)
 	{
-		ClearElementRow();
-		foreach (string elementId in elementIds)
-		{
-			ElementIconView icon = new();
-			icon.Configure(elementId);
-			_elementRow.AddChild(icon);
-		}
-	}
-
-	private void RebuildBuildingPanel(Building building)
-	{
-		_currentBuilding = building;
-		_currentUnit = null;
-		Sprite2D sprite = building.GetNodeOrNull<Sprite2D>("View/Sprite");
-		_portraitRect.Texture = sprite?.Texture ?? LoadPlaceholder();
-		_nameLabel.Text = building.DisplayName;
-		_subLabel.Text = (building.IsPlayerOwned ? "我方" : "敌方") + " · " + GetBuildingStatus(building);
-		ShowBuildingSections();
-		_statsLabel.Text = BuildBuildingStats(building);
-		ClearSkillsRow();
-	}
-
-	private void RefreshUnitCooldowns(UnitLogic unit)
-	{
-		IUnitState state = unit.Handle;
-		for (int i = 0; i < _skillIcons.Count && i < state.Skills.All.Count; i++)
+		for (int i = 0; i < _skillIcons.Count; i++)
 		{
 			SkillDef skill = state.Skills.All[i];
 			SpecialConfig special = state.Skills.GetSpecialById(skill.Id);
-			float total = special?.Cooldown ?? 0f;
-			float remaining = state.GetSkillCooldownRemaining(skill.Id);
-			_skillIcons[i].SetCooldown(remaining, total);
+			float total = special == null ? 0f : special.Cooldown;
+			_skillIcons[i].SetCooldown(state.GetSkillCooldownRemaining(skill.Id), total);
 		}
 	}
 
-	private static string BuildBuildingStats(Building building)
+	private void BuildBuilding(Building building)
 	{
 		BuildingSystem system = AdapterRegistry.Resolve<BuildingSystem>();
-		string type = system.IsCoreBuilding(building.TypeId) ? "核心建筑" : "普通建筑";
-		string lines = $"占地 {system.GetFootprint(building.TypeId).Count} 格\n"
-			+ $"类型 {type}   价值 {system.GetValue(building.TypeId)}\n";
+		_currentBuilding = building;
+		_currentUnit = null;
+		Sprite2D sprite = building.GetNodeOrNull<Sprite2D>("View/Sprite");
+		_portraitRect.Texture = sprite == null ? LoadPlaceholder() : sprite.Texture;
+		_nameLabel.Text = building.DisplayName;
+		_badgeLabel.Text = $"价值 {system.GetValue(building.TypeId)}";
+		BuildBuildingStats(building, system);
+		ClearSkills();
+	}
 
+	private void BuildBuildingStats(Building building, BuildingSystem system)
+	{
+		ClearStats();
+		string type = system.IsCoreBuilding(building.TypeId) ? "核心建筑" : "普通建筑";
+		AddStat(StatIconView.StatIconKind.Building, type, "建筑类型");
+		AddStat(StatIconView.StatIconKind.Footprint, $"{system.GetFootprint(building.TypeId).Count} 格", "占地面积");
 		string unitTypeId = GameManager.Get<IBuildingRepository>().GetUnitTypeId(building.TypeId);
 		if (string.IsNullOrEmpty(unitTypeId))
-			return lines + "不产出单位";
-
+		{
+			AddStat(StatIconView.StatIconKind.Production, "不产出单位", "该建筑没有单位生产周期");
+			return;
+		}
 		UnitStats stats = GameManager.Get<IUnitRepository>().Get(unitTypeId);
-		return lines + $"生产 {UnitDisplayName.Get(stats.TypeId)}   成本 {stats.UnitCost}\n"
-			+ $"生产率 {system.GetProductionRate(building.TypeId):0}/s";
+		AddStat(StatIconView.StatIconKind.Unit, $"{UnitDisplayName.Get(unitTypeId)} · {stats.UnitCost}", "产出单位 · 单次生产成本");
+		_productionLabel = AddStat(StatIconView.StatIconKind.Production, BuildProductionText(building, system), BuildProductionTooltip(building, system));
 	}
 
-	private static string GetBuildingStatus(Building building)
+	private void UpdateBuildingHeader(Building building)
 	{
-		if (building.IsDestroyed)
-			return "已摧毁";
-		if (building.IsManuallyPaused)
-			return "手动暂停";
-		if (building.IsCombineProhibited)
-			return "已禁止组合";
-		return building.CanWork ? "工作中" : "休眠";
+		string side = building.IsPlayerOwned ? "我方" : "敌方";
+		_subLabel.Text = side + " · " + GetBuildingStatus(building);
 	}
 
-	private static string BuildResistanceSummary(IReadOnlyList<ResistanceEntry> resistances)
+	private void UpdateBuildingLiveStats(Building building)
 	{
-		if (resistances.Count == 0)
-			return NoResistanceText;
-		ResistanceEntry strongest = resistances[0];
-		ResistanceEntry weakest = resistances[0];
-		foreach (ResistanceEntry entry in resistances)
+		if (_productionLabel == null)
+			return;
+		BuildingSystem system = AdapterRegistry.Resolve<BuildingSystem>();
+		_productionLabel.Text = BuildProductionText(building, system);
+		_productionLabel.TooltipText = BuildProductionTooltip(building, system);
+	}
+
+	private void UpdateBuildingProgress(Building building)
+	{
+		_skillsRow.Visible = false;
+		if (building.IsRitualInProgress)
 		{
-			if (entry.Percent > strongest.Percent)
-				strongest = entry;
-			if (entry.Percent < weakest.Percent)
-				weakest = entry;
+			ShowRitualProgress(building);
+			return;
 		}
-		return $"最强 {strongest.Name} {strongest.Percent}%   最弱 {weakest.Name} {weakest.Percent}%";
-	}
-
-	private static string BuildResistanceTooltip(IReadOnlyList<ResistanceEntry> resistances)
-	{
-		if (resistances.Count == 0)
-			return NoResistanceTooltip;
-		List<string> lines = new();
-		foreach (ResistanceEntry entry in resistances)
-			lines.Add($"{entry.Name} {entry.Percent}%");
-		return string.Join("\n", lines);
-	}
-
-	private static string BuildAttackValueTooltip(IUnitState state)
-	{
-		return $"攻击值范围：{state.Damage} ~ {state.Damage}";
-	}
-
-	private static string BuildAttackTypeTooltip(IUnitState state)
-	{
-		DamageMatrix damageMatrix = GameManager.Get<DamageMatrix>();
-		List<string> lines = new();
-		foreach (ArmorType armor in System.Enum.GetValues<ArmorType>())
+		if (building.HasProductionCycle)
 		{
-			float multiplier = damageMatrix.GetMultiplier(state.DamageType, armor);
-			if (!Mathf.IsEqualApprox(multiplier, NeutralMultiplier))
-				lines.Add($"{ArmorName(armor)} {FormatMultiplier(multiplier)}");
+			ShowProductionProgress(building);
+			return;
 		}
-		if (lines.Count == 0)
-			return NoBonusTooltip;
-		return "对护甲伤害修正\n" + string.Join("\n", lines);
+		_bottomArea.Visible = false;
 	}
 
-	private static string BuildArmorValueTooltip(IUnitState state)
+	private void ShowRitualProgress(Building building)
 	{
-		double reduction = DamageMatrix.CalculateReduction(state.EffectiveArmorValue);
-		int percent = (int)System.Math.Round(reduction * DamageMatrix.PercentScale);
-		return $"护甲减伤：{percent}%";
+		RitualDef ritual = RitualRules.Get(building.ActiveRitualId);
+		float elapsed = building.RitualTotalSeconds - building.RitualRemainingSeconds;
+		_progressLabel.Text = $"{ritual.DisplayName} · 剩余 {building.RitualRemainingSeconds:0.0} 秒";
+		_progressBar.MaxValue = building.RitualTotalSeconds;
+		_progressBar.Value = elapsed;
+		_progressBox.Visible = true;
+		_bottomArea.Visible = true;
 	}
 
-	private static string BuildArmorTypeTooltip(IUnitState state)
+	private void ShowProductionProgress(Building building)
 	{
-		DamageMatrix damageMatrix = GameManager.Get<DamageMatrix>();
-		List<string> lines = new();
-		foreach (DamageType damage in System.Enum.GetValues<DamageType>())
+		string state = building.CanWork ? $"剩余 {building.ProductionSecondsRemaining:0.0} 秒" : GetBuildingStatus(building);
+		_progressLabel.Text = "生产进度 · " + state;
+		_progressBar.MaxValue = 1f;
+		_progressBar.Value = building.ProductionProgress;
+		_progressBox.Visible = true;
+		_bottomArea.Visible = true;
+	}
+
+	private Label AddStat(StatIconView.StatIconKind kind, string text, string tooltip, string elementId = "")
+	{
+		HBoxContainer row = new();
+		row.CustomMinimumSize = new Vector2(StatColumnWidth, StatRowHeight);
+		row.MouseFilter = Control.MouseFilterEnum.Stop;
+		row.TooltipText = tooltip;
+		StatIconView icon = new();
+		icon.Configure(kind);
+		icon.TooltipText = tooltip;
+		row.AddChild(icon);
+		Label label = CreateStatLabel(text, tooltip);
+		row.AddChild(label);
+		if (!string.IsNullOrEmpty(elementId))
+			row.AddChild(CreateElementIcon(elementId));
+		_statsGrid.AddChild(row);
+		return label;
+	}
+
+	private static Label CreateStatLabel(string text, string tooltip)
+	{
+		Label label = new();
+		label.Text = text;
+		label.TooltipText = tooltip;
+		label.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+		label.AddThemeFontSizeOverride("font_size", 14);
+		label.AddThemeColorOverride("font_color", new Color(0.84f, 0.87f, 0.93f));
+		label.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis;
+		return label;
+	}
+
+	private static ElementIconView CreateElementIcon(string elementId)
+	{
+		ElementIconView icon = new();
+		icon.Configure(elementId);
+		return icon;
+	}
+
+	private void UpdateHealth(int health, int maxHealth)
+	{
+		_healthBar.MaxValue = maxHealth;
+		_healthBar.Value = health;
+		_healthValueLabel.Text = $"{health} / {maxHealth}";
+	}
+
+	private void ClearStats()
+	{
+		foreach (Node child in _statsGrid.GetChildren())
 		{
-			float multiplier = damageMatrix.GetMultiplier(damage, state.ArmorType);
-			if (!Mathf.IsEqualApprox(multiplier, NeutralMultiplier))
-				lines.Add($"{DamageName(damage)} {FormatMultiplier(multiplier)}");
+			_statsGrid.RemoveChild(child);
+			child.QueueFree();
 		}
-		if (lines.Count == 0)
-			return NoBonusTooltip;
-		return "受到攻击伤害修正\n" + string.Join("\n", lines);
+		_attackLabel = null;
+		_armorLabel = null;
+		_shieldLabel = null;
+		_productionLabel = null;
 	}
 
-	private static string FormatMultiplier(float multiplier)
-	{
-		int percent = Mathf.RoundToInt((multiplier - NeutralMultiplier) * DamageMatrix.PercentScale);
-		return percent > 0 ? $"+{percent}%" : $"{percent}%";
-	}
-
-	private static IReadOnlyList<string> GetAttackElements(IUnitState state)
-	{
-		List<string> elements = new();
-		if (state.DamageType == DamageType.Holy)
-			elements.Add(HolyElementId);
-		return elements;
-	}
-
-	private static List<ResistanceEntry> GetUnitResistances(IUnitState state)
-	{
-		return new List<ResistanceEntry>();
-	}
-
-	private void ClearSkillsRow()
+	private void ClearSkills()
 	{
 		foreach (Node child in _skillsRow.GetChildren())
 		{
@@ -382,19 +327,96 @@ public sealed class AttributePanelController
 		_skillIcons.Clear();
 	}
 
-	private void ClearElementRow()
+	private static string BuildAttackText(IUnitState state)
 	{
-		foreach (Node child in _elementRow.GetChildren())
+		if (state.Damage <= 0 && state.HealAmount > 0f)
+			return $"治疗 {state.HealAmount:0}";
+		return $"{state.Damage} · {AttackName(state.AttackType)}·{DamageName(state.DamageType)}";
+	}
+
+	private static string BuildAttackTooltip(IUnitState state)
+	{
+		if (state.Damage <= 0 && state.HealAmount > 0f)
+			return $"治疗量：{state.HealAmount:0}\n治疗范围：{state.HealRange:0}\n治疗间隔：{state.HealInterval:0.##} 秒";
+		List<string> lines = new() { $"攻击值：{state.Damage}" };
+		DamageMatrix matrix = GameManager.Get<DamageMatrix>();
+		foreach (ArmorType armor in Enum.GetValues<ArmorType>())
 		{
-			_elementRow.RemoveChild(child);
-			child.QueueFree();
+			float multiplier = matrix.GetMultiplier(state.DamageType, armor);
+			if (!Mathf.IsEqualApprox(multiplier, NeutralMultiplier))
+				lines.Add($"对{ArmorName(armor)} {FormatMultiplier(multiplier)}");
 		}
+		return string.Join("\n", lines);
+	}
+
+	private static string BuildArmorText(IUnitState state)
+	{
+		return $"{state.EffectiveArmorValue} · {ArmorName(state.ArmorType)}";
+	}
+
+	private static string BuildArmorTooltip(IUnitState state)
+	{
+		int reduction = (int)Math.Round(DamageMatrix.CalculateReduction(state.EffectiveArmorValue) * DamageMatrix.PercentScale);
+		List<string> lines = new() { $"护甲减伤：{reduction}%" };
+		DamageMatrix matrix = GameManager.Get<DamageMatrix>();
+		foreach (DamageType damage in Enum.GetValues<DamageType>())
+		{
+			float multiplier = matrix.GetMultiplier(damage, state.ArmorType);
+			if (!Mathf.IsEqualApprox(multiplier, NeutralMultiplier))
+				lines.Add($"受到{DamageName(damage)} {FormatMultiplier(multiplier)}");
+		}
+		return lines.Count == 1 && reduction == 0 ? NoBonusTooltip : string.Join("\n", lines);
+	}
+
+	private static string BuildVisionTooltip(IUnitState state)
+	{
+		return state.CanDetectStealth ? "视野范围 · 可侦测隐身" : "视野范围";
+	}
+
+	private static string BuildProductionText(Building building, BuildingSystem system)
+	{
+		float rate = building.EffectiveProductionRate;
+		if (rate <= 0f)
+			rate = system.GetProductionRate(building.TypeId);
+		float interval = system.GetSpawnInterval(building.TypeId);
+		return $"{rate:0.##}/秒 · {interval:0.##}秒";
+	}
+	private static string BuildProductionTooltip(Building building, BuildingSystem system)
+	{
+		float baseRate = system.GetProductionRate(building.TypeId);
+		float effectiveRate = building.EffectiveProductionRate > 0f ? building.EffectiveProductionRate : baseRate;
+		int bonus = baseRate > 0f ? Mathf.RoundToInt((effectiveRate / baseRate - 1f) * 100f) : 0;
+		return $"基础生产率：{baseRate:0.##}/秒\n有效生产率：{effectiveRate:0.##}/秒\n运行时修正：{(bonus >= 0 ? "+" : "")}{bonus}%";
+	}
+
+	private static string GetAttackElement(IUnitState state)
+	{
+		return state.DamageType == DamageType.Holy ? HolyElementId : "";
+	}
+
+	private static string FormatMultiplier(float multiplier)
+	{
+		int percent = Mathf.RoundToInt((multiplier - NeutralMultiplier) * DamageMatrix.PercentScale);
+		return percent > 0 ? $"+{percent}%" : $"{percent}%";
+	}
+
+	private static string GetBuildingStatus(Building building)
+	{
+		if (building.IsDestroyed)
+			return "已摧毁";
+		if (building.IsRitualInProgress)
+			return "仪式中";
+		if (building.IsManuallyPaused)
+			return "手动暂停";
+		if (building.IsCombineProhibited)
+			return "已禁止组合";
+		return building.CanWork ? "工作中" : "休眠";
 	}
 
 	public static Texture2D LoadUnitPortrait(string typeId)
 	{
 		IVisualAssetRepository repository = GameManager.Get<IVisualAssetRepository>();
-		string portraitUid = repository?.GetPortraitUid(typeId) ?? "";
+		string portraitUid = repository.GetPortraitUid(typeId);
 		if (string.IsNullOrEmpty(portraitUid))
 			return null;
 		return GD.Load<Texture2D>(portraitUid);
@@ -459,16 +481,5 @@ public sealed class AttributePanelController
 			"DemonKing" => "魔王",
 			_ => race,
 		};
-	}
-
-	private readonly struct ResistanceEntry
-	{
-		public readonly string Name;
-		public readonly int Percent;
-		public ResistanceEntry(string name, int percent)
-		{
-			Name = name;
-			Percent = percent;
-		}
 	}
 }
