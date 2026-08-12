@@ -150,7 +150,7 @@ public sealed class DetailedAttributePanelProfile : IAttributePanelProfile
 
 	private static StyleBoxFlat CreateHealthFill()
 	{
-		return CreateStyle(new Color(0.72f, 0.055f, 0.055f, 1f), Colors.Transparent, 0, 5);
+		return CreateStyle(new Color(0.3f, 0.65f, 0.3f, 1f), Colors.Transparent, 0, 5);
 	}
 
 	internal static StyleBoxFlat CreateStyle(Color background, Color border, int borderWidth, int radius)

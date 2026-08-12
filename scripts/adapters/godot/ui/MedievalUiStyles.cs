@@ -30,7 +30,7 @@ public static class MedievalUiStyles
 	private static readonly Color Text = new(0.88f, 0.85f, 0.76f, 1f);
 	private static readonly Color MutedText = new(0.55f, 0.54f, 0.49f, 1f);
 	private static readonly Color HealthBackground = new(0.07f, 0.045f, 0.035f, 1f);
-	private static readonly Color HealthFill = new(0.72f, 0.055f, 0.055f, 1f);
+	private static readonly Color HealthFill = new(0.3f, 0.65f, 0.3f, 1f);
 
 	public static void ApplyHud(CanvasLayer uiRoot)
 	{
