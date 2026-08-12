@@ -1,4 +1,4 @@
-// 显示设置管理：分辨率、窗口模式与开发者模式开关
+// 显示设置管理：持久化窗口、操作、音频与界面外观选项
 using CasualCastle.Adapters.Godot;
 using Godot;
 using System;
@@ -14,6 +14,7 @@ public partial class DisplaySettingsManager : Node
 	public static DisplaySettingsManager Instance { get; private set; }
 	public static bool DevModeEnabled { get; set; }
 	public static bool ConfirmSellEnabled { get; set; }
+	public event Action<AttributePanelProfileKind> AttributePanelProfileChanged;
 
 	private const int DesignWidth = 1920;
 	private const int DesignHeight = 1080;
@@ -41,6 +42,7 @@ public partial class DisplaySettingsManager : Node
 	public float CameraDragSpeed { get; private set; } = DefaultDragSpeed;
 	public float MusicVolume { get; private set; } = DefaultMusicVolume;
 	public float SfxVolume { get; private set; } = DefaultSfxVolume;
+	public AttributePanelProfileKind AttributePanelProfile { get; private set; } = AttributePanelProfileKind.Detailed;
 
 	public override void _Ready()
 	{
@@ -59,15 +61,19 @@ public partial class DisplaySettingsManager : Node
 		}
 	}
 
-	public void SaveAndApply(DisplayWindowMode mode, Vector2I resolution, float dragSpeed, float musicVolume, float sfxVolume)
+	public void SaveAndApply(DisplayWindowMode mode, Vector2I resolution, float dragSpeed, float musicVolume, float sfxVolume, AttributePanelProfileKind profile)
 	{
+		bool profileChanged = AttributePanelProfile != profile;
 		WindowMode = mode;
 		OutputResolution = resolution;
 		CameraDragSpeed = Mathf.Clamp(dragSpeed, DragSpeedMin, DragSpeedMax);
 		MusicVolume = musicVolume;
 		SfxVolume = sfxVolume;
+		AttributePanelProfile = profile;
 		Save();
 		Apply();
+		if (profileChanged)
+			AttributePanelProfileChanged?.Invoke(profile);
 	}
 
 	public void SetAudioVolumes(float musicVolume, float sfxVolume)
@@ -100,6 +106,7 @@ public partial class DisplaySettingsManager : Node
 		OutputResolution = new Vector2I(width, height);
 		DevModeEnabled = (bool)config.GetValue(Section, "dev_mode", false);
 		ConfirmSellEnabled = (bool)config.GetValue(Section, "confirm_sell", false);
+		AttributePanelProfile = (AttributePanelProfileKind)(int)config.GetValue(Section, "attribute_panel_profile", (int)AttributePanelProfile);
 		CameraDragSpeed = Mathf.Clamp(
 			(float)config.GetValue(Section, "camera_drag_speed", CameraDragSpeed),
 			DragSpeedMin,
@@ -122,6 +129,7 @@ public partial class DisplaySettingsManager : Node
 		config.SetValue(Section, "height", OutputResolution.Y);
 		config.SetValue(Section, "dev_mode", DevModeEnabled);
 		config.SetValue(Section, "confirm_sell", ConfirmSellEnabled);
+		config.SetValue(Section, "attribute_panel_profile", (int)AttributePanelProfile);
 		config.SetValue(Section, "camera_drag_speed", CameraDragSpeed);
 		config.SetValue(AudioSection, "music_volume", MusicVolume);
 		config.SetValue(AudioSection, "sfx_volume", SfxVolume);
