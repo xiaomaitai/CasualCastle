@@ -12,12 +12,24 @@ public sealed class AttributePanelController
 	private const string PlaceholderTexture = "res://assets/art/placeholders/test_image.png";
 	private const string HolyElementId = "holy";
 	private const float NeutralMultiplier = 1f;
+	private const float StatColumnWidth = 430f;
 	private const string NoBonusTooltip = "无特殊修正";
+	private const float StatNameWidth = 78f;
+	private const float StatInfoWidth = 22f;
+	private const int StatFontSize = 14;
+	private const int StatRowSeparation = 8;
+	private const int StatBorderWidth = 1;
+	private const int StatCornerRadius = 2;
+	private const float StatMarginLeft = 6f;
+	private const float StatMarginRight = 4f;
+	private static readonly Color StatRowBackground = new(0.045f, 0.05f, 0.048f, 0.92f);
+	private static readonly Color StatRowBorder = new(0.24f, 0.2f, 0.13f, 1f);
+	private static readonly Color StatNameColor = new(0.86f, 0.73f, 0.52f, 1f);
+	private static readonly Color StatValueColor = new(0.86f, 0.84f, 0.77f, 1f);
 
 	private readonly AttributePanelView _unitView;
 	private readonly AttributePanelView _buildingView;
 	private AttributePanelView _view;
-	private IAttributePanelProfile _profile;
 	private readonly UnitSelectionController _selection;
 	private readonly List<SkillIconView> _skillIcons = new();
 	private UnitLogic _currentUnit;
@@ -34,25 +46,6 @@ public sealed class AttributePanelController
 		_unitView = new AttributePanelView(uiRoot.GetNode<Panel>("UnitAttributePanel"));
 		_buildingView = new AttributePanelView(uiRoot.GetNode<Panel>("BuildingAttributePanel"));
 		_view = _unitView;
-		DisplaySettingsManager settings = AdapterRegistry.Resolve<DisplaySettingsManager>();
-		SetProfile(settings.AttributePanelProfile);
-		settings.AttributePanelProfileChanged += SetProfile;
-	}
-
-	public void Dispose()
-	{
-		AdapterRegistry.Resolve<DisplaySettingsManager>().AttributePanelProfileChanged -= SetProfile;
-	}
-
-	private void SetProfile(AttributePanelProfileKind kind)
-	{
-		if (_profile != null && _profile.Kind == kind)
-			return;
-		_profile = AttributePanelProfiles.Get(kind);
-		_profile.Apply(_unitView);
-		_profile.Apply(_buildingView);
-		_currentUnit = null;
-		_currentBuilding = null;
 	}
 
 	public void Process()
@@ -149,12 +142,12 @@ public sealed class AttributePanelController
 
 	private void UpdateUnitLiveStats(IUnitState state)
 	{
-		_attackLabel.Text = _profile.FormatValue(StatIconView.StatIconKind.Attack, BuildAttackText(state));
+		_attackLabel.Text = BuildAttackText(state);
 		_attackLabel.TooltipText = BuildAttackTooltip(state);
-		_armorLabel.Text = _profile.FormatValue(StatIconView.StatIconKind.Armor, BuildArmorText(state));
+		_armorLabel.Text = BuildArmorText(state);
 		_armorLabel.TooltipText = BuildArmorTooltip(state);
 		if (_shieldEntryVisible)
-			_shieldLabel.Text = _profile.FormatValue(StatIconView.StatIconKind.Shield, state.ShieldHealth.ToString());
+			_shieldLabel.Text = state.ShieldHealth.ToString();
 	}
 
 	private void BuildSkills(IUnitState state)
@@ -224,7 +217,7 @@ public sealed class AttributePanelController
 		if (_productionLabel == null)
 			return;
 		BuildingSystem system = AdapterRegistry.Resolve<BuildingSystem>();
-		_productionLabel.Text = _profile.FormatValue(StatIconView.StatIconKind.Production, BuildProductionText(building, system));
+		_productionLabel.Text = BuildProductionText(building, system);
 		_productionLabel.TooltipText = BuildProductionTooltip(building, system);
 	}
 
@@ -267,9 +260,60 @@ public sealed class AttributePanelController
 
 	private Label AddStat(StatIconView.StatIconKind kind, string text, string tooltip, string elementId = "")
 	{
-		AttributeStatControl control = _profile.CreateStat(kind, StatName(kind), text, tooltip, elementId);
-		_view.StatsGrid.AddChild(control.Panel);
-		return control.ValueLabel;
+		PanelContainer panel = CreateStatPanel(tooltip);
+		HBoxContainer row = new();
+		row.AddThemeConstantOverride("separation", StatRowSeparation);
+		panel.AddChild(row);
+		StatIconView icon = new();
+		icon.Configure(kind);
+		icon.TooltipText = tooltip;
+		row.AddChild(icon);
+		row.AddChild(CreateStatNameLabel(StatName(kind)));
+		Label label = CreateStatLabel(text, tooltip);
+		row.AddChild(label);
+		if (!string.IsNullOrEmpty(elementId))
+			row.AddChild(CreateElementIcon(elementId));
+		row.AddChild(CreateInfoLabel(tooltip));
+		_view.StatsGrid.AddChild(panel);
+		return label;
+	}
+
+	private static PanelContainer CreateStatPanel(string tooltip)
+	{
+		PanelContainer panel = new();
+		panel.CustomMinimumSize = new Vector2(StatColumnWidth, AttributePanelView.StatRowHeight);
+		panel.MouseFilter = Control.MouseFilterEnum.Stop;
+		panel.TooltipText = tooltip;
+		StyleBoxFlat style = new();
+		style.BgColor = StatRowBackground;
+		style.BorderColor = StatRowBorder;
+		style.SetBorderWidthAll(StatBorderWidth);
+		style.SetCornerRadiusAll(StatCornerRadius);
+		style.ContentMarginLeft = StatMarginLeft;
+		style.ContentMarginRight = StatMarginRight;
+		panel.AddThemeStyleboxOverride("panel", style);
+		return panel;
+	}
+
+	private static Label CreateStatNameLabel(string text)
+	{
+		Label label = new();
+		label.Text = text;
+		label.CustomMinimumSize = new Vector2(StatNameWidth, 0f);
+		label.AddThemeFontSizeOverride("font_size", StatFontSize);
+		label.AddThemeColorOverride("font_color", StatNameColor);
+		return label;
+	}
+
+	private static Label CreateInfoLabel(string tooltip)
+	{
+		Label label = new();
+		label.Text = "ⓘ";
+		label.TooltipText = tooltip;
+		label.CustomMinimumSize = new Vector2(StatInfoWidth, 0f);
+		label.HorizontalAlignment = HorizontalAlignment.Center;
+		label.AddThemeColorOverride("font_color", StatNameColor);
+		return label;
 	}
 
 	private static string StatName(StatIconView.StatIconKind kind)
@@ -290,6 +334,26 @@ public sealed class AttributePanelController
 			_ => "属性",
 		};
 	}
+
+	private static Label CreateStatLabel(string text, string tooltip)
+	{
+		Label label = new();
+		label.Text = text;
+		label.TooltipText = tooltip;
+		label.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+		label.AddThemeFontSizeOverride("font_size", StatFontSize);
+		label.AddThemeColorOverride("font_color", StatValueColor);
+		label.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis;
+		return label;
+	}
+
+	private static ElementIconView CreateElementIcon(string elementId)
+	{
+		ElementIconView icon = new();
+		icon.Configure(elementId);
+		return icon;
+	}
+
 	private void UpdateHealth(int health, int maxHealth)
 	{
 		_view.HealthBar.MaxValue = maxHealth;

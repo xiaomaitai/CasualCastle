@@ -16,12 +16,9 @@ public sealed class AttributePanelView
 	private const float StatSeparation = 3f;
 
 	public readonly Panel Panel;
-	public readonly HBoxContainer Header;
-	public readonly PanelContainer PortraitFrame;
 	public readonly TextureRect PortraitRect;
 	public readonly Label NameLabel;
 	public readonly Label SubLabel;
-	public readonly PanelContainer Badge;
 	public readonly Label BadgeLabel;
 	public readonly ProgressBar HealthBar;
 	public readonly Label HealthValueLabel;
@@ -35,13 +32,10 @@ public sealed class AttributePanelView
 	public AttributePanelView(Panel panel)
 	{
 		Panel = panel;
-		Header = panel.GetNode<HBoxContainer>("Margin/Content/Header");
-		PortraitFrame = Header.GetNode<PanelContainer>("PortraitFrame");
-		PortraitRect = PortraitFrame.GetNode<TextureRect>("PortraitRect");
-		NameLabel = Header.GetNode<Label>("HeaderText/NameLabel");
-		SubLabel = Header.GetNode<Label>("HeaderText/SubLabel");
-		Badge = Header.GetNode<PanelContainer>("Badge");
-		BadgeLabel = Badge.GetNode<Label>("BadgeLabel");
+		PortraitRect = panel.GetNode<TextureRect>("Margin/Content/Header/PortraitFrame/PortraitRect");
+		NameLabel = panel.GetNode<Label>("Margin/Content/Header/HeaderText/NameLabel");
+		SubLabel = panel.GetNode<Label>("Margin/Content/Header/HeaderText/SubLabel");
+		BadgeLabel = panel.GetNode<Label>("Margin/Content/Header/Badge/BadgeLabel");
 		HealthBar = panel.GetNode<ProgressBar>("Margin/Content/HealthRow/HealthBar");
 		HealthValueLabel = panel.GetNode<Label>("Margin/Content/HealthRow/HealthValueLabel");
 		StatsGrid = panel.GetNode<GridContainer>("Margin/Content/StatsGrid");

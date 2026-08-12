@@ -65,7 +65,6 @@ public partial class UIManager : Node2D
 		if (_settingsUi != null)
 			_settingsUi.OpenChanged -= OnSettingsOpenChanged;
 		_buildingActionRing?.Dispose();
-		_attributePanel?.Dispose();
 		_gameOverUi?.Dispose();
 		_settingsUi?.Dispose();
 

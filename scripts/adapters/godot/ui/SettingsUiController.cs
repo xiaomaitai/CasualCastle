@@ -1,4 +1,4 @@
-// 设置面板控制器：管理显示、属性面板风格、操作与音频选项
+// 设置面板控制器：显示/分辨率/开发者模式/拖拽速度与音乐音效音量。
 using CasualCastle.Adapters.Godot;
 using Godot;
 using System;
@@ -12,7 +12,6 @@ public sealed class SettingsUiController
 	private readonly Control _root;
 	private readonly OptionButton _windowModeOption;
 	private readonly OptionButton _resolutionOption;
-	private readonly OptionButton _attributePanelProfileOption;
 	private readonly CheckBox _devModeCheck;
 	private readonly CheckBox _confirmSellCheck;
 	private readonly HSlider _dragSpeedSlider;
@@ -36,7 +35,6 @@ public sealed class SettingsUiController
 		_root = root;
 		_windowModeOption = root.GetNode<OptionButton>("Panel/WindowModeOption");
 		_resolutionOption = root.GetNode<OptionButton>("Panel/ResolutionOption");
-		_attributePanelProfileOption = root.GetNode<OptionButton>("Panel/AttributePanelProfileOption");
 		_devModeCheck = root.GetNode<CheckBox>("Panel/DevModeCheck");
 		_confirmSellCheck = root.GetNode<CheckBox>("Panel/ConfirmSellCheck");
 		_dragSpeedSlider = root.GetNode<HSlider>("Panel/DragSpeedSlider");
@@ -55,10 +53,6 @@ public sealed class SettingsUiController
 		_resolutionOption.Clear();
 		foreach (Vector2I resolution in DisplaySettingsManager.OutputResolutions)
 			_resolutionOption.AddItem($"{resolution.X} × {resolution.Y}", _resolutionOption.ItemCount);
-
-		_attributePanelProfileOption.Clear();
-		_attributePanelProfileOption.AddItem("经典详细", (int)AttributePanelProfileKind.Detailed);
-		_attributePanelProfileOption.AddItem("粗描边动画", (int)AttributePanelProfileKind.Cartoon);
 
 		_windowModeOption.ItemSelected += OnWindowModeSelected;
 		_dragSpeedSlider.MinValue = DisplaySettingsManager.DragSpeedMin;
@@ -121,7 +115,6 @@ public sealed class SettingsUiController
 		DisplaySettingsManager settings = AdapterRegistry.Resolve<DisplaySettingsManager>();
 		_windowModeOption.Select(_windowModeOption.GetItemIndex((int)settings.WindowMode));
 		_resolutionOption.Select(settings.FindResolutionIndex(settings.OutputResolution));
-		_attributePanelProfileOption.Select(_attributePanelProfileOption.GetItemIndex((int)settings.AttributePanelProfile));
 		_devModeCheck.ButtonPressed = DisplaySettingsManager.DevModeEnabled;
 		_confirmSellCheck.ButtonPressed = DisplaySettingsManager.ConfirmSellEnabled;
 		_dragSpeed = settings.CameraDragSpeed;
@@ -202,9 +195,8 @@ public sealed class SettingsUiController
 		Vector2I resolution = DisplaySettingsManager.OutputResolutions[_resolutionOption.Selected];
 		DisplaySettingsManager.DevModeEnabled = _devModeCheck.ButtonPressed;
 		DisplaySettingsManager.ConfirmSellEnabled = _confirmSellCheck.ButtonPressed;
-		AttributePanelProfileKind profile = (AttributePanelProfileKind)_attributePanelProfileOption.GetSelectedId();
 		DisplaySettingsManager settings = AdapterRegistry.Resolve<DisplaySettingsManager>();
-		settings.SaveAndApply(mode, resolution, _dragSpeed, _musicVolume, _sfxVolume, profile);
+		settings.SaveAndApply(mode, resolution, _dragSpeed, _musicVolume, _sfxVolume);
 		AudioManager.Instance?.SetMusicVolume(_musicVolume);
 		AudioManager.Instance?.SetSfxVolume(_sfxVolume);
 	}
