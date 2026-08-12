@@ -3,13 +3,13 @@ using Godot;
 
 public sealed partial class StatIconView : Control
 {
-	private const float IconSize = 20f;
-	private static readonly Color Steel = new(0.82f, 0.87f, 0.93f, 1f);
-	private static readonly Color SteelDark = new(0.42f, 0.52f, 0.68f, 1f);
-	private static readonly Color Gold = new(0.94f, 0.74f, 0.28f, 1f);
-	private static readonly Color Purple = new(0.72f, 0.52f, 0.96f, 1f);
-	private static readonly Color Cyan = new(0.46f, 0.82f, 0.95f, 1f);
-	private static readonly Color Green = new(0.42f, 0.82f, 0.48f, 1f);
+	private const float IconSize = 22f;
+	private static readonly Color Steel = new(0.82f, 0.78f, 0.67f, 1f);
+	private static readonly Color SteelDark = new(0.32f, 0.3f, 0.26f, 1f);
+	private static readonly Color Gold = new(0.86f, 0.63f, 0.25f, 1f);
+	private static readonly Color Purple = new(0.63f, 0.34f, 0.78f, 1f);
+	private static readonly Color Cyan = new(0.3f, 0.58f, 0.76f, 1f);
+	private static readonly Color Green = new(0.35f, 0.68f, 0.36f, 1f);
 
 	private StatIconKind _kind;
 

@@ -5,12 +5,12 @@ using Godot;
 
 public partial class SkillIconView : Control
 {
-	private const float IconSize = 56f;
-	private const float GlyphRadius = 23f;
-	private static readonly Color Background = new(0.14f, 0.18f, 0.26f, 1f);
-	private static readonly Color BorderColor = new(0.42f, 0.5f, 0.62f, 1f);
-	private static readonly Color CooldownShade = new(0.02f, 0.03f, 0.06f, 0.72f);
-	private static readonly Color CooldownLine = new(1f, 0.9f, 0.55f, 1f);
+	private const float IconSize = 58f;
+	private const float GlyphRadius = 25f;
+	private static readonly Color Background = new(0.025f, 0.03f, 0.032f, 1f);
+	private static readonly Color BorderColor = new(0.72f, 0.51f, 0.22f, 1f);
+	private static readonly Color CooldownShade = new(0.01f, 0.012f, 0.014f, 0.8f);
+	private static readonly Color CooldownLine = new(0.96f, 0.76f, 0.34f, 1f);
 	private static readonly Color Steel = new(0.82f, 0.87f, 0.93f, 1f);
 	private static readonly Color Gold = new(0.92f, 0.76f, 0.32f, 1f);
 	private static readonly Color Ice = new(0.62f, 0.86f, 1f, 1f);
@@ -63,7 +63,7 @@ public partial class SkillIconView : Control
 			CreateBackgroundStyle();
 		DrawStyleBox(_bg, new Rect2(Vector2.Zero, new Vector2(IconSize, IconSize)));
 		if (_iconTexture != null)
-			DrawTextureRect(_iconTexture, new Rect2(5f, 5f, IconSize - 10f, IconSize - 10f), false);
+			DrawTextureRect(_iconTexture, new Rect2(4f, 4f, IconSize - 8f, IconSize - 8f), false);
 		else
 			DrawSkillGlyph();
 		if (_total > 0f && _remaining > 0f)
@@ -332,6 +332,6 @@ public partial class SkillIconView : Control
 		_bg.BgColor = Background;
 		_bg.BorderColor = BorderColor;
 		_bg.SetBorderWidthAll(2);
-		_bg.SetCornerRadiusAll(8);
+		_bg.SetCornerRadiusAll(3);
 	}
 }

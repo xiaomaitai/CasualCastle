@@ -1,38 +1,38 @@
 [gd_scene format=3 uid="uid://c7m4n8p2q5r6s"]
 
 [sub_resource type="StyleBoxFlat" id="PanelStyle"]
-bg_color = Color(0.055, 0.075, 0.11, 0.96)
+bg_color = Color(0.018, 0.022, 0.024, 0.97)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.31, 0.38, 0.5, 0.9)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
-shadow_color = Color(0, 0, 0, 0.38)
-shadow_size = 8
+border_color = Color(0.63, 0.46, 0.22, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_color = Color(0, 0, 0, 0.72)
+shadow_size = 12
 
 [sub_resource type="StyleBoxFlat" id="PortraitStyle"]
-bg_color = Color(0.09, 0.12, 0.18, 1)
+bg_color = Color(0.025, 0.031, 0.034, 1)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.43, 0.5, 0.62, 1)
-corner_radius_top_left = 7
-corner_radius_top_right = 7
-corner_radius_bottom_right = 7
-corner_radius_bottom_left = 7
+border_color = Color(0.58, 0.42, 0.2, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
 
 [sub_resource type="StyleBoxFlat" id="BadgeStyle"]
-bg_color = Color(0.16, 0.2, 0.28, 1)
+bg_color = Color(0.11, 0.075, 0.03, 1)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0.67, 0.55, 0.24, 1)
+border_color = Color(0.76, 0.56, 0.24, 1)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
@@ -43,14 +43,14 @@ content_margin_top = 3.0
 content_margin_bottom = 3.0
 
 [sub_resource type="StyleBoxFlat" id="HealthBackground"]
-bg_color = Color(0.13, 0.16, 0.2, 1)
+bg_color = Color(0.07, 0.045, 0.035, 1)
 corner_radius_top_left = 5
 corner_radius_top_right = 5
 corner_radius_bottom_right = 5
 corner_radius_bottom_left = 5
 
 [sub_resource type="StyleBoxFlat" id="HealthFill"]
-bg_color = Color(0.22, 0.69, 0.33, 1)
+bg_color = Color(0.72, 0.055, 0.055, 1)
 corner_radius_top_left = 5
 corner_radius_top_right = 5
 corner_radius_bottom_right = 5
@@ -58,10 +58,10 @@ corner_radius_bottom_left = 5
 
 [node name="AttributePanel" type="Panel"]
 visible = false
-offset_left = 24.0
-offset_top = 837.0
-offset_right = 456.0
-offset_bottom = 1080.0
+offset_left = 18.0
+offset_top = 632.0
+offset_right = 478.0
+offset_bottom = 1062.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("PanelStyle")
 
@@ -72,22 +72,22 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 11
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 11
-theme_override_constants/margin_bottom = 8
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
 
 [node name="Content" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
-theme_override_constants/separation = 4
+theme_override_constants/separation = 6
 
 [node name="Header" type="HBoxContainer" parent="Margin/Content"]
-custom_minimum_size = Vector2(0, 56)
+custom_minimum_size = Vector2(0, 96)
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 10
 
 [node name="PortraitFrame" type="PanelContainer" parent="Margin/Content/Header"]
-custom_minimum_size = Vector2(56, 56)
+custom_minimum_size = Vector2(118, 96)
 layout_mode = 2
 theme_override_styles/panel = SubResource("PortraitStyle")
 
@@ -105,14 +105,14 @@ theme_override_constants/separation = 0
 [node name="NameLabel" type="Label" parent="Margin/Content/Header/HeaderText"]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_colors/font_color = Color(0.95, 0.96, 1, 1)
-theme_override_font_sizes/font_size = 23
+theme_override_colors/font_color = Color(0.93, 0.82, 0.62, 1)
+theme_override_font_sizes/font_size = 25
 text = "单位"
 text_overrun_behavior = 3
 
 [node name="SubLabel" type="Label" parent="Margin/Content/Header/HeaderText"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.64, 0.7, 0.8, 1)
+theme_override_colors/font_color = Color(0.68, 0.7, 0.65, 1)
 theme_override_font_sizes/font_size = 14
 text = "我方"
 text_overrun_behavior = 3
@@ -124,15 +124,25 @@ theme_override_styles/panel = SubResource("BadgeStyle")
 
 [node name="BadgeLabel" type="Label" parent="Margin/Content/Header/Badge"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.97, 0.82, 0.43, 1)
+theme_override_colors/font_color = Color(0.96, 0.76, 0.34, 1)
 theme_override_font_sizes/font_size = 14
 text = "费用 0"
 
 [node name="HealthRow" type="HBoxContainer" parent="Margin/Content"]
-custom_minimum_size = Vector2(0, 20)
+custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 10
 
+[node name="HealthIcon" type="Label" parent="Margin/Content/HealthRow"]
+custom_minimum_size = Vector2(24, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.86, 0.12, 0.1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 21
+text = "♥"
+horizontal_alignment = 1
 [node name="HealthBar" type="ProgressBar" parent="Margin/Content/HealthRow"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -146,21 +156,21 @@ value = 100.0
 [node name="HealthValueLabel" type="Label" parent="Margin/Content/HealthRow"]
 custom_minimum_size = Vector2(78, 0)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.92, 0.83, 1)
+theme_override_colors/font_color = Color(0.94, 0.86, 0.74, 1)
 theme_override_font_sizes/font_size = 14
 text = "100 / 100"
 horizontal_alignment = 2
 
 [node name="StatsGrid" type="GridContainer" parent="Margin/Content"]
-custom_minimum_size = Vector2(0, 72)
+custom_minimum_size = Vector2(0, 174)
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_constants/h_separation = 10
-theme_override_constants/v_separation = 0
-columns = 2
+theme_override_constants/h_separation = 0
+theme_override_constants/v_separation = 3
+columns = 1
 
 [node name="BottomArea" type="Control" parent="Margin/Content"]
-custom_minimum_size = Vector2(0, 56)
+custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 
 [node name="SkillsRow" type="HBoxContainer" parent="Margin/Content/BottomArea"]
@@ -171,7 +181,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_override_constants/separation = 7
+theme_override_constants/separation = 9
 alignment = 1
 
 [node name="ProgressBox" type="VBoxContainer" parent="Margin/Content/BottomArea"]
@@ -186,7 +196,7 @@ theme_override_constants/separation = 5
 
 [node name="ProgressLabel" type="Label" parent="Margin/Content/BottomArea/ProgressBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.75, 0.82, 0.92, 1)
+theme_override_colors/font_color = Color(0.9, 0.78, 0.58, 1)
 theme_override_font_sizes/font_size = 14
 text = "生产进度"
 

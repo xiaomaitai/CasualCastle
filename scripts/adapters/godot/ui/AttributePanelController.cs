@@ -12,9 +12,21 @@ public sealed class AttributePanelController
 	private const string PlaceholderTexture = "res://assets/art/placeholders/test_image.png";
 	private const string HolyElementId = "holy";
 	private const float NeutralMultiplier = 1f;
-	private const float StatRowHeight = 20f;
-	private const float StatColumnWidth = 198f;
+	private const float StatRowHeight = 26f;
+	private const float StatColumnWidth = 430f;
 	private const string NoBonusTooltip = "无特殊修正";
+	private const float StatNameWidth = 78f;
+	private const float StatInfoWidth = 22f;
+	private const int StatFontSize = 14;
+	private const int StatRowSeparation = 8;
+	private const int StatBorderWidth = 1;
+	private const int StatCornerRadius = 2;
+	private const float StatMarginLeft = 6f;
+	private const float StatMarginRight = 4f;
+	private static readonly Color StatRowBackground = new(0.045f, 0.05f, 0.048f, 0.92f);
+	private static readonly Color StatRowBorder = new(0.24f, 0.2f, 0.13f, 1f);
+	private static readonly Color StatNameColor = new(0.86f, 0.73f, 0.52f, 1f);
+	private static readonly Color StatValueColor = new(0.86f, 0.84f, 0.77f, 1f);
 
 	private readonly Panel _panel;
 	private readonly TextureRect _portraitRect;
@@ -262,20 +274,79 @@ public sealed class AttributePanelController
 
 	private Label AddStat(StatIconView.StatIconKind kind, string text, string tooltip, string elementId = "")
 	{
+		PanelContainer panel = CreateStatPanel(tooltip);
 		HBoxContainer row = new();
-		row.CustomMinimumSize = new Vector2(StatColumnWidth, StatRowHeight);
-		row.MouseFilter = Control.MouseFilterEnum.Stop;
-		row.TooltipText = tooltip;
+		row.AddThemeConstantOverride("separation", StatRowSeparation);
+		panel.AddChild(row);
 		StatIconView icon = new();
 		icon.Configure(kind);
 		icon.TooltipText = tooltip;
 		row.AddChild(icon);
+		row.AddChild(CreateStatNameLabel(StatName(kind)));
 		Label label = CreateStatLabel(text, tooltip);
 		row.AddChild(label);
 		if (!string.IsNullOrEmpty(elementId))
 			row.AddChild(CreateElementIcon(elementId));
-		_statsGrid.AddChild(row);
+		row.AddChild(CreateInfoLabel(tooltip));
+		_statsGrid.AddChild(panel);
 		return label;
+	}
+
+	private static PanelContainer CreateStatPanel(string tooltip)
+	{
+		PanelContainer panel = new();
+		panel.CustomMinimumSize = new Vector2(StatColumnWidth, StatRowHeight);
+		panel.MouseFilter = Control.MouseFilterEnum.Stop;
+		panel.TooltipText = tooltip;
+		StyleBoxFlat style = new();
+		style.BgColor = StatRowBackground;
+		style.BorderColor = StatRowBorder;
+		style.SetBorderWidthAll(StatBorderWidth);
+		style.SetCornerRadiusAll(StatCornerRadius);
+		style.ContentMarginLeft = StatMarginLeft;
+		style.ContentMarginRight = StatMarginRight;
+		panel.AddThemeStyleboxOverride("panel", style);
+		return panel;
+	}
+
+	private static Label CreateStatNameLabel(string text)
+	{
+		Label label = new();
+		label.Text = text;
+		label.CustomMinimumSize = new Vector2(StatNameWidth, 0f);
+		label.AddThemeFontSizeOverride("font_size", StatFontSize);
+		label.AddThemeColorOverride("font_color", StatNameColor);
+		return label;
+	}
+
+	private static Label CreateInfoLabel(string tooltip)
+	{
+		Label label = new();
+		label.Text = "ⓘ";
+		label.TooltipText = tooltip;
+		label.CustomMinimumSize = new Vector2(StatInfoWidth, 0f);
+		label.HorizontalAlignment = HorizontalAlignment.Center;
+		label.AddThemeColorOverride("font_color", StatNameColor);
+		return label;
+	}
+
+	private static string StatName(StatIconView.StatIconKind kind)
+	{
+		return kind switch
+		{
+			StatIconView.StatIconKind.Attack => "攻击力",
+			StatIconView.StatIconKind.Armor => "护甲",
+			StatIconView.StatIconKind.Cooldown => "攻击间隔",
+			StatIconView.StatIconKind.Range => "射程",
+			StatIconView.StatIconKind.Speed => "移动速度",
+			StatIconView.StatIconKind.Vision => "视野",
+			StatIconView.StatIconKind.Shield => "护盾",
+			StatIconView.StatIconKind.Footprint => "占地格数",
+			StatIconView.StatIconKind.Production => "生产率",
+			StatIconView.StatIconKind.Building => "类型",
+			StatIconView.StatIconKind.Unit => "产出兵种",
+			_ => "属性",
+		};
 	}
 
 	private static Label CreateStatLabel(string text, string tooltip)
@@ -284,8 +355,8 @@ public sealed class AttributePanelController
 		label.Text = text;
 		label.TooltipText = tooltip;
 		label.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
-		label.AddThemeFontSizeOverride("font_size", 14);
-		label.AddThemeColorOverride("font_color", new Color(0.84f, 0.87f, 0.93f));
+		label.AddThemeFontSizeOverride("font_size", StatFontSize);
+		label.AddThemeColorOverride("font_color", StatValueColor);
 		label.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis;
 		return label;
 	}
