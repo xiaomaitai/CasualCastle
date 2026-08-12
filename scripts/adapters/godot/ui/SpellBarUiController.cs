@@ -20,6 +20,7 @@ public sealed class SpellBarUiController
 	private bool _inputBlocked;
 	private bool _ritualInProgress;
 	private bool _hiddenByRing;
+	private UiProfileKind _profile;
 
 	public SpellBarUiController(CanvasLayer uiRoot, UnitSelectionController selection)
 	{
@@ -29,6 +30,22 @@ public sealed class SpellBarUiController
 		_handPanel = uiRoot.GetNode<Control>("HandPanel");
 		_scroll.Visible = false;
 		_handPanel.Visible = true;
+		DisplaySettingsManager settings = AdapterRegistry.Resolve<DisplaySettingsManager>();
+		_profile = settings.UiProfile;
+		settings.UiProfileChanged += ApplyProfile;
+	}
+
+	public void Dispose()
+	{
+		AdapterRegistry.Resolve<DisplaySettingsManager>().UiProfileChanged -= ApplyProfile;
+		ClearSlots();
+	}
+
+	private void ApplyProfile(UiProfileKind kind)
+	{
+		_profile = kind;
+		foreach (Button button in _slotButtons)
+			UiProfileStyles.ApplyCardButton(button, false, true, kind);
 	}
 
 	public void Process()
@@ -111,7 +128,7 @@ public sealed class SpellBarUiController
 			Disabled = !IsAvailable(building, def),
 			CustomMinimumSize = new Vector2(SlotWidth, SlotHeight),
 		};
-		MedievalUiStyles.ApplyCardButton(button, false, true);
+		UiProfileStyles.ApplyCardButton(button, false, true, _profile);
 		string ritualId = def.Id;
 		button.Pressed += () => TryStartRitual(building, ritualId);
 		return button;
@@ -124,7 +141,7 @@ public sealed class SpellBarUiController
 			Disabled = true,
 			CustomMinimumSize = new Vector2(SlotWidth * 1.4f, SlotHeight),
 		};
-		MedievalUiStyles.ApplyCardButton(button, false, true);
+		UiProfileStyles.ApplyCardButton(button, false, true, _profile);
 		_slotRow.AddChild(button);
 		_slotButtons.Add(button);
 		UpdateProgressText(building);

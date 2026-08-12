@@ -8,6 +8,7 @@ using System;
 
 public sealed class HudUiController
 {
+	private readonly CanvasLayer _uiRoot;
 	private readonly ProgressBar _playerHealthBar;
 	private readonly ProgressBar _enemyHealthBar;
 	private readonly Label _phaseLabel;
@@ -19,6 +20,7 @@ public sealed class HudUiController
 
 	public HudUiController(CanvasLayer uiRoot)
 	{
+		_uiRoot = uiRoot;
 		_playerHealthBar = uiRoot.GetNode<ProgressBar>("PlayerHealthBar");
 		_enemyHealthBar = uiRoot.GetNode<ProgressBar>("EnemyHealthBar");
 		_phaseLabel = uiRoot.GetNode<Label>("PhasePanel/PhaseLabel");
@@ -28,7 +30,9 @@ public sealed class HudUiController
 		_goldLabel = uiRoot.GetNode<Label>("GoldLabel");
 		_blackMagicLabel = uiRoot.GetNode<Label>("BlackMagicLabel");
 
-		MedievalUiStyles.ApplyHud(uiRoot);
+		DisplaySettingsManager settings = AdapterRegistry.Resolve<DisplaySettingsManager>();
+		ApplyProfile(settings.UiProfile);
+		settings.UiProfileChanged += ApplyProfile;
 
 		_newDayButton.Pressed += OnNewDayPressed;
 		_newDayButton.Text = AdapterRegistry.Resolve<GameManager>().IsUndeadBattle ? "进入夜晚" : "新的一天";
@@ -59,6 +63,7 @@ public sealed class HudUiController
 
 	public void Dispose()
 	{
+		AdapterRegistry.Resolve<DisplaySettingsManager>().UiProfileChanged -= ApplyProfile;
 		_newDayButton.Pressed -= OnNewDayPressed;
 		_skipPhaseButton.Pressed -= OnSkipPhasePressed;
 
@@ -73,6 +78,10 @@ public sealed class HudUiController
 			blackMagic.ValueChanged -= UpdateBlackMagicDisplay;
 	}
 
+	private void ApplyProfile(UiProfileKind kind)
+	{
+		UiProfileStyles.ApplyHud(_uiRoot, kind);
+	}
 	public void Process()
 	{
 		UpdatePhaseDisplay();

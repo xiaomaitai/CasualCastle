@@ -10,6 +10,7 @@ public sealed class HandUiController
 	private const float DragThreshold = 8f;
 
 	private readonly Node _owner;
+	private readonly CanvasLayer _uiRoot;
 	private readonly Button[] _handButtons = new Button[MaxHandSize];
 	private readonly Control.GuiInputEventHandler[] _handGuiInputHandlers = new Control.GuiInputEventHandler[MaxHandSize];
 	private readonly Label _placementHintLabel;
@@ -28,6 +29,7 @@ public sealed class HandUiController
 	private int _pendingHandIndex = -1;
 	private Vector2 _dragStartPosition;
 	private int _selectedIndex = -1;
+	private UiProfileKind _profile;
 	private const int MaxHandSize = Hand.MaxHandSize;
 
 	public bool IsDragging => _dragging;
@@ -36,6 +38,7 @@ public sealed class HandUiController
 	public HandUiController(Node owner, CanvasLayer uiRoot, Hand handService, ShopUiController shopUi)
 	{
 		_owner = owner;
+		_uiRoot = uiRoot;
 		_hand = handService;
 		_shop = AdapterRegistry.Resolve<Shop>();
 		_gameManager = AdapterRegistry.Resolve<GameManager>();
@@ -48,7 +51,10 @@ public sealed class HandUiController
 		_useItemButton.Size = new Vector2(180f, 50f);
 		_useItemButton.AddThemeFontSizeOverride("font_size", 22);
 		uiRoot.AddChild(_useItemButton);
-		MedievalUiStyles.ApplyHand(uiRoot, _useItemButton);
+		DisplaySettingsManager settings = AdapterRegistry.Resolve<DisplaySettingsManager>();
+		_profile = settings.UiProfile;
+		UiProfileStyles.ApplyHand(uiRoot, _useItemButton, _profile);
+		settings.UiProfileChanged += ApplyProfile;
 		_useItemButton.Pressed += OnUseItemPressed;
 
 		for (int i = 0; i < MaxHandSize; i++)
@@ -67,12 +73,20 @@ public sealed class HandUiController
 
 	public void Dispose()
 	{
+		AdapterRegistry.Resolve<DisplaySettingsManager>().UiProfileChanged -= ApplyProfile;
 		for (int i = 0; i < MaxHandSize; i++)
 			_handButtons[i].GuiInput -= _handGuiInputHandlers[i];
 
 		_hand.HandChanged -= RefreshDisplay;
 		_hand.SelectionChanged -= OnSelectionChanged;
 		_useItemButton.Pressed -= OnUseItemPressed;
+	}
+
+	private void ApplyProfile(UiProfileKind kind)
+	{
+		_profile = kind;
+		UiProfileStyles.ApplyHand(_uiRoot, _useItemButton, kind);
+		RefreshHighlight();
 	}
 
 	public void SetInputBlocked(bool blocked)
@@ -319,7 +333,7 @@ public sealed class HandUiController
 		for (int i = 0; i < MaxHandSize; i++)
 		{
 			bool highlighted = i == _selectedIndex || (_dragging && i == _dragHandIndex);
-			MedievalUiStyles.ApplyCardButton(_handButtons[i], highlighted, i < _hand.Cards.Count);
+			UiProfileStyles.ApplyCardButton(_handButtons[i], highlighted, i < _hand.Cards.Count, _profile);
 			_handButtons[i].Modulate = Colors.White;
 		}
 	}

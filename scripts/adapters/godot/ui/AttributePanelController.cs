@@ -35,16 +35,16 @@ public sealed class AttributePanelController
 		_buildingView = new AttributePanelView(uiRoot.GetNode<Panel>("BuildingAttributePanel"));
 		_view = _unitView;
 		DisplaySettingsManager settings = AdapterRegistry.Resolve<DisplaySettingsManager>();
-		SetProfile(settings.AttributePanelProfile);
-		settings.AttributePanelProfileChanged += SetProfile;
+		SetProfile(settings.UiProfile);
+		settings.UiProfileChanged += SetProfile;
 	}
 
 	public void Dispose()
 	{
-		AdapterRegistry.Resolve<DisplaySettingsManager>().AttributePanelProfileChanged -= SetProfile;
+		AdapterRegistry.Resolve<DisplaySettingsManager>().UiProfileChanged -= SetProfile;
 	}
 
-	private void SetProfile(AttributePanelProfileKind kind)
+	private void SetProfile(UiProfileKind kind)
 	{
 		if (_profile != null && _profile.Kind == kind)
 			return;
@@ -164,6 +164,7 @@ public sealed class AttributePanelController
 		{
 			SkillIconView icon = new();
 			icon.Configure(skill);
+			icon.ApplyProfile(_profile.Kind);
 			_view.SkillsRow.AddChild(icon);
 			_skillIcons.Add(icon);
 		}

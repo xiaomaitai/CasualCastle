@@ -31,10 +31,15 @@ public sealed class BuildingActionRingController
 	private Button _sellConfirmOk;
 	private Button _sellConfirmCancel;
 	private Building _pendingSell;
+	private UiProfileKind _profile;
 
 	public BuildingActionRingController(CanvasLayer uiRoot, UnitSelectionController selection, SpellBarUiController spellBarUi)
 	{
 		_ring = uiRoot.GetNode<BuildingActionRing>("BuildingActionRing");
+		DisplaySettingsManager settings = AdapterRegistry.Resolve<DisplaySettingsManager>();
+		_profile = settings.UiProfile;
+		ApplyProfile(_profile);
+		settings.UiProfileChanged += ApplyProfile;
 		_selection = selection;
 		_spellBarUi = spellBarUi;
 		_ring.Visible = false;
@@ -48,6 +53,7 @@ public sealed class BuildingActionRingController
 
 	public void Dispose()
 	{
+		AdapterRegistry.Resolve<DisplaySettingsManager>().UiProfileChanged -= ApplyProfile;
 		ClearButtons();
 		_sellConfirmOk.Pressed -= ConfirmSell;
 		_sellConfirmCancel.Pressed -= CloseSellConfirm;
@@ -55,6 +61,13 @@ public sealed class BuildingActionRingController
 		_spellBarUi.SetHiddenByRing(false);
 	}
 
+	private void ApplyProfile(UiProfileKind kind)
+	{
+		_profile = kind;
+		_ring.ApplyProfile(kind);
+		foreach (Button button in _buttons)
+			ApplyButtonStyle(button);
+	}
 	public bool TryHandleEscape()
 	{
 		if (!_sellConfirmOverlay.Visible)
@@ -439,17 +452,22 @@ public sealed class BuildingActionRingController
 		return !AdapterRegistry.Resolve<BuildingSystem>().IsCoreBuilding(building.TypeId);
 	}
 
-	private static void ApplyButtonStyle(Button button)
+	private void ApplyButtonStyle(Button button)
 	{
-		button.AddThemeStyleboxOverride("normal", CreateButtonStyle(false));
-		button.AddThemeStyleboxOverride("hover", CreateButtonStyle(true));
-		button.AddThemeStyleboxOverride("pressed", CreateButtonStyle(true));
-		button.AddThemeStyleboxOverride("hover_pressed", CreateButtonStyle(true));
-		button.AddThemeStyleboxOverride("disabled", CreateDisabledStyle());
+		button.AddThemeStyleboxOverride("normal", CreateButtonStyle(button, false, 0));
+		button.AddThemeStyleboxOverride("hover", CreateButtonStyle(button, true, 1));
+		button.AddThemeStyleboxOverride("pressed", CreateButtonStyle(button, true, 2));
+		button.AddThemeStyleboxOverride("hover_pressed", CreateButtonStyle(button, true, 3));
+		button.AddThemeStyleboxOverride("disabled", CreateDisabledStyle(button));
 	}
 
-	private static StyleBoxFlat CreateButtonStyle(bool hover)
+	private StyleBox CreateButtonStyle(Button button, bool hover, int offset)
 	{
+		if (_profile == UiProfileKind.Cartoon)
+		{
+			Color color = hover ? new Color(1f, 0.94f, 0.75f, 1f) : new Color(1f, 0.9f, 0.62f, 1f);
+			return HandDrawnUiStyles.CreatePanel(color, Variant(button, offset), 5f);
+		}
 		StyleBoxFlat style = new();
 		style.BgColor = new Color(0.08f, 0.12f, 0.2f, 0.95f);
 		style.BorderColor = hover ? new Color(1f, 0.88f, 0.5f, 1f) : new Color(0.55f, 0.65f, 0.8f, 1f);
@@ -458,8 +476,10 @@ public sealed class BuildingActionRingController
 		return style;
 	}
 
-	private static StyleBoxFlat CreateDisabledStyle()
+	private StyleBox CreateDisabledStyle(Button button)
 	{
+		if (_profile == UiProfileKind.Cartoon)
+			return HandDrawnUiStyles.CreatePanel(new Color(1f, 0.99f, 0.96f, 1f), Variant(button, 4), 5f);
 		StyleBoxFlat style = new();
 		style.BgColor = new Color(0.12f, 0.14f, 0.18f, 0.7f);
 		style.BorderColor = new Color(0.35f, 0.38f, 0.45f, 0.8f);
@@ -468,6 +488,10 @@ public sealed class BuildingActionRingController
 		return style;
 	}
 
+	private static int Variant(Control control, int offset)
+	{
+		return Mathf.Abs(control.GetInstanceId().GetHashCode() + offset);
+	}
 	private sealed class RingAction
 	{
 		public string Kind;

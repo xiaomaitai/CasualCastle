@@ -1,11 +1,6 @@
 // 属性面板外观配置：定义经典详细与平面动画两套展示策略
 using Godot;
 
-public enum AttributePanelProfileKind
-{
-	Detailed,
-	Cartoon,
-}
 
 public sealed class AttributeStatControl
 {
@@ -21,7 +16,7 @@ public sealed class AttributeStatControl
 
 public interface IAttributePanelProfile
 {
-	AttributePanelProfileKind Kind { get; }
+	UiProfileKind Kind { get; }
 	void Apply(AttributePanelView view);
 	AttributeStatControl CreateStat(StatIconView.StatIconKind kind, string name, string text, string tooltip, string elementId);
 	string FormatValue(StatIconView.StatIconKind kind, string text);
@@ -32,9 +27,9 @@ public static class AttributePanelProfiles
 	private static readonly IAttributePanelProfile Detailed = new DetailedAttributePanelProfile();
 	private static readonly IAttributePanelProfile Cartoon = new CartoonAttributePanelProfile();
 
-	public static IAttributePanelProfile Get(AttributePanelProfileKind kind)
+	public static IAttributePanelProfile Get(UiProfileKind kind)
 	{
-		return kind == AttributePanelProfileKind.Cartoon ? Cartoon : Detailed;
+		return kind == UiProfileKind.Cartoon ? Cartoon : Detailed;
 	}
 }
 
@@ -49,7 +44,7 @@ public sealed class DetailedAttributePanelProfile : IAttributePanelProfile
 	private static readonly Color NameColor = new(0.86f, 0.73f, 0.52f, 1f);
 	private static readonly Color ValueColor = new(0.86f, 0.84f, 0.77f, 1f);
 
-	public AttributePanelProfileKind Kind => AttributePanelProfileKind.Detailed;
+	public UiProfileKind Kind => UiProfileKind.Detailed;
 
 	public void Apply(AttributePanelView view)
 	{
@@ -207,24 +202,18 @@ public sealed class CartoonAttributePanelProfile : IAttributePanelProfile
 {
 	private const float CardWidth = 138f;
 	private const float CardHeight = 48f;
-	private static readonly Color Ink = new(0.025f, 0.055f, 0.09f, 1f);
-	private static readonly Color Navy = new(0.02f, 0.12f, 0.24f, 1f);
-	private static readonly Color Coral = new(1f, 0.43f, 0.29f, 1f);
-	private static readonly Color Cream = new(1f, 0.88f, 0.64f, 1f);
-	private static readonly Color Yellow = new(1f, 0.76f, 0.05f, 1f);
+	private static readonly Color Ink = new(0.025f, 0.035f, 0.045f, 1f);
+	private static readonly Color Paper = new(1f, 0.99f, 0.96f, 1f);
+	private static readonly Color PaleYellow = new(1f, 0.9f, 0.62f, 1f);
 
-	public AttributePanelProfileKind Kind => AttributePanelProfileKind.Cartoon;
+	public UiProfileKind Kind => UiProfileKind.Cartoon;
 
 	public void Apply(AttributePanelView view)
 	{
 		view.StatsGrid.Columns = 3;
 		view.StatsGrid.AddThemeConstantOverride("h_separation", 6);
 		view.StatsGrid.AddThemeConstantOverride("v_separation", 6);
-		view.Panel.AddThemeStyleboxOverride("panel", CreatePanelStyle());
-		view.PortraitFrame.AddThemeStyleboxOverride("panel", CreatePortraitStyle());
-		view.Badge.AddThemeStyleboxOverride("panel", CreateBadgeStyle());
-		view.HealthBar.AddThemeStyleboxOverride("background", CreateHealthBackground());
-		view.HealthBar.AddThemeStyleboxOverride("fill", CreateHealthFill());
+		ApplyFrames(view);
 		ApplyTextColors(view);
 	}
 
@@ -239,14 +228,22 @@ public sealed class CartoonAttributePanelProfile : IAttributePanelProfile
 		VBoxContainer labels = CreateLabels(name, FormatValue(kind, text), tooltip);
 		row.AddChild(labels);
 		DetailedAttributePanelProfile.AddElement(row, elementId);
-		Label value = labels.GetNode<Label>("Value");
-		return new AttributeStatControl(panel, value);
+		return new AttributeStatControl(panel, labels.GetNode<Label>("Value"));
 	}
 
 	public string FormatValue(StatIconView.StatIconKind kind, string text)
 	{
 		int separator = text.IndexOf('·');
 		return separator < 0 ? text : text[..separator].Trim();
+	}
+
+	private static void ApplyFrames(AttributePanelView view)
+	{
+		view.Panel.AddThemeStyleboxOverride("panel", CreateFrame(view.Panel, Paper));
+		view.PortraitFrame.AddThemeStyleboxOverride("panel", CreateFrame(view.PortraitFrame, PaleYellow));
+		view.Badge.AddThemeStyleboxOverride("panel", CreateFrame(view.Badge, PaleYellow, 6f));
+		view.HealthBar.AddThemeStyleboxOverride("background", CreateFrame(view.HealthBar, Paper));
+		view.HealthBar.AddThemeStyleboxOverride("fill", CreateFrame(view.HealthBar, new Color(0.55f, 0.82f, 0.35f, 1f), 5f, 1));
 	}
 
 	private static PanelContainer CreateStatPanel(string tooltip)
@@ -257,9 +254,7 @@ public sealed class CartoonAttributePanelProfile : IAttributePanelProfile
 		panel.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
 		panel.MouseFilter = Control.MouseFilterEnum.Stop;
 		panel.TooltipText = tooltip;
-		StyleBoxFlat style = DetailedAttributePanelProfile.CreateStyle(Cream, Ink, 4, 12);
-		DetailedAttributePanelProfile.SetMargins(style, 5f, 4f);
-		panel.AddThemeStyleboxOverride("panel", style);
+		panel.AddThemeStyleboxOverride("panel", HandDrawnUiStyles.CreatePanel(PaleYellow, (int)panel.GetInstanceId(), 5f));
 		return panel;
 	}
 
@@ -279,40 +274,20 @@ public sealed class CartoonAttributePanelProfile : IAttributePanelProfile
 
 	private static void ApplyTextColors(AttributePanelView view)
 	{
-		view.NameLabel.AddThemeColorOverride("font_color", Colors.White);
-		view.SubLabel.AddThemeColorOverride("font_color", Cream);
+		view.NameLabel.AddThemeColorOverride("font_color", Ink);
+		view.SubLabel.AddThemeColorOverride("font_color", Ink);
 		view.BadgeLabel.AddThemeColorOverride("font_color", Ink);
-		view.HealthValueLabel.AddThemeColorOverride("font_color", Colors.White);
-		view.ProgressLabel.AddThemeColorOverride("font_color", Cream);
+		view.HealthValueLabel.AddThemeColorOverride("font_color", Ink);
+		view.ProgressLabel.AddThemeColorOverride("font_color", Ink);
 	}
 
-	private static StyleBoxFlat CreatePanelStyle()
+	private static StyleBoxTexture CreateFrame(Control control, Color color, float margin = 8f, int offset = 0)
 	{
-		StyleBoxFlat style = DetailedAttributePanelProfile.CreateStyle(Navy, Coral, 10, 18);
-		style.ShadowColor = Ink;
-		style.ShadowSize = 7;
-		return style;
+		return HandDrawnUiStyles.CreatePanel(color, Variant(control, offset), margin);
 	}
 
-	private static StyleBoxFlat CreatePortraitStyle()
+	private static int Variant(Control control, int offset = 0)
 	{
-		return DetailedAttributePanelProfile.CreateStyle(Cream, Ink, 5, 14);
-	}
-
-	private static StyleBoxFlat CreateBadgeStyle()
-	{
-		StyleBoxFlat style = DetailedAttributePanelProfile.CreateStyle(Yellow, Ink, 4, 14);
-		DetailedAttributePanelProfile.SetMargins(style, 8f, 3f);
-		return style;
-	}
-
-	private static StyleBoxFlat CreateHealthBackground()
-	{
-		return DetailedAttributePanelProfile.CreateStyle(Navy, Ink, 3, 9);
-	}
-
-	private static StyleBoxFlat CreateHealthFill()
-	{
-		return DetailedAttributePanelProfile.CreateStyle(new Color(0.05f, 0.78f, 0.2f, 1f), Ink, 3, 9);
+		return Mathf.Abs(control.GetPath().ToString().GetHashCode() + offset);
 	}
 }

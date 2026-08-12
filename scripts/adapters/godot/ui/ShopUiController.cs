@@ -9,6 +9,7 @@ public sealed class ShopUiController
 {
 	private const string ShopIconPath = "res://assets/art/ui/shop_goods_pile_194.png";
 	private readonly Node _owner;
+	private readonly CanvasLayer _uiRoot;
 	private readonly Button _shopButton;
 	private readonly Panel _shopButtonCircle;
 	private readonly Panel _panel;
@@ -17,7 +18,7 @@ public sealed class ShopUiController
 	private readonly Button _refreshButton;
 	private readonly Button[] _buyButtons = new Button[Shop.OfferCount];
 	private readonly Label[] _offerLabels = new Label[Shop.OfferCount];
-	private readonly Control[] _offerFrames = new Control[Shop.OfferCount];
+	private readonly OfferFrame[] _offerFrames = new OfferFrame[Shop.OfferCount];
 	private readonly Control.GuiInputEventHandler[] _offerGuiInputHandlers = new Control.GuiInputEventHandler[Shop.OfferCount];
 
 	private readonly Shop _shop;
@@ -29,6 +30,7 @@ public sealed class ShopUiController
 	private bool _ready;
 	private bool _dragging;
 	private int _dragSlotIndex = -1;
+	private UiProfileKind _profile;
 
 	public bool IsOpen { get; private set; }
 	public bool IsDragging => _dragging;
@@ -47,6 +49,7 @@ public sealed class ShopUiController
 	public ShopUiController(Node owner, CanvasLayer uiRoot, Shop shopService)
 	{
 		_owner = owner;
+		_uiRoot = uiRoot;
 		_shop = shopService;
 		_gameManager = AdapterRegistry.Resolve<GameManager>();
 		_buildingSystem = AdapterRegistry.Resolve<BuildingSystem>();
@@ -57,14 +60,17 @@ public sealed class ShopUiController
 		_closeButton = uiRoot.GetNode<Button>("ShopPanel/ShopCloseButton");
 		ApplyShopIcons();
 		_refreshButton = uiRoot.GetNode<Button>("ShopPanel/ShopRefreshButton");
-		MedievalUiStyles.ApplyShop(uiRoot);
+		DisplaySettingsManager settings = AdapterRegistry.Resolve<DisplaySettingsManager>();
+		_profile = settings.UiProfile;
+		UiProfileStyles.ApplyShop(uiRoot, _profile);
+		settings.UiProfileChanged += ApplyProfile;
 		UpdateShopButtonHighlight();
 
 		for (int i = 0; i < Shop.OfferCount; i++)
 		{
 			_offerLabels[i] = uiRoot.GetNode<Label>($"ShopPanel/OfferSlot{i + 1}/OfferLabel");
 			_buyButtons[i] = uiRoot.GetNode<Button>($"ShopPanel/OfferSlot{i + 1}/BuyButton");
-			_offerFrames[i] = uiRoot.GetNode<Control>($"ShopPanel/OfferFrame{i + 1}");
+			_offerFrames[i] = uiRoot.GetNode<OfferFrame>($"ShopPanel/OfferFrame{i + 1}");
 			_offerLabels[i].MouseFilter = Control.MouseFilterEnum.Stop;
 
 			int slotIndex = i;
@@ -72,6 +78,8 @@ public sealed class ShopUiController
 			_offerGuiInputHandlers[i] = inputEvent => OnOfferGuiInput(slotIndex, inputEvent);
 			_offerLabels[i].GuiInput += _offerGuiInputHandlers[i];
 		}
+
+		ApplyOfferFrames();
 
 		_shopButton.Pressed += OnShopButtonPressed;
 		_shopButton.MouseEntered += OnShopButtonMouseEntered;
@@ -92,6 +100,7 @@ public sealed class ShopUiController
 
 	public void Dispose()
 	{
+		AdapterRegistry.Resolve<DisplaySettingsManager>().UiProfileChanged -= ApplyProfile;
 		_shopButton.Pressed -= OnShopButtonPressed;
 		_shopButton.MouseEntered -= OnShopButtonMouseEntered;
 		_shopButton.MouseExited -= OnShopButtonMouseExited;
@@ -105,6 +114,20 @@ public sealed class ShopUiController
 		_shop.ShopAvailabilityChanged -= UpdateShopButtonAvailability;
 		_shop.ShopOpenRequested -= Open;
 		_shop.ShopOffersChanged -= RefreshOffers;
+	}
+
+	private void ApplyProfile(UiProfileKind kind)
+	{
+		_profile = kind;
+		UiProfileStyles.ApplyShop(_uiRoot, kind);
+		ApplyOfferFrames();
+		UpdateShopButtonHighlight();
+	}
+
+	private void ApplyOfferFrames()
+	{
+		for (int i = 0; i < _offerFrames.Length; i++)
+			_offerFrames[i].ApplyProfile(_profile);
 	}
 
 	public void SetGameOver(bool gameOver)
@@ -208,7 +231,7 @@ public sealed class ShopUiController
 
 	private void UpdateShopButtonHighlight()
 	{
-		MedievalUiStyles.SetShopCircleHighlight(_shopButtonCircle, _shopButtonHovered || IsOpen);
+		UiProfileStyles.SetShopCircleHighlight(_shopButtonCircle, _shopButtonHovered || IsOpen, _profile);
 	}
 
 	private void ApplyShopIcons()

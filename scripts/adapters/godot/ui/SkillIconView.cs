@@ -27,8 +27,9 @@ public partial class SkillIconView : Control
 	private string _skillId;
 	private float _remaining;
 	private float _total;
-	private StyleBoxFlat _bg;
+	private StyleBox _bg;
 	private Texture2D _iconTexture;
+	private UiProfileKind _profile;
 
 	public override void _Ready()
 	{
@@ -48,6 +49,12 @@ public partial class SkillIconView : Control
 		QueueRedraw();
 	}
 
+	public void ApplyProfile(UiProfileKind kind)
+	{
+		_profile = kind;
+		CreateBackgroundStyle();
+		QueueRedraw();
+	}
 	public void SetCooldown(float remaining, float total)
 	{
 		if (Mathf.IsEqualApprox(_remaining, remaining) && Mathf.IsEqualApprox(_total, total))
@@ -328,10 +335,16 @@ public partial class SkillIconView : Control
 
 	private void CreateBackgroundStyle()
 	{
-		_bg = new StyleBoxFlat();
-		_bg.BgColor = Background;
-		_bg.BorderColor = BorderColor;
-		_bg.SetBorderWidthAll(2);
-		_bg.SetCornerRadiusAll(3);
+		if (_profile == UiProfileKind.Cartoon)
+		{
+			_bg = HandDrawnUiStyles.CreatePanel(new Color(1f, 0.9f, 0.62f, 1f), (int)GetInstanceId(), 4f);
+			return;
+		}
+		StyleBoxFlat style = new();
+		style.BgColor = Background;
+		style.BorderColor = BorderColor;
+		style.SetBorderWidthAll(2);
+		style.SetCornerRadiusAll(3);
+		_bg = style;
 	}
 }

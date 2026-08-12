@@ -173,16 +173,16 @@ offset_bottom = 444.0
 theme_override_font_sizes/font_size = 20
 text = "90%"
 
-[node name="AttributePanelProfileLabel" type="Label" parent="Panel"]
+[node name="UiProfileLabel" type="Label" parent="Panel"]
 layout_mode = 0
 offset_left = 48.0
 offset_top = 468.0
 offset_right = 200.0
 offset_bottom = 504.0
 theme_override_font_sizes/font_size = 20
-text = "属性面板风格"
+text = "游戏界面风格"
 
-[node name="AttributePanelProfileOption" type="OptionButton" parent="Panel"]
+[node name="UiProfileOption" type="OptionButton" parent="Panel"]
 layout_mode = 0
 offset_left = 220.0
 offset_top = 464.0
