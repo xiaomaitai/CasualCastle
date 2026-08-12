@@ -13,6 +13,9 @@ public static class MedievalUiStyles
 	private const int HudFontSize = 24;
 	private const int SmallFontSize = 16;
 	private const int PanelShadowSize = 8;
+	private const int ShopCircleRadius = 54;
+	private const int ShopCircleHighlightBorder = 3;
+	private const int ShopCircleHighlightShadow = 10;
 	private const float PanelContentMargin = 8f;
 	private static readonly Color PanelBackground = new(0.018f, 0.022f, 0.024f, 0.96f);
 	private static readonly Color PanelBorder = new(0.63f, 0.46f, 0.22f, 1f);
@@ -48,7 +51,7 @@ public static class MedievalUiStyles
 	public static void ApplyHand(CanvasLayer uiRoot, Button useItemButton)
 	{
 		StylePanel(uiRoot.GetNode<Panel>("HandBackdrop"));
-		StyleButton(uiRoot.GetNode<Button>("ShopButton"), true);
+		StyleShopButton(uiRoot.GetNode<Button>("ShopButton"));
 		StyleToolButton(uiRoot.GetNode<Button>("BuildingPauseToolButton"));
 		StyleToolButton(uiRoot.GetNode<Button>("BuildingRepairToolButton"));
 		StyleToolButton(uiRoot.GetNode<Button>("CombineProhibitToolButton"));
@@ -57,6 +60,17 @@ public static class MedievalUiStyles
 		hint.AddThemeColorOverride("font_color", BrightGold);
 		hint.AddThemeColorOverride("font_outline_color", Colors.Black);
 		hint.AddThemeConstantOverride("outline_size", PanelBorderWidth);
+	}
+
+	public static void SetShopCircleHighlight(Panel panel, bool highlighted)
+	{
+		Color background = highlighted ? ButtonPressed : ButtonBackground;
+		Color border = highlighted ? BrightGold : PanelBorder;
+		int width = highlighted ? ShopCircleHighlightBorder : ButtonBorderWidth;
+		StyleBoxFlat style = CreateFlatStyle(background, border, width, ShopCircleRadius);
+		style.ShadowColor = highlighted ? Gold : PanelShadow;
+		style.ShadowSize = highlighted ? ShopCircleHighlightShadow : PanelShadowSize;
+		panel.AddThemeStyleboxOverride("panel", style);
 	}
 
 	public static void ApplyCardButton(Button button, bool selected, bool occupied)
@@ -130,6 +144,16 @@ public static class MedievalUiStyles
 	{
 		StyleButton(button);
 		button.AddThemeFontSizeOverride("font_size", SmallFontSize);
+	}
+
+	private static void StyleShopButton(Button button)
+	{
+		StyleBoxEmpty style = new();
+		button.AddThemeStyleboxOverride("normal", style);
+		button.AddThemeStyleboxOverride("hover", style);
+		button.AddThemeStyleboxOverride("pressed", style);
+		button.AddThemeStyleboxOverride("disabled", style);
+		button.AddThemeStyleboxOverride("focus", style);
 	}
 
 	private static void StyleButton(Button button, bool emphasized = false)

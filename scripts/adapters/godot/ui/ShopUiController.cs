@@ -7,8 +7,10 @@ using System;
 
 public sealed class ShopUiController
 {
+	private const string ShopIconPath = "res://assets/art/ui/shop_goods_pile_194.png";
 	private readonly Node _owner;
 	private readonly Button _shopButton;
+	private readonly Panel _shopButtonCircle;
 	private readonly Panel _panel;
 	private readonly Label _shopGoldLabel;
 	private readonly Button _closeButton;
@@ -23,6 +25,7 @@ public sealed class ShopUiController
 	private readonly BuildingSystem _buildingSystem;
 
 	private bool _gameOver;
+	private bool _shopButtonHovered;
 	private bool _ready;
 	private bool _dragging;
 	private int _dragSlotIndex = -1;
@@ -48,11 +51,14 @@ public sealed class ShopUiController
 		_gameManager = AdapterRegistry.Resolve<GameManager>();
 		_buildingSystem = AdapterRegistry.Resolve<BuildingSystem>();
 		_shopButton = uiRoot.GetNode<Button>("ShopButton");
+		_shopButtonCircle = uiRoot.GetNode<Panel>("ShopButtonCircle");
 		_panel = uiRoot.GetNode<Panel>("ShopPanel");
 		_shopGoldLabel = uiRoot.GetNode<Label>("ShopPanel/ShopGoldLabel");
 		_closeButton = uiRoot.GetNode<Button>("ShopPanel/ShopCloseButton");
+		ApplyShopIcons();
 		_refreshButton = uiRoot.GetNode<Button>("ShopPanel/ShopRefreshButton");
 		MedievalUiStyles.ApplyShop(uiRoot);
+		UpdateShopButtonHighlight();
 
 		for (int i = 0; i < Shop.OfferCount; i++)
 		{
@@ -68,6 +74,8 @@ public sealed class ShopUiController
 		}
 
 		_shopButton.Pressed += OnShopButtonPressed;
+		_shopButton.MouseEntered += OnShopButtonMouseEntered;
+		_shopButton.MouseExited += OnShopButtonMouseExited;
 		_closeButton.Pressed += OnClosePressed;
 		_refreshButton.Pressed += OnRefreshPressed;
 
@@ -85,6 +93,8 @@ public sealed class ShopUiController
 	public void Dispose()
 	{
 		_shopButton.Pressed -= OnShopButtonPressed;
+		_shopButton.MouseEntered -= OnShopButtonMouseEntered;
+		_shopButton.MouseExited -= OnShopButtonMouseExited;
 		_closeButton.Pressed -= OnClosePressed;
 		_refreshButton.Pressed -= OnRefreshPressed;
 
@@ -159,7 +169,9 @@ public sealed class ShopUiController
 			return false;
 
 		IsOpen = false;
+		_shopButton.ButtonPressed = false;
 		_panel.Visible = false;
+		UpdateShopButtonHighlight();
 		CancelDrag();
 		UpdateShopButtonAvailability(_shop.IsShopAvailable);
 		OpenChanged?.Invoke(IsOpen);
@@ -173,16 +185,45 @@ public sealed class ShopUiController
 			return;
 
 		IsOpen = true;
+		_shopButton.ButtonPressed = true;
 		_panel.Visible = true;
+		UpdateShopButtonHighlight();
 		UpdateShopButtonAvailability(_shop.IsShopAvailable);
 		RefreshOffers();
 		OpenChanged?.Invoke(IsOpen);
 		Sfx.Play(SfxEvents.ShopOpen);
 	}
 
+	private void OnShopButtonMouseEntered()
+	{
+		_shopButtonHovered = true;
+		UpdateShopButtonHighlight();
+	}
+
+	private void OnShopButtonMouseExited()
+	{
+		_shopButtonHovered = false;
+		UpdateShopButtonHighlight();
+	}
+
+	private void UpdateShopButtonHighlight()
+	{
+		MedievalUiStyles.SetShopCircleHighlight(_shopButtonCircle, _shopButtonHovered || IsOpen);
+	}
+
+	private void ApplyShopIcons()
+	{
+		Texture2D icon = GD.Load<Texture2D>(ShopIconPath);
+		_shopButton.Icon = icon;
+		_shopButton.Text = "";
+	}
+
 	private void OnShopButtonPressed()
 	{
-		_shop.RequestOpenShop();
+		if (_shopButton.ButtonPressed)
+			_shop.RequestOpenShop();
+		else
+			Close();
 	}
 
 	private void OnRefreshPressed()
@@ -260,8 +301,8 @@ public sealed class ShopUiController
 
 	private void UpdateShopButtonAvailability(bool available)
 	{
-		_shopButton.Disabled = _gameOver || !available || IsOpen;
-		_shopButton.Text = "商店";
+		_shopButton.Disabled = _gameOver || !available;
+		_shopButton.Text = "";
 	}
 
 	private void RefreshOffers()

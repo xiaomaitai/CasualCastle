@@ -2,13 +2,13 @@
 
 ## 1. 面板概述
 
-- 位置：1920×1080 下左侧 x 18~478，y 632~1062；尺寸 460×430
+- 位置：1920×1080 下左侧 x 18~478，底边固定为 y=1062；宽度 460，高度按实际内容动态收缩但不低于 230，与手牌区同高
 - 纯展示面板，无升级、出售等交互
-- 点选单位或建筑时显示，点空白处隐藏
+- 单位与建筑使用两个独立面板实例；点选对应对象时只显示对应面板，点空白处隐藏
 - 无内容的区域隐藏，后续内容紧凑补位
-- 独立场景：`scenes/ui/attribute_panel.tscn`
-- 控制器：`scripts/adapters/godot/ui/AttributePanelController.cs`
-- 挂载点：`scenes/main/main_game.tscn` 的 `UI/AttributePanel`
+- 复用场景：`scenes/ui/attribute_panel.tscn`，分别实例化单位面板和建筑面板
+- 控制器：`scripts/adapters/godot/ui/AttributePanelController.cs`；共享视图：`AttributePanelView.cs`
+- 挂载点：`scenes/main/main_game.tscn` 的 `UI/UnitAttributePanel` 与 `UI/BuildingAttributePanel`
 
 ## 2. 视觉与信息层级
 
@@ -16,8 +16,8 @@
 - 顶部使用横向身份区：左侧大头像，右侧名称、副标题和费用/价值徽章
 - 生命条紧邻身份区，使用暗红色填充并显示当前值/最大值，不显示百分比
 - 核心属性使用单列紧凑表格，依次展示图标、属性名、数值和悬停明细
-- 底部由技能栏或建筑进度区占用，两者不会同时留空占位
-- 所有详细换算和攻防修正通过悬停浮窗展示
+- 单位面板底部仅在有技能时显示技能栏；建筑面板底部仅在有生产或仪式进度时显示
+- 属性行数量和底部区域共同决定面板高度，不为隐藏区域预留空白；详细换算和攻防修正通过悬停浮窗展示
 
 ## 3. 通用区域
 

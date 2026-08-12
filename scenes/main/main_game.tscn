@@ -157,12 +157,22 @@ offset_right = 1896
 offset_bottom = 72
 text = "☰"
 
+[node name="ShopButtonCircle" type="Panel" parent="UI"]
+offset_left = 1778
+offset_top = 924
+offset_right = 1886
+offset_bottom = 1032
+mouse_filter = 2
+
 [node name="ShopButton" type="Button" parent="UI"]
-offset_left = 1735.5
-offset_top = 930
-offset_right = 1915.5
-offset_bottom = 1014
-text = "商店"
+offset_left = 1760
+offset_top = 906
+offset_right = 1904
+offset_bottom = 1050
+toggle_mode = true
+text = ""
+expand_icon = true
+tooltip_text = "打开/关闭商店"
 
 [node name="BuildingPauseToolButton" type="Button" parent="UI"]
 visible = false
@@ -198,82 +208,110 @@ expand_icon = true
 tooltip_text = "禁止组合"
 
 [node name="HandBackdrop" type="Panel" parent="UI"]
-offset_left = 482.0
-offset_top = 891.0
-offset_right = 1497.0
-offset_bottom = 1059.0
+offset_left = 488.0
+offset_top = 832.0
+offset_right = 1588.0
+offset_bottom = 1062.0
 mouse_filter = 2
 
 [node name="HandPanel" type="HBoxContainer" parent="UI"]
-offset_left = 490.0
-offset_top = 907.5
-offset_right = 1489.0
-offset_bottom = 1042.5
-theme_override_constants/separation = 18
-alignment = 1
+offset_left = 502.0
+offset_top = 846.0
+offset_right = 1574.0
+offset_bottom = 1046.0
+theme_override_constants/separation = 8
+alignment = 0
 
 [node name="HandSlot1" type="Button" parent="UI/HandPanel"]
-custom_minimum_size = Vector2(126, 120)
+visible = false
+custom_minimum_size = Vector2(100, 200)
 layout_mode = 2
 disabled = true
 text = "空"
 
 [node name="HandSlot2" type="Button" parent="UI/HandPanel"]
-custom_minimum_size = Vector2(126, 120)
+visible = false
+custom_minimum_size = Vector2(100, 200)
 layout_mode = 2
 disabled = true
 text = "空"
 
 [node name="HandSlot3" type="Button" parent="UI/HandPanel"]
-custom_minimum_size = Vector2(126, 120)
+visible = false
+custom_minimum_size = Vector2(100, 200)
 layout_mode = 2
 disabled = true
 text = "空"
 
 [node name="HandSlot4" type="Button" parent="UI/HandPanel"]
-custom_minimum_size = Vector2(126, 120)
+visible = false
+custom_minimum_size = Vector2(100, 200)
 layout_mode = 2
 disabled = true
 text = "空"
 
 [node name="HandSlot5" type="Button" parent="UI/HandPanel"]
-custom_minimum_size = Vector2(126, 120)
+visible = false
+custom_minimum_size = Vector2(100, 200)
 layout_mode = 2
 disabled = true
 text = "空"
 
 [node name="HandSlot6" type="Button" parent="UI/HandPanel"]
-custom_minimum_size = Vector2(126, 120)
+visible = false
+custom_minimum_size = Vector2(100, 200)
 layout_mode = 2
 disabled = true
 text = "空"
 
 [node name="HandSlot7" type="Button" parent="UI/HandPanel"]
-custom_minimum_size = Vector2(126, 120)
+visible = false
+custom_minimum_size = Vector2(100, 200)
+layout_mode = 2
+disabled = true
+text = "空"
+
+[node name="HandSlot8" type="Button" parent="UI/HandPanel"]
+visible = false
+custom_minimum_size = Vector2(100, 200)
+layout_mode = 2
+disabled = true
+text = "空"
+
+[node name="HandSlot9" type="Button" parent="UI/HandPanel"]
+visible = false
+custom_minimum_size = Vector2(100, 200)
+layout_mode = 2
+disabled = true
+text = "空"
+
+[node name="HandSlot10" type="Button" parent="UI/HandPanel"]
+visible = false
+custom_minimum_size = Vector2(100, 200)
 layout_mode = 2
 disabled = true
 text = "空"
 
 [node name="SpellBarPanel" type="ScrollContainer" parent="UI"]
 visible = false
-offset_left = 490.0
-offset_top = 907.5
-offset_right = 1489.0
-offset_bottom = 1042.5
+offset_left = 502.0
+offset_top = 846.0
+offset_right = 1574.0
+offset_bottom = 1046.0
 horizontal_scroll_mode = 1
 vertical_scroll_mode = 0
 
 [node name="SpellSlots" type="HBoxContainer" parent="UI/SpellBarPanel"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 18
+theme_override_constants/separation = 8
 
 [node name="PlacementHintLabel" type="Label" parent="UI"]
 visible = false
-offset_left = 690
-offset_top = 862.5
-offset_right = 1230
-offset_bottom = 900
+offset_left = 768
+offset_top = 796.0
+offset_right = 1308
+offset_bottom = 832.0
 theme_override_font_sizes/font_size = 24
 text = "左键放置，右键或 Esc 取消"
 horizontal_alignment = 1
@@ -318,7 +356,9 @@ offset_bottom = 198
 theme_override_font_sizes/font_size = 27
 text = "工作中"
 
-[node name="AttributePanel" parent="UI" instance=ExtResource("24")]
+[node name="UnitAttributePanel" parent="UI" instance=ExtResource("24")]
+
+[node name="BuildingAttributePanel" parent="UI" instance=ExtResource("24")]
 
 [node name="ShopPanel" type="Panel" parent="UI"]
 visible = false
@@ -349,6 +389,7 @@ offset_top = 18
 offset_right = 630
 offset_bottom = 66
 text = "X"
+tooltip_text = "关闭商店"
 
 [node name="ShopGoldLabel" type="Label" parent="UI/ShopPanel"]
 layout_mode = 0
@@ -362,9 +403,9 @@ text = "当前金币：30"
 [node name="OfferSlot1" type="HBoxContainer" parent="UI/ShopPanel"]
 layout_mode = 0
 offset_left = 36
-offset_top = 156
+offset_top = 144
 offset_right = 616.5
-offset_bottom = 228
+offset_bottom = 216
 theme_override_constants/separation = 18
 
 [node name="OfferLabel" type="Label" parent="UI/ShopPanel/OfferSlot1"]
@@ -382,17 +423,17 @@ text = "购买"
 layout_mode = 0
 mouse_filter = 2
 offset_left = 18
-offset_top = 144
+offset_top = 132
 offset_right = 634.5
-offset_bottom = 240
+offset_bottom = 228
 script = ExtResource("23")
 
 [node name="OfferSlot2" type="HBoxContainer" parent="UI/ShopPanel"]
 layout_mode = 0
 offset_left = 36
-offset_top = 264
+offset_top = 252
 offset_right = 616.5
-offset_bottom = 336
+offset_bottom = 324
 theme_override_constants/separation = 18
 
 [node name="OfferLabel" type="Label" parent="UI/ShopPanel/OfferSlot2"]
@@ -410,17 +451,17 @@ text = "购买"
 layout_mode = 0
 mouse_filter = 2
 offset_left = 18
-offset_top = 252
+offset_top = 240
 offset_right = 634.5
-offset_bottom = 348
+offset_bottom = 336
 script = ExtResource("23")
 
 [node name="OfferSlot3" type="HBoxContainer" parent="UI/ShopPanel"]
 layout_mode = 0
 offset_left = 36
-offset_top = 372
+offset_top = 360
 offset_right = 616.5
-offset_bottom = 444
+offset_bottom = 432
 theme_override_constants/separation = 18
 
 [node name="OfferLabel" type="Label" parent="UI/ShopPanel/OfferSlot3"]
@@ -438,17 +479,17 @@ text = "购买"
 layout_mode = 0
 mouse_filter = 2
 offset_left = 18
-offset_top = 360
+offset_top = 348
 offset_right = 634.5
-offset_bottom = 456
+offset_bottom = 444
 script = ExtResource("23")
 
 [node name="OfferSlot4" type="HBoxContainer" parent="UI/ShopPanel"]
 layout_mode = 0
 offset_left = 36
-offset_top = 480
+offset_top = 468
 offset_right = 616.5
-offset_bottom = 552
+offset_bottom = 540
 theme_override_constants/separation = 18
 
 [node name="OfferLabel" type="Label" parent="UI/ShopPanel/OfferSlot4"]
@@ -466,17 +507,17 @@ text = "购买"
 layout_mode = 0
 mouse_filter = 2
 offset_left = 18
-offset_top = 468
+offset_top = 456
 offset_right = 634.5
-offset_bottom = 564
+offset_bottom = 552
 script = ExtResource("23")
 
 [node name="OfferSlot5" type="HBoxContainer" parent="UI/ShopPanel"]
 layout_mode = 0
 offset_left = 36
-offset_top = 588
+offset_top = 576
 offset_right = 616.5
-offset_bottom = 660
+offset_bottom = 648
 theme_override_constants/separation = 18
 
 [node name="OfferLabel" type="Label" parent="UI/ShopPanel/OfferSlot5"]
@@ -494,17 +535,17 @@ text = "购买"
 layout_mode = 0
 mouse_filter = 2
 offset_left = 18
-offset_top = 576
+offset_top = 564
 offset_right = 634.5
-offset_bottom = 672
+offset_bottom = 660
 script = ExtResource("23")
 
 [node name="ShopRefreshButton" type="Button" parent="UI/ShopPanel"]
 layout_mode = 0
-offset_left = 210
-offset_top = 696
-offset_right = 442.5
-offset_bottom = 762
+offset_left = 480.5
+offset_top = 664
+offset_right = 634.5
+offset_bottom = 704
 text = "刷新商品"
 
 [node name="PauseOverlay" type="ColorRect" parent="UI"]

@@ -9,14 +9,14 @@ public class CardRulesTests
 	public void CanAddCard_BelowMax_ReturnsTrue()
 	{
 		Assert.True(CardRules.CanAddCard(0));
-		Assert.True(CardRules.CanAddCard(6));
+		Assert.True(CardRules.CanAddCard(9));
 	}
 
 	[Fact]
 	public void CanAddCard_AtMax_ReturnsFalse()
 	{
+		Assert.Equal(10, CardRules.MaxHandSize);
 		Assert.False(CardRules.CanAddCard(CardRules.MaxHandSize));
-		Assert.False(CardRules.CanAddCard(10));
 	}
 
 	[Fact]

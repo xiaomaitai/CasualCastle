@@ -28,7 +28,7 @@ public sealed class HandUiController
 	private int _pendingHandIndex = -1;
 	private Vector2 _dragStartPosition;
 	private int _selectedIndex = -1;
-	private const int MaxHandSize = 7;
+	private const int MaxHandSize = Hand.MaxHandSize;
 
 	public bool IsDragging => _dragging;
 	public bool IsPlacementActive => _dragging || _hand.HasSelection;
@@ -44,7 +44,7 @@ public sealed class HandUiController
 		_placementHintLabel = uiRoot.GetNode<Label>("PlacementHintLabel");
 
 		_useItemButton = new Button { Text = "使用经验魔晶", Visible = false };
-		_useItemButton.Position = new Vector2(700f, 810f);
+		_useItemButton.Position = new Vector2(778f, 740f);
 		_useItemButton.Size = new Vector2(180f, 50f);
 		_useItemButton.AddThemeFontSizeOverride("font_size", 22);
 		uiRoot.AddChild(_useItemButton);
@@ -274,8 +274,8 @@ public sealed class HandUiController
 			}
 			else
 			{
-				button.Visible = true;
-				button.Text = $"[{i + 1}]\n空";
+				button.Visible = false;
+				button.Text = "";
 				button.Disabled = true;
 			}
 		}

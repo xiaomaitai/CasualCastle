@@ -181,7 +181,7 @@ public partial class NecromancerBattleSmoke : Node
 		Control handPanel = GetNode<Control>("MainGame/UI/HandPanel");
 		Control spellBar = GetNode<Control>("MainGame/UI/SpellBarPanel");
 		HBoxContainer slots = GetNode<HBoxContainer>("MainGame/UI/SpellBarPanel/SpellSlots");
-		Control attributePanel = GetNode<Control>("MainGame/UI/AttributePanel");
+		Control attributePanel = GetNode<Control>("MainGame/UI/BuildingAttributePanel");
 		if (attributePanel.Visible != _spellBarExpectSelected)
 			_failures.Add($"选中切换错误 attributeVisible={attributePanel.Visible} 期望={_spellBarExpectSelected}");
 		if (handPanel.Visible == _spellBarExpectVisible)

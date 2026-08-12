@@ -12,7 +12,6 @@ public sealed class AttributePanelController
 	private const string PlaceholderTexture = "res://assets/art/placeholders/test_image.png";
 	private const string HolyElementId = "holy";
 	private const float NeutralMultiplier = 1f;
-	private const float StatRowHeight = 26f;
 	private const float StatColumnWidth = 430f;
 	private const string NoBonusTooltip = "无特殊修正";
 	private const float StatNameWidth = 78f;
@@ -28,19 +27,9 @@ public sealed class AttributePanelController
 	private static readonly Color StatNameColor = new(0.86f, 0.73f, 0.52f, 1f);
 	private static readonly Color StatValueColor = new(0.86f, 0.84f, 0.77f, 1f);
 
-	private readonly Panel _panel;
-	private readonly TextureRect _portraitRect;
-	private readonly Label _nameLabel;
-	private readonly Label _subLabel;
-	private readonly Label _badgeLabel;
-	private readonly ProgressBar _healthBar;
-	private readonly Label _healthValueLabel;
-	private readonly GridContainer _statsGrid;
-	private readonly Control _bottomArea;
-	private readonly HBoxContainer _skillsRow;
-	private readonly VBoxContainer _progressBox;
-	private readonly Label _progressLabel;
-	private readonly ProgressBar _progressBar;
+	private readonly AttributePanelView _unitView;
+	private readonly AttributePanelView _buildingView;
+	private AttributePanelView _view;
 	private readonly UnitSelectionController _selection;
 	private readonly List<SkillIconView> _skillIcons = new();
 	private UnitLogic _currentUnit;
@@ -54,19 +43,9 @@ public sealed class AttributePanelController
 	public AttributePanelController(CanvasLayer uiRoot, UnitSelectionController selection)
 	{
 		_selection = selection;
-		_panel = uiRoot.GetNode<Panel>("AttributePanel");
-		_portraitRect = _panel.GetNode<TextureRect>("Margin/Content/Header/PortraitFrame/PortraitRect");
-		_nameLabel = _panel.GetNode<Label>("Margin/Content/Header/HeaderText/NameLabel");
-		_subLabel = _panel.GetNode<Label>("Margin/Content/Header/HeaderText/SubLabel");
-		_badgeLabel = _panel.GetNode<Label>("Margin/Content/Header/Badge/BadgeLabel");
-		_healthBar = _panel.GetNode<ProgressBar>("Margin/Content/HealthRow/HealthBar");
-		_healthValueLabel = _panel.GetNode<Label>("Margin/Content/HealthRow/HealthValueLabel");
-		_statsGrid = _panel.GetNode<GridContainer>("Margin/Content/StatsGrid");
-		_bottomArea = _panel.GetNode<Control>("Margin/Content/BottomArea");
-		_skillsRow = _bottomArea.GetNode<HBoxContainer>("SkillsRow");
-		_progressBox = _bottomArea.GetNode<VBoxContainer>("ProgressBox");
-		_progressLabel = _progressBox.GetNode<Label>("ProgressLabel");
-		_progressBar = _progressBox.GetNode<ProgressBar>("ProgressBar");
+		_unitView = new AttributePanelView(uiRoot.GetNode<Panel>("UnitAttributePanel"));
+		_buildingView = new AttributePanelView(uiRoot.GetNode<Panel>("BuildingAttributePanel"));
+		_view = _unitView;
 	}
 
 	public void Process()
@@ -88,6 +67,8 @@ public sealed class AttributePanelController
 
 	private void ShowUnit(UnitLogic unit)
 	{
+		_view = _unitView;
+		_buildingView.Hide();
 		IUnitState state = unit.Handle;
 		bool hasShield = state.ShieldHealth > 0;
 		if (_currentUnit != unit || _shieldEntryVisible != hasShield)
@@ -96,23 +77,28 @@ public sealed class AttributePanelController
 		UpdateHealth(state.Health, state.MaxHealth);
 		UpdateUnitLiveStats(state);
 		RefreshSkillCooldowns(state);
-		_panel.Visible = true;
+		_view.Show();
+		_view.UpdateLayout();
 	}
 
 	private void ShowBuilding(Building building)
 	{
+		_view = _buildingView;
+		_unitView.Hide();
 		if (_currentBuilding != building)
 			BuildBuilding(building);
 		UpdateBuildingHeader(building);
 		UpdateHealth(building.Health, building.MaxHealth);
 		UpdateBuildingLiveStats(building);
 		UpdateBuildingProgress(building);
-		_panel.Visible = true;
+		_view.Show();
+		_view.UpdateLayout();
 	}
 
 	private void Hide()
 	{
-		_panel.Visible = false;
+		_unitView.Hide();
+		_buildingView.Hide();
 		_currentUnit = null;
 		_currentBuilding = null;
 		ClearSkills();
@@ -124,9 +110,9 @@ public sealed class AttributePanelController
 		_currentUnit = unit;
 		_currentBuilding = null;
 		_shieldEntryVisible = state.ShieldHealth > 0;
-		_portraitRect.Texture = LoadUnitPortrait(state.TypeId) ?? LoadPlaceholder();
-		_nameLabel.Text = UnitDisplayName.Get(state.TypeId);
-		_badgeLabel.Text = $"费用 {state.UnitCost}";
+		_view.PortraitRect.Texture = LoadUnitPortrait(state.TypeId) ?? LoadPlaceholder();
+		_view.NameLabel.Text = UnitDisplayName.Get(state.TypeId);
+		_view.BadgeLabel.Text = $"费用 {state.UnitCost}";
 		BuildUnitStats(state);
 		BuildSkills(state);
 	}
@@ -151,7 +137,7 @@ public sealed class AttributePanelController
 		string status = state.IsStealthed ? " · 隐身中" : "";
 		status += state.IsAmbushing ? " · 伏击中" : "";
 		status += state.IsFurious ? " · 狂怒" : "";
-		_subLabel.Text = side + " · " + RaceName(state.Race) + status;
+		_view.SubLabel.Text = side + " · " + RaceName(state.Race) + status;
 	}
 
 	private void UpdateUnitLiveStats(IUnitState state)
@@ -171,12 +157,12 @@ public sealed class AttributePanelController
 		{
 			SkillIconView icon = new();
 			icon.Configure(skill);
-			_skillsRow.AddChild(icon);
+			_view.SkillsRow.AddChild(icon);
 			_skillIcons.Add(icon);
 		}
-		_skillsRow.Visible = true;
-		_progressBox.Visible = false;
-		_bottomArea.Visible = state.Skills.All.Count > 0;
+		_view.SkillsRow.Visible = true;
+		_view.ProgressBox.Visible = false;
+		_view.BottomArea.Visible = state.Skills.All.Count > 0;
 	}
 
 	private void RefreshSkillCooldowns(IUnitState state)
@@ -196,9 +182,9 @@ public sealed class AttributePanelController
 		_currentBuilding = building;
 		_currentUnit = null;
 		Sprite2D sprite = building.GetNodeOrNull<Sprite2D>("View/Sprite");
-		_portraitRect.Texture = sprite == null ? LoadPlaceholder() : sprite.Texture;
-		_nameLabel.Text = building.DisplayName;
-		_badgeLabel.Text = $"价值 {system.GetValue(building.TypeId)}";
+		_view.PortraitRect.Texture = sprite == null ? LoadPlaceholder() : sprite.Texture;
+		_view.NameLabel.Text = building.DisplayName;
+		_view.BadgeLabel.Text = $"价值 {system.GetValue(building.TypeId)}";
 		BuildBuildingStats(building, system);
 		ClearSkills();
 	}
@@ -223,7 +209,7 @@ public sealed class AttributePanelController
 	private void UpdateBuildingHeader(Building building)
 	{
 		string side = building.IsPlayerOwned ? "我方" : "敌方";
-		_subLabel.Text = side + " · " + GetBuildingStatus(building);
+		_view.SubLabel.Text = side + " · " + GetBuildingStatus(building);
 	}
 
 	private void UpdateBuildingLiveStats(Building building)
@@ -237,7 +223,7 @@ public sealed class AttributePanelController
 
 	private void UpdateBuildingProgress(Building building)
 	{
-		_skillsRow.Visible = false;
+		_view.SkillsRow.Visible = false;
 		if (building.IsRitualInProgress)
 		{
 			ShowRitualProgress(building);
@@ -248,28 +234,28 @@ public sealed class AttributePanelController
 			ShowProductionProgress(building);
 			return;
 		}
-		_bottomArea.Visible = false;
+		_view.BottomArea.Visible = false;
 	}
 
 	private void ShowRitualProgress(Building building)
 	{
 		RitualDef ritual = RitualRules.Get(building.ActiveRitualId);
 		float elapsed = building.RitualTotalSeconds - building.RitualRemainingSeconds;
-		_progressLabel.Text = $"{ritual.DisplayName} · 剩余 {building.RitualRemainingSeconds:0.0} 秒";
-		_progressBar.MaxValue = building.RitualTotalSeconds;
-		_progressBar.Value = elapsed;
-		_progressBox.Visible = true;
-		_bottomArea.Visible = true;
+		_view.ProgressLabel.Text = $"{ritual.DisplayName} · 剩余 {building.RitualRemainingSeconds:0.0} 秒";
+		_view.ProgressBar.MaxValue = building.RitualTotalSeconds;
+		_view.ProgressBar.Value = elapsed;
+		_view.ProgressBox.Visible = true;
+		_view.BottomArea.Visible = true;
 	}
 
 	private void ShowProductionProgress(Building building)
 	{
 		string state = building.CanWork ? $"剩余 {building.ProductionSecondsRemaining:0.0} 秒" : GetBuildingStatus(building);
-		_progressLabel.Text = "生产进度 · " + state;
-		_progressBar.MaxValue = 1f;
-		_progressBar.Value = building.ProductionProgress;
-		_progressBox.Visible = true;
-		_bottomArea.Visible = true;
+		_view.ProgressLabel.Text = "生产进度 · " + state;
+		_view.ProgressBar.MaxValue = 1f;
+		_view.ProgressBar.Value = building.ProductionProgress;
+		_view.ProgressBox.Visible = true;
+		_view.BottomArea.Visible = true;
 	}
 
 	private Label AddStat(StatIconView.StatIconKind kind, string text, string tooltip, string elementId = "")
@@ -288,14 +274,14 @@ public sealed class AttributePanelController
 		if (!string.IsNullOrEmpty(elementId))
 			row.AddChild(CreateElementIcon(elementId));
 		row.AddChild(CreateInfoLabel(tooltip));
-		_statsGrid.AddChild(panel);
+		_view.StatsGrid.AddChild(panel);
 		return label;
 	}
 
 	private static PanelContainer CreateStatPanel(string tooltip)
 	{
 		PanelContainer panel = new();
-		panel.CustomMinimumSize = new Vector2(StatColumnWidth, StatRowHeight);
+		panel.CustomMinimumSize = new Vector2(StatColumnWidth, AttributePanelView.StatRowHeight);
 		panel.MouseFilter = Control.MouseFilterEnum.Stop;
 		panel.TooltipText = tooltip;
 		StyleBoxFlat style = new();
@@ -370,16 +356,16 @@ public sealed class AttributePanelController
 
 	private void UpdateHealth(int health, int maxHealth)
 	{
-		_healthBar.MaxValue = maxHealth;
-		_healthBar.Value = health;
-		_healthValueLabel.Text = $"{health} / {maxHealth}";
+		_view.HealthBar.MaxValue = maxHealth;
+		_view.HealthBar.Value = health;
+		_view.HealthValueLabel.Text = $"{health} / {maxHealth}";
 	}
 
 	private void ClearStats()
 	{
-		foreach (Node child in _statsGrid.GetChildren())
+		foreach (Node child in _view.StatsGrid.GetChildren())
 		{
-			_statsGrid.RemoveChild(child);
+			_view.StatsGrid.RemoveChild(child);
 			child.QueueFree();
 		}
 		_attackLabel = null;
@@ -390,9 +376,9 @@ public sealed class AttributePanelController
 
 	private void ClearSkills()
 	{
-		foreach (Node child in _skillsRow.GetChildren())
+		foreach (Node child in _view.SkillsRow.GetChildren())
 		{
-			_skillsRow.RemoveChild(child);
+			_view.SkillsRow.RemoveChild(child);
 			child.QueueFree();
 		}
 		_skillIcons.Clear();

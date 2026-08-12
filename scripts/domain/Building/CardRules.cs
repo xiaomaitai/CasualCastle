@@ -3,7 +3,7 @@ namespace CasualCastle.Domain.Building;
 
 public static class CardRules
 {
-	public const int MaxHandSize = 7;
+	public const int MaxHandSize = 10;
 
 	public static bool CanAddCard(int currentHandSize) => currentHandSize < MaxHandSize;
 
