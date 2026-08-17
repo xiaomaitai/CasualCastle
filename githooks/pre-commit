@@ -29,4 +29,6 @@ fi
 
 echo "[pre-commit] Checking architecture constraints ..."
 python tools/check_architecture.py || exit 1
+echo "[pre-commit] Checking smoke path constraints ..."
+python tools/check_smoke_paths.py || exit 1
 echo "[pre-commit] Done — $DUMP staged"

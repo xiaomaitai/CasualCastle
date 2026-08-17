@@ -73,6 +73,7 @@
 | `assetSpecs.md` | 素材尺寸规格（以游戏单位定义） |
 | `audioRequirements.md` | 音频需求清单（v0.6 采购/实现唯一依据） |
 | `audioSmokeTest.md` | 音频冒烟测试说明 |
+| `smokeTestGuidelines.md` | 冒烟测试编写与运行规范（防卡死三层机制、PASS/FAIL 契约） |
 | `devTools.md` | 开发者工具说明 |
 | `factions/allianceFaction.md`、`dungeonFaction.md`、`hordeFaction.md`、`necromancerFaction.md` | 四大派系设计 |
 
@@ -200,6 +201,7 @@
 | `tools/build_game_texture.py` | 建筑贴图裁边/缩放构建 |
 | `tools/check_uids.py` | 校验 `.uid` 文件 |
 | `tools/check_architecture.py` | 校验分层架构约束（domain 零 Godot/零 SQLite、依赖方向），已接入 pre-commit |
+| `tools/check_smoke_paths.py` | 校验冒烟脚本不硬编码 MainGame/UI 节点路径，已接入 pre-commit |
 
 ## 7. 入口与运行链路
 

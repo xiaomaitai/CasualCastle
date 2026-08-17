@@ -5,7 +5,7 @@ using CasualCastle.Domain.Shared;
 using Godot;
 using System.Collections.Generic;
 
-public partial class AudioSmoke : Node
+public partial class AudioSmoke : SmokeTestBase
 {
 	private const string SfxRoot = "res://assets/audio/sfx/";
 	private const string MusicBusName = "Music";
@@ -49,22 +49,21 @@ public partial class AudioSmoke : Node
 		SfxEvents.Defeat,
 	};
 
-	private readonly List<string> _failures = new();
-
 	public override void _Ready()
 	{
-		CheckBuses();
-		CheckResources();
-		CheckAudioManager();
+		StartWatchdog(30f);
+		RunGuarded(CheckBuses);
+		RunGuarded(CheckResources);
+		RunGuarded(CheckAudioManager);
 		ReportAndQuit();
 	}
 
 	private void CheckBuses()
 	{
 		if (AudioServer.GetBusIndex(MusicBusName) < 0)
-			_failures.Add($"缺少音频总线 {MusicBusName}");
+			Fail($"缺少音频总线 {MusicBusName}");
 		if (AudioServer.GetBusIndex(SfxBusName) < 0)
-			_failures.Add($"缺少音频总线 {SfxBusName}");
+			Fail($"缺少音频总线 {SfxBusName}");
 		GD.Print("SMOKE: buses ok");
 	}
 
@@ -73,13 +72,13 @@ public partial class AudioSmoke : Node
 		foreach (BgmDef def in GameDataLoader.BgmCatalog)
 		{
 			if (GD.Load<AudioStream>(def.Uid) == null)
-				_failures.Add($"BGM 资源缺失 {def.Name}（{def.Uid}）");
+				Fail($"BGM 资源缺失 {def.Name}（{def.Uid}）");
 		}
 
 		foreach (string eventName in SfxEventNames)
 		{
 			if (GD.Load<AudioStream>($"{SfxRoot}sfx_{eventName}.ogg") == null)
-				_failures.Add($"SFX 资源缺失 {eventName}");
+				Fail($"SFX 资源缺失 {eventName}");
 		}
 
 		GD.Print("SMOKE: resources ok");
@@ -90,7 +89,7 @@ public partial class AudioSmoke : Node
 		AudioManager audio = AdapterRegistry.Resolve<AudioManager>();
 		if (audio == null)
 		{
-			_failures.Add("AudioManager 未注册");
+			Fail("AudioManager 未注册");
 			return;
 		}
 
@@ -107,21 +106,8 @@ public partial class AudioSmoke : Node
 		int musicBus = AudioServer.GetBusIndex(MusicBusName);
 		float expectedDb = Mathf.LinearToDb(CheckVolume);
 		if (Mathf.Abs(AudioServer.GetBusVolumeDb(musicBus) - expectedDb) > VolumeTolerance)
-			_failures.Add("音乐总线音量写入未生效");
+			Fail("音乐总线音量写入未生效");
 		GD.Print("SMOKE: audio manager ok");
 	}
 
-	private void ReportAndQuit()
-	{
-		if (_failures.Count == 0)
-		{
-			GD.Print("SMOKE: PASS");
-			GetTree().Quit(0);
-			return;
-		}
-
-		foreach (string failure in _failures)
-			GD.Print($"SMOKE: FAIL {failure}");
-		GetTree().Quit(1);
-	}
 }

@@ -6,7 +6,7 @@ using CasualCastle.Domain.Building;
 using CasualCastle.Domain.Shared;
 using Godot;
 
-public partial class NecromancerBattleSmoke : Node
+public partial class NecromancerBattleSmoke : SmokeTestBase
 {
 	private const string MainGameScene = "res://scenes/main/main_game.tscn";
 	private const float NightSpawnWait = 4f;
@@ -56,6 +56,7 @@ public partial class NecromancerBattleSmoke : Node
 
 	public override void _Ready()
 	{
+		StartWatchdog(240f);
 		AdapterRegistry.Resolve<GameManager>().SetSelectedFaction(FactionDef.NecromancerId);
 		AddChild(GD.Load<PackedScene>(MainGameScene).Instantiate());
 		_playerCastle = AdapterRegistry.Resolve<GameManager>().PlayerCastle;
@@ -68,10 +69,10 @@ public partial class NecromancerBattleSmoke : Node
 		if (_playerCastle == null)
 			return;
 		_elapsed += (float)delta;
-		AdvanceStep();
+		RunGuarded(AdvanceStep);
 		if (_elapsed > TotalTimeout)
 		{
-			_failures.Add("冒烟超时");
+			Fail("冒烟超时");
 			ReportAndQuit();
 		}
 	}
@@ -109,11 +110,11 @@ public partial class NecromancerBattleSmoke : Node
 		BuildingSystem system = AdapterRegistry.Resolve<BuildingSystem>();
 		if (_playerCastle == null)
 		{
-			_failures.Add("玩家城堡缺失");
+			Fail("玩家城堡缺失");
 			return;
 		}
 		if (_playerCastle.Heart == null || _playerCastle.Heart.TypeId != "RitualCircleL1")
-			_failures.Add($"仪式之环 L1 缺失 type={_playerCastle.Heart?.TypeId}");
+			Fail($"仪式之环 L1 缺失 type={_playerCastle.Heart?.TypeId}");
 		_tomb = TryPlaceBuilding(system, "Tomb", 0, 0);
 		TryPlaceBuilding(system, "BlightField", 2, 0);
 		_darkAltar = TryPlaceBuilding(system, "DarkAltar", 0, 2);
@@ -123,7 +124,7 @@ public partial class NecromancerBattleSmoke : Node
 	{
 		if (!system.TryPlace(_playerCastle, typeId, gridX, gridY))
 		{
-			_failures.Add($"{typeId} 放置失败");
+			Fail($"{typeId} 放置失败");
 			return null;
 		}
 		return FindBuilding(typeId);
@@ -178,18 +179,18 @@ public partial class NecromancerBattleSmoke : Node
 
 	private void VerifySpellBarState()
 	{
-		Control handPanel = GetNode<Control>("MainGame/UI/Hand/HandPanel");
-		Control spellBar = GetNode<Control>("MainGame/UI/SpellBarPanel");
-		HBoxContainer slots = GetNode<HBoxContainer>("MainGame/UI/SpellBarPanel/SpellSlots");
-		Control attributePanel = GetNode<Control>("MainGame/UI/BuildingAttributePanel");
+		Control handPanel = RequireNode<Control>(this, "MainGame/UI/Hand/HandPanel");
+		Control spellBar = RequireNode<Control>(this, "MainGame/UI/SpellBarPanel");
+		HBoxContainer slots = RequireNode<HBoxContainer>(this, "MainGame/UI/SpellBarPanel/SpellSlots");
+		Control attributePanel = RequireNode<Control>(this, "MainGame/UI/BuildingAttributePanel");
 		if (attributePanel.Visible != _spellBarExpectSelected)
-			_failures.Add($"选中切换错误 attributeVisible={attributePanel.Visible} 期望={_spellBarExpectSelected}");
+			Fail($"选中切换错误 attributeVisible={attributePanel.Visible} 期望={_spellBarExpectSelected}");
 		if (handPanel.Visible == _spellBarExpectVisible)
-			_failures.Add($"法术栏手牌切换错误 handVisible={handPanel.Visible} 期望={_spellBarExpectVisible}");
+			Fail($"法术栏手牌切换错误 handVisible={handPanel.Visible} 期望={_spellBarExpectVisible}");
 		if (spellBar.Visible != _spellBarExpectVisible)
-			_failures.Add($"法术栏显示错误 spellBarVisible={spellBar.Visible} 期望={_spellBarExpectVisible}");
+			Fail($"法术栏显示错误 spellBarVisible={spellBar.Visible} 期望={_spellBarExpectVisible}");
 		if (_spellBarExpectVisible && slots.GetChildCount() != 2)
-			_failures.Add($"法术栏槽位数量错误 count={slots.GetChildCount()}");
+			Fail($"法术栏槽位数量错误 count={slots.GetChildCount()}");
 	}
 
 	private Vector2 GetEmptyScreenPoint()
@@ -260,7 +261,7 @@ public partial class NecromancerBattleSmoke : Node
 		GameManager.Get<BlackMagicService>().Add(20);
 		if (_darkAltar == null || !_darkAltar.TryStartRitual(RitualRules.BlackMagicChargeId))
 		{
-			_failures.Add("阶段门控检查无法开始仪式");
+			Fail("阶段门控检查无法开始仪式");
 			ReportAndQuit();
 			return;
 		}
@@ -275,7 +276,7 @@ public partial class NecromancerBattleSmoke : Node
 		if (_elapsed - _stepStartedAt < RitualTickWait)
 			return;
 		if (!(_darkAltar.RitualRemainingSeconds < _ritualRemainingAtStart))
-			_failures.Add("战斗阶段仪式未读条");
+			Fail("战斗阶段仪式未读条");
 		_ritualRemainingAtCombatEnd = _darkAltar.RitualRemainingSeconds;
 		AdapterRegistry.Resolve<GameManager>().AdvancePhase();
 		_ritualGateStep = 2;
@@ -287,7 +288,7 @@ public partial class NecromancerBattleSmoke : Node
 		if (_elapsed - _stepStartedAt < RitualPauseWait)
 			return;
 		if (_darkAltar.RitualRemainingSeconds != _ritualRemainingAtCombatEnd)
-			_failures.Add("商店阶段仪式不应读条");
+			Fail("商店阶段仪式不应读条");
 		AdapterRegistry.Resolve<GameManager>().AdvancePhase();
 		_ritualGateStep = 3;
 		_stepStartedAt = _elapsed;
@@ -299,7 +300,7 @@ public partial class NecromancerBattleSmoke : Node
 			return;
 		if (_darkAltar.RitualRemainingSeconds != _ritualRemainingAtCombatEnd)
 		{
-			_failures.Add("组合阶段仪式不应读条");
+			Fail("组合阶段仪式不应读条");
 			ReportAndQuit();
 			return;
 		}
@@ -358,7 +359,7 @@ public partial class NecromancerBattleSmoke : Node
 		if (_elapsed - _stepStartedAt < CombineCheckDelay)
 			return;
 		if (FindBuilding("DeathTemple") == null)
-			_failures.Add("组合阶段未生成死亡圣殿");
+			Fail("组合阶段未生成死亡圣殿");
 		_stepStartedAt = _elapsed;
 		_step = SmokeStep.CheckRitualPhaseGate;
 	}
@@ -391,7 +392,7 @@ public partial class NecromancerBattleSmoke : Node
 		});
 		if (_playerCastle.Heart == null || !_playerCastle.Heart.TryStartRitual(RitualRules.DarkMagicStudyId))
 		{
-			_failures.Add($"研习仪式无法开始 {ritualId}");
+			Fail($"研习仪式无法开始 {ritualId}");
 			ReportAndQuit();
 			return;
 		}
@@ -409,7 +410,7 @@ public partial class NecromancerBattleSmoke : Node
 		Building source = FindBuilding(sourceTypeId);
 		if (source == null)
 		{
-			_failures.Add($"{sourceTypeId} 缺失无法升级");
+			Fail($"{sourceTypeId} 缺失无法升级");
 			return;
 		}
 		float healthRatio = source.MaxHealth > 0 ? source.Health / (float)source.MaxHealth : 1f;
@@ -421,7 +422,7 @@ public partial class NecromancerBattleSmoke : Node
 			new UpgradeBuildingFactory(_playerCastle),
 			RitualCircleRules.GetCoreLevel(states));
 		if (upgraded == null)
-			_failures.Add($"{sourceTypeId} 升级失败");
+			Fail($"{sourceTypeId} 升级失败");
 	}
 
 	private void CheckNightSpawns()
@@ -438,9 +439,9 @@ public partial class NecromancerBattleSmoke : Node
 				hasDarkMage = true;
 		}
 		if (!hasSkeleton)
-			_failures.Add("夜晚墓穴未产出骷髅兵");
+			Fail("夜晚墓穴未产出骷髅兵");
 		if (!hasDarkMage)
-			_failures.Add("夜晚黑暗祭坛未产出暗黑法师");
+			Fail("夜晚黑暗祭坛未产出暗黑法师");
 		GD.Print("SMOKE: night spawns checked");
 	}
 
@@ -454,16 +455,4 @@ public partial class NecromancerBattleSmoke : Node
 		return null;
 	}
 
-	private void ReportAndQuit()
-	{
-		if (_failures.Count == 0)
-		{
-			GD.Print("SMOKE: PASS");
-			GetTree().Quit(0);
-			return;
-		}
-		foreach (string failure in _failures)
-			GD.Print($"SMOKE: FAIL {failure}");
-		GetTree().Quit(1);
-	}
 }

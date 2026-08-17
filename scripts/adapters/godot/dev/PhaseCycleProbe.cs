@@ -4,7 +4,7 @@ using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Shared;
 using Godot;
 
-public partial class PhaseCycleProbe : Node
+public partial class PhaseCycleProbe : SmokeTestBase
 {
 	private float _elapsed;
 	private float _lastLog;
@@ -13,6 +13,7 @@ public partial class PhaseCycleProbe : Node
 
 	public override void _Ready()
 	{
+		StartWatchdog(180f);
 		AddChild(GD.Load<PackedScene>("res://scenes/main/main_game.tscn").Instantiate());
 	}
 
@@ -44,7 +45,7 @@ public partial class PhaseCycleProbe : Node
 		else if (gm.CurrentPhase == MatchPhase.Combat && _advancedCombine && _elapsed > 70f)
 		{
 			GD.Print("PROBE full cycle ok");
-			GetTree().Quit(0);
+			ReportAndQuit();
 		}
 	}
 }

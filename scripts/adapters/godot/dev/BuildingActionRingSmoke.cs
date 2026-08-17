@@ -5,7 +5,7 @@ using CasualCastle.Domain.Shared;
 using Godot;
 using System.Collections.Generic;
 
-public partial class BuildingActionRingSmoke : Node
+public partial class BuildingActionRingSmoke : SmokeTestBase
 {
 	private const string MainGameScene = "res://scenes/main/main_game.tscn";
 	private const float ButtonSize = 64f;
@@ -72,15 +72,16 @@ public partial class BuildingActionRingSmoke : Node
 
 	public override void _Ready()
 	{
+		StartWatchdog(180f);
 		AdapterRegistry.Resolve<GameManager>().SetSelectedFaction(FactionDef.NecromancerId);
 		AddChild(GD.Load<PackedScene>(MainGameScene).Instantiate());
 		_playerCastle = AdapterRegistry.Resolve<GameManager>().PlayerCastle;
 		_shop = AdapterRegistry.Resolve<Shop>();
-		_ring = GetNode<BuildingActionRing>("MainGame/UI/BuildingActionRing");
-		_spellBar = GetNode<Control>("MainGame/UI/SpellBarPanel");
-		_sellConfirmOverlay = GetNode<Control>("MainGame/UI/SellConfirmOverlay");
-		_sellConfirmOk = GetNode<Button>("MainGame/UI/SellConfirmOverlay/SellConfirmPanel/ConfirmButton");
-		_sellConfirmCancel = GetNode<Button>("MainGame/UI/SellConfirmOverlay/SellConfirmPanel/CancelButton");
+		_ring = RequireNode<BuildingActionRing>(this, "MainGame/UI/BuildingActionRing");
+		_spellBar = RequireNode<Control>(this, "MainGame/UI/SpellBarPanel");
+		_sellConfirmOverlay = RequireNode<Control>(this, "MainGame/UI/SellConfirmOverlay");
+		_sellConfirmOk = RequireNode<Button>(this, "MainGame/UI/SellConfirmOverlay/SellConfirmPanel/ConfirmButton");
+		_sellConfirmCancel = RequireNode<Button>(this, "MainGame/UI/SellConfirmOverlay/SellConfirmPanel/CancelButton");
 		PlaceBuildings();
 		_step = SmokeStep.SelectTomb;
 	}
@@ -90,11 +91,11 @@ public partial class BuildingActionRingSmoke : Node
 		_elapsed += (float)delta;
 		if (_elapsed > TotalTimeout)
 		{
-			_failures.Add("冒烟超时");
+			Fail("冒烟超时");
 			ReportAndQuit();
 			return;
 		}
-		AdvanceStep();
+		RunGuarded(AdvanceStep);
 	}
 
 	private void PlaceBuildings()
@@ -102,16 +103,16 @@ public partial class BuildingActionRingSmoke : Node
 		BuildingSystem system = AdapterRegistry.Resolve<BuildingSystem>();
 		if (_playerCastle == null)
 		{
-			_failures.Add("玩家城堡缺失");
+			Fail("玩家城堡缺失");
 			return;
 		}
 		if (system.TryPlace(_playerCastle, "Tomb", 0, 0))
 			_tomb = FindBuilding("Tomb");
 		else
-			_failures.Add("Tomb 放置失败");
+			Fail("Tomb 放置失败");
 		_darkAltar = system.TryPlace(_playerCastle, "DarkAltar", 0, 2) ? FindBuilding("DarkAltar") : null;
 		if (_darkAltar == null)
-			_failures.Add("DarkAltar 放置失败");
+			Fail("DarkAltar 放置失败");
 		GameManager.Get<RitualService>().Learn(RitualRules.EvilRitualId);
 	}
 
@@ -213,13 +214,13 @@ public partial class BuildingActionRingSmoke : Node
 		}
 		if (!_ring.Visible)
 		{
-			_failures.Add($"选中后环未显示 position={_ring.Position}");
+			Fail($"选中后环未显示 position={_ring.Position}");
 			ReportAndQuit();
 			return;
 		}
 		if (_ring.GetChildCount() != 3)
 		{
-			_failures.Add($"Tomb 按钮数量错误 count={_ring.GetChildCount()}");
+			Fail($"Tomb 按钮数量错误 count={_ring.GetChildCount()}");
 			ReportAndQuit();
 			return;
 		}
@@ -235,7 +236,7 @@ public partial class BuildingActionRingSmoke : Node
 		Vector2 expected = _ring.Position + new Vector2(Mathf.Sin(angle), Mathf.Cos(angle)) * RingRadius;
 		Vector2 actual = button.GlobalPosition + new Vector2(ButtonSize * 0.5f, ButtonSize * 0.5f);
 		if (actual.DistanceTo(expected) > PositionTolerance)
-			_failures.Add($"{label} 按钮位置错误 actual={actual} expected={expected}");
+			Fail($"{label} 按钮位置错误 actual={actual} expected={expected}");
 	}
 
 	private void VerifyPause()
@@ -246,9 +247,9 @@ public partial class BuildingActionRingSmoke : Node
 			return;
 		}
 		if (!_tomb.IsManuallyPaused)
-			_failures.Add("暂停按钮未生效");
+			Fail("暂停按钮未生效");
 		if (!GetButton(1).ButtonPressed)
-			_failures.Add("暂停按钮按下态错误");
+			Fail("暂停按钮按下态错误");
 		_step = SmokeStep.SellTomb;
 	}
 
@@ -260,11 +261,11 @@ public partial class BuildingActionRingSmoke : Node
 			return;
 		}
 		if (_shop.Gold != _goldBefore + SellPriceTomb)
-			_failures.Add($"卖出金币错误 before={_goldBefore} after={_shop.Gold}");
+			Fail($"卖出金币错误 before={_goldBefore} after={_shop.Gold}");
 		if (FindBuilding("Tomb") != null)
-			_failures.Add("卖出后建筑仍在");
+			Fail("卖出后建筑仍在");
 		if (_ring.Visible)
-			_failures.Add("卖出后环未隐藏");
+			Fail("卖出后环未隐藏");
 		_step = SmokeStep.UpgradeTomb;
 	}
 
@@ -274,7 +275,7 @@ public partial class BuildingActionRingSmoke : Node
 		BuildingSystem system = AdapterRegistry.Resolve<BuildingSystem>();
 		if (!system.TryPlace(_playerCastle, "Tomb", 0, 0))
 		{
-			_failures.Add("重新放置 Tomb 失败");
+			Fail("重新放置 Tomb 失败");
 			ReportAndQuit();
 			return;
 		}
@@ -292,10 +293,10 @@ public partial class BuildingActionRingSmoke : Node
 			return;
 		}
 		if (_ring.GetChildCount() != 3)
-			_failures.Add($"升级按钮数量错误 count={_ring.GetChildCount()}");
+			Fail($"升级按钮数量错误 count={_ring.GetChildCount()}");
 		Button upgrade = GetButton(2);
 		if (upgrade.Disabled)
-			_failures.Add("升级按钮不应禁用");
+			Fail("升级按钮不应禁用");
 		PushButtonClick(upgrade);
 		Wait(SmokeStep.VerifyUpgraded);
 	}
@@ -308,11 +309,11 @@ public partial class BuildingActionRingSmoke : Node
 			return;
 		}
 		if (FindBuilding("Necropolis") == null)
-			_failures.Add("升级后未生成 Necropolis");
+			Fail("升级后未生成 Necropolis");
 		if (FindBuilding("Tomb") != null)
-			_failures.Add("升级后 Tomb 仍存在");
+			Fail("升级后 Tomb 仍存在");
 		if (_shop.Gold != _goldBefore - UpgradeCostTomb)
-			_failures.Add($"升级金币错误 before={_goldBefore} after={_shop.Gold}");
+			Fail($"升级金币错误 before={_goldBefore} after={_shop.Gold}");
 		_step = SmokeStep.EnableConfirmSell;
 	}
 
@@ -322,7 +323,7 @@ public partial class BuildingActionRingSmoke : Node
 		BuildingSystem system = AdapterRegistry.Resolve<BuildingSystem>();
 		if (!system.TryPlace(_playerCastle, "Tomb", 4, 0))
 		{
-			_failures.Add("确认出售测试放置 Tomb 失败");
+			Fail("确认出售测试放置 Tomb 失败");
 			ReportAndQuit();
 			return;
 		}
@@ -341,40 +342,40 @@ public partial class BuildingActionRingSmoke : Node
 	private void VerifyConfirmDialog()
 	{
 		if (!_sellConfirmOverlay.Visible)
-			_failures.Add("确认出售弹窗未显示");
+			Fail("确认出售弹窗未显示");
 		if (FindBuilding("Tomb") == null)
-			_failures.Add("弹窗打开时建筑不应被出售");
+			Fail("弹窗打开时建筑不应被出售");
 		if (_shop.Gold != _goldBefore)
-			_failures.Add($"弹窗打开时金币不应变化 before={_goldBefore} after={_shop.Gold}");
+			Fail($"弹窗打开时金币不应变化 before={_goldBefore} after={_shop.Gold}");
 		_step = SmokeStep.CancelConfirm;
 	}
 
 	private void VerifyConfirmCanceled()
 	{
 		if (_sellConfirmOverlay.Visible)
-			_failures.Add("取消后弹窗应关闭");
+			Fail("取消后弹窗应关闭");
 		if (FindBuilding("Tomb") == null)
-			_failures.Add("取消后建筑仍应存在");
+			Fail("取消后建筑仍应存在");
 		if (_shop.Gold != _goldBefore)
-			_failures.Add($"取消后金币不应变化 before={_goldBefore} after={_shop.Gold}");
+			Fail($"取消后金币不应变化 before={_goldBefore} after={_shop.Gold}");
 		_step = SmokeStep.SellWithConfirm;
 	}
 
 	private void VerifyConfirmDialogAgain()
 	{
 		if (!_sellConfirmOverlay.Visible)
-			_failures.Add("再次点击出售弹窗未显示");
+			Fail("再次点击出售弹窗未显示");
 		_step = SmokeStep.AcceptConfirm;
 	}
 
 	private void VerifyConfirmAccepted()
 	{
 		if (_sellConfirmOverlay.Visible)
-			_failures.Add("确认后弹窗应关闭");
+			Fail("确认后弹窗应关闭");
 		if (FindBuilding("Tomb") != null)
-			_failures.Add("确认后建筑应被出售");
+			Fail("确认后建筑应被出售");
 		if (_shop.Gold != _goldBefore + SellPriceTomb)
-			_failures.Add($"确认出售金币错误 before={_goldBefore} after={_shop.Gold}");
+			Fail($"确认出售金币错误 before={_goldBefore} after={_shop.Gold}");
 		DisplaySettingsManager.ConfirmSellEnabled = false;
 		_step = SmokeStep.SelectDarkAltar;
 	}
@@ -387,14 +388,14 @@ public partial class BuildingActionRingSmoke : Node
 			return;
 		}
 		if (!_ring.Visible)
-			_failures.Add("选中仪式建筑时环未显示");
+			Fail("选中仪式建筑时环未显示");
 		if (_ring.GetChildCount() != 4)
-			_failures.Add($"仪式建筑按钮数量错误 count={_ring.GetChildCount()}");
+			Fail($"仪式建筑按钮数量错误 count={_ring.GetChildCount()}");
 		if (!_spellBar.Visible)
-			_failures.Add("选中仪式建筑时法术栏应自动显示");
+			Fail("选中仪式建筑时法术栏应自动显示");
 		Button special = GetButton(3);
 		if (!special.ButtonPressed)
-			_failures.Add("仪式按钮应处于按下态");
+			Fail("仪式按钮应处于按下态");
 		_step = SmokeStep.ToggleSpecialHidden;
 	}
 
@@ -406,7 +407,7 @@ public partial class BuildingActionRingSmoke : Node
 			return;
 		}
 		if (_spellBar.Visible)
-			_failures.Add("点击仪式按钮后法术栏应隐藏");
+			Fail("点击仪式按钮后法术栏应隐藏");
 		_step = SmokeStep.ToggleSpecialShown;
 	}
 
@@ -418,7 +419,7 @@ public partial class BuildingActionRingSmoke : Node
 			return;
 		}
 		if (!_spellBar.Visible)
-			_failures.Add("再次点击仪式按钮后法术栏应显示");
+			Fail("再次点击仪式按钮后法术栏应显示");
 		GD.Print("SMOKE: building action ring ok");
 		ReportAndQuit();
 	}
@@ -493,16 +494,4 @@ public partial class BuildingActionRingSmoke : Node
 		return null;
 	}
 
-	private void ReportAndQuit()
-	{
-		if (_failures.Count == 0)
-		{
-			GD.Print("SMOKE: PASS");
-			GetTree().Quit(0);
-			return;
-		}
-		foreach (string failure in _failures)
-			GD.Print($"SMOKE: FAIL {failure}");
-		GetTree().Quit(1);
-	}
 }
