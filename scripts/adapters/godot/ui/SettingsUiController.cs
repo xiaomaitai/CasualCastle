@@ -1,28 +1,27 @@
-// 设置面板控制器：管理显示、游戏界面风格、操作与音频选项
+// 设置面板组件：管理显示、游戏界面风格、操作与音频选项（settings_panel.tscn 场景根）
 using CasualCastle.Adapters.Godot;
 using Godot;
 using System;
 
-public sealed class SettingsUiController
+public partial class SettingsUiController : Control
 {
 	private const float VolumeMinPercent = 0f;
 	private const float VolumeMaxPercent = 100f;
 	private const float VolumeStep = 1f;
 
-	private readonly Control _root;
-	private readonly OptionButton _windowModeOption;
-	private readonly OptionButton _resolutionOption;
-	private readonly OptionButton _uiProfileOption;
-	private readonly CheckBox _devModeCheck;
-	private readonly CheckBox _confirmSellCheck;
-	private readonly HSlider _dragSpeedSlider;
-	private readonly Label _dragSpeedValueLabel;
-	private readonly HSlider _musicVolumeSlider;
-	private readonly Label _musicVolumeValueLabel;
-	private readonly HSlider _sfxVolumeSlider;
-	private readonly Label _sfxVolumeValueLabel;
-	private readonly Button _applyButton;
-	private readonly Button _backButton;
+	private OptionButton _windowModeOption;
+	private OptionButton _resolutionOption;
+	private OptionButton _uiProfileOption;
+	private CheckBox _devModeCheck;
+	private CheckBox _confirmSellCheck;
+	private HSlider _dragSpeedSlider;
+	private Label _dragSpeedValueLabel;
+	private HSlider _musicVolumeSlider;
+	private Label _musicVolumeValueLabel;
+	private HSlider _sfxVolumeSlider;
+	private Label _sfxVolumeValueLabel;
+	private Button _applyButton;
+	private Button _backButton;
 
 	public bool IsOpen { get; private set; }
 	public event Action<bool> OpenChanged;
@@ -31,22 +30,21 @@ public sealed class SettingsUiController
 	private float _sfxVolume = DisplaySettingsManager.DefaultSfxVolume;
 	private bool _syncing;
 
-	public SettingsUiController(Control root)
+	public override void _Ready()
 	{
-		_root = root;
-		_windowModeOption = root.GetNode<OptionButton>("Panel/WindowModeOption");
-		_resolutionOption = root.GetNode<OptionButton>("Panel/ResolutionOption");
-		_uiProfileOption = root.GetNode<OptionButton>("Panel/UiProfileOption");
-		_devModeCheck = root.GetNode<CheckBox>("Panel/DevModeCheck");
-		_confirmSellCheck = root.GetNode<CheckBox>("Panel/ConfirmSellCheck");
-		_dragSpeedSlider = root.GetNode<HSlider>("Panel/DragSpeedSlider");
-		_dragSpeedValueLabel = root.GetNode<Label>("Panel/DragSpeedValueLabel");
-		_musicVolumeSlider = root.GetNode<HSlider>("Panel/MusicVolumeSlider");
-		_musicVolumeValueLabel = root.GetNode<Label>("Panel/MusicVolumeValueLabel");
-		_sfxVolumeSlider = root.GetNode<HSlider>("Panel/SfxVolumeSlider");
-		_sfxVolumeValueLabel = root.GetNode<Label>("Panel/SfxVolumeValueLabel");
-		_applyButton = root.GetNode<Button>("Panel/ApplyButton");
-		_backButton = root.GetNode<Button>("Panel/BackButton");
+		_windowModeOption = GetNode<OptionButton>("Panel/WindowModeOption");
+		_resolutionOption = GetNode<OptionButton>("Panel/ResolutionOption");
+		_uiProfileOption = GetNode<OptionButton>("Panel/UiProfileOption");
+		_devModeCheck = GetNode<CheckBox>("Panel/DevModeCheck");
+		_confirmSellCheck = GetNode<CheckBox>("Panel/ConfirmSellCheck");
+		_dragSpeedSlider = GetNode<HSlider>("Panel/DragSpeedSlider");
+		_dragSpeedValueLabel = GetNode<Label>("Panel/DragSpeedValueLabel");
+		_musicVolumeSlider = GetNode<HSlider>("Panel/MusicVolumeSlider");
+		_musicVolumeValueLabel = GetNode<Label>("Panel/MusicVolumeValueLabel");
+		_sfxVolumeSlider = GetNode<HSlider>("Panel/SfxVolumeSlider");
+		_sfxVolumeValueLabel = GetNode<Label>("Panel/SfxVolumeValueLabel");
+		_applyButton = GetNode<Button>("Panel/ApplyButton");
+		_backButton = GetNode<Button>("Panel/BackButton");
 
 		_windowModeOption.Clear();
 		_windowModeOption.AddItem("窗口化", (int)DisplayWindowMode.Windowed);
@@ -78,10 +76,10 @@ public sealed class SettingsUiController
 		_applyButton.Pressed += OnApplyPressed;
 		_backButton.Pressed += OnBackPressed;
 
-		_root.Visible = false;
+		Visible = false;
 	}
 
-	public void Dispose()
+	public override void _ExitTree()
 	{
 		_windowModeOption.ItemSelected -= OnWindowModeSelected;
 		_dragSpeedSlider.ValueChanged -= OnDragSpeedChanged;
@@ -99,7 +97,7 @@ public sealed class SettingsUiController
 			return;
 
 		IsOpen = true;
-		_root.Visible = true;
+		Visible = true;
 		SyncFromSaved();
 		OpenChanged?.Invoke(true);
 	}
@@ -110,7 +108,7 @@ public sealed class SettingsUiController
 			return false;
 
 		IsOpen = false;
-		_root.Visible = false;
+		Visible = false;
 		OpenChanged?.Invoke(false);
 		return true;
 	}

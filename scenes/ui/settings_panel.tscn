@@ -1,6 +1,9 @@
 [gd_scene format=3 uid="uid://bygrrmvcskot1"]
 
+[ext_resource type="Script" path="res://scripts/adapters/godot/ui/SettingsUiController.cs" id="1"]
+
 [node name="SettingsPanel" type="Control"]
+script = ExtResource("1")
 visible = false
 layout_mode = 3
 anchors_preset = 15

@@ -57,17 +57,12 @@ public partial class UIManager : Node2D
 		_cheatMenu?.Dispose();
 		_runtimeInfoPanel?.Dispose();
 		if (_pauseMenuUi != null)
-		{
 			_pauseMenuUi.OpenChanged -= OnPauseMenuOpenChanged;
-			_pauseMenuUi.Dispose();
-		}
 		if (_settingsUi != null)
 			_settingsUi.OpenChanged -= OnSettingsOpenChanged;
 		_buildingActionRing?.Dispose();
 		_spellBarUi?.Dispose();
 		_attributePanel?.Dispose();
-		_gameOverUi?.Dispose();
-		_settingsUi?.Dispose();
 
 		if (Instance == this)
 			Instance = null;
@@ -165,9 +160,12 @@ public partial class UIManager : Node2D
 		_cheatMenu = new CheatMenuUiController(uiRoot, _hudUi);
 		_runtimeInfoPanel = new RuntimeInfoPanelController(uiRoot, _hudUi);
 		_bgmInfo = new BgmInfoController(_hudUi.BgmInfoLabel);
-		_settingsUi = new SettingsUiController(uiRoot.GetNode<Control>("SettingsPanel"));
-		_pauseMenuUi = new PauseMenuUiController(uiRoot, _hudUi, GoToTitle, OpenSettings);
-		_gameOverUi = new GameOverUiController(uiRoot, GoToTitle);
+		_settingsUi = uiRoot.GetNode<SettingsUiController>("SettingsPanel");
+		_pauseMenuUi = uiRoot.GetNode<PauseMenuUiController>("PauseMenu");
+		_pauseMenuUi.GoToTitleAction = GoToTitle;
+		_pauseMenuUi.OpenSettingsAction = OpenSettings;
+		_gameOverUi = uiRoot.GetNode<GameOverUiController>("GameOver");
+		_gameOverUi.GoToTitleAction = GoToTitle;
 
 		UiSfx.Bind(uiRoot);
 		RegisterRouting();

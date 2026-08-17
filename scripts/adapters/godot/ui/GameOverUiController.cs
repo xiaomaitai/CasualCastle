@@ -1,31 +1,31 @@
-// 结算弹窗 UI
+// 结算弹窗组件（game_over.tscn 场景根）
 using CasualCastle.Adapters.Godot;
 using Godot;
 using System;
 
-public sealed class GameOverUiController
+public partial class GameOverUiController : Control
 {
-	private readonly ColorRect _overlay;
-	private readonly Panel _panel;
-	private readonly Label _label;
-	private readonly Button _saveReportButton;
-	private readonly Button _discardAndBackButton;
-	private readonly Action _goToTitle;
+	private ColorRect _overlay;
+	private Panel _panel;
+	private Label _label;
+	private Button _saveReportButton;
+	private Button _discardAndBackButton;
 
-	public GameOverUiController(CanvasLayer uiRoot, Action goToTitle)
+	public Action GoToTitleAction { get; set; }
+
+	public override void _Ready()
 	{
-		_overlay = uiRoot.GetNode<ColorRect>("GameOverOverlay");
-		_panel = uiRoot.GetNode<Panel>("GameOverPanel");
-		_label = uiRoot.GetNode<Label>("GameOverPanel/GameOverLabel");
-		_saveReportButton = uiRoot.GetNode<Button>("GameOverPanel/SaveReportButton");
-		_discardAndBackButton = uiRoot.GetNode<Button>("GameOverPanel/DiscardAndBackButton");
-		_goToTitle = goToTitle;
+		_overlay = GetNode<ColorRect>("GameOverOverlay");
+		_panel = GetNode<Panel>("GameOverPanel");
+		_label = GetNode<Label>("GameOverPanel/GameOverLabel");
+		_saveReportButton = GetNode<Button>("GameOverPanel/SaveReportButton");
+		_discardAndBackButton = GetNode<Button>("GameOverPanel/DiscardAndBackButton");
 
 		_saveReportButton.Pressed += OnSaveReportConfirmed;
 		_discardAndBackButton.Pressed += OnDiscardReportConfirmed;
 	}
 
-	public void Dispose()
+	public override void _ExitTree()
 	{
 		_saveReportButton.Pressed -= OnSaveReportConfirmed;
 		_discardAndBackButton.Pressed -= OnDiscardReportConfirmed;
@@ -49,12 +49,12 @@ public sealed class GameOverUiController
 	private void OnSaveReportConfirmed()
 	{
 		AdapterRegistry.Resolve<BattleReportSystem>()?.SaveCurrentReport();
-		_goToTitle();
+		GoToTitleAction?.Invoke();
 	}
 
 	private void OnDiscardReportConfirmed()
 	{
 		AdapterRegistry.Resolve<BattleReportSystem>()?.DiscardCurrentReport();
-		_goToTitle();
+		GoToTitleAction?.Invoke();
 	}
 }

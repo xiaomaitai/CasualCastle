@@ -54,7 +54,7 @@ public partial class TitleScreen : Control
 		_settingsButton.Pressed += OnSettingsPressed;
 		_devToolsButton.Pressed += OnDevToolsPressed;
 
-		_settingsUi = new SettingsUiController(GetNode<Control>("SettingsPanel"));
+		_settingsUi = GetNode<SettingsUiController>("SettingsPanel");
 		BuildReportOptions();
 		BuildFactionOptions();
 
@@ -72,7 +72,6 @@ public partial class TitleScreen : Control
 
 	public override void _ExitTree()
 	{
-		_settingsUi?.Dispose();
 	}
 
 	public override void _Input(InputEvent @event)

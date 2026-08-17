@@ -1,45 +1,36 @@
-// 暂停菜单 UI
+// 暂停菜单组件（pause_menu.tscn 场景根）
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Shared;
 using Godot;
 using System;
 
-public sealed class PauseMenuUiController
+public partial class PauseMenuUiController : Control
 {
-	private readonly ColorRect _overlay;
-	private readonly Panel _panel;
-	private readonly Button _menuButton;
-	private readonly Button _continueButton;
-	private readonly Button _saveButton;
-	private readonly Button _backToTitleButton;
-	private readonly Button _settingsButton;
-	private readonly Action _goToTitle;
-	private readonly Action _openSettings;
+	private ColorRect _overlay;
+	private Panel _panel;
+	private Button _menuButton;
+	private Button _continueButton;
+	private Button _saveButton;
+	private Button _backToTitleButton;
+	private Button _settingsButton;
+
+	public Action GoToTitleAction { get; set; }
+	public Action OpenSettingsAction { get; set; }
 
 	private bool _gameOver;
 
 	public bool IsOpen { get; private set; }
 	public event Action<bool> OpenChanged;
 
-	public PauseMenuUiController(CanvasLayer uiRoot, HudUiController hud, Action goToTitle, Action openSettings)
+	public override void _Ready()
 	{
-		_overlay = uiRoot.GetNode<ColorRect>("PauseOverlay");
-		_panel = uiRoot.GetNode<Panel>("PausePanel");
-		_menuButton = hud.MenuButton;
-		_continueButton = uiRoot.GetNode<Button>("PausePanel/ContinueButton");
-		_backToTitleButton = uiRoot.GetNode<Button>("PausePanel/BackToTitleButton");
-		_settingsButton = uiRoot.GetNode<Button>("PausePanel/SettingsButton");
-		_goToTitle = goToTitle;
-		_openSettings = openSettings;
-
-		_saveButton = new Button();
-		_saveButton.Name = "SaveButton";
-		_saveButton.Text = "保存游戏";
-		_saveButton.OffsetLeft = 138;
-		_saveButton.OffsetTop = 438;
-		_saveButton.OffsetRight = 438;
-		_saveButton.OffsetBottom = 510;
-		_panel.AddChild(_saveButton);
+		_overlay = GetNode<ColorRect>("PauseOverlay");
+		_panel = GetNode<Panel>("PausePanel");
+		_menuButton = GetParent().GetNode<HudUiController>("Hud").MenuButton;
+		_continueButton = GetNode<Button>("PausePanel/ContinueButton");
+		_saveButton = GetNode<Button>("PausePanel/SaveButton");
+		_backToTitleButton = GetNode<Button>("PausePanel/BackToTitleButton");
+		_settingsButton = GetNode<Button>("PausePanel/SettingsButton");
 
 		_menuButton.Pressed += OnMenuButtonPressed;
 		_continueButton.Pressed += OnContinuePressed;
@@ -47,10 +38,10 @@ public sealed class PauseMenuUiController
 		_backToTitleButton.Pressed += OnBackToTitlePressed;
 		_settingsButton.Pressed += OnSettingsPressed;
 
-		Hide();
+		HidePanel();
 	}
 
-	public void Dispose()
+	public override void _ExitTree()
 	{
 		_menuButton.Pressed -= OnMenuButtonPressed;
 		_continueButton.Pressed -= OnContinuePressed;
@@ -87,7 +78,7 @@ public sealed class PauseMenuUiController
 			return false;
 
 		IsOpen = false;
-		Hide();
+		HidePanel();
 		AdapterRegistry.Resolve<GameManager>()?.SetPaused(false);
 		OpenChanged?.Invoke(false);
 		return true;
@@ -110,15 +101,15 @@ public sealed class PauseMenuUiController
 	private void OnBackToTitlePressed()
 	{
 		Close();
-		_goToTitle();
+		GoToTitleAction?.Invoke();
 	}
 
 	private void OnSettingsPressed()
 	{
-		_openSettings?.Invoke();
+		OpenSettingsAction?.Invoke();
 	}
 
-	private void Hide()
+	private void HidePanel()
 	{
 		_overlay.Visible = false;
 		_panel.Visible = false;

@@ -16,6 +16,8 @@
 [ext_resource type="PackedScene" uid="uid://brbbmy65b7a1r" path="res://scenes/ui/shop_panel.tscn" id="27"]
 [ext_resource type="PackedScene" uid="uid://bu2mmyumtlebd" path="res://scenes/ui/building_info_panel.tscn" id="28"]
 [ext_resource type="PackedScene" uid="uid://v57nh7q2ebgs" path="res://scenes/ui/unit_info_panel.tscn" id="29"]
+[ext_resource type="PackedScene" uid="uid://hvu72c7cs8y8" path="res://scenes/ui/pause_menu.tscn" id="30"]
+[ext_resource type="PackedScene" uid="uid://bxv2ya3pa3uo1" path="res://scenes/ui/game_over.tscn" id="31"]
 
 [node name="MainGame" type="Node2D" unique_id=1]
 script = ExtResource("10")
@@ -98,112 +100,9 @@ theme_override_constants/separation = 8
 
 [node name="Shop" parent="UI" instance=ExtResource("27")]
 
-[node name="PauseOverlay" type="ColorRect" parent="UI"]
-visible = false
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 0
-color = Color(0, 0, 0, 0.55)
+[node name="PauseMenu" parent="UI" instance=ExtResource("30")]
 
-[node name="PausePanel" type="Panel" parent="UI"]
-visible = false
-offset_left = 672
-offset_top = 259.5
-offset_right = 1248
-offset_bottom = 757.5
-
-[node name="PanelBackground" type="ColorRect" parent="UI/PausePanel"]
-layout_mode = 0
-offset_right = 576
-offset_bottom = 498
-color = Color(0.12, 0.16, 0.22, 0.96)
-
-[node name="TitleLabel" type="Label" parent="UI/PausePanel"]
-layout_mode = 0
-offset_left = 138
-offset_top = 36
-offset_right = 438
-offset_bottom = 96
-theme_override_font_sizes/font_size = 42
-text = "菜单"
-horizontal_alignment = 1
-
-[node name="ContinueButton" type="Button" parent="UI/PausePanel"]
-layout_mode = 0
-offset_left = 138
-offset_top = 132
-offset_right = 438
-offset_bottom = 204
-text = "继续游戏"
-
-[node name="BackToTitleButton" type="Button" parent="UI/PausePanel"]
-layout_mode = 0
-offset_left = 138
-offset_top = 234
-offset_right = 438
-offset_bottom = 306
-text = "返回标题"
-
-[node name="SettingsButton" type="Button" parent="UI/PausePanel"]
-layout_mode = 0
-offset_left = 138
-offset_top = 336
-offset_right = 438
-offset_bottom = 408
-text = "设置"
-
-[node name="GameOverOverlay" type="ColorRect" parent="UI"]
-visible = false
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 0
-color = Color(0, 0, 0, 0.55)
-
-[node name="GameOverPanel" type="Panel" parent="UI" unique_id=8]
-visible = false
-offset_left = 660
-offset_top = 360
-offset_right = 1260
-offset_bottom = 630
-
-[node name="PanelBackground" type="ColorRect" parent="UI/GameOverPanel"]
-layout_mode = 0
-offset_right = 600
-offset_bottom = 270
-color = Color(0.18, 0.22, 0.28, 0.95)
-
-[node name="GameOverLabel" type="Label" parent="UI/GameOverPanel" unique_id=9]
-layout_mode = 0
-offset_left = 75
-offset_top = 54
-offset_right = 525
-offset_bottom = 129
-theme_override_font_sizes/font_size = 48
-text = "游戏结束"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="SaveReportButton" type="Button" parent="UI/GameOverPanel" unique_id=10]
-layout_mode = 0
-offset_left = 75
-offset_top = 165
-offset_right = 285
-offset_bottom = 232.5
-text = "保存战报并返回"
-
-[node name="DiscardAndBackButton" type="Button" parent="UI/GameOverPanel"]
-layout_mode = 0
-offset_left = 315
-offset_top = 165
-offset_right = 525
-offset_bottom = 232.5
-text = "不保存并返回标题"
+[node name="GameOver" parent="UI" instance=ExtResource("31")]
 
 [node name="CheatOverlay" type="ColorRect" parent="UI"]
 visible = false
