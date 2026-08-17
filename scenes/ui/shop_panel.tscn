@@ -1,0 +1,213 @@
+[gd_scene format=3 uid="uid://brbbmy65b7a1r"]
+
+[ext_resource type="Script" path="res://scripts/adapters/godot/ui/ShopUiController.cs" id="1"]
+[ext_resource type="Script" path="res://scripts/adapters/godot/ui/OfferFrame.cs" id="2"]
+
+[node name="Shop" type="Control"]
+mouse_filter = 2
+script = ExtResource("1")
+
+[node name="ShopButtonCircle" type="Panel" parent="."]
+offset_left = 1778
+offset_top = 924
+offset_right = 1886
+offset_bottom = 1032
+mouse_filter = 2
+
+[node name="ShopButton" type="Button" parent="."]
+offset_left = 1760
+offset_top = 906
+offset_right = 1904
+offset_bottom = 1050
+toggle_mode = true
+text = ""
+expand_icon = true
+tooltip_text = "打开/关闭商店"
+
+[node name="ShopPanel" type="Panel" parent="."]
+visible = false
+offset_left = 1228.5
+offset_top = 108
+offset_right = 1881
+offset_bottom = 822
+
+[node name="ShopPanelBackground" type="ColorRect" parent="ShopPanel"]
+layout_mode = 0
+offset_right = 652.5
+offset_bottom = 714
+color = Color(0.12, 0.16, 0.22, 0.96)
+
+[node name="ShopTitleLabel" type="Label" parent="ShopPanel"]
+layout_mode = 0
+offset_left = 36
+offset_top = 24
+offset_right = 330
+offset_bottom = 72
+theme_override_font_sizes/font_size = 36
+text = "商店"
+
+[node name="ShopCloseButton" type="Button" parent="ShopPanel"]
+layout_mode = 0
+offset_left = 582
+offset_top = 18
+offset_right = 630
+offset_bottom = 66
+text = "X"
+tooltip_text = "关闭商店"
+
+[node name="ShopGoldLabel" type="Label" parent="ShopPanel"]
+layout_mode = 0
+offset_left = 36
+offset_top = 84
+offset_right = 390
+offset_bottom = 126
+theme_override_font_sizes/font_size = 27
+text = "当前金币：30"
+
+[node name="OfferSlot1" type="HBoxContainer" parent="ShopPanel"]
+layout_mode = 0
+offset_left = 36
+offset_top = 144
+offset_right = 616.5
+offset_bottom = 216
+theme_override_constants/separation = 18
+
+[node name="OfferLabel" type="Label" parent="ShopPanel/OfferSlot1"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 27
+text = "兵营  费用：10"
+
+[node name="BuyButton" type="Button" parent="ShopPanel/OfferSlot1"]
+custom_minimum_size = Vector2(144, 60)
+layout_mode = 2
+text = "购买"
+
+[node name="OfferFrame1" type="Control" parent="ShopPanel"]
+layout_mode = 0
+mouse_filter = 2
+offset_left = 18
+offset_top = 132
+offset_right = 634.5
+offset_bottom = 228
+script = ExtResource("2")
+
+[node name="OfferSlot2" type="HBoxContainer" parent="ShopPanel"]
+layout_mode = 0
+offset_left = 36
+offset_top = 252
+offset_right = 616.5
+offset_bottom = 324
+theme_override_constants/separation = 18
+
+[node name="OfferLabel" type="Label" parent="ShopPanel/OfferSlot2"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 27
+text = "强化兵营  费用：15"
+
+[node name="BuyButton" type="Button" parent="ShopPanel/OfferSlot2"]
+custom_minimum_size = Vector2(144, 60)
+layout_mode = 2
+text = "购买"
+
+[node name="OfferFrame2" type="Control" parent="ShopPanel"]
+layout_mode = 0
+mouse_filter = 2
+offset_left = 18
+offset_top = 240
+offset_right = 634.5
+offset_bottom = 336
+script = ExtResource("2")
+
+[node name="OfferSlot3" type="HBoxContainer" parent="ShopPanel"]
+layout_mode = 0
+offset_left = 36
+offset_top = 360
+offset_right = 616.5
+offset_bottom = 432
+theme_override_constants/separation = 18
+
+[node name="OfferLabel" type="Label" parent="ShopPanel/OfferSlot3"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 27
+text = "精英兵营  费用：20"
+
+[node name="BuyButton" type="Button" parent="ShopPanel/OfferSlot3"]
+custom_minimum_size = Vector2(144, 60)
+layout_mode = 2
+text = "购买"
+
+[node name="OfferFrame3" type="Control" parent="ShopPanel"]
+layout_mode = 0
+mouse_filter = 2
+offset_left = 18
+offset_top = 348
+offset_right = 634.5
+offset_bottom = 444
+script = ExtResource("2")
+
+[node name="OfferSlot4" type="HBoxContainer" parent="ShopPanel"]
+layout_mode = 0
+offset_left = 36
+offset_top = 468
+offset_right = 616.5
+offset_bottom = 540
+theme_override_constants/separation = 18
+
+[node name="OfferLabel" type="Label" parent="ShopPanel/OfferSlot4"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 27
+text = "马厩  费用：18"
+
+[node name="BuyButton" type="Button" parent="ShopPanel/OfferSlot4"]
+custom_minimum_size = Vector2(144, 60)
+layout_mode = 2
+text = "购买"
+
+[node name="OfferFrame4" type="Control" parent="ShopPanel"]
+layout_mode = 0
+mouse_filter = 2
+offset_left = 18
+offset_top = 456
+offset_right = 634.5
+offset_bottom = 552
+script = ExtResource("2")
+
+[node name="OfferSlot5" type="HBoxContainer" parent="ShopPanel"]
+layout_mode = 0
+offset_left = 36
+offset_top = 576
+offset_right = 616.5
+offset_bottom = 648
+theme_override_constants/separation = 18
+
+[node name="OfferLabel" type="Label" parent="ShopPanel/OfferSlot5"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 27
+text = "兵营  费用：10"
+
+[node name="BuyButton" type="Button" parent="ShopPanel/OfferSlot5"]
+custom_minimum_size = Vector2(144, 60)
+layout_mode = 2
+text = "购买"
+
+[node name="OfferFrame5" type="Control" parent="ShopPanel"]
+layout_mode = 0
+mouse_filter = 2
+offset_left = 18
+offset_top = 564
+offset_right = 634.5
+offset_bottom = 660
+script = ExtResource("2")
+
+[node name="ShopRefreshButton" type="Button" parent="ShopPanel"]
+layout_mode = 0
+offset_left = 480.5
+offset_top = 664
+offset_right = 634.5
+offset_bottom = 704
+text = "刷新商品"

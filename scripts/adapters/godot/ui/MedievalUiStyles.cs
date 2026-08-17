@@ -46,7 +46,6 @@ public static class MedievalUiStyles
 		StyleButton(hud.GetNode<Button>("PhasePanel/CheatButton"));
 		StyleButton(hud.GetNode<Button>("PhasePanel/InfoButton"));
 		StyleButton(hud.GetNode<Button>("MenuButton"), true);
-		StyleShopButton(hud.GetNode<Button>("ShopButton"));
 		StyleToolButton(hud.GetNode<Button>("BuildingPauseToolButton"));
 		StyleToolButton(hud.GetNode<Button>("BuildingRepairToolButton"));
 		StyleToolButton(hud.GetNode<Button>("CombineProhibitToolButton"));
@@ -86,26 +85,27 @@ public static class MedievalUiStyles
 		button.AddThemeFontSizeOverride("font_size", CardFontSize);
 	}
 
-	public static void ApplyShop(CanvasLayer uiRoot)
+	public static void ApplyShop(Control shopPanel)
 	{
-		Panel panel = uiRoot.GetNode<Panel>("ShopPanel");
+		Panel panel = shopPanel.GetNode<Panel>("ShopPanel");
 		StylePanel(panel);
-		uiRoot.GetNode<ColorRect>("ShopPanel/ShopPanelBackground").Color = Colors.Transparent;
-		StyleHudLabel(uiRoot.GetNode<Label>("ShopPanel/ShopTitleLabel"), Gold);
-		StyleHudLabel(uiRoot.GetNode<Label>("ShopPanel/ShopGoldLabel"), BrightGold);
-		StyleButton(uiRoot.GetNode<Button>("ShopPanel/ShopCloseButton"));
-		StyleButton(uiRoot.GetNode<Button>("ShopPanel/ShopRefreshButton"), true);
+		shopPanel.GetNode<ColorRect>("ShopPanel/ShopPanelBackground").Color = Colors.Transparent;
+		StyleHudLabel(shopPanel.GetNode<Label>("ShopPanel/ShopTitleLabel"), Gold);
+		StyleHudLabel(shopPanel.GetNode<Label>("ShopPanel/ShopGoldLabel"), BrightGold);
+		StyleButton(shopPanel.GetNode<Button>("ShopPanel/ShopCloseButton"));
+		StyleButton(shopPanel.GetNode<Button>("ShopPanel/ShopRefreshButton"), true);
+		StyleShopButton(shopPanel.GetNode<Button>("ShopButton"));
 		for (int i = 0; i < Shop.OfferCount; i++)
-			StyleOffer(uiRoot, i);
+			StyleOffer(shopPanel, i);
 	}
 
-	private static void StyleOffer(CanvasLayer uiRoot, int index)
+	private static void StyleOffer(Control shopPanel, int index)
 	{
 		string path = $"ShopPanel/OfferSlot{index + 1}";
-		Label label = uiRoot.GetNode<Label>($"{path}/OfferLabel");
+		Label label = shopPanel.GetNode<Label>($"{path}/OfferLabel");
 		label.AddThemeColorOverride("font_color", Text);
 		label.AddThemeFontSizeOverride("font_size", ButtonFontSize);
-		StyleButton(uiRoot.GetNode<Button>($"{path}/BuyButton"), true);
+		StyleButton(shopPanel.GetNode<Button>($"{path}/BuyButton"), true);
 	}
 
 	private static void StyleTopBar(Panel panel)

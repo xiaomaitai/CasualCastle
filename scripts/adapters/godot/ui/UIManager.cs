@@ -51,11 +51,7 @@ public partial class UIManager : Node2D
 		if (AdapterRegistry.Resolve<GameManager>() != null)
 			AdapterRegistry.Resolve<GameManager>().GameStateChanged -= OnGameStateChanged;
 
-		if (_shopUi != null)
-		{
-			_shopUi.Dispose();
-		}
-		AdapterRegistry.Unregister<ShopUiController>(_shopUi);
+
 		_buildingManageUi?.Dispose();
 		_combineProhibitUi?.Dispose();
 		_cheatMenu?.Dispose();
@@ -150,8 +146,7 @@ public partial class UIManager : Node2D
 
 		_hudUi = uiRoot.GetNode<HudUiController>("Hud");
 		Shop shopService = AdapterRegistry.Resolve<Shop>();
-		_shopUi = new ShopUiController(this, uiRoot, _hudUi, shopService);
-		AdapterRegistry.Register<ShopUiController>(_shopUi);
+		_shopUi = uiRoot.GetNode<ShopUiController>("Shop");
 		_handUi = uiRoot.GetNode<HandUiController>("Hand");
 		Castle playerCastle = GetParent().GetNode<Castle>("Battlefield/PlayerSide/PlayerCastle");
 		_buildingSell = new BuildingSellController(this, playerCastle, shopService, _shopUi);

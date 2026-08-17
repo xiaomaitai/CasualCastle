@@ -1,29 +1,28 @@
-// 商店 UI：购买与直接放置
+// 商店组件：购买与直接放置（shop_panel.tscn 场景根）
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Building;
 using CasualCastle.Domain.Shared;
 using Godot;
 using System;
 
-public sealed class ShopUiController
+public partial class ShopUiController : Control
 {
 	private const string ShopIconPath = "res://assets/art/ui/shop_goods_pile_194.png";
-	private readonly Node _owner;
-	private readonly CanvasLayer _uiRoot;
-	private readonly Button _shopButton;
-	private readonly Panel _shopButtonCircle;
-	private readonly Panel _panel;
-	private readonly Label _shopGoldLabel;
-	private readonly Button _closeButton;
-	private readonly Button _refreshButton;
+
+	private Button _shopButton;
+	private Panel _shopButtonCircle;
+	private Panel _panel;
+	private Label _shopGoldLabel;
+	private Button _closeButton;
+	private Button _refreshButton;
 	private readonly Button[] _buyButtons = new Button[Shop.OfferCount];
 	private readonly Label[] _offerLabels = new Label[Shop.OfferCount];
 	private readonly OfferFrame[] _offerFrames = new OfferFrame[Shop.OfferCount];
 	private readonly Control.GuiInputEventHandler[] _offerGuiInputHandlers = new Control.GuiInputEventHandler[Shop.OfferCount];
 
-	private readonly Shop _shop;
-	private readonly GameManager _gameManager;
-	private readonly BuildingSystem _buildingSystem;
+	private Shop _shop;
+	private GameManager _gameManager;
+	private BuildingSystem _buildingSystem;
 
 	private bool _gameOver;
 	private bool _shopButtonHovered;
@@ -46,31 +45,30 @@ public sealed class ShopUiController
 		_panel.Modulate = active ? new Color(1f, 1f, 0.75f) : Colors.White;
 	}
 
-	public ShopUiController(Node owner, CanvasLayer uiRoot, HudUiController hud, Shop shopService)
+	public override void _Ready()
 	{
-		_owner = owner;
-		_uiRoot = uiRoot;
-		_shop = shopService;
+		_shop = AdapterRegistry.Resolve<Shop>();
 		_gameManager = AdapterRegistry.Resolve<GameManager>();
 		_buildingSystem = AdapterRegistry.Resolve<BuildingSystem>();
-		_shopButton = hud.ShopButton;
-		_shopButtonCircle = hud.ShopButtonCircle;
-		_panel = uiRoot.GetNode<Panel>("ShopPanel");
-		_shopGoldLabel = uiRoot.GetNode<Label>("ShopPanel/ShopGoldLabel");
-		_closeButton = uiRoot.GetNode<Button>("ShopPanel/ShopCloseButton");
+		_shopButton = GetNode<Button>("ShopButton");
+		_shopButtonCircle = GetNode<Panel>("ShopButtonCircle");
+		_panel = GetNode<Panel>("ShopPanel");
+		_shopGoldLabel = GetNode<Label>("ShopPanel/ShopGoldLabel");
+		_closeButton = GetNode<Button>("ShopPanel/ShopCloseButton");
+		_refreshButton = GetNode<Button>("ShopPanel/ShopRefreshButton");
+		AdapterRegistry.Register<ShopUiController>(this);
 		ApplyShopIcons();
-		_refreshButton = uiRoot.GetNode<Button>("ShopPanel/ShopRefreshButton");
 		DisplaySettingsManager settings = AdapterRegistry.Resolve<DisplaySettingsManager>();
 		_profile = settings.UiProfile;
-		UiProfileStyles.ApplyShop(uiRoot, _profile);
+		UiProfileStyles.ApplyShop(this, _profile);
 		settings.UiProfileChanged += ApplyProfile;
 		UpdateShopButtonHighlight();
 
 		for (int i = 0; i < Shop.OfferCount; i++)
 		{
-			_offerLabels[i] = uiRoot.GetNode<Label>($"ShopPanel/OfferSlot{i + 1}/OfferLabel");
-			_buyButtons[i] = uiRoot.GetNode<Button>($"ShopPanel/OfferSlot{i + 1}/BuyButton");
-			_offerFrames[i] = uiRoot.GetNode<OfferFrame>($"ShopPanel/OfferFrame{i + 1}");
+			_offerLabels[i] = GetNode<Label>($"ShopPanel/OfferSlot{i + 1}/OfferLabel");
+			_buyButtons[i] = GetNode<Button>($"ShopPanel/OfferSlot{i + 1}/BuyButton");
+			_offerFrames[i] = GetNode<OfferFrame>($"ShopPanel/OfferFrame{i + 1}");
 			_offerLabels[i].MouseFilter = Control.MouseFilterEnum.Stop;
 
 			int slotIndex = i;
@@ -98,7 +96,7 @@ public sealed class ShopUiController
 		_ready = true;
 	}
 
-	public void Dispose()
+	public override void _ExitTree()
 	{
 		AdapterRegistry.Resolve<DisplaySettingsManager>().UiProfileChanged -= ApplyProfile;
 		_shopButton.Pressed -= OnShopButtonPressed;
@@ -114,12 +112,13 @@ public sealed class ShopUiController
 		_shop.ShopAvailabilityChanged -= UpdateShopButtonAvailability;
 		_shop.ShopOpenRequested -= Open;
 		_shop.ShopOffersChanged -= RefreshOffers;
+		AdapterRegistry.Unregister<ShopUiController>(this);
 	}
 
 	private void ApplyProfile(UiProfileKind kind)
 	{
 		_profile = kind;
-		UiProfileStyles.ApplyShop(_uiRoot, kind);
+		UiProfileStyles.ApplyShop(this, kind);
 		ApplyOfferFrames();
 		UpdateShopButtonHighlight();
 	}
@@ -301,7 +300,7 @@ public sealed class ShopUiController
 		if (playerCastle == null)
 			return;
 
-		Vector2 mouseScreen = _owner.GetViewport().GetMousePosition();
+		Vector2 mouseScreen = GetViewport().GetMousePosition();
 		if (!playerCastle.TryGetGridFromScreenPoint(mouseScreen, out int gridX, out int gridY))
 		{
 			playerCastle.ClearPlacementPreview();

@@ -25,6 +25,8 @@ public partial class HandUiController : Control
 	private BuildingSystem _buildingSystem;
 	private ShopUiController _shopUi;
 
+	private ShopUiController ShopUi => _shopUi ??= AdapterRegistry.Resolve<ShopUiController>();
+
 	private bool _inputBlocked;
 	private bool _dragging;
 	private int _dragHandIndex = -1;
@@ -42,7 +44,6 @@ public partial class HandUiController : Control
 		_shop = AdapterRegistry.Resolve<Shop>();
 		_gameManager = AdapterRegistry.Resolve<GameManager>();
 		_buildingSystem = AdapterRegistry.Resolve<BuildingSystem>();
-		_shopUi = AdapterRegistry.Resolve<ShopUiController>();
 		_placementHintLabel = GetNode<Label>("PlacementHintLabel");
 
 		_useItemButton = new Button { Text = "使用经验魔晶", Visible = false };
@@ -110,9 +111,9 @@ public partial class HandUiController : Control
 
 	private void UpdateSellDropHighlight()
 	{
-		bool overPanel = _dragging && _shopUi != null && _shopUi.IsOpen
-			&& _shopUi.IsPointInPanel(GetViewport().GetMousePosition());
-		_shopUi?.SetSellHighlight(overPanel);
+		bool overPanel = _dragging && ShopUi != null && ShopUi.IsOpen
+			&& ShopUi.IsPointInPanel(GetViewport().GetMousePosition());
+		ShopUi?.SetSellHighlight(overPanel);
 	}
 
 	public bool TryHandleEscape()
@@ -158,7 +159,7 @@ public partial class HandUiController : Control
 
 	public bool CancelDrag(bool playFeedback = true)
 	{
-		_shopUi?.SetSellHighlight(false);
+		ShopUi?.SetSellHighlight(false);
 		if (!_dragging && _pendingHandIndex < 0)
 			return false;
 
@@ -263,7 +264,7 @@ public partial class HandUiController : Control
 		if (playerCastle == null || _dragHandIndex < 0)
 			return false;
 
-		if (_shopUi != null && _shopUi.IsOpen && _shopUi.IsPointInPanel(screenPosition))
+		if (ShopUi != null && ShopUi.IsOpen && ShopUi.IsPointInPanel(screenPosition))
 			return _shop.TrySellHandCard(_dragHandIndex);
 
 		if (!playerCastle.TryGetGridFromScreenPoint(screenPosition, out int gridX, out int gridY))

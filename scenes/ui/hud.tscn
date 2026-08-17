@@ -99,23 +99,6 @@ offset_right = 1896
 offset_bottom = 72
 text = "☰"
 
-[node name="ShopButtonCircle" type="Panel" parent="."]
-offset_left = 1778
-offset_top = 924
-offset_right = 1886
-offset_bottom = 1032
-mouse_filter = 2
-
-[node name="ShopButton" type="Button" parent="."]
-offset_left = 1760
-offset_top = 906
-offset_right = 1904
-offset_bottom = 1050
-toggle_mode = true
-text = ""
-expand_icon = true
-tooltip_text = "打开/关闭商店"
-
 [node name="BuildingPauseToolButton" type="Button" parent="."]
 visible = false
 custom_minimum_size = Vector2(72, 54)

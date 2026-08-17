@@ -25,12 +25,12 @@ public static class UiProfileStyles
 			MedievalUiStyles.ApplyHand(handPanel, useItemButton);
 	}
 
-	public static void ApplyShop(CanvasLayer uiRoot, UiProfileKind kind)
+	public static void ApplyShop(Control shopPanel, UiProfileKind kind)
 	{
 		if (kind == UiProfileKind.Cartoon)
-			CartoonUiStyles.ApplyShop(uiRoot);
+			CartoonUiStyles.ApplyShop(shopPanel);
 		else
-			MedievalUiStyles.ApplyShop(uiRoot);
+			MedievalUiStyles.ApplyShop(shopPanel);
 	}
 
 	public static void ApplyCardButton(Button button, bool selected, bool occupied, UiProfileKind kind)

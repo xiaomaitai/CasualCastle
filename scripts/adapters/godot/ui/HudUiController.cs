@@ -20,8 +20,6 @@ public partial class HudUiController : Control
 	private Button _cheatButton;
 	private Button _infoButton;
 	private Button _menuButton;
-	private Panel _shopButtonCircle;
-	private Button _shopButton;
 	private Button _buildingPauseToolButton;
 	private Button _buildingRepairToolButton;
 	private Button _combineProhibitToolButton;
@@ -38,8 +36,6 @@ public partial class HudUiController : Control
 	public Button CheatButton => _cheatButton ??= GetNode<Button>("PhasePanel/CheatButton");
 	public Button InfoButton => _infoButton ??= GetNode<Button>("PhasePanel/InfoButton");
 	public Button MenuButton => _menuButton ??= GetNode<Button>("MenuButton");
-	public Panel ShopButtonCircle => _shopButtonCircle ??= GetNode<Panel>("ShopButtonCircle");
-	public Button ShopButton => _shopButton ??= GetNode<Button>("ShopButton");
 	public Button BuildingPauseToolButton => _buildingPauseToolButton ??= GetNode<Button>("BuildingPauseToolButton");
 	public Button BuildingRepairToolButton => _buildingRepairToolButton ??= GetNode<Button>("BuildingRepairToolButton");
 	public Button CombineProhibitToolButton => _combineProhibitToolButton ??= GetNode<Button>("CombineProhibitToolButton");
