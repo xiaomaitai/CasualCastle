@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using CasualCastle.Adapters.Godot.Battle;
 using CasualCastle.Adapters.Godot.Flow;
 using CasualCastle.Adapters.Persistence;
+using CasualCastle.Application;
 using CasualCastle.Domain.Shared;
 using CasualCastle.Domain.Building;
 using CasualCastle.Domain.Battle;
@@ -42,7 +43,7 @@ public static class CompositionRoot
 		services.AddSingleton<DamageMatrix>(_ => GameDataLoader.DamageMatrix);
 		services.AddSingleton<CombineRules>(_ => GameDataLoader.CombineRules);
 		services.AddSingleton<ISaveRepository, SaveStorage>();
-		services.AddSingleton<IGameSessionService, GameSessionService>();
+		services.AddApplication();
 
 		return services.BuildServiceProvider();
 	}

@@ -10,11 +10,14 @@ Domain.Shared
     ↑        ↑            ↑
 Domain.Building  Domain.Battle  Domain.History(→Shared, Building)
     ↑
+Application 纯 C# 项目（scripts/application/Application.csproj，跨聚合用例）
+    ↑
 Persistence 纯 C# 项目（scripts/adapters/persistence/Persistence.csproj，当前只含 SaveDatabase.cs）
     ↑
 CasualCastle 主项目（Godot 适配层 + 存储适配的 Godot 侧文件）
     ↑
 tests：CasualCastle.Domain.Tests（→ 四个 domain 项目）
+       CasualCastle.Application.Tests（→ Application）
        CasualCastle.Persistence.Tests（→ Persistence + Shared）
 ```
 
@@ -23,9 +26,9 @@ tests：CasualCastle.Domain.Tests（→ 四个 domain 项目）
 
 ## 规则
 
-1. **domain 零 Godot**：四个 domain 项目不得引用 Godot 包，源码不得出现 Godot 类型
-   （由此保证领域端口不会返回 Godot 类型）。
-2. **domain 零 SQLite**：domain 源码不得出现 SqliteConnection 等存储访问。
+1. **domain 与 application 零 Godot**：四个 domain 项目与 application 项目不得引用 Godot 包，
+   源码不得出现 Godot 类型（由此保证领域端口不会返回 Godot 类型）。
+2. **domain 与 application 零 SQLite**：内层源码不得出现 SqliteConnection 等存储访问。
 3. **场景脚本零 SQLite**：`scripts/adapters/godot/` 下运行时脚本不得直接访问 SQLite，
    配置数据只经 `scripts/adapters/persistence/` 读取。
    唯一例外：`scripts/adapters/godot/dev/` 开发者工具（按 AGENTS.md 约定，工具可直连 config.db）。
@@ -41,5 +44,5 @@ tests：CasualCastle.Domain.Tests（→ 四个 domain 项目）
 
 ## 迁移期间注意
 
-- Phase 二起新增 `scripts/application/` 项目时，本文件与检查工具同步更新（application 也只允许引用 domain 与端口）。
+- Phase 二已新增 `scripts/application/` 项目（只引用 domain 与端口，检查工具已覆盖）。
 - Phase 六将更多存储文件迁入 Persistence 纯 C# 项目时，逐个加入 csproj 的 Compile Include 清单并保持零 Godot。

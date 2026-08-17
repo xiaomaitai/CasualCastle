@@ -3,6 +3,7 @@ namespace CasualCastle.Domain.Building;
 
 public interface IBuildingState : IAdjacencyBuilding
 {
+	int Health { get; }
 	bool IsDestroyed { get; }
 	bool IsManuallyPaused { get; }
 	bool IsCombineProhibited { get; }

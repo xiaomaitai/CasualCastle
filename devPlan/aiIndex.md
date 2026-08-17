@@ -98,6 +98,12 @@
 
 端口接口（`I*` 文件）按子域散落在上述目录中，如 `IFieldUnitRepository.cs`、`IBuildingPlacement.cs`、`IBattleReportRepository.cs`。
 
+### 2.2a application — 纯 C# 应用用例层（零 Godot）
+
+| 目录 | 职责 | 关键文件 |
+| --- | --- | --- |
+| `application/` | 跨聚合/跨子域编排用例与存档映射 | `GameSessionService.cs`（保存/恢复）、`NightCombineUseCase.cs`、`PhaseTransitionUseCase.cs`、`MatchSessionUseCase.cs`、`SaveDataMapper.cs`、`GameSessionPorts.cs`、`ApplicationModule.cs` |
+
 ### 2.2 adapters/godot — Godot 适配层
 
 | 目录 | 职责 | 关键文件 |
@@ -181,6 +187,7 @@
 
 - `CasualCastle.Domain.Tests/`：单测文件按被测类命名（`{Xxx}Tests.cs`），`BattleTestFakes.cs` 为公共测试替身；运行 `dotnet test tests/CasualCastle.Domain.Tests/CasualCastle.Domain.Tests.csproj`
 - `CasualCastle.Persistence.Tests/`：存档 SQLite 真实文件往返测试（引用纯 C# Persistence 项目）；运行 `dotnet test tests/CasualCastle.Persistence.Tests/CasualCastle.Persistence.Tests.csproj`
+- `CasualCastle.Application.Tests/`：应用用例测试（保存/恢复、阶段流转、夜间结算、开局重置）；运行 `dotnet test tests/CasualCastle.Application.Tests/CasualCastle.Application.Tests.csproj`
 - 约定：domain 改动必须带单测；bug 修复写 `RealBug` 测试；测试文件零注释
 
 ## 6. 工具（tools/）

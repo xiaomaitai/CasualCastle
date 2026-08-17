@@ -1,5 +1,6 @@
 // 游戏总控：对局状态、阶段信号、血量与存档入口
 using CasualCastle.Adapters.Godot;
+using CasualCastle.Application;
 using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
 using CasualCastle.Domain.History;
@@ -75,8 +76,6 @@ public partial class GameManager : Node2D, IGameState
 	private Castle _playerCastle;
 	private Castle _enemyCastle;
 
-	private BattleReportSystem BattleReportSystem => _battleReportSystem ??= AdapterRegistry.Resolve<BattleReportSystem>();
-	private BattleReportSystem _battleReportSystem;
 	private readonly MatchPhaseMachine _phaseMachine = new();
 	private bool _pendingEnemyIsNecromancer;
 
@@ -121,22 +120,7 @@ public partial class GameManager : Node2D, IGameState
 		EmitSignal(SignalName.GameStateChanged, (int)CurrentState);
 		IsPaused = false;
 		SyncHeartHealthFromCastles();
-		BattleReportSystem?.StartMatch(PendingReplayReportId);
-
-		if (SelectedFaction == FactionDef.NecromancerId)
-		{
-			Get<BlackMagicService>()?.Reset();
-			UndeadFactionBuffs.Reset();
-			Get<RitualService>()?.Reset();
-		}
-
-		if (SelectedFaction == FactionDef.DungeonId)
-		{
-			Get<ComfortService>()?.Reset();
-			Get<KingExperienceService>()?.Reset();
-			Get<KingSkillSet>()?.Reset();
-			DungeonFactionBuffs.Reset();
-		}
+		Get<MatchSessionUseCase>().StartNewMatch(SelectedFaction, PendingReplayReportId);
 
 		_phaseMachine.StartMatch();
 		SetProcess(true);
@@ -185,7 +169,7 @@ public partial class GameManager : Node2D, IGameState
 	public void SetPendingReplayReportId(string reportId)
 	{
 		PendingReplayReportId = reportId ?? "";
-		_pendingEnemyIsNecromancer = Get<BattleReportService>()?.IsNecromancerReport(PendingReplayReportId) ?? false;
+		_pendingEnemyIsNecromancer = Services.GetRequiredService<BattleReportService>().IsNecromancerReport(PendingReplayReportId);
 	}
 
 	public void SetSelectedFaction(string factionId)
@@ -210,8 +194,8 @@ public partial class GameManager : Node2D, IGameState
 
 	private void OnPhaseChanged(MatchPhase previous, MatchPhase next)
 	{
-		if (previous != next)
-			BattleReportSystem?.CapturePhaseSnapshot(_playerCastle, CurrentNightIndex, PhaseMapping.ToBattlePhase(previous));
+		ReplayTarget replayTarget = _enemyCastle == null ? null : new ReplayTarget(_enemyCastle);
+		Get<PhaseTransitionUseCase>().Handle(previous, next, replayTarget);
 
 		EmitSignal(SignalName.PhaseChanged, (int)next);
 		Sfx.Play(SfxEvents.PhaseChange);
@@ -254,77 +238,6 @@ public partial class GameManager : Node2D, IGameState
 
 		int slot = 0;
 		Get<IGameSessionService>().DeleteSave(slot);
-	}
-
-	public void SaveGame(int slot)
-	{
-		SaveData data = new SaveData
-		{
-			SlotIndex = slot,
-			FactionId = AdapterRegistry.Resolve<Shop>()?.FactionId ?? FactionIds.Alliance,
-			Gold = AdapterRegistry.Resolve<Shop>().Gold,
-			CurrentNightIndex = CurrentNightIndex,
-			PendingReplayReportId = PendingReplayReportId,
-		};
-
-		List<Building> buildings = _playerCastle.GetBuildings();
-		foreach (Building b in buildings)
-		{
-			data.Buildings.Add(new BuildingSaveEntry
-			{
-				TypeId = b.TypeId,
-				AnchorGridX = b.AnchorGridX,
-				AnchorGridY = b.AnchorGridY,
-				Health = b.Health,
-			});
-		}
-
-		IReadOnlyList<CardData> handCards = AdapterRegistry.Resolve<Hand>().Cards;
-		foreach (CardData c in handCards)
-		{
-			data.HandCards.Add(new CardSaveEntry
-			{
-				Id = c.Id,
-				Name = c.Name,
-				Cost = c.Cost,
-				BuildingType = c.BuildingType,
-				Weight = c.Weight,
-				IsPlaceable = c.IsPlaceable,
-				ItemType = c.ItemType,
-				Attributes = new Dictionary<string, string>(c.Attributes),
-			});
-		}
-
-		RitualService ritualService = Get<RitualService>();
-		if (ritualService != null)
-		{
-			data.RitualStudyCompletionCount = ritualService.StudyCompletionCount;
-			data.LearnedRitualIds.AddRange(ritualService.GetLearnedRitualIds());
-		}
-
-		KingExperienceService kingXp = Get<KingExperienceService>();
-		if (kingXp != null)
-			data.DungeonKingXp = kingXp.GetCumulativeExperience();
-		KingSkillSet kingSkills = Get<KingSkillSet>();
-		if (kingSkills != null)
-		{
-			data.DungeonLearnedSkillIds.AddRange(kingSkills.GetAll());
-			foreach (string skillId in kingSkills.GetAll())
-				data.DungeonLearnedSkillLevels.Add(kingSkills.GetLearnLevel(skillId));
-		}
-
-		Get<IGameSessionService>().SaveGame(data);
-		GD.Print($"Game saved to slot {slot}");
-	}
-
-	public SaveData LoadSaveData(int slot)
-	{
-		return Get<IGameSessionService>().LoadSaveData(slot);
-	}
-
-	public bool HasSave(int slot)
-	{
-		return Get<IGameSessionService>().HasSave(slot);
 	}
 
 	public void RestartGame()

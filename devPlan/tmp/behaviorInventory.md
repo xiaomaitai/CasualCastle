@@ -55,8 +55,8 @@
 | --- | --- | --- | --- |
 | 阶段推进/计时/夜数 | MatchPhaseMachine | MatchPhaseMachineTests（8 个） | — |
 | 阶段→战报阶段映射 | PhaseMapping | PhaseMappingTests（3 个） | — |
-| 战报快照触发 | GameManager.OnPhaseChanged | phase_cycle_probe | 快照内容等价性无测试（Phase 二用例化后补） |
-| 自动存档触发 | InitManager → GameManager.SaveGame | SaveDatabaseTests（存储层） | 触发时机无验证（Phase 二 GameSessionService 用例化后补） |
+| 战报快照触发 | PhaseTransitionUseCase.Handle | phase_cycle_probe、PhaseTransitionUseCaseTests | 快照内容等价性测试待补 |
+| 自动存档触发 | PhaseTransitionUseCase（night>=1 进入 Combat） | PhaseTransitionUseCaseTests（触发时机已覆盖）、SaveDatabaseTests（存储层） | — |
 
 ### 商店与手牌
 
@@ -73,7 +73,7 @@
 | 全字段往返 | SaveDatabase（纯 C#） | SaveDatabaseTests（5 个） | — |
 | 旧档兼容 | 列迁移 + InitManager 旧档回填 | LegacySaveWithoutNewColumnsLoadsWithDefaults | — |
 | 运行时卡牌属性 | SaveDatabase attributes 列 | RuntimeModifiedCardAttributesSurviveRoundTrip | — |
-| 恢复映射 | InitManager.LoadSaveIntoGame | — | Godot 侧恢复无 smoke（Phase 二用例化后补） |
+| 恢复映射 | Application.GameSessionService.RestoreSession | GameSessionServiceTests（22 个用例测试含恢复/回填） | Godot 侧端到端读档 smoke 待补 |
 
 ### UI 模态输入（待迁移：UIManager.cs，目标见 Phase 三）
 
@@ -96,6 +96,7 @@
 | 建筑生命/暂停/组合禁止 | Building（Godot 节点） | 由 Adapter 直接写 | Phase 四迁入 BuildingRuntime |
 | 单位生命/目标/冷却/状态 | domain Unit 意图方法 | 已收口 | 保持 |
 | 阵营资源（黑魔法/法力/魔晶） | BlackMagicService/ManaService 单例 | 单位持有同一单例 | Phase 五改为对局级资源池 |
-| 存档文件 | SaveStorage → SaveDatabase | 已收口（Phase 零） | 保持 |
-| 战报快照 | BattleReportSystem → BattleReportService | 触发分散在 GameManager | Phase 二收拢为应用用例 |
+| 存档文件 | GameSessionService → SaveStorage → SaveDatabase | 已收口（Phase 二：用例唯一入口） | 保持 |
+| 战报快照 | BattleReportSystem → BattleReportService | 已收口（Phase 二）：PhaseTransitionUseCase 单一触发 | 保持 |
+| 阶段副作用（商店刷新/结算/复刻/自动存档） | PhaseTransitionUseCase | 已收口（Phase 二）：GameManager 只调用用例+发信号 | 保持 |
 | UI 输入屏蔽 | SetInputBlocked 分散调用 | 多处调用 | Phase 三统一 UiInteractionState |

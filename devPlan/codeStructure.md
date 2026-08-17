@@ -36,11 +36,17 @@ CasualCastle/
 │   │   │   ├── SkillEffectTypes.cs
 │   │   │   └── BattleModule.cs
 │   │   └── History/                                # History.csproj → Shared, Building
-│   │       ├── BattleReportModels.cs, IBattleReportRepository.cs
+│   │       ├── BattleReportModels.cs, IBattleReportRepository.cs, IBattleReportCapture.cs
 │   │       ├── ReportBuilder.cs, MirrorRules.cs
-│   │       ├── BattleReportService.cs, ReplayService.cs
+│   │       ├── BattleReportService.cs, ReplayService.cs, PhaseMapping.cs
 │   │       ├── IReplayTarget.cs
 │   │       └── HistoryModule.cs
+│   │
+│   ├── application/                             # Application.csproj — 纯 C# 应用用例层（零 Godot）
+│   │   ├── GameSessionService.cs                # 保存/恢复用例
+│   │   ├── NightCombineUseCase.cs, PhaseTransitionUseCase.cs
+│   │   ├── MatchSessionUseCase.cs, SaveDataMapper.cs
+│   │   ├── GameSessionPorts.cs, ApplicationModule.cs
 │   │
 │   ├── CompositionRoot.cs                          # MS DI 容器构建
 │   │
@@ -59,7 +65,7 @@ CasualCastle/
 │       │   ├── combine/        CombineBuildingFactory.cs
 │       │   ├── replay/        ReplayTarget.cs
 │       │   ├── ui/            UIManager + 子控制器
-│       │   ├── flow/          TitleScreen, MainGameController, NightOrchestrator
+│       │   ├── flow/          TitleScreen, MainGameController, GameSessionBridge
 │       │   ├── core/          GameConfig, GameCoordinatesAdapter
 │       │   ├── dev/           DevInputLogger
 │       │   └── audio/         AudioManager, Sfx, UiSfx
@@ -73,8 +79,8 @@ CasualCastle/
 │
 ├── scenes/    prefabs/    assets/    project.godot
 ├── devPlan/design/          # 系统设计文档
-├── tests/                   # CasualCastle.Domain.Tests / CasualCastle.Persistence.Tests
-└── CasualCastle.sln         # 8 个项目
+├── tests/                   # Domain / Persistence / Application 三套测试
+└── CasualCastle.sln         # 10 个项目
 ```
 
 ---
@@ -89,6 +95,8 @@ CasualCastle/
 Domain.Building  Domain.Battle  Domain.History
     ↑              ↑              ↑
     └──────────────┴──────────────┘
+                   │
+            Application (纯 C# 用例)
                    │
           adapters (Godot + persistence)
 ```
@@ -168,7 +176,10 @@ domain 项目零 `using Godot`，单向无循环。
 | `Player` | Building | 手动 new（通过 InitManager） |
 | `BattleReportService` | History | MS DI Singleton |
 | `ReplayService` | History | MS DI Singleton（通过 IReplayUseCase） |
-| `NightOrchestrator` | flow | 手动 new（通过 InitManager） |
+| `GameSessionService` | Application | MS DI Singleton（IGameSessionService） |
+| `NightCombineUseCase` | Application | MS DI Singleton |
+| `PhaseTransitionUseCase` | Application | MS DI Singleton |
+| `MatchSessionUseCase` | Application | MS DI Singleton |
 
 ### 纯 C# 控制器（无 Godot 继承）
 
@@ -221,3 +232,8 @@ domain 项目零 `using Godot`，单向无循环。
 | `IReplayUseCase` | Domain.History | ReplayService | 入站 |
 | `IReplayTarget` | Domain.History | ReplayTarget | 出站 |
 | `IBuildingFactory` | adapters/godot/building | BuildingFactory | 出站 |
+| `IGameSessionService` | Domain.Shared | Application.GameSessionService | 入站 |
+| `IGameSessionQuery` | Domain.Building | GameSessionBridge | 出站 |
+| `IGameSessionCommand` | Domain.Building | GameSessionBridge | 出站 |
+| `IShopAccess` | Domain.Building | GameSessionBridge | 出站 |
+| `IBattleReportCapture` | Domain.History | BattleReportSystem | 出站 |

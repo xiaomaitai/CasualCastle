@@ -658,6 +658,7 @@ internal sealed class FakeBuildingState : IBuildingState
 	public int AnchorGridX { get; }
 	public int AnchorGridY { get; }
 	public bool ContributesToAdjacency => true;
+	public int Health => 100;
 	public bool IsDestroyed => false;
 	public bool IsManuallyPaused => false;
 	public bool IsCombineProhibited => false;

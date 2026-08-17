@@ -145,6 +145,11 @@ GameManager.Services.GetService<IBattleReportRepository>();
 | `IBuildingVisualRepository` | `SqliteBuildingRepository` | Singleton |
 | `IVisualAssetRepository` | `SqliteVisualAssetRepository` | Singleton |
 | `ISaveRepository` | `SaveStorage` | Singleton |
+| `IGameSessionService` | `GameSessionService`（Application） | Singleton |
+| `GameSessionPorts` | `GameSessionPorts`（InitManager 注入端口实现） | Singleton |
+| `NightCombineUseCase` | `NightCombineUseCase`（Application） | Singleton |
+| `PhaseTransitionUseCase` | `PhaseTransitionUseCase`（Application） | Singleton |
+| `MatchSessionUseCase` | `MatchSessionUseCase`（Application） | Singleton |
 
 ---
 
@@ -367,5 +372,6 @@ public static IServiceCollection AddDomainBuilding(this IServiceCollection servi
 | `scripts/domain/Building/BuildingModule.cs` | Building 模块注册 |
 | `scripts/domain/Battle/BattleModule.cs` | Battle 模块注册 |
 | `scripts/domain/History/HistoryModule.cs` | History 模块注册 |
+| `scripts/application/ApplicationModule.cs` | Application 用例与端口集合注册 |
 | `devPlan/outline/c05ProjectArchitecture.md` | 项目架构（含 DI 概述和端口表） |
 | `devPlan/codeStructure.md` | 代码结构（含系统清单） |

@@ -123,7 +123,7 @@ public partial class TitleScreen : Control
 		_continueButton.Text = "加载中...";
 		AdapterRegistry.Resolve<GameManager>().PendingLoadSlot = 0;
 		AdapterRegistry.Resolve<GameManager>().SetPendingReplayReportId("");
-		SaveData save = AdapterRegistry.Resolve<GameManager>().LoadSaveData(0);
+		SaveData save = GameManager.Get<IGameSessionService>().LoadSaveData(0);
 		if (save != null)
 			AdapterRegistry.Resolve<GameManager>().SetSelectedFaction(save.FactionId);
 		await ForceClearMainGameResidue();

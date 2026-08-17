@@ -1,5 +1,6 @@
 // 暂停菜单 UI
 using CasualCastle.Adapters.Godot;
+using CasualCastle.Domain.Shared;
 using Godot;
 using System;
 
@@ -103,7 +104,7 @@ public sealed class PauseMenuUiController
 
 	private void OnSavePressed()
 	{
-		AdapterRegistry.Resolve<GameManager>().SaveGame(0);
+		GameManager.Get<IGameSessionService>().SaveGame(0);
 	}
 
 	private void OnBackToTitlePressed()

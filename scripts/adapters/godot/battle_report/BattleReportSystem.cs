@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public partial class BattleReportSystem : Node
+public partial class BattleReportSystem : Node, IBattleReportCapture
 {
 	private BattleReportService _service;
 
@@ -32,12 +32,12 @@ public partial class BattleReportSystem : Node
 		_service.StartMatch(selectedReportId);
 	}
 
-	public void CapturePhaseSnapshot(Castle castle, int nightIndex, BattlePhase phase)
+	public void CapturePhaseSnapshot(IReadOnlyList<IBuildingState> buildings, int gold, IReadOnlyList<CardData> handCards, int nightIndex, BattlePhase phase)
 	{
-		if (castle == null || nightIndex <= 0)
+		if (nightIndex <= 0)
 			return;
 
-		IEnumerable<BuildingSnapshot> snapshots = castle.GetBuildings()
+		IEnumerable<BuildingSnapshot> snapshots = buildings
 			.Where(b => !GameManager.Get<IBuildingRepository>().IsCoreBuilding(b.TypeId) && !b.IsDestroyed)
 			.Select(b => new BuildingSnapshot
 			{
@@ -49,19 +49,7 @@ public partial class BattleReportSystem : Node
 				IsCombineProhibited = b.IsCombineProhibited,
 			});
 
-		(int gold, IReadOnlyList<CardData> handCards) = CapturePlayerEconomy();
 		_service.CapturePhaseSnapshot(snapshots, nightIndex, phase, gold, handCards);
-	}
-
-	private static (int gold, IReadOnlyList<CardData> handCards) CapturePlayerEconomy()
-	{
-		Shop shop = AdapterRegistry.Resolve<Shop>();
-		Hand hand = AdapterRegistry.Resolve<Hand>();
-		int gold = shop == null ? 0 : shop.Gold;
-		IReadOnlyList<CardData> handCards = hand == null
-			? System.Array.Empty<CardData>()
-			: hand.Cards;
-		return (gold, handCards);
 	}
 
 	public void DiscardCurrentReport()
