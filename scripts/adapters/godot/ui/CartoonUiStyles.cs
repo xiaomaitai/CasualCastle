@@ -33,11 +33,11 @@ public static class CartoonUiStyles
 		StyleToolButton(hud.GetNode<Button>("CombineProhibitToolButton"));
 	}
 
-	public static void ApplyHand(CanvasLayer uiRoot, Button useItemButton)
+	public static void ApplyHand(Control handPanel, Button useItemButton)
 	{
-		StylePanel(uiRoot.GetNode<Panel>("HandBackdrop"));
+		StylePanel(handPanel.GetNode<Panel>("HandBackdrop"));
 		StyleButton(useItemButton);
-		StyleOutlinedText(uiRoot.GetNode<Label>("PlacementHintLabel"), Ink);
+		StyleOutlinedText(handPanel.GetNode<Label>("PlacementHintLabel"), Ink);
 	}
 
 	public static void SetShopCircleHighlight(Panel panel, bool highlighted)

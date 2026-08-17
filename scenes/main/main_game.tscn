@@ -12,6 +12,7 @@
 [ext_resource type="Script" path="res://scripts/adapters/godot/ui/OfferFrame.cs" id="23"]
 [ext_resource type="PackedScene" uid="uid://c7m4n8p2q5r6s" path="res://scenes/ui/attribute_panel.tscn" id="24"]
 [ext_resource type="PackedScene" uid="uid://besmx6p5gonsn" path="res://scenes/ui/hud.tscn" id="25"]
+[ext_resource type="PackedScene" uid="uid://bsjhrjq7ybonw" path="res://scenes/ui/hand_panel.tscn" id="26"]
 
 [node name="MainGame" type="Node2D" unique_id=1]
 script = ExtResource("10")
@@ -68,90 +69,7 @@ SecondBarracksGridY = -1
 
 [node name="Hud" parent="UI" instance=ExtResource("25")]
 
-[node name="HandBackdrop" type="Panel" parent="UI"]
-offset_left = 488.0
-offset_top = 832.0
-offset_right = 1588.0
-offset_bottom = 1062.0
-mouse_filter = 2
-
-[node name="HandPanel" type="HBoxContainer" parent="UI"]
-offset_left = 502.0
-offset_top = 846.0
-offset_right = 1574.0
-offset_bottom = 1046.0
-theme_override_constants/separation = 8
-alignment = 0
-
-[node name="HandSlot1" type="Button" parent="UI/HandPanel"]
-visible = false
-custom_minimum_size = Vector2(100, 200)
-layout_mode = 2
-disabled = true
-text = "空"
-
-[node name="HandSlot2" type="Button" parent="UI/HandPanel"]
-visible = false
-custom_minimum_size = Vector2(100, 200)
-layout_mode = 2
-disabled = true
-text = "空"
-
-[node name="HandSlot3" type="Button" parent="UI/HandPanel"]
-visible = false
-custom_minimum_size = Vector2(100, 200)
-layout_mode = 2
-disabled = true
-text = "空"
-
-[node name="HandSlot4" type="Button" parent="UI/HandPanel"]
-visible = false
-custom_minimum_size = Vector2(100, 200)
-layout_mode = 2
-disabled = true
-text = "空"
-
-[node name="HandSlot5" type="Button" parent="UI/HandPanel"]
-visible = false
-custom_minimum_size = Vector2(100, 200)
-layout_mode = 2
-disabled = true
-text = "空"
-
-[node name="HandSlot6" type="Button" parent="UI/HandPanel"]
-visible = false
-custom_minimum_size = Vector2(100, 200)
-layout_mode = 2
-disabled = true
-text = "空"
-
-[node name="HandSlot7" type="Button" parent="UI/HandPanel"]
-visible = false
-custom_minimum_size = Vector2(100, 200)
-layout_mode = 2
-disabled = true
-text = "空"
-
-[node name="HandSlot8" type="Button" parent="UI/HandPanel"]
-visible = false
-custom_minimum_size = Vector2(100, 200)
-layout_mode = 2
-disabled = true
-text = "空"
-
-[node name="HandSlot9" type="Button" parent="UI/HandPanel"]
-visible = false
-custom_minimum_size = Vector2(100, 200)
-layout_mode = 2
-disabled = true
-text = "空"
-
-[node name="HandSlot10" type="Button" parent="UI/HandPanel"]
-visible = false
-custom_minimum_size = Vector2(100, 200)
-layout_mode = 2
-disabled = true
-text = "空"
+[node name="Hand" parent="UI" instance=ExtResource("26")]
 
 [node name="SpellBarPanel" type="ScrollContainer" parent="UI"]
 visible = false
@@ -166,16 +84,6 @@ vertical_scroll_mode = 0
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
-
-[node name="PlacementHintLabel" type="Label" parent="UI"]
-visible = false
-offset_left = 768
-offset_top = 796.0
-offset_right = 1308
-offset_bottom = 832.0
-theme_override_font_sizes/font_size = 24
-text = "左键放置，右键或 Esc 取消"
-horizontal_alignment = 1
 
 [node name="BuildingInfoPanel" type="Panel" parent="UI"]
 visible = false

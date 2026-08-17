@@ -27,7 +27,7 @@ public sealed class SpellBarUiController
 		_selection = selection;
 		_scroll = uiRoot.GetNode<ScrollContainer>("SpellBarPanel");
 		_slotRow = uiRoot.GetNode<HBoxContainer>("SpellBarPanel/SpellSlots");
-		_handPanel = uiRoot.GetNode<Control>("HandPanel");
+		_handPanel = uiRoot.GetNode<HandUiController>("Hand").HandPanel;
 		_scroll.Visible = false;
 		_handPanel.Visible = true;
 		DisplaySettingsManager settings = AdapterRegistry.Resolve<DisplaySettingsManager>();

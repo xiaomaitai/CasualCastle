@@ -17,12 +17,12 @@ public static class UiProfileStyles
 			MedievalUiStyles.ApplyHud(hud);
 	}
 
-	public static void ApplyHand(CanvasLayer uiRoot, Button useItemButton, UiProfileKind kind)
+	public static void ApplyHand(Control handPanel, Button useItemButton, UiProfileKind kind)
 	{
 		if (kind == UiProfileKind.Cartoon)
-			CartoonUiStyles.ApplyHand(uiRoot, useItemButton);
+			CartoonUiStyles.ApplyHand(handPanel, useItemButton);
 		else
-			MedievalUiStyles.ApplyHand(uiRoot, useItemButton);
+			MedievalUiStyles.ApplyHand(handPanel, useItemButton);
 	}
 
 	public static void ApplyShop(CanvasLayer uiRoot, UiProfileKind kind)

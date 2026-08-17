@@ -43,7 +43,7 @@ public partial class UIManager : Node2D
 		_inputRouter = new UiInputRouter();
 		SetProcess(true);
 		SetProcessInput(true);
-		InitializeUI();
+		CallDeferred(nameof(InitializeUI));
 	}
 
 	public override void _ExitTree()
@@ -55,7 +55,7 @@ public partial class UIManager : Node2D
 		{
 			_shopUi.Dispose();
 		}
-		_handUi?.Dispose();
+		AdapterRegistry.Unregister<ShopUiController>(_shopUi);
 		_buildingManageUi?.Dispose();
 		_combineProhibitUi?.Dispose();
 		_cheatMenu?.Dispose();
@@ -151,8 +151,8 @@ public partial class UIManager : Node2D
 		_hudUi = uiRoot.GetNode<HudUiController>("Hud");
 		Shop shopService = AdapterRegistry.Resolve<Shop>();
 		_shopUi = new ShopUiController(this, uiRoot, _hudUi, shopService);
-		Hand handService = AdapterRegistry.Resolve<Hand>();
-		_handUi = new HandUiController(this, uiRoot, handService, _shopUi);
+		AdapterRegistry.Register<ShopUiController>(_shopUi);
+		_handUi = uiRoot.GetNode<HandUiController>("Hand");
 		Castle playerCastle = GetParent().GetNode<Castle>("Battlefield/PlayerSide/PlayerCastle");
 		_buildingSell = new BuildingSellController(this, playerCastle, shopService, _shopUi);
 		_buildingInfoUi = new BuildingInfoUiController(this, uiRoot);

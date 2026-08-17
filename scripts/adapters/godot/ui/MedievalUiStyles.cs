@@ -52,11 +52,11 @@ public static class MedievalUiStyles
 		StyleToolButton(hud.GetNode<Button>("CombineProhibitToolButton"));
 	}
 
-	public static void ApplyHand(CanvasLayer uiRoot, Button useItemButton)
+	public static void ApplyHand(Control handPanel, Button useItemButton)
 	{
-		StylePanel(uiRoot.GetNode<Panel>("HandBackdrop"));
+		StylePanel(handPanel.GetNode<Panel>("HandBackdrop"));
 		StyleButton(useItemButton, true);
-		Label hint = uiRoot.GetNode<Label>("PlacementHintLabel");
+		Label hint = handPanel.GetNode<Label>("PlacementHintLabel");
 		hint.AddThemeColorOverride("font_color", BrightGold);
 		hint.AddThemeColorOverride("font_outline_color", Colors.Black);
 		hint.AddThemeConstantOverride("outline_size", PanelBorderWidth);

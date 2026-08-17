@@ -1,27 +1,29 @@
-// 手牌 UI：展示、选择与拖拽放置
+// 手牌组件：展示、选择与拖拽放置（hand_panel.tscn 场景根）
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
 using CasualCastle.Domain.Shared;
 using Godot;
 
-public sealed class HandUiController
+public partial class HandUiController : Control
 {
 	private const float DragThreshold = 8f;
+	private const int MaxHandSize = Hand.MaxHandSize;
 
-	private readonly Node _owner;
-	private readonly CanvasLayer _uiRoot;
 	private readonly Button[] _handButtons = new Button[MaxHandSize];
 	private readonly Control.GuiInputEventHandler[] _handGuiInputHandlers = new Control.GuiInputEventHandler[MaxHandSize];
-	private readonly Label _placementHintLabel;
 
-	private readonly Button _useItemButton;
+	private Label _placementHintLabel;
+	private Button _useItemButton;
+	private Control _handPanel;
 
-	private readonly Hand _hand;
-	private readonly Shop _shop;
-	private readonly GameManager _gameManager;
-	private readonly BuildingSystem _buildingSystem;
-	private readonly ShopUiController _shopUi;
+	public Control HandPanel => _handPanel ??= GetNode<Control>("HandPanel");
+
+	private Hand _hand;
+	private Shop _shop;
+	private GameManager _gameManager;
+	private BuildingSystem _buildingSystem;
+	private ShopUiController _shopUi;
 
 	private bool _inputBlocked;
 	private bool _dragging;
@@ -30,36 +32,33 @@ public sealed class HandUiController
 	private Vector2 _dragStartPosition;
 	private int _selectedIndex = -1;
 	private UiProfileKind _profile;
-	private const int MaxHandSize = Hand.MaxHandSize;
 
 	public bool IsDragging => _dragging;
 	public bool IsPlacementActive => _dragging || _hand.HasSelection;
 
-	public HandUiController(Node owner, CanvasLayer uiRoot, Hand handService, ShopUiController shopUi)
+	public override void _Ready()
 	{
-		_owner = owner;
-		_uiRoot = uiRoot;
-		_hand = handService;
+		_hand = AdapterRegistry.Resolve<Hand>();
 		_shop = AdapterRegistry.Resolve<Shop>();
 		_gameManager = AdapterRegistry.Resolve<GameManager>();
 		_buildingSystem = AdapterRegistry.Resolve<BuildingSystem>();
-		_shopUi = shopUi;
-		_placementHintLabel = uiRoot.GetNode<Label>("PlacementHintLabel");
+		_shopUi = AdapterRegistry.Resolve<ShopUiController>();
+		_placementHintLabel = GetNode<Label>("PlacementHintLabel");
 
 		_useItemButton = new Button { Text = "使用经验魔晶", Visible = false };
 		_useItemButton.Position = new Vector2(778f, 740f);
 		_useItemButton.Size = new Vector2(180f, 50f);
 		_useItemButton.AddThemeFontSizeOverride("font_size", 22);
-		uiRoot.AddChild(_useItemButton);
+		AddChild(_useItemButton);
 		DisplaySettingsManager settings = AdapterRegistry.Resolve<DisplaySettingsManager>();
 		_profile = settings.UiProfile;
-		UiProfileStyles.ApplyHand(uiRoot, _useItemButton, _profile);
+		UiProfileStyles.ApplyHand(this, _useItemButton, _profile);
 		settings.UiProfileChanged += ApplyProfile;
 		_useItemButton.Pressed += OnUseItemPressed;
 
 		for (int i = 0; i < MaxHandSize; i++)
 		{
-			_handButtons[i] = uiRoot.GetNode<Button>($"HandPanel/HandSlot{i + 1}");
+			_handButtons[i] = GetNode<Button>($"HandPanel/HandSlot{i + 1}");
 			int handIndex = i;
 			_handButtons[i].Pressed += () => OnHandButtonPressed(handIndex);
 			_handGuiInputHandlers[i] = inputEvent => OnHandGuiInput(handIndex, inputEvent);
@@ -71,7 +70,7 @@ public sealed class HandUiController
 		RefreshDisplay();
 	}
 
-	public void Dispose()
+	public override void _ExitTree()
 	{
 		AdapterRegistry.Resolve<DisplaySettingsManager>().UiProfileChanged -= ApplyProfile;
 		for (int i = 0; i < MaxHandSize; i++)
@@ -85,7 +84,7 @@ public sealed class HandUiController
 	private void ApplyProfile(UiProfileKind kind)
 	{
 		_profile = kind;
-		UiProfileStyles.ApplyHand(_uiRoot, _useItemButton, kind);
+		UiProfileStyles.ApplyHand(this, _useItemButton, kind);
 		RefreshHighlight();
 	}
 
@@ -112,7 +111,7 @@ public sealed class HandUiController
 	private void UpdateSellDropHighlight()
 	{
 		bool overPanel = _dragging && _shopUi != null && _shopUi.IsOpen
-			&& _shopUi.IsPointInPanel(_owner.GetViewport().GetMousePosition());
+			&& _shopUi.IsPointInPanel(GetViewport().GetMousePosition());
 		_shopUi?.SetSellHighlight(overPanel);
 	}
 
@@ -210,7 +209,7 @@ public sealed class HandUiController
 
 	private bool IsInteractiveUiHovered()
 	{
-		Control hoveredControl = _owner.GetViewport().GuiGetHoveredControl();
+		Control hoveredControl = GetViewport().GuiGetHoveredControl();
 		return hoveredControl != null && hoveredControl.MouseFilter != Control.MouseFilterEnum.Ignore;
 	}
 
@@ -247,7 +246,7 @@ public sealed class HandUiController
 		if (!Input.IsMouseButtonPressed(MouseButton.Left))
 			return;
 
-		Vector2 mouseGlobal = _owner.GetViewport().GetMousePosition();
+		Vector2 mouseGlobal = GetViewport().GetMousePosition();
 		if (mouseGlobal.DistanceTo(_dragStartPosition) < DragThreshold)
 			return;
 
@@ -353,7 +352,7 @@ public sealed class HandUiController
 			return;
 		}
 
-		Vector2 mouseScreen = _owner.GetViewport().GetMousePosition();
+		Vector2 mouseScreen = GetViewport().GetMousePosition();
 		if (!playerCastle.TryGetGridFromScreenPoint(mouseScreen, out int gridX, out int gridY))
 		{
 			playerCastle.ClearPlacementPreview();

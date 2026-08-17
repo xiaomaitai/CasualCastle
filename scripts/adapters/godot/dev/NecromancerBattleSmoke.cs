@@ -178,7 +178,7 @@ public partial class NecromancerBattleSmoke : Node
 
 	private void VerifySpellBarState()
 	{
-		Control handPanel = GetNode<Control>("MainGame/UI/HandPanel");
+		Control handPanel = GetNode<Control>("MainGame/UI/Hand/HandPanel");
 		Control spellBar = GetNode<Control>("MainGame/UI/SpellBarPanel");
 		HBoxContainer slots = GetNode<HBoxContainer>("MainGame/UI/SpellBarPanel/SpellSlots");
 		Control attributePanel = GetNode<Control>("MainGame/UI/BuildingAttributePanel");
