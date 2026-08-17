@@ -27,11 +27,11 @@
 验收：存档所有字段往返不丢失；传送陷阱不依赖具体领域实现；阶段快照和回放共用同一映射；Domain 仍零 Godot 引用。
 ## 一、建立重构基线与依赖规则
 
-- [ ] 运行并记录 `dotnet build`、全部 Domain 单测、UID 校验和现有关键无头冒烟结果，确保当前分支可作为行为基线
-- [ ] 为建筑生产/暂停/受损/摧毁/修复/仪式、单位生成/攻击/死亡、阶段切换、商店、存档恢复、UI 模态输入建立行为清单
-- [ ] 给缺少自动保护的关键链路先补特征测试；Domain 行为放单元测试，Godot 装配和场景行为放无头 smoke，不把 Godot 类型引入 Domain 测试
-- [ ] 增加架构约束检查：Domain 项目不得引用 Godot、Persistence、Godot Adapter；领域端口不得返回 Godot 类型；场景脚本不得直接访问 SQLite
-- [ ] 建立迁移期间的依赖图和职责表，明确每个状态的唯一写入者，避免新旧实现同时修改同一状态
+- [x] 运行并记录 `dotnet build`、全部 Domain 单测、UID 校验和现有关键无头冒烟结果，确保当前分支可作为行为基线（见 `behaviorInventory.md` 基线表）
+- [x] 为建筑生产/暂停/受损/摧毁/修复/仪式、单位生成/攻击/死亡、阶段切换、商店、存档恢复、UI 模态输入建立行为清单（见 `behaviorInventory.md`）
+- [x] 给缺少自动保护的关键链路先补特征测试；Domain 行为放单元测试，Godot 装配和场景行为放无头 smoke，不把 Godot 类型引入 Domain 测试（Phase 零已补存档往返/传送/映射测试；其余缺口已列入 `behaviorInventory.md` 并挂到 Phase 二/三/四/五）
+- [x] 增加架构约束检查：Domain 项目不得引用 Godot、Persistence、Godot Adapter；领域端口不得返回 Godot 类型；场景脚本不得直接访问 SQLite（`tools/check_architecture.py`，已接入 pre-commit）
+- [x] 建立迁移期间的依赖图和职责表，明确每个状态的唯一写入者，避免新旧实现同时修改同一状态（`dependencyRules.md` + `behaviorInventory.md` 第三节）
 
 验收：基线全部通过；每条待迁移主链路有可重复验证方式；依赖方向可自动检查；本阶段不改变运行行为。
 

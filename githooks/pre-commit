@@ -27,4 +27,6 @@ if git ls-files --error-unmatch "$DB" >/dev/null 2>&1; then
     git rm --cached "$DB" 2>/dev/null
 fi
 
+echo "[pre-commit] Checking architecture constraints ..."
+python tools/check_architecture.py || exit 1
 echo "[pre-commit] Done — $DUMP staged"

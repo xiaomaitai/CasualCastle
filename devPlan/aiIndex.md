@@ -11,6 +11,7 @@
 | 了解术语/游戏规则 | `devPlan/concepts/general.md`（派系概念见同目录各派系文档） |
 | 查看当前任务/验收项 | `devPlan/tmp/currentTasks.md` |
 | 查看架构 backlog | `devPlan/tmp/todo.md` |
+| 查看行为清单与重构基线 | `devPlan/tmp/behaviorInventory.md` |
 | 查看里程碑进度 | `devPlan/outline/c05Milestones.md` |
 | 找某个功能模块的代码 | 本文件 §2.4 功能模块对照表 |
 | 找场景/预制体 | 本文件 §3 |
@@ -66,6 +67,7 @@
 | `unitCardDesign.md` | 单位卡牌 UI 设计 |
 | `attributePanel.md` | 左下角属性面板展示规则与备选属性 |
 | `dependencyInjection.md` | 双层 DI 设计 |
+| `dependencyRules.md` | 分层依赖方向规则与自动检查说明 |
 | `nodeStructure.md` | 实体节点 Logic/View/Effects 三层结构 |
 | `rtsPushApart.md` | 单位推开系统 |
 | `assetSpecs.md` | 素材尺寸规格（以游戏单位定义） |
@@ -190,6 +192,7 @@
 | `tools/godot_import.py` | Godot 无头导入，生成 `.import`/`.uid` |
 | `tools/build_game_texture.py` | 建筑贴图裁边/缩放构建 |
 | `tools/check_uids.py` | 校验 `.uid` 文件 |
+| `tools/check_architecture.py` | 校验分层架构约束（domain 零 Godot/零 SQLite、依赖方向），已接入 pre-commit |
 
 ## 7. 入口与运行链路
 

@@ -9,6 +9,7 @@
 | 还原/构建 | `dotnet build CasualCastle.sln` |
 | 单元测试（纯域，无需 Godot） | `dotnet test tests/CasualCastle.Domain.Tests/CasualCastle.Domain.Tests.csproj` |
 | 存档往返测试（纯 C#，无需 Godot） | `dotnet test tests/CasualCastle.Persistence.Tests/CasualCastle.Persistence.Tests.csproj` |
+| UID / 架构约束校验 | `python tools/check_uids.py`、`python tools/check_architecture.py` |
 | 导入资源（运行游戏前必须先跑一次） | `godot --headless --import` |
 | 运行游戏 | `DISPLAY=:1 godot --path . --rendering-driver opengl3` |
 
