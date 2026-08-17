@@ -1,48 +1,93 @@
-# 当前任务：Phase 二——补齐应用编排层，收拢组合根
+# 当前任务：Phase 三——UI 与前端场景组件化
 
 ## 目标与边界
 
-在不改变现有玩法、数值、存档格式和场景可见行为的前提下，新增纯 C# Application 层承载跨聚合/跨子域编排；
-Godot 适配层只翻译节点、输入、帧时钟和信号。不引入 CQRS、通用 EventBus 或每个操作一个空壳 Handler。
+每个可独立显示/隐藏/交互的面板都是独立 `.tscn + C#` 组件，自己持有节点引用、信号绑定和清理；根 UI 只负责组合、全局模态栈和跨组件导航。本阶段只做行为保持的组件提取与输入路由，数据源重构留给对应后端阶段。
 
-## 新增项目与文件
+## 现状盘点（已核实）
 
-- `scripts/application/Application.csproj`（net8.0，零 Godot；引用 Shared/Building/Battle/History + DI.Abstractions）
-- `scripts/application/ApplicationModule.cs`（AddApplication 注册扩展，CompositionRoot 仍是唯一 DI 注册入口）
-- `scripts/application/GameSessionService.cs`（保存/恢复用例：迁自 adapters/godot/flow/GameSessionService.cs + GameManager.SaveGame + InitManager.LoadSaveIntoGame）
-- `scripts/application/SaveDataMapper.cs`（IBuildingState/CardData ↔ SaveEntry 映射；旧档 catalog 回填迁入，依赖 DI 的 `IReadOnlyList<CardData>`）
-- `scripts/application/NightCombineUseCase.cs`（夜间结算 + 复刻应用，迁自 NightOrchestrator）
-- `scripts/application/PhaseTransitionUseCase.cs`（阶段副作用单一入口：快照/商店刷新/复刻/自动存档）
-- `scripts/application/MatchSessionUseCase.cs`（对局启动副作用：阵营重置 + 战报 StartMatch）
-- 删除：`scripts/adapters/godot/flow/NightOrchestrator.cs`、`scripts/adapters/godot/flow/GameSessionService.cs`
-- 新增测试项目 `tests/CasualCastle.Application.Tests/`
+- `scenes/main/main_game.tscn` 772 行：UI CanvasLayer 下内嵌 HUD/手牌/商店/建筑信息/暂停/结算/作弊/法术栏/行动环/出售确认等大量节点；`SettingsPanel` 与属性面板已独立成场景（ExtResource 13/24）
+- `UIManager.cs` 356 行：组合 20 个控制器、逐帧轮询、Esc 硬编码长链、模态输入屏蔽分散调用、TavernBubble 动态挂到 Battlefield（层级错误）
+- 面板控制器已是纯 C# 类（HudUiController/ShopUiController/HandUiController/BuildingInfoUiController/PauseMenuUiController/GameOverUiController/CheatMenuUiController/SpellBarUiController/BuildingActionRingController 等），各自从共享 uiRoot 按字符串路径抓取节点
 
-## 新端口（domain 内，零 Godot）
+## 分步实施（每步一个提交、行为保持、全量验证通过再下一步）
 
-- `domain/History/IBattleReportCapture.cs`：StartMatch(string) / CapturePhaseSnapshot(IReadOnlyList<IBuildingState>, int gold, IReadOnlyList<CardData>, int nightIndex, BattlePhase) / SaveCurrentReportDaily()；由 BattleReportSystem 实现
-- `domain/Building/IGameSessionQuery.cs`：FactionId / Gold / CurrentNightIndex / PendingReplayReportId / PlayerBuildingStates / HandCards / CombineFactory
-- `domain/Building/IGameSessionCommand.cs`：ClearNonCoreBuildings / PlaceRestoredBuilding / RestoreCoreBuilding / SetGold / ResetHand / AddRestoredCard / SetNightIndex / SetPendingReplayReportId / RefreshPlayerAdjacency（含合并后 Sfx）
-- `domain/Building/IShopAccess.cs`：SetShopAvailable / RefreshOffers / RequestOpenShop / SetFaction
-- `domain/Building/IBuildingState.cs`：补 `int Health { get; }`（Building 已有该属性）
-- `domain/Shared/IGameSessionService.cs` 更新为：SaveGame(int slot) / LoadSaveData / HasSave / DeleteSave / RestoreSession(SaveData)
-- 适配实现：`adapters/godot/flow/GameSessionBridge.cs`（实现 Query/Command/ShopAccess，InitManager 构造并注册 AdapterRegistry；CompositionRoot 用工厂委托注册到 MS DI）
-
-## 分步实施（每步一个提交、一种职责迁移、全量验证通过再下一步）
-
-- [x] 骨架：application 项目 + 注册进 sln/主 csproj（含 Compile Remove）+ check_architecture.py 增加 application 规则（零 Godot/零 SQLite/只引用 domain）+ dependencyRules 更新；构建与全部测试不变
-- [x] 端口与桥接：5 个新端口 + IBuildingState.Health + BattleReportSystem 实现 IBattleReportCapture + GameSessionBridge + CompositionRoot 工厂注册；行为不变，6 个冒烟与主场景无头通过
-- [x] 保存/恢复用例：GameSessionService 迁入 application + SaveDataMapper（含旧档回填）；删 GameManager.SaveGame/LoadSaveData/HasSave 与 InitManager.LoadSaveIntoGame/CreateRestoredCard/CopyItemFromCatalog/FindCatalogCard；PauseMenu/TitleScreen/InitManager 调用点切换；Application.Tests 覆盖保存/恢复/回填
-- [x] 夜间结算用例：NightCombineUseCase（含 coreLevel 计算与复刻）；删 NightOrchestrator.cs 及其构造点；测试覆盖派系 coreLevel 与回调
-- [x] 阶段副作用用例：PhaseTransitionUseCase；GameManager.OnPhaseChanged 只做「调用用例 + 发信号 + 音效」；InitManager 取消 PhaseChanged 订阅；测试覆盖快照映射、StartMatch 无快照、night>=1 自动存档、night 0 不存档
-- [x] 对局启动用例：MatchSessionUseCase（阵营重置 + 战报 StartMatch）；GameManager.StartGameSession 委托；把正常路径上的 Get<T>()?.X 兜底收紧为 GetRequiredService；测试覆盖两派系重置与无操作派系
-- [x] 收尾：文档同步（aiIndex/codeStructure/dependencyInjection/dependencyRules/behaviorInventory/cloudEnvironment）+ 勾选本清单 + 全量验证（build 0 警告、三测试套件、uid 校验、架构检查、6 冒烟、主场景无头 240 帧）
+- [ ] 基础：`UiInteractionState`（纯 C# 状态投影：GameOver/任意模态/暂停/设置/商店）与 `UiModalStack`（按优先级压栈/弹栈/Esc 关闭栈顶）；UIManager 只保留注册式输入分发，删除 `_Input` 硬编码长链；SetInputBlocked 全部改经状态订阅；TavernBubble 挂载点移入 UI 层专用节点；冒烟与主场景无头通过
+- [ ] HUD 面板：`scenes/ui/hud.tscn`（血条/金币/黑魔法/阶段面板/菜单按钮/商店入口/工具按钮）+ HudUiController 改造为场景根脚本（导出节点引用）；UIManager 删除对应 InitializeUI 分支；冒烟通过
+- [ ] 手牌面板：`scenes/ui/hand_panel.tscn`（HandBackdrop + 10 槽位）+ HandUiController 场景化；拖拽行为保持；冒烟通过
+- [ ] 商店面板：`scenes/ui/shop_panel.tscn`（5 货架 + 刷新 + 关闭）+ ShopUiController 场景化；购买/拖放直放行为保持；冒烟通过
+- [ ] 建筑信息/单位信息面板：`scenes/ui/building_info_panel.tscn` + BuildingInfoUiController/UnitInfoUiController 场景化
+- [ ] 暂停/设置/结算面板：`scenes/ui/pause_menu.tscn`、`scenes/ui/game_over.tscn`（settings_panel 已独立）；PauseMenuUiController/GameOverUiController/SettingsUiController 场景化并接入模态栈
+- [ ] 作弊/运行信息面板（dev 区）：`scenes/ui/dev_tools/cheat_menu.tscn`、`runtime_info_panel.tscn` + CheatMenuUiController/RuntimeInfoPanelController/BgmInfoController 场景化
+- [ ] 法术栏/行动环/出售确认：`scenes/ui/spell_bar.tscn`、`scenes/ui/building_action_ring.tscn`（含出售确认）+ SpellBarUiController/BuildingActionRingController 场景化
+- [ ] 事件化收尾：UIManager `_Process` 中央轮询拆除（仅动画/拖拽/世界跟随保留自身 `_Process`）；购买/选卡/关闭/暂停/设置等用户意图改走组件信号或显式接口；主场景只剩面板实例引用
+- [ ] 冒烟与验收：每个新面板场景可单独实例化 smoke；新增 `ui_smoke.tscn` 或复用现有冒烟验证模态优先级/拖拽/暂停/设置/分辨率切换；行为清单与文档同步；勾选本清单
 
 ## 风险与行为保持要点
 
-- Godot 信号 `PhaseChanged` 有 5 个单参订阅者（AudioManager/UnitLogic/Building/HudUiController/InitManager），签名保持不变；副作用改由 GameManager.OnPhaseChanged（机器事件第一个订阅者）直接调用用例，快照仍先于信号
-- 副作用内部顺序保持：快照 → SetShopAvailable → 商店刷新/开门 → 夜间结算 → 复刻 → 自动存档；StartMatch（prev==next）不发快照
-- GameSessionBridge 懒读 gm.PlayerCastle/Shop/Hand（与现行为一致），桥接在 InitManager._Ready 注册，早于任何用例解析
+- Esc 优先级顺序保持：设置 → 作弊 → 运行信息 → 禁止组合 → 建筑管理 → 行动环 → 暂停关闭 → 手牌取消 → 商店取消拖拽 → 商店关闭 → 打开暂停
+- 暂停打开时：商店关闭、手牌取消、拖拽取消、管理/禁止组合输入屏蔽；设置打开时管理工具屏蔽
+- 所有面板根节点必须留在 UI CanvasLayer；TavernBubble 等世界空间表现放 Battlefield View 层专用节点，禁止混放
+- 分辨率切换/百分比坐标行为与基线一致（uiDesign.md 约定）
 
 ## 验收（沿用原计划）
 
-应用项目零 Godot 引用；InitManager 仅做装配和订阅；GameManager 不再组装存档 DTO、不直接编排阵营领域服务；阶段副作用由单一用例触发；现有存档可读取且 round-trip 等价。
+新增/移除一个面板只改 UI 组合场景和注册，不修改中央输入长链；各组件可单独实例化 smoke；主场景不再内嵌大段面板节点；模态优先级、拖拽、暂停、设置和分辨率切换行为与基线一致。
+
+## 后续阶段大纲（四~七）
+
+### 四、重构 Building：领域状态、能力组件、表现三分离
+
+- [ ] 先为建筑生命、操作状态、生产进度、修复成本、摧毁/再生、仪式开始/完成补齐聚合级特征测试
+- [ ] 引入纯领域 `BuildingRuntime`，封装 Health/MaxHealth、暂停、禁止组合、生产进度、活动仪式等状态
+- [ ] 产兵时钟拆为 `ProductionComponent`；领域只产生"应生成何种单位/数量"结果，实例化留在 Godot Adapter
+- [ ] 仪式宿主拆为 `RitualHostComponent`；消费金币/黑魔法、移除书、升级核心、召唤奖励经应用端口
+- [ ] 陷阱、宝箱、活体生长/再生/繁殖、法力生产、瘟疫、晶矿按能力挂载组件或策略；禁止向 `Building._Process` 添加类型分支
+- [ ] 共享生成流程统一到 `UnitSpawnService/Factory`
+- [ ] 新建 `BuildingView`/`BuildingEffects` 独占贴图/材质/Tween/粒子/状态图标
+- [ ] `IBuildingState/IBuildingRef/IBuildingTarget` 适配投影集中到一个桥接对象
+- [ ] `Building.tscn` 改 Shell/Logic/View/Effects 组合，逐类迁移、删旧分支
+- 验收：Building.cs 只负责节点生命周期、组件装配和极薄转发；表现类不写领域状态；所有产兵建筑、陷阱、仪式和活体建筑 smoke 与基线一致
+
+### 五、重构 Unit：保持聚合内聚，拆掉 Adapter 上帝类
+
+- [ ] 确认 `Domain.Battle.Unit` 聚合边界；仅将可独立演化状态提为 `CombatState/StatusEffects/SkillRuntime`，不按行数机械拆服务
+- [ ] 大量公共 setter 收紧为意图方法，初始化数据改不可变定义 + 运行时状态
+- [ ] 派系共享资源建模为对局/阵营级资源池，移除 Unit 持有 BlackMagicService/ManaService Singleton 所有权
+- [ ] 移除聚合对全局静态阵营 Buff 的直接读取；经对局上下文/效果快照注入
+- [ ] `UnitLogic` 拆为领域桥接、Navigation/Motion、Targeting Adapter、UnitPresentation、DeathPresentation、ProjectilePresenter 等单一职责组件
+- [ ] 死亡副作用改为领域事件 + 应用事件处理器；`OnDied` 只转发事件和触发表现
+- [ ] 统一单位生成工厂，替换 Building 与 UnitLogic 内重复加载/初始化/增益逻辑
+- [ ] 投射物路径/纹理/音效映射集中为表现配置，领域攻击事件不引用素材路径
+- [ ] Buff 展示改只读 `UnitPresentationModel`，领域状态不含本地化文案
+- 验收：Domain Unit 状态只能通过意图方法改变；UnitLogic 不含派系结算规则、素材路径和 Buff 文案；战斗和死亡测试、全兵种 smoke 与基线一致
+
+### 六、领域边界与 Infrastructure 隔离
+
+- [ ] 区分领域模型、应用命令/结果、持久化 DTO 和 UI ViewModel，禁止同一个可变类跨四层复用
+- [ ] History 建立反腐败映射：适配器先映射为 History 自有 Snapshot，移除对 Building 项目的直接引用
+- [ ] `SaveData` 构建/恢复映射集中到 Application mapper（Phase 二已完成大部分），Godot Adapter 只提供运行时快照端口
+- [ ] 抽取唯一网格单元归属计算，供 `AdjacentRules` 与 `HordeAdjacencyRules` 共用
+- [ ] 审核 `IBuildingRepository/IUnitRepository/ISkillRepository`：静态配置查询用 Repository/Definition Catalog 语义
+- [ ] 审核端口方向和命名：UseCase 入站、Repository/Gateway/Presenter 出站；删除无边界价值接口
+- [ ] Persistence 拆为可独立测试纯 C# 项目（Phase 零已建 Persistence.csproj，继续迁入剩余存储实现）
+- [ ] 收紧 MS DI 纯度：依赖 Godot 生命周期的实现留在场景 Adapter/Registry
+- [ ] 给配置映射、存档版本兼容、空存档、旧存档迁移和战报 Snapshot 映射增加契约测试
+- 验收：History 消费自身 Snapshot；Domain 不认识 SQLite/节点/资源路径/Save DTO；相邻网格归属只有一个实现；旧存档兼容
+
+### 七、收尾、性能与文档同步
+
+- [ ] 删除迁移后失效的静态单例入口、重复工厂、旧控制器和双轨代码，检查无未订阅信号、悬挂事件和场景路径引用
+- [ ] 高频路径做有证据的优化；不为未测量问题引入对象池/ECS
+- [ ] profiler 对比单位密集战斗、建筑密集、UI 打开/拖拽场景，性能不得显著回退
+- [ ] 更新 AGENTS.md、aiIndex.md、codeStructure.md、dependencyInjection.md、nodeStructure.md 和相关设计文档
+- [ ] 完整 build、Domain tests、UID 校验、无头导入及关键 smoke；人工验证新局、读档、完整昼夜循环、四派系核心链路、结算返回标题
+- [ ] 按阶段拆分提交；任何阶段失败时可回退该阶段
+- 验收：构建零 warning、全部测试通过、无头导入无脚本/资源错误、关键 smoke 通过；职责表与依赖图和代码一致；性能不低于基线
+
+## 执行顺序与停止条件
+
+- [ ] 顺序固定为：正确性缺陷（已完成）→ 基线（已完成）→ 应用编排（已完成）→ UI 场景化/输入路由（进行中）→ Building → Unit → 领域边界与 Infrastructure → 收尾
+- [ ] 每阶段开始前再次细化到文件级迁移清单，并限制单次提交只包含一种职责迁移
+- [ ] 若发现行为无测试、存档不兼容、领域规则归属存在两种同等合理解释，先停止迁移并补测试/确认模型，不以猜测继续
+- [ ] 若拆分只减少文件行数，却增加双向依赖、全局解析或无业务语义接口，则撤销该拆分

@@ -31,12 +31,16 @@ public partial class UIManager : Node2D
 	private AttributePanelController _attributePanel;
 	private GameOverUiController _gameOverUi;
 	private SettingsUiController _settingsUi;
+	private UiInteractionState _interactionState;
+	private UiInputRouter _inputRouter;
 	private bool _gameOver;
 	private bool _isChangingScene;
 
 	public override void _Ready()
 	{
 		Instance = this;
+		_interactionState = new UiInteractionState();
+		_inputRouter = new UiInputRouter();
 		SetProcess(true);
 		SetProcessInput(true);
 		InitializeUI();
@@ -99,6 +103,7 @@ public partial class UIManager : Node2D
 		EnsureTavernBubble();
 		_tavernBubble?.Process(_unitSelection.SelectedBuilding, _tavernParty);
 		_attributePanel?.Process();
+		RefreshInteractionState();
 	}
 
 	public override void _Input(InputEvent @event)
@@ -106,60 +111,7 @@ public partial class UIManager : Node2D
 		if (@event is InputEventKey keyEvent && keyEvent.Pressed && !keyEvent.Echo
 			&& keyEvent.Keycode == Key.Escape)
 		{
-			if (_settingsUi?.Close() == true)
-			{
-				GetViewport().SetInputAsHandled();
-				return;
-			}
-
-			if (_cheatMenu?.TryHandleEscape() == true)
-			{
-				GetViewport().SetInputAsHandled();
-				return;
-			}
-			if (_runtimeInfoPanel?.TryHandleEscape() == true)
-			{
-				GetViewport().SetInputAsHandled();
-				return;
-			}
-
-			if (_combineProhibitUi?.TryHandleEscape() == true)
-			{
-				GetViewport().SetInputAsHandled();
-				return;
-			}
-
-			if (_buildingManageUi?.TryHandleEscape() == true)
-			{
-				GetViewport().SetInputAsHandled();
-				return;
-			}
-
-			if (_buildingActionRing?.TryHandleEscape() == true)
-			{
-				GetViewport().SetInputAsHandled();
-				return;
-			}
-
-			if (_pauseMenuUi?.Close() == true)
-			{
-				GetViewport().SetInputAsHandled();
-				return;
-			}
-
-			if (_handUi?.TryHandleEscape() == true)
-			{
-				GetViewport().SetInputAsHandled();
-				return;
-			}
-
-			if (_shopUi?.CancelDrag() == true)
-			{
-				GetViewport().SetInputAsHandled();
-				return;
-			}
-
-			if (_shopUi?.Close() == true)
+			if (_inputRouter.HandleEscape())
 			{
 				GetViewport().SetInputAsHandled();
 				return;
@@ -172,53 +124,13 @@ public partial class UIManager : Node2D
 			}
 		}
 
-		if (_pauseMenuUi?.IsOpen == true)
-			return;
-
-		if (_settingsUi?.IsOpen == true)
+		if (_interactionState.InputBlocked)
 			return;
 
 		if (_cheatMenu?.IsOpen == true)
 			return;
 
-		if (_combineProhibitUi?.HandleInput(@event) == true)
-		{
-			GetViewport().SetInputAsHandled();
-			return;
-		}
-
-		if (_buildingManageUi?.HandleInput(@event) == true)
-		{
-			GetViewport().SetInputAsHandled();
-			return;
-		}
-
-		if (_buildingSell?.HandleInput(@event) == true)
-		{
-			GetViewport().SetInputAsHandled();
-			return;
-		}
-
-		if (_handUi?.HandleInput(@event) == true)
-		{
-			GetViewport().SetInputAsHandled();
-			return;
-		}
-
-		if (_shopUi?.HandleInput(@event) == true)
-		{
-			GetViewport().SetInputAsHandled();
-			return;
-		}
-
-		EnsureTavernBubble();
-		if (_tavernBubble?.HandleInput(@event, _tavernParty) == true)
-		{
-			GetViewport().SetInputAsHandled();
-			return;
-		}
-
-		if (_unitSelection?.HandleInput(@event) == true)
+		if (_inputRouter.HandleInput(@event))
 		{
 			GetViewport().SetInputAsHandled();
 			return;
@@ -265,6 +177,7 @@ public partial class UIManager : Node2D
 		_gameOverUi = new GameOverUiController(uiRoot, GoToTitle);
 
 		UiSfx.Bind(uiRoot);
+		RegisterRouting();
 		_pauseMenuUi.OpenChanged += OnPauseMenuOpenChanged;
 		_settingsUi.OpenChanged += OnSettingsOpenChanged;
 
@@ -272,6 +185,32 @@ public partial class UIManager : Node2D
 			AdapterRegistry.Resolve<GameManager>().GameStateChanged += OnGameStateChanged;
 
 		OnGameStateChanged(AdapterRegistry.Resolve<GameManager>().CurrentState);
+	}
+
+	private void RegisterRouting()
+	{
+		_inputRouter.RegisterEsc(100, () => _settingsUi?.Close() == true);
+		_inputRouter.RegisterEsc(90, () => _cheatMenu?.TryHandleEscape() == true);
+		_inputRouter.RegisterEsc(80, () => _runtimeInfoPanel?.TryHandleEscape() == true);
+		_inputRouter.RegisterEsc(70, () => _combineProhibitUi?.TryHandleEscape() == true);
+		_inputRouter.RegisterEsc(60, () => _buildingManageUi?.TryHandleEscape() == true);
+		_inputRouter.RegisterEsc(50, () => _buildingActionRing?.TryHandleEscape() == true);
+		_inputRouter.RegisterEsc(40, () => _pauseMenuUi?.Close() == true);
+		_inputRouter.RegisterEsc(30, () => _handUi?.TryHandleEscape() == true);
+		_inputRouter.RegisterEsc(20, () => _shopUi?.CancelDrag() == true);
+		_inputRouter.RegisterEsc(10, () => _shopUi?.Close() == true);
+
+		_inputRouter.RegisterInput(70, e => _combineProhibitUi?.HandleInput(e) == true);
+		_inputRouter.RegisterInput(60, e => _buildingManageUi?.HandleInput(e) == true);
+		_inputRouter.RegisterInput(50, e => _buildingSell?.HandleInput(e) == true);
+		_inputRouter.RegisterInput(40, e => _handUi?.HandleInput(e) == true);
+		_inputRouter.RegisterInput(30, e => _shopUi?.HandleInput(e) == true);
+		_inputRouter.RegisterInput(20, e =>
+		{
+			EnsureTavernBubble();
+			return _tavernBubble?.HandleInput(e, _tavernParty) == true;
+		});
+		_inputRouter.RegisterInput(10, e => _unitSelection?.HandleInput(e) == true);
 	}
 
 	public void OnGameStateChanged(GameManager.GameState state)
@@ -293,6 +232,16 @@ public partial class UIManager : Node2D
 		_runtimeInfoPanel?.SetGameOver(_gameOver);
 		_pauseMenuUi.SetGameOver(_gameOver);
 		_gameOverUi.SetState(state);
+		RefreshInteractionState();
+	}
+
+	private void RefreshInteractionState()
+	{
+		_interactionState.Update(
+			_gameOver,
+			_pauseMenuUi?.IsOpen == true,
+			_settingsUi?.IsOpen == true,
+			_shopUi?.IsOpen == true);
 	}
 
 	private void UpdateHandInputBlocked()
@@ -320,6 +269,7 @@ public partial class UIManager : Node2D
 		}
 
 		UpdateHandInputBlocked();
+		RefreshInteractionState();
 	}
 
 	private void OnPauseMenuOpenChanged(bool open)
@@ -339,6 +289,7 @@ public partial class UIManager : Node2D
 		}
 
 		UpdateHandInputBlocked();
+		RefreshInteractionState();
 	}
 
 	public void GoToTitle()
