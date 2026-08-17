@@ -1,5 +1,5 @@
 // 左下角属性面板：展示单位与建筑的核心属性和实时进度
-using CasualCastle.Adapters.Persistence;
+using CasualCastle.Domain.Shared;
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;

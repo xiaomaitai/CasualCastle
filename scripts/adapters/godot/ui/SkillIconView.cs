@@ -1,5 +1,5 @@
 // 技能图标视图
-using CasualCastle.Adapters.Persistence;
+using CasualCastle.Domain.Shared;
 using CasualCastle.Domain.Battle;
 using Godot;
 

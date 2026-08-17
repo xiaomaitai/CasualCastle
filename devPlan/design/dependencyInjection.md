@@ -142,6 +142,9 @@ GameManager.Services.GetService<IBattleReportRepository>();
 | `IBattleReportRepository` | `BattleReportStorage` | Singleton |
 | `IUnitRepository` | `SqliteUnitRepository` | Singleton |
 | `IBuildingRepository` | `SqliteBuildingRepository` | Singleton |
+| `IBuildingVisualRepository` | `SqliteBuildingRepository` | Singleton |
+| `IVisualAssetRepository` | `SqliteVisualAssetRepository` | Singleton |
+| `ISaveRepository` | `SaveStorage` | Singleton |
 
 ---
 

@@ -1,5 +1,5 @@
 // 单位卡牌视图：单位信息卡面
-using CasualCastle.Adapters.Persistence;
+using CasualCastle.Domain.Shared;
 using Godot;
 using System;
 using System.Collections.Generic;

@@ -210,12 +210,8 @@ public partial class GameManager : Node2D, IGameState
 
 	private void OnPhaseChanged(MatchPhase previous, MatchPhase next)
 	{
-		if (next == MatchPhase.Shop && previous == MatchPhase.Combat)
-			BattleReportSystem?.CapturePhaseSnapshot(_playerCastle, CurrentNightIndex, BattlePhase.Day);
-		else if (next == MatchPhase.Combine && previous == MatchPhase.Shop)
-			BattleReportSystem?.CapturePhaseSnapshot(_playerCastle, CurrentNightIndex, BattlePhase.Night);
-		else if (next == MatchPhase.Combat && previous == MatchPhase.Combine)
-			BattleReportSystem?.CapturePhaseSnapshot(_playerCastle, CurrentNightIndex, BattlePhase.Combine);
+		if (previous != next)
+			BattleReportSystem?.CapturePhaseSnapshot(_playerCastle, CurrentNightIndex, PhaseMapping.ToBattlePhase(previous));
 
 		EmitSignal(SignalName.PhaseChanged, (int)next);
 		Sfx.Play(SfxEvents.PhaseChange);

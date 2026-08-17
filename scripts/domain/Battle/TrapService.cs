@@ -31,8 +31,8 @@ public sealed class TrapService
 			}
 			if (config.PoisonPerSecond > 0f)
 				enemy.ApplyPoison(config.PoisonPerSecond, config.PoisonDuration);
-			if (config.IsTeleport && enemy is Unit unit)
-				unit.TeleportTo(teleportX, teleportY);
+			if (config.IsTeleport)
+				enemy.TeleportTo(teleportX, teleportY);
 			hitCount++;
 		}
 		return hitCount;
@@ -40,14 +40,14 @@ public sealed class TrapService
 
 	public void PullTowards(IUnitHandle enemy, float targetX, float targetY, float speed, float dt)
 	{
-		if (enemy is not Unit unit || speed <= 0f || dt <= 0f)
+		if (speed <= 0f || dt <= 0f)
 			return;
-		float dx = targetX - unit.GameX;
-		float dy = targetY - unit.GameY;
+		float dx = targetX - enemy.GameX;
+		float dy = targetY - enemy.GameY;
 		float distance = MathF.Sqrt(dx * dx + dy * dy);
 		if (distance <= 0f)
 			return;
 		float step = MathF.Min(distance, speed * dt);
-		unit.TeleportTo(unit.GameX + dx / distance * step, unit.GameY + dy / distance * step);
+		enemy.TeleportTo(enemy.GameX + dx / distance * step, enemy.GameY + dy / distance * step);
 	}
 }

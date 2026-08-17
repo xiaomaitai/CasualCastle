@@ -89,8 +89,8 @@
 
 | 目录 | 职责 | 关键文件 |
 |---|---|---|
-| `domain/Shared/` | 坐标、常量、阶段状态机、存档模型、BGM 目录与选择规则 | `GameVector2.cs`、`GameCoordinateRules.cs`、`GameRules.cs`、`BuildingTypeIds.cs`、`FactionIds.cs`、`MatchPhaseMachine.cs`、`SaveModels.cs`、`BgmDef.cs`、`BgmSelectionRules.cs` |
-| `domain/Building/` | 建筑、卡牌、手牌、商店、组合、升级、仪式、邻接、科技树 | `BuildingData.cs`、`OccupancyGrid.cs`、`CardRules.cs`、`Hand.cs`、`ShopRules.cs`、`CombineService.cs`、`UpgradeService.cs`、`RitualService.cs`、`AdjacencyService.cs`、`TechTreeNode.cs` |
+| `domain/Shared/` | 坐标、常量、阶段状态机、存档模型、BGM 目录与选择规则 | `GameVector2.cs`、`GameCoordinateRules.cs`、`GameRules.cs`、`BuildingTypeIds.cs`、`FactionIds.cs`、`MatchPhaseMachine.cs`、`SaveModels.cs`、`IVisualAssetRepository.cs`、`BgmDef.cs`、`BgmSelectionRules.cs` |
+| `domain/Building/` | 建筑、卡牌、手牌、商店、组合、升级、仪式、邻接、科技树 | `BuildingData.cs`、`OccupancyGrid.cs`、`CardRules.cs`、`Hand.cs`、`ShopRules.cs`、`CombineService.cs`、`UpgradeService.cs`、`RitualService.cs`、`AdjacencyService.cs`、`IBuildingVisualRepository.cs`、`BuildingVisualData.cs`、`TechTreeNode.cs` |
 | `domain/Battle/` | 战斗、单位、技能、光环、隐身、尸体、RVO 推开、黑魔法 | `CombatRules.cs`、`Unit.cs`、`UnitState.cs`、`UnitStats.cs`、`SkillService.cs`、`AuraService.cs`、`StealthService.cs`、`CorpseService.cs`、`RvoService.cs`、`BlackMagicService.cs` |
 | `domain/History/` | 战报、回放、镜像复刻 | `BattleReportService.cs`、`ReportBuilder.cs`、`ReplayService.cs`、`MirrorRules.cs` |
 
@@ -120,7 +120,8 @@
 | 文件 | 职责 |
 |---|---|
 | `SqliteBuildingRepository.cs`、`SqliteUnitRepository.cs`、`SqliteSkillRepository.cs`、`SqliteTechTreeRepository.cs` | 读写 `assets/data/config.db` |
-| `SaveStorage.cs` | 存档文件 |
+| `SaveDatabase.cs`（纯 C# 项目 `Persistence.csproj`） | 存档文件 SQLite 读写核心（路径注入、零 Godot） |
+| `SaveStorage.cs` | 存档文件 Godot 侧入口（解析 `user://` 后委托 SaveDatabase） |
 | `BattleReportStorage.cs` | 战报文件持久化 |
 | `GameDataLoader.cs` | 数据加载 |
 
@@ -174,10 +175,10 @@
 
 素材规格见 `devPlan/design/assetSpecs.md`；新素材产出或变更后须用 `tools/godot_import.py` 生成 `.import`/`.uid`。
 
-## 5. 测试（tests/CasualCastle.Domain.Tests/）
+## 5. 测试（tests/）
 
-- 单测文件按被测类命名（`{Xxx}Tests.cs`），`BattleTestFakes.cs` 为公共测试替身
-- 运行：`dotnet test tests/CasualCastle.Domain.Tests/CasualCastle.Domain.Tests.csproj`
+- `CasualCastle.Domain.Tests/`：单测文件按被测类命名（`{Xxx}Tests.cs`），`BattleTestFakes.cs` 为公共测试替身；运行 `dotnet test tests/CasualCastle.Domain.Tests/CasualCastle.Domain.Tests.csproj`
+- `CasualCastle.Persistence.Tests/`：存档 SQLite 真实文件往返测试（引用纯 C# Persistence 项目）；运行 `dotnet test tests/CasualCastle.Persistence.Tests/CasualCastle.Persistence.Tests.csproj`
 - 约定：domain 改动必须带单测；bug 修复写 `RealBug` 测试；测试文件零注释
 
 ## 6. 工具（tools/）

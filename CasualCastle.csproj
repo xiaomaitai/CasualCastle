@@ -10,6 +10,8 @@
   <ItemGroup>
     <Compile Remove="tests/**/*.cs" />
     <Compile Remove="scripts/domain/*/**/*.cs" />
+    <Compile Remove="scripts/adapters/persistence/SaveDatabase.cs" />
+    <Compile Remove="scripts/adapters/persistence/obj/**/*.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.9" />
@@ -20,5 +22,6 @@
     <ProjectReference Include="scripts\domain\Building\Building.csproj" />
     <ProjectReference Include="scripts\domain\Battle\Battle.csproj" />
     <ProjectReference Include="scripts\domain\History\History.csproj" />
+    <ProjectReference Include="scripts\adapters\persistence\Persistence.csproj" />
   </ItemGroup>
 </Project>

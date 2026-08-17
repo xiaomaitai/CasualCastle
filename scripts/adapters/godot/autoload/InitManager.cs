@@ -57,7 +57,7 @@ public partial class InitManager : Node
 				_nightOrchestrator.ResolveNightCombines(gm);
 			}
 			if (phase == MatchPhase.Combat)
-				_nightOrchestrator.ApplyReplaySnapshot(gm, gm.CurrentNightIndex + 1, BattlePhase.Day);
+				_nightOrchestrator.ApplyReplaySnapshot(gm, gm.CurrentNightIndex + 1, PhaseMapping.ToBattlePhase(phase));
 			if (phase == MatchPhase.Combat && gm.CurrentNightIndex >= 1)
 			{
 				try

@@ -14,14 +14,16 @@ CasualCastle/
 │   │   │   ├── GameVector2.cs, GridCellOffset.cs
 │   │   │   ├── GameCoordinateRules.cs, GameRules.cs
 │   │   │   ├── MatchPhaseMachine.cs, FactionIds.cs, BuildingTypeIds.cs
-│   │   │   └── SaveModels.cs, IGameSessionService.cs, ISaveRepository.cs
+│   │   │   ├── SaveModels.cs, IGameSessionService.cs, ISaveRepository.cs
+│   │   │   └── IVisualAssetRepository.cs
 │   │   ├── Building/                               # Building.csproj → Shared
 │   │   │   ├── CardData.cs, CombineRecipe.cs
 │   │   │   ├── BuildingDefinitions.cs, OccupancyGrid.cs, Player.cs
 │   │   │   ├── AdjacentRules.cs, CombineRules.cs, ShopRules.cs, CardRules.cs
 │   │   │   ├── Hand.cs, Shop.cs, AdjacencyService.cs, CombineService.cs
 │   │   │   ├── IBuildingState.cs, IBuildingPlacement.cs
-│   │   │   ├── IBuildingRepository.cs, ICombineBuildingFactory.cs
+│   │   │   ├── IBuildingRepository.cs, IBuildingVisualRepository.cs
+│   │   │   ├── ICombineBuildingFactory.cs, BuildingVisualData.cs
 │   │   │   └── BuildingModule.cs
 │   │   ├── Battle/                                 # Battle.csproj → Shared
 │   │   │   ├── Unit.cs, Unit.Combat.cs, Unit.Skills.cs, Unit.Status.cs
@@ -61,15 +63,18 @@ CasualCastle/
 │       │   ├── core/          GameConfig, GameCoordinatesAdapter
 │       │   ├── dev/           DevInputLogger
 │       │   └── audio/         AudioManager, Sfx, UiSfx
-│       └── persistence/
+│       └── persistence/                           # Persistence.csproj 为纯 C# 子项目
+│           ├── SaveDatabase.cs                     # SQLite 存档读写核心（纯 C#）
+│           ├── SaveStorage.cs                      # user:// 目录解析后委托 SaveDatabase
 │           ├── GameDataLoader.cs, BattleReportStorage.cs
 │           ├── SqliteUnitRepository.cs, SqliteBuildingRepository.cs
-│           └── FieldUnitRepository.cs
+│           ├── SqliteSkillRepository.cs, SqliteTechTreeRepository.cs
+│           └── SqliteVisualAssetRepository.cs
 │
 ├── scenes/    prefabs/    assets/    project.godot
 ├── devPlan/design/          # 系统设计文档
-├── tests/                   # CasualCastle.Domain.Tests
-└── CasualCastle.sln         # 6 个项目
+├── tests/                   # CasualCastle.Domain.Tests / CasualCastle.Persistence.Tests
+└── CasualCastle.sln         # 8 个项目
 ```
 
 ---
@@ -102,6 +107,7 @@ domain 项目零 `using Godot`，单向无循环。
   ├── BattleReportService, ReplayService (IReplayUseCase)
   ├── 出站 Port 实现：IFieldUnitRepository→FieldUnitRepository
   ├── 持久化：IBattleReportRepository, IUnitRepository, IBuildingRepository
+  ├── ISaveRepository, IVisualAssetRepository, IBuildingVisualRepository
   └── IGameState（工厂委托到 AdapterRegistry）
 
 第二层：AdapterRegistry（Godot 节点服务定位器）
@@ -210,6 +216,8 @@ domain 项目零 `using Godot`，单向无循环。
 | `IBuildingState` | Domain.Building | Building | 领域内接口 |
 | `ICombineBuildingFactory` | Domain.Building | CombineBuildingFactory | 出站 |
 | `IBattleReportRepository` | Domain.History | BattleReportStorage | 出站 |
+| `IVisualAssetRepository` | Domain.Shared | SqliteVisualAssetRepository | 出站 |
+| `IBuildingVisualRepository` | Domain.Building | SqliteBuildingRepository | 出站 |
 | `IReplayUseCase` | Domain.History | ReplayService | 入站 |
 | `IReplayTarget` | Domain.History | ReplayTarget | 出站 |
 | `IBuildingFactory` | adapters/godot/building | BuildingFactory | 出站 |

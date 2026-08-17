@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
+namespace CasualCastle.Adapters.Persistence;
+
 public class BattleReportStorage : IBattleReportRepository
 {
 	private const string ReportDir = "user://battle_reports";
@@ -42,7 +44,6 @@ public class BattleReportStorage : IBattleReportRepository
 		using FileAccess file = FileAccess.Open(ReportFile, FileAccess.ModeFlags.Write);
 		file.StoreString(json);
 	}
-
 
 	private static void EnsureDirectory()
 	{

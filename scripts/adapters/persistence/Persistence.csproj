@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<RootNamespace>CasualCastle.Adapters.Persistence</RootNamespace>
+		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+	</PropertyGroup>
+	<ItemGroup>
+		<Compile Include="SaveDatabase.cs" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.9" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\domain\Shared\Shared.csproj" />
+	</ItemGroup>
+</Project>
