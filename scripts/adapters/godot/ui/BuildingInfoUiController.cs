@@ -1,32 +1,30 @@
-// 建筑信息 UI：悬停详情
+// 建筑信息组件：悬停详情（building_info_panel.tscn 场景根）
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Building;
 using Godot;
 using System.Collections.Generic;
 
-public sealed class BuildingInfoUiController
+public partial class BuildingInfoUiController : Control
 {
-	private readonly Node _owner;
-	private readonly Panel _panel;
-	private readonly Label _nameLabel;
-	private readonly Label _healthLabel;
-	private readonly Label _statusLabel;
-	private readonly Castle _playerCastle;
-	private readonly Castle _enemyCastle;
+	private Panel _panel;
+	private Label _nameLabel;
+	private Label _healthLabel;
+	private Label _statusLabel;
+	private Castle _playerCastle;
+	private Castle _enemyCastle;
 	private Building _hoveredBuilding;
 	private bool _inputBlocked;
 	private bool _placementActive;
 	private bool _pauseOpen;
 
-	public BuildingInfoUiController(Node owner, CanvasLayer uiRoot)
+	public override void _Ready()
 	{
-		_owner = owner;
-		_panel = uiRoot.GetNode<Panel>("BuildingInfoPanel");
-		_nameLabel = uiRoot.GetNode<Label>("BuildingInfoPanel/NameLabel");
-		_healthLabel = uiRoot.GetNode<Label>("BuildingInfoPanel/HealthLabel");
-		_statusLabel = uiRoot.GetNode<Label>("BuildingInfoPanel/StatusLabel");
+		_panel = GetNode<Panel>("BuildingInfoPanel");
+		_nameLabel = GetNode<Label>("BuildingInfoPanel/NameLabel");
+		_healthLabel = GetNode<Label>("BuildingInfoPanel/HealthLabel");
+		_statusLabel = GetNode<Label>("BuildingInfoPanel/StatusLabel");
 
-		Node mainGame = owner.GetParent();
+		Node mainGame = GetParent().GetParent();
 		_playerCastle = mainGame.GetNode<Castle>("Battlefield/PlayerSide/PlayerCastle");
 		_enemyCastle = mainGame.GetNode<Castle>("Battlefield/EnemySide/EnemyCastle");
 
@@ -59,7 +57,7 @@ public sealed class BuildingInfoUiController
 		if (_inputBlocked || _placementActive || _pauseOpen)
 			return;
 
-		Vector2 mouseScreen = _owner.GetViewport().GetMousePosition();
+		Vector2 mouseScreen = GetViewport().GetMousePosition();
 		Building building = PickBuilding(mouseScreen);
 		if (building == null)
 		{

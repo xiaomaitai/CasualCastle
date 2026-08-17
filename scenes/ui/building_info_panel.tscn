@@ -1,0 +1,47 @@
+[gd_scene format=3 uid="uid://bu2mmyumtlebd"]
+
+[ext_resource type="Script" path="res://scripts/adapters/godot/ui/BuildingInfoUiController.cs" id="1"]
+
+[node name="BuildingInfo" type="Control"]
+mouse_filter = 2
+script = ExtResource("1")
+
+[node name="BuildingInfoPanel" type="Panel" parent="."]
+visible = false
+offset_left = 1383
+offset_top = 195
+offset_right = 1843.5
+offset_bottom = 498
+
+[node name="PanelBackground" type="ColorRect" parent="BuildingInfoPanel"]
+layout_mode = 0
+offset_right = 460.5
+offset_bottom = 303
+color = Color(0.1, 0.14, 0.2, 0.92)
+
+[node name="NameLabel" type="Label" parent="BuildingInfoPanel"]
+layout_mode = 0
+offset_left = 24
+offset_top = 24
+offset_right = 436.5
+offset_bottom = 78
+theme_override_font_sizes/font_size = 33
+text = "兵营"
+
+[node name="HealthLabel" type="Label" parent="BuildingInfoPanel"]
+layout_mode = 0
+offset_left = 24
+offset_top = 90
+offset_right = 436.5
+offset_bottom = 138
+theme_override_font_sizes/font_size = 27
+text = "生命：100/100"
+
+[node name="StatusLabel" type="Label" parent="BuildingInfoPanel"]
+layout_mode = 0
+offset_left = 24
+offset_top = 150
+offset_right = 436.5
+offset_bottom = 198
+theme_override_font_sizes/font_size = 27
+text = "工作中"

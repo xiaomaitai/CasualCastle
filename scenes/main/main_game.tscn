@@ -14,6 +14,8 @@
 [ext_resource type="PackedScene" uid="uid://besmx6p5gonsn" path="res://scenes/ui/hud.tscn" id="25"]
 [ext_resource type="PackedScene" uid="uid://bsjhrjq7ybonw" path="res://scenes/ui/hand_panel.tscn" id="26"]
 [ext_resource type="PackedScene" uid="uid://brbbmy65b7a1r" path="res://scenes/ui/shop_panel.tscn" id="27"]
+[ext_resource type="PackedScene" uid="uid://bu2mmyumtlebd" path="res://scenes/ui/building_info_panel.tscn" id="28"]
+[ext_resource type="PackedScene" uid="uid://v57nh7q2ebgs" path="res://scenes/ui/unit_info_panel.tscn" id="29"]
 
 [node name="MainGame" type="Node2D" unique_id=1]
 script = ExtResource("10")
@@ -86,45 +88,9 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="BuildingInfoPanel" type="Panel" parent="UI"]
-visible = false
-offset_left = 1383
-offset_top = 195
-offset_right = 1843.5
-offset_bottom = 498
+[node name="BuildingInfo" parent="UI" instance=ExtResource("28")]
 
-[node name="PanelBackground" type="ColorRect" parent="UI/BuildingInfoPanel"]
-layout_mode = 0
-offset_right = 460.5
-offset_bottom = 303
-color = Color(0.1, 0.14, 0.2, 0.92)
-
-[node name="NameLabel" type="Label" parent="UI/BuildingInfoPanel"]
-layout_mode = 0
-offset_left = 24
-offset_top = 24
-offset_right = 436.5
-offset_bottom = 78
-theme_override_font_sizes/font_size = 33
-text = "兵营"
-
-[node name="HealthLabel" type="Label" parent="UI/BuildingInfoPanel"]
-layout_mode = 0
-offset_left = 24
-offset_top = 90
-offset_right = 436.5
-offset_bottom = 138
-theme_override_font_sizes/font_size = 27
-text = "生命：100/100"
-
-[node name="StatusLabel" type="Label" parent="UI/BuildingInfoPanel"]
-layout_mode = 0
-offset_left = 24
-offset_top = 150
-offset_right = 436.5
-offset_bottom = 198
-theme_override_font_sizes/font_size = 27
-text = "工作中"
+[node name="UnitInfo" parent="UI" instance=ExtResource("29")]
 
 [node name="UnitAttributePanel" parent="UI" instance=ExtResource("24")]
 

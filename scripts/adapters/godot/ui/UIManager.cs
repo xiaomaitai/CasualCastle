@@ -150,8 +150,8 @@ public partial class UIManager : Node2D
 		_handUi = uiRoot.GetNode<HandUiController>("Hand");
 		Castle playerCastle = GetParent().GetNode<Castle>("Battlefield/PlayerSide/PlayerCastle");
 		_buildingSell = new BuildingSellController(this, playerCastle, shopService, _shopUi);
-		_buildingInfoUi = new BuildingInfoUiController(this, uiRoot);
-		_unitInfoUi = new UnitInfoUiController(this, uiRoot);
+		_buildingInfoUi = uiRoot.GetNode<BuildingInfoUiController>("BuildingInfo");
+		_unitInfoUi = uiRoot.GetNode<UnitInfoUiController>("UnitInfo");
 		_unitSelection = new UnitSelectionController(this);
 		_spellBarUi = new SpellBarUiController(uiRoot, _unitSelection);
 		_buildingActionRing = new BuildingActionRingController(uiRoot, _unitSelection, _spellBarUi);

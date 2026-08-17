@@ -13,9 +13,9 @@
 ## 分步实施（每步一个提交、行为保持、全量验证通过再下一步）
 
 - [ ] 基础：`UiInteractionState`（纯 C# 状态投影：GameOver/任意模态/暂停/设置/商店）与 `UiModalStack`（按优先级压栈/弹栈/Esc 关闭栈顶）；UIManager 只保留注册式输入分发，删除 `_Input` 硬编码长链；SetInputBlocked 全部改经状态订阅；TavernBubble 挂载点移入 UI 层专用节点；冒烟与主场景无头通过
-- [ ] HUD 面板：`scenes/ui/hud.tscn`（血条/金币/黑魔法/阶段面板/菜单按钮/商店入口/工具按钮）+ HudUiController 改造为场景根脚本（导出节点引用）；UIManager 删除对应 InitializeUI 分支；冒烟通过
-- [ ] 手牌面板：`scenes/ui/hand_panel.tscn`（HandBackdrop + 10 槽位）+ HandUiController 场景化；拖拽行为保持；冒烟通过
-- [ ] 商店面板：`scenes/ui/shop_panel.tscn`（5 货架 + 刷新 + 关闭）+ ShopUiController 场景化；购买/拖放直放行为保持；冒烟通过
+- [x] HUD 面板：`scenes/ui/hud.tscn`（血条/金币/黑魔法/阶段面板/菜单按钮/商店入口/工具按钮）+ HudUiController 改造为场景根脚本（导出节点引用）；UIManager 删除对应 InitializeUI 分支；冒烟通过
+- [x] 手牌面板：`scenes/ui/hand_panel.tscn`（HandBackdrop + 10 槽位）+ HandUiController 场景化；拖拽行为保持；冒烟通过
+- [x] 商店面板：`scenes/ui/shop_panel.tscn`（5 货架 + 刷新 + 关闭）+ ShopUiController 场景化；购买/拖放直放行为保持；冒烟通过
 - [ ] 建筑信息/单位信息面板：`scenes/ui/building_info_panel.tscn` + BuildingInfoUiController/UnitInfoUiController 场景化
 - [ ] 暂停/设置/结算面板：`scenes/ui/pause_menu.tscn`、`scenes/ui/game_over.tscn`（settings_panel 已独立）；PauseMenuUiController/GameOverUiController/SettingsUiController 场景化并接入模态栈
 - [ ] 作弊/运行信息面板（dev 区）：`scenes/ui/dev_tools/cheat_menu.tscn`、`runtime_info_panel.tscn` + CheatMenuUiController/RuntimeInfoPanelController/BgmInfoController 场景化

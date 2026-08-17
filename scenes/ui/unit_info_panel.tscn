@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://v57nh7q2ebgs"]
+
+[ext_resource type="Script" path="res://scripts/adapters/godot/ui/UnitInfoUiController.cs" id="1"]
+
+[node name="UnitInfo" type="Control"]
+mouse_filter = 2
+script = ExtResource("1")

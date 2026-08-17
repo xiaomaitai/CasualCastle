@@ -1,20 +1,18 @@
-// 单位信息 UI
+// 单位信息组件：悬停详情（unit_info_panel.tscn 场景根）
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
 using Godot;
-using System.Collections.Generic;
 
-public sealed class UnitInfoUiController
+public partial class UnitInfoUiController : Control
 {
-	private readonly Node _owner;
-	private readonly Panel _panel;
-	private readonly Label _label;
+	private Panel _panel;
+	private Label _label;
 	private bool _suppressed;
+	private Node2D _battlefield;
+	private readonly float _pickRadiusPixels = 40f;
 
-	public UnitInfoUiController(Node owner, CanvasLayer uiRoot)
+	public override void _Ready()
 	{
-		_owner = owner;
-
 		_panel = new Panel();
 		_panel.Size = new Vector2(200, 80);
 		_panel.Visible = false;
@@ -34,7 +32,7 @@ public sealed class UnitInfoUiController
 		_label.Position = new Vector2(4, 2);
 
 		_panel.AddChild(_label);
-		uiRoot.AddChild(_panel);
+		AddChild(_panel);
 	}
 
 	public void SetSuppressed(bool suppressed)
@@ -48,7 +46,7 @@ public sealed class UnitInfoUiController
 	{
 		if (_suppressed)
 			return;
-		Vector2 mouseGlobal = _owner.GetViewport().GetMousePosition();
+		Vector2 mouseGlobal = GetViewport().GetMousePosition();
 		UnitLogic unit = PickUnit(mouseGlobal);
 
 		if (unit == null || !unit.IsAlive)
@@ -82,14 +80,11 @@ public sealed class UnitInfoUiController
 		_panel.Visible = true;
 	}
 
-	private Node2D _battlefield;
-	private float _pickRadiusPixels = 40f;
-
 	private UnitLogic PickUnit(Vector2 globalPoint)
 	{
 		if (_battlefield == null)
 		{
-			Node mainGame = _owner.GetParent();
+			Node mainGame = GetParent().GetParent();
 			_battlefield = mainGame?.GetNodeOrNull<Node2D>("Battlefield");
 			if (_battlefield == null)
 				return null;
