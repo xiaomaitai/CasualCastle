@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://scripts/adapters/godot/ui/BuildingActionRing.cs" id="22"]
 [ext_resource type="Script" path="res://scripts/adapters/godot/ui/OfferFrame.cs" id="23"]
 [ext_resource type="PackedScene" uid="uid://c7m4n8p2q5r6s" path="res://scenes/ui/attribute_panel.tscn" id="24"]
+[ext_resource type="PackedScene" uid="uid://besmx6p5gonsn" path="res://scenes/ui/hud.tscn" id="25"]
 
 [node name="MainGame" type="Node2D" unique_id=1]
 script = ExtResource("10")
@@ -65,147 +66,7 @@ SecondBarracksGridY = -1
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=5]
 
-[node name="TopBarBackground" type="Panel" parent="UI"]
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 1920.0
-offset_bottom = 88.0
-mouse_filter = 2
-
-[node name="PlayerHealthBar" type="ProgressBar" parent="UI" unique_id=6]
-offset_left = 32
-offset_top = 18
-offset_right = 332
-offset_bottom = 58
-max_value = 500.0
-value = 500.0
-
-[node name="EnemyHealthBar" type="ProgressBar" parent="UI" unique_id=7]
-offset_left = 1450
-offset_top = 18
-offset_right = 1750
-offset_bottom = 58
-max_value = 500.0
-value = 500.0
-
-[node name="GoldLabel" type="Label" parent="UI"]
-offset_left = 354
-offset_top = 18
-offset_right = 550
-offset_bottom = 58
-theme_override_font_sizes/font_size = 33
-text = "金币：30"
-
-[node name="BlackMagicLabel" type="Label" parent="UI"]
-visible = false
-offset_left = 552
-offset_top = 18
-offset_right = 720
-offset_bottom = 58
-theme_override_font_sizes/font_size = 27
-text = "黑魔法：0"
-
-[node name="BgmInfoLabel" type="Label" parent="UI"]
-visible = false
-offset_left = 12
-offset_top = 6
-offset_right = 560
-offset_bottom = 30
-theme_override_font_sizes/font_size = 14
-text = ""
-
-[node name="PhasePanel" type="HBoxContainer" parent="UI"]
-offset_left = 730
-offset_top = 14
-offset_right = 1210
-offset_bottom = 74
-theme_override_constants/separation = 12
-alignment = 1
-
-[node name="PhaseLabel" type="Label" parent="UI/PhasePanel"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 33
-text = "白天"
-horizontal_alignment = 1
-
-[node name="PhaseTimerLabel" type="Label" parent="UI/PhasePanel"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = "1:00"
-horizontal_alignment = 1
-
-[node name="NewDayButton" type="Button" parent="UI/PhasePanel"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 36
-text = "新的一天"
-
-[node name="SkipPhaseButton" type="Button" parent="UI/PhasePanel"]
-layout_mode = 2
-text = "切换昼夜"
-
-[node name="CheatButton" type="Button" parent="UI/PhasePanel"]
-layout_mode = 2
-text = "作弊"
-[node name="InfoButton" type="Button" parent="UI/PhasePanel"]
-layout_mode = 2
-text = "信息"
-
-[node name="MenuButton" type="Button" parent="UI"]
-offset_left = 1814
-offset_top = 12
-offset_right = 1896
-offset_bottom = 72
-text = "☰"
-
-[node name="ShopButtonCircle" type="Panel" parent="UI"]
-offset_left = 1778
-offset_top = 924
-offset_right = 1886
-offset_bottom = 1032
-mouse_filter = 2
-
-[node name="ShopButton" type="Button" parent="UI"]
-offset_left = 1760
-offset_top = 906
-offset_right = 1904
-offset_bottom = 1050
-toggle_mode = true
-text = ""
-expand_icon = true
-tooltip_text = "打开/关闭商店"
-
-[node name="BuildingPauseToolButton" type="Button" parent="UI"]
-visible = false
-custom_minimum_size = Vector2(72, 54)
-offset_left = 1483.5
-offset_top = 942
-offset_right = 1555.5
-offset_bottom = 996
-toggle_mode = true
-expand_icon = true
-tooltip_text = "暂停建筑"
-
-[node name="BuildingRepairToolButton" type="Button" parent="UI"]
-visible = false
-custom_minimum_size = Vector2(72, 54)
-offset_left = 1567.5
-offset_top = 942
-offset_right = 1639.5
-offset_bottom = 996
-toggle_mode = true
-expand_icon = true
-tooltip_text = "修复建筑（仅夜晚）"
-
-[node name="CombineProhibitToolButton" type="Button" parent="UI"]
-visible = false
-custom_minimum_size = Vector2(72, 54)
-offset_left = 1651.5
-offset_top = 942
-offset_right = 1723.5
-offset_bottom = 996
-toggle_mode = true
-expand_icon = true
-tooltip_text = "禁止组合"
+[node name="Hud" parent="UI" instance=ExtResource("25")]
 
 [node name="HandBackdrop" type="Panel" parent="UI"]
 offset_left = 488.0

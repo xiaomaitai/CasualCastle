@@ -1,4 +1,4 @@
-// HUD UI：血条、金币、阶段与跳过按钮
+// HUD 组件：血条、金币、阶段面板与顶部按钮（hud.tscn 场景根）
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
@@ -6,52 +6,70 @@ using CasualCastle.Domain.Shared;
 using Godot;
 using System;
 
-public sealed class HudUiController
+public partial class HudUiController : Control
 {
-	private readonly CanvasLayer _uiRoot;
-	private readonly ProgressBar _playerHealthBar;
-	private readonly ProgressBar _enemyHealthBar;
-	private readonly Label _phaseLabel;
-	private readonly Label _phaseTimerLabel;
-	private readonly Button _newDayButton;
-	private readonly Button _skipPhaseButton;
-	private readonly Label _goldLabel;
-	private readonly Label _blackMagicLabel;
+	private ProgressBar _playerHealthBar;
+	private ProgressBar _enemyHealthBar;
+	private Label _goldLabel;
+	private Label _blackMagicLabel;
+	private Label _bgmInfoLabel;
+	private Label _phaseLabel;
+	private Label _phaseTimerLabel;
+	private Button _newDayButton;
+	private Button _skipPhaseButton;
+	private Button _cheatButton;
+	private Button _infoButton;
+	private Button _menuButton;
+	private Panel _shopButtonCircle;
+	private Button _shopButton;
+	private Button _buildingPauseToolButton;
+	private Button _buildingRepairToolButton;
+	private Button _combineProhibitToolButton;
 
-	public HudUiController(CanvasLayer uiRoot)
+	public ProgressBar PlayerHealthBar => _playerHealthBar ??= GetNode<ProgressBar>("PlayerHealthBar");
+	public ProgressBar EnemyHealthBar => _enemyHealthBar ??= GetNode<ProgressBar>("EnemyHealthBar");
+	public Label GoldLabel => _goldLabel ??= GetNode<Label>("GoldLabel");
+	public Label BlackMagicLabel => _blackMagicLabel ??= GetNode<Label>("BlackMagicLabel");
+	public Label BgmInfoLabel => _bgmInfoLabel ??= GetNode<Label>("BgmInfoLabel");
+	public Label PhaseLabel => _phaseLabel ??= GetNode<Label>("PhasePanel/PhaseLabel");
+	public Label PhaseTimerLabel => _phaseTimerLabel ??= GetNode<Label>("PhasePanel/PhaseTimerLabel");
+	public Button NewDayButton => _newDayButton ??= GetNode<Button>("PhasePanel/NewDayButton");
+	public Button SkipPhaseButton => _skipPhaseButton ??= GetNode<Button>("PhasePanel/SkipPhaseButton");
+	public Button CheatButton => _cheatButton ??= GetNode<Button>("PhasePanel/CheatButton");
+	public Button InfoButton => _infoButton ??= GetNode<Button>("PhasePanel/InfoButton");
+	public Button MenuButton => _menuButton ??= GetNode<Button>("MenuButton");
+	public Panel ShopButtonCircle => _shopButtonCircle ??= GetNode<Panel>("ShopButtonCircle");
+	public Button ShopButton => _shopButton ??= GetNode<Button>("ShopButton");
+	public Button BuildingPauseToolButton => _buildingPauseToolButton ??= GetNode<Button>("BuildingPauseToolButton");
+	public Button BuildingRepairToolButton => _buildingRepairToolButton ??= GetNode<Button>("BuildingRepairToolButton");
+	public Button CombineProhibitToolButton => _combineProhibitToolButton ??= GetNode<Button>("CombineProhibitToolButton");
+
+	public override void _Ready()
 	{
-		_uiRoot = uiRoot;
-		_playerHealthBar = uiRoot.GetNode<ProgressBar>("PlayerHealthBar");
-		_enemyHealthBar = uiRoot.GetNode<ProgressBar>("EnemyHealthBar");
-		_phaseLabel = uiRoot.GetNode<Label>("PhasePanel/PhaseLabel");
-		_phaseTimerLabel = uiRoot.GetNode<Label>("PhasePanel/PhaseTimerLabel");
-		_newDayButton = uiRoot.GetNode<Button>("PhasePanel/NewDayButton");
-		_skipPhaseButton = uiRoot.GetNode<Button>("PhasePanel/SkipPhaseButton");
-		_goldLabel = uiRoot.GetNode<Label>("GoldLabel");
-		_blackMagicLabel = uiRoot.GetNode<Label>("BlackMagicLabel");
-
 		DisplaySettingsManager settings = AdapterRegistry.Resolve<DisplaySettingsManager>();
 		ApplyProfile(settings.UiProfile);
 		settings.UiProfileChanged += ApplyProfile;
 
-		_newDayButton.Pressed += OnNewDayPressed;
-		_newDayButton.Text = AdapterRegistry.Resolve<GameManager>().IsUndeadBattle ? "进入夜晚" : "新的一天";
-		_skipPhaseButton.Pressed += OnSkipPhasePressed;
-		_newDayButton.Visible = false;
-		_skipPhaseButton.Visible = false;
+		NewDayButton.Pressed += OnNewDayPressed;
+		NewDayButton.Text = AdapterRegistry.Resolve<GameManager>().IsUndeadBattle ? "进入夜晚" : "新的一天";
+		SkipPhaseButton.Pressed += OnSkipPhasePressed;
+		NewDayButton.Visible = false;
+		SkipPhaseButton.Visible = false;
 
-		AdapterRegistry.Resolve<GameManager>().PlayerHealthChanged += UpdatePlayerHealth;
-		AdapterRegistry.Resolve<GameManager>().EnemyHealthChanged += UpdateEnemyHealth;
-		AdapterRegistry.Resolve<GameManager>().PhaseChanged += OnPhaseChanged;
+		GameManager gm = AdapterRegistry.Resolve<GameManager>();
+		gm.PlayerHealthChanged += UpdatePlayerHealth;
+		gm.EnemyHealthChanged += UpdateEnemyHealth;
+		gm.PhaseChanged += OnPhaseChanged;
 
-		UpdatePlayerHealth(AdapterRegistry.Resolve<GameManager>().PlayerHealth);
-		UpdateEnemyHealth(AdapterRegistry.Resolve<GameManager>().EnemyHealth);
+		UpdatePlayerHealth(gm.PlayerHealth);
+		UpdateEnemyHealth(gm.EnemyHealth);
 		UpdatePhaseDisplay();
 
-		if (AdapterRegistry.Resolve<Shop>() != null)
+		Shop shop = AdapterRegistry.Resolve<Shop>();
+		if (shop != null)
 		{
-			AdapterRegistry.Resolve<Shop>().GoldChanged += UpdateGoldDisplay;
-			UpdateGoldDisplay(AdapterRegistry.Resolve<Shop>().Gold);
+			shop.GoldChanged += UpdateGoldDisplay;
+			UpdateGoldDisplay(shop.Gold);
 		}
 		BlackMagicService blackMagic = GameManager.Get<BlackMagicService>();
 		if (blackMagic != null)
@@ -61,15 +79,16 @@ public sealed class HudUiController
 		}
 	}
 
-	public void Dispose()
+	public override void _ExitTree()
 	{
 		AdapterRegistry.Resolve<DisplaySettingsManager>().UiProfileChanged -= ApplyProfile;
-		_newDayButton.Pressed -= OnNewDayPressed;
-		_skipPhaseButton.Pressed -= OnSkipPhasePressed;
+		NewDayButton.Pressed -= OnNewDayPressed;
+		SkipPhaseButton.Pressed -= OnSkipPhasePressed;
 
-		AdapterRegistry.Resolve<GameManager>().PlayerHealthChanged -= UpdatePlayerHealth;
-		AdapterRegistry.Resolve<GameManager>().EnemyHealthChanged -= UpdateEnemyHealth;
-		AdapterRegistry.Resolve<GameManager>().PhaseChanged -= OnPhaseChanged;
+		GameManager gm = AdapterRegistry.Resolve<GameManager>();
+		gm.PlayerHealthChanged -= UpdatePlayerHealth;
+		gm.EnemyHealthChanged -= UpdateEnemyHealth;
+		gm.PhaseChanged -= OnPhaseChanged;
 
 		if (AdapterRegistry.Resolve<Shop>() != null)
 			AdapterRegistry.Resolve<Shop>().GoldChanged -= UpdateGoldDisplay;
@@ -78,19 +97,20 @@ public sealed class HudUiController
 			blackMagic.ValueChanged -= UpdateBlackMagicDisplay;
 	}
 
-	private void ApplyProfile(UiProfileKind kind)
-	{
-		UiProfileStyles.ApplyHud(_uiRoot, kind);
-	}
-	public void Process()
+	public override void _Process(double _)
 	{
 		UpdatePhaseDisplay();
 	}
 
 	public void SetGameOverVisible(bool visible)
 	{
-		_newDayButton.Visible = false;
-		_skipPhaseButton.Visible = false;
+		NewDayButton.Visible = false;
+		SkipPhaseButton.Visible = false;
+	}
+
+	private void ApplyProfile(UiProfileKind kind)
+	{
+		UiProfileStyles.ApplyHud(this, kind);
 	}
 
 	private void OnNewDayPressed()
@@ -110,44 +130,44 @@ public sealed class HudUiController
 
 	private void UpdatePlayerHealth(int health)
 	{
-		_playerHealthBar.MaxValue = AdapterRegistry.Resolve<GameManager>().PlayerMaxHealth;
-		_playerHealthBar.SetValue(health);
+		PlayerHealthBar.MaxValue = AdapterRegistry.Resolve<GameManager>().PlayerMaxHealth;
+		PlayerHealthBar.SetValue(health);
 	}
 
 	private void UpdateEnemyHealth(int health)
 	{
-		_enemyHealthBar.MaxValue = AdapterRegistry.Resolve<GameManager>().EnemyMaxHealth;
-		_enemyHealthBar.SetValue(health);
+		EnemyHealthBar.MaxValue = AdapterRegistry.Resolve<GameManager>().EnemyMaxHealth;
+		EnemyHealthBar.SetValue(health);
 	}
 
 	private void UpdateGoldDisplay(int gold)
 	{
-		_goldLabel.Text = $"金币：{gold}";
+		GoldLabel.Text = $"金币：{gold}";
 	}
 
 	private void UpdateBlackMagicDisplay(int value)
 	{
 		Shop shop = AdapterRegistry.Resolve<Shop>();
 		bool isNecromancer = shop != null && shop.FactionId == FactionDef.NecromancerId;
-		_blackMagicLabel.Visible = isNecromancer;
-		_blackMagicLabel.Text = $"黑魔法：{value}";
+		BlackMagicLabel.Visible = isNecromancer;
+		BlackMagicLabel.Text = $"黑魔法：{value}";
 	}
 
 	private void UpdatePhaseDisplay()
 	{
 		GameManager gm = AdapterRegistry.Resolve<GameManager>();
-		_phaseLabel.Text = gm.IsCombine ? "合成" : gm.IsNightDisplayed ? "夜晚" : "白天";
+		PhaseLabel.Text = gm.IsCombine ? "合成" : gm.IsNightDisplayed ? "夜晚" : "白天";
 		if (gm.IsCombat)
 		{
-			_phaseTimerLabel.Text = FormatTime(gm.PhaseTimeRemaining);
-			_newDayButton.Visible = false;
-			_skipPhaseButton.Visible = DisplaySettingsManager.DevModeEnabled;
+			PhaseTimerLabel.Text = FormatTime(gm.PhaseTimeRemaining);
+			NewDayButton.Visible = false;
+			SkipPhaseButton.Visible = DisplaySettingsManager.DevModeEnabled;
 		}
 		else
 		{
-			_phaseTimerLabel.Text = "";
-			_newDayButton.Visible = gm.IsShop;
-			_skipPhaseButton.Visible = false;
+			PhaseTimerLabel.Text = "";
+			NewDayButton.Visible = gm.IsShop;
+			SkipPhaseButton.Visible = false;
 		}
 	}
 

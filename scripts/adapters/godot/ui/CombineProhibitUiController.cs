@@ -14,10 +14,10 @@ public sealed class CombineProhibitUiController
 
 	public bool IsToolActive => _active;
 
-	public CombineProhibitUiController(Node owner, CanvasLayer uiRoot, ButtonGroup toolGroup)
+	public CombineProhibitUiController(Node owner, CanvasLayer uiRoot, HudUiController hud, ButtonGroup toolGroup)
 	{
 		_toolGroup = toolGroup;
-		_button = uiRoot.GetNode<Button>("CombineProhibitToolButton");
+		_button = hud.CombineProhibitToolButton;
 
 		Node mainGame = owner.GetParent();
 		_playerCastle = mainGame.GetNode<Castle>("Battlefield/PlayerSide/PlayerCastle");

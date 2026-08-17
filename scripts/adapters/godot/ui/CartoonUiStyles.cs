@@ -17,25 +17,25 @@ public static class CartoonUiStyles
 	private static readonly Color Muted = new(0.4f, 0.38f, 0.33f, 1f);
 	private static readonly Color HealthFill = new(0.9f, 0.27f, 0.23f, 1f);
 
-	public static void ApplyHud(CanvasLayer uiRoot)
+	public static void ApplyHud(Control hud)
 	{
-		StylePanel(uiRoot.GetNode<Panel>("TopBarBackground"));
-		StyleProgress(uiRoot.GetNode<ProgressBar>("PlayerHealthBar"));
-		StyleProgress(uiRoot.GetNode<ProgressBar>("EnemyHealthBar"));
-		StyleHudLabel(uiRoot.GetNode<Label>("GoldLabel"));
-		StyleHudLabel(uiRoot.GetNode<Label>("BlackMagicLabel"));
-		StyleHudLabel(uiRoot.GetNode<Label>("PhasePanel/PhaseLabel"));
-		StyleHudLabel(uiRoot.GetNode<Label>("PhasePanel/PhaseTimerLabel"));
-		StyleHudButtons(uiRoot);
+		StylePanel(hud.GetNode<Panel>("TopBarBackground"));
+		StyleProgress(hud.GetNode<ProgressBar>("PlayerHealthBar"));
+		StyleProgress(hud.GetNode<ProgressBar>("EnemyHealthBar"));
+		StyleHudLabel(hud.GetNode<Label>("GoldLabel"));
+		StyleHudLabel(hud.GetNode<Label>("BlackMagicLabel"));
+		StyleHudLabel(hud.GetNode<Label>("PhasePanel/PhaseLabel"));
+		StyleHudLabel(hud.GetNode<Label>("PhasePanel/PhaseTimerLabel"));
+		StyleHudButtons(hud);
+		StyleShopButton(hud.GetNode<Button>("ShopButton"));
+		StyleToolButton(hud.GetNode<Button>("BuildingPauseToolButton"));
+		StyleToolButton(hud.GetNode<Button>("BuildingRepairToolButton"));
+		StyleToolButton(hud.GetNode<Button>("CombineProhibitToolButton"));
 	}
 
 	public static void ApplyHand(CanvasLayer uiRoot, Button useItemButton)
 	{
 		StylePanel(uiRoot.GetNode<Panel>("HandBackdrop"));
-		StyleShopButton(uiRoot.GetNode<Button>("ShopButton"));
-		StyleToolButton(uiRoot.GetNode<Button>("BuildingPauseToolButton"));
-		StyleToolButton(uiRoot.GetNode<Button>("BuildingRepairToolButton"));
-		StyleToolButton(uiRoot.GetNode<Button>("CombineProhibitToolButton"));
 		StyleButton(useItemButton);
 		StyleOutlinedText(uiRoot.GetNode<Label>("PlacementHintLabel"), Ink);
 	}
@@ -71,13 +71,13 @@ public static class CartoonUiStyles
 			StyleOffer(uiRoot, i);
 	}
 
-	private static void StyleHudButtons(CanvasLayer uiRoot)
+	private static void StyleHudButtons(Control hud)
 	{
-		StyleButton(uiRoot.GetNode<Button>("PhasePanel/NewDayButton"));
-		StyleButton(uiRoot.GetNode<Button>("PhasePanel/SkipPhaseButton"));
-		StyleButton(uiRoot.GetNode<Button>("PhasePanel/CheatButton"));
-		StyleButton(uiRoot.GetNode<Button>("PhasePanel/InfoButton"));
-		StyleButton(uiRoot.GetNode<Button>("MenuButton"));
+		StyleButton(hud.GetNode<Button>("PhasePanel/NewDayButton"));
+		StyleButton(hud.GetNode<Button>("PhasePanel/SkipPhaseButton"));
+		StyleButton(hud.GetNode<Button>("PhasePanel/CheatButton"));
+		StyleButton(hud.GetNode<Button>("PhasePanel/InfoButton"));
+		StyleButton(hud.GetNode<Button>("MenuButton"));
 	}
 
 	private static void StyleOffer(CanvasLayer uiRoot, int index)

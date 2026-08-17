@@ -46,15 +46,15 @@ public sealed class ShopUiController
 		_panel.Modulate = active ? new Color(1f, 1f, 0.75f) : Colors.White;
 	}
 
-	public ShopUiController(Node owner, CanvasLayer uiRoot, Shop shopService)
+	public ShopUiController(Node owner, CanvasLayer uiRoot, HudUiController hud, Shop shopService)
 	{
 		_owner = owner;
 		_uiRoot = uiRoot;
 		_shop = shopService;
 		_gameManager = AdapterRegistry.Resolve<GameManager>();
 		_buildingSystem = AdapterRegistry.Resolve<BuildingSystem>();
-		_shopButton = uiRoot.GetNode<Button>("ShopButton");
-		_shopButtonCircle = uiRoot.GetNode<Panel>("ShopButtonCircle");
+		_shopButton = hud.ShopButton;
+		_shopButtonCircle = hud.ShopButtonCircle;
 		_panel = uiRoot.GetNode<Panel>("ShopPanel");
 		_shopGoldLabel = uiRoot.GetNode<Label>("ShopPanel/ShopGoldLabel");
 		_closeButton = uiRoot.GetNode<Button>("ShopPanel/ShopCloseButton");

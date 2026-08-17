@@ -8,9 +8,9 @@ public sealed class BgmInfoController
 {
 	private readonly Label _label;
 
-	public BgmInfoController(Node uiRoot)
+	public BgmInfoController(Label label)
 	{
-		_label = uiRoot.GetNode<Label>("BgmInfoLabel");
+		_label = label;
 	}
 
 	public void Process()

@@ -9,12 +9,12 @@ public enum UiProfileKind
 
 public static class UiProfileStyles
 {
-	public static void ApplyHud(CanvasLayer uiRoot, UiProfileKind kind)
+	public static void ApplyHud(Control hud, UiProfileKind kind)
 	{
 		if (kind == UiProfileKind.Cartoon)
-			CartoonUiStyles.ApplyHud(uiRoot);
+			CartoonUiStyles.ApplyHud(hud);
 		else
-			MedievalUiStyles.ApplyHud(uiRoot);
+			MedievalUiStyles.ApplyHud(hud);
 	}
 
 	public static void ApplyHand(CanvasLayer uiRoot, Button useItemButton, UiProfileKind kind)

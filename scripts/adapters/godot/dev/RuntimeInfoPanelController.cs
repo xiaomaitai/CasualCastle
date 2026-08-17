@@ -21,9 +21,9 @@ public sealed class RuntimeInfoPanelController
 
 	public bool IsOpen { get; private set; }
 
-	public RuntimeInfoPanelController(CanvasLayer uiRoot)
+	public RuntimeInfoPanelController(CanvasLayer uiRoot, HudUiController hud)
 	{
-		_openButton = uiRoot.GetNode<Button>("PhasePanel/InfoButton");
+		_openButton = hud.InfoButton;
 		_panel = CreatePanel(uiRoot);
 		_closeButton = _panel.GetNode<Button>("CloseButton");
 		_wealthCheck = _panel.GetNode<CheckBox>("WealthCheck");

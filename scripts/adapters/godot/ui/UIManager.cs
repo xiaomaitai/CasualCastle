@@ -51,7 +51,6 @@ public partial class UIManager : Node2D
 		if (AdapterRegistry.Resolve<GameManager>() != null)
 			AdapterRegistry.Resolve<GameManager>().GameStateChanged -= OnGameStateChanged;
 
-		_hudUi?.Dispose();
 		if (_shopUi != null)
 		{
 			_shopUi.Dispose();
@@ -80,7 +79,6 @@ public partial class UIManager : Node2D
 
 	public override void _Process(double _)
 	{
-		_hudUi?.Process();
 		_runtimeInfoPanel?.Process();
 		_bgmInfo?.Process();
 		_shopUi?.Process();
@@ -150,9 +148,9 @@ public partial class UIManager : Node2D
 		CanvasLayer uiRoot = GetParent()?.GetNodeOrNull<CanvasLayer>("UI");
 		if (uiRoot == null) return;
 
-		_hudUi = new HudUiController(uiRoot);
+		_hudUi = uiRoot.GetNode<HudUiController>("Hud");
 		Shop shopService = AdapterRegistry.Resolve<Shop>();
-		_shopUi = new ShopUiController(this, uiRoot, shopService);
+		_shopUi = new ShopUiController(this, uiRoot, _hudUi, shopService);
 		Hand handService = AdapterRegistry.Resolve<Hand>();
 		_handUi = new HandUiController(this, uiRoot, handService, _shopUi);
 		Castle playerCastle = GetParent().GetNode<Castle>("Battlefield/PlayerSide/PlayerCastle");
@@ -167,13 +165,13 @@ public partial class UIManager : Node2D
 		GetParent()?.GetNodeOrNull<Node2D>("Battlefield")?.AddChild(_tavernBubble);
 		_attributePanel = new AttributePanelController(uiRoot, _unitSelection);
 		ButtonGroup toolGroup = new ButtonGroup();
-		_buildingManageUi = new BuildingManageUiController(this, uiRoot, toolGroup);
-		_combineProhibitUi = new CombineProhibitUiController(this, uiRoot, toolGroup);
-		_cheatMenu = new CheatMenuUiController(uiRoot);
-		_runtimeInfoPanel = new RuntimeInfoPanelController(uiRoot);
-		_bgmInfo = new BgmInfoController(uiRoot);
+		_buildingManageUi = new BuildingManageUiController(this, uiRoot, _hudUi, toolGroup);
+		_combineProhibitUi = new CombineProhibitUiController(this, uiRoot, _hudUi, toolGroup);
+		_cheatMenu = new CheatMenuUiController(uiRoot, _hudUi);
+		_runtimeInfoPanel = new RuntimeInfoPanelController(uiRoot, _hudUi);
+		_bgmInfo = new BgmInfoController(_hudUi.BgmInfoLabel);
 		_settingsUi = new SettingsUiController(uiRoot.GetNode<Control>("SettingsPanel"));
-		_pauseMenuUi = new PauseMenuUiController(uiRoot, GoToTitle, OpenSettings);
+		_pauseMenuUi = new PauseMenuUiController(uiRoot, _hudUi, GoToTitle, OpenSettings);
 		_gameOverUi = new GameOverUiController(uiRoot, GoToTitle);
 
 		UiSfx.Bind(uiRoot);

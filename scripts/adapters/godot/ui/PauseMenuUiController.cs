@@ -21,11 +21,11 @@ public sealed class PauseMenuUiController
 	public bool IsOpen { get; private set; }
 	public event Action<bool> OpenChanged;
 
-	public PauseMenuUiController(CanvasLayer uiRoot, Action goToTitle, Action openSettings)
+	public PauseMenuUiController(CanvasLayer uiRoot, HudUiController hud, Action goToTitle, Action openSettings)
 	{
 		_overlay = uiRoot.GetNode<ColorRect>("PauseOverlay");
 		_panel = uiRoot.GetNode<Panel>("PausePanel");
-		_menuButton = uiRoot.GetNode<Button>("MenuButton");
+		_menuButton = hud.MenuButton;
 		_continueButton = uiRoot.GetNode<Button>("PausePanel/ContinueButton");
 		_backToTitleButton = uiRoot.GetNode<Button>("PausePanel/BackToTitleButton");
 		_settingsButton = uiRoot.GetNode<Button>("PausePanel/SettingsButton");

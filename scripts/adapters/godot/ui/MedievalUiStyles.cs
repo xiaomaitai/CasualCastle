@@ -32,29 +32,29 @@ public static class MedievalUiStyles
 	private static readonly Color HealthBackground = new(0.07f, 0.045f, 0.035f, 1f);
 	private static readonly Color HealthFill = new(0.3f, 0.65f, 0.3f, 1f);
 
-	public static void ApplyHud(CanvasLayer uiRoot)
+	public static void ApplyHud(Control hud)
 	{
-		StyleTopBar(uiRoot.GetNode<Panel>("TopBarBackground"));
-		StyleProgress(uiRoot.GetNode<ProgressBar>("PlayerHealthBar"));
-		StyleProgress(uiRoot.GetNode<ProgressBar>("EnemyHealthBar"));
-		StyleHudLabel(uiRoot.GetNode<Label>("GoldLabel"), Gold);
-		StyleHudLabel(uiRoot.GetNode<Label>("BlackMagicLabel"), new Color(0.7f, 0.46f, 0.88f, 1f));
-		StyleHudLabel(uiRoot.GetNode<Label>("PhasePanel/PhaseLabel"), Gold);
-		StyleHudLabel(uiRoot.GetNode<Label>("PhasePanel/PhaseTimerLabel"), Text);
-		StyleButton(uiRoot.GetNode<Button>("PhasePanel/NewDayButton"), true);
-		StyleButton(uiRoot.GetNode<Button>("PhasePanel/SkipPhaseButton"));
-		StyleButton(uiRoot.GetNode<Button>("PhasePanel/CheatButton"));
-		StyleButton(uiRoot.GetNode<Button>("PhasePanel/InfoButton"));
-		StyleButton(uiRoot.GetNode<Button>("MenuButton"), true);
+		StyleTopBar(hud.GetNode<Panel>("TopBarBackground"));
+		StyleProgress(hud.GetNode<ProgressBar>("PlayerHealthBar"));
+		StyleProgress(hud.GetNode<ProgressBar>("EnemyHealthBar"));
+		StyleHudLabel(hud.GetNode<Label>("GoldLabel"), Gold);
+		StyleHudLabel(hud.GetNode<Label>("BlackMagicLabel"), new Color(0.7f, 0.46f, 0.88f, 1f));
+		StyleHudLabel(hud.GetNode<Label>("PhasePanel/PhaseLabel"), Gold);
+		StyleHudLabel(hud.GetNode<Label>("PhasePanel/PhaseTimerLabel"), Text);
+		StyleButton(hud.GetNode<Button>("PhasePanel/NewDayButton"), true);
+		StyleButton(hud.GetNode<Button>("PhasePanel/SkipPhaseButton"));
+		StyleButton(hud.GetNode<Button>("PhasePanel/CheatButton"));
+		StyleButton(hud.GetNode<Button>("PhasePanel/InfoButton"));
+		StyleButton(hud.GetNode<Button>("MenuButton"), true);
+		StyleShopButton(hud.GetNode<Button>("ShopButton"));
+		StyleToolButton(hud.GetNode<Button>("BuildingPauseToolButton"));
+		StyleToolButton(hud.GetNode<Button>("BuildingRepairToolButton"));
+		StyleToolButton(hud.GetNode<Button>("CombineProhibitToolButton"));
 	}
 
 	public static void ApplyHand(CanvasLayer uiRoot, Button useItemButton)
 	{
 		StylePanel(uiRoot.GetNode<Panel>("HandBackdrop"));
-		StyleShopButton(uiRoot.GetNode<Button>("ShopButton"));
-		StyleToolButton(uiRoot.GetNode<Button>("BuildingPauseToolButton"));
-		StyleToolButton(uiRoot.GetNode<Button>("BuildingRepairToolButton"));
-		StyleToolButton(uiRoot.GetNode<Button>("CombineProhibitToolButton"));
 		StyleButton(useItemButton, true);
 		Label hint = uiRoot.GetNode<Label>("PlacementHintLabel");
 		hint.AddThemeColorOverride("font_color", BrightGold);

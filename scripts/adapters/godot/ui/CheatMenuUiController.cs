@@ -13,9 +13,9 @@ public sealed class CheatMenuUiController
 
 	public bool IsOpen { get; private set; }
 
-	public CheatMenuUiController(CanvasLayer uiRoot)
+	public CheatMenuUiController(CanvasLayer uiRoot, HudUiController hud)
 	{
-		_openButton = uiRoot.GetNode<Button>("PhasePanel/CheatButton");
+		_openButton = hud.CheatButton;
 		_overlay = uiRoot.GetNode<ColorRect>("CheatOverlay");
 		_panel = uiRoot.GetNode<Panel>("CheatPanel");
 		_fastProductionCheck = uiRoot.GetNode<CheckBox>("CheatPanel/FastProductionCheck");

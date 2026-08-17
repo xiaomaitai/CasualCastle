@@ -62,7 +62,7 @@ public partial class TitleScreen : Control
 		_continueButton.Disabled = !saveRepo.HasSave(0);
 	UiSfx.Bind(this);
 	AudioManager.Instance?.PlayTitleMusic();
-	_bgmInfo = new BgmInfoController(this);
+	_bgmInfo = new BgmInfoController(GetNode<Label>("BgmInfoLabel"));
 	}
 
 	public override void _Process(double _)
