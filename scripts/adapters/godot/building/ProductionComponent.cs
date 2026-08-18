@@ -6,7 +6,7 @@ using System;
 
 public sealed class ProductionComponent
 {
-	public event Action<int> CyclesCompleted;
+	public event Action<string, int> SpawnRequested;
 
 	private readonly Building _owner;
 	private readonly BuildingRuntime _runtime;
@@ -30,7 +30,7 @@ public sealed class ProductionComponent
 
 		int cycles = _runtime.TickWork(delta, _speedMultiplier * DungeonFactionBuffs.ProductionSpeedMultiplier);
 		if (cycles > 0)
-			CyclesCompleted?.Invoke(cycles);
+			SpawnRequested?.Invoke(_owner.TypeId, cycles);
 	}
 
 	public void SetSpeedMultiplier(float multiplier)

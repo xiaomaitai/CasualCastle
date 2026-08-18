@@ -17,6 +17,9 @@ public partial class InitManager : Node
 		AddChild(new BuildingSystem());
 		BuildingSystem buildingSystem = AdapterRegistry.Resolve<BuildingSystem>();
 
+		UnitSpawnService spawnService = new UnitSpawnService();
+		AdapterRegistry.Register<UnitSpawnService>(spawnService);
+
 		AddChild(new BattleReportSystem());
 
 		Player player = new Player();

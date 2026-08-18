@@ -45,6 +45,8 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	private Node2D _battlefield;
 
+	public Node2D Battlefield => _battlefield;
+
 	private int _spawnCount;
 
 	private bool _isPlayerBuilding;
@@ -403,7 +405,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		_ritualService = GameManager.Get<RitualService>();
 		_runtime.HealthChanged += (health, maxHealth) => EmitSignal(SignalName.HealthChanged, health, maxHealth);
 		_production = new ProductionComponent(this, _runtime, BuildingSys);
-		_production.CyclesCompleted += OnProductionCyclesCompleted;
+		_production.SpawnRequested += OnSpawnRequested;
 		_ritualHost = new RitualHostComponent(this, _runtime, _ritualService, _gameManager);
 		_ritualHost.CoreUpgradeRequested += () => CallDeferred(nameof(UpgradeCircleAfterRitual));
 		
@@ -505,84 +507,23 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		UpdateHordeIndicator();
 	}
 
-	private void OnProductionCyclesCompleted(int cycles)
+	private void OnSpawnRequested(string unitTypeId, int count)
 	{
-		for (int i = 0; i < cycles; i++)
+		for (int i = 0; i < count; i++)
 		{
-			SpawnUnits(1);
+			SpawnService?.SpawnProduction(this, 1);
 			PlayWorkJumpVisual();
 		}
 	}
 
-	private void SpawnUnits(int count)
+	public int NextSpawnIndex()
 	{
-		if (!CanWork || _battlefield == null || CastleRef == null || count <= 0)
-			return;
-		if (_gameManager?.CurrentState == GameManager.GameState.GameOver)
-			return;
-
-		PackedScene unitScene = GD.Load<PackedScene>("res://prefabs/Unit.tscn");
-		if (unitScene == null)
-			return;
-
-		for (int i = 0; i < count; i++)
-		{
-			Unit shell = unitScene.Instantiate<Unit>();
-			UnitLogic unit = shell.GetNode<UnitLogic>("Logic");
-			unit.IsPlayerUnit = _isPlayerBuilding;
-			BuildingSys.ApplyUnitSpawnStats(TypeId, unit);
-			ApplyFactionBuff(unit);
-			UnitSpawn.PlaceUnit(
-				_battlefield, CastleRef, shell,
-				BuildingSys.GetFootprint(TypeId), GridX, GridY, _spawnCount);
-			_spawnCount++;
-			if (_isPlayerBuilding)
-				AssignToTavern(unit);
-		}
+		int index = _spawnCount;
+		_spawnCount++;
+		return index;
 	}
 
-	public void SpawnUnitType(string unitTypeId, int count)
-	{
-		if (_battlefield == null || CastleRef == null || count <= 0 || string.IsNullOrEmpty(unitTypeId))
-			return;
-		if (_gameManager?.CurrentState == GameManager.GameState.GameOver)
-			return;
-
-		PackedScene unitScene = GD.Load<PackedScene>("res://prefabs/Unit.tscn");
-		if (unitScene == null)
-			return;
-
-		IUnitRepository unitRepo = GameManager.Get<IUnitRepository>();
-		for (int i = 0; i < count; i++)
-		{
-			Unit shell = unitScene.Instantiate<Unit>();
-			UnitLogic unit = shell.GetNode<UnitLogic>("Logic");
-			unit.IsPlayerUnit = _isPlayerBuilding;
-			unit.InitializeFromStats(unitRepo.Get(unitTypeId));
-			ApplyFactionBuff(unit);
-			UnitSpawn.PlaceUnit(
-				_battlefield, CastleRef, shell,
-				BuildingSys.GetFootprint(TypeId), GridX, GridY, _spawnCount);
-			_spawnCount++;
-			if (_isPlayerBuilding)
-				AssignToTavern(unit);
-		}
-	}
-
-	private static void ApplyFactionBuff(UnitLogic unit)
-	{
-		if (unit.Handle != null && UndeadRules.IsUndead(unit.Handle.Race) && UndeadFactionBuffs.MaxHealthBonus > 0)
-			unit.Handle.AddMaxHealthBonus(UndeadFactionBuffs.MaxHealthBonus);
-	}
-
-	private void AssignToTavern(UnitLogic unit)
-	{
-		TavernPartyService tavernParty = GameManager.Get<TavernPartyService>();
-		IFieldUnitRepository fieldRepo = GameManager.Get<IFieldUnitRepository>();
-		if (tavernParty == null || fieldRepo == null)
-			return;
-		tavernParty.TryAssignTavern(unit.Handle, fieldRepo.AllBuildings);
-	}
+	private UnitSpawnService SpawnService => AdapterRegistry.Resolve<UnitSpawnService>();
 
 	public void OnWorkStarted()
 	{

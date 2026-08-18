@@ -62,7 +62,11 @@ public sealed class RitualHostComponent
 				blackMagic.Add(reward.BlackMagicAmount);
 		}
 		if (!string.IsNullOrEmpty(reward.SummonUnitTypeId) && reward.SummonCount > 0)
-			_owner.SpawnUnitType(reward.SummonUnitTypeId, reward.SummonCount);
+		{
+			UnitSpawnService spawnService = AdapterRegistry.Resolve<UnitSpawnService>();
+			if (spawnService != null)
+				spawnService.SpawnUnitType(_owner, reward.SummonUnitTypeId, reward.SummonCount);
+		}
 		if (reward.UndeadMaxHealthBonus > 0)
 			ApplyUndeadHealthBonus(reward.UndeadMaxHealthBonus);
 		if (reward.UndeadDamageMultiplier > 0f)
