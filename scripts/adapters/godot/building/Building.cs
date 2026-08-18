@@ -19,7 +19,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	private readonly BuildingRuntime _runtime = new();
 
-	private float _workSpeedMultiplier = 1f;
+	private ProductionComponent _production;
 
 	private bool _visualApplied;
 
@@ -34,16 +34,6 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 	private Tween _jumpTween;
 
 	private Vector2 _spriteBasePosition;
-
-	private float _workRequired;
-
-	private float _workDone;
-
-	private float _productionRate;
-
-	private bool _workActive;
-
-	private bool _workPaused;
 
 	private bool _jumpTweenAwaitingResume;
 
@@ -118,13 +108,13 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	public float RitualTotalSeconds => _runtime.ActiveRitual?.TotalSeconds ?? 0f;
 
-	public bool HasProductionCycle => _workRequired > 0f;
+	public bool HasProductionCycle => _runtime.HasWorkCycle;
 
-	public float ProductionProgress => _workRequired > 0f ? Mathf.Clamp(_workDone / _workRequired, 0f, 1f) : 0f;
+	public float ProductionProgress => _runtime.WorkRequired > 0f ? Mathf.Clamp(_runtime.WorkDone / _runtime.WorkRequired, 0f, 1f) : 0f;
 
-	public float EffectiveProductionRate => _productionRate * _workSpeedMultiplier * DungeonFactionBuffs.ProductionSpeedMultiplier;
+	public float EffectiveProductionRate => _runtime.ProductionRate * _production.SpeedMultiplier * DungeonFactionBuffs.ProductionSpeedMultiplier;
 
-	public float ProductionSecondsRemaining => EffectiveProductionRate > 0f ? (_workRequired - _workDone) / EffectiveProductionRate : 0f;
+	public float ProductionSecondsRemaining => EffectiveProductionRate > 0f ? (_runtime.WorkRequired - _runtime.WorkDone) / EffectiveProductionRate : 0f;
 
 	public bool ContributesToAdjacency => !IsDestroyed;
 
@@ -297,7 +287,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		if (Health <= 0)
 			OnDestroyed();
 		else if (BuildingSys.IsCoreBuilding(TypeId))
-			PauseWork();
+			_production.Pause();
 	}
 
 	private void OnDestroyed()
@@ -596,6 +586,8 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		_ritualService = GameManager.Get<RitualService>();
 		_trapService = GameManager.Get<TrapService>();
 		_runtime.HealthChanged += (health, maxHealth) => EmitSignal(SignalName.HealthChanged, health, maxHealth);
+		_production = new ProductionComponent(this, _runtime, BuildingSys);
+		_production.CyclesCompleted += OnProductionCyclesCompleted;
 		
 
 		_sprite = GetNodeOrNull<Sprite2D>("View/Sprite");
@@ -652,7 +644,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		if (_gameManager != null)
 			_gameManager.PhaseChanged -= OnPhaseChanged;
 		CheatState.FastProductionChanged -= OnFastProductionChanged;
-		StopWork();
+		_production.Stop();
 	}
 
 	public Vector2 GetBuildingSize()
@@ -674,18 +666,8 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		TickCrystalMine((float)delta);
 		TickTreasureBox((float)delta);
 		TickRitual((float)delta);
-		if (!_workActive || _workPaused || !CanWork)
-			return;
-
-		_workDone += (float)delta * _productionRate * _workSpeedMultiplier * DungeonFactionBuffs.ProductionSpeedMultiplier;
+		_production.Tick((float)delta);
 		UpdateWorkEffectFromProgress();
-
-		if (_workDone < _workRequired)
-			return;
-
-		_workDone -= _workRequired;
-		PerformWork();
-		PlayWorkJumpVisual();
 	}
 
 	protected virtual void OnPhaseChanged(MatchPhase phase)
@@ -700,46 +682,22 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	protected void UpdateWorkCycle()
 	{
-		if (CanWork)
-		{
-			if (_workPaused)
-				ResumeWork();
-			else if (!_workActive)
-				StartWorkCycle();
-		}
-		else
-		{
-			PauseWork();
-		}
+		_production.RefreshCycle();
 	}
 
 	public void SetWorkSpeedMultiplier(float multiplier)
 	{
-		multiplier = Mathf.Max(0.1f, multiplier);
-		if (Mathf.IsEqualApprox(_workSpeedMultiplier, multiplier))
-			return;
-
-		_workSpeedMultiplier = multiplier;
+		_production.SetSpeedMultiplier(multiplier);
 		UpdateHordeIndicator();
 	}
 
-	private void StartWorkCycle()
+	private void OnProductionCyclesCompleted(int cycles)
 	{
-		float productionRate = BuildingSys.GetProductionRate(TypeId);
-		if (productionRate <= 0f)
-			return;
-
-		int unitCost = BuildingSys.GetUnitCost(TypeId);
-		if (unitCost <= 0)
-			return;
-
-		_productionRate = productionRate;
-		BeginWork(unitCost);
-	}
-
-	private void PerformWork()
-	{
-		SpawnUnits(1);
+		for (int i = 0; i < cycles; i++)
+		{
+			SpawnUnits(1);
+			PlayWorkJumpVisual();
+		}
 	}
 
 	private void SpawnUnits(int count)
@@ -812,26 +770,13 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		tavernParty.TryAssignTavern(unit.Handle, fieldRepo.AllBuildings);
 	}
 
-	protected void BeginWork(float workRequired)
+	public void OnWorkStarted()
 	{
-		_workRequired = workRequired;
-
-		if (_workActive)
-			return;
-
-		_workActive = true;
-		_workPaused = false;
-		_workDone = 0f;
 		SetProcess(true);
 	}
 
-	protected void PauseWork()
+	public void OnWorkPaused()
 	{
-		if (!_workActive || _workPaused)
-			return;
-
-		_workPaused = true;
-
 		if (_jumpTween != null && _jumpTween.IsValid() && _jumpTween.IsRunning())
 		{
 			_jumpTween.Pause();
@@ -839,15 +784,8 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		}
 	}
 
-	protected void ResumeWork()
+	public void OnWorkResumed()
 	{
-		if (!_workActive || !_workPaused)
-			return;
-
-		_workPaused = false;
-		if (!CanWork)
-			return;
-
 		if (_jumpTweenAwaitingResume && _jumpTween != null && _jumpTween.IsValid())
 		{
 			_jumpTweenAwaitingResume = false;
@@ -855,11 +793,8 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		}
 	}
 
-	private void StopWork()
+	public void OnWorkStopped()
 	{
-		_workActive = false;
-		_workPaused = false;
-		_workDone = 0f;
 		_jumpTweenAwaitingResume = false;
 		SetProcess(false);
 		CancelJumpTween();
@@ -1066,12 +1001,12 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	private void UpdateWorkEffectFromProgress()
 	{
-		if (_sprite == null || _workRequired <= 0f)
+		if (_sprite == null || _runtime.WorkRequired <= 0f)
 			return;
 
 		EnsureWorkMaterial();
 		_sprite.Material = _workMaterial;
-		float progress = Mathf.Clamp(_workDone / _workRequired, 0f, 1f);
+		float progress = Mathf.Clamp(_runtime.WorkDone / _runtime.WorkRequired, 0f, 1f);
 		_workMaterial.SetShaderParameter("fill_amount", progress);
 	}
 
@@ -1142,12 +1077,12 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		{
 			if (IsManuallyPaused)
 			{
-				if (_workActive && !_workPaused)
-					PauseWork();
+				if (_runtime.HasWorkCycle && !_runtime.WorkPaused)
+					_production.Pause();
 			}
 			else
 			{
-				StopWork();
+				_production.Stop();
 			}
 		}
 		else
