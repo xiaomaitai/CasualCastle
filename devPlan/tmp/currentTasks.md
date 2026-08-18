@@ -44,7 +44,7 @@
 - [ ] 4.2 状态迁移：Building.cs 的 Health/MaxHealth/暂停/禁止组合/生产字段/_activeRitual 全部改为代理 BuildingRuntime；删重复字段与散落写入点；公共属性与信号语义逐项对齐；全部 smoke 与主场景无头通过（每迁移一项删除旧写入，不留双轨）
 - [x] 4.3 生产组件 `adapters/godot/building/ProductionComponent.cs`：迁 StartWorkCycle/PerformWork/UpdateWorkCycle/SetWorkSpeedMultiplier 与 _Process 生产段；组件持有 runtime 引用并发出 `CyclesCompleted(cycles)` 事件，Building 只订阅并实例化（`SpawnRequested(unitTypeId, count)` 待 4.6 统一生成时升级）
 - [x] 4.4 仪式宿主 `RitualHostComponent.cs`：迁 TickRitual/ApplyRitualReward/ApplyUndeadHealthBonus；金币/黑魔法消耗、移除书、核心升级经领域服务端口（RitualService/Shop/Hand），组件不含素材路径与表现
-- [ ] 4.5 能力组件六件套（adapter）：`TrapComponent`（TickTrap）、`TreasureBoxComponent`（TickTreasureBox）、`LivingComponent`（TickLivingGrowth/TickLivingRegen/TickBreeding/TryBreedFleshNest）、`ManaComponent`（TickManaProduction）、`PlagueComponent`（TickPlagueSpread）、`CrystalMineComponent`（TickCrystalMine）；InitFromType 按能力挂载进组件列表，_Process 遍历列表，删除全部类型分支
+- [x] 4.5 能力组件六件套（adapter）：`TrapComponent`（TickTrap）、`TreasureBoxComponent`（TickTreasureBox）、`LivingComponent`（TickLivingGrowth/TickLivingRegen/TickBreeding/TryBreedFleshNest）、`ManaComponent`（TickManaProduction）、`PlagueComponent`（TickPlagueSpread）、`CrystalMineComponent`（TickCrystalMine）；InitFromType 按能力挂载进组件列表，_Process 遍历列表，删除全部类型分支
 - [ ] 4.6 统一生成 `adapters/godot/battle/UnitSpawnService.cs`：普通产兵、仪式召唤（Phase 五再接入死亡召唤）共用 PackedScene 加载与初始化；Building.SpawnUnits/SpawnUnitType 迁移；ProductionComponent 事件升级为 `SpawnRequested(unitTypeId, count)`
 - [ ] 4.7 表现分离 `BuildingView.cs`（贴图/材质/高亮/状态图标/部落邻接指示）与 `BuildingEffects.cs`（工作跳动/受损闪色/摧毁粒子）；Building 只转发事件，表现类不写领域状态
 - [ ] 4.8 桥接与场景：`IBuildingState/IBuildingRef/IBuildingTarget` 投影集中到一个桥接对象（Building 不再同时实现三接口的散落投影）；`Building.tscn` 改 Shell/Logic/View/Effects 组合；文档同步与全量验收
