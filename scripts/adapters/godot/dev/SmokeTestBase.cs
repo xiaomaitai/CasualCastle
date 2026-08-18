@@ -2,6 +2,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 public partial class SmokeTestBase : Node
 {
@@ -17,6 +18,13 @@ public partial class SmokeTestBase : Node
 			GD.Print("SMOKE: FAIL 看门狗超时，冒烟未在限定时间内退出");
 			GetTree().Quit(1);
 		};
+
+		int hardDelayMs = (int)((seconds + 30f) * 1000f);
+		System.Threading.Timer hardTimer = new System.Threading.Timer(_ =>
+		{
+			Console.WriteLine("SMOKE: FAIL 硬看门狗强制终止（主循环无响应）");
+			System.Environment.Exit(1);
+		}, null, hardDelayMs, Timeout.Infinite);
 	}
 
 	public void Fail(string message)

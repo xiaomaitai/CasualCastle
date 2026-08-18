@@ -12,6 +12,7 @@ SMOKE_FILES = (
     "NecromancerBattleSmoke.cs",
     "BuildingActionRingSmoke.cs",
     "PhaseCycleProbe.cs",
+    "UiSmoke.cs",
 )
 FORBIDDEN = re.compile(r'GetNode(?:OrNull)?<[^>]*>\("MainGame/')
 

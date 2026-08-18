@@ -4,21 +4,24 @@
 目标是让冒烟测试**永远不会挂起卡死**：任何情况下都必须「打印 `SMOKE: PASS` 并以退出码 0 结束」，或
 「打印 `SMOKE: FAIL ...` 并以退出码 1 结束」，二者必有其一。
 
-背景：2026-08 曾发生冒烟卡死事故——冒烟脚本硬编码 `MainGame/UI/HandPanel` 节点路径，手牌面板场景化后路径失效，
-`GetNode` 抛异常中断了步骤逻辑，冒烟既未通过也未退出。以下三层机制从代码上杜绝此类问题复发。
+历史事故（2026-08，两次）：
+1. 冒烟脚本硬编码 `MainGame/UI/HandPanel` 路径，面板场景化后路径失效，`GetNode` 抛异常中断步骤逻辑，冒烟永不退出。
+2. 新冒烟脚本未重新构建导致 C# 类缺失，场景根脚本实例化失败，`_Ready`（含看门狗）根本没执行，进程空转挂起。
 
-## 一、防卡死三层机制（强制）
+两层事故暴露了「脚本内看门狗」的两个盲区：脚本加载失败时看门狗不启动；主循环卡死时 SceneTree 定时器永不触发。
+因此防卡死必须是**四层防御**，从内到外：
 
-1. **看门狗（Watchdog）**：`SmokeTestBase.StartWatchdog(秒)` 必须在 `_Ready` 第一行启动。
-   超时未退出则打印 `SMOKE: FAIL 看门狗超时` 并强制 `Quit(1)`。
-   任何意外（异常吞掉、死循环、等待条件永不成立）都无法让冒烟挂起。
-2. **统一报告（ReportAndQuit）**：所有结果经 `SmokeTestBase.ReportAndQuit()` 输出；该方法幂等（只首次生效），
-   有失败时逐条打印 `SMOKE: FAIL ...` 并以 1 退出，否则打印 `SMOKE: PASS` 并以 0 退出。
-   脚本内禁止再自实现 ReportAndQuit，禁止直接 `GetTree().Quit`。
-3. **安全节点访问（RequireNode）**：禁止在冒烟脚本中用 `GetNode` 硬编码跨场景 UI 节点路径
-   （尤其 `MainGame/UI/...`——UI 面板正在场景化，路径随时可能失效）。
-   一律使用 `SmokeTestBase.RequireNode<T>(this, path)`：节点缺失时记录失败、统一报告并抛异常中止当前步骤，
-   不会静默空引用，也不会挂起。该规则由 `tools/check_smoke_paths.py` 静态检查强制（已接入 pre-commit）。
+## 一、防卡死四层机制（强制）
+
+| 层 | 位置 | 覆盖的故障 | 实现 |
+| --- | --- | --- | --- |
+| L1 基类看门狗 | `SmokeTestBase.StartWatchdog(秒)`，`_Ready` 第一行调用 | 逻辑卡死但帧正常泵 | SceneTree 定时器超时 → 打印 FAIL → `Quit(1)` |
+| L2 硬看门狗 | `SmokeTestBase` 内置线程定时器（看门狗秒数+30） | 主循环卡死、L1 定时器不触发 | 独立线程 `System.Environment.Exit(1)` 强制终止进程 |
+| L3 引擎帧上限 | 运行器统一追加 `--quit-after` | 脚本加载失败/无退出路径但帧正常泵 | 引擎到帧数强制退出；无 SMOKE 行 → 判定失败 |
+| L4 OS 硬超时 | 运行器统一用 GNU `timeout` 包裹 | 引擎级死锁等一切未知情况 | 到秒杀进程，退出码 124 → 判定失败 |
+
+L1/L2 在 `SmokeTestBase` 内，脚本只需继承并在 `_Ready` 第一行 `StartWatchdog(秒)`；
+L3/L4 由统一运行器提供（见第三节），**所有冒烟必须经运行器执行**。
 
 ## 二、编写规范（checklist）
 
@@ -28,35 +31,32 @@
 4. 步骤机类冒烟：`_Process` 中把步骤分发包进 `RunGuarded(AdvanceStep)`，任何步骤抛异常都会记录失败并退出
 5. `_Ready` 里的检查序列逐条包 `RunGuarded(CheckXxx)`，单个检查抛异常不中断其余检查的报告
 6. 需要场景节点时：UI 根组件经 `UIManager.Instance`/场景实例根/AdapterRegistry 等公开入口；
-   其余节点一律 `RequireNode<T>`；路径变更后同步更新（缺失会在 1 帧内以 FAIL 暴露，绝不挂起）
-7. 结束只经 `ReportAndQuit()`
+   其余节点一律 `RequireNode<T>`（缺失即记失败退出，绝不挂起）。
+   禁止裸 `GetNode` 硬编码 `MainGame/UI/...` 路径——`tools/check_smoke_paths.py` 静态检查强制（已接入 pre-commit）。
+7. 结束只经 `ReportAndQuit()`（幂等，首次生效），禁止自实现报告、禁止直接 `GetTree().Quit`
+8. **新增/修改冒烟脚本后必须先 `dotnet build` 再用运行器执行**（事故 2 的直接教训）
 
-## 三、运行规范
+## 三、运行规范（强制经运行器）
 
-单条（仓库根目录，Windows 用 console 版 Godot）：
+统一运行器：`sh tools/run_smoke.sh <场景路径.tscn>`
 
-    godot --headless --path . scenes/ui/dev_tools/<smoke>.tscn
-
-自动判定契约（CI/批量脚本必须遵守）：
-
-| 结果 | 判定 |
-| --- | --- |
-| 退出码 0 且输出含 `SMOKE: PASS` | 通过 |
-| 退出码 1 且输出含 `SMOKE: FAIL` | 失败（含看门狗超时） |
-| 无 SMOKE 行、进程崩溃、超时未退出 | 失败 |
-
-批量运行时每条冒烟独立进程，外层加硬超时兜底（bash：`timeout 600 godot ...`；Windows 由任务框架限制时长），
-**超时一律视为失败，绝不无限等待**。当前冒烟清单与最新基线见 `devPlan/tmp/behaviorInventory.md`。
+- 内部自动叠加 L3（`--quit-after`）与 L4（`timeout`）；可用 `GODOT_BIN`/`TIMEOUT_SEC`/`QUIT_AFTER` 环境变量覆盖默认值
+- 判定契约：退出码 0 且输出含 `SMOKE: PASS` → `[PASS]`；其余（FAIL、无 SMOKE 行、超时 124、崩溃）→ `[FAIL]` 并摘录错误行
+- 批量：每个冒烟独立进程，逐条调用运行器；**绝不裸跑 `godot --headless`，绝不无限等待**
+- 当前冒烟清单与最新基线见 `devPlan/tmp/behaviorInventory.md`
 
 ## 四、反例与正例
 
-反例（曾导致卡死）：
+反例（事故 1，曾卡死）：
 
     Control handPanel = GetNode<Control>("MainGame/UI/HandPanel");
-    // 面板移入 Hand 场景后路径失效 → 抛异常 → 冒烟永不退出
+
+反例（事故 2，曾卡死）：新增 UiSmoke.cs 后未 `dotnet build` 直接运行——场景根脚本类缺失，
+`_Ready` 未执行、看门狗未启动。现在该情况由 L3/L4 兜底：帧上限退出后因无 `SMOKE: PASS` 判定失败。
 
 正例：
 
+    StartWatchdog(180f);                                  // _Ready 第一行
     Control handPanel = RequireNode<Control>(this, "MainGame/UI/Hand/HandPanel");
 
 相关文档：`devPlan/design/audioSmokeTest.md`（音频冒烟专项）、`devPlan/design/devTools.md`（开发者工具）。

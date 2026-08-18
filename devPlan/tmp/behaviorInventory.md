@@ -26,6 +26,7 @@
 | scenes/ui/dev_tools/necromancer_smoke.tscn | 死灵数据/黑魔法/狂热光环/施法/仪式 |
 | scenes/ui/dev_tools/necromancer_battle_smoke.tscn | 法术栏 UI/夜晚产兵/仪式研习/阶段门控 |
 | scenes/ui/dev_tools/building_action_ring_smoke.tscn | 建筑行动环/暂停/出售/升级/确认弹窗 |
+| scenes/ui/dev_tools/ui_smoke.tscn | 14 个面板场景装配、Esc 模态优先级（设置→暂停）、暂停状态投影、商店开关 |
 
 ## 二、行为清单
 

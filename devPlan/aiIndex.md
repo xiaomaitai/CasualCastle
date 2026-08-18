@@ -73,7 +73,7 @@
 | `assetSpecs.md` | 素材尺寸规格（以游戏单位定义） |
 | `audioRequirements.md` | 音频需求清单（v0.6 采购/实现唯一依据） |
 | `audioSmokeTest.md` | 音频冒烟测试说明 |
-| `smokeTestGuidelines.md` | 冒烟测试编写与运行规范（防卡死三层机制、PASS/FAIL 契约） |
+| `smokeTestGuidelines.md` | 冒烟测试编写与运行规范（防卡死四层机制、PASS/FAIL 契约、统一运行器） |
 | `devTools.md` | 开发者工具说明 |
 | `factions/allianceFaction.md`、`dungeonFaction.md`、`hordeFaction.md`、`necromancerFaction.md` | 四大派系设计 |
 
@@ -118,10 +118,10 @@
 | `upgrade/` | 升级结果实例化 | `UpgradeBuildingFactory.cs` |
 | `replay/` | 敌方复刻目标 | `ReplayTarget.cs` |
 | `ui/` | UIManager 与各面板控制器 | `UIManager.cs`、`HudUiController.cs`、`ShopUiController.cs`、`HandUiController.cs`、`BuildingManageUiController.cs`、`BuildingActionRingController.cs`、`BuildingActionRing.cs`、`PauseMenuUiController.cs`、`GameOverUiController.cs`、`SettingsUiController.cs` |
-| `flow/` | 场景流程与夜晚编排 | `TitleScreen.cs`、`MainGameController.cs`、`NightOrchestrator.cs`、`GameSessionService.cs`、`CameraController.cs` |
+| `flow/` | 场景流程与会话桥接 | `TitleScreen.cs`、`MainGameController.cs`、`GameSessionBridge.cs`、`CameraController.cs` |
 | `core/` | 战场尺寸换算 | `BattlefieldMetrics.cs` |
 | `audio/` | 音频总线、BGM/SFX | `AudioManager.cs`、`Sfx.cs`、`SfxEvents.cs`、`UiSfx.cs` |
-| `dev/` | 开发者工具（不走单测） | `DevToolsMenu.cs`、`TechTreeEditorController.cs`、`DamageMatrixEditor.cs`、`AudioSmoke.cs`、`RuntimeInfoPanelController.cs` |
+| `dev/` | 开发者工具与冒烟（不走单测） | `DevToolsMenu.cs`、`TechTreeEditorController.cs`、`DamageMatrixEditor.cs`、`SmokeTestBase.cs`、`AudioSmoke.cs`、`UiSmoke.cs`、`RuntimeInfoPanelController.cs` |
 | `cheat/` | 作弊状态 | `CheatState.cs` |
 
 ### 2.3 adapters/persistence — 存储
@@ -161,7 +161,7 @@
 | `scenes/main/main_game.tscn` | 主战场场景，系统挂载点 |
 | `scenes/ui/settings_panel.tscn` | 设置面板 |
 | `scenes/dev/tech_tree_editor.tscn` | 科技树编辑器 |
-| `scenes/ui/dev_tools/*.tscn` | 开发者工具场景（audio_smoke、damage_matrix_editor、dev_tools_menu、runtime_info_panel、necromancer_smoke、building_action_ring_smoke、phase_cycle_probe 等） |
+| `scenes/ui/dev_tools/*.tscn` | 开发者工具与冒烟场景（audio_smoke、ui_smoke、dungeon_smoke、damage_matrix_editor、dev_tools_menu、runtime_info_panel、necromancer_smoke、necromancer_battle_smoke、building_action_ring_smoke、phase_cycle_probe 等），冒烟一律经 `tools/run_smoke.sh` 运行 |
 | `prefabs/Building.tscn`、`Castle.tscn`、`Unit.tscn`、`UnitCard.tscn`、`HealthBar.tscn`、`CardArt.tscn` | 动态实体预制体 |
 
 ## 4. 素材与数据（assets/）
@@ -202,6 +202,7 @@
 | `tools/check_uids.py` | 校验 `.uid` 文件 |
 | `tools/check_architecture.py` | 校验分层架构约束（domain 零 Godot/零 SQLite、依赖方向），已接入 pre-commit |
 | `tools/check_smoke_paths.py` | 校验冒烟脚本不硬编码 MainGame/UI 节点路径，已接入 pre-commit |
+| `tools/run_smoke.sh` | 冒烟统一运行器（四层防卡死：基类看门狗 + 线程硬看门狗 + --quit-after + OS timeout），PASS 判定契约 |
 
 ## 7. 入口与运行链路
 

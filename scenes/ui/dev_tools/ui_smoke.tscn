@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://ba5ktpw44wd4c"]
+
+[ext_resource type="Script" path="res://scripts/adapters/godot/dev/UiSmoke.cs" id="1"]
+
+[node name="UiSmoke" type="Node"]
+script = ExtResource("1")
