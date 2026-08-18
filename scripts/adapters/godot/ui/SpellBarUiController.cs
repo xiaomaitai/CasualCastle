@@ -51,7 +51,7 @@ public partial class SpellBarUiController : Control
 			UiProfileStyles.ApplyCardButton(button, false, true, kind);
 	}
 
-	public void Process()
+	public override void _Process(double _)
 	{
 		Building building = Selection.SelectedBuilding;
 		if (building != _currentBuilding)

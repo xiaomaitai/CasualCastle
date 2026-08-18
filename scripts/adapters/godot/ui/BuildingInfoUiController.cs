@@ -14,8 +14,15 @@ public partial class BuildingInfoUiController : Control
 	private Castle _enemyCastle;
 	private Building _hoveredBuilding;
 	private bool _inputBlocked;
-	private bool _placementActive;
-	private bool _pauseOpen;
+	private HandUiController _handUi;
+	private ShopUiController _shopUi;
+	private PauseMenuUiController _pauseMenuUi;
+	private SettingsUiController _settingsUi;
+
+	private HandUiController HandUi => _handUi ??= AdapterRegistry.Resolve<HandUiController>();
+	private ShopUiController ShopUi => _shopUi ??= AdapterRegistry.Resolve<ShopUiController>();
+	private PauseMenuUiController PauseMenu => _pauseMenuUi ??= AdapterRegistry.Resolve<PauseMenuUiController>();
+	private SettingsUiController Settings => _settingsUi ??= AdapterRegistry.Resolve<SettingsUiController>();
 
 	public override void _Ready()
 	{
@@ -38,23 +45,9 @@ public partial class BuildingInfoUiController : Control
 			ClearHover();
 	}
 
-	public void SetPlacementActive(bool active)
+	public override void _Process(double _)
 	{
-		_placementActive = active;
-		if (active)
-			ClearHover();
-	}
-
-	public void SetPauseOpen(bool open)
-	{
-		_pauseOpen = open;
-		if (open)
-			ClearHover();
-	}
-
-	public void Process()
-	{
-		if (_inputBlocked || _placementActive || _pauseOpen)
+		if (_inputBlocked || IsPlacementActive() || IsPauseOpen())
 			return;
 
 		Vector2 mouseScreen = GetViewport().GetMousePosition();
@@ -74,6 +67,16 @@ public partial class BuildingInfoUiController : Control
 		_hoveredBuilding = building;
 		RefreshPanel(building);
 		UpdateHighlights(building);
+	}
+
+	private bool IsPlacementActive()
+	{
+		return HandUi?.IsPlacementActive == true || ShopUi?.IsDragging == true;
+	}
+
+	private bool IsPauseOpen()
+	{
+		return PauseMenu?.IsOpen == true || Settings?.IsOpen == true || ShopUi?.IsOpen == true;
 	}
 
 	private Building PickBuilding(Vector2 screenPoint)

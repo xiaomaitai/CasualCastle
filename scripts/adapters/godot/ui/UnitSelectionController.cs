@@ -2,12 +2,11 @@
 using CasualCastle.Adapters.Godot;
 using Godot;
 
-public sealed class UnitSelectionController
+public partial class UnitSelectionController : Node
 {
-	private readonly Node _owner;
-	private readonly Node2D _battlefield;
-	private readonly Castle _playerCastle;
-	private readonly Castle _enemyCastle;
+	private Node2D _battlefield;
+	private Castle _playerCastle;
+	private Castle _enemyCastle;
 	private UnitLogic _selectedUnit;
 	private Building _selectedBuilding;
 	private bool _inputBlocked;
@@ -15,10 +14,9 @@ public sealed class UnitSelectionController
 	public UnitLogic SelectedUnit => _selectedUnit;
 	public Building SelectedBuilding => _selectedBuilding;
 
-	public UnitSelectionController(Node owner)
+	public override void _Ready()
 	{
-		_owner = owner;
-		_battlefield = owner.GetParent().GetNode<Node2D>("Battlefield");
+		_battlefield = GetParent().GetParent().GetNode<Node2D>("Battlefield");
 		_playerCastle = _battlefield.GetNodeOrNull<Castle>("PlayerSide/PlayerCastle");
 		_enemyCastle = _battlefield.GetNodeOrNull<Castle>("EnemySide/EnemyCastle");
 	}
@@ -30,7 +28,7 @@ public sealed class UnitSelectionController
 			ClearSelection();
 	}
 
-	public void Process()
+	public override void _Process(double _)
 	{
 		if (_selectedUnit != null && (!GodotObject.IsInstanceValid(_selectedUnit) || !_selectedUnit.IsAlive))
 			ClearSelection();
@@ -48,11 +46,11 @@ public sealed class UnitSelectionController
 			|| !mouseButton.Pressed)
 			return false;
 
-		Control hoveredControl = _owner.GetViewport().GuiGetHoveredControl();
+		Control hoveredControl = GetViewport().GuiGetHoveredControl();
 		if (hoveredControl != null && hoveredControl.MouseFilter != Control.MouseFilterEnum.Ignore)
 			return false;
 
-		Vector2 worldPoint = GameCoordinatesAdapter.ScreenToWorld(_owner.GetViewport(), mouseButton.GlobalPosition);
+		Vector2 worldPoint = GameCoordinatesAdapter.ScreenToWorld(GetViewport(), mouseButton.GlobalPosition);
 		UnitLogic picked = PickUnit(worldPoint);
 		if (picked != null)
 		{

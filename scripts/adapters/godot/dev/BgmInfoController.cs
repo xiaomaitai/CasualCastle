@@ -4,22 +4,18 @@ using Godot;
 
 namespace CasualCastle.Adapters.Godot.Dev;
 
-public sealed class BgmInfoController
+public partial class BgmInfoController : Node
 {
-	private readonly Label _label;
+	public Label Label { get; set; }
 
-	public BgmInfoController(Label label)
+	public override void _Process(double _)
 	{
-		_label = label;
-	}
-
-	public void Process()
-	{
-		_label.Visible = DisplaySettingsManager.DevModeEnabled;
+		Label label = Label;
+		label.Visible = DisplaySettingsManager.DevModeEnabled;
 		if (!DisplaySettingsManager.DevModeEnabled)
 			return;
 
 		BgmDef current = AudioManager.Instance?.CurrentBgm;
-		_label.Text = current == null ? "" : $"BGM {current.Id:D2} · {current.Name}";
+		label.Text = current == null ? "" : $"BGM {current.Id:D2} · {current.Name}";
 	}
 }

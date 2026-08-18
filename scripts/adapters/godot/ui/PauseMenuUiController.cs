@@ -39,6 +39,7 @@ public partial class PauseMenuUiController : Control
 		_settingsButton.Pressed += OnSettingsPressed;
 
 		HidePanel();
+		AdapterRegistry.Register<PauseMenuUiController>(this);
 	}
 
 	public override void _ExitTree()
@@ -48,6 +49,7 @@ public partial class PauseMenuUiController : Control
 		_saveButton.Pressed -= OnSavePressed;
 		_backToTitleButton.Pressed -= OnBackToTitlePressed;
 		_settingsButton.Pressed -= OnSettingsPressed;
+		AdapterRegistry.Unregister<PauseMenuUiController>(this);
 	}
 
 	public void SetGameOver(bool gameOver)

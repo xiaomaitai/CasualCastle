@@ -93,7 +93,7 @@ public partial class BuildingActionRingController : Control
 			HideRing();
 	}
 
-	public void Process()
+	public override void _Process(double _)
 	{
 		if (_gameOver || _inputBlocked)
 		{

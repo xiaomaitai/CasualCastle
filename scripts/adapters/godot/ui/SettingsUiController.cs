@@ -77,6 +77,7 @@ public partial class SettingsUiController : Control
 		_backButton.Pressed += OnBackPressed;
 
 		Visible = false;
+		AdapterRegistry.Register<SettingsUiController>(this);
 	}
 
 	public override void _ExitTree()
@@ -89,6 +90,7 @@ public partial class SettingsUiController : Control
 		_sfxVolumeSlider.DragEnded -= OnVolumeDragEnded;
 		_applyButton.Pressed -= OnApplyPressed;
 		_backButton.Pressed -= OnBackPressed;
+		AdapterRegistry.Unregister<SettingsUiController>(this);
 	}
 
 	public void Open()

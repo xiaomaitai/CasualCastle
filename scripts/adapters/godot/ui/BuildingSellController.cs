@@ -3,14 +3,17 @@ using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Building;
 using Godot;
 
-public sealed class BuildingSellController
+public partial class BuildingSellController : Node
 {
 	private const float DragThreshold = 12f;
 
-	private readonly Node _owner;
-	private readonly Castle _playerCastle;
-	private readonly Shop _shop;
-	private readonly ShopUiController _shopUi;
+	private Castle _playerCastle;
+	private Shop _shop;
+	private ShopUiController _shopUi;
+
+	public Castle PlayerCastle { get; set; }
+	public Shop Shop { get; set; }
+	public ShopUiController ShopUi { get; set; }
 
 	private Building _pressedBuilding;
 	private Vector2 _pressStartPosition;
@@ -19,12 +22,11 @@ public sealed class BuildingSellController
 
 	public bool IsDragging => _dragging;
 
-	public BuildingSellController(Node owner, Castle playerCastle, Shop shop, ShopUiController shopUi)
+	public override void _Ready()
 	{
-		_owner = owner;
-		_playerCastle = playerCastle;
-		_shop = shop;
-		_shopUi = shopUi;
+		_playerCastle = PlayerCastle;
+		_shop = Shop;
+		_shopUi = ShopUi;
 	}
 
 	public void SetInputBlocked(bool blocked)
@@ -34,11 +36,11 @@ public sealed class BuildingSellController
 			CancelDrag();
 	}
 
-	public void Process()
+	public override void _Process(double _)
 	{
 		if (_dragging && _shopUi != null)
 		{
-			bool overPanel = _shopUi.IsOpen && _shopUi.IsPointInPanel(_owner.GetViewport().GetMousePosition());
+			bool overPanel = _shopUi.IsOpen && _shopUi.IsPointInPanel(GetViewport().GetMousePosition());
 			_shopUi.SetSellHighlight(overPanel);
 			return;
 		}
@@ -46,7 +48,7 @@ public sealed class BuildingSellController
 		if (_pressedBuilding == null || !Input.IsMouseButtonPressed(MouseButton.Left))
 			return;
 
-		Vector2 mousePosition = _owner.GetViewport().GetMousePosition();
+		Vector2 mousePosition = GetViewport().GetMousePosition();
 		if (mousePosition.DistanceTo(_pressStartPosition) < DragThreshold)
 			return;
 

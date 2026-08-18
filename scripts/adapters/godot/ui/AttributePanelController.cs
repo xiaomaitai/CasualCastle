@@ -7,18 +7,19 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public sealed class AttributePanelController
+public partial class AttributePanelController : Node
 {
 	private const string PlaceholderTexture = "res://assets/art/placeholders/test_image.png";
 	private const string HolyElementId = "holy";
 	private const float NeutralMultiplier = 1f;
 	private const string NoBonusTooltip = "无特殊修正";
 
-	private readonly AttributePanelView _unitView;
-	private readonly AttributePanelView _buildingView;
+	private AttributePanelView _unitView;
+	private AttributePanelView _buildingView;
 	private AttributePanelView _view;
 	private IAttributePanelProfile _profile;
-	private readonly UnitSelectionController _selection;
+	private UnitSelectionController _selection;
+	public UnitSelectionController Selection { get; set; }
 	private readonly List<SkillIconView> _skillIcons = new();
 	private UnitLogic _currentUnit;
 	private Building _currentBuilding;
@@ -28,9 +29,10 @@ public sealed class AttributePanelController
 	private Label _productionLabel;
 	private bool _shieldEntryVisible;
 
-	public AttributePanelController(CanvasLayer uiRoot, UnitSelectionController selection)
+	public override void _Ready()
 	{
-		_selection = selection;
+		_selection = Selection;
+		CanvasLayer uiRoot = GetParent().GetParent().GetNode<CanvasLayer>("UI");
 		_unitView = new AttributePanelView(uiRoot.GetNode<Panel>("UnitAttributePanel"));
 		_buildingView = new AttributePanelView(uiRoot.GetNode<Panel>("BuildingAttributePanel"));
 		_view = _unitView;
@@ -39,7 +41,7 @@ public sealed class AttributePanelController
 		settings.UiProfileChanged += SetProfile;
 	}
 
-	public void Dispose()
+	public override void _ExitTree()
 	{
 		AdapterRegistry.Resolve<DisplaySettingsManager>().UiProfileChanged -= SetProfile;
 	}
@@ -55,7 +57,7 @@ public sealed class AttributePanelController
 		_currentBuilding = null;
 	}
 
-	public void Process()
+	public override void _Process(double _)
 	{
 		UnitLogic unit = _selection.SelectedUnit;
 		Building building = _selection.SelectedBuilding;

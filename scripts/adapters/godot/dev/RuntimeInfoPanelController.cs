@@ -42,7 +42,7 @@ public partial class RuntimeInfoPanelController : Panel
 			_wealthCheck.Toggled -= OnWealthToggled;
 	}
 
-	public void Process()
+	public override void _Process(double _)
 	{
 		if (IsOpen)
 			RefreshInfo();

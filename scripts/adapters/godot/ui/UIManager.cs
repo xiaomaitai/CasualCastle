@@ -52,13 +52,13 @@ public partial class UIManager : Node2D
 			AdapterRegistry.Resolve<GameManager>().GameStateChanged -= OnGameStateChanged;
 
 
-		_buildingManageUi?.Dispose();
 		_combineProhibitUi?.Dispose();
 		if (_pauseMenuUi != null)
 			_pauseMenuUi.OpenChanged -= OnPauseMenuOpenChanged;
 		if (_settingsUi != null)
 			_settingsUi.OpenChanged -= OnSettingsOpenChanged;
-		_attributePanel?.Dispose();
+		if (_shopUi != null)
+			_shopUi.OpenChanged -= OnShopOpenChanged;
 
 		AdapterRegistry.Unregister<UnitSelectionController>(_unitSelection);
 
@@ -68,29 +68,8 @@ public partial class UIManager : Node2D
 
 	public override void _Process(double _)
 	{
-		_runtimeInfoPanel?.Process();
-		_bgmInfo?.Process();
-		_shopUi?.Process();
-		_buildingManageUi?.Process();
-		_buildingSell?.Process();
-		if (_shopUi?.IsDragging != true)
-			_handUi?.Process();
-
-		_buildingInfoUi?.SetPlacementActive(
-			_handUi?.IsPlacementActive == true || _shopUi?.IsDragging == true);
-		_buildingInfoUi?.SetPauseOpen(
-			_pauseMenuUi?.IsOpen == true || _settingsUi?.IsOpen == true || _shopUi?.IsOpen == true);
-		_buildingInfoUi?.Process();
-		_unitInfoUi?.SetSuppressed(
-			_shopUi?.IsOpen == true || _pauseMenuUi?.IsOpen == true || _settingsUi?.IsOpen == true);
-		_unitInfoUi?.Process();
-		_unitSelection?.Process();
-		_spellBarUi?.Process();
-		_buildingActionRing?.Process();
 		EnsureTavernBubble();
 		_tavernBubble?.Process(_unitSelection.SelectedBuilding, _tavernParty);
-		_attributePanel?.Process();
-		RefreshInteractionState();
 	}
 
 	public override void _Input(InputEvent @event)
@@ -142,23 +121,28 @@ public partial class UIManager : Node2D
 		_shopUi = uiRoot.GetNode<ShopUiController>("Shop");
 		_handUi = uiRoot.GetNode<HandUiController>("Hand");
 		Castle playerCastle = GetParent().GetNode<Castle>("Battlefield/PlayerSide/PlayerCastle");
-		_buildingSell = new BuildingSellController(this, playerCastle, shopService, _shopUi);
+		_buildingSell = new BuildingSellController { PlayerCastle = playerCastle, Shop = shopService, ShopUi = _shopUi };
+		AddChild(_buildingSell);
 		_buildingInfoUi = uiRoot.GetNode<BuildingInfoUiController>("BuildingInfo");
 		_unitInfoUi = uiRoot.GetNode<UnitInfoUiController>("UnitInfo");
-		_unitSelection = new UnitSelectionController(this);
+		_unitSelection = new UnitSelectionController();
+		AddChild(_unitSelection);
 		AdapterRegistry.Register<UnitSelectionController>(_unitSelection);
 		_spellBarUi = uiRoot.GetNode<SpellBarUiController>("SpellBar");
 		_buildingActionRing = uiRoot.GetNode<BuildingActionRingController>("ActionRingHost");
 		_tavernParty = GameManager.Get<TavernPartyService>();
 		_tavernBubble = new TavernBubble();
 		GetParent()?.GetNodeOrNull<Node2D>("Battlefield")?.AddChild(_tavernBubble);
-		_attributePanel = new AttributePanelController(uiRoot, _unitSelection);
+		_attributePanel = new AttributePanelController { Selection = _unitSelection };
+		AddChild(_attributePanel);
 		ButtonGroup toolGroup = new ButtonGroup();
-		_buildingManageUi = new BuildingManageUiController(this, uiRoot, _hudUi, toolGroup);
+		_buildingManageUi = new BuildingManageUiController { Hud = _hudUi, ToolGroup = toolGroup };
+		AddChild(_buildingManageUi);
 		_combineProhibitUi = new CombineProhibitUiController(this, uiRoot, _hudUi, toolGroup);
 		_cheatMenu = uiRoot.GetNode<CheatMenuUiController>("CheatMenu");
 		_runtimeInfoPanel = uiRoot.GetNode<RuntimeInfoPanelController>("RuntimeInfoPanel");
-		_bgmInfo = new BgmInfoController(_hudUi.BgmInfoLabel);
+		_bgmInfo = new BgmInfoController { Label = _hudUi.BgmInfoLabel };
+		AddChild(_bgmInfo);
 		_settingsUi = uiRoot.GetNode<SettingsUiController>("SettingsPanel");
 		_pauseMenuUi = uiRoot.GetNode<PauseMenuUiController>("PauseMenu");
 		_pauseMenuUi.GoToTitleAction = GoToTitle;
@@ -170,6 +154,7 @@ public partial class UIManager : Node2D
 		RegisterRouting();
 		_pauseMenuUi.OpenChanged += OnPauseMenuOpenChanged;
 		_settingsUi.OpenChanged += OnSettingsOpenChanged;
+		_shopUi.OpenChanged += OnShopOpenChanged;
 
 		if (AdapterRegistry.Resolve<GameManager>() != null)
 			AdapterRegistry.Resolve<GameManager>().GameStateChanged += OnGameStateChanged;
@@ -259,6 +244,11 @@ public partial class UIManager : Node2D
 		}
 
 		UpdateHandInputBlocked();
+		RefreshInteractionState();
+	}
+
+	private void OnShopOpenChanged(bool open)
+	{
 		RefreshInteractionState();
 	}
 

@@ -7,7 +7,13 @@ public partial class UnitInfoUiController : Control
 {
 	private Panel _panel;
 	private Label _label;
-	private bool _suppressed;
+	private ShopUiController _shopUi;
+	private PauseMenuUiController _pauseMenuUi;
+	private SettingsUiController _settingsUi;
+
+	private ShopUiController ShopUi => _shopUi ??= AdapterRegistry.Resolve<ShopUiController>();
+	private PauseMenuUiController PauseMenu => _pauseMenuUi ??= AdapterRegistry.Resolve<PauseMenuUiController>();
+	private SettingsUiController Settings => _settingsUi ??= AdapterRegistry.Resolve<SettingsUiController>();
 	private Node2D _battlefield;
 	private readonly float _pickRadiusPixels = 40f;
 
@@ -35,16 +41,14 @@ public partial class UnitInfoUiController : Control
 		AddChild(_panel);
 	}
 
-	public void SetSuppressed(bool suppressed)
+	private bool IsSuppressed()
 	{
-		_suppressed = suppressed;
-		if (_suppressed)
-			_panel.Visible = false;
+		return ShopUi?.IsOpen == true || PauseMenu?.IsOpen == true || Settings?.IsOpen == true;
 	}
 
-	public void Process()
+	public override void _Process(double _)
 	{
-		if (_suppressed)
+		if (IsSuppressed())
 			return;
 		Vector2 mouseGlobal = GetViewport().GetMousePosition();
 		UnitLogic unit = PickUnit(mouseGlobal);

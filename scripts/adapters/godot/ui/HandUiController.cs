@@ -69,6 +69,7 @@ public partial class HandUiController : Control
 		_hand.HandChanged += RefreshDisplay;
 		_hand.SelectionChanged += OnSelectionChanged;
 		RefreshDisplay();
+		AdapterRegistry.Register<HandUiController>(this);
 	}
 
 	public override void _ExitTree()
@@ -80,6 +81,7 @@ public partial class HandUiController : Control
 		_hand.HandChanged -= RefreshDisplay;
 		_hand.SelectionChanged -= OnSelectionChanged;
 		_useItemButton.Pressed -= OnUseItemPressed;
+		AdapterRegistry.Unregister<HandUiController>(this);
 	}
 
 	private void ApplyProfile(UiProfileKind kind)
@@ -102,8 +104,10 @@ public partial class HandUiController : Control
 		}
 	}
 
-	public void Process()
+	public override void _Process(double _)
 	{
+		if (ShopUi?.IsDragging == true)
+			return;
 		UpdatePendingDrag();
 		UpdatePlacementPreview();
 		UpdateSellDropHighlight();

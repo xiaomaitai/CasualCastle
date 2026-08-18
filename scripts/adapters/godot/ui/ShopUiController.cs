@@ -140,7 +140,7 @@ public partial class ShopUiController : Control
 		UpdateShopButtonAvailability(_shop.IsShopAvailable);
 	}
 
-	public void Process()
+	public override void _Process(double _)
 	{
 		if (!_dragging)
 			return;

@@ -3,7 +3,7 @@ using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Building;
 using Godot;
 
-public sealed class BuildingManageUiController
+public partial class BuildingManageUiController : Node
 {
 	private enum ToolMode
 	{
@@ -12,11 +12,13 @@ public sealed class BuildingManageUiController
 		Repair,
 	}
 
-	private readonly Node _owner;
-	private readonly Button _pauseButton;
-	private readonly Button _repairButton;
-	private readonly Castle _playerCastle;
-	private readonly ButtonGroup _toolGroup;
+	private Button _pauseButton;
+	private Button _repairButton;
+	private Castle _playerCastle;
+	private ButtonGroup _toolGroup;
+
+	public HudUiController Hud { get; set; }
+	public ButtonGroup ToolGroup { get; set; }
 
 	private ToolMode _mode = ToolMode.None;
 	private bool _gameOver;
@@ -25,16 +27,14 @@ public sealed class BuildingManageUiController
 
 	public bool IsToolActive => _mode != ToolMode.None;
 
-	public BuildingManageUiController(Node owner, CanvasLayer uiRoot, HudUiController hud, ButtonGroup toolGroup = null)
+	public override void _Ready()
 	{
-		_owner = owner;
-		_pauseButton = hud.BuildingPauseToolButton;
-		_repairButton = hud.BuildingRepairToolButton;
+		_pauseButton = Hud.BuildingPauseToolButton;
+		_repairButton = Hud.BuildingRepairToolButton;
 
-		Node mainGame = owner.GetParent();
-		_playerCastle = mainGame.GetNode<Castle>("Battlefield/PlayerSide/PlayerCastle");
+		_playerCastle = GetParent().GetParent().GetNode<Castle>("Battlefield/PlayerSide/PlayerCastle");
 
-		_toolGroup = toolGroup ?? new ButtonGroup();
+		_toolGroup = ToolGroup ?? new ButtonGroup();
 		_pauseButton.ButtonGroup = _toolGroup;
 		_repairButton.ButtonGroup = _toolGroup;
 		_pauseButton.ToggleMode = true;
@@ -54,14 +54,14 @@ public sealed class BuildingManageUiController
 		UpdateButtonVisuals();
 	}
 
-	public void Dispose()
+	public override void _ExitTree()
 	{
 		_pauseButton.Toggled -= OnPauseToggled;
 		_repairButton.Toggled -= OnRepairToggled;
 		ResetCursor();
 	}
 
-	public void Process()
+	public override void _Process(double _)
 	{
 		if (_mode != ToolMode.Repair || _gameOver || _inputBlocked)
 			return;
@@ -171,7 +171,7 @@ public sealed class BuildingManageUiController
 	private void UpdateRepairCursor()
 	{
 		bool blocked = false;
-		Vector2 mouse = _owner.GetViewport().GetMousePosition();
+		Vector2 mouse = GetViewport().GetMousePosition();
 		if (_playerCastle.TryGetBuildingAtScreenPoint(mouse, out Building building)
 			&& CanManage(building)
 			&& building.IsDamaged
