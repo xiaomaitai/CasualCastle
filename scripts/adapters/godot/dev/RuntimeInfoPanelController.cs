@@ -1,4 +1,4 @@
-// 开发者模式专属：局内运行时信息面板，按分组显示可选实时数据。
+// 开发者模式专属：局内运行时信息面板，按分组显示可选实时数据（runtime_info_panel.tscn 场景根）
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Building;
 using CasualCastle.Domain.History;
@@ -7,32 +7,39 @@ using System.Collections.Generic;
 
 namespace CasualCastle.Adapters.Godot.Dev;
 
-public sealed class RuntimeInfoPanelController
+public partial class RuntimeInfoPanelController : Panel
 {
-	private const string PanelScenePath = "res://scenes/ui/dev_tools/runtime_info_panel.tscn";
 	private const string NotStartedText = "对局未开始";
 
-	private readonly Button _openButton;
-	private readonly Panel _panel;
-	private readonly Button _closeButton;
-	private readonly CheckBox _wealthCheck;
-	private readonly Label _infoLabel;
+	private Button _openButton;
+	private Button _closeButton;
+	private CheckBox _wealthCheck;
+	private Label _infoLabel;
 	private bool _gameOver;
 
 	public bool IsOpen { get; private set; }
 
-	public RuntimeInfoPanelController(CanvasLayer uiRoot, HudUiController hud)
+	public override void _Ready()
 	{
-		_openButton = hud.InfoButton;
-		_panel = CreatePanel(uiRoot);
-		_closeButton = _panel.GetNode<Button>("CloseButton");
-		_wealthCheck = _panel.GetNode<CheckBox>("WealthCheck");
-		_infoLabel = _panel.GetNode<Label>("InfoLabel");
+		_openButton = GetParent().GetNode<HudUiController>("Hud").InfoButton;
+		_closeButton = GetNode<Button>("CloseButton");
+		_wealthCheck = GetNode<CheckBox>("WealthCheck");
+		_infoLabel = GetNode<Label>("InfoLabel");
 
 		_openButton.Pressed += OnOpenPressed;
 		_closeButton.Pressed += Close;
 		_wealthCheck.Toggled += OnWealthToggled;
 		_openButton.Visible = DisplaySettingsManager.DevModeEnabled;
+	}
+
+	public override void _ExitTree()
+	{
+		if (GodotObject.IsInstanceValid(_openButton))
+			_openButton.Pressed -= OnOpenPressed;
+		if (GodotObject.IsInstanceValid(_closeButton))
+			_closeButton.Pressed -= Close;
+		if (GodotObject.IsInstanceValid(_wealthCheck))
+			_wealthCheck.Toggled -= OnWealthToggled;
 	}
 
 	public void Process()
@@ -56,24 +63,6 @@ public sealed class RuntimeInfoPanelController
 		return true;
 	}
 
-	public void Dispose()
-	{
-		if (GodotObject.IsInstanceValid(_openButton))
-			_openButton.Pressed -= OnOpenPressed;
-		if (GodotObject.IsInstanceValid(_closeButton))
-			_closeButton.Pressed -= Close;
-		if (GodotObject.IsInstanceValid(_wealthCheck))
-			_wealthCheck.Toggled -= OnWealthToggled;
-	}
-
-	private static Panel CreatePanel(CanvasLayer uiRoot)
-	{
-		PackedScene scene = GD.Load<PackedScene>(PanelScenePath);
-		Panel panel = scene.Instantiate<Panel>();
-		uiRoot.AddChild(panel);
-		return panel;
-	}
-
 	private void OnOpenPressed()
 	{
 		if (IsOpen)
@@ -87,7 +76,7 @@ public sealed class RuntimeInfoPanelController
 		if (IsOpen || _gameOver)
 			return;
 		IsOpen = true;
-		_panel.Visible = true;
+		Visible = true;
 		RefreshInfo();
 	}
 
@@ -96,7 +85,7 @@ public sealed class RuntimeInfoPanelController
 		if (!IsOpen)
 			return;
 		IsOpen = false;
-		_panel.Visible = false;
+		Visible = false;
 	}
 
 	private void OnWealthToggled(bool enabled)

@@ -1,6 +1,9 @@
 [gd_scene format=3 uid="uid://cnovsae0wbuo6"]
 
+[ext_resource type="Script" path="res://scripts/adapters/godot/dev/RuntimeInfoPanelController.cs" id="1"]
+
 [node name="RuntimeInfoPanel" type="Panel"]
+script = ExtResource("1")
 visible = false
 offset_left = 24
 offset_top = 96

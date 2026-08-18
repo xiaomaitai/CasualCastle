@@ -1,35 +1,35 @@
-// 作弊菜单 UI
+// 作弊菜单组件（cheat_menu.tscn 场景根）
 using CasualCastle.Adapters.Godot;
 using Godot;
 
-public sealed class CheatMenuUiController
+public partial class CheatMenuUiController : Control
 {
-	private readonly ColorRect _overlay;
-	private readonly Panel _panel;
-	private readonly Button _openButton;
-	private readonly CheckBox _fastProductionCheck;
-	private readonly Button _closeButton;
+	private ColorRect _overlay;
+	private Panel _panel;
+	private Button _openButton;
+	private CheckBox _fastProductionCheck;
+	private Button _closeButton;
 	private bool _gameOver;
 
 	public bool IsOpen { get; private set; }
 
-	public CheatMenuUiController(CanvasLayer uiRoot, HudUiController hud)
+	public override void _Ready()
 	{
-		_openButton = hud.CheatButton;
-		_overlay = uiRoot.GetNode<ColorRect>("CheatOverlay");
-		_panel = uiRoot.GetNode<Panel>("CheatPanel");
-		_fastProductionCheck = uiRoot.GetNode<CheckBox>("CheatPanel/FastProductionCheck");
-		_closeButton = uiRoot.GetNode<Button>("CheatPanel/CloseButton");
+		_openButton = GetParent().GetNode<HudUiController>("Hud").CheatButton;
+		_overlay = GetNode<ColorRect>("CheatOverlay");
+		_panel = GetNode<Panel>("CheatPanel");
+		_fastProductionCheck = GetNode<CheckBox>("CheatPanel/FastProductionCheck");
+		_closeButton = GetNode<Button>("CheatPanel/CloseButton");
 
 		_openButton.Pressed += OnOpenButtonPressed;
 		_fastProductionCheck.Toggled += OnFastProductionToggled;
 		_closeButton.Pressed += Close;
 
 		_openButton.Visible = DisplaySettingsManager.DevModeEnabled;
-		Hide();
+		HidePanel();
 	}
 
-	public void Dispose()
+	public override void _ExitTree()
 	{
 		_openButton.Pressed -= OnOpenButtonPressed;
 		_fastProductionCheck.Toggled -= OnFastProductionToggled;
@@ -78,7 +78,7 @@ public sealed class CheatMenuUiController
 		_panel.Visible = false;
 	}
 
-	private void Hide()
+	private void HidePanel()
 	{
 		_overlay.Visible = false;
 		_panel.Visible = false;

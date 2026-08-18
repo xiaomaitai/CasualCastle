@@ -54,8 +54,6 @@ public partial class UIManager : Node2D
 
 		_buildingManageUi?.Dispose();
 		_combineProhibitUi?.Dispose();
-		_cheatMenu?.Dispose();
-		_runtimeInfoPanel?.Dispose();
 		if (_pauseMenuUi != null)
 			_pauseMenuUi.OpenChanged -= OnPauseMenuOpenChanged;
 		if (_settingsUi != null)
@@ -157,8 +155,8 @@ public partial class UIManager : Node2D
 		ButtonGroup toolGroup = new ButtonGroup();
 		_buildingManageUi = new BuildingManageUiController(this, uiRoot, _hudUi, toolGroup);
 		_combineProhibitUi = new CombineProhibitUiController(this, uiRoot, _hudUi, toolGroup);
-		_cheatMenu = new CheatMenuUiController(uiRoot, _hudUi);
-		_runtimeInfoPanel = new RuntimeInfoPanelController(uiRoot, _hudUi);
+		_cheatMenu = uiRoot.GetNode<CheatMenuUiController>("CheatMenu");
+		_runtimeInfoPanel = uiRoot.GetNode<RuntimeInfoPanelController>("RuntimeInfoPanel");
 		_bgmInfo = new BgmInfoController(_hudUi.BgmInfoLabel);
 		_settingsUi = uiRoot.GetNode<SettingsUiController>("SettingsPanel");
 		_pauseMenuUi = uiRoot.GetNode<PauseMenuUiController>("PauseMenu");
