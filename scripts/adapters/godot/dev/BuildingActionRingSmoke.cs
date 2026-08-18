@@ -77,11 +77,11 @@ public partial class BuildingActionRingSmoke : SmokeTestBase
 		AddChild(GD.Load<PackedScene>(MainGameScene).Instantiate());
 		_playerCastle = AdapterRegistry.Resolve<GameManager>().PlayerCastle;
 		_shop = AdapterRegistry.Resolve<Shop>();
-		_ring = RequireNode<BuildingActionRing>(this, "MainGame/UI/BuildingActionRing");
-		_spellBar = RequireNode<Control>(this, "MainGame/UI/SpellBarPanel");
-		_sellConfirmOverlay = RequireNode<Control>(this, "MainGame/UI/SellConfirmOverlay");
-		_sellConfirmOk = RequireNode<Button>(this, "MainGame/UI/SellConfirmOverlay/SellConfirmPanel/ConfirmButton");
-		_sellConfirmCancel = RequireNode<Button>(this, "MainGame/UI/SellConfirmOverlay/SellConfirmPanel/CancelButton");
+		_ring = RequireNode<BuildingActionRing>(this, "MainGame/UI/ActionRingHost/BuildingActionRing");
+		_spellBar = RequireNode<Control>(this, "MainGame/UI/SpellBar/SpellBarPanel");
+		_sellConfirmOverlay = RequireNode<Control>(this, "MainGame/UI/ActionRingHost/SellConfirmOverlay");
+		_sellConfirmOk = RequireNode<Button>(this, "MainGame/UI/ActionRingHost/SellConfirmOverlay/SellConfirmPanel/ConfirmButton");
+		_sellConfirmCancel = RequireNode<Button>(this, "MainGame/UI/ActionRingHost/SellConfirmOverlay/SellConfirmPanel/CancelButton");
 		PlaceBuildings();
 		_step = SmokeStep.SelectTomb;
 	}

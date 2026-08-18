@@ -58,9 +58,9 @@ public partial class UIManager : Node2D
 			_pauseMenuUi.OpenChanged -= OnPauseMenuOpenChanged;
 		if (_settingsUi != null)
 			_settingsUi.OpenChanged -= OnSettingsOpenChanged;
-		_buildingActionRing?.Dispose();
-		_spellBarUi?.Dispose();
 		_attributePanel?.Dispose();
+
+		AdapterRegistry.Unregister<UnitSelectionController>(_unitSelection);
 
 		if (Instance == this)
 			Instance = null;
@@ -146,8 +146,9 @@ public partial class UIManager : Node2D
 		_buildingInfoUi = uiRoot.GetNode<BuildingInfoUiController>("BuildingInfo");
 		_unitInfoUi = uiRoot.GetNode<UnitInfoUiController>("UnitInfo");
 		_unitSelection = new UnitSelectionController(this);
-		_spellBarUi = new SpellBarUiController(uiRoot, _unitSelection);
-		_buildingActionRing = new BuildingActionRingController(uiRoot, _unitSelection, _spellBarUi);
+		AdapterRegistry.Register<UnitSelectionController>(_unitSelection);
+		_spellBarUi = uiRoot.GetNode<SpellBarUiController>("SpellBar");
+		_buildingActionRing = uiRoot.GetNode<BuildingActionRingController>("ActionRingHost");
 		_tavernParty = GameManager.Get<TavernPartyService>();
 		_tavernBubble = new TavernBubble();
 		GetParent()?.GetNodeOrNull<Node2D>("Battlefield")?.AddChild(_tavernBubble);

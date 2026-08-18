@@ -1,44 +1,47 @@
-// 法术栏 UI：选中施法/仪式建筑时替换手牌区，展示并触发可用仪式
+// 法术栏组件：仪式技能槽（spell_bar.tscn 场景根）
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
 using Godot;
 using System.Collections.Generic;
 
-public sealed class SpellBarUiController
+public partial class SpellBarUiController : Control
 {
-	private const float SlotWidth = 190f;
-	private const float SlotHeight = 118f;
+	private const float SlotWidth = 150f;
+	private const float SlotHeight = 100f;
 
-	private readonly ScrollContainer _scroll;
-	private readonly HBoxContainer _slotRow;
-	private readonly Control _handPanel;
-	private readonly UnitSelectionController _selection;
+	private ScrollContainer _scroll;
+	private HBoxContainer _slotRow;
+	private Control _handPanel;
 	private readonly List<Button> _slotButtons = new();
 
+	private UnitSelectionController _selection;
 	private Building _currentBuilding;
 	private bool _inputBlocked;
 	private bool _ritualInProgress;
 	private bool _hiddenByRing;
 	private UiProfileKind _profile;
 
-	public SpellBarUiController(CanvasLayer uiRoot, UnitSelectionController selection)
+	private UnitSelectionController Selection => _selection ??= AdapterRegistry.Resolve<UnitSelectionController>();
+
+	public override void _Ready()
 	{
-		_selection = selection;
-		_scroll = uiRoot.GetNode<ScrollContainer>("SpellBarPanel");
-		_slotRow = uiRoot.GetNode<HBoxContainer>("SpellBarPanel/SpellSlots");
-		_handPanel = uiRoot.GetNode<HandUiController>("Hand").HandPanel;
+		_scroll = GetNode<ScrollContainer>("SpellBarPanel");
+		_slotRow = GetNode<HBoxContainer>("SpellBarPanel/SpellSlots");
+		_handPanel = GetParent().GetNode<HandUiController>("Hand").HandPanel;
 		_scroll.Visible = false;
 		_handPanel.Visible = true;
 		DisplaySettingsManager settings = AdapterRegistry.Resolve<DisplaySettingsManager>();
 		_profile = settings.UiProfile;
 		settings.UiProfileChanged += ApplyProfile;
+		AdapterRegistry.Register<SpellBarUiController>(this);
 	}
 
-	public void Dispose()
+	public override void _ExitTree()
 	{
 		AdapterRegistry.Resolve<DisplaySettingsManager>().UiProfileChanged -= ApplyProfile;
 		ClearSlots();
+		AdapterRegistry.Unregister<SpellBarUiController>(this);
 	}
 
 	private void ApplyProfile(UiProfileKind kind)
@@ -50,7 +53,7 @@ public sealed class SpellBarUiController
 
 	public void Process()
 	{
-		Building building = _selection.SelectedBuilding;
+		Building building = Selection.SelectedBuilding;
 		if (building != _currentBuilding)
 		{
 			_currentBuilding = building;

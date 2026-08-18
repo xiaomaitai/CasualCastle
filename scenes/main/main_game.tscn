@@ -20,6 +20,8 @@
 [ext_resource type="PackedScene" uid="uid://bxv2ya3pa3uo1" path="res://scenes/ui/game_over.tscn" id="31"]
 [ext_resource type="PackedScene" uid="uid://b4begwoosae4" path="res://scenes/ui/dev_tools/cheat_menu.tscn" id="32"]
 [ext_resource type="PackedScene" uid="uid://cnovsae0wbuo6" path="res://scenes/ui/dev_tools/runtime_info_panel.tscn" id="33"]
+[ext_resource type="PackedScene" uid="uid://kpmvup6u5f4f" path="res://scenes/ui/spell_bar.tscn" id="34"]
+[ext_resource type="PackedScene" uid="uid://blci4e233c5y2" path="res://scenes/ui/building_action_ring.tscn" id="35"]
 
 [node name="MainGame" type="Node2D" unique_id=1]
 script = ExtResource("10")
@@ -78,19 +80,7 @@ SecondBarracksGridY = -1
 
 [node name="Hand" parent="UI" instance=ExtResource("26")]
 
-[node name="SpellBarPanel" type="ScrollContainer" parent="UI"]
-visible = false
-offset_left = 502.0
-offset_top = 846.0
-offset_right = 1574.0
-offset_bottom = 1046.0
-horizontal_scroll_mode = 1
-vertical_scroll_mode = 0
-
-[node name="SpellSlots" type="HBoxContainer" parent="UI/SpellBarPanel"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 8
+[node name="SpellBar" parent="UI" instance=ExtResource("34")]
 
 [node name="BuildingInfo" parent="UI" instance=ExtResource("28")]
 
@@ -110,68 +100,6 @@ theme_override_constants/separation = 8
 
 [node name="RuntimeInfoPanel" parent="UI" instance=ExtResource("33")]
 
-[node name="BuildingActionRing" type="Control" parent="UI"]
-visible = false
-mouse_filter = 2
-script = ExtResource("22")
-
-[node name="SellConfirmOverlay" type="ColorRect" parent="UI"]
-visible = false
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 0
-color = Color(0, 0, 0, 0.45)
-
-[node name="SellConfirmPanel" type="Panel" parent="UI/SellConfirmOverlay"]
-offset_left = 700.0
-offset_top = 410.0
-offset_right = 1220.0
-offset_bottom = 670.0
-
-[node name="PanelBackground" type="ColorRect" parent="UI/SellConfirmOverlay/SellConfirmPanel"]
-layout_mode = 0
-offset_right = 520.0
-offset_bottom = 260.0
-color = Color(0.12, 0.16, 0.22, 0.96)
-
-[node name="TitleLabel" type="Label" parent="UI/SellConfirmOverlay/SellConfirmPanel"]
-layout_mode = 0
-offset_left = 30.0
-offset_top = 24.0
-offset_right = 490.0
-offset_bottom = 76.0
-theme_override_font_sizes/font_size = 32
-text = "出售建筑"
-horizontal_alignment = 1
-
-[node name="MessageLabel" type="Label" parent="UI/SellConfirmOverlay/SellConfirmPanel"]
-layout_mode = 0
-offset_left = 30.0
-offset_top = 92.0
-offset_right = 490.0
-offset_bottom = 160.0
-theme_override_font_sizes/font_size = 24
-text = "确定出售？"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="CancelButton" type="Button" parent="UI/SellConfirmOverlay/SellConfirmPanel"]
-layout_mode = 0
-offset_left = 74.0
-offset_top = 186.0
-offset_right = 234.0
-offset_bottom = 240.0
-text = "取消"
-
-[node name="ConfirmButton" type="Button" parent="UI/SellConfirmOverlay/SellConfirmPanel"]
-layout_mode = 0
-offset_left = 286.0
-offset_top = 186.0
-offset_right = 446.0
-offset_bottom = 240.0
-text = "出售"
+[node name="ActionRingHost" parent="UI" instance=ExtResource("35")]
 
 [node name="SettingsPanel" parent="UI" instance=ExtResource("13")]

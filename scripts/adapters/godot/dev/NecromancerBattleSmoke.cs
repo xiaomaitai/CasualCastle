@@ -180,8 +180,8 @@ public partial class NecromancerBattleSmoke : SmokeTestBase
 	private void VerifySpellBarState()
 	{
 		Control handPanel = RequireNode<Control>(this, "MainGame/UI/Hand/HandPanel");
-		Control spellBar = RequireNode<Control>(this, "MainGame/UI/SpellBarPanel");
-		HBoxContainer slots = RequireNode<HBoxContainer>(this, "MainGame/UI/SpellBarPanel/SpellSlots");
+		Control spellBar = RequireNode<Control>(this, "MainGame/UI/SpellBar/SpellBarPanel");
+		HBoxContainer slots = RequireNode<HBoxContainer>(this, "MainGame/UI/SpellBar/SpellBarPanel/SpellSlots");
 		Control attributePanel = RequireNode<Control>(this, "MainGame/UI/BuildingAttributePanel");
 		if (attributePanel.Visible != _spellBarExpectSelected)
 			Fail($"选中切换错误 attributeVisible={attributePanel.Visible} 期望={_spellBarExpectSelected}");

@@ -1,10 +1,10 @@
-// 建筑行动环控制：选中建筑时在环上提供卖出/暂停/升级/特殊行动按钮
+// 建筑行动环组件：选中建筑时在环上提供卖出/暂停/升级/特殊行动按钮（building_action_ring.tscn 场景根）
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Building;
 using Godot;
 using System.Collections.Generic;
 
-public sealed class BuildingActionRingController
+public partial class BuildingActionRingController : Control
 {
 	private const float ButtonSize = 64f;
 	private const float RingRadius = 150f;
@@ -16,9 +16,9 @@ public sealed class BuildingActionRingController
 	private const string UpgradeKind = "Upgrade";
 	private const string SpecialKind = "Special";
 
-	private readonly BuildingActionRing _ring;
-	private readonly UnitSelectionController _selection;
-	private readonly SpellBarUiController _spellBarUi;
+	private BuildingActionRing _ring;
+	private UnitSelectionController _selection;
+	private SpellBarUiController _spellBarUi;
 	private readonly List<Button> _buttons = new();
 	private readonly List<string> _buttonKinds = new();
 	private readonly List<RingAction> _currentActions = new();
@@ -33,32 +33,33 @@ public sealed class BuildingActionRingController
 	private Building _pendingSell;
 	private UiProfileKind _profile;
 
-	public BuildingActionRingController(CanvasLayer uiRoot, UnitSelectionController selection, SpellBarUiController spellBarUi)
+	private UnitSelectionController Selection => _selection ??= AdapterRegistry.Resolve<UnitSelectionController>();
+	private SpellBarUiController SpellBarUi => _spellBarUi ??= AdapterRegistry.Resolve<SpellBarUiController>();
+
+	public override void _Ready()
 	{
-		_ring = uiRoot.GetNode<BuildingActionRing>("BuildingActionRing");
+		_ring = GetNode<BuildingActionRing>("BuildingActionRing");
 		DisplaySettingsManager settings = AdapterRegistry.Resolve<DisplaySettingsManager>();
 		_profile = settings.UiProfile;
 		ApplyProfile(_profile);
 		settings.UiProfileChanged += ApplyProfile;
-		_selection = selection;
-		_spellBarUi = spellBarUi;
 		_ring.Visible = false;
-		_sellConfirmOverlay = uiRoot.GetNode<Control>("SellConfirmOverlay");
-		_sellConfirmMessage = uiRoot.GetNode<Label>("SellConfirmOverlay/SellConfirmPanel/MessageLabel");
-		_sellConfirmOk = uiRoot.GetNode<Button>("SellConfirmOverlay/SellConfirmPanel/ConfirmButton");
-		_sellConfirmCancel = uiRoot.GetNode<Button>("SellConfirmOverlay/SellConfirmPanel/CancelButton");
+		_sellConfirmOverlay = GetNode<Control>("SellConfirmOverlay");
+		_sellConfirmMessage = GetNode<Label>("SellConfirmOverlay/SellConfirmPanel/MessageLabel");
+		_sellConfirmOk = GetNode<Button>("SellConfirmOverlay/SellConfirmPanel/ConfirmButton");
+		_sellConfirmCancel = GetNode<Button>("SellConfirmOverlay/SellConfirmPanel/CancelButton");
 		_sellConfirmOk.Pressed += ConfirmSell;
 		_sellConfirmCancel.Pressed += CloseSellConfirm;
 	}
 
-	public void Dispose()
+	public override void _ExitTree()
 	{
 		AdapterRegistry.Resolve<DisplaySettingsManager>().UiProfileChanged -= ApplyProfile;
 		ClearButtons();
 		_sellConfirmOk.Pressed -= ConfirmSell;
 		_sellConfirmCancel.Pressed -= CloseSellConfirm;
 		_sellConfirmOverlay.Visible = false;
-		_spellBarUi.SetHiddenByRing(false);
+		SpellBarUi.SetHiddenByRing(false);
 	}
 
 	private void ApplyProfile(UiProfileKind kind)
@@ -68,6 +69,7 @@ public sealed class BuildingActionRingController
 		foreach (Button button in _buttons)
 			ApplyButtonStyle(button);
 	}
+
 	public bool TryHandleEscape()
 	{
 		if (!_sellConfirmOverlay.Visible)
@@ -99,7 +101,7 @@ public sealed class BuildingActionRingController
 			return;
 		}
 
-		Building building = _selection.SelectedBuilding;
+		Building building = Selection.SelectedBuilding;
 		if (!CanShowRing(building))
 		{
 			HideRing();
@@ -132,7 +134,7 @@ public sealed class BuildingActionRingController
 		_currentBuilding = null;
 		ClearButtons();
 		_ring.Visible = false;
-		_spellBarUi.SetHiddenByRing(false);
+		SpellBarUi.SetHiddenByRing(false);
 	}
 
 	private void RebuildButtons(Building building)
@@ -222,7 +224,7 @@ public sealed class BuildingActionRingController
 			if (kind == PauseKind)
 				_buttons[i].SetPressedNoSignal(building.IsManuallyPaused);
 			else if (kind == SpecialKind)
-				_buttons[i].SetPressedNoSignal(!_spellBarUi.IsHiddenByRing);
+				_buttons[i].SetPressedNoSignal(!SpellBarUi.IsHiddenByRing);
 			else if (kind == UpgradeKind)
 				_buttons[i].Disabled = !IsUpgradeEnabled(building, _currentActions[i].Recipe);
 		}
@@ -313,7 +315,7 @@ public sealed class BuildingActionRingController
 			Icon = BuildingIcons.Ritual,
 			Tooltip = "仪式",
 			Enabled = true,
-			Toggled = !_spellBarUi.IsHiddenByRing,
+			Toggled = !SpellBarUi.IsHiddenByRing,
 		};
 	}
 
@@ -385,7 +387,7 @@ public sealed class BuildingActionRingController
 
 	private void ToggleSpellBar(bool pressed)
 	{
-		_spellBarUi.SetHiddenByRing(!pressed);
+		SpellBarUi.SetHiddenByRing(!pressed);
 		Sfx.Play(SfxEvents.ButtonClick);
 	}
 
@@ -492,6 +494,7 @@ public sealed class BuildingActionRingController
 	{
 		return Mathf.Abs(control.GetInstanceId().GetHashCode() + offset);
 	}
+
 	private sealed class RingAction
 	{
 		public string Kind;
