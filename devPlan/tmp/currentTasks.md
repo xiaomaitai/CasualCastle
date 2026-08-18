@@ -16,10 +16,10 @@
 - [x] HUD 面板：`scenes/ui/hud.tscn`（血条/金币/黑魔法/阶段面板/菜单按钮/商店入口/工具按钮）+ HudUiController 改造为场景根脚本（导出节点引用）；UIManager 删除对应 InitializeUI 分支；冒烟通过
 - [x] 手牌面板：`scenes/ui/hand_panel.tscn`（HandBackdrop + 10 槽位）+ HandUiController 场景化；拖拽行为保持；冒烟通过
 - [x] 商店面板：`scenes/ui/shop_panel.tscn`（5 货架 + 刷新 + 关闭）+ ShopUiController 场景化；购买/拖放直放行为保持；冒烟通过
-- [ ] 建筑信息/单位信息面板：`scenes/ui/building_info_panel.tscn` + BuildingInfoUiController/UnitInfoUiController 场景化
-- [ ] 暂停/设置/结算面板：`scenes/ui/pause_menu.tscn`、`scenes/ui/game_over.tscn`（settings_panel 已独立）；PauseMenuUiController/GameOverUiController/SettingsUiController 场景化并接入模态栈
-- [ ] 作弊/运行信息面板（dev 区）：`scenes/ui/dev_tools/cheat_menu.tscn`、`runtime_info_panel.tscn` + CheatMenuUiController/RuntimeInfoPanelController/BgmInfoController 场景化
-- [ ] 法术栏/行动环/出售确认：`scenes/ui/spell_bar.tscn`、`scenes/ui/building_action_ring.tscn`（含出售确认）+ SpellBarUiController/BuildingActionRingController 场景化
+- [x] 建筑信息/单位信息面板：`scenes/ui/building_info_panel.tscn` + BuildingInfoUiController/UnitInfoUiController 场景化
+- [x] 暂停/设置/结算面板：`scenes/ui/pause_menu.tscn`、`scenes/ui/game_over.tscn`（settings_panel 已独立）；PauseMenuUiController/GameOverUiController/SettingsUiController 场景化并接入模态栈
+- [x] 作弊/运行信息面板（dev 区）：`scenes/ui/dev_tools/cheat_menu.tscn`、`runtime_info_panel.tscn` + CheatMenuUiController/RuntimeInfoPanelController/BgmInfoController 场景化
+- [x] 法术栏/行动环/出售确认：`scenes/ui/spell_bar.tscn`、`scenes/ui/building_action_ring.tscn`（含出售确认）+ SpellBarUiController/BuildingActionRingController 场景化
 - [ ] 事件化收尾：UIManager `_Process` 中央轮询拆除（仅动画/拖拽/世界跟随保留自身 `_Process`）；购买/选卡/关闭/暂停/设置等用户意图改走组件信号或显式接口；主场景只剩面板实例引用
 - [ ] 冒烟与验收：每个新面板场景可单独实例化 smoke；新增 `ui_smoke.tscn` 或复用现有冒烟验证模态优先级/拖拽/暂停/设置/分辨率切换；行为清单与文档同步；勾选本清单
 
