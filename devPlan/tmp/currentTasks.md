@@ -46,7 +46,7 @@
 - [x] 4.4 仪式宿主 `RitualHostComponent.cs`：迁 TickRitual/ApplyRitualReward/ApplyUndeadHealthBonus；金币/黑魔法消耗、移除书、核心升级经领域服务端口（RitualService/Shop/Hand），组件不含素材路径与表现
 - [x] 4.5 能力组件六件套（adapter）：`TrapComponent`（TickTrap）、`TreasureBoxComponent`（TickTreasureBox）、`LivingComponent`（TickLivingGrowth/TickLivingRegen/TickBreeding/TryBreedFleshNest）、`ManaComponent`（TickManaProduction）、`PlagueComponent`（TickPlagueSpread）、`CrystalMineComponent`（TickCrystalMine）；InitFromType 按能力挂载进组件列表，_Process 遍历列表，删除全部类型分支
 - [x] 4.6 统一生成 `adapters/godot/battle/UnitSpawnService.cs`：普通产兵、仪式召唤（Phase 五再接入死亡召唤）共用 PackedScene 加载与初始化；Building.SpawnUnits/SpawnUnitType 迁移；ProductionComponent 事件升级为 `SpawnRequested(unitTypeId, count)`
-- [ ] 4.7 表现分离 `BuildingView.cs`（贴图/材质/高亮/状态图标/部落邻接指示）与 `BuildingEffects.cs`（工作跳动/受损闪色/摧毁粒子）；Building 只转发事件，表现类不写领域状态
+- [x] 4.7 表现分离 `BuildingView.cs`（贴图/材质/高亮/状态图标/部落邻接指示）与 `BuildingEffects.cs`（工作跳动/受损闪色/摧毁粒子）；Building 只转发事件，表现类不写领域状态
 - [ ] 4.8 桥接与场景：`IBuildingState/IBuildingRef/IBuildingTarget` 投影集中到一个桥接对象（Building 不再同时实现三接口的散落投影）；`Building.tscn` 改 Shell/Logic/View/Effects 组合；文档同步与全量验收
 - 验收（沿用）：Building.cs 只负责节点生命周期、组件装配和极薄转发；业务能力新增不需要修改中央 _Process；表现类不写领域状态；Domain 单测覆盖所有迁移规则；所有产兵建筑、陷阱、仪式和活体建筑 smoke 与基线一致
 

@@ -23,25 +23,9 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	private RitualHostComponent _ritualHost;
 
-	private bool _visualApplied;
+	private BuildingView _view;
 
-	private bool _isHordeBuilding;
-
-	private Sprite2D _sprite;
-
-	private ShaderMaterial _workMaterial;
-
-	private Material _originalMaterial;
-
-	private Tween _jumpTween;
-
-	private Vector2 _spriteBasePosition;
-
-	private bool _jumpTweenAwaitingResume;
-
-	private BuildingStateIcon _stateIcon;
-
-	private HordeAdjacencyIndicator _hordeIndicator;
+	private BuildingEffects _effects;
 
 	private Node2D _battlefield;
 
@@ -168,7 +152,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		GridX = gridX;
 		GridY = gridY;
 		_isPlayerBuilding = castle.IsPlayerCastle;
-		SyncStateIconPosition();
+		_view?.SyncStateIconPosition();
 	}
 
 	public void SetManuallyPaused(bool paused)
@@ -186,7 +170,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 			return;
 
 		_runtime.SetCombineProhibited(prohibited);
-		UpdateStateIcon();
+		_view?.UpdateStateIcon();
 	}
 
 	public void ApplySnapshotState(int health, bool manuallyPaused, bool combineProhibited)
@@ -195,7 +179,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 			return;
 
 		_runtime.Restore(Mathf.Clamp(health, 1, MaxHealth), MaxHealth, manuallyPaused, combineProhibited);
-		UpdateDamageVisual();
+		_effects?.UpdateDamageVisual();
 		RefreshOperationalState();
 	}
 
@@ -205,7 +189,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 			return;
 
 		_runtime.ApplyHealthRatio(ratio);
-		UpdateDamageVisual();
+		_effects?.UpdateDamageVisual();
 	}
 
 	public void InitFromType(string buildingType)
@@ -213,9 +197,22 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		TypeId = buildingType;
 		_runtime.Restore(BuildingSys.GetMaxHealth(buildingType), BuildingSys.GetMaxHealth(buildingType), false, false, false);
 		MountComponents();
-		TryApplyVisual();
-		UpdateDamageVisual();
+		EnsureVisuals();
+		_view.TryApplyVisual();
+		_effects?.UpdateDamageVisual();
 	}
+
+	private void EnsureVisuals()
+	{
+		if (_view != null)
+			return;
+
+		_view = new BuildingView(this, BuildingSys);
+		_effects = new BuildingEffects(this, BuildingSys);
+		_view.Initialize();
+		_effects.Initialize();
+	}
+
 
 	private void MountComponents()
 	{
@@ -230,7 +227,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 			_living.HealthRestored += amount =>
 			{
 				_runtime.Heal(amount);
-				UpdateDamageVisual();
+				_effects?.UpdateDamageVisual();
 			};
 			_living.Upgraded += () => Sfx.Play(SfxEvents.Upgrade);
 			_components.Add(_living);
@@ -297,7 +294,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 	private void ApplyDamage(int amount)
 	{
 		_runtime.TakeDamage(amount);
-		UpdateDamageVisual();
+		_effects?.UpdateDamageVisual();
 		Sfx.Play(SfxEvents.BuildingHit);
 
 		if (BuildingSys.IsCoreBuilding(TypeId) && CastleRef != null)
@@ -318,7 +315,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		if (TypeId != BuildingTypeIds.CastleHeart)
 		{
 			RefreshOperationalState();
-			PlayDestructionEffect();
+			_effects?.PlayDestructionEffect();
 			if (LivingBuildingRules.IsLivingBuilding(TypeId))
 				ScheduleRegrow();
 		}
@@ -378,7 +375,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 	private void Repair()
 	{
 		_runtime.Heal(MaxHealth);
-		UpdateDamageVisual();
+		_effects?.UpdateDamageVisual();
 		RefreshOperationalState();
 	}
 
@@ -410,22 +407,11 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		_ritualHost.CoreUpgradeRequested += () => CallDeferred(nameof(UpgradeCircleAfterRitual));
 		
 
-		_sprite = GetNodeOrNull<Sprite2D>("View/Sprite");
-		TryApplyVisual();
+		EnsureVisuals();
 
 		if (_gameManager != null)
 			_gameManager.PhaseChanged += OnPhaseChanged;
 
-		_stateIcon = new BuildingStateIcon();
-		Node2D effects = GetNodeOrNull<Node2D>("Effects");
-		effects?.AddChild(_stateIcon);
-		_isHordeBuilding = BuildingSys.GetFactionId(TypeId) == FactionDef.HordeId;
-		if (_isHordeBuilding)
-		{
-			_hordeIndicator = new HordeAdjacencyIndicator();
-			effects?.AddChild(_hordeIndicator);
-		}
-		SyncStateIconPosition();
 		RefreshOperationalState();
 
 		if (CheatState.FastProductionEnabled)
@@ -483,7 +469,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 			component.Tick(step);
 		_ritualHost.Tick(step);
 		_production.Tick(step);
-		UpdateWorkEffectFromProgress();
+		_view?.UpdateWorkEffectFromProgress(HasProductionCycle, ProductionProgress);
 	}
 
 	protected virtual void OnPhaseChanged(MatchPhase phase)
@@ -504,7 +490,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 	public void SetWorkSpeedMultiplier(float multiplier)
 	{
 		_production.SetSpeedMultiplier(multiplier);
-		UpdateHordeIndicator();
+		_view?.UpdateHordeIndicator();
 	}
 
 	private void OnSpawnRequested(string unitTypeId, int count)
@@ -512,7 +498,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		for (int i = 0; i < count; i++)
 		{
 			SpawnService?.SpawnProduction(this, 1);
-			PlayWorkJumpVisual();
+			_effects?.PlayWorkJumpVisual();
 		}
 	}
 
@@ -532,28 +518,20 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	public void OnWorkPaused()
 	{
-		if (_jumpTween != null && _jumpTween.IsValid() && _jumpTween.IsRunning())
-		{
-			_jumpTween.Pause();
-			_jumpTweenAwaitingResume = true;
-		}
+		_effects?.PauseJump();
 	}
 
 	public void OnWorkResumed()
 	{
-		if (_jumpTweenAwaitingResume && _jumpTween != null && _jumpTween.IsValid())
-		{
-			_jumpTweenAwaitingResume = false;
-			_jumpTween.Play();
-		}
+		_effects?.ResumeJump();
 	}
 
 	public void OnWorkStopped()
 	{
-		_jumpTweenAwaitingResume = false;
 		SetProcess(false);
-		CancelJumpTween();
-		ResetWorkVisual();
+		_effects?.StopJump();
+		_view?.ResetWorkVisual();
+		_effects?.UpdateDamageVisual();
 	}
 
 
@@ -580,7 +558,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 		_runtime.StartRitual(ritualId, started.TotalSeconds, isCoreHosted, started.BookCardId, started.BookRitualId);
 		RefreshProductionCycle();
-		UpdateStateIcon();
+		_view?.UpdateStateIcon();
 		return true;
 	}
 
@@ -613,150 +591,10 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 	}
 
 
-	private const float WorkBrightenAmount = 0.35f;
-	private void TryApplyVisual()
-	{
-		Sprite2D sprite = _sprite ?? GetNodeOrNull<Sprite2D>("View/Sprite");
-		if (sprite == null)
-			return;
-
-		if (!_visualApplied)
-		{
-			BuildingSys.ApplyVisual(this);
-			_visualApplied = true;
-		}
-
-		_sprite = sprite;
-		_spriteBasePosition = sprite.Position;
-		if (_originalMaterial == null)
-			_originalMaterial = sprite.Material;
-	}
-
-	private void PlayDestructionEffect()
-	{
-		Node parent = GetParent();
-		if (parent == null)
-			return;
-
-		Image img = Image.CreateEmpty(8, 8, false, Image.Format.Rgba8);
-		for (int x = 0; x < 8; x++)
-			for (int y = 0; y < 8; y++)
-				img.SetPixel(x, y, new Color(1, 1, 1, 1));
-		ImageTexture tex = ImageTexture.CreateFromImage(img);
-
-		ParticleProcessMaterial mat = new ParticleProcessMaterial();
-		mat.Gravity = new Vector3(0, 200, 0);
-		mat.InitialVelocityMin = -80;
-		mat.InitialVelocityMax = 80;
-		mat.ScaleMin = 1.5f;
-		mat.ScaleMax = 3.5f;
-		mat.DampingMin = 2f;
-		mat.DampingMax = 5f;
-		mat.AngleMin = 0;
-		mat.AngleMax = 360;
-		mat.AngularVelocityMin = -360;
-		mat.AngularVelocityMax = 360;
-		mat.Color = new Color(0.5f, 0.45f, 0.4f, 1f);
-
-		GpuParticles2D particles = new GpuParticles2D();
-		particles.OneShot = true;
-		particles.Explosiveness = 1f;
-		particles.Amount = 16;
-		particles.Lifetime = 0.6f;
-		particles.ProcessMaterial = mat;
-		particles.Texture = tex;
-		particles.GlobalPosition = GlobalPosition;
-		particles.Emitting = true;
-		parent.AddChild(particles);
-
-		if (_sprite != null)
-		{
-			Tween tween = CreateTween();
-			tween.TweenProperty(_sprite, "modulate:a", 0f, 0.3f);
-		}
-
-		Tween delayTween = CreateTween();
-		delayTween.TweenInterval(0.7f);
-		delayTween.TweenCallback(Callable.From(() =>
-		{
-			particles.QueueFree();
-			QueueFree();
-		}));
-	}
-
-	private void UpdateWorkEffectFromProgress()
-	{
-		if (_sprite == null || _runtime.WorkRequired <= 0f)
-			return;
-
-		EnsureWorkMaterial();
-		_sprite.Material = _workMaterial;
-		float progress = Mathf.Clamp(_runtime.WorkDone / _runtime.WorkRequired, 0f, 1f);
-		_workMaterial.SetShaderParameter("fill_amount", progress);
-	}
-
-	private void PlayWorkJumpVisual()
-	{
-		if (_sprite == null)
-			return;
-
-		CancelJumpTween();
-		_jumpTweenAwaitingResume = false;
-
-		const float jumpOffset = -6f;
-		const float jumpUpDuration = 0.08f;
-		const float jumpDownDuration = 0.1f;
-
-		_jumpTween = CreateTween();
-		_jumpTween.TweenProperty(_sprite, "position:y", _spriteBasePosition.Y + jumpOffset, jumpUpDuration)
-			.SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
-		_jumpTween.TweenProperty(_sprite, "position:y", _spriteBasePosition.Y, jumpDownDuration)
-			.SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.In);
-	}
-
-	private void EnsureWorkMaterial()
-	{
-		if (_workMaterial != null)
-			return;
-
-		Shader shader = GD.Load<Shader>("res://assets/shaders/building_work.gdshader");
-		_workMaterial = new ShaderMaterial { Shader = shader };
-		_workMaterial.SetShaderParameter("brighten", WorkBrightenAmount);
-	}
-
-	private void CancelJumpTween()
-	{
-		if (_jumpTween != null && _jumpTween.IsValid())
-			_jumpTween.Kill();
-		_jumpTween = null;
-	}
-
-	private void ResetWorkVisual()
-	{
-		if (_sprite == null)
-			return;
-		_sprite.Material = _originalMaterial;
-		_sprite.Position = _spriteBasePosition;
-		UpdateDamageVisual();
-	}
-
-	private void UpdateDamageVisual()
-	{
-		if (_sprite == null)
-			return;
-
-		if (Health <= 0)
-			_sprite.Modulate = new Color(0.55f, 0.55f, 0.6f, 0.75f);
-		else if (IsDamaged)
-			_sprite.Modulate = new Color(0.85f, 0.75f, 0.75f);
-		else
-			_sprite.Modulate = BuildingSys.GetSpriteModulate(TypeId);
-	}
-
 	private void RefreshOperationalState()
 	{
-		SyncStateIconPosition();
-		UpdateStateIcon();
+		_view?.SyncStateIconPosition();
+		_view?.UpdateStateIcon();
 
 		if (!IsOperational)
 		{
@@ -782,46 +620,6 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		Castle castle = CastleRef;
 		if (castle != null)
 			_adjacencyService.RefreshCastle(castle.GetBuildingStates());
-	}
-
-	private void SyncStateIconPosition()
-	{
-		if (_stateIcon == null || CastleRef == null)
-			return;
-
-		Vector2I mainOffset = BuildingSys.GetMainCellOffset(TypeId);
-		Vector2 mainCenter = CastleRef.GetCellCenter(GridX + mainOffset.X, GridY + mainOffset.Y);
-		_stateIcon.Position = mainCenter - Position;
-		if (_hordeIndicator != null)
-			_hordeIndicator.Position = mainCenter - Position;
-	}
-
-	private void UpdateHordeIndicator()
-	{
-		if (_hordeIndicator == null || CastleRef == null)
-			return;
-
-		List<IBuildingState> all = CastleRef.GetBuildingStates();
-		List<IAdjacencyBuilding> domain = all.OfType<IAdjacencyBuilding>().ToList();
-		int count = HordeAdjacencyRules.CountAdjacencyBonusCells(this, domain, GameManager.Get<IBuildingRepository>());
-		_hordeIndicator.SetAdjacencyCellCount(count);
-	}
-
-	private void UpdateStateIcon()
-	{
-		if (_stateIcon == null || BuildingSys.IsCoreBuilding(TypeId))
-		{
-			_stateIcon?.SetPaused(false);
-			_stateIcon?.SetCombineProhibited(false);
-			return;
-		}
-
-		if (IsManuallyPaused)
-			_stateIcon.SetPaused(true);
-		else
-			_stateIcon.SetPaused(false);
-
-		_stateIcon.SetCombineProhibited(IsCombineProhibited);
 	}
 
 }
