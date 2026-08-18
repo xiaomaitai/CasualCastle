@@ -21,6 +21,8 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	private ProductionComponent _production;
 
+	private RitualHostComponent _ritualHost;
+
 	private bool _visualApplied;
 
 	private bool _isHordeBuilding;
@@ -588,6 +590,8 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		_runtime.HealthChanged += (health, maxHealth) => EmitSignal(SignalName.HealthChanged, health, maxHealth);
 		_production = new ProductionComponent(this, _runtime, BuildingSys);
 		_production.CyclesCompleted += OnProductionCyclesCompleted;
+		_ritualHost = new RitualHostComponent(this, _runtime, _ritualService, _gameManager);
+		_ritualHost.CoreUpgradeRequested += () => CallDeferred(nameof(UpgradeCircleAfterRitual));
 		
 
 		_sprite = GetNodeOrNull<Sprite2D>("View/Sprite");
@@ -619,7 +623,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 				_battlefield = GetNodeOrNull<Node2D>("/root/MainGame/Battlefield");
 			if (_battlefield == null)
 				_battlefield = GetTree().Root.GetNodeOrNull<Node2D>("MainGame/Battlefield");
-			UpdateWorkCycle();
+			RefreshProductionCycle();
 		}
 		else if (RitualRules.CanHostRitual(TypeId))
 		{
@@ -665,14 +669,14 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		TickPlagueSpread((float)delta);
 		TickCrystalMine((float)delta);
 		TickTreasureBox((float)delta);
-		TickRitual((float)delta);
+		_ritualHost.Tick((float)delta);
 		_production.Tick((float)delta);
 		UpdateWorkEffectFromProgress();
 	}
 
 	protected virtual void OnPhaseChanged(MatchPhase phase)
 	{
-		UpdateWorkCycle();
+		RefreshProductionCycle();
 	}
 
 	private void OnFastProductionChanged()
@@ -680,7 +684,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		SetWorkSpeedMultiplier(CheatState.FastProductionEnabled ? 10f : 1f);
 	}
 
-	protected void UpdateWorkCycle()
+	public void RefreshProductionCycle()
 	{
 		_production.RefreshCycle();
 	}
@@ -727,7 +731,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		}
 	}
 
-	private void SpawnUnitType(string unitTypeId, int count)
+	public void SpawnUnitType(string unitTypeId, int count)
 	{
 		if (_battlefield == null || CastleRef == null || count <= 0 || string.IsNullOrEmpty(unitTypeId))
 			return;
@@ -824,7 +828,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 			return false;
 
 		_runtime.StartRitual(ritualId, started.TotalSeconds, isCoreHosted, started.BookCardId, started.BookRitualId);
-		UpdateWorkCycle();
+		RefreshProductionCycle();
 		UpdateStateIcon();
 		return true;
 	}
@@ -844,82 +848,12 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		return null;
 	}
 
-	private void TickRitual(float delta)
-	{
-		if (!_runtime.IsRitualInProgress || _gameManager == null
-			|| _gameManager.CurrentState != GameManager.GameState.Playing
-			|| !_gameManager.IsCombat)
-			return;
-
-		_ritualService.Tick(_runtime.ActiveRitual, delta);
-		if (_runtime.ActiveRitual.IsComplete)
-			CompleteRitual();
-	}
-
-	private void CompleteRitual()
-	{
-		RitualReward reward = _ritualService.Complete(_runtime.ActiveRitual);
-		ApplyRitualReward(reward);
-		bool isCoreHosted = RitualRules.IsRitualCircleHost(TypeId);
-		_runtime.CompleteRitual();
-		if (reward.CoreLevelUp && isCoreHosted)
-			CallDeferred(nameof(UpgradeCircleAfterRitual));
-		else
-			UpdateWorkCycle();
-	}
-
-	private void ApplyRitualReward(RitualReward reward)
-	{
-		if (reward == null)
-			return;
-		if (reward.GoldAmount > 0 && _shop != null)
-			_shop.AddGold(reward.GoldAmount);
-		if (reward.BlackMagicAmount > 0)
-		{
-			BlackMagicService blackMagic = GameManager.Get<BlackMagicService>();
-			if (blackMagic != null)
-				blackMagic.Add(reward.BlackMagicAmount);
-		}
-		if (!string.IsNullOrEmpty(reward.SummonUnitTypeId) && reward.SummonCount > 0)
-			SpawnUnitType(reward.SummonUnitTypeId, reward.SummonCount);
-		if (reward.UndeadMaxHealthBonus > 0)
-			ApplyUndeadHealthBonus(reward.UndeadMaxHealthBonus);
-		if (reward.UndeadDamageMultiplier > 0f)
-			UndeadFactionBuffs.AddUndeadDamageMultiplier(reward.UndeadDamageMultiplier);
-		if (!string.IsNullOrEmpty(reward.LearnedRitualId))
-			RemoveStudyBookFromHand();
-	}
-
-	private void RemoveStudyBookFromHand()
-	{
-		Hand hand = AdapterRegistry.Resolve<Hand>();
-		if (hand == null || !_runtime.IsRitualInProgress)
-			return;
-		hand.TryRemoveCardById(_runtime.ActiveRitual.BookCardId);
-	}
-
-	private void ApplyUndeadHealthBonus(int amount)
-	{
-		UndeadFactionBuffs.AddUndeadMaxHealthBonus(amount);
-		IFieldUnitRepository fieldRepo = GameManager.Get<IFieldUnitRepository>();
-		if (fieldRepo == null)
-			return;
-		foreach (IUnitHandle unit in fieldRepo.AllUnits)
-		{
-			if (!unit.IsAlive || unit.IsPlayerUnit != _isPlayerBuilding || !UndeadRules.IsUndead(unit.Race))
-				continue;
-			unit.AddMaxHealthBonus(amount);
-			if (unit is UnitLogic logic)
-				logic.RefreshHealthVisual();
-		}
-	}
-
 	private void UpgradeCircleAfterRitual()
 	{
 		string nextTypeId = RitualCircleRules.GetNextLevelTypeId(TypeId);
 		if (nextTypeId == null)
 		{
-			UpdateWorkCycle();
+			RefreshProductionCycle();
 			return;
 		}
 
@@ -1087,7 +1021,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		}
 		else
 		{
-			UpdateWorkCycle();
+			RefreshProductionCycle();
 		}
 
 		if (IsOperational && (LivingBuildingRules.IsLivingBuilding(TypeId) || TrapRules.IsTrap(TypeId)
