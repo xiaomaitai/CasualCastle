@@ -36,18 +36,20 @@
 
 ## 后续阶段大纲（四~七）
 
-### 四、重构 Building：领域状态、能力组件、表现三分离
+### 四、重构 Building：领域状态、能力组件、表现三分离（文件级清单）
 
-- [ ] 先为建筑生命、操作状态、生产进度、修复成本、摧毁/再生、仪式开始/完成补齐聚合级特征测试
-- [ ] 引入纯领域 `BuildingRuntime`，封装 Health/MaxHealth、暂停、禁止组合、生产进度、活动仪式等状态
-- [ ] 产兵时钟拆为 `ProductionComponent`；领域只产生"应生成何种单位/数量"结果，实例化留在 Godot Adapter
-- [ ] 仪式宿主拆为 `RitualHostComponent`；消费金币/黑魔法、移除书、升级核心、召唤奖励经应用端口
-- [ ] 陷阱、宝箱、活体生长/再生/繁殖、法力生产、瘟疫、晶矿按能力挂载组件或策略；禁止向 `Building._Process` 添加类型分支
-- [ ] 共享生成流程统一到 `UnitSpawnService/Factory`
-- [ ] 新建 `BuildingView`/`BuildingEffects` 独占贴图/材质/Tween/粒子/状态图标
-- [ ] `IBuildingState/IBuildingRef/IBuildingTarget` 适配投影集中到一个桥接对象
-- [ ] `Building.tscn` 改 Shell/Logic/View/Effects 组合，逐类迁移、删旧分支
-- 验收：Building.cs 只负责节点生命周期、组件装配和极薄转发；表现类不写领域状态；所有产兵建筑、陷阱、仪式和活体建筑 smoke 与基线一致
+现状（已核实）：Building.cs 1214 行；_Process 依次调度 TickTrap/TickLivingGrowth/TickBreeding/TickManaProduction/TickPlagueSpread/TickCrystalMine/TickTreasureBox/TickRitual + 生产循环；表现方法 TryApplyVisual/UpdateWorkEffectFromProgress/UpdateDamageVisual/UpdateHordeIndicator/UpdateStateIcon；BuildingSystem.cs 241 行负责配置查询与创建。
+
+- [ ] 4.1 领域聚合 `domain/Building/BuildingRuntime.cs`（纯 C#）：封装 Health/MaxHealth、手动暂停、禁止组合、生产循环（激活/暂停/进度/速率/Tick 产出循环数）、活动仪式（复用 ActiveRitual）、摧毁判定与事件；配套 `BuildingRuntimeTests.cs` 覆盖：伤害/修复、暂停/恢复、禁止组合、摧毁、生产进度与循环产出、仪式开始/计时完成、快照恢复（验收：领域规则先有单测保护）
+- [ ] 4.2 状态迁移：Building.cs 的 Health/MaxHealth/暂停/禁止组合/生产字段/_activeRitual 全部改为代理 BuildingRuntime；删重复字段与散落写入点；公共属性与信号语义逐项对齐；全部 smoke 与主场景无头通过（每迁移一项删除旧写入，不留双轨）
+- [ ] 4.3 生产组件 `adapters/godot/building/ProductionComponent.cs`：迁 StartWorkCycle/PerformWork/UpdateWorkCycle/SetWorkSpeedMultiplier 与 _Process 生产段；组件持有 runtime 引用并发出 `SpawnRequested(unitTypeId, count)` 事件，Building 只订阅并实例化
+- [ ] 4.4 仪式宿主 `RitualHostComponent.cs`：迁 TickRitual/ApplyRitualReward/ApplyUndeadHealthBonus；金币/黑魔法消耗、移除书、核心升级经领域服务端口（RitualService/Shop/Hand），组件不含素材路径与表现
+- [ ] 4.5 能力组件六件套（adapter）：`TrapComponent`（TickTrap）、`TreasureBoxComponent`（TickTreasureBox）、`LivingComponent`（TickLivingGrowth/TickLivingRegen/TickBreeding/TryBreedFleshNest）、`ManaComponent`（TickManaProduction）、`PlagueComponent`（TickPlagueSpread）、`CrystalMineComponent`（TickCrystalMine）；InitFromType 按能力挂载进组件列表，_Process 遍历列表，删除全部类型分支
+- [ ] 4.6 统一生成 `adapters/godot/battle/UnitSpawnService.cs`：普通产兵、仪式召唤（Phase 五再接入死亡召唤）共用 PackedScene 加载与初始化；Building.SpawnUnits/SpawnUnitType 迁移
+- [ ] 4.7 表现分离 `BuildingView.cs`（贴图/材质/高亮/状态图标/部落邻接指示）与 `BuildingEffects.cs`（工作跳动/受损闪色/摧毁粒子）；Building 只转发事件，表现类不写领域状态
+- [ ] 4.8 桥接与场景：`IBuildingState/IBuildingRef/IBuildingTarget` 投影集中到一个桥接对象（Building 不再同时实现三接口的散落投影）；`Building.tscn` 改 Shell/Logic/View/Effects 组合；文档同步与全量验收
+- 验收（沿用）：Building.cs 只负责节点生命周期、组件装配和极薄转发；业务能力新增不需要修改中央 _Process；表现类不写领域状态；Domain 单测覆盖所有迁移规则；所有产兵建筑、陷阱、仪式和活体建筑 smoke 与基线一致
+
 
 ### 五、重构 Unit：保持聚合内聚，拆掉 Adapter 上帝类
 
