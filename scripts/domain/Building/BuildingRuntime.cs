@@ -34,13 +34,14 @@ public class BuildingRuntime
 	public ActiveRitual ActiveRitual => _activeRitual;
 	public bool IsRitualInProgress => _activeRitual != null;
 
-	public void Restore(int health, int maxHealth, bool manuallyPaused, bool combineProhibited)
+	public void Restore(int health, int maxHealth, bool manuallyPaused, bool combineProhibited, bool raiseEvent = true)
 	{
 		_maxHealth = Math.Max(1, maxHealth);
 		_health = Math.Clamp(health, 0, _maxHealth);
 		_manuallyPaused = manuallyPaused;
 		_combineProhibited = combineProhibited;
-		HealthChanged?.Invoke(_health, _maxHealth);
+		if (raiseEvent)
+			HealthChanged?.Invoke(_health, _maxHealth);
 	}
 
 	public void SetPaused(bool paused)

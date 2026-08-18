@@ -17,6 +17,8 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	protected int GridY;
 
+	private readonly BuildingRuntime _runtime = new();
+
 	private float _workSpeedMultiplier = 1f;
 
 	private bool _visualApplied;
@@ -63,8 +65,6 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	private RitualService _ritualService;
 
-	private ActiveRitual _activeRitual;
-
 	private TrapService _trapService;
 
 	private CasualCastle.Domain.Battle.Unit _trapSource;
@@ -92,19 +92,19 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	public string TypeId { get; set; } = BuildingTypeIds.Barracks;
 
-	public int MaxHealth { get; private set; }
+	public int MaxHealth => _runtime.MaxHealth;
 
-	public int Health { get; private set; }
+	public int Health => _runtime.Health;
 
-	public bool IsManuallyPaused { get; private set; }
+	public bool IsManuallyPaused => _runtime.IsManuallyPaused;
 
-	public bool IsCombineProhibited { get; private set; }
+	public bool IsCombineProhibited => _runtime.IsCombineProhibited;
 
 	public bool IsDestroyed => Health <= 0;
 
 	public bool IsOperational => Health > 0 && !IsManuallyPaused;
 
-	public bool IsRitualInProgress => _activeRitual != null;
+	public bool IsRitualInProgress => _runtime.IsRitualInProgress;
 
 	public bool CanUseSpellBar()
 	{
@@ -112,11 +112,11 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		return BuildingActionRules.CanUseSpellBar(TypeId, isAltarUnlocked);
 	}
 
-	public string ActiveRitualId => _activeRitual?.RitualId;
+	public string ActiveRitualId => _runtime.ActiveRitual?.RitualId;
 
-	public float RitualRemainingSeconds => _activeRitual?.RemainingSeconds ?? 0f;
+	public float RitualRemainingSeconds => _runtime.ActiveRitual?.RemainingSeconds ?? 0f;
 
-	public float RitualTotalSeconds => _activeRitual?.TotalSeconds ?? 0f;
+	public float RitualTotalSeconds => _runtime.ActiveRitual?.TotalSeconds ?? 0f;
 
 	public bool HasProductionCycle => _workRequired > 0f;
 
@@ -196,7 +196,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		if (BuildingSys.IsCoreBuilding(TypeId) || IsManuallyPaused == paused)
 			return;
 
-		IsManuallyPaused = paused;
+		_runtime.SetPaused(paused);
 		RefreshOperationalState();
 	}
 
@@ -205,7 +205,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		if (BuildingSys.IsCoreBuilding(TypeId) || IsCombineProhibited == prohibited)
 			return;
 
-		IsCombineProhibited = prohibited;
+		_runtime.SetCombineProhibited(prohibited);
 		UpdateStateIcon();
 	}
 
@@ -214,12 +214,8 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		if (TypeId == BuildingTypeIds.CastleHeart)
 			return;
 
-		Health = Mathf.Clamp(health, 1, MaxHealth);
-		EmitSignal(SignalName.HealthChanged, Health, MaxHealth);
+		_runtime.Restore(Mathf.Clamp(health, 1, MaxHealth), MaxHealth, manuallyPaused, combineProhibited);
 		UpdateDamageVisual();
-
-		IsManuallyPaused = manuallyPaused;
-		IsCombineProhibited = combineProhibited;
 		RefreshOperationalState();
 	}
 
@@ -228,16 +224,14 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		if (TypeId == BuildingTypeIds.CastleHeart)
 			return;
 
-		Health = Mathf.Clamp(Mathf.RoundToInt(MaxHealth * ratio), 1, MaxHealth);
-		EmitSignal(SignalName.HealthChanged, Health, MaxHealth);
+		_runtime.ApplyHealthRatio(ratio);
 		UpdateDamageVisual();
 	}
 
 	public void InitFromType(string buildingType)
 	{
 		TypeId = buildingType;
-		MaxHealth = BuildingSys.GetMaxHealth(buildingType);
-		Health = MaxHealth;
+		_runtime.Restore(BuildingSys.GetMaxHealth(buildingType), BuildingSys.GetMaxHealth(buildingType), false, false, false);
 		TryApplyVisual();
 		UpdateDamageVisual();
 	}
@@ -293,8 +287,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	private void ApplyDamage(int amount)
 	{
-		Health = Mathf.Max(0, Health - amount);
-		EmitSignal(SignalName.HealthChanged, Health, MaxHealth);
+		_runtime.TakeDamage(amount);
 		UpdateDamageVisual();
 		Sfx.Play(SfxEvents.BuildingHit);
 
@@ -470,8 +463,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		if (heal <= 0)
 			return;
 		_livingRegenAccumulator -= heal;
-		Health = Mathf.Min(MaxHealth, Health + heal);
-		EmitSignal(SignalName.HealthChanged, Health, MaxHealth);
+		_runtime.Heal(heal);
 		UpdateDamageVisual();
 	}
 
@@ -576,8 +568,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	private void Repair()
 	{
-		Health = MaxHealth;
-		EmitSignal(SignalName.HealthChanged, Health, MaxHealth);
+		_runtime.Heal(MaxHealth);
 		UpdateDamageVisual();
 		RefreshOperationalState();
 	}
@@ -604,6 +595,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		_adjacencyService = GameManager.Get<AdjacencyService>();
 		_ritualService = GameManager.Get<RitualService>();
 		_trapService = GameManager.Get<TrapService>();
+		_runtime.HealthChanged += (health, maxHealth) => EmitSignal(SignalName.HealthChanged, health, maxHealth);
 		
 
 		_sprite = GetNodeOrNull<Sprite2D>("View/Sprite");
@@ -877,7 +869,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	public bool TryStartRitual(string ritualId)
 	{
-		if (_ritualService == null || _activeRitual != null || CastleRef == null)
+		if (_ritualService == null || _runtime.IsRitualInProgress || CastleRef == null)
 			return false;
 		if (!RitualRules.CanHostRitual(TypeId, _ritualService.IsDarkAltarUnlocked) || !IsPlayerOwned)
 			return false;
@@ -888,14 +880,15 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		CardData book = null;
 		if (RitualRules.IsStudyRitual(ritualId))
 			book = FindUnlearnedBook();
-		_activeRitual = _ritualService.TryStartRitual(
+		ActiveRitual started = _ritualService.TryStartRitual(
 			ritualId, isCoreHosted, coreLevel,
 			_shop.TrySpendGold,
 			amount => blackMagic != null && blackMagic.TrySpend(amount),
 			book?.Id, book == null ? null : DarkMagicBookRules.GetRitualId(book));
-		if (_activeRitual == null)
+		if (started == null)
 			return false;
 
+		_runtime.StartRitual(ritualId, started.TotalSeconds, isCoreHosted, started.BookCardId, started.BookRitualId);
 		UpdateWorkCycle();
 		UpdateStateIcon();
 		return true;
@@ -918,22 +911,22 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 
 	private void TickRitual(float delta)
 	{
-		if (_activeRitual == null || _gameManager == null
+		if (!_runtime.IsRitualInProgress || _gameManager == null
 			|| _gameManager.CurrentState != GameManager.GameState.Playing
 			|| !_gameManager.IsCombat)
 			return;
 
-		_ritualService.Tick(_activeRitual, delta);
-		if (_activeRitual.IsComplete)
+		_ritualService.Tick(_runtime.ActiveRitual, delta);
+		if (_runtime.ActiveRitual.IsComplete)
 			CompleteRitual();
 	}
 
 	private void CompleteRitual()
 	{
-		RitualReward reward = _ritualService.Complete(_activeRitual);
+		RitualReward reward = _ritualService.Complete(_runtime.ActiveRitual);
 		ApplyRitualReward(reward);
 		bool isCoreHosted = RitualRules.IsRitualCircleHost(TypeId);
-		_activeRitual = null;
+		_runtime.CompleteRitual();
 		if (reward.CoreLevelUp && isCoreHosted)
 			CallDeferred(nameof(UpgradeCircleAfterRitual));
 		else
@@ -965,9 +958,9 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 	private void RemoveStudyBookFromHand()
 	{
 		Hand hand = AdapterRegistry.Resolve<Hand>();
-		if (hand == null || _activeRitual == null)
+		if (hand == null || !_runtime.IsRitualInProgress)
 			return;
-		hand.TryRemoveCardById(_activeRitual.BookCardId);
+		hand.TryRemoveCardById(_runtime.ActiveRitual.BookCardId);
 	}
 
 	private void ApplyUndeadHealthBonus(int amount)
