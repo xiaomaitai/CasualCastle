@@ -29,9 +29,9 @@ public static class AdjacentRules
 		IBuildingRepository buildingRepo)
 	{
 		HashSet<IAdjacencyBuilding> neighbors = new();
-		Dictionary<(int x, int y), IAdjacencyBuilding> cellOwners = BuildCellOwnerMap(allBuildings, buildingRepo);
+		Dictionary<(int x, int y), IAdjacencyBuilding> cellOwners = BuildingCellOccupancy.BuildCellOwnerMap(allBuildings, buildingRepo);
 
-		foreach ((int x, int y) cell in GetOccupiedCells(source, buildingRepo))
+		foreach ((int x, int y) cell in BuildingCellOccupancy.GetOccupiedCells(source, buildingRepo))
 		{
 			foreach (GridCellOffset direction in Directions)
 			{
@@ -78,22 +78,4 @@ public static class AdjacentRules
 		return adjacentSameType > 0 ? 1f / (float)System.Math.Pow(SameLineNeighborSpeedFactor, adjacentSameType) : 1f;
 	}
 
-	private static Dictionary<(int x, int y), IAdjacencyBuilding> BuildCellOwnerMap(
-		IReadOnlyList<IAdjacencyBuilding> buildings, IBuildingRepository buildingRepo)
-	{
-		Dictionary<(int x, int y), IAdjacencyBuilding> cellOwners = new();
-		foreach (IAdjacencyBuilding building in buildings)
-		{
-			foreach ((int x, int y) cell in GetOccupiedCells(building, buildingRepo))
-				cellOwners[cell] = building;
-		}
-		return cellOwners;
-	}
-
-	private static IEnumerable<(int x, int y)> GetOccupiedCells(IAdjacencyBuilding building, IBuildingRepository buildingRepo)
-	{
-		IReadOnlyList<GridCellOffset> footprint = buildingRepo.GetFootprint(building.TypeId);
-		foreach (GridCellOffset offset in footprint)
-			yield return (building.AnchorGridX + offset.X, building.AnchorGridY + offset.Y);
-	}
 }

@@ -14,7 +14,7 @@
 - [ ] 6.1 区分领域模型、应用命令/结果、持久化 DTO 与 UI ViewModel，禁止同一个可变类跨四层复用
 - [ ] 6.2 History 建立反腐败映射：适配器先映射为 History 自有 Snapshot，移除对 Building 项目的直接引用
 - [ ] 6.3 `SaveData` 构建/恢复映射集中到 Application mapper（Phase 二已完成大部分），Godot Adapter 只提供运行时快照端口
-- [ ] 6.4 抽取唯一网格单元归属计算：`AdjacentRules` 与 `HordeAdjacencyRules` 共用一套实现
+- [x] 6.4 抽取唯一网格单元归属计算：`AdjacentRules` 与 `HordeAdjacencyRules` 共用 `BuildingCellOccupancy` 一套实现
 - [ ] 6.5 审核 `IBuildingRepository/IUnitRepository/ISkillRepository`：静态配置查询用 Repository/Definition Catalog 语义
 - [ ] 6.6 审核端口方向和命名：UseCase 入站、Repository/Gateway/Presenter 出站；删除无边界价值接口
 - [ ] 6.7 Persistence 拆为可独立测试纯 C# 项目（Phase 零已建 Persistence.csproj，继续迁入剩余存储实现）

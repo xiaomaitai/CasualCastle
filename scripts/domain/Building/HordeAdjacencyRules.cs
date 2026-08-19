@@ -11,7 +11,7 @@ public static class HordeAdjacencyRules
 		IAdjacencyBuilding building, IReadOnlyList<IAdjacencyBuilding> allBuildings,
 		IBuildingRepository buildingRepo)
 	{
-		Dictionary<(int x, int y), IAdjacencyBuilding> owners = CollectCellOwners(allBuildings, buildingRepo);
+		Dictionary<(int x, int y), IAdjacencyBuilding> owners = BuildingCellOccupancy.BuildCellOwnerMap(allBuildings, buildingRepo);
 		string raceId = buildingRepo.GetRaceId(building.TypeId);
 		int count = 0;
 		foreach ((int x, int y) cell in GetSideCells(building, buildingRepo))
@@ -65,15 +65,4 @@ public static class HordeAdjacencyRules
 		yield return (maxX + 1, minY);
 	}
 
-	private static Dictionary<(int x, int y), IAdjacencyBuilding> CollectCellOwners(
-		IReadOnlyList<IAdjacencyBuilding> buildings, IBuildingRepository buildingRepo)
-	{
-		Dictionary<(int x, int y), IAdjacencyBuilding> owners = new();
-		foreach (IAdjacencyBuilding building in buildings)
-		{
-			foreach (GridCellOffset offset in buildingRepo.GetFootprint(building.TypeId))
-				owners[(building.AnchorGridX + offset.X, building.AnchorGridY + offset.Y)] = building;
-		}
-		return owners;
-	}
 }
