@@ -109,7 +109,7 @@ public partial class Unit : IUnitHandle
 
 	private readonly System.Random _rng = new();
 
-	private readonly Dictionary<string, float> _skillCooldowns = new();
+	private SkillRuntime _skillRuntime;
 
 	private float _kiteTimer;
 
@@ -174,6 +174,7 @@ public partial class Unit : IUnitHandle
 		HealRange = stats.HealRange;
 		HealInterval = stats.HealInterval;
 		Skills = new SkillSet();
+		_skillRuntime = new SkillRuntime(Skills);
 	}
 
 	public void SetGameContext(GameContext ctx)
@@ -585,25 +586,9 @@ public partial class Unit : IUnitHandle
 			if (effect.Type == HealEffectTypes.Shield)
 				AddShield((int)(healed * GameRules.GraceShieldMult));
 			else if (effect.Type == HealEffectTypes.CooldownReduction)
-				ReduceSkillCooldowns(GameRules.GraceCooldownReduction);
+				_skillRuntime?.Reduce(GameRules.GraceCooldownReduction);
 			else if (effect.Type == HealEffectTypes.Burn)
 				ApplyBurn(effect);
-		}
-	}
-
-	private void ReduceSkillCooldowns(float seconds)
-	{
-		if (_skillCooldowns.Count == 0 || seconds <= 0f)
-			return;
-
-		List<string> keys = new(_skillCooldowns.Keys);
-		foreach (string skillId in keys)
-		{
-			float next = _skillCooldowns[skillId] - seconds;
-			if (next <= 0f)
-				_skillCooldowns.Remove(skillId);
-			else
-				_skillCooldowns[skillId] = next;
 		}
 	}
 
@@ -618,42 +603,22 @@ public partial class Unit : IUnitHandle
 
 	public float GetSkillCooldownRemaining(string skillId)
 	{
-		if (_skillCooldowns.TryGetValue(skillId, out float remaining))
-			return remaining;
-		return 0f;
+		return _skillRuntime?.GetRemaining(skillId) ?? 0f;
 	}
 
 	public void StartSkillCooldown(string skillId)
 	{
-		SpecialConfig cfg = Skills.GetSpecialById(skillId);
-		if (cfg == null || cfg.Cooldown <= 0f)
-			return;
-		_skillCooldowns[skillId] = cfg.Cooldown;
+		_skillRuntime?.Start(skillId);
 	}
 
 	public void TickSkillCooldowns(float dt)
 	{
-		if (_skillCooldowns.Count == 0)
-			return;
-
-		List<string> expired = new();
-		foreach (KeyValuePair<string, float> kv in _skillCooldowns)
-		{
-			float next = kv.Value - dt;
-			if (next <= 0f)
-				expired.Add(kv.Key);
-			else
-				_skillCooldowns[kv.Key] = next;
-		}
-		foreach (string skillId in expired)
-			_skillCooldowns.Remove(skillId);
+		_skillRuntime?.Tick(dt);
 	}
 
 	private void StartStealthCooldown()
 	{
-		SpecialConfig stealth = Skills.GetSpecial(SpecialBehavior.Stealth);
-		if (stealth != null)
-			StartSkillCooldown(stealth.SkillId);
+		_skillRuntime?.StartStealth();
 	}
 
 	private bool TryCastSpell()
