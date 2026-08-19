@@ -151,16 +151,13 @@ public partial class UnitLogic : Node2D
 	{
 		if (_unit == null)
 			return;
-		_unit.IsDefender = true;
-		_unit.PatrolCenterX = patrolCenterX;
-		_unit.PatrolCenterY = patrolCenterY;
-		_unit.PatrolRadius = patrolRadius;
+		_unit.SetDefender(patrolCenterX, patrolCenterY, patrolRadius);
 	}
 
 	public void SetResting(bool resting)
 	{
 		if (_unit != null)
-			_unit.IsResting = resting;
+			_unit.SetResting(resting);
 	}
 
 	public void ApplyKingSkill(SkillDef skill)
@@ -178,7 +175,7 @@ public partial class UnitLogic : Node2D
 	public void SetPatrolRadius(float radius)
 	{
 		if (_unit != null)
-			_unit.PatrolRadius = radius;
+			_unit.SetPatrolRadius(radius);
 	}
 
 	public void SetTarget(UnitLogic target)

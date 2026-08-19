@@ -21,9 +21,9 @@ public partial class Unit : IUnitHandle
 
 	public float GameY { get; internal set; }
 
-	public int Health { get; set; }
+	public int Health { get; private set; }
 
-	public int MaxHealth { get; set; }
+	public int MaxHealth { get; private set; }
 
 	public int Damage { get; set; }
 
@@ -89,15 +89,33 @@ public partial class Unit : IUnitHandle
 
 	public IBuildingRef AssignedTavern { get; set; }
 
-	public bool IsDefender { get; set; }
+	public bool IsDefender { get; private set; }
 
-	public float PatrolCenterX { get; set; }
+	public float PatrolCenterX { get; private set; }
 
-	public float PatrolCenterY { get; set; }
+	public float PatrolCenterY { get; private set; }
 
-	public float PatrolRadius { get; set; }
+	public float PatrolRadius { get; private set; }
 
-	public bool IsResting { get; set; }
+	public bool IsResting { get; private set; }
+
+	public void SetDefender(float centerX, float centerY, float radius)
+	{
+		IsDefender = true;
+		PatrolCenterX = centerX;
+		PatrolCenterY = centerY;
+		PatrolRadius = radius;
+	}
+
+	public void SetResting(bool resting)
+	{
+		IsResting = resting;
+	}
+
+	public void SetPatrolRadius(float radius)
+	{
+		PatrolRadius = radius;
+	}
 
 	public UnitState State { get; set; }
 

@@ -11,7 +11,7 @@
 ## Phase 五 分步实施（每步一个提交、行为保持、全量验证通过再下一步）
 
 - [x] 5.1 确认 `Domain.Battle.Unit` 聚合边界；仅将可独立演化状态提为可独立演化组件：`SkillRuntime`（技能冷却状态机）与 `StatusEffects`（减速/中毒/诅咒/战斗计时/伏击/再生），`CombatState` 对应现有 `UnitState` 枚举 + `SetAmbushing` 内部意图；不按行数机械拆服务（+7 单测 @612）
-- [ ] 5.2 大量公共 setter 收紧为意图方法，初始化数据改不可变定义 + 运行时状态
+- [x] 5.2 大量公共 setter 收紧为意图方法，初始化数据改不可变定义 + 运行时状态（Health/MaxHealth 改 private set；IsDefender/Patrol*/IsResting → `SetDefender/SetPatrolRadius/SetResting`；初始化经不可变 `UnitStats`）
 - [ ] 5.3 派系共享资源建模为对局/阵营级资源池，移除 Unit 持有 BlackMagicService/ManaService Singleton 所有权
 - [ ] 5.4 移除聚合对全局静态阵营 Buff 的直接读取；经对局上下文/效果快照注入
 - [ ] 5.5 `UnitLogic` 拆为领域桥接、Navigation/Motion、Targeting Adapter、UnitPresentation、DeathPresentation、ProjectilePresenter 等单一职责组件

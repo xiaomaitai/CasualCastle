@@ -53,10 +53,7 @@ public class DemonKingCombatTests
 	public void UpdateTargeting_DefenderEnemyWithinPatrolRadius_Fights()
 	{
 		Unit king = CreateKing();
-		king.IsDefender = true;
-		king.PatrolCenterX = 0f;
-		king.PatrolCenterY = 0f;
-		king.PatrolRadius = 200f;
+		king.SetDefender(0f, 0f, 200f);
 		Unit enemy = UnitTestFactory.CreateUnit(AttackType.Melee, false);
 		enemy.SetPosition(100f, 0f);
 
@@ -70,10 +67,7 @@ public class DemonKingCombatTests
 	public void UpdateTargeting_DefenderEnemyBeyondPatrolRadius_Waits()
 	{
 		Unit king = CreateKing();
-		king.IsDefender = true;
-		king.PatrolCenterX = 0f;
-		king.PatrolCenterY = 0f;
-		king.PatrolRadius = 200f;
+		king.SetDefender(0f, 0f, 200f);
 		Unit enemy = UnitTestFactory.CreateUnit(AttackType.Melee, false);
 		enemy.SetPosition(500f, 0f);
 
@@ -87,10 +81,7 @@ public class DemonKingCombatTests
 	public void UpdateTargeting_DefenderOutOfPatrolRadius_MarchesBack()
 	{
 		Unit king = CreateKing();
-		king.IsDefender = true;
-		king.PatrolCenterX = 0f;
-		king.PatrolCenterY = 0f;
-		king.PatrolRadius = 200f;
+		king.SetDefender(0f, 0f, 200f);
 		king.SetPosition(400f, 0f);
 
 		king.UpdateTargeting(null);
