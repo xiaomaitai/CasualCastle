@@ -111,27 +111,7 @@ public partial class Unit : IUnitHandle
 
 	private SkillRuntime _skillRuntime;
 
-	private float _kiteTimer;
-
-	private float _slowRemaining;
-
-	private float _slowFactor;
-
-	private float _curseRemaining;
-
-	private float _curseFactor;
-
-	private float _poisonDamagePerSecond;
-
-	private float _poisonRemaining;
-
-	private float _poisonAccumulator;
-
-	private float _timeSinceLastCombat;
-
-	private float _auraRegenAccumulator;
-
-	private float _wildHeartAccumulator;
+	private StatusEffects _status;
 
 	public string TargetDescription
 	{
@@ -175,6 +155,12 @@ public partial class Unit : IUnitHandle
 		HealInterval = stats.HealInterval;
 		Skills = new SkillSet();
 		_skillRuntime = new SkillRuntime(Skills);
+		_status = new StatusEffects(this);
+	}
+
+	internal void SetAmbushing(bool value)
+	{
+		IsAmbushing = value;
 	}
 
 	public void SetGameContext(GameContext ctx)
@@ -255,7 +241,7 @@ public partial class Unit : IUnitHandle
 
 		if (DemonKingRules.IsDemonKing(Race))
 		{
-			_timeSinceLastCombat = 0f;
+			_status?.NotifyCombat();
 			Comfort?.SpendHit();
 			if (Skills != null && Skills.HasTrigger(StatModifierTrigger.OnDamaged))
 				IsFurious = true;
@@ -263,7 +249,7 @@ public partial class Unit : IUnitHandle
 			return;
 		}
 
-		_timeSinceLastCombat = 0f;
+		_status?.NotifyCombat();
 		IsAmbushing = false;
 
 		if (Skills != null && GameCtx != null)
@@ -408,7 +394,7 @@ public partial class Unit : IUnitHandle
 			return;
 
 		TickSkillCooldowns(dt);
-		TickCombatStateTimers(dt);
+		_status?.Tick(dt);
 
 		float effectiveAttackCooldown = AttackCooldown;
 		if (Skills != null)
@@ -507,7 +493,7 @@ public partial class Unit : IUnitHandle
 
 		IsStealthed = false;
 		StartStealthCooldown();
-		_timeSinceLastCombat = 0f;
+		_status?.NotifyCombat();
 		if (DemonKingRules.IsDemonKing(Race))
 			Comfort?.SpendAttack();
 
@@ -532,8 +518,8 @@ public partial class Unit : IUnitHandle
 				IsAmbushing = false;
 			}
 			SpecialConfig kiting = Skills.GetSpecial(SpecialBehavior.Kiting);
-			if (kiting != null)
-				_kiteTimer = kiting.Param;
+			if (kiting != null && _status != null)
+				_status.MarkKite(kiting.Param);
 		}
 		effectiveDamage = (int)(effectiveDamage * GameCtx.AuraAttackDamageMultiplier * GetCurseDamageFactor());
 		if (UndeadRules.IsUndead(Race))
@@ -684,14 +670,7 @@ public partial class Unit : IUnitHandle
 	public float GetCurrentSpeed()
 	{
 		float speedMult = Skills.GetStatMultiplier("move_speed_mult", GameCtx) * GameCtx.AuraMoveSpeedMultiplier;
-		if (_kiteTimer > 0f)
-		{
-			SpecialConfig kiting = Skills.GetSpecial(SpecialBehavior.Kiting);
-			if (kiting != null)
-				speedMult *= kiting.SpeedMult;
-		}
-		if (_slowRemaining > 0f)
-			speedMult *= 1f - _slowFactor;
+		speedMult = _status != null ? _status.ApplyDebuffMultipliers(speedMult, Skills) : speedMult;
 		if (!IsStealthed)
 			return Speed * speedMult;
 		SpecialConfig stealth = Skills.GetSpecial(SpecialBehavior.Stealth);
@@ -702,89 +681,22 @@ public partial class Unit : IUnitHandle
 
 	public void ApplySlow(float slowValue, float duration)
 	{
-		if (slowValue <= 0f || duration <= 0f)
-			return;
-		_slowFactor = slowValue;
-		_slowRemaining = duration;
+		_status?.ApplySlow(slowValue, duration);
 	}
 
 	public void ApplyPoison(float damagePerSecond, float duration)
 	{
-		if (damagePerSecond <= 0f || duration <= 0f)
-			return;
-		_poisonDamagePerSecond = damagePerSecond;
-		_poisonRemaining = duration;
-		_poisonAccumulator = 0f;
+		_status?.ApplyPoison(damagePerSecond, duration);
 	}
 
 	public void ApplyCurse(float factor, float duration)
 	{
-		if (factor <= 0f || duration <= 0f)
-			return;
-		_curseFactor = factor;
-		_curseRemaining = duration;
+		_status?.ApplyCurse(factor, duration);
 	}
 
 	private float GetCurseDamageFactor()
 	{
-		return _curseRemaining > 0f ? 1f - _curseFactor : 1f;
-	}
-
-	private void TickCombatStateTimers(float dt)
-	{
-		if (_kiteTimer > 0f)
-			_kiteTimer -= dt;
-		if (_slowRemaining > 0f)
-			_slowRemaining -= dt;
-		if (_curseRemaining > 0f)
-			_curseRemaining -= dt;
-		TickPoison(dt);
-		_timeSinceLastCombat += dt;
-		UpdateAmbushState();
-		ApplyWildHeartRegen(dt);
-		ApplyAuraRegen(dt);
-	}
-
-	private void UpdateAmbushState()
-	{
-		SpecialConfig ambush = Skills != null ? Skills.GetSpecial(SpecialBehavior.Ambush) : null;
-		if (ambush != null && _timeSinceLastCombat >= ambush.Param)
-			IsAmbushing = true;
-	}
-
-	private void ApplyWildHeartRegen(float dt)
-	{
-		SpecialConfig regen = Skills != null ? Skills.GetSpecial(SpecialBehavior.Regen) : null;
-		if (regen == null || _timeSinceLastCombat < regen.Param)
-			return;
-		if (Health >= MaxHealth)
-		{
-			_wildHeartAccumulator = 0f;
-			return;
-		}
-		_wildHeartAccumulator += MaxHealth * GameRules.WildHeartRegenPercentPerSecond * dt;
-		int amount = (int)_wildHeartAccumulator;
-		if (amount <= 0)
-			return;
-		_wildHeartAccumulator -= amount;
-		Heal(amount);
-	}
-
-	private void ApplyAuraRegen(float dt)
-	{
-		if (GameCtx.AuraRegenPerSecond <= 0f)
-			return;
-		if (Health >= MaxHealth)
-		{
-			_auraRegenAccumulator = 0f;
-			return;
-		}
-		_auraRegenAccumulator += MaxHealth * GameCtx.AuraRegenPerSecond * dt;
-		int amount = (int)_auraRegenAccumulator;
-		if (amount <= 0)
-			return;
-		_auraRegenAccumulator -= amount;
-		Heal(amount);
+		return _status?.GetCurseDamageFactor() ?? 1f;
 	}
 
 	private void ApplyExplosion(float damage, float range)
@@ -796,25 +708,6 @@ public partial class Unit : IUnitHandle
 			if (enemy == TargetEnemy)
 				continue;
 			enemy.TakeDamage((int)damage, this, GameX, GameY);
-		}
-	}
-
-	private void TickPoison(float dt)
-	{
-		if (_poisonRemaining <= 0f)
-			return;
-		_poisonRemaining -= dt;
-		_poisonAccumulator += _poisonDamagePerSecond * dt;
-		int poisonDamage = (int)_poisonAccumulator;
-		if (poisonDamage > 0)
-		{
-			_poisonAccumulator -= poisonDamage;
-			TakeDamage(poisonDamage, null, GameX, GameY);
-		}
-		if (_poisonRemaining <= 0f)
-		{
-			_poisonDamagePerSecond = 0f;
-			_poisonAccumulator = 0f;
 		}
 	}
 
