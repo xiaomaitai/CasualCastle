@@ -1,5 +1,4 @@
 // 战报构建器：快照捕获与克隆
-using CasualCastle.Domain.Building;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,14 +9,14 @@ public static class ReportBuilder
 {
 	public static CastleSnapshot CaptureSnapshot(
 		IEnumerable<BuildingSnapshot> sourceBuildings, int nightIndex, BattlePhase phase,
-		System.Func<string, bool> isCoreBuilding, int gold, IEnumerable<CardData> handCards)
+		System.Func<string, bool> isCoreBuilding, int gold, IEnumerable<CardSnapshot> handCards)
 	{
 		CastleSnapshot snapshot = new()
 		{
 			NightIndex = nightIndex,
 			Phase = phase,
 			Gold = gold,
-			HandCards = handCards.Select(CreateCardSnapshot).ToList(),
+			HandCards = handCards.Select(CloneCardSnapshot).ToList(),
 		};
 
 		foreach (BuildingSnapshot building in sourceBuildings)
@@ -71,15 +70,6 @@ public static class ReportBuilder
 			Health = source.Health,
 			IsManuallyPaused = source.IsManuallyPaused,
 			IsCombineProhibited = source.IsCombineProhibited,
-		};
-	}
-
-	public static CardSnapshot CreateCardSnapshot(CardData card)
-	{
-		return new CardSnapshot
-		{
-			BuildingType = card.BuildingType,
-			Cost = card.Cost,
 		};
 	}
 

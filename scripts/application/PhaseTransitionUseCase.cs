@@ -3,6 +3,8 @@ using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
 using CasualCastle.Domain.History;
 using CasualCastle.Domain.Shared;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace CasualCastle.Application;
 
@@ -21,13 +23,39 @@ public class PhaseTransitionUseCase
 		_session = session;
 	}
 
+	private static List<BuildingSnapshot> MapSnapshots(IReadOnlyList<IBuildingState> buildings)
+	{
+		List<BuildingSnapshot> snapshots = new();
+		foreach (IBuildingState b in buildings)
+		{
+			if (b.IsDestroyed)
+				continue;
+			snapshots.Add(new BuildingSnapshot
+			{
+				TypeId = b.TypeId,
+				AnchorGridX = b.AnchorGridX,
+				AnchorGridY = b.AnchorGridY,
+				Health = b.Health,
+				IsManuallyPaused = b.IsManuallyPaused,
+				IsCombineProhibited = b.IsCombineProhibited,
+			});
+		}
+		return snapshots;
+	}
+
 	public void Handle(MatchPhase previous, MatchPhase next, IReplayTarget enemyTarget)
 	{
 		IGameSessionQuery query = _ports.Query;
 		IShopAccess shop = _ports.Shop;
 
 		if (previous != next)
-			_ports.BattleReportCapture.CapturePhaseSnapshot(query.PlayerBuildingStates, query.Gold, query.HandCards, query.CurrentNightIndex, PhaseMapping.ToBattlePhase(previous));
+		{
+			List<BuildingSnapshot> buildingSnapshots = MapSnapshots(query.PlayerBuildingStates);
+			List<CardSnapshot> cardSnapshots = query.HandCards
+				.Select(c => new CardSnapshot { BuildingType = c.BuildingType, Cost = c.Cost })
+				.ToList();
+			_ports.BattleReportCapture.CapturePhaseSnapshot(buildingSnapshots, query.Gold, cardSnapshots, query.CurrentNightIndex, PhaseMapping.ToBattlePhase(previous));
+		}
 
 		shop.SetShopAvailable(next == MatchPhase.Combat || next == MatchPhase.Shop);
 		if (next == MatchPhase.Shop)

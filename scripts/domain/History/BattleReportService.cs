@@ -1,5 +1,5 @@
 // 战报服务：快照记录与战报保存
-using CasualCastle.Domain.Building;
+using CasualCastle.Domain.Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ namespace CasualCastle.Domain.History;
 public class BattleReportService
 {
 	private readonly IBattleReportRepository _repository;
-	private readonly IBuildingRepository _buildingRepo;
+	private readonly IHistoryCoreLookup _coreLookup;
 	private readonly List<BattleReport> _savedReports = new();
 	private BattleReport _currentReport = new();
 	private string _selectedReportId = "";
@@ -19,10 +19,10 @@ public class BattleReportService
 	public bool HasCurrentSnapshots => _currentReport.Nights.Count > 0;
 	public string SelectedReportId => _selectedReportId;
 
-	public BattleReportService(IBattleReportRepository repository, IBuildingRepository buildingRepo)
+	public BattleReportService(IBattleReportRepository repository, IHistoryCoreLookup coreLookup)
 	{
 		_repository = repository;
-		_buildingRepo = buildingRepo;
+		_coreLookup = coreLookup;
 		ReloadSavedReports();
 	}
 
@@ -35,13 +35,13 @@ public class BattleReportService
 
 	public void CapturePhaseSnapshot(
 		IEnumerable<BuildingSnapshot> buildingSnapshots, int nightIndex, BattlePhase phase,
-		int gold, IEnumerable<CardData> handCards)
+		int gold, IEnumerable<CardSnapshot> handCards)
 	{
 		if (nightIndex <= 0)
 			return;
 
 		CastleSnapshot snapshot = ReportBuilder.CaptureSnapshot(
-			buildingSnapshots, nightIndex, phase, _buildingRepo.IsCoreBuilding, gold, handCards);
+			buildingSnapshots, nightIndex, phase, _coreLookup.IsCoreBuilding, gold, handCards);
 
 		_currentReport.Nights.RemoveAll(s => s.NightIndex == nightIndex && s.Phase == phase);
 		_currentReport.Nights.Add(snapshot);
@@ -134,7 +134,7 @@ public class BattleReportService
 
 	public bool IsNecromancerReport(string reportId)
 	{
-		return LoadReport(reportId)?.FactionId == FactionDef.NecromancerId;
+		return LoadReport(reportId)?.FactionId == FactionIds.Necromancer;
 	}
 
 	public CastleSnapshot GetSelectedPhaseSnapshot(int nightIndex, BattlePhase phase)

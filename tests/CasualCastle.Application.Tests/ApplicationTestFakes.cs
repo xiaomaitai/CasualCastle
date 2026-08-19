@@ -180,7 +180,7 @@ internal sealed class RecordingShop : IShopAccess
 internal sealed class RecordingCapture : IBattleReportCapture
 {
 	public string StartedReportId;
-	public List<(List<IBuildingState> Buildings, int Gold, List<CardData> Hand, int NightIndex, BattlePhase Phase)> Snapshots = new();
+	public List<(List<BuildingSnapshot> Buildings, int Gold, List<CardSnapshot> Hand, int NightIndex, BattlePhase Phase)> Snapshots = new();
 	public int DailyCalls;
 
 	public void StartMatch(string selectedReportId)
@@ -188,9 +188,9 @@ internal sealed class RecordingCapture : IBattleReportCapture
 		StartedReportId = selectedReportId;
 	}
 
-	public void CapturePhaseSnapshot(IReadOnlyList<IBuildingState> buildings, int gold, IReadOnlyList<CardData> handCards, int nightIndex, BattlePhase phase)
+	public void CapturePhaseSnapshot(IReadOnlyList<BuildingSnapshot> buildings, int gold, IReadOnlyList<CardSnapshot> handCards, int nightIndex, BattlePhase phase)
 	{
-		Snapshots.Add((new List<IBuildingState>(buildings), gold, new List<CardData>(handCards), nightIndex, phase));
+		Snapshots.Add((new List<BuildingSnapshot>(buildings), gold, new List<CardSnapshot>(handCards), nightIndex, phase));
 	}
 
 	public BattleReport SaveCurrentReportDaily()

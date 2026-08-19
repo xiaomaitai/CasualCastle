@@ -39,6 +39,7 @@ public static class CompositionRoot
 		SqliteBuildingRepository buildingRepo = new SqliteBuildingRepository();
 		services.AddSingleton<IBuildingRepository>(buildingRepo);
 		services.AddSingleton<IBuildingVisualRepository>(buildingRepo);
+		services.AddSingleton<IHistoryCoreLookup>(new BuildingCoreLookup(buildingRepo));
 		services.AddSingleton<ITechTreeRepository, SqliteTechTreeRepository>();
 		services.AddSingleton<DamageMatrix>(_ => GameDataLoader.DamageMatrix);
 		services.AddSingleton<CombineRules>(_ => GameDataLoader.CombineRules);

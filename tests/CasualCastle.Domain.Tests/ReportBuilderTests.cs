@@ -16,7 +16,7 @@ public class ReportBuilderTests
 			new BuildingSnapshot { TypeId = "Barracks", AnchorGridX = 2, AnchorGridY = 3, Health = 80 },
 		};
 
-		CastleSnapshot snapshot = ReportBuilder.CaptureSnapshot(source, 1, BattlePhase.Day, typeId => typeId == "CastleHeart", 0, new List<CardData>());
+		CastleSnapshot snapshot = ReportBuilder.CaptureSnapshot(source, 1, BattlePhase.Day, typeId => typeId == "CastleHeart", 0, new List<CardSnapshot>());
 
 		Assert.Single(snapshot.Buildings);
 		Assert.Equal("Barracks", snapshot.Buildings[0].TypeId);
@@ -36,7 +36,7 @@ public class ReportBuilderTests
 			},
 		};
 
-		CastleSnapshot snapshot = ReportBuilder.CaptureSnapshot(source, 2, BattlePhase.Night, _ => false, 0, new List<CardData>());
+		CastleSnapshot snapshot = ReportBuilder.CaptureSnapshot(source, 2, BattlePhase.Night, _ => false, 0, new List<CardSnapshot>());
 
 		Assert.Single(snapshot.Buildings);
 		BuildingSnapshot building = snapshot.Buildings[0];
@@ -102,10 +102,10 @@ public class ReportBuilderTests
 	[Fact]
 	public void CaptureSnapshot_RecordsGoldAndHandCards()
 	{
-		List<CardData> cards = new()
+		List<CardSnapshot> cards = new()
 		{
-			new CardData { BuildingType = "Barracks", Cost = 3 },
-			new CardData { BuildingType = "Stable", Cost = 5 },
+			new CardSnapshot { BuildingType = "Barracks", Cost = 3 },
+			new CardSnapshot { BuildingType = "Stable", Cost = 5 },
 		};
 
 		CastleSnapshot snapshot = ReportBuilder.CaptureSnapshot(

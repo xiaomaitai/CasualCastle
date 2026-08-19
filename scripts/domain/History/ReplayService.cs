@@ -1,17 +1,15 @@
 // 回放服务：应用战报快照到目标
-using CasualCastle.Domain.Building;
-
 namespace CasualCastle.Domain.History;
 
 public class ReplayService : IReplayUseCase
 {
 	private readonly BattleReportService _reportService;
-	private readonly IBuildingRepository _buildingRepo;
+	private readonly IHistoryCoreLookup _coreLookup;
 
-	public ReplayService(BattleReportService reportService, IBuildingRepository buildingRepo)
+	public ReplayService(BattleReportService reportService, IHistoryCoreLookup coreLookup)
 	{
 		_reportService = reportService;
-		_buildingRepo = buildingRepo;
+		_coreLookup = coreLookup;
 	}
 
 	public void ApplyNightSnapshot(IReplayTarget target, int nightIndex, BattlePhase phase)
@@ -24,7 +22,7 @@ public class ReplayService : IReplayUseCase
 
 		foreach (BuildingSnapshot buildingSnapshot in snapshot.Buildings)
 		{
-			if (_buildingRepo.IsCoreBuilding(buildingSnapshot.TypeId))
+			if (_coreLookup.IsCoreBuilding(buildingSnapshot.TypeId))
 				continue;
 
 			target.TryPlaceMirrored(buildingSnapshot);

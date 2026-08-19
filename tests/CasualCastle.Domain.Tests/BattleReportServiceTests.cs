@@ -156,9 +156,9 @@ public class BattleReportServiceTests
 	{
 		BattleReportService service = CreateService(out FakeReportRepository _);
 		service.StartMatch("");
-		List<CardData> cards = new()
+		List<CardSnapshot> cards = new()
 		{
-			new CardData { BuildingType = "Barracks", Cost = 3 },
+			new CardSnapshot { BuildingType = "Barracks", Cost = 3 },
 		};
 
 		service.CapturePhaseSnapshot(new[]
@@ -238,25 +238,17 @@ public class BattleReportServiceTests
 	{
 		repository = new FakeReportRepository();
 		repository.Reports.Add(report);
-		Mock<IBuildingRepository> buildingRepo = new();
-		buildingRepo.Setup(r => r.Get(It.IsAny<string>())).Returns(new BuildingData
-		{
-			TypeId = "Barracks",
-			IsCore = false,
-		});
-		return new BattleReportService(repository, buildingRepo.Object);
+		Mock<IHistoryCoreLookup> coreLookup = new();
+		coreLookup.Setup(r => r.IsCoreBuilding(It.IsAny<string>())).Returns(false);
+		return new BattleReportService(repository, coreLookup.Object);
 	}
 
 	private static BattleReportService CreateService(out FakeReportRepository repository)
 	{
 		repository = new FakeReportRepository();
-		Mock<IBuildingRepository> buildingRepo = new();
-		buildingRepo.Setup(r => r.Get(It.IsAny<string>())).Returns(new BuildingData
-		{
-			TypeId = "Barracks",
-			IsCore = false,
-		});
-		return new BattleReportService(repository, buildingRepo.Object);
+		Mock<IHistoryCoreLookup> coreLookup = new();
+		coreLookup.Setup(r => r.IsCoreBuilding(It.IsAny<string>())).Returns(false);
+		return new BattleReportService(repository, coreLookup.Object);
 	}
 
 	private static void CapturePhase(BattleReportService service, int nightIndex, BattlePhase phase)
@@ -264,7 +256,7 @@ public class BattleReportServiceTests
 		service.CapturePhaseSnapshot(new[]
 		{
 			new BuildingSnapshot { TypeId = "Barracks", AnchorGridX = 1, AnchorGridY = 1, Health = 100 },
-		}, nightIndex, phase, 0, new List<CardData>());
+		}, nightIndex, phase, 0, new List<CardSnapshot>());
 	}
 }
 

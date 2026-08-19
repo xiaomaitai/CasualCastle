@@ -32,24 +32,12 @@ public partial class BattleReportSystem : Node, IBattleReportCapture
 		_service.StartMatch(selectedReportId);
 	}
 
-	public void CapturePhaseSnapshot(IReadOnlyList<IBuildingState> buildings, int gold, IReadOnlyList<CardData> handCards, int nightIndex, BattlePhase phase)
+	public void CapturePhaseSnapshot(IReadOnlyList<BuildingSnapshot> buildings, int gold, IReadOnlyList<CardSnapshot> handCards, int nightIndex, BattlePhase phase)
 	{
 		if (nightIndex <= 0)
 			return;
 
-		IEnumerable<BuildingSnapshot> snapshots = buildings
-			.Where(b => !GameManager.Get<IBuildingRepository>().IsCoreBuilding(b.TypeId) && !b.IsDestroyed)
-			.Select(b => new BuildingSnapshot
-			{
-				TypeId = b.TypeId,
-				AnchorGridX = b.AnchorGridX,
-				AnchorGridY = b.AnchorGridY,
-				Health = b.Health,
-				IsManuallyPaused = b.IsManuallyPaused,
-				IsCombineProhibited = b.IsCombineProhibited,
-			});
-
-		_service.CapturePhaseSnapshot(snapshots, nightIndex, phase, gold, handCards);
+		_service.CapturePhaseSnapshot(buildings, nightIndex, phase, gold, handCards);
 	}
 
 	public void DiscardCurrentReport()
