@@ -50,21 +50,15 @@ public sealed class DeathSideEffects
 		Node2D battlefield = AdapterRegistry.Resolve<GameManager>()?.Battlefield;
 		if (battlefield == null)
 			return;
-		PackedScene unitScene = GD.Load<PackedScene>("res://prefabs/Unit.tscn");
-		if (unitScene == null)
+		UnitSpawnService spawnService = AdapterRegistry.Resolve<UnitSpawnService>();
+		if (spawnService == null)
 			return;
-		IUnitRepository unitRepo = GameManager.Get<IUnitRepository>();
 		float kingX = GameCoordinatesAdapter.GameUnitsToPixels(killer.GameX);
 		float kingY = GameCoordinatesAdapter.GameUnitsToPixels(killer.GameY);
 		for (int i = 0; i < 2; i++)
 		{
-			Unit shell = unitScene.Instantiate<Unit>();
-			UnitLogic logic = shell.GetNode<UnitLogic>("Logic");
-			logic.IsPlayerUnit = true;
-			logic.InitializeFromStats(unitRepo.Get("Bloodletter"));
 			float offsetX = i == 0 ? -50f : 50f;
-			shell.GlobalPosition = new Vector2(kingX + offsetX, kingY + 40f);
-			battlefield.AddChild(shell);
+			spawnService.SpawnUnitAt(battlefield, "Bloodletter", new Vector2(kingX + offsetX, kingY + 40f), true);
 		}
 	}
 }

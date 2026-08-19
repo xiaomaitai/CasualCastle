@@ -16,7 +16,7 @@
 - [x] 5.4 移除聚合对全局静态阵营 Buff 的直接读取；经对局上下文/效果快照注入（`UndeadDamageMultiplier` 注入 `GameContext`，SkillService 构建快照，Unit 不再直接读 `UndeadFactionBuffs`）
 - [ ] 5.5 `UnitLogic` 拆为领域桥接、Navigation/Motion、Targeting Adapter、UnitPresentation、DeathPresentation、ProjectilePresenter 等单一职责组件（已抽 `ProjectilePresenter.cs`、`UnitSfx.cs` 音效映射；Navigation 已有 NavigationPortAdapter；其余待续）
 - [ ] 5.6 死亡副作用改为领域事件 + 应用事件处理器；`OnDied` 只转发事件和触发表现（已抽 `DeathSideEffects.cs`：黑魔法 OnUnitDied/地下城经验/血魔召唤经应用侧处理器；OnDied 改薄转发）
-- [ ] 5.7 统一单位生成工厂，替换 Building 与 UnitLogic 内重复加载/初始化/增益逻辑（4.6 已建 UnitSpawnService，此处接入死亡召唤）
+- [x] 5.7 统一单位生成工厂，替换 Building 与 UnitLogic 内重复加载/初始化/增益逻辑（4.6 已建 UnitSpawnService；新增 `SpawnUnitAt` 供血魔召唤接入，删除 DeathSideEffects 内重复 load/初始化）
 - [ ] 5.8 投射物路径/纹理/音效映射集中为表现配置，领域攻击事件不引用素材路径
 - [ ] 5.9 Buff 展示改只读 `UnitPresentationModel`，领域状态不含本地化文案
 

@@ -24,6 +24,25 @@ public sealed class UnitSpawnService
 			Spawn(building, buildingSystem, unitScene, unit => buildingSystem.ApplyUnitSpawnStats(building.TypeId, unit));
 	}
 
+	public void SpawnUnitAt(Node2D battlefield, string unitTypeId, Vector2 globalPosition, bool isPlayerUnit)
+	{
+		if (battlefield == null || string.IsNullOrEmpty(unitTypeId))
+			return;
+		IUnitRepository unitRepo = GameManager.Get<IUnitRepository>();
+		if (unitRepo == null)
+			return;
+		PackedScene unitScene = GD.Load<PackedScene>(UnitPrefabPath);
+		if (unitScene == null)
+			return;
+
+		Unit shell = unitScene.Instantiate<Unit>();
+		UnitLogic unit = shell.GetNode<UnitLogic>("Logic");
+		unit.IsPlayerUnit = isPlayerUnit;
+		unit.InitializeFromStats(unitRepo.Get(unitTypeId));
+		unit.GlobalPosition = globalPosition;
+		battlefield.AddChild(shell);
+	}
+
 	public void SpawnUnitType(Building building, string unitTypeId, int count)
 	{
 		if (building.Battlefield == null || building.GetCastle() == null || count <= 0 || string.IsNullOrEmpty(unitTypeId))
