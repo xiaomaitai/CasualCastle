@@ -52,7 +52,7 @@ Unit (Area2D)
 同样按三层拆：
 
 ```
-Building (Area2D)
+Building (Area2D，薄壳：装配领域桥接与能力组件)
 ├── Logic (Node2D)
 │   ├── CollisionShape
 │   └── NavigationObstacle
@@ -61,6 +61,11 @@ Building (Area2D)
 └── Effects (Node2D)
     └── BuildingStateIcon
 ```
+
+**补充（Phase 四后）：**
+- `Building.cs` 只做节点生命周期与组件装配；领域状态在 `BuildingRuntime`，能力逐帧逻辑在 `IBuildingComponent` 六件套（Trap/TreasureBox/Living/Mana/Plague/CrystalMine），仪式在 `RitualHostComponent`，产兵在 `ProductionComponent`→`UnitSpawnService`
+- 领域接口投影集中在 `BuildingBridge`（IBuildingState/IBuildingRef/IBuildingTarget），`Castle.GetBuildingStates()` 返回桥接对象
+- 表现分离：`BuildingView` 管贴图/工作材质/状态图标/部落指示，`BuildingEffects` 管工作跳动/受损闪色/摧毁粒子
 
 ## 特效组件约定
 

@@ -125,8 +125,8 @@ public partial class Castle : Node2D
 		List<IBuildingState> states = new();
 		foreach (Node child in GetChildren())
 		{
-			if (child is IBuildingState state)
-				states.Add(state);
+			if (child is Building building)
+				states.Add(building.Bridge);
 		}
 
 		return states;

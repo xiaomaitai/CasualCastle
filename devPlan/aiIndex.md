@@ -110,8 +110,8 @@
 | 目录 | 职责 | 关键文件 |
 |---|---|---|
 | `autoload/` | 常驻节点：DI 根、阶段、初始化、显示设置 | `GameManager.cs`、`InitManager.cs`、`DisplaySettingsManager.cs`、`AdapterRegistry.cs` |
-| `building/` | 城堡/建筑/放置/状态表现 | `Castle.cs`、`Building.cs`、`BuildingSystem.cs`、`CastlePlacementAdapter.cs` |
-| `battle/` | 战场单位逻辑与表现、导航、弹道 | `Unit.cs`、`UnitLogic.cs`、`UnitLifecycle.cs`、`UnitVisual.cs`、`UnitSpawn.cs`、`BattleManager.cs`、`NavigationPortAdapter.cs`、`FieldUnitRepository.cs`、`Projectile.cs` |
+| `building/` | 城堡/建筑/放置/状态表现 | `Castle.cs`、`Building.cs`（薄壳：装配组件）、`BuildingBridge.cs`（IBuildingState/IBuildingRef/IBuildingTarget 投影）、`BuildingView.cs`/`BuildingEffects.cs`（表现）、`ProductionComponent.cs`/`RitualHostComponent.cs`/`IBuildingComponent.cs` 与六能力组件（Trap/TreasureBox/Living/Mana/Plague/CrystalMine）、`TrapSourceFactory.cs`/`TrapNavPort.cs`、`BuildingSystem.cs`、`CastlePlacementAdapter.cs` |
+| `battle/` | 战场单位逻辑与表现、导航、弹道、统一生成 | `Unit.cs`、`UnitLogic.cs`、`UnitLifecycle.cs`、`UnitVisual.cs`、`UnitSpawn.cs`、`UnitSpawnService.cs`（产兵/仪式召唤共用）、`BattleManager.cs`、`NavigationPortAdapter.cs`、`FieldUnitRepository.cs`、`Projectile.cs` |
 | `battlefield/` | 战场地块 | `BattlefieldTileMap.cs` |
 | `battle_report/` | 战报快照/缓存/持久化 | `BattleReportSystem.cs` |
 | `combine/` | 组合结果实例化 | `CombineBuildingFactory.cs` |

@@ -417,7 +417,7 @@ public partial class NecromancerBattleSmoke : SmokeTestBase
 		IUpgradeUseCase useCase = GameManager.Get<IUpgradeUseCase>();
 		List<IBuildingState> states = _playerCastle.GetBuildingStates();
 		IBuildingState upgraded = useCase.TryUpgrade(
-			source, resultTypeId, healthRatio,
+			source.Bridge, resultTypeId, healthRatio,
 			AdapterRegistry.Resolve<Shop>().TrySpendGold,
 			new UpgradeBuildingFactory(_playerCastle),
 			RitualCircleRules.GetCoreLevel(states));

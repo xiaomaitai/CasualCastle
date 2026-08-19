@@ -103,7 +103,7 @@ public sealed class BuildingView
 
 		List<IBuildingState> all = _owner.GetCastle().GetBuildingStates();
 		List<IAdjacencyBuilding> domain = all.OfType<IAdjacencyBuilding>().ToList();
-		int count = HordeAdjacencyRules.CountAdjacencyBonusCells(_owner, domain, GameManager.Get<IBuildingRepository>());
+		int count = HordeAdjacencyRules.CountAdjacencyBonusCells(_owner.Bridge, domain, GameManager.Get<IBuildingRepository>());
 		_hordeIndicator.SetAdjacencyCellCount(count);
 	}
 

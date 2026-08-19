@@ -20,13 +20,14 @@ public class CombineBuildingFactory : ICombineBuildingFactory
 
 		building.BindToGrid(_castle, anchorX, anchorY);
 		_castle.PlaceBuilding(building, anchorX, anchorY, typeId);
-		return building;
+		return building.Bridge;
 	}
 
 	public void Destroy(IBuildingState building)
 	{
-		if (building is not Building b)
+		if (building is not BuildingBridge bridge)
 			return;
+		Building b = bridge.Building;
 		if (!GodotObject.IsInstanceValid(b))
 			return;
 		_castle.ReleaseBuildingFootprint(b);

@@ -9,8 +9,12 @@ using System.Linq;
 
 
 
-public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildingRef
+public partial class Building : Area2D
 {
+	private BuildingBridge _bridge;
+
+	public BuildingBridge Bridge => _bridge ??= new BuildingBridge(this, BuildingSys);
+
 	protected Castle CastleRef;
 
 	protected int GridX;
@@ -109,30 +113,9 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 			ITacticalQueries tactical = GameManager.Get<ITacticalQueries>();
 			if (tactical == null || CastleRef == null)
 				return false;
-			return tactical.HasEnemyOnBuilding(this);
+			return tactical.HasEnemyOnBuilding(Bridge);
 		}
 	}
-
-	bool IBuildingRef.IsDestroyed => IsDestroyed;
-
-	bool IBuildingRef.IsCore => BuildingSys.IsCoreBuilding(TypeId);
-
-	bool IBuildingRef.IsEnemyOf(IUnitState unit)
-	{
-		if (CastleRef == null)
-			return false;
-		return CastleRef.IsPlayerCastle != unit.IsPlayerUnit;
-	}
-
-	float IBuildingRef.MinX => GameCoordinatesAdapter.PixelsToGameUnits(GlobalPosition.X - GetBuildingSize().X * 0.5f);
-
-	float IBuildingRef.MinY => GameCoordinatesAdapter.PixelsToGameUnits(GlobalPosition.Y - GetBuildingSize().Y * 0.5f);
-
-	float IBuildingRef.MaxX => GameCoordinatesAdapter.PixelsToGameUnits(GlobalPosition.X + GetBuildingSize().X * 0.5f);
-
-	float IBuildingRef.MaxY => GameCoordinatesAdapter.PixelsToGameUnits(GlobalPosition.Y + GetBuildingSize().Y * 0.5f);
-
-	IBuildingTarget IBuildingRef.BuildingTarget => this;
 
 	public Vector2I GetMainGridPosition()
 	{
@@ -273,8 +256,8 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		for (int i = 0; i < neighbors.Count; i++)
 		{
 			int share = perNeighbor + (i < remainder ? 1 : 0);
-			if (neighbors[i] is Building neighbor && !neighbor.IsDestroyed)
-				neighbor.ApplyDamage(share);
+			if (neighbors[i] is BuildingBridge neighbor && !neighbor.Building.IsDestroyed)
+				neighbor.Building.ApplyDamage(share);
 		}
 	}
 
@@ -283,7 +266,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 		List<IBuildingState> result = new();
 		List<IBuildingState> states = CastleRef.GetBuildingStates();
 		List<IAdjacencyBuilding> adjacent = states.OfType<IAdjacencyBuilding>().ToList();
-		foreach (IAdjacencyBuilding neighbor in AdjacentRules.GetAdjacentBuildings(this, adjacent, GameManager.Get<IBuildingRepository>()))
+		foreach (IAdjacencyBuilding neighbor in AdjacentRules.GetAdjacentBuildings(Bridge, adjacent, GameManager.Get<IBuildingRepository>()))
 		{
 			if (neighbor is IBuildingState state && !state.IsDestroyed && LivingBuildingRules.IsLivingBuilding(state.TypeId))
 				result.Add(state);
@@ -394,7 +377,7 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 	public override void _Ready()
 	{
 		IFieldUnitRepository fieldRepo = GameManager.Get<IFieldUnitRepository>();
-		fieldRepo?.RegisterBuilding(this);
+		fieldRepo?.RegisterBuilding(Bridge);
 
 		_gameManager = AdapterRegistry.Resolve<GameManager>();
 		_shop = AdapterRegistry.Resolve<Shop>();
@@ -442,10 +425,10 @@ public partial class Building : Area2D, IBuildingState, IBuildingTarget, IBuildi
 	public override void _ExitTree()
 	{
 		TavernPartyService tavernParty = GameManager.Get<TavernPartyService>();
-		tavernParty?.ReleaseTavern(this);
+		tavernParty?.ReleaseTavern(Bridge);
 
 		IFieldUnitRepository fieldRepo = GameManager.Get<IFieldUnitRepository>();
-		fieldRepo?.UnregisterBuilding(this);
+		fieldRepo?.UnregisterBuilding(Bridge);
 
 		if (_gameManager != null)
 			_gameManager.PhaseChanged -= OnPhaseChanged;

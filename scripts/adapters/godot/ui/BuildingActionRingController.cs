@@ -243,7 +243,7 @@ public partial class BuildingActionRingController : Control
 		if (cost <= 0)
 			return false;
 
-		bool canUpgrade = rules.CanUpgrade(building, repo,
+		bool canUpgrade = rules.CanUpgrade(building.Bridge, repo,
 			GetCoreLevel(building, states), HordeCoreRules.CountBurrows(states));
 		return canUpgrade && AdapterRegistry.Resolve<Shop>().CanAfford(cost);
 	}
@@ -404,7 +404,7 @@ public partial class BuildingActionRingController : Control
 		List<IBuildingState> states = castle.GetBuildingStates();
 		IUpgradeUseCase useCase = GameManager.Get<IUpgradeUseCase>();
 		IBuildingState upgraded = useCase.TryUpgrade(
-			building, recipe.ResultTypeId, healthRatio,
+			building.Bridge, recipe.ResultTypeId, healthRatio,
 			AdapterRegistry.Resolve<Shop>().TrySpendGold,
 			new UpgradeBuildingFactory(castle),
 			GetCoreLevel(building, states),

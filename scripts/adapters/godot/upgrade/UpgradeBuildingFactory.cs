@@ -21,13 +21,14 @@ public class UpgradeBuildingFactory : IUpgradeBuildingFactory
 		building.BindToGrid(_castle, anchorX, anchorY);
 		building.ApplyHealthRatio(healthRatio);
 		_castle.PlaceBuilding(building, anchorX, anchorY, typeId);
-		return building;
+		return building.Bridge;
 	}
 
 	public void Destroy(IBuildingState building)
 	{
-		if (building is not Building b)
+		if (building is not BuildingBridge bridge)
 			return;
+		Building b = bridge.Building;
 		if (!GodotObject.IsInstanceValid(b))
 			return;
 		_castle.ReleaseBuildingFootprint(b);

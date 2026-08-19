@@ -80,7 +80,7 @@ public sealed class LivingComponent : IBuildingComponent
 			return;
 		UpgradeBuildingFactory factory = new(castle);
 		factory.Create(nextTypeId, _owner.AnchorGridX, _owner.AnchorGridY, _owner.Health / (float)_owner.MaxHealth);
-		factory.Destroy(_owner);
+		factory.Destroy(_owner.Bridge);
 		GameManager.Get<AdjacencyService>()?.RefreshCastle(castle.GetBuildingStates());
 		Upgraded?.Invoke();
 	}

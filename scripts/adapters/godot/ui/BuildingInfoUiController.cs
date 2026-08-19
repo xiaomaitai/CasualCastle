@@ -122,12 +122,12 @@ public partial class BuildingInfoUiController : Control
 			return;
 
 		AdjacencyService adjacencyService = GameManager.Get<AdjacencyService>();
-		IReadOnlyList<IAdjacencyBuilding> domainTargets = adjacencyService.GetAdjacentSameTypeTargets(hovered, castle.GetBuildingStates());
+		IReadOnlyList<IAdjacencyBuilding> domainTargets = adjacencyService.GetAdjacentSameTypeTargets(hovered.Bridge, castle.GetBuildingStates());
 		List<Building> targets = new();
 		foreach (IAdjacencyBuilding t in domainTargets)
 		{
-			if (t is Building b)
-				targets.Add(b);
+			if (t is BuildingBridge b)
+				targets.Add(b.Building);
 		}
 		castle.SetAdjacencyHighlightBuildings(targets);
 	}

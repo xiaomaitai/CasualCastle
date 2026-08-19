@@ -30,7 +30,7 @@ public partial class TavernBubble : Node2D
 			return;
 		}
 
-		IReadOnlyList<IUnitHandle> waiting = tavernParty.GetWaitingUnits(building);
+		IReadOnlyList<IUnitHandle> waiting = tavernParty.GetWaitingUnits(building.Bridge);
 		if (waiting.Count == 0)
 		{
 			HideBubble();
