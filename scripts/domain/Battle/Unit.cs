@@ -72,10 +72,7 @@ public partial class Unit : IUnitHandle
 
 	public ITacticalQueries Tactical { get; set; }
 
-	public BlackMagicService BlackMagic { get; set; }
-	public ComfortService Comfort { get; set; }
-
-	public ManaService Mana { get; set; }
+	public FactionResources Resources { get; set; }
 
 	public SkillSet Skills { get; private set; }
 
@@ -260,7 +257,7 @@ public partial class Unit : IUnitHandle
 		if (DemonKingRules.IsDemonKing(Race))
 		{
 			_status?.NotifyCombat();
-			Comfort?.SpendHit();
+			Resources?.Comfort?.SpendHit();
 			if (Skills != null && Skills.HasTrigger(StatModifierTrigger.OnDamaged))
 				IsFurious = true;
 			EventPort?.OnDamaged(amount, attacker);
@@ -513,7 +510,7 @@ public partial class Unit : IUnitHandle
 		StartStealthCooldown();
 		_status?.NotifyCombat();
 		if (DemonKingRules.IsDemonKing(Race))
-			Comfort?.SpendAttack();
+			Resources?.Comfort?.SpendAttack();
 
 		if (Skills != null && TryCastSpell())
 		{
@@ -630,7 +627,7 @@ public partial class Unit : IUnitHandle
 		if (TargetEnemy == null || !TargetEnemy.IsAlive)
 			return false;
 		SpecialConfig nova = Skills.GetSpecial(SpecialBehavior.ShadowNova);
-		if (nova != null && BlackMagic != null && CanCastSpell(nova) && Tactical != null
+		if (nova != null && Resources?.BlackMagic != null && CanCastSpell(nova) && Tactical != null
 			&& Tactical.FindEnemiesNearPoint(this, TargetEnemy.GameX, TargetEnemy.GameY, nova.Param).Count > 1)
 			return CastNova(nova);
 		SpecialConfig curse = Skills.GetSpecial(SpecialBehavior.Curse);
@@ -645,18 +642,20 @@ public partial class Unit : IUnitHandle
 
 	private bool CanCastSpell(SpecialConfig cfg)
 	{
-		return cfg.Cost > 0 && BlackMagic.Value >= cfg.Cost && GetSkillCooldownRemaining(cfg.SkillId) <= 0f;
+		BlackMagicService blackMagic = Resources?.BlackMagic;
+		return cfg.Cost > 0 && blackMagic != null && blackMagic.Value >= cfg.Cost && GetSkillCooldownRemaining(cfg.SkillId) <= 0f;
 	}
 
 	private bool CanCastManaStorm(SpecialConfig cfg)
 	{
-		return Mana != null && cfg.Cost > 0 && Mana.Value >= cfg.Cost
+		ManaService mana = Resources?.Mana;
+		return mana != null && cfg.Cost > 0 && mana.Value >= cfg.Cost
 			&& GetSkillCooldownRemaining(cfg.SkillId) <= 0f;
 	}
 
 	private bool CastManaStorm(SpecialConfig cfg)
 	{
-		Mana.TrySpend(cfg.Cost);
+		Resources?.Mana?.TrySpend(cfg.Cost);
 		StartSkillCooldown(cfg.SkillId);
 		foreach (IUnitHandle enemy in Tactical.FindEnemiesNearPoint(this, TargetEnemy.GameX, TargetEnemy.GameY, cfg.Param))
 			enemy.TakeDamage((int)cfg.Value, this, GameX, GameY);
@@ -666,7 +665,7 @@ public partial class Unit : IUnitHandle
 
 	private bool CastCurse(SpecialConfig cfg)
 	{
-		BlackMagic.TrySpend(cfg.Cost);
+		Resources?.BlackMagic?.TrySpend(cfg.Cost);
 		StartSkillCooldown(cfg.SkillId);
 		TargetEnemy.ApplySlow(cfg.Value, cfg.Param);
 		TargetEnemy.ApplyCurse(cfg.Value, cfg.Param);
@@ -676,7 +675,7 @@ public partial class Unit : IUnitHandle
 
 	private bool CastNova(SpecialConfig cfg)
 	{
-		BlackMagic.TrySpend(cfg.Cost);
+		Resources?.BlackMagic?.TrySpend(cfg.Cost);
 		StartSkillCooldown(cfg.SkillId);
 		foreach (IUnitHandle enemy in Tactical.FindEnemiesNearPoint(this, TargetEnemy.GameX, TargetEnemy.GameY, cfg.Param))
 			enemy.TakeDamage((int)cfg.Value, this, GameX, GameY);

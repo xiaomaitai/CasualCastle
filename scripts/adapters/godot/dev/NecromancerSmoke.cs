@@ -115,7 +115,7 @@ public partial class NecromancerSmoke : SmokeTestBase
 		CasualCastle.Domain.Battle.Unit mage = CreateDarkMage();
 		BlackMagicService blackMagic = new();
 		blackMagic.Add(20);
-		mage.BlackMagic = blackMagic;
+		mage.Resources = new FactionResources(blackMagic, null, null);
 		CasualCastle.Domain.Battle.Unit target = CreateTarget();
 		PrepareFight(mage, target);
 		mage.UpdateBehavior(2f, 0, 0);
@@ -129,7 +129,7 @@ public partial class NecromancerSmoke : SmokeTestBase
 	{
 		CasualCastle.Domain.Battle.Unit mage = CreateDarkMage();
 		BlackMagicService blackMagic = new();
-		mage.BlackMagic = blackMagic;
+		mage.Resources = new FactionResources(blackMagic, null, null);
 		CasualCastle.Domain.Battle.Unit target = CreateTarget();
 		PrepareFight(mage, target);
 		mage.UpdateBehavior(2f, 0, 0);
@@ -142,7 +142,7 @@ public partial class NecromancerSmoke : SmokeTestBase
 		CasualCastle.Domain.Battle.Unit mage = CreateDarkMage();
 		BlackMagicService blackMagic = new();
 		blackMagic.Add(40);
-		mage.BlackMagic = blackMagic;
+		mage.Resources = new FactionResources(blackMagic, null, null);
 		CasualCastle.Domain.Battle.Unit target = CreateTarget();
 		CasualCastle.Domain.Battle.Unit nearby = CreateTarget();
 		PrepareFight(mage, target, nearby);

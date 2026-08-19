@@ -8,7 +8,7 @@ public class ManaStormTests
 	private static Unit CreateKingWithManaStorm(ManaService mana)
 	{
 		Unit king = UnitTestFactory.CreateUnit(AttackType.Melee, true);
-		king.Mana = mana;
+		king.Resources = new FactionResources(null, mana, null);
 		king.Skills.Add(new SkillDef
 		{
 			Id = "mana_storm",

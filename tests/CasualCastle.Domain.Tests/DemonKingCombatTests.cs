@@ -11,7 +11,7 @@ public class DemonKingCombatTests
 	{
 		Unit king = CreateKing();
 		ComfortService comfort = new();
-		king.Comfort = comfort;
+		king.Resources = new FactionResources(null, null, comfort);
 		Unit attacker = UnitTestFactory.CreateUnit(AttackType.Melee, false);
 
 		king.TakeDamage(60, attacker, 0f, 0f);
@@ -37,7 +37,7 @@ public class DemonKingCombatTests
 	{
 		Unit king = CreateKing();
 		ComfortService comfort = new();
-		king.Comfort = comfort;
+		king.Resources = new FactionResources(null, null, comfort);
 		Unit target = UnitTestFactory.CreateUnit(AttackType.Melee, false);
 		king.SetPosition(0f, 0f);
 		target.SetPosition(50f, 0f);

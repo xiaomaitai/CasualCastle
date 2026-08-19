@@ -200,7 +200,7 @@ public partial class DungeonSmoke : SmokeTestBase
 	{
 		CasualCastle.Domain.Battle.Unit king = CreateKing();
 		ComfortService comfort = new();
-		king.Comfort = comfort;
+		king.Resources = new FactionResources(null, null, comfort);
 		CasualCastle.Domain.Battle.Unit attacker = CreateUnit(GameManager.Get<IUnitRepository>().Get("Imp"), false);
 		king.TakeDamage(999, attacker, 0f, 0f);
 		if (!king.IsAlive || king.Health != 1500)
@@ -411,7 +411,7 @@ public partial class DungeonSmoke : SmokeTestBase
 		if (mana.Value != 40f)
 			Fail("魔力累积错误");
 		CasualCastle.Domain.Battle.Unit king = CreateUnit(GameManager.Get<IUnitRepository>().Get("DemonKing"), true);
-		king.Mana = mana;
+		king.Resources = new FactionResources(null, mana, null);
 		king.Skills.Add(GameManager.Get<ISkillRepository>().Get("mana_storm"));
 		CasualCastle.Domain.Battle.Unit target = CreateUnit(GameManager.Get<IUnitRepository>().Get("Imp"), false);
 		target.SetPosition(50f, 0f);

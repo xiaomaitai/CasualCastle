@@ -9,7 +9,7 @@ public class DarkMagicCastingTests
 	{
 		Unit mage = UnitTestFactory.CreateUnit(AttackType.Ranged, true);
 		mage.Damage = 12;
-		mage.BlackMagic = blackMagic;
+		mage.Resources = new FactionResources(blackMagic, null, null);
 		mage.Skills.Add(new SkillDef
 		{
 			Id = "shadow_curse",

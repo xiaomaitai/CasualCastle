@@ -112,8 +112,7 @@ public partial class UnitLogic : Node2D
 			_unit.Initialize(stats, IsPlayerUnit);
 			_unit.SetDamageMatrix(GameManager.Get<DamageMatrix>());
 			_unit.Tactical = _tactical;
-			_unit.BlackMagic = GameManager.Get<BlackMagicService>();
-			_unit.Mana = GameManager.Get<ManaService>();
+			_unit.Resources = new FactionResources(GameManager.Get<BlackMagicService>(), GameManager.Get<ManaService>(), null);
 			ISkillRepository skillRepo = GameManager.Get<ISkillRepository>();
 		IReadOnlyList<SkillDef> skills = skillRepo.GetByUnitType(stats.TypeId);
 		foreach (SkillDef skill in skills)
@@ -144,7 +143,11 @@ public partial class UnitLogic : Node2D
 	public void SetComfort(ComfortService comfort)
 	{
 		if (_unit != null)
-			_unit.Comfort = comfort;
+		{
+			if (_unit.Resources == null)
+				_unit.Resources = new FactionResources(null, null, null);
+			_unit.Resources.Comfort = comfort;
+		}
 	}
 
 	public void ConfigureDefender(float patrolCenterX, float patrolCenterY, float patrolRadius)
