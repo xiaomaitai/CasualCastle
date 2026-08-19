@@ -16,7 +16,9 @@ public static class CompositionRoot
 {
 	public static ServiceProvider Build()
 	{
-		GameDataLoader.Load();
+		string configDbPath = Godot.ProjectSettings.GlobalizePath("res://assets/data/config.db");
+		string savesDir = Godot.ProjectSettings.GlobalizePath("user://saves");
+		GameDataLoader.Load(configDbPath);
 
 		ServiceCollection services = new ServiceCollection();
 
@@ -32,18 +34,18 @@ public static class CompositionRoot
 		services.AddSingleton<TavernPartyService>();
 		services.AddSingleton<IDelayScheduler, DelaySchedulerAdapter>();
 		services.AddSingleton<IBattleReportRepository, BattleReportStorage>();
-		services.AddSingleton<IUnitRepository, SqliteUnitRepository>();
-		services.AddSingleton<ISkillRepository, SqliteSkillRepository>();
-		services.AddSingleton<IVisualAssetRepository, SqliteVisualAssetRepository>();
+		services.AddSingleton<IUnitRepository, SqliteUnitRepository>(_ => new SqliteUnitRepository(configDbPath));
+		services.AddSingleton<ISkillRepository, SqliteSkillRepository>(_ => new SqliteSkillRepository(configDbPath));
+		services.AddSingleton<IVisualAssetRepository, SqliteVisualAssetRepository>(_ => new SqliteVisualAssetRepository(configDbPath));
 
-		SqliteBuildingRepository buildingRepo = new SqliteBuildingRepository();
+		SqliteBuildingRepository buildingRepo = new SqliteBuildingRepository(configDbPath);
 		services.AddSingleton<IBuildingRepository>(buildingRepo);
 		services.AddSingleton<IBuildingVisualRepository>(buildingRepo);
 		services.AddSingleton<IHistoryCoreLookup>(new BuildingCoreLookup(buildingRepo));
-		services.AddSingleton<ITechTreeRepository, SqliteTechTreeRepository>();
+		services.AddSingleton<ITechTreeRepository, SqliteTechTreeRepository>(_ => new SqliteTechTreeRepository(configDbPath));
 		services.AddSingleton<DamageMatrix>(_ => GameDataLoader.DamageMatrix);
 		services.AddSingleton<CombineRules>(_ => GameDataLoader.CombineRules);
-		services.AddSingleton<ISaveRepository, SaveStorage>();
+		services.AddSingleton<ISaveRepository, SaveStorage>(_ => new SaveStorage(savesDir));
 		services.AddApplication();
 
 		return services.BuildServiceProvider();

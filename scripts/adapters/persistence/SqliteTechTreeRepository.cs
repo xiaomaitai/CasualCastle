@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using CasualCastle.Domain.Building;
 using Godot;
 using Microsoft.Data.Sqlite;
-using GodotProjectSettings = Godot.ProjectSettings;
 
 namespace CasualCastle.Adapters.Persistence;
 
@@ -12,9 +11,9 @@ public class SqliteTechTreeRepository : ITechTreeRepository
 {
 	private readonly string _connectionString;
 
-	public SqliteTechTreeRepository()
+	public SqliteTechTreeRepository(string dbPath)
 	{
-		string fullPath = GodotProjectSettings.GlobalizePath("res://assets/data/config.db");
+		string fullPath = dbPath;
 		_connectionString = $"Data Source={fullPath}";
 		RunMigrations();
 	}

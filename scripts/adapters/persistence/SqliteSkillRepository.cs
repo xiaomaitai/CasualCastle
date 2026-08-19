@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using CasualCastle.Domain.Battle;
 using Microsoft.Data.Sqlite;
-using GodotProjectSettings = Godot.ProjectSettings;
 
 namespace CasualCastle.Adapters.Persistence;
 
@@ -11,9 +10,9 @@ public class SqliteSkillRepository : ISkillRepository
 	private readonly Dictionary<string, SkillDef> _skillCache = new();
 	private readonly Dictionary<string, List<SkillDef>> _unitSkillCache = new();
 
-	public SqliteSkillRepository()
+	public SqliteSkillRepository(string dbPath)
 	{
-		string fullPath = GodotProjectSettings.GlobalizePath("res://assets/data/config.db");
+		string fullPath = dbPath;
 		using SqliteConnection connection = new($"Data Source={fullPath}");
 		connection.Open();
 		EnsureDescriptionColumn(connection);

@@ -2,7 +2,6 @@
 using CasualCastle.Domain.Shared;
 using System.Collections.Generic;
 
-using GodotProjectSettings = Godot.ProjectSettings;
 
 namespace CasualCastle.Adapters.Persistence;
 
@@ -10,9 +9,9 @@ public class SaveStorage : ISaveRepository
 {
 	private readonly SaveDatabase _database;
 
-	public SaveStorage()
+	public SaveStorage(string savesDir)
 	{
-		_database = new SaveDatabase(GodotProjectSettings.GlobalizePath("user://saves"));
+		_database = new SaveDatabase(savesDir);
 	}
 
 	public void Save(SaveData data)

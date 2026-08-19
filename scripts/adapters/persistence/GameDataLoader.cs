@@ -6,7 +6,6 @@ using Microsoft.Data.Sqlite;
 using System.Collections.Generic;
 using System.Text.Json;
 
-using GodotProjectSettings = Godot.ProjectSettings;
 
 namespace CasualCastle.Adapters.Persistence;
 
@@ -19,9 +18,8 @@ public static class GameDataLoader
 	public static List<CardData> ShopCatalog { get; private set; }
 	public static List<BgmDef> BgmCatalog { get; private set; }
 
-	public static void Load()
+	public static void Load(string fullPath)
 	{
-		string fullPath = GodotProjectSettings.GlobalizePath(DbPath);
 		using SqliteConnection connection = new($"Data Source={fullPath}");
 		connection.Open();
 

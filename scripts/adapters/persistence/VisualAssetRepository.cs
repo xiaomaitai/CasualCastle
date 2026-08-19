@@ -2,7 +2,6 @@
 using CasualCastle.Domain.Shared;
 using System.Collections.Generic;
 using Microsoft.Data.Sqlite;
-using GodotProjectSettings = Godot.ProjectSettings;
 
 namespace CasualCastle.Adapters.Persistence;
 
@@ -12,9 +11,9 @@ public class SqliteVisualAssetRepository : IVisualAssetRepository
 	private readonly Dictionary<string, string> _portraitUids = new();
 	private readonly Dictionary<string, string> _buildingTextureUids = new();
 
-	public SqliteVisualAssetRepository()
+	public SqliteVisualAssetRepository(string dbPath)
 	{
-		string fullPath = GodotProjectSettings.GlobalizePath("res://assets/data/config.db");
+		string fullPath = dbPath;
 		using SqliteConnection connection = new($"Data Source={fullPath}");
 		connection.Open();
 		LoadSkillIconUids(connection);
