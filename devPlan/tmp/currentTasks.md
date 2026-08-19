@@ -13,7 +13,7 @@
 - [x] 5.1 确认 `Domain.Battle.Unit` 聚合边界；仅将可独立演化状态提为可独立演化组件：`SkillRuntime`（技能冷却状态机）与 `StatusEffects`（减速/中毒/诅咒/战斗计时/伏击/再生），`CombatState` 对应现有 `UnitState` 枚举 + `SetAmbushing` 内部意图；不按行数机械拆服务（+7 单测 @612）
 - [x] 5.2 大量公共 setter 收紧为意图方法，初始化数据改不可变定义 + 运行时状态（Health/MaxHealth 改 private set；IsDefender/Patrol*/IsResting → `SetDefender/SetPatrolRadius/SetResting`；初始化经不可变 `UnitStats`）
 - [x] 5.3 派系共享资源建模为对局/阵营级资源池，移除 Unit 持有 BlackMagicService/ManaService Singleton 所有权（新建 `FactionResources` 池对象承载 BlackMagic/Mana/Comfort，Unit 经 `Resources` 端口访问；资源不在每帧重建的 GameContext 上）
-- [ ] 5.4 移除聚合对全局静态阵营 Buff 的直接读取；经对局上下文/效果快照注入
+- [x] 5.4 移除聚合对全局静态阵营 Buff 的直接读取；经对局上下文/效果快照注入（`UndeadDamageMultiplier` 注入 `GameContext`，SkillService 构建快照，Unit 不再直接读 `UndeadFactionBuffs`）
 - [ ] 5.5 `UnitLogic` 拆为领域桥接、Navigation/Motion、Targeting Adapter、UnitPresentation、DeathPresentation、ProjectilePresenter 等单一职责组件
 - [ ] 5.6 死亡副作用改为领域事件 + 应用事件处理器；`OnDied` 只转发事件和触发表现
 - [ ] 5.7 统一单位生成工厂，替换 Building 与 UnitLogic 内重复加载/初始化/增益逻辑（4.6 已建 UnitSpawnService，此处接入死亡召唤）

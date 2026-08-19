@@ -436,7 +436,7 @@ public partial class Unit : IUnitHandle
 				{
 					int siegeDamage = (int)(Damage * GameCtx.AuraAttackDamageMultiplier * GetCurseDamageFactor());
 					if (UndeadRules.IsUndead(Race))
-						siegeDamage = (int)(siegeDamage * UndeadFactionBuffs.DamageMultiplier);
+						siegeDamage = (int)(siegeDamage * GameCtx.UndeadDamageMultiplier);
 					TargetBuilding.TakeDamage(siegeDamage);
 					if (GameCtx.AuraLifestealFraction > 0f)
 						Heal((int)(siegeDamage * GameCtx.AuraLifestealFraction));
@@ -538,7 +538,7 @@ public partial class Unit : IUnitHandle
 		}
 		effectiveDamage = (int)(effectiveDamage * GameCtx.AuraAttackDamageMultiplier * GetCurseDamageFactor());
 		if (UndeadRules.IsUndead(Race))
-			effectiveDamage = (int)(effectiveDamage * UndeadFactionBuffs.DamageMultiplier);
+			effectiveDamage = (int)(effectiveDamage * GameCtx.UndeadDamageMultiplier);
 		if (executeMultiplier != 1f)
 			effectiveDamage = (int)(effectiveDamage * executeMultiplier);
 		int finalDamage = CombatRules.CalculateDamage(effectiveDamage, DamageType, TargetEnemy.ArmorType, TargetEnemy.EffectiveArmorValue, _damageMatrix);

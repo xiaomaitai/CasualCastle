@@ -84,6 +84,7 @@ public class SkillService
 			ctx.AuraArmorBonus = aura.ArmorBonus;
 			ctx.AuraLifestealFraction = aura.LifestealFraction;
 			ctx.AuraDispelResistFraction = aura.DispelResistFraction;
+			ctx.UndeadDamageMultiplier = UndeadFactionBuffs.DamageMultiplier;
 
 			unit.SetGameContext(ctx);
 		}

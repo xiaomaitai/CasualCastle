@@ -229,6 +229,7 @@ public class NecromancerV05Tests
 			Unit attacker = CreateUndeadUnit(true);
 			attacker.Damage = 10;
 			attacker.ArmorValue = 0;
+			attacker.GameCtx.UndeadDamageMultiplier = 1.10f;
 			Unit target = UnitTestFactory.CreateUnit(AttackType.Melee, false);
 			target.ArmorValue = 0;
 			target.SetPosition(120, 0);
