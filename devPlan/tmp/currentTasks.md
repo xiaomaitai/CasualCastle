@@ -19,7 +19,7 @@
 - [ ] 6.6 审核端口方向和命名：UseCase 入站、Repository/Gateway/Presenter 出站；删除无边界价值接口
 - [ ] 6.7 Persistence 拆为可独立测试纯 C# 项目（Phase 零已建 Persistence.csproj，继续迁入剩余存储实现）
 - [ ] 6.8 收紧 MS DI 纯度：依赖 Godot 生命周期的实现留在场景 Adapter/Registry
-- [ ] 6.9 契约测试：配置映射、存档版本兼容、空存档、旧存档迁移、战报 Snapshot 映射
+- [x] 6.9 契约测试：配置映射、存档版本兼容、空存档、旧存档迁移、战报 Snapshot 映射（新增 `ToCardData_RestoresPlaceableCardFields`/`OldSaveWithoutItemType_BackfillsFromCatalog`；空/典型存档恢复与快照映射由 GameSession/SaveDataMapper/ReportBuilder/ReportService 测试覆盖）
 
 ## 验收
 
