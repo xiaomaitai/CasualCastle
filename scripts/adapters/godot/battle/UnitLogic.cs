@@ -17,6 +17,8 @@ public partial class UnitLogic : Node2D
 
 	public IUnitHandle Handle => _unit;
 
+	public IUnitHandle LastAttacker => _eventRelay?.LastAttacker;
+
 	private IFieldUnitRepository _fieldRepo;
 
 	private ITacticalQueries _tactical;
@@ -88,6 +90,8 @@ public partial class UnitLogic : Node2D
 	private bool _isDead;
 
 	private readonly ProjectilePresenter _projectiles = new();
+
+	private DeathSideEffects _deathSideEffects;
 
 	private const float PushSyncEpsilonSq = 0.01f;
 
@@ -382,60 +386,13 @@ public partial class UnitLogic : Node2D
 	private void OnDied()
 	{
 		_isDead = true;
-		Shop shop = AdapterRegistry.Resolve<Shop>();
-		if (shop != null && shop.FactionId == FactionDef.NecromancerId)
-			GameManager.Get<BlackMagicService>()?.OnUnitDied(IsPlayerUnit, _unit?.Race);
-		if (shop != null && shop.FactionId == FactionDef.DungeonId)
-			HandleDungeonDeath();
+		(_deathSideEffects ??= new DeathSideEffects(this)).Process();
 		_visual?.UpdateSleepVisual(false, false);
 		_lifecycle?.PlayDeathAnimation(_body);
 		Sfx.Play(SfxEvents.UnitDeath);
 		TavernPartyService tavernParty = GameManager.Get<TavernPartyService>();
 		tavernParty?.RemoveOnDeath(_unit);
 		_corpseService?.ScheduleCorpseRemoval(_unit);
-	}
-
-	private void HandleDungeonDeath()
-	{
-		KingExperienceService xp = GameManager.Get<KingExperienceService>();
-		if (xp == null)
-			return;
-		xp.OnUnitDied(IsPlayerUnit);
-		if (IsPlayerUnit)
-			return;
-		if (_unit != null && _unit.UnitCost >= DemonKingRules.BossDropCostThreshold)
-			xp.OnSmallCrystalMined();
-		IUnitHandle killer = _eventRelay?.LastAttacker;
-		if (killer != null && DemonKingRules.IsDemonKing(killer.Race))
-		{
-			xp.OnKingKill();
-			TrySummonBloodletters(killer);
-		}
-	}
-
-	private void TrySummonBloodletters(IUnitHandle killer)
-	{
-		if (killer.Skills == null || !killer.Skills.HasSkill("summon_bloodletter"))
-			return;
-		Node2D battlefield = AdapterRegistry.Resolve<GameManager>()?.Battlefield;
-		if (battlefield == null)
-			return;
-		PackedScene unitScene = GD.Load<PackedScene>("res://prefabs/Unit.tscn");
-		if (unitScene == null)
-			return;
-		IUnitRepository unitRepo = GameManager.Get<IUnitRepository>();
-		float kingX = GameCoordinatesAdapter.GameUnitsToPixels(killer.GameX);
-		float kingY = GameCoordinatesAdapter.GameUnitsToPixels(killer.GameY);
-		for (int i = 0; i < 2; i++)
-		{
-			Unit shell = unitScene.Instantiate<Unit>();
-			UnitLogic logic = shell.GetNode<UnitLogic>("Logic");
-			logic.IsPlayerUnit = true;
-			logic.InitializeFromStats(unitRepo.Get("Bloodletter"));
-			float offsetX = i == 0 ? -50f : 50f;
-			shell.GlobalPosition = new Vector2(kingX + offsetX, kingY + 40f);
-			battlefield.AddChild(shell);
-		}
 	}
 
 	private void OnHealed()
