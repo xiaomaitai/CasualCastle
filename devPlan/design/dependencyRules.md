@@ -8,7 +8,7 @@
 ```
 Domain.Shared
     ↑        ↑            ↑
-Domain.Building  Domain.Battle  Domain.History(→Shared, Building)
+Domain.Building  Domain.Battle  Domain.History(→Shared)
     ↑
 Application 纯 C# 项目（scripts/application/Application.csproj，跨聚合用例）
     ↑

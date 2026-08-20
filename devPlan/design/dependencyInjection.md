@@ -294,7 +294,7 @@ domain 聚合
 ├──────────────────────────────────────────┤
 │  Domain.Building  → Shared                │
 │  Domain.Battle    → Shared                │
-│  Domain.History   → Shared, Building      │
+│  Domain.History   → Shared              │
 │  (零 Godot，只依赖下层 domain)              │
 ├──────────────────────────────────────────┤
 │  Adapters (Godot + persistence)           │

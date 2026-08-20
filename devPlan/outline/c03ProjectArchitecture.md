@@ -9,7 +9,7 @@ CasualCastle/
 │   │   ├── Shared/       Shared.csproj             # 坐标、常量、阶段状态机
 │   │   ├── Building/     Building.csproj → Shared  # 建筑、邻接、商店、手牌、组合
 │   │   ├── Battle/       Battle.csproj → Shared          # 战斗、昼夜
-│   │   └── History/      History.csproj → Shared, Building # 战报、回放
+│   │   └── History/      History.csproj → Shared        # 战报、回放
 │   │
 │   ├── CompositionRoot.cs                          # MS DI 容器构建入口
 │   │
@@ -44,7 +44,7 @@ CasualCastle/
 ├── scenes/  prefabs/  assets/  project.godot
 ├── tests/CasualCastle.Domain.Tests/
 ├── devPlan/
-└── CasualCastle.sln                               # 6 个项目
+└── CasualCastle.sln                               # 10 个项目（5 domain/application/persistence + 3 测试 + 主项目）
 ```
 
 ## 5.2 DI 机制

@@ -19,6 +19,7 @@
 | 架构 P5 | static Instance 全部替换为 AdapterRegistry | ✅ |
 | 架构 P6 | 领域服务层迁移（6 个 System → Service） | ✅ |
 | 架构 P7 | 战斗系统 B1-B6（多兵种/远程/克制/表现/SQLite） | ✅ |
+| 架构 P8 | 领域边界与 Infrastructure 隔离：反腐败映射、存档映射集中、唯一网格归属、端口方向审核、Persistence 纯 C#、MS DI 纯度、契约测试（单测 612+5+24） | ✅ |
 | v0.7 | 建筑美术：全部建筑独立透明图 + 去除泥土地基 | ⏸ 延后（优先级最低，先做其他方向） |
 
 ## v0.1 版本目标
