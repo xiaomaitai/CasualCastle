@@ -95,7 +95,7 @@
 | `domain/Shared/` | 坐标、常量、阶段状态机、存档模型、BGM 目录与选择规则 | `GameVector2.cs`、`GameCoordinateRules.cs`、`GameRules.cs`、`BuildingTypeIds.cs`、`FactionIds.cs`、`MatchPhaseMachine.cs`、`SaveModels.cs`、`IVisualAssetRepository.cs`、`BgmDef.cs`、`BgmSelectionRules.cs` |
 | `domain/Building/` | 建筑、卡牌、手牌、商店、组合、升级、仪式、邻接、科技树 | `BuildingData.cs`、`OccupancyGrid.cs`、`CardRules.cs`、`Hand.cs`、`ShopRules.cs`、`CombineService.cs`、`UpgradeService.cs`、`RitualService.cs`、`AdjacencyService.cs`、`IBuildingVisualRepository.cs`、`BuildingVisualData.cs`、`TechTreeNode.cs` |
 | `domain/Battle/` | 战斗、单位、技能、光环、隐身、尸体、RVO 推开、黑魔法 | `CombatRules.cs`、`Unit.cs`、`UnitState.cs`、`UnitStats.cs`、`SkillService.cs`、`AuraService.cs`、`StealthService.cs`、`CorpseService.cs`、`RvoService.cs`、`BlackMagicService.cs` |
-| `domain/History/` | 战报、回放、镜像复刻 | `BattleReportService.cs`、`ReportBuilder.cs`、`ReplayService.cs`、`MirrorRules.cs` |
+| `domain/History/` | 战报、回放、镜像复刻 | `BattleReportService.cs`、`ReportBuilder.cs`、`ReplayService.cs`、`MirrorRules.cs`、`IHistoryCoreLookup.cs` |
 
 端口接口（`I*` 文件）按子域散落在上述目录中，如 `IFieldUnitRepository.cs`、`IBuildingPlacement.cs`、`IBattleReportRepository.cs`。
 
@@ -113,7 +113,7 @@
 | `building/` | 城堡/建筑/放置/状态表现 | `Castle.cs`、`Building.cs`（薄壳：装配组件）、`BuildingBridge.cs`（IBuildingState/IBuildingRef/IBuildingTarget 投影）、`BuildingView.cs`/`BuildingEffects.cs`（表现）、`ProductionComponent.cs`/`RitualHostComponent.cs`/`IBuildingComponent.cs` 与六能力组件（Trap/TreasureBox/Living/Mana/Plague/CrystalMine）、`TrapSourceFactory.cs`/`TrapNavPort.cs`、`BuildingSystem.cs`、`CastlePlacementAdapter.cs` |
 | `battle/` | 战场单位逻辑与表现、导航、弹道、统一生成 | `Unit.cs`、`UnitLogic.cs`、`UnitLifecycle.cs`、`UnitVisual.cs`、`UnitSpawn.cs`、`UnitSpawnService.cs`（产兵/仪式召唤共用）、`BattleManager.cs`、`NavigationPortAdapter.cs`、`FieldUnitRepository.cs`、`Projectile.cs` |
 | `battlefield/` | 战场地块 | `BattlefieldTileMap.cs` |
-| `battle_report/` | 战报快照/缓存/持久化 | `BattleReportSystem.cs` |
+| `battle_report/` | 战报快照/缓存/持久化 | `BattleReportSystem.cs`、`BuildingCoreLookup.cs` |
 | `combine/` | 组合结果实例化 | `CombineBuildingFactory.cs` |
 | `upgrade/` | 升级结果实例化 | `UpgradeBuildingFactory.cs` |
 | `replay/` | 敌方复刻目标 | `ReplayTarget.cs` |
