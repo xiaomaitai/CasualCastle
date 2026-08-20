@@ -49,6 +49,8 @@ public sealed class BuildingBridge : IBuildingState, IBuildingRef, IBuildingTarg
 
 	bool IBuildingRef.IsCore => _buildingSystem.IsCoreBuilding(_building.TypeId);
 
+	bool IBuildingRef.IsPlayerOwned => _building.IsPlayerOwned;
+
 	bool IBuildingRef.IsEnemyOf(IUnitState unit)
 	{
 		Castle castle = _building.GetCastle();

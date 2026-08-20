@@ -122,8 +122,7 @@ public class HealerBehaviorTests
 	public void UpdateBehavior_Healer_HealsAllyInRange()
 	{
 		FakeUnitRepository repo = new();
-		RecordingNavPort nav = new();
-		Unit healer = CreateHealer(repo, 0f, nav);
+		Unit healer = CreateHealer(repo, 0f);
 		Unit ally = CreateAlly(repo, 50f);
 		ally.TakeDamage(50, null, 0f, 0f);
 		healer.UpdateTargeting(null);
@@ -131,16 +130,14 @@ public class HealerBehaviorTests
 		healer.UpdateBehavior(0.2f, 500f, 500f);
 
 		Assert.Equal(80, ally.Health);
-		Assert.Equal(healer.GameX, nav.LastTargetX);
-		Assert.Equal(healer.GameY, nav.LastTargetY);
+		Assert.False(healer.HasMoveGoal);
 	}
 
 	[Fact]
 	public void UpdateBehavior_Healer_RespectsHealInterval()
 	{
 		FakeUnitRepository repo = new();
-		RecordingNavPort nav = new();
-		Unit healer = CreateHealer(repo, 0f, nav);
+		Unit healer = CreateHealer(repo, 0f);
 		Unit ally = CreateAlly(repo, 50f);
 		ally.TakeDamage(50, null, 0f, 0f);
 		healer.UpdateTargeting(null);
@@ -155,8 +152,7 @@ public class HealerBehaviorTests
 	public void UpdateBehavior_Healer_AfterIntervalHealsAgain()
 	{
 		FakeUnitRepository repo = new();
-		RecordingNavPort nav = new();
-		Unit healer = CreateHealer(repo, 0f, nav);
+		Unit healer = CreateHealer(repo, 0f);
 		Unit ally = CreateAlly(repo, 50f);
 		ally.TakeDamage(50, null, 0f, 0f);
 		healer.UpdateTargeting(null);
@@ -171,22 +167,21 @@ public class HealerBehaviorTests
 	public void UpdateBehavior_Healer_NoTarget_Marches()
 	{
 		FakeUnitRepository repo = new();
-		RecordingNavPort nav = new();
-		Unit healer = CreateHealer(repo, 0f, nav);
+		Unit healer = CreateHealer(repo, 0f);
 		healer.UpdateTargeting(null);
 
 		healer.UpdateBehavior(0.2f, 500f, 500f);
 
-		Assert.Equal(500f, nav.LastTargetX);
-		Assert.Equal(500f, nav.LastTargetY);
+		Assert.True(healer.HasMoveGoal);
+		Assert.Equal(500f, healer.MoveGoalX);
+		Assert.Equal(500f, healer.MoveGoalY);
 	}
 
 	[Fact]
 	public void UpdateBehavior_Healer_DoesNotAttackEnemy()
 	{
 		FakeUnitRepository repo = new();
-		RecordingNavPort nav = new();
-		Unit healer = CreateHealer(repo, 0f, nav);
+		Unit healer = CreateHealer(repo, 0f);
 		Unit ally = CreateAlly(repo, 50f);
 		ally.TakeDamage(50, null, 0f, 0f);
 		Unit enemy = CreateEnemy(repo, 40f);
@@ -197,7 +192,7 @@ public class HealerBehaviorTests
 		Assert.Equal(100, enemy.Health);
 	}
 
-	private static Unit CreateHealer(FakeUnitRepository repo, float offsetX, RecordingNavPort nav = null)
+	private static Unit CreateHealer(FakeUnitRepository repo, float offsetX)
 	{
 		UnitStats stats = new()
 		{
@@ -218,7 +213,7 @@ public class HealerBehaviorTests
 			HealRange = 150f,
 			HealInterval = 2f
 		};
-		Unit unit = new(nav ?? new RecordingNavPort());
+		Unit unit = new();
 		unit.Initialize(stats, true);
 		unit.SetDamageMatrix(new DamageMatrix());
 		unit.SetPosition(offsetX, 0f);

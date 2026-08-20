@@ -64,7 +64,7 @@ public class StealthServiceTests
 	{
 		FakeUnitRepository repo = new();
 		Unit assassin = CreateStealthyUnit(true, 0, 0);
-		Unit detector = UnitTestFactory.CreateUnit(AttackType.Melee, false, 90f, null, true);
+		Unit detector = UnitTestFactory.CreateUnit(AttackType.Melee, false, 90f, true);
 		detector.SetPosition(1000, 0);
 		repo.Register(assassin);
 		repo.Register(detector);
@@ -79,7 +79,7 @@ public class StealthServiceTests
 	{
 		FakeUnitRepository repo = new();
 		Unit assassin = CreateStealthyUnit(true, 0, 0);
-		Unit detector = UnitTestFactory.CreateUnit(AttackType.Melee, false, 90f, null, true);
+		Unit detector = UnitTestFactory.CreateUnit(AttackType.Melee, false, 90f, true);
 		detector.SetPosition(1000, 0);
 		repo.Register(assassin);
 		repo.Register(detector);

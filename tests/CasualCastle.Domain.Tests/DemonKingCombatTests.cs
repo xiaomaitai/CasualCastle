@@ -150,7 +150,7 @@ public class DemonKingCombatTests
 			VisionRange = 260,
 			Race = DemonKingRules.DemonKingRace,
 		};
-		Unit king = new(new RecordingNavPort());
+		Unit king = new();
 		king.Initialize(stats, true);
 		king.SetDamageMatrix(new DamageMatrix());
 		return king;

@@ -3,7 +3,7 @@ public static class TrapSourceFactory
 {
 	public static CasualCastle.Domain.Battle.Unit Create(bool isPlayerUnit)
 	{
-		CasualCastle.Domain.Battle.Unit source = new(new TrapNavPort());
+		CasualCastle.Domain.Battle.Unit source = new();
 		source.IsPlayerUnit = isPlayerUnit;
 		return source;
 	}

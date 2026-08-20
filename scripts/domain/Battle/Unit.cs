@@ -7,8 +7,6 @@ namespace CasualCastle.Domain.Battle;
 
 public partial class Unit : IUnitHandle
 {
-	internal INavigationPort NavPort { get; }
-
 	public IUnitEventPort EventPort { get; set; }
 
 	public string TypeId { get; set; }
@@ -114,6 +112,34 @@ public partial class Unit : IUnitHandle
 		PatrolRadius = radius;
 	}
 
+	public bool HasMoveGoal { get; private set; }
+
+	public float MoveGoalX { get; private set; }
+
+	public float MoveGoalY { get; private set; }
+
+	public float NavVelX { get; private set; }
+
+	public float NavVelY { get; private set; }
+
+	public void SetNavVelocity(float vx, float vy)
+	{
+		NavVelX = vx;
+		NavVelY = vy;
+	}
+
+	private void SetMoveGoal(float x, float y)
+	{
+		HasMoveGoal = true;
+		MoveGoalX = x;
+		MoveGoalY = y;
+	}
+
+	private void StopMoving()
+	{
+		HasMoveGoal = false;
+	}
+
 	public UnitState State { get; set; }
 
 	private float _attackTimer;
@@ -140,9 +166,8 @@ public partial class Unit : IUnitHandle
 		}
 	}
 
-	public Unit(INavigationPort navPort)
+	public Unit()
 	{
-		NavPort = navPort;
 	}
 
 	public void Initialize(UnitStats stats, bool isPlayerUnit)
@@ -444,7 +469,7 @@ public partial class Unit : IUnitHandle
 				}
 				else
 				{
-					NavPort.SetTarget(GameX, GameY);
+					StopMoving();
 				}
 				break;
 
@@ -454,12 +479,12 @@ public partial class Unit : IUnitHandle
 
 			case UnitState.Marching:
 				TargetEnemy = null;
-				NavPort.SetTarget(marchTargetGameX, marchTargetGameY);
+				SetMoveGoal(marchTargetGameX, marchTargetGameY);
 				break;
 
 			case UnitState.Waiting:
 				TargetEnemy = null;
-				NavPort.SetTarget(GameX, GameY);
+				StopMoving();
 				break;
 		}
 	}
@@ -468,7 +493,7 @@ public partial class Unit : IUnitHandle
 	{
 		if (HealTarget == null || !HealTarget.IsAlive || HealTarget.Health >= HealTarget.MaxHealth)
 		{
-			NavPort.SetTarget(GameX, GameY);
+			StopMoving();
 			return;
 		}
 
@@ -476,11 +501,11 @@ public partial class Unit : IUnitHandle
 		float dy = HealTarget.GameY - GameY;
 		if (MathF.Sqrt(dx * dx + dy * dy) > HealRange)
 		{
-			NavPort.SetTarget(HealTarget.GameX, HealTarget.GameY);
+			SetMoveGoal(HealTarget.GameX, HealTarget.GameY);
 			return;
 		}
 
-		NavPort.SetTarget(GameX, GameY);
+		StopMoving();
 		if (_healTimer > 0f)
 			return;
 
@@ -493,16 +518,19 @@ public partial class Unit : IUnitHandle
 	private void TryEngage(float effectiveAttackCooldown)
 	{
 		if (TargetEnemy == null || !TargetEnemy.IsAlive)
+		{
+			StopMoving();
 			return;
+		}
 		if (EdgeDistanceTo(TargetEnemy) <= AttackRange)
 			TryAttack(effectiveAttackCooldown);
 		else
-			NavPort.SetTarget(TargetEnemy.GameX, TargetEnemy.GameY);
+			SetMoveGoal(TargetEnemy.GameX, TargetEnemy.GameY);
 	}
 
 	private void TryAttack(float effectiveAttackCooldown)
 	{
-		NavPort.SetTarget(GameX, GameY);
+		StopMoving();
 		if (_attackTimer > 0)
 			return;
 
@@ -570,13 +598,6 @@ public partial class Unit : IUnitHandle
 		float dy = GameY - target.GameY;
 		return MathF.Sqrt(dx * dx + dy * dy) - CollisionRadius - target.CollisionRadius;
 	}
-
-	public void ApplyPush(float dx, float dy)
-	{
-		GameX += dx;
-		GameY += dy;
-	}
-
 
 	private void ApplyGraceEffects(int healed)
 	{

@@ -16,7 +16,6 @@ Entity (Area2D / Node2D)
 ```
 Unit (Area2D)
 ├── Logic (Node2D)
-│   └── NavigationAgent (NavigationAgent2D)
 ├── CollisionShape (CollisionShape2D)
 └── View (Node2D)
     └── UnitCard (Node2D)          ← UnitCardView
@@ -35,7 +34,6 @@ Unit (Area2D)
 | 节点 | 类型 | 职责 | 修改者 |
 |------|------|------|--------|
 | `Logic` | Node2D | 容纳逻辑组件 | — |
-| `Logic/NavigationAgent` | NavigationAgent2D | 寻路 | UnitLogic._Process 设 TargetPosition |
 | `CollisionShape` | CollisionShape2D | 碰撞体 | Unit 设半径 |
 | `View` | Node2D | 表现容器 | 运动特效脚本改 Scale / Position |
 | `View/UnitCard` | UnitCardView | 单位卡牌（名称、血量条、状态/Buff 标签） | UnitVisual 调 SetHealth/SetStatus/SetBuffs/SetFlipH/SetPortraitTint |
@@ -58,8 +56,7 @@ Unit (Area2D)
 ```
 Building (Area2D，薄壳：装配领域桥接与能力组件)
 ├── Logic (Node2D)
-│   ├── CollisionShape
-│   └── NavigationObstacle
+│   └── CollisionShape
 ├── View (Node2D)
 │   └── Sprite
 └── Effects (Node2D)

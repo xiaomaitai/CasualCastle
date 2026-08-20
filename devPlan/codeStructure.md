@@ -29,9 +29,10 @@ CasualCastle/
 │   │   │   ├── Unit.cs, Unit.Combat.cs, Unit.Skills.cs, Unit.Status.cs
 │   │   │   ├── UnitState.cs, UnitStats.cs, UnitSize.cs
 │   │   │   ├── CombatRules.cs, DamageMatrix.cs, DamageType.cs, AttackType.cs, ArmorType.cs
-│   │   │   ├── UnitSpatialService.cs, IUnitSpatialService.cs
+│   │   │   ├── NavGrid.cs, FlowField.cs, FlowFieldService.cs, NavSpatialHash.cs
+│   │   │   ├── SteeringService.cs, NavigationService.cs, INavigationService.cs, INavGridSource.cs
 │   │   │   ├── IFieldUnitRepository.cs, IUnitRepository.cs
-│   │   │   ├── IGameState.cs, INavigationPort.cs, IUnitEventPort.cs
+│   │   │   ├── IGameState.cs, IUnitEventPort.cs
 │   │   │   ├── IBuildingRef.cs, IBuildingTarget.cs
 │   │   │   ├── SkillEffectTypes.cs
 │   │   │   └── BattleModule.cs
@@ -111,7 +112,9 @@ domain 项目零 `using Godot`，单向无循环。
 
 ```
 第一层：MS DI (ServiceProvider)
-  ├── 纯 C# 领域服务：ShopRules, AdjacencyService, UnitSpatialService (IUnitSpatialService)
+  ├── 纯 C# 领域服务：ShopRules, AdjacencyService
+  ├── 寻路领域服务：FlowFieldService, SteeringService, NavigationService (INavigationService)
+  ├── 寻路网格来源：INavGridSource→NavGridSource（adapter 桥接）
   ├── BattleReportService, ReplayService (IReplayUseCase)
   ├── 出站 Port 实现：IFieldUnitRepository→FieldUnitRepository
   ├── 持久化：IBattleReportRepository, IUnitRepository, IBuildingRepository
@@ -148,7 +151,7 @@ domain 项目零 `using Godot`，单向无循环。
 |----|------|
 | `MainGameController` | 场景入口，注册 Battlefield/Castle 到 GameManager |
 | `UIManager` | UI 总控，组合 HUD/商店/手牌/暂停/设置/结算控制器 |
-| `BattleManager` | 每帧调用 UnitSpatialService.PushUnits |
+| `BattleManager` | 每帧驱动单位寻路（FlowField + Steering）与战场刷新 |
 | `BuildingSystem` | 统一放置、占地配置表、产兵属性应用 |
 | `BattleReportSystem` | 夜末快照、局内缓存、持久化 |
 
@@ -166,7 +169,10 @@ domain 项目零 `using Godot`，单向无循环。
 
 | 类 | 子域 | 注册方式 |
 |----|------|---------|
-| `UnitSpatialService` | Battle | MS DI Singleton（通过 IUnitSpatialService） |
+| `FlowFieldService` | Battle | MS DI Singleton |
+| `SteeringService` | Battle | MS DI Singleton |
+| `NavigationService` | Battle | MS DI Singleton（通过 INavigationService） |
+| `NavGridSource` | Battle | MS DI Singleton（通过 INavGridSource，adapter） |
 | `UnitService` | Battle | 手动 new（每个单位实例，通过 UnitLogic） |
 | `AdjacencyService` | Building | MS DI Singleton |
 | `ShopRules` | Building | MS DI Singleton |
@@ -203,7 +209,7 @@ domain 项目零 `using Godot`，单向无循环。
 2. 点击开始 → `main_game.tscn`
 3. `MainGameController._Ready()` 注册 Battlefield/Castle 到 GameManager
 4. `GameManager.StartGameSession()` → 开始昼夜循环（Day 60s / Night 30s）
-5. 白天：兵营产兵、单位推进战斗（UnitLogic → IFieldUnitRepository → UnitSpatialService）
+5. 白天：兵营产兵、单位推进战斗（UnitLogic → IFieldUnitRepository → NavigationService 流场寻路 + Steering 避障）
 6. 夜晚：组合 → 敌方复刻 → 开商店 → 全军休眠
 7. 任一方城堡血量归零 → GameOver → 结算弹窗（保存战报/返回标题）
 
@@ -214,10 +220,10 @@ domain 项目零 `using Godot`，单向无循环。
 | 端口 | 定义位置 | 实现方 | 类型 |
 |------|----------|--------|------|
 | `IGameState` | Domain.Battle | GameManager | 入站 |
-| `IUnitSpatialService` | Domain.Battle | UnitSpatialService | 领域服务 |
+| `INavigationService` | Domain.Battle | NavigationService | 领域服务 |
+| `INavGridSource` | Domain.Battle | NavGridSource | 领域服务（adapter 桥接） |
 | `IFieldUnitRepository` | Domain.Battle | FieldUnitRepository | 出站 |
 | `IUnitRepository` | Domain.Battle | SqliteUnitRepository | 出站 |
-| `INavigationPort` | Domain.Battle | NavigationPortAdapter | 出站 |
 | `IUnitEventPort` | Domain.Battle | UnitEventRelay | 出站 |
 | `IBuildingRef` | Domain.Battle | Building | 出站 |
 | `IBuildingTarget` | Domain.Battle | Building | 出站 |

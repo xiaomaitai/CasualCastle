@@ -135,7 +135,10 @@ GameManager.Services.GetService<IBattleReportRepository>();
 | `IReadOnlyList<CardData>` | `GameDataLoader.ShopCatalog`（工厂委托） | Singleton |
 | `ShopRules` | `ShopRules` | Singleton |
 | `AdjacencyService` | `AdjacencyService` | Singleton |
-| `IUnitSpatialService` | `UnitSpatialService` | Singleton |
+| `FlowFieldService` | `FlowFieldService` | Singleton |
+| `SteeringService` | `SteeringService` | Singleton |
+| `INavigationService` | `NavigationService` | Singleton |
+| `INavGridSource` | `NavGridSource` | Singleton |
 | `IReplayUseCase` | `ReplayService` | Singleton |
 | `IFieldUnitRepository` | `FieldUnitRepository` | Singleton |
 | `IGameState` | `GameManager`（通过 GameStateProvider 桥接） | Singleton（工厂委托） |
@@ -214,7 +217,9 @@ public static class BattleModule
 {
     public static IServiceCollection AddDomainBattle(this IServiceCollection services)
     {
-        services.AddSingleton<IUnitSpatialService, UnitSpatialService>();
+        services.AddSingleton<FlowFieldService>();
+        services.AddSingleton<SteeringService>();
+        services.AddSingleton<INavigationService, NavigationService>();
         return services;
     }
 }
@@ -224,7 +229,7 @@ public static class BattleModule
 |------|---------|---------|
 | Shared | （无模块注册） | — |
 | Building | `AddDomainBuilding()` | `ShopRules`, `AdjacencyService` |
-| Battle | `AddDomainBattle()` | `IUnitSpatialService → UnitSpatialService` |
+| Battle | `AddDomainBattle()` | `FlowFieldService`, `SteeringService`, `INavigationService → NavigationService` |
 | History | `AddDomainHistory()` | `BattleReportService`, `IReplayUseCase → ReplayService` |
 
 ---

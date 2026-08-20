@@ -11,17 +11,6 @@ public partial class MainGameController : Node2D
 		Castle playerCastle = GetNode<Castle>("Battlefield/PlayerSide/PlayerCastle");
 		Castle enemyCastle = GetNode<Castle>("Battlefield/EnemySide/EnemyCastle");
 
-		NavigationRegion2D navRegion = GetNode<NavigationRegion2D>("Battlefield/NavigationRegion");
-		NavigationPolygon navPoly = new NavigationPolygon();
-		navPoly.AddOutline(new Vector2[] {
-			new Vector2(0, 0),
-			new Vector2(BattlefieldMetrics.WorldWidth, 0),
-			new Vector2(BattlefieldMetrics.WorldWidth, BattlefieldMetrics.WorldHeight),
-			new Vector2(0, BattlefieldMetrics.WorldHeight)
-		});
-		navRegion.NavigationPolygon = navPoly;
-		navRegion.BakeNavigationPolygon();
-
 		AdapterRegistry.Resolve<GameManager>().StartGameSession(battlefield, playerCastle, enemyCastle);
 		GameManager.Get<AdjacencyService>().RefreshCastle(playerCastle.GetBuildingStates());
 		GameManager.Get<AdjacencyService>().RefreshCastle(enemyCastle.GetBuildingStates());

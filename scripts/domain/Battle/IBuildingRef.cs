@@ -6,6 +6,7 @@ public interface IBuildingRef
 	string TypeId { get; }
 	bool IsDestroyed { get; }
 	bool IsCore { get; }
+	bool IsPlayerOwned { get; }
 	bool IsEnemyOf(IUnitState unit);
 	float MinX { get; }
 	float MinY { get; }

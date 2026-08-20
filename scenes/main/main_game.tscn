@@ -54,8 +54,6 @@ texture_filter = 1
 z_index = 1
 texture_filter = 1
 
-[node name="NavigationRegion" type="NavigationRegion2D" parent="Battlefield"]
-
 [node name="PlayerSide" type="Node2D" parent="Battlefield" unique_id=3]
 position = Vector2(170, 1210)
 

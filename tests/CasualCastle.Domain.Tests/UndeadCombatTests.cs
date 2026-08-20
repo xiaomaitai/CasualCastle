@@ -46,7 +46,7 @@ public class UndeadCombatTests
 			Speed = 70,
 			HasNightCombat = true,
 		};
-		Unit unit = new(new RecordingNavPort());
+		Unit unit = new();
 
 		unit.Initialize(stats, true);
 

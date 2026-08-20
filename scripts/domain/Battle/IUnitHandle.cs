@@ -8,7 +8,6 @@ public interface IUnitHandle : IUnitState
 	int Heal(int amount);
 	void SetEnemyTarget(IUnitHandle target);
 	void SetStealth(bool stealthed);
-	void ApplyPush(float dx, float dy);
 	void ApplySlow(float slowValue, float duration);
 	void ApplyCurse(float factor, float duration);
 	void AddMaxHealthBonus(int amount);
@@ -17,4 +16,12 @@ public interface IUnitHandle : IUnitState
 	void SetGameContext(GameContext ctx);
 	IBuildingRef AssignedTavern { get; set; }
 	void ApplyPoison(float damagePerSecond, float duration);
+	bool HasMoveGoal { get; }
+	float MoveGoalX { get; }
+	float MoveGoalY { get; }
+	float NavVelX { get; }
+	float NavVelY { get; }
+	float GetCurrentSpeed();
+	void SetPosition(float x, float y);
+	void SetNavVelocity(float vx, float vy);
 }

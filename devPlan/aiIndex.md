@@ -69,7 +69,7 @@
 | `dependencyInjection.md` | 双层 DI 设计 |
 | `dependencyRules.md` | 分层依赖方向规则与自动检查说明 |
 | `nodeStructure.md` | 实体节点 Logic/View/Effects 三层结构 |
-| `rtsPushApart.md` | 单位推开系统 |
+| `navigationSystem.md` | 流场寻路 + 局部转向（SC2 式） |
 | `assetSpecs.md` | 素材尺寸规格（以游戏单位定义） |
 | `audioRequirements.md` | 音频需求清单（v0.6 采购/实现唯一依据） |
 | `audioSmokeTest.md` | 音频冒烟测试说明 |
@@ -94,7 +94,7 @@
 |---|---|---|
 | `domain/Shared/` | 坐标、常量、阶段状态机、存档模型、BGM 目录与选择规则 | `GameVector2.cs`、`GameCoordinateRules.cs`、`GameRules.cs`、`BuildingTypeIds.cs`、`FactionIds.cs`、`MatchPhaseMachine.cs`、`SaveModels.cs`、`IVisualAssetRepository.cs`、`BgmDef.cs`、`BgmSelectionRules.cs` |
 | `domain/Building/` | 建筑、卡牌、手牌、商店、组合、升级、仪式、邻接、科技树 | `BuildingData.cs`、`OccupancyGrid.cs`、`BuildingCellOccupancy.cs`、`CardRules.cs`、`Hand.cs`、`ShopRules.cs`、`CombineService.cs`、`UpgradeService.cs`、`RitualService.cs`、`AdjacencyService.cs`、`IBuildingVisualRepository.cs`、`BuildingVisualData.cs`、`TechTreeNode.cs` |
-| `domain/Battle/` | 战斗、单位、技能、光环、隐身、尸体、RVO 推开、黑魔法 | `CombatRules.cs`、`Unit.cs`、`UnitState.cs`、`UnitStats.cs`、`SkillService.cs`、`AuraService.cs`、`StealthService.cs`、`CorpseService.cs`、`RvoService.cs`、`BlackMagicService.cs` |
+| `domain/Battle/` | 战斗、单位、技能、光环、隐身、尸体、流场寻路、黑魔法 | `CombatRules.cs`、`Unit.cs`、`UnitState.cs`、`UnitStats.cs`、`SkillService.cs`、`AuraService.cs`、`StealthService.cs`、`CorpseService.cs`、`FlowFieldService.cs`、`NavigationService.cs`、`BlackMagicService.cs` |
 | `domain/History/` | 战报、回放、镜像复刻 | `BattleReportService.cs`、`ReportBuilder.cs`、`ReplayService.cs`、`MirrorRules.cs`、`IHistoryCoreLookup.cs` |
 
 端口接口（`I*` 文件）按子域散落在上述目录中，如 `IFieldUnitRepository.cs`、`IBuildingPlacement.cs`、`IBattleReportRepository.cs`。
@@ -110,8 +110,8 @@
 | 目录 | 职责 | 关键文件 |
 |---|---|---|
 | `autoload/` | 常驻节点：DI 根、阶段、初始化、显示设置 | `GameManager.cs`、`InitManager.cs`、`DisplaySettingsManager.cs`、`AdapterRegistry.cs` |
-| `building/` | 城堡/建筑/放置/状态表现 | `Castle.cs`、`Building.cs`（薄壳：装配组件）、`BuildingBridge.cs`（IBuildingState/IBuildingRef/IBuildingTarget 投影）、`BuildingView.cs`/`BuildingEffects.cs`（表现）、`ProductionComponent.cs`/`RitualHostComponent.cs`/`IBuildingComponent.cs` 与六能力组件（Trap/TreasureBox/Living/Mana/Plague/CrystalMine）、`TrapSourceFactory.cs`/`TrapNavPort.cs`、`BuildingSystem.cs`、`CastlePlacementAdapter.cs` |
-| `battle/` | 战场单位逻辑与表现、导航、弹道、统一生成 | `Unit.cs`、`UnitLogic.cs`、`UnitLifecycle.cs`、`UnitVisual.cs`、`UnitSpawn.cs`、`UnitSpawnService.cs`（产兵/仪式召唤共用）、`BattleManager.cs`、`NavigationPortAdapter.cs`、`FieldUnitRepository.cs`、`Projectile.cs` |
+| `building/` | 城堡/建筑/放置/状态表现 | `Castle.cs`、`Building.cs`（薄壳：装配组件）、`BuildingBridge.cs`（IBuildingState/IBuildingRef/IBuildingTarget 投影）、`BuildingView.cs`/`BuildingEffects.cs`（表现）、`ProductionComponent.cs`/`RitualHostComponent.cs`/`IBuildingComponent.cs` 与六能力组件（Trap/TreasureBox/Living/Mana/Plague/CrystalMine）、`TrapSourceFactory.cs`、`BuildingSystem.cs`、`CastlePlacementAdapter.cs` |
+| `battle/` | 战场单位逻辑与表现、寻路网格源、弹道、统一生成 | `Unit.cs`、`UnitLogic.cs`、`UnitLifecycle.cs`、`UnitVisual.cs`、`UnitSpawn.cs`、`UnitSpawnService.cs`（产兵/仪式召唤共用）、`BattleManager.cs`、`NavGridSource.cs`、`FieldUnitRepository.cs`、`Projectile.cs` |
 | `battlefield/` | 战场地块 | `BattlefieldTileMap.cs` |
 | `battle_report/` | 战报快照/缓存/持久化 | `BattleReportSystem.cs`、`BuildingCoreLookup.cs` |
 | `combine/` | 组合结果实例化 | `CombineBuildingFactory.cs` |

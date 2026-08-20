@@ -7,8 +7,9 @@ public static class BattleModule
 {
 	public static IServiceCollection AddDomainBattle(this IServiceCollection services)
 	{
-		services.AddSingleton<IUnitSpatialService, UnitSpatialService>();
-		services.AddSingleton<IRvoService, RvoService>();
+		services.AddSingleton<FlowFieldService>();
+		services.AddSingleton<SteeringService>();
+		services.AddSingleton<INavigationService, NavigationService>();
 		services.AddSingleton<SkillService>();
 		services.AddSingleton<StealthService>();
 		services.AddSingleton<AuraService>();

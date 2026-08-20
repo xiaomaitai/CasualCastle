@@ -89,9 +89,8 @@ public class UnitBehaviorTests
 	[Fact]
 	public void UpdateBehavior_FightingInAttackRange_StandsStill()
 	{
-		RecordingNavPort navPort = new();
 		Unit target = UnitTestFactory.CreateUnit(AttackType.Melee, false);
-		Unit self = UnitTestFactory.CreateUnit(AttackType.Melee, true, navPort);
+		Unit self = UnitTestFactory.CreateUnit(AttackType.Melee, true);
 		target.SetPosition(120, 0);
 		self.SetPosition(0, 0);
 		self.SetEnemyTarget(target);
@@ -99,21 +98,20 @@ public class UnitBehaviorTests
 
 		self.UpdateBehavior(2f, 0, 0);
 
-		Assert.Equal(self.GameX, navPort.LastTargetX);
-		Assert.Equal(self.GameY, navPort.LastTargetY);
+		Assert.False(self.HasMoveGoal);
 	}
 
 	[Fact]
 	public void UpdateBehavior_Marching_SetsMarchTarget()
 	{
-		RecordingNavPort navPort = new();
-		Unit self = UnitTestFactory.CreateUnit(AttackType.Melee, true, navPort);
+		Unit self = UnitTestFactory.CreateUnit(AttackType.Melee, true);
 		self.UpdateTargeting(null);
 
 		self.UpdateBehavior(0.016f, 500, 800);
 
-		Assert.Equal(500f, navPort.LastTargetX);
-		Assert.Equal(800f, navPort.LastTargetY);
+		Assert.True(self.HasMoveGoal);
+		Assert.Equal(500f, self.MoveGoalX);
+		Assert.Equal(800f, self.MoveGoalY);
 	}
 
 	[Fact]

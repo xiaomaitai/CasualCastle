@@ -528,7 +528,7 @@ public partial class NecromancerSmoke : SmokeTestBase
 
 	private static CasualCastle.Domain.Battle.Unit CreateUnit(UnitStats stats, bool isPlayerUnit)
 	{
-		CasualCastle.Domain.Battle.Unit unit = new(new SmokeNavPort());
+		CasualCastle.Domain.Battle.Unit unit = new();
 		unit.Initialize(stats, isPlayerUnit);
 		unit.SetDamageMatrix(GameManager.Get<DamageMatrix>());
 		return unit;
@@ -547,7 +547,7 @@ public partial class NecromancerSmoke : SmokeTestBase
 			Speed = 50,
 			VisionRange = 400,
 		};
-		CasualCastle.Domain.Battle.Unit unit = new(new SmokeNavPort());
+		CasualCastle.Domain.Battle.Unit unit = new();
 		unit.Initialize(stats, false);
 		unit.SetDamageMatrix(GameManager.Get<DamageMatrix>());
 		return unit;
@@ -567,17 +567,6 @@ public partial class NecromancerSmoke : SmokeTestBase
 				return true;
 		}
 		return false;
-	}
-}
-
-internal sealed class SmokeNavPort : INavigationPort
-{
-	public void SetTarget(float gameX, float gameY)
-	{
-	}
-
-	public void ConfigureRvo(float radius, float neighborDistance, float timeHorizon)
-	{
 	}
 }
 

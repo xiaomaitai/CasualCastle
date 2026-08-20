@@ -13,8 +13,6 @@ public partial class UnitLogic : Node2D
 {
 	internal CasualCastle.Domain.Battle.Unit _unit;
 
-	private NavigationPortAdapter _navPort;
-
 	public IUnitHandle Handle => _unit;
 
 	public IUnitHandle LastAttacker => _eventRelay?.LastAttacker;
@@ -22,8 +20,6 @@ public partial class UnitLogic : Node2D
 	private IFieldUnitRepository _fieldRepo;
 
 	private ITacticalQueries _tactical;
-
-	private IRvoService _rvoService;
 
 	private UnitEventRelay _eventRelay;
 
@@ -83,11 +79,7 @@ public partial class UnitLogic : Node2D
 
 	private bool _statsPending;
 
-	private NavigationAgent2D _navigationAgent;
-
 	private Node2D _body;
-
-	private Vector2 _safeVelocity;
 
 	private bool _isDead;
 
@@ -95,24 +87,20 @@ public partial class UnitLogic : Node2D
 
 	private DeathSideEffects _deathSideEffects;
 
-	private const float PushSyncEpsilonSq = 0.01f;
+	private const float BodySyncEpsilonSq = 0.01f;
 
 	public void InitializeFromStats(UnitStats stats)
 	{
 		if (_unit == null)
 		{
 			_body = GetParent<Node2D>();
-			_navigationAgent = GetNode<NavigationAgent2D>("NavigationAgent");
-			_navigationAgent.VelocityComputed += OnVelocityComputed;
-			_navPort = new NavigationPortAdapter(_navigationAgent);
-			_unit = new CasualCastle.Domain.Battle.Unit(_navPort);
+			_unit = new CasualCastle.Domain.Battle.Unit();
 			_eventRelay = new UnitEventRelay();
 			AddChild(_eventRelay);
 			_eventRelay.Attack += OnAttack;
 			_unit.EventPort = _eventRelay;
 			_fieldRepo = GameManager.Get<IFieldUnitRepository>();
 			_tactical = GameManager.Get<ITacticalQueries>();
-			_rvoService = GameManager.Get<IRvoService>();
 			_visual = new UnitVisual();
 			_lifecycle = new UnitLifecycle();
 			_corpseService = GameManager.Get<CorpseService>();
@@ -125,7 +113,6 @@ public partial class UnitLogic : Node2D
 		IReadOnlyList<SkillDef> skills = skillRepo.GetByUnitType(stats.TypeId);
 		foreach (SkillDef skill in skills)
 			_unit.Skills.Add(skill);
-		_rvoService.ConfigureRvo(_navPort, _unit.CollisionRadius);
 
 		if (_fieldRepo != null)
 			_fieldRepo.Register(_unit);
@@ -260,7 +247,6 @@ public partial class UnitLogic : Node2D
 		&& !IsActive;
 
 
-	private const float MinMoveDirectionLength = 0.001f;
 	private const float FlipThresholdSpeed = 0.1f;
 	private const float SmallDisplaySize = 60f;
 	private const float MediumDisplaySize = 90f;
@@ -275,12 +261,7 @@ public partial class UnitLogic : Node2D
 
 		_visual?.UpdateHitFlash(dt);
 
-		Vector2 pushedPixelPos = new Vector2(
-			GameCoordinatesAdapter.GameUnitsToPixels(_unit.GameX),
-			GameCoordinatesAdapter.GameUnitsToPixels(_unit.GameY));
-		if ((pushedPixelPos - _body.GlobalPosition).LengthSquared() > PushSyncEpsilonSq)
-			_body.GlobalPosition = pushedPixelPos;
-
+		SyncBodyPosition();
 		UpdateSleepVisual();
 		UpdateStealthVisual();
 		if (!IsActive) return;
@@ -302,31 +283,17 @@ public partial class UnitLogic : Node2D
 		marchY = GameCoordinatesAdapter.PixelsToGameUnits(marchDest.Y);
 
 		_unit.UpdateBehavior(dt, marchX, marchY);
-
-		Vector2 currentPixelPos = _body.GlobalPosition;
-		Vector2 nextPathPos = _navigationAgent.GetNextPathPosition();
-		Vector2 direction = nextPathPos - currentPixelPos;
-		float pixelSpeed = GameCoordinatesAdapter.GameUnitsToPixels(_unit.GetCurrentSpeed());
-		Vector2 desiredVelocity = direction.Length() > MinMoveDirectionLength
-			? direction.Normalized() * pixelSpeed
-			: Vector2.Zero;
-		_navigationAgent.Velocity = desiredVelocity;
-
-		Vector2 moveVelocity = _safeVelocity != Vector2.Zero ? _safeVelocity : desiredVelocity;
-		_body.GlobalPosition += moveVelocity * dt;
-
-		if (Mathf.Abs(moveVelocity.X) > FlipThresholdSpeed)
-			_visual.SetFlipH(moveVelocity.X < 0);
-
-		_unit.SetPosition(
-			GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.X),
-			GameCoordinatesAdapter.PixelsToGameUnits(_body.GlobalPosition.Y));
-
 	}
 
-	private void OnVelocityComputed(Vector2 safeVelocity)
+	private void SyncBodyPosition()
 	{
-		_safeVelocity = safeVelocity;
+		Vector2 target = new Vector2(
+			GameCoordinatesAdapter.GameUnitsToPixels(_unit.GameX),
+			GameCoordinatesAdapter.GameUnitsToPixels(_unit.GameY));
+		if ((target - _body.GlobalPosition).LengthSquared() > BodySyncEpsilonSq)
+			_body.GlobalPosition = target;
+		if (Mathf.Abs(_unit.NavVelX) > FlipThresholdSpeed)
+			_visual.SetFlipH(_unit.NavVelX < 0);
 	}
 
 	public void TakeDamage(int amount, UnitLogic attacker = null, bool isAoe = false)

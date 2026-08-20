@@ -80,7 +80,7 @@ public class TacticalQueryServiceTests
 	public void FindNearestEnemy_DetectorUnit_CanSelectStealthedEnemy()
 	{
 		FakeUnitRepository repo = new();
-		Unit self = UnitTestFactory.CreateUnit(AttackType.Melee, true, 90f, null, true);
+		Unit self = UnitTestFactory.CreateUnit(AttackType.Melee, true, 90f, true);
 		Unit stealthed = UnitTestFactory.CreateUnit(AttackType.Melee, false);
 		self.SetPosition(0, 0);
 		stealthed.SetPosition(100, 0);

@@ -478,7 +478,7 @@ public partial class DungeonSmoke : SmokeTestBase
 	private static CasualCastle.Domain.Battle.Unit CreateKing()
 	{
 		UnitStats stats = GameManager.Get<IUnitRepository>().Get("DemonKing");
-		CasualCastle.Domain.Battle.Unit unit = new(new SmokeNavPort());
+		CasualCastle.Domain.Battle.Unit unit = new();
 		unit.Initialize(stats, true);
 		unit.SetDamageMatrix(GameManager.Get<DamageMatrix>());
 		return unit;
@@ -486,7 +486,7 @@ public partial class DungeonSmoke : SmokeTestBase
 
 	private static CasualCastle.Domain.Battle.Unit CreateUnit(UnitStats stats, bool isPlayerUnit)
 	{
-		CasualCastle.Domain.Battle.Unit unit = new(new SmokeNavPort());
+		CasualCastle.Domain.Battle.Unit unit = new();
 		unit.Initialize(stats, isPlayerUnit);
 		unit.SetDamageMatrix(GameManager.Get<DamageMatrix>());
 		return unit;

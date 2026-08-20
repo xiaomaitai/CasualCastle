@@ -221,17 +221,15 @@ public class TavernPartyServiceTests
 	[Fact]
 	public void UpdateBehavior_Waiting_StandsStill()
 	{
-		RecordingNavPort navPort = new();
-		Unit unit = CreateAdventurer("ElfRanger", "Elf", navPort);
+		Unit unit = CreateAdventurer("ElfRanger", "Elf");
 		unit.State = UnitState.Waiting;
 
 		unit.UpdateBehavior(0.5f, 999f, 999f);
 
-		Assert.Equal(unit.GameX, navPort.LastTargetX);
-		Assert.Equal(unit.GameY, navPort.LastTargetY);
+		Assert.False(unit.HasMoveGoal);
 	}
 
-	private static Unit CreateAdventurer(string typeId, string race, INavigationPort navPort = null)
+	private static Unit CreateAdventurer(string typeId, string race)
 	{
 		UnitStats stats = new()
 		{
@@ -249,7 +247,7 @@ public class TavernPartyServiceTests
 			UnitCost = 1,
 			Race = race,
 		};
-		Unit unit = new(navPort ?? new RecordingNavPort());
+		Unit unit = new();
 		unit.Initialize(stats, true);
 		unit.SetDamageMatrix(new DamageMatrix());
 		return unit;

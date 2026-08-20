@@ -234,7 +234,7 @@ public class GraceBurnTests
 			AttackCooldown = 1f,
 			VisionRange = 300f
 		};
-		Unit enemy = new(new RecordingNavPort());
+		Unit enemy = new();
 		enemy.Initialize(stats, false);
 		enemy.SetDamageMatrix(new DamageMatrix());
 		enemy.SetPosition(50f, 0f);

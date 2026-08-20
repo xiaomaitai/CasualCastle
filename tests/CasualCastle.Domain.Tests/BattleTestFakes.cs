@@ -4,22 +4,6 @@ using CasualCastle.Domain.Battle;
 
 namespace CasualCastle.Domain.Tests;
 
-internal sealed class RecordingNavPort : INavigationPort
-{
-	public float LastTargetX { get; private set; }
-	public float LastTargetY { get; private set; }
-
-	public void SetTarget(float gameX, float gameY)
-	{
-		LastTargetX = gameX;
-		LastTargetY = gameY;
-	}
-
-	public void ConfigureRvo(float radius, float neighborDistance, float timeHorizon)
-	{
-	}
-}
-
 internal sealed class FakeUnitRepository : IFieldUnitRepository
 {
 	private readonly List<IUnitHandle> _units = new();
@@ -54,6 +38,7 @@ internal sealed class FakeBuilding : IBuildingRef
 	public string TypeId { get; init; } = "Inn";
 	public bool IsDestroyed { get; init; }
 	public bool IsCore { get; init; }
+	public bool IsPlayerOwned { get; init; }
 	public bool IsEnemyOfUnit { get; init; }
 	public float MinX { get; init; }
 	public float MinY { get; init; }
@@ -87,17 +72,17 @@ internal sealed class FakeDelayScheduler : IDelayScheduler
 
 internal static class UnitTestFactory
 {
-	public static Unit CreateUnit(AttackType attackType, bool isPlayerUnit, INavigationPort navPort = null)
+	public static Unit CreateUnit(AttackType attackType, bool isPlayerUnit)
 	{
-		return CreateUnit(attackType, isPlayerUnit, 90f, navPort);
+		return CreateUnit(attackType, isPlayerUnit, 90f);
 	}
 
-	public static Unit CreateUnit(AttackType attackType, bool isPlayerUnit, float attackRange, INavigationPort navPort = null)
+	public static Unit CreateUnit(AttackType attackType, bool isPlayerUnit, float attackRange)
 	{
-		return CreateUnit(attackType, isPlayerUnit, attackRange, navPort, false);
+		return CreateUnit(attackType, isPlayerUnit, attackRange, false);
 	}
 
-	public static Unit CreateUnit(AttackType attackType, bool isPlayerUnit, float attackRange, INavigationPort navPort, bool canDetectStealth)
+	public static Unit CreateUnit(AttackType attackType, bool isPlayerUnit, float attackRange, bool canDetectStealth)
 	{
 		UnitStats stats = new()
 		{
@@ -114,7 +99,7 @@ internal static class UnitTestFactory
 			VisionRange = 400,
 			CanDetectStealth = canDetectStealth,
 		};
-		Unit unit = new(navPort ?? new RecordingNavPort());
+		Unit unit = new();
 		unit.Initialize(stats, isPlayerUnit);
 		unit.SetDamageMatrix(new DamageMatrix());
 		return unit;
