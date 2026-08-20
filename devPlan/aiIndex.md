@@ -93,7 +93,7 @@
 | 目录 | 职责 | 关键文件 |
 |---|---|---|
 | `domain/Shared/` | 坐标、常量、阶段状态机、存档模型、BGM 目录与选择规则 | `GameVector2.cs`、`GameCoordinateRules.cs`、`GameRules.cs`、`BuildingTypeIds.cs`、`FactionIds.cs`、`MatchPhaseMachine.cs`、`SaveModels.cs`、`IVisualAssetRepository.cs`、`BgmDef.cs`、`BgmSelectionRules.cs` |
-| `domain/Building/` | 建筑、卡牌、手牌、商店、组合、升级、仪式、邻接、科技树 | `BuildingData.cs`、`OccupancyGrid.cs`、`CardRules.cs`、`Hand.cs`、`ShopRules.cs`、`CombineService.cs`、`UpgradeService.cs`、`RitualService.cs`、`AdjacencyService.cs`、`IBuildingVisualRepository.cs`、`BuildingVisualData.cs`、`TechTreeNode.cs` |
+| `domain/Building/` | 建筑、卡牌、手牌、商店、组合、升级、仪式、邻接、科技树 | `BuildingData.cs`、`OccupancyGrid.cs`、`BuildingCellOccupancy.cs`、`CardRules.cs`、`Hand.cs`、`ShopRules.cs`、`CombineService.cs`、`UpgradeService.cs`、`RitualService.cs`、`AdjacencyService.cs`、`IBuildingVisualRepository.cs`、`BuildingVisualData.cs`、`TechTreeNode.cs` |
 | `domain/Battle/` | 战斗、单位、技能、光环、隐身、尸体、RVO 推开、黑魔法 | `CombatRules.cs`、`Unit.cs`、`UnitState.cs`、`UnitStats.cs`、`SkillService.cs`、`AuraService.cs`、`StealthService.cs`、`CorpseService.cs`、`RvoService.cs`、`BlackMagicService.cs` |
 | `domain/History/` | 战报、回放、镜像复刻 | `BattleReportService.cs`、`ReportBuilder.cs`、`ReplayService.cs`、`MirrorRules.cs`、`IHistoryCoreLookup.cs` |
 

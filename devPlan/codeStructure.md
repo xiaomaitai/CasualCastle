@@ -18,7 +18,7 @@ CasualCastle/
 │   │   │   └── IVisualAssetRepository.cs
 │   │   ├── Building/                               # Building.csproj → Shared
 │   │   │   ├── CardData.cs, CombineRecipe.cs
-│   │   │   ├── BuildingDefinitions.cs, OccupancyGrid.cs, Player.cs
+│   │   │   ├── BuildingDefinitions.cs, OccupancyGrid.cs, BuildingCellOccupancy.cs
 │   │   │   ├── AdjacentRules.cs, CombineRules.cs, ShopRules.cs, CardRules.cs
 │   │   │   ├── Hand.cs, Shop.cs, AdjacencyService.cs, CombineService.cs
 │   │   │   ├── IBuildingState.cs, IBuildingPlacement.cs
@@ -35,11 +35,11 @@ CasualCastle/
 │   │   │   ├── IBuildingRef.cs, IBuildingTarget.cs
 │   │   │   ├── SkillEffectTypes.cs
 │   │   │   └── BattleModule.cs
-│   │   └── History/                                # History.csproj → Shared, Building
+│   │   └── History/                                # History.csproj → Shared（零 Building 引用）
 │   │       ├── BattleReportModels.cs, IBattleReportRepository.cs, IBattleReportCapture.cs
 │   │       ├── ReportBuilder.cs, MirrorRules.cs
 │   │       ├── BattleReportService.cs, ReplayService.cs, PhaseMapping.cs
-│   │       ├── IReplayTarget.cs
+│   │       ├── IReplayTarget.cs, IHistoryCoreLookup.cs
 │   │       └── HistoryModule.cs
 │   │
 │   ├── application/                             # Application.csproj — 纯 C# 应用用例层（零 Godot）
@@ -61,7 +61,7 @@ CasualCastle/
 │       │   ├── battle/                             # Unit, UnitLogic, UnitEventRelay
 │   │       │                                       # UnitLifecycle, UnitVisual
 │   │       │                                       # NavigationPortAdapter, BattleManager, UnitSpawn
-│       │   ├── battle_report/ BattleReportSystem.cs
+│       │   ├── battle_report/ BattleReportSystem.cs, BuildingCoreLookup.cs
 │       │   ├── combine/        CombineBuildingFactory.cs
 │       │   ├── replay/        ReplayTarget.cs
 │       │   ├── ui/            UIManager + 子控制器
@@ -71,11 +71,11 @@ CasualCastle/
 │       │   └── audio/         AudioManager, Sfx, UiSfx
 │       └── persistence/                           # Persistence.csproj 为纯 C# 子项目
 │           ├── SaveDatabase.cs                     # SQLite 存档读写核心（纯 C#）
-│           ├── SaveStorage.cs                      # user:// 目录解析后委托 SaveDatabase
-│           ├── GameDataLoader.cs, BattleReportStorage.cs
+│           ├── SaveStorage.cs, GameDataLoader.cs   # 路径注入，纯 C#（user:// 由 Godot 侧解析后传入）
 │           ├── SqliteUnitRepository.cs, SqliteBuildingRepository.cs
-│           ├── SqliteSkillRepository.cs, SqliteTechTreeRepository.cs
-│           └── SqliteVisualAssetRepository.cs
+│           ├── SqliteSkillRepository.cs, SqliteVisualAssetRepository.cs
+│           ├── SqliteTechTreeRepository.cs         # 仍属 Godot 边界（GD.Load 贴图）
+│           └── BattleReportStorage.cs              # 仍属 Godot 边界（FileAccess）
 │
 ├── scenes/    prefabs/    assets/    project.godot
 ├── devPlan/design/          # 系统设计文档
