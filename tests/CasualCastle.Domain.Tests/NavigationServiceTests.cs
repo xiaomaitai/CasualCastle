@@ -75,6 +75,22 @@ public class NavigationServiceTests
 		Assert.True(Math.Abs(a.GameY - b.GameY) > 20f);
 	}
 
+	[Fact]
+	public void Step_DeeplyOverlappingUnits_ResolveToNoOverlap()
+	{
+		(NavigationService service, FakeUnitRepository repo, _) = CreateContext();
+		Unit a = CreateMarchingUnit(repo, 100f, 100f, 500f, 100f);
+		Unit b = CreateMarchingUnit(repo, 100f, 102f, 500f, 100f);
+		a.CollisionRadius = 20f;
+		b.CollisionRadius = 20f;
+
+		for (int i = 0; i < 40; i++)
+			service.Step(0.05f);
+
+		float dist = MathF.Sqrt((a.GameX - b.GameX) * (a.GameX - b.GameX) + (a.GameY - b.GameY) * (a.GameY - b.GameY));
+		Assert.True(dist >= 39f);
+	}
+
 	private static (NavigationService, FakeUnitRepository, NavGrid) CreateContext()
 	{
 		NavGrid grid = new(20, 20, 0f, 0f);

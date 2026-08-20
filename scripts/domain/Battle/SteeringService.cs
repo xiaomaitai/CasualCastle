@@ -1,4 +1,4 @@
-// 转向服务：流场跟随、软分离、到达刹车与贴墙滑动
+// 转向服务：流场跟随、软分离、硬去重叠、到达刹车与贴墙滑动
 using System;
 using System.Collections.Generic;
 
@@ -6,17 +6,24 @@ namespace CasualCastle.Domain.Battle;
 
 public sealed class SteeringService
 {
-	public const float SeparationClearance = 4f;
+	public const float SeparationRadiusMultiplier = 1.6f;
 	private const float ArrivalRadius = 8f;
-	private const float SeparationScale = 0.6f;
+	private const float SeparationScale = 0.7f;
 	private const float VelocitySmoothing = 12f;
+	private const float MaxOverlapPush = 24f;
 	private const float Epsilon = 0.001f;
 
 	public void Steer(IUnitHandle unit, NavGrid grid, FlowField field, IReadOnlyList<IUnitHandle> neighbors, float dt)
 	{
+		float nx, ny;
 		if (DistanceToGoal(unit) <= ArrivalRadius)
 		{
 			unit.SetNavVelocity(0f, 0f);
+			nx = unit.GameX;
+			ny = unit.GameY;
+			ResolveOverlap(unit, grid, neighbors, ref nx, ref ny);
+			grid.ClampToBounds(ref nx, ref ny);
+			unit.SetPosition(nx, ny);
 			return;
 		}
 		float desiredX, desiredY;
@@ -26,8 +33,9 @@ public sealed class SteeringService
 		float vy = unit.NavVelY + (desiredY - unit.NavVelY) * blend;
 		ApplyWallSlide(unit, grid, ref vx, ref vy, dt);
 		unit.SetNavVelocity(vx, vy);
-		float nx = unit.GameX + vx * dt;
-		float ny = unit.GameY + vy * dt;
+		nx = unit.GameX + vx * dt;
+		ny = unit.GameY + vy * dt;
+		ResolveOverlap(unit, grid, neighbors, ref nx, ref ny);
 		grid.ClampToBounds(ref nx, ref ny);
 		unit.SetPosition(nx, ny);
 	}
@@ -118,13 +126,44 @@ public sealed class SteeringService
 			float dx = unit.GameX - other.GameX;
 			float dy = unit.GameY - other.GameY;
 			float dist = MathF.Sqrt(dx * dx + dy * dy);
-			float minDist = unit.CollisionRadius + other.CollisionRadius + SeparationClearance;
+			float minDist = (unit.CollisionRadius + other.CollisionRadius) * SeparationRadiusMultiplier;
 			if (dist >= minDist || dist <= Epsilon)
 				continue;
 			float strength = (minDist - dist) / minDist;
 			sepX += dx / dist * strength;
 			sepY += dy / dist * strength;
 		}
+	}
+
+	private static void ResolveOverlap(IUnitHandle unit, NavGrid grid, IReadOnlyList<IUnitHandle> neighbors, ref float nx, ref float ny)
+	{
+		float pushX = 0f;
+		float pushY = 0f;
+		foreach (IUnitHandle other in neighbors)
+		{
+			if (other == unit || !other.IsAlive)
+				continue;
+			float dx = nx - other.GameX;
+			float dy = ny - other.GameY;
+			float minDist = unit.CollisionRadius + other.CollisionRadius;
+			float distSq = dx * dx + dy * dy;
+			if (distSq >= minDist * minDist || distSq <= Epsilon)
+				continue;
+			float dist = MathF.Sqrt(distSq);
+			float push = (minDist - dist) * other.CollisionRadius / minDist;
+			pushX += dx / dist * push;
+			pushY += dy / dist * push;
+		}
+		float length = MathF.Sqrt(pushX * pushX + pushY * pushY);
+		if (length <= Epsilon)
+			return;
+		float scale = Math.Min(1f, MaxOverlapPush / length);
+		float cx = nx + pushX * scale;
+		float cy = ny + pushY * scale;
+		if (grid.IsBlockedAtWorld(cx, cy))
+			return;
+		nx = cx;
+		ny = cy;
 	}
 
 	private static void ApplyWallSlide(IUnitHandle unit, NavGrid grid, ref float vx, ref float vy, float dt)

@@ -38,7 +38,7 @@ public sealed class NavigationService : INavigationService
 			}
 			NavGrid grid = _gridSource.GetGrid(unit.IsPlayerUnit);
 			FlowField field = GetFlowField(grid, unit, unit.IsPlayerUnit);
-			float queryRadius = unit.CollisionRadius + UnitStats.HugeCollisionRadius + SteeringService.SeparationClearance;
+			float queryRadius = (unit.CollisionRadius + UnitStats.HugeCollisionRadius) * SteeringService.SeparationRadiusMultiplier;
 			IReadOnlyList<IUnitHandle> neighbors = hash.Query(unit.GameX, unit.GameY, queryRadius);
 			_steering.Steer(unit, grid, field, neighbors, dt);
 		}
