@@ -46,3 +46,10 @@ tests：CasualCastle.Domain.Tests（→ 四个 domain 项目）
 
 - Phase 二已新增 `scripts/application/` 项目（只引用 domain 与端口，检查工具已覆盖）。
 - Phase 六将更多存储文件迁入 Persistence 纯 C# 项目时，逐个加入 csproj 的 Compile Include 清单并保持零 Godot。
+
+## Phase 六审计结论（6.1/6.5/6.6/6.8）
+
+- **分层（6.1）**：领域模型（`Unit`/`BuildingRuntime`）、应用命令/结果（UseCase/Ports）、持久化 DTO（`SaveData`/`BuildingSaveEntry`/`CardSaveEntry`、History 的 `BuildingSnapshot`/`CardSnapshot`/`CastleSnapshot`）与 UI 展示（`BuildingView`/`UnitPresentationModel` 等）互相隔离，无单一可变类跨四层复用。
+- **Repository 语义（6.5）**：`IBuildingRepository`/`IUnitRepository`/`ISkillRepository`/`ITechTreeRepository` 均为只读配置查询（Definition Catalog），SQLite 读取集中在 `scripts/adapters/persistence/` 的 Sqlite*Repository。
+- **端口方向（6.6）**：入站 UseCase 端口由 domain/application 实现、适配层消费——`ICombineUseCase`/`IUpgradeUseCase`（domain 的 `CombineService`/`UpgradeService`）、`IGameSessionService`（application 的 `GameSessionService`）；出站 Repository/Gateway/Presenter 端口由 Adapter/Persistence 实现——`IUnitRepository`/`ISkillRepository`/`IBuildingRepository`/`IBuildingVisualRepository`/`ITechTreeRepository`/`IVisualAssetRepository`（Persistence 的 Sqlite*Repository）、`IFieldUnitRepository`/`IBattleReportRepository`/`ISaveRepository`/`IDelayScheduler`（Adapter）、`IGameSessionQuery`/`IGameSessionCommand`/`IShopAccess`（Godot 的 `GameSessionBridge`，供 Application 的 `GameSessionService`/`PhaseTransitionUseCase` 消费）。经审查**无无边界价值接口**；History 对 Building 的依赖经 `IHistoryCoreLookup` + 桥接对象收敛。
+- **DI 纯度（6.8）**：MS DI（`CompositionRoot` + domain/application modules）只注册纯 C# 领域/应用/持久化服务；Godot 生命周期节点（`BuildingSystem`/`UIManager`/`BattleManager`/`BattleReportSystem` 等）经 `AdapterRegistry` 自注册，不入 MS DI。res:///user:// 路径解析留在主项目组合根，注入到纯 C# 存储实现。
