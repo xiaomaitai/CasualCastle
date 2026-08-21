@@ -8,6 +8,11 @@ using System;
 
 public partial class HudUiController : Control
 {
+	public const float SpeedMin = 0.5f;
+	public const float SpeedMax = 10.0f;
+	public const float SpeedStep = 0.1f;
+	public const float SpeedDefault = 1.0f;
+
 	private ProgressBar _playerHealthBar;
 	private ProgressBar _enemyHealthBar;
 	private Label _goldLabel;
@@ -15,6 +20,7 @@ public partial class HudUiController : Control
 	private Label _bgmInfoLabel;
 	private Label _phaseLabel;
 	private Label _phaseTimerLabel;
+	private Label _speedLabel;
 	private Button _newDayButton;
 	private Button _skipPhaseButton;
 	private Button _cheatButton;
@@ -23,6 +29,8 @@ public partial class HudUiController : Control
 	private Button _buildingPauseToolButton;
 	private Button _buildingRepairToolButton;
 	private Button _combineProhibitToolButton;
+	private HSlider _speedSlider;
+	private Panel _speedPanel;
 
 	public ProgressBar PlayerHealthBar => _playerHealthBar ??= GetNode<ProgressBar>("PlayerHealthBar");
 	public ProgressBar EnemyHealthBar => _enemyHealthBar ??= GetNode<ProgressBar>("EnemyHealthBar");
@@ -39,6 +47,9 @@ public partial class HudUiController : Control
 	public Button BuildingPauseToolButton => _buildingPauseToolButton ??= GetNode<Button>("BuildingPauseToolButton");
 	public Button BuildingRepairToolButton => _buildingRepairToolButton ??= GetNode<Button>("BuildingRepairToolButton");
 	public Button CombineProhibitToolButton => _combineProhibitToolButton ??= GetNode<Button>("CombineProhibitToolButton");
+	public Label SpeedLabel => _speedLabel ??= GetNode<Label>("SpeedPanel/SpeedLabel");
+	public HSlider SpeedSlider => _speedSlider ??= GetNode<HSlider>("SpeedPanel/SpeedSlider");
+	public Panel SpeedPanel => _speedPanel ??= GetNode<Panel>("SpeedPanel");
 
 	public override void _Ready()
 	{
@@ -73,6 +84,14 @@ public partial class HudUiController : Control
 			blackMagic.ValueChanged += UpdateBlackMagicDisplay;
 			UpdateBlackMagicDisplay(blackMagic.Value);
 		}
+
+		SpeedPanel.Visible = DisplaySettingsManager.DevModeEnabled;
+		SpeedSlider.MinValue = SpeedMin;
+		SpeedSlider.MaxValue = SpeedMax;
+		SpeedSlider.Step = SpeedStep;
+		SpeedSlider.Value = SpeedDefault;
+		SpeedSlider.ValueChanged += OnSpeedChanged;
+		UpdateSpeedLabel();
 	}
 
 	public override void _ExitTree()
@@ -91,6 +110,9 @@ public partial class HudUiController : Control
 		BlackMagicService blackMagic = GameManager.Get<BlackMagicService>();
 		if (blackMagic != null)
 			blackMagic.ValueChanged -= UpdateBlackMagicDisplay;
+
+		SpeedSlider.ValueChanged -= OnSpeedChanged;
+		Engine.TimeScale = SpeedDefault;
 	}
 
 	public override void _Process(double _)
@@ -117,6 +139,18 @@ public partial class HudUiController : Control
 	private void OnSkipPhasePressed()
 	{
 		AdapterRegistry.Resolve<GameManager>().AdvancePhase();
+	}
+
+	private void OnSpeedChanged(double value)
+	{
+		Engine.TimeScale = value;
+		UpdateSpeedLabel();
+		Sfx.Play(SfxEvents.SliderChange);
+	}
+
+	private void UpdateSpeedLabel()
+	{
+		SpeedLabel.Text = $"{SpeedSlider.Value:0.0}×";
 	}
 
 	private void OnPhaseChanged(MatchPhase phase)
