@@ -12,6 +12,7 @@ public partial class HudUiController : Control
 	public const float SpeedMax = 4f;
 	public const float SpeedStep = 1f;
 	public const float SpeedDefault = 1.0f;
+	private const float DangerFlashFadeSeconds = 0.45f;
 
 	private ProgressBar _playerHealthBar;
 	private ProgressBar _enemyHealthBar;
@@ -31,6 +32,8 @@ public partial class HudUiController : Control
 	private Button _combineProhibitToolButton;
 	private HSlider _speedSlider;
 	private Panel _speedPanel;
+	private ColorRect _dangerFlash;
+	private int _lastPlayerHealth = -1;
 
 	public ProgressBar PlayerHealthBar => _playerHealthBar ??= GetNode<ProgressBar>("PlayerHealthBar");
 	public ProgressBar EnemyHealthBar => _enemyHealthBar ??= GetNode<ProgressBar>("EnemyHealthBar");
@@ -69,6 +72,7 @@ public partial class HudUiController : Control
 		gm.PhaseChanged += OnPhaseChanged;
 
 		UpdatePlayerHealth(gm.PlayerHealth);
+		_lastPlayerHealth = gm.PlayerHealth;
 		UpdateEnemyHealth(gm.EnemyHealth);
 		UpdatePhaseDisplay();
 
@@ -161,8 +165,21 @@ public partial class HudUiController : Control
 
 	private void UpdatePlayerHealth(int health)
 	{
+		if (_lastPlayerHealth >= 0 && health < _lastPlayerHealth)
+			PlayDangerFlash();
+		_lastPlayerHealth = health;
 		PlayerHealthBar.MaxValue = AdapterRegistry.Resolve<GameManager>().PlayerMaxHealth;
 		PlayerHealthBar.SetValue(health);
+	}
+
+	private void PlayDangerFlash()
+	{
+		Tween tween = CreateTween();
+		_dangerFlash ??= GetNode<ColorRect>("DangerFlash");
+		_dangerFlash.Modulate = Colors.White;
+		_dangerFlash.Visible = true;
+		tween.TweenProperty(_dangerFlash, "modulate:a", 0f, DangerFlashFadeSeconds);
+		tween.TweenCallback(Callable.From(() => _dangerFlash.Visible = false));
 	}
 
 	private void UpdateEnemyHealth(int health)
