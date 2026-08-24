@@ -618,7 +618,7 @@ v0.7 重新定义为**完善版**（2026-08-25 用户决策）：原「建筑美
 
 **验收**：✅ 加速/暂停/快捷键/镜头/快速重开/快速购买均可在局内生效；Domain 627 / Persistence 30 / Application 24 全绿、adapter 零 warning
 
-### G4 UI 与交互 + 交互/展示 QOL（部分完成：19bc1d1 / 4c0ae35 / a920f4d / 1628c3f / dff6bec / 22096cb / f154890 / 08eaea0 / 6e0378c / 6a3bee3 / 03aee08 / 164da54 / 2fee885）
+### G4 UI 与交互 + 交互/展示 QOL（部分完成：19bc1d1 / 4c0ae35 / a920f4d / 1628c3f / dff6bec / 22096cb / f154890 / 08eaea0 / 6e0378c / 6a3bee3 / 03aee08 / 164da54 / 2fee885 / 78652e3）
 
 **基础 UI**：
 - 标题界面演示战场（`uiDesign.md` §6.2 待重做）：待做
@@ -635,7 +635,7 @@ v0.7 重新定义为**完善版**（2026-08-25 用户决策）：原「建筑美
 - 悬浮浮窗增强：✅ 建筑/单位悬停精简浮窗已有；✅ 商店/手牌卡悬停单位属性提示（08eaea0）；详细面板即左侧属性面板
 
 **展示 QOL（Display）**：
-- buff 状态栏（单位头顶 buff 图标 + 剩余时间）：待做（依赖 A2 的 buff 只读端口，见 todo）
+- ✅ buff 状态栏：领域新增只读端口 `IUnitState.GetActiveStatusEffects()`（减速/中毒/诅咒 + 剩余秒数，78652e3），单位卡 buff 区实时显示计时标签（含 A2 缺口 #5，Domain 627→631）
 - ✅ 飘字系统：单位受击伤害/治疗数值上浮淡出（FloatingText + IUnitEventPort 挂接，dff6bec）；金币变化/击杀飘字待做
 - 生产进度：✅ 建筑产兵倒计时已由 building_work.gdshader 填充上浮体现（BuildingView.UpdateWorkEffectFromProgress）+ 属性面板剩余秒数；产兵倒计时圆环待做（可选）
 - ✅ 血条改进：单位血条满血短暂显示后淡出（HealthBarView.Ping）；城堡核心血条受损闪白（Castle.FlashHealthBar，03aee08）；建筑耐久条待做
