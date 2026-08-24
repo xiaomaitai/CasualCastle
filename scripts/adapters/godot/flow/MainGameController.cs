@@ -1,12 +1,20 @@
-// 主对局场景入口：组装战场并启动对局
+// 主对局场景入口：组装战场、启动对局并按昼夜切换战场色调
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Building;
+using CasualCastle.Domain.Shared;
 using Godot;
 
 public partial class MainGameController : Node2D
 {
+	private const string NightTintPath = "NightTint";
+	private static readonly Color DayTint = Colors.White;
+	private static readonly Color NightTintColor = new(0.72f, 0.78f, 0.95f, 1f);
+
+	private CanvasModulate _nightTint;
+
 	public override void _Ready()
 	{
+		_nightTint = GetNode<CanvasModulate>(NightTintPath);
 		Node2D battlefield = GetNode<Node2D>("Battlefield");
 		Castle playerCastle = GetNode<Castle>("Battlefield/PlayerSide/PlayerCastle");
 		Castle enemyCastle = GetNode<Castle>("Battlefield/EnemySide/EnemyCastle");
@@ -14,10 +22,21 @@ public partial class MainGameController : Node2D
 		AdapterRegistry.Resolve<GameManager>().StartGameSession(battlefield, playerCastle, enemyCastle);
 		GameManager.Get<AdjacencyService>().RefreshCastle(playerCastle.GetBuildingStates());
 		GameManager.Get<AdjacencyService>().RefreshCastle(enemyCastle.GetBuildingStates());
+
+		GameManager gameManager = AdapterRegistry.Resolve<GameManager>();
+		gameManager.PhaseChanged += OnPhaseChanged;
+		OnPhaseChanged(gameManager.CurrentPhase);
 	}
 
 	public override void _ExitTree()
 	{
+		if (AdapterRegistry.Resolve<GameManager>() != null)
+			AdapterRegistry.Resolve<GameManager>().PhaseChanged -= OnPhaseChanged;
 		AdapterRegistry.Resolve<GameManager>().ClearGameSession();
+	}
+
+	private void OnPhaseChanged(MatchPhase phase)
+	{
+		_nightTint.Color = phase == MatchPhase.Combat ? NightTintColor : DayTint;
 	}
 }

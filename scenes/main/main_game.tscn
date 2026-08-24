@@ -26,6 +26,9 @@
 [node name="MainGame" type="Node2D" unique_id=1]
 script = ExtResource("10")
 
+[node name="NightTint" type="CanvasModulate" parent="."]
+color = Color(1, 1, 1, 1)
+
 [node name="DevInputLogger" type="Node" parent="."]
 script = ExtResource("6")
 
