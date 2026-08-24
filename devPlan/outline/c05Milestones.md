@@ -618,16 +618,16 @@ v0.7 重新定义为**完善版**（2026-08-25 用户决策）：原「建筑美
 
 **验收**：✅ 加速/暂停/快捷键/镜头/快速重开/快速购买均可在局内生效；Domain 627 / Persistence 30 / Application 24 全绿、adapter 零 warning
 
-### G4 UI 与交互 + 交互/展示 QOL（部分完成：19bc1d1 / 4c0ae35 / a920f4d / 1628c3f / dff6bec / 22096cb / f154890 / 08eaea0 / 6e0378c / 6a3bee3 / 03aee08）
+### G4 UI 与交互 + 交互/展示 QOL（部分完成：19bc1d1 / 4c0ae35 / a920f4d / 1628c3f / dff6bec / 22096cb / f154890 / 08eaea0 / 6e0378c / 6a3bee3 / 03aee08 / 164da54 / 2fee885）
 
 **基础 UI**：
 - 标题界面演示战场（`uiDesign.md` §6.2 待重做）：待做
 - ✅ 地下城技能三选一 + 魔王 HUD 正式 UI：dungeon_skill_pick.tscn + dungeon_king_hud.tscn 场景化（DemonKingController 委托），替换临时代码面板/代码 Label（6a3bee3）
-- 色孽恩赐主动技落地：**死技能**（skill_defs `slaanesh_grace` modifiers 为空）；设计为"主动技：舒适度消耗减半"，缺冷却/时长/触发 UI 参数，需用户细化
+- ✅ 色孽恩赐主动技：HUD 按钮激活 8s 舒适度消耗减半窗口 + 30s 冷却（命名常量可调，DemonKingController 事件驱动按钮状态，164da54）
 - ✅ 文案清理：死灵 `????` 建筑名（BloodAltar→鲜血祭坛 / NecromancySanctum→亡灵巫术禁殿 / DeathGate→死者之门，building_defs + tech_tree_nodes 双表）、4 个技能名（吸血光环/反魔法护罩/稳定光环/色孽恩赐）、20 条乱码技能描述按设计与 config 重写；RealBugTextCorruptionTests 3 例（19bc1d1 / 4c0ae35）
 
 **交互 QOL（Interaction）**：
-- 范围/射程预览：✅ 选中单位射程圈已做（RangePreview，22096cb）；✅ 攻击目标红圈标记（TargetRing，f154890）；建筑光环/陷阱范围圈待做
+- 范围/射程预览：✅ 选中单位射程圈已做（RangePreview，22096cb）；✅ 攻击目标红圈标记（TargetRing，f154890）；✅ 选中陷阱显示触发范围圈（TrapRangeView，2fee885）；光环为单位技能属性（AuraService/GameRules.AuraRangeRadius），建筑无半径光环（享乐舞台为全图加成，非范围圈）
 - 选中反馈增强：✅ 单位脚底光圈选中视觉已有；✅ 攻击目标红圈（TargetRing）
 - 放置体验：✅ 占格高亮跟随已有 + 非法红显已有（Castle 双色 PreviewColor）；非法放置微颤待做
 - 组合结果预览：✅ 建筑悬停面板显示「可组合成」（BuildingInfoUiController，按派系缓存配方，6e0378c）
