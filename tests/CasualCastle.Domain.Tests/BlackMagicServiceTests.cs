@@ -12,7 +12,7 @@ public class BlackMagicServiceTests
 
 		service.OnUnitDied(true, "Human");
 
-		Assert.Equal(BlackMagicService.FriendlyDeathYield, service.Value);
+		Assert.Equal(BlackMagicService.DefaultFriendlyDeathYield, service.Value);
 	}
 
 	[Fact]
@@ -22,7 +22,7 @@ public class BlackMagicServiceTests
 
 		service.OnUnitDied(false, "Orc");
 
-		Assert.Equal(BlackMagicService.EnemyDeathYield, service.Value);
+		Assert.Equal(BlackMagicService.DefaultEnemyDeathYield, service.Value);
 	}
 
 	[Fact]
@@ -47,7 +47,7 @@ public class BlackMagicServiceTests
 		service.OnUnitDied(false, "Orc");
 		service.OnUnitDied(true, "Undead");
 
-		Assert.Equal(BlackMagicService.FriendlyDeathYield * 2 + BlackMagicService.EnemyDeathYield, service.Value);
+		Assert.Equal(BlackMagicService.DefaultFriendlyDeathYield * 2 + BlackMagicService.DefaultEnemyDeathYield, service.Value);
 	}
 
 	[Fact]
@@ -59,7 +59,7 @@ public class BlackMagicServiceTests
 
 		service.OnUnitDied(true, "Human");
 
-		Assert.Equal(BlackMagicService.FriendlyDeathYield, lastValue);
+		Assert.Equal(BlackMagicService.DefaultFriendlyDeathYield, lastValue);
 	}
 
 	[Fact]
@@ -101,5 +101,28 @@ public class BlackMagicServiceTests
 
 		Assert.Equal(0, service.Value);
 		Assert.Equal(0, lastValue);
+	}
+
+	[Fact]
+	public void OnUnitDied_UsesInjectedConfig_RealBug_HardcodedYields()
+	{
+		BlackMagicService service = new(new FakeConfig(50, 20));
+
+		service.OnUnitDied(true, "Human");
+		service.OnUnitDied(false, "Orc");
+
+		Assert.Equal(70, service.Value);
+	}
+
+	private sealed class FakeConfig : INecromancerBalanceConfig
+	{
+		public FakeConfig(int friendlyDeathYield, int enemyDeathYield)
+		{
+			FriendlyDeathYield = friendlyDeathYield;
+			EnemyDeathYield = enemyDeathYield;
+		}
+
+		public int FriendlyDeathYield { get; }
+		public int EnemyDeathYield { get; }
 	}
 }

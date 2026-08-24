@@ -5,18 +5,29 @@ namespace CasualCastle.Domain.Battle;
 
 public sealed class BlackMagicService
 {
-	public const int FriendlyDeathYield = 25;
-	public const int EnemyDeathYield = 10;
+	public const int DefaultFriendlyDeathYield = 25;
+	public const int DefaultEnemyDeathYield = 10;
+
+	private readonly INecromancerBalanceConfig _config;
 
 	public event Action<int> ValueChanged;
 
 	public int Value { get; private set; }
 
+	public BlackMagicService(INecromancerBalanceConfig config)
+	{
+		_config = config;
+	}
+
+	public BlackMagicService() : this(new DefaultNecromancerBalanceConfig())
+	{
+	}
+
 	public void OnUnitDied(bool isFriendlyToNecromancer, string race)
 	{
 		if (UndeadRules.IsNonLiving(race))
 			return;
-		Add(isFriendlyToNecromancer ? FriendlyDeathYield : EnemyDeathYield);
+		Add(isFriendlyToNecromancer ? _config.FriendlyDeathYield : _config.EnemyDeathYield);
 	}
 
 	public void Add(int amount)

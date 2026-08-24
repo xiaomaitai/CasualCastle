@@ -38,6 +38,7 @@ public static class CompositionRoot
 		services.AddSingleton<IUnitRepository, SqliteUnitRepository>(_ => new SqliteUnitRepository(configDbPath));
 		services.AddSingleton<ISkillRepository, SqliteSkillRepository>(_ => new SqliteSkillRepository(configDbPath));
 		services.AddSingleton<IVisualAssetRepository, SqliteVisualAssetRepository>(_ => new SqliteVisualAssetRepository(configDbPath));
+		services.AddSingleton<INecromancerBalanceConfig, SqliteNecromancerBalanceConfig>(_ => new SqliteNecromancerBalanceConfig(configDbPath));
 
 		SqliteBuildingRepository buildingRepo = new SqliteBuildingRepository(configDbPath);
 		services.AddSingleton<IBuildingRepository>(buildingRepo);
