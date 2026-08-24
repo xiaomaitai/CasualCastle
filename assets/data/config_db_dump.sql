@@ -415,11 +415,13 @@ CREATE TABLE "combine_recipes" (
                 result_type_id TEXT NOT NULL,
                 PRIMARY KEY (main_type_id, material_type_id, result_type_id)
             );
-INSERT INTO "combine_recipes" VALUES('RoyalBulwark','RoyalArmory',1,'HolyWall');
 INSERT INTO "combine_recipes" VALUES('HolyWall','HeavenPunishmentTower',1,'RoyalCourt');
 INSERT INTO "combine_recipes" VALUES('Necropolis','BlightMarsh',1,'DeathTemple');
 INSERT INTO "combine_recipes" VALUES('BloodAltar','DarkAltar',1,'DeathGate');
 INSERT INTO "combine_recipes" VALUES('HeartPortal','MaidResidence',1,'CharmingPalace');
+INSERT INTO "combine_recipes" VALUES('RoyalBulwark','RoyalBulwark',1,'HolyWall');
+INSERT INTO "combine_recipes" VALUES('RoyalArcheryRange','RoyalStable',1,'HeavenPunishmentTower');
+INSERT INTO "combine_recipes" VALUES('RoyalRanger','RoyalRanger',1,'ShadowSanctum');
 CREATE TABLE "damage_matrix" (damage_type INTEGER NOT NULL, armor_type INTEGER NOT NULL, multiplier INTEGER NOT NULL, PRIMARY KEY (damage_type, armor_type));
 INSERT INTO "damage_matrix" VALUES(0,0,150);
 INSERT INTO "damage_matrix" VALUES(0,1,150);
@@ -718,6 +720,7 @@ INSERT INTO "tech_tree_nodes" VALUES('SlaaneshParadise','dungeon',5,5,0,NULL,NUL
 INSERT INTO "tech_tree_nodes" VALUES('NurgleGarden','dungeon',5,6,0,NULL,NULL,0,'纳垢花园','PlagueBehemoth',200,10.0,70,'Demon',0);
 INSERT INTO "tech_tree_nodes" VALUES('CrystalMine','dungeon',1,3,1,3,8,0,'魔晶矿井',NULL,200,10.0,3,'Demon',0);
 INSERT INTO "tech_tree_nodes" VALUES('TreasureBox','dungeon',1,2,1,3,8,0,'宝箱',NULL,200,10.0,3,'Demon',0);
+INSERT INTO "tech_tree_nodes" VALUES('RangerPost','alliance',2,4,0,NULL,NULL,0,'游骑哨','LightCavalry',150,5.0,5,'',0);
 CREATE TABLE unit_skills (
     unit_type_id TEXT NOT NULL,
     skill_id TEXT NOT NULL,
@@ -875,11 +878,7 @@ INSERT INTO "upgrade_recipes" VALUES('Stable','Ranch');
 INSERT INTO "upgrade_recipes" VALUES('Sanctum','GreatTemple');
 INSERT INTO "upgrade_recipes" VALUES('HolySpring','HolyLightSanctum');
 INSERT INTO "upgrade_recipes" VALUES('Tribunal','JudgementHall');
-INSERT INTO "upgrade_recipes" VALUES('Armory','RoyalBulwark');
-INSERT INTO "upgrade_recipes" VALUES('Ranch','RoyalRanger');
 INSERT INTO "upgrade_recipes" VALUES('Ranch','RoyalStable');
-INSERT INTO "upgrade_recipes" VALUES('RoyalArcheryRange','HeavenPunishmentTower');
-INSERT INTO "upgrade_recipes" VALUES('RoyalRanger','ShadowSanctum');
 INSERT INTO "upgrade_recipes" VALUES('HordeCoreL1','HordeCoreL2');
 INSERT INTO "upgrade_recipes" VALUES('OrcCamp','OrcFortress');
 INSERT INTO "upgrade_recipes" VALUES('HordeCoreL2','HordeCoreL3');
@@ -926,6 +925,12 @@ INSERT INTO "upgrade_recipes" VALUES('DestructionGate','KhorneBloodThrone');
 INSERT INTO "upgrade_recipes" VALUES('TeleportTrap','TzeentchLabyrinth');
 INSERT INTO "upgrade_recipes" VALUES('CharmingPalace','SlaaneshParadise');
 INSERT INTO "upgrade_recipes" VALUES('PlagueMaw','NurgleGarden');
+INSERT INTO "upgrade_recipes" VALUES('Barracks','Armory');
+INSERT INTO "upgrade_recipes" VALUES('Armory','RoyalArmory');
+INSERT INTO "upgrade_recipes" VALUES('Bulwark','RoyalBulwark');
+INSERT INTO "upgrade_recipes" VALUES('CrossbowTower','RoyalArcheryRange');
+INSERT INTO "upgrade_recipes" VALUES('ScoutCamp','RangerPost');
+INSERT INTO "upgrade_recipes" VALUES('RangerPost','RoyalRanger');
 DELETE FROM "sqlite_sequence";
 INSERT INTO "sqlite_sequence" VALUES('asset_gen_tasks',195);
 COMMIT;
