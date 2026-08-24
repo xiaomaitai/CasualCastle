@@ -1,4 +1,5 @@
 // 摄像机控制：跟随战场与缩放
+using CasualCastle.Adapters.Godot;
 using Godot;
 
 public partial class CameraController : Camera2D
@@ -117,7 +118,10 @@ public partial class CameraController : Camera2D
 
 	private void ResetView()
 	{
-		Position = new Vector2(Boundary.GetCenter().X, Position.Y);
+		GameManager gameManager = AdapterRegistry.Resolve<GameManager>();
+		Vector2 target = gameManager?.PlayerCastle?.GlobalPosition ?? new Vector2(Boundary.GetCenter().X, Position.Y);
+		Position = new Vector2(target.X, Position.Y);
+		ClampToBoundary();
 	}
 
 	private void ClampToBoundary()

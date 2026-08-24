@@ -14,6 +14,8 @@ public partial class SettingsUiController : Control
 	private OptionButton _uiProfileOption;
 	private CheckBox _devModeCheck;
 	private CheckBox _confirmSellCheck;
+	private CheckBox _autoPauseNightCheck;
+	private CheckBox _autoResumePlaceCheck;
 	private HSlider _dragSpeedSlider;
 	private Label _dragSpeedValueLabel;
 	private HSlider _musicVolumeSlider;
@@ -37,6 +39,8 @@ public partial class SettingsUiController : Control
 		_uiProfileOption = GetNode<OptionButton>("Panel/UiProfileOption");
 		_devModeCheck = GetNode<CheckBox>("Panel/DevModeCheck");
 		_confirmSellCheck = GetNode<CheckBox>("Panel/ConfirmSellCheck");
+		_autoPauseNightCheck = GetNode<CheckBox>("Panel/AutoPauseNightCheck");
+		_autoResumePlaceCheck = GetNode<CheckBox>("Panel/AutoResumePlaceCheck");
 		_dragSpeedSlider = GetNode<HSlider>("Panel/DragSpeedSlider");
 		_dragSpeedValueLabel = GetNode<Label>("Panel/DragSpeedValueLabel");
 		_musicVolumeSlider = GetNode<HSlider>("Panel/MusicVolumeSlider");
@@ -124,6 +128,8 @@ public partial class SettingsUiController : Control
 		_uiProfileOption.Select(_uiProfileOption.GetItemIndex((int)settings.UiProfile));
 		_devModeCheck.ButtonPressed = DisplaySettingsManager.DevModeEnabled;
 		_confirmSellCheck.ButtonPressed = DisplaySettingsManager.ConfirmSellEnabled;
+		_autoPauseNightCheck.ButtonPressed = DisplaySettingsManager.AutoPauseNightEnabled;
+		_autoResumePlaceCheck.ButtonPressed = DisplaySettingsManager.AutoResumeAfterPlaceEnabled;
 		_dragSpeed = settings.CameraDragSpeed;
 		_dragSpeedSlider.Value = _dragSpeed;
 		_musicVolume = settings.MusicVolume;
@@ -202,6 +208,8 @@ public partial class SettingsUiController : Control
 		Vector2I resolution = DisplaySettingsManager.OutputResolutions[_resolutionOption.Selected];
 		DisplaySettingsManager.DevModeEnabled = _devModeCheck.ButtonPressed;
 		DisplaySettingsManager.ConfirmSellEnabled = _confirmSellCheck.ButtonPressed;
+		DisplaySettingsManager.AutoPauseNightEnabled = _autoPauseNightCheck.ButtonPressed;
+		DisplaySettingsManager.AutoResumeAfterPlaceEnabled = _autoResumePlaceCheck.ButtonPressed;
 		UiProfileKind profile = (UiProfileKind)_uiProfileOption.GetSelectedId();
 		DisplaySettingsManager settings = AdapterRegistry.Resolve<DisplaySettingsManager>();
 		settings.SaveAndApply(mode, resolution, _dragSpeed, _musicVolume, _sfxVolume, profile);

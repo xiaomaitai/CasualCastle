@@ -3,6 +3,7 @@ using CasualCastle.Adapters.Godot;
 using CasualCastle.Adapters.Godot.Dev;
 using CasualCastle.Domain.Building;
 using CasualCastle.Domain.Battle;
+using CasualCastle.Domain.Shared;
 using Godot;
 
 public partial class UIManager : Node2D
@@ -49,7 +50,10 @@ public partial class UIManager : Node2D
 	public override void _ExitTree()
 	{
 		if (AdapterRegistry.Resolve<GameManager>() != null)
+		{
 			AdapterRegistry.Resolve<GameManager>().GameStateChanged -= OnGameStateChanged;
+			AdapterRegistry.Resolve<GameManager>().PhaseChanged -= OnPhaseChanged;
+		}
 
 
 		_combineProhibitUi?.Dispose();
@@ -74,16 +78,24 @@ public partial class UIManager : Node2D
 
 	public override void _Input(InputEvent @event)
 	{
-		if (@event is InputEventKey keyEvent && keyEvent.Pressed && !keyEvent.Echo
-			&& keyEvent.Keycode == Key.Escape)
+		if (@event is InputEventKey keyEvent && keyEvent.Pressed && !keyEvent.Echo)
 		{
-			if (_inputRouter.HandleEscape())
+			if (keyEvent.Keycode == Key.Escape)
 			{
-				GetViewport().SetInputAsHandled();
-				return;
+				if (_inputRouter.HandleEscape())
+				{
+					GetViewport().SetInputAsHandled();
+					return;
+				}
+
+				if (_pauseMenuUi?.Open() == true)
+				{
+					GetViewport().SetInputAsHandled();
+					return;
+				}
 			}
 
-			if (_pauseMenuUi?.Open() == true)
+			if (HandleGameHotkey(keyEvent.Keycode))
 			{
 				GetViewport().SetInputAsHandled();
 				return;
@@ -101,6 +113,37 @@ public partial class UIManager : Node2D
 			GetViewport().SetInputAsHandled();
 			return;
 		}
+	}
+
+	private bool HandleGameHotkey(Key keycode)
+	{
+		switch (keycode)
+		{
+			case >= Key.Key1 and <= Key.Key9:
+				int slotIndex = (int)(keycode - Key.Key1);
+				if (_shopUi != null && _shopUi.IsOpen && slotIndex < Shop.OfferCount)
+					return _shopUi.TryBuySlot(slotIndex);
+				return _handUi != null && _handUi.SelectCardIndex(slotIndex);
+			case Key.Space:
+				return !_gameOver && _pauseMenuUi != null && _pauseMenuUi.Toggle();
+			case Key.B:
+				return _shopUi != null && _shopUi.ToggleOpen();
+			case Key.S:
+				if (_handUi != null && _handUi.IsPlacementActive)
+					return false;
+				return TrySellSelectedBuilding();
+			case Key.M:
+				AdapterRegistry.Resolve<DisplaySettingsManager>()?.ToggleMute();
+				return true;
+		}
+		return false;
+	}
+
+	private bool TrySellSelectedBuilding()
+	{
+		if (_buildingSell == null || _unitSelection?.SelectedBuilding == null)
+			return false;
+		return _buildingSell.TrySell(_unitSelection.SelectedBuilding);
 	}
 
 	private void EnsureTavernBubble()
@@ -149,6 +192,7 @@ public partial class UIManager : Node2D
 		_pauseMenuUi.OpenSettingsAction = OpenSettings;
 		_gameOverUi = uiRoot.GetNode<GameOverUiController>("GameOver");
 		_gameOverUi.GoToTitleAction = GoToTitle;
+		_gameOverUi.RestartMatchAction = RestartMatch;
 
 		UiSfx.Bind(uiRoot);
 		RegisterRouting();
@@ -157,7 +201,10 @@ public partial class UIManager : Node2D
 		_shopUi.OpenChanged += OnShopOpenChanged;
 
 		if (AdapterRegistry.Resolve<GameManager>() != null)
+		{
 			AdapterRegistry.Resolve<GameManager>().GameStateChanged += OnGameStateChanged;
+			AdapterRegistry.Resolve<GameManager>().PhaseChanged += OnPhaseChanged;
+		}
 
 		OnGameStateChanged(AdapterRegistry.Resolve<GameManager>().CurrentState);
 	}
@@ -210,6 +257,14 @@ public partial class UIManager : Node2D
 		RefreshInteractionState();
 	}
 
+	private void OnPhaseChanged(MatchPhase phase)
+	{
+		if (_gameOver || !DisplaySettingsManager.AutoPauseNightEnabled)
+			return;
+		if (phase == MatchPhase.Combat)
+			_pauseMenuUi?.Open();
+	}
+
 	private void RefreshInteractionState()
 	{
 		_interactionState.Update(
@@ -253,8 +308,7 @@ public partial class UIManager : Node2D
 	}
 
 	private void OnPauseMenuOpenChanged(bool open)
-	{
-		if (open)
+	{		if (open)
 		{
 			_shopUi?.Close();
 			_handUi?.TryHandleEscape();
@@ -283,5 +337,18 @@ public partial class UIManager : Node2D
 		AdapterRegistry.Resolve<Hand>().ResetHand();
 		AdapterRegistry.Resolve<BattleReportSystem>()?.ClearCurrentCache();
 		GetTree().ChangeSceneToFile(TitleScene);
+	}
+
+	public void RestartMatch()
+	{
+		if (_isChangingScene)
+			return;
+
+		_isChangingScene = true;
+		SetProcessInput(false);
+		AdapterRegistry.Resolve<GameManager>()?.SetPaused(false);
+		AdapterRegistry.Resolve<Hand>()?.ResetHand();
+		AdapterRegistry.Resolve<BattleReportSystem>()?.ClearCurrentCache();
+		GetTree().ReloadCurrentScene();
 	}
 }

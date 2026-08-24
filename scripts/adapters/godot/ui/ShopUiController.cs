@@ -216,6 +216,19 @@ public partial class ShopUiController : Control
 		Sfx.Play(SfxEvents.ShopOpen);
 	}
 
+	public bool ToggleOpen()
+	{
+		if (IsOpen)
+		{
+			Close();
+			return true;
+		}
+		if (!_shop.IsShopAvailable || _gameOver)
+			return false;
+		Open();
+		return true;
+	}
+
 	private void OnShopButtonMouseEntered()
 	{
 		_shopButtonHovered = true;
@@ -262,6 +275,14 @@ public partial class ShopUiController : Control
 	{
 		if (_shop.TryPurchase(slotIndex))
 			Sfx.Play(SfxEvents.Buy);
+	}
+
+	public bool TryBuySlot(int slotIndex)
+	{
+		if (slotIndex < 0 || slotIndex >= Shop.OfferCount || !IsOpen || _gameOver)
+			return false;
+		OnBuyButtonPressed(slotIndex);
+		return true;
 	}
 
 	private void OnOfferGuiInput(int slotIndex, InputEvent @event)

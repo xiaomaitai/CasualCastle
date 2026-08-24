@@ -199,8 +199,15 @@ public partial class HandUiController : Control
 		if (!playerCastle.TryGetGridFromScreenPoint(mouseButton.GlobalPosition, out int gridX, out int gridY))
 			return false;
 
-		_hand.TryPlaceSelected(gridX, gridY);
+		if (_hand.TryPlaceSelected(gridX, gridY))
+			ResumeAfterPlace();
 		return true;
+	}
+
+	private void ResumeAfterPlace()
+	{
+		if (DisplaySettingsManager.AutoResumeAfterPlaceEnabled)
+			AdapterRegistry.Resolve<GameManager>()?.SetPaused(false);
 	}
 
 	private bool ClearSelection()
@@ -224,6 +231,16 @@ public partial class HandUiController : Control
 			return;
 
 		_hand.SelectCard(handIndex);
+	}
+
+	public bool SelectCardIndex(int handIndex)
+	{
+		if (_inputBlocked || _gameManager.CurrentState == GameManager.GameState.GameOver)
+			return false;
+		if (handIndex < 0 || handIndex >= _hand.Cards.Count)
+			return false;
+		_hand.SelectCard(handIndex);
+		return true;
 	}
 
 	private void OnHandGuiInput(int handIndex, InputEvent @event)
@@ -274,7 +291,10 @@ public partial class HandUiController : Control
 		if (!playerCastle.TryGetGridFromScreenPoint(screenPosition, out int gridX, out int gridY))
 			return false;
 
-		return _hand.TryPlaceAtIndex(_dragHandIndex, gridX, gridY);
+		bool placed = _hand.TryPlaceAtIndex(_dragHandIndex, gridX, gridY);
+		if (placed)
+			ResumeAfterPlace();
+		return placed;
 	}
 
 	private void RefreshDisplay()

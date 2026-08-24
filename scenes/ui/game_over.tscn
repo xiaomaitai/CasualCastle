@@ -19,39 +19,47 @@ color = Color(0, 0, 0, 0.55)
 [node name="GameOverPanel" type="Panel" parent="."]
 visible = false
 offset_left = 660
-offset_top = 360
+offset_top = 330
 offset_right = 1260
-offset_bottom = 630
+offset_bottom = 680
 
 [node name="PanelBackground" type="ColorRect" parent="GameOverPanel"]
 layout_mode = 0
 offset_right = 600
-offset_bottom = 270
+offset_bottom = 350
 color = Color(0.18, 0.22, 0.28, 0.95)
 
 [node name="GameOverLabel" type="Label" parent="GameOverPanel"]
 layout_mode = 0
 offset_left = 75
-offset_top = 54
+offset_top = 40
 offset_right = 525
-offset_bottom = 129
+offset_bottom = 115
 theme_override_font_sizes/font_size = 48
 text = "游戏结束"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="RestartButton" type="Button" parent="GameOverPanel"]
+layout_mode = 0
+offset_left = 75
+offset_top = 150
+offset_right = 525
+offset_bottom = 217.5
+text = "再来一局"
+
 [node name="SaveReportButton" type="Button" parent="GameOverPanel"]
 layout_mode = 0
 offset_left = 75
-offset_top = 165
+offset_top = 245
 offset_right = 285
-offset_bottom = 232.5
+offset_bottom = 312.5
 text = "保存战报并返回"
 
 [node name="DiscardAndBackButton" type="Button" parent="GameOverPanel"]
 layout_mode = 0
 offset_left = 315
-offset_top = 165
+offset_top = 245
 offset_right = 525
-offset_bottom = 232.5
+offset_bottom = 312.5
 text = "不保存并返回标题"

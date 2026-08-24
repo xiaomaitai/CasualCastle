@@ -8,9 +8,9 @@ using System;
 
 public partial class HudUiController : Control
 {
-	public const float SpeedMin = 0.5f;
-	public const float SpeedMax = 10.0f;
-	public const float SpeedStep = 0.1f;
+	public const float SpeedMin = 1f;
+	public const float SpeedMax = 4f;
+	public const float SpeedStep = 1f;
 	public const float SpeedDefault = 1.0f;
 
 	private ProgressBar _playerHealthBar;
@@ -85,11 +85,11 @@ public partial class HudUiController : Control
 			UpdateBlackMagicDisplay(blackMagic.Value);
 		}
 
-		SpeedPanel.Visible = DisplaySettingsManager.DevModeEnabled;
+		SpeedPanel.Visible = true;
 		SpeedSlider.MinValue = SpeedMin;
 		SpeedSlider.MaxValue = SpeedMax;
 		SpeedSlider.Step = SpeedStep;
-		SpeedSlider.Value = SpeedDefault;
+		SpeedSlider.Value = settings.GameSpeed;
 		SpeedSlider.ValueChanged += OnSpeedChanged;
 		UpdateSpeedLabel();
 	}
@@ -144,6 +144,7 @@ public partial class HudUiController : Control
 	private void OnSpeedChanged(double value)
 	{
 		Engine.TimeScale = value;
+		AdapterRegistry.Resolve<DisplaySettingsManager>().SetGameSpeed((float)value);
 		UpdateSpeedLabel();
 		Sfx.Play(SfxEvents.SliderChange);
 	}

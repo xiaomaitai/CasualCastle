@@ -118,6 +118,13 @@ public partial class BuildingSellController : Node
 		return true;
 	}
 
+	public bool TrySell(Building building)
+	{
+		if (_inputBlocked || building == null || !GodotObject.IsInstanceValid(building))
+			return false;
+		return SellBuilding(building);
+	}
+
 	private void CancelDrag()
 	{
 		_dragging = false;
