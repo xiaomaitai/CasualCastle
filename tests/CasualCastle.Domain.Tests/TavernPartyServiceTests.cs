@@ -90,7 +90,7 @@ public class TavernPartyServiceTests
 	}
 
 	[Fact]
-	public void AdventurerGuild_WaitsAtFourDistinctRaces()
+	public void AdventurerGuild_DepartsAtFourAvailableRaces_RealBug_WasStuckAtSix()
 	{
 		FakeBuilding tavern = CreateTavern("AdventurerGuild", 0f, 0f);
 		TavernPartyService service = new();
@@ -104,8 +104,11 @@ public class TavernPartyServiceTests
 		service.TryAssignTavern(thief, Taverns(tavern));
 		service.TryAssignTavern(mage, Taverns(tavern));
 
-		Assert.True(service.IsOccupied(tavern));
-		Assert.Equal(4, service.GetWaitingUnits(tavern).Count);
+		Assert.False(service.IsOccupied(tavern));
+		Assert.Null(ranger.AssignedTavern);
+		Assert.Null(warrior.AssignedTavern);
+		Assert.Null(thief.AssignedTavern);
+		Assert.Null(mage.AssignedTavern);
 	}
 
 	[Fact]

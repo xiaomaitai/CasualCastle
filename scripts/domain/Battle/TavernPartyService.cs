@@ -10,7 +10,7 @@ public sealed class TavernPartyService
 	public const string InnTypeId = BuildingTypeIds.Inn;
 	public const string AdventurerGuildTypeId = BuildingTypeIds.AdventurerGuild;
 	public const int InnPartyLimit = 4;
-	public const int AdventurerGuildPartyLimit = 6;
+	public const int AdventurerGuildPartyLimit = 4;
 	public const float StandRadius = 40f;
 
 	private static readonly string[] AdventurerRaces = { "Elf", "Dwarf", "Halfling", "Dragonborn" };
