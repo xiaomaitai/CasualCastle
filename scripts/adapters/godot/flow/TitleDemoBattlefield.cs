@@ -36,6 +36,8 @@ public partial class TitleDemoBattlefield : Node2D
 	private float _cameraDirection = 1f;
 	private bool _demoReady;
 
+	public bool IsReady => _demoReady;
+
 	public override void _Ready()
 	{
 		try

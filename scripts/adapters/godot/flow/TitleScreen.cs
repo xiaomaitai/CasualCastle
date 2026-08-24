@@ -24,10 +24,12 @@ public partial class TitleScreen : Control
 	private Button _devToolsButton;
 	private OptionButton _reportOption;
 	private OptionButton _factionOption;
+	private Label _demoStateLabel;
 	private bool _isStartingGame;
 
 	public override void _Ready()
 	{
+		ResetGameManagerToTitleState();
 		VBoxContainer ui = GetNode<VBoxContainer>("UI");
 		_startButton = ui.GetNode<Button>("StartButton");
 		_settingsButton = ui.GetNode<Button>("SettingsButton");
@@ -64,10 +66,42 @@ public partial class TitleScreen : Control
 	AudioManager.Instance?.PlayTitleMusic();
 	_bgmInfo = new BgmInfoController { Label = GetNode<Label>("BgmInfoLabel") };
 	AddChild(_bgmInfo);
+	if (DisplaySettingsManager.DevModeEnabled)
+		CreateDemoStateMarker();
+	}
+
+	public override void _Process(double delta)
+	{
+		if (_demoStateLabel == null)
+			return;
+
+		TitleDemoBattlefield demo = GetNodeOrNull<TitleDemoBattlefield>("DemoBattlefield");
+		_demoStateLabel.Text = demo != null && demo.IsReady ? "演示战场：运行中" : "演示战场：未启动";
 	}
 
 	public override void _ExitTree()
 	{
+	}
+
+	private void ResetGameManagerToTitleState()
+	{
+		AdapterRegistry.Resolve<GameManager>()?.ResetToTitleState();
+	}
+
+	private void CreateDemoStateMarker()
+	{
+		_demoStateLabel = new Label
+		{
+			Text = "演示战场：未启动",
+		};
+		_demoStateLabel.AddThemeFontSizeOverride("font_size", 14);
+		_demoStateLabel.SetAnchorsPreset(LayoutPreset.BottomRight);
+		_demoStateLabel.OffsetLeft = -380f;
+		_demoStateLabel.OffsetTop = -40f;
+		_demoStateLabel.OffsetRight = 0f;
+		_demoStateLabel.OffsetBottom = -10f;
+		_demoStateLabel.HorizontalAlignment = HorizontalAlignment.Right;
+		AddChild(_demoStateLabel);
 	}
 
 	public override void _Input(InputEvent @event)

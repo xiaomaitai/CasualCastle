@@ -246,4 +246,12 @@ public partial class GameManager : Node2D, IGameState
 		EmitSignal(SignalName.GameStateChanged, (int)CurrentState);
 		SetProcess(true);
 	}
+
+	public void ResetToTitleState()
+	{
+		CurrentState = GameState.Playing;
+		IsPaused = false;
+		SetProcess(false);
+		EmitSignal(SignalName.GameStateChanged, (int)CurrentState);
+	}
 }
