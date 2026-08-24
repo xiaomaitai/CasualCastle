@@ -43,6 +43,10 @@ public partial class Castle : Node2D
 	public bool IsAlive => Heart != null && Heart.Health > 0;
 
 	private const float HealthBarFlashSeconds = 0.5f;
+	private const float InvalidFlashSeconds = 0.35f;
+	private const float InvalidFlashAlphaBoost = 0.5f;
+	private const float InvalidShakeAmplitude = 2.5f;
+	private const float InvalidShakeFrequency = 40f;
 	private static readonly Color HealthBarFlashTint = new(1f, 0.92f, 0.92f, 1f);
 
 	private OccupancyGrid _occupancy;
@@ -54,6 +58,10 @@ public partial class Castle : Node2D
 	private int _previewGridY;
 
 	private bool _previewValid;
+
+	private float _invalidFlashStrength;
+
+	private float _invalidShakePhase;
 
 	private IReadOnlyList<Vector2I> _previewFootprint;
 
@@ -347,6 +355,12 @@ public partial class Castle : Node2D
 		_showPlacementPreview = show;
 		_previewGridX = gridX;
 		_previewGridY = gridY;
+		if (show && !valid && _previewValid)
+		{
+			_invalidFlashStrength = 1f;
+			_invalidShakePhase = 0f;
+		}
+
 		_previewValid = valid;
 		_previewFootprint = _buildingSystem.GetFootprint(buildingType);
 		QueueRedraw();
@@ -400,6 +414,16 @@ public partial class Castle : Node2D
 		DrawPlacementPreview();
 	}
 
+	public override void _Process(double delta)
+	{
+		float step = (float)delta;
+		if (_invalidFlashStrength <= 0f)
+			return;
+		_invalidFlashStrength = Mathf.Max(0f, _invalidFlashStrength - step / InvalidFlashSeconds);
+		_invalidShakePhase += step * InvalidShakeFrequency;
+		QueueRedraw();
+	}
+
 	private void DrawCellTextures()
 	{
 		Vector2 cellPixelSize = GameCoordinatesAdapter.ToLocalPixels(
@@ -420,22 +444,31 @@ public partial class Castle : Node2D
 			return;
 
 		Color previewColor = _previewValid ? ValidPreviewColor : InvalidPreviewColor;
+		Vector2 shakeOffset = Vector2.Zero;
+		if (_invalidFlashStrength > 0f)
+		{
+			previewColor.A = Mathf.Min(1f, previewColor.A + _invalidFlashStrength * InvalidFlashAlphaBoost);
+			shakeOffset = new Vector2(
+				Mathf.Sin(_invalidShakePhase) * InvalidShakeAmplitude * _invalidFlashStrength,
+				Mathf.Cos(_invalidShakePhase * 1.3f) * InvalidShakeAmplitude * _invalidFlashStrength);
+		}
+
 		Vector2 cellPixelSize = GameCoordinatesAdapter.ToLocalPixels(
 			GameCoordinateRules.UnitsPerCell,
 			GameCoordinateRules.UnitsPerCell);
 
 		foreach (Vector2I offset in _previewFootprint)
-			DrawPreviewCell(offset, cellPixelSize, previewColor);
+			DrawPreviewCell(offset, cellPixelSize, previewColor, shakeOffset);
 	}
 
-	private void DrawPreviewCell(Vector2I offset, Vector2 cellPixelSize, Color previewColor)
+	private void DrawPreviewCell(Vector2I offset, Vector2 cellPixelSize, Color previewColor, Vector2 shakeOffset)
 	{
 		int col = _previewGridX + offset.X;
 		int row = _previewGridY + offset.Y;
 		if (!IsInBounds(col, row))
 			return;
 
-		Vector2 previewPos = GameCoordinatesAdapter.ToLocalPixels(GameCoordinateRules.CellCorner(col, row));
+		Vector2 previewPos = GameCoordinatesAdapter.ToLocalPixels(GameCoordinateRules.CellCorner(col, row)) + shakeOffset;
 		DrawRect(new Rect2(previewPos, cellPixelSize), previewColor);
 	}
 
