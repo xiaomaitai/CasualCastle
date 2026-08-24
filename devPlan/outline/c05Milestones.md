@@ -542,7 +542,7 @@ v0.7 重新定义为**完善版**（2026-08-25 用户决策）：原「建筑美
 | 编号 | 目标 | 说明 | 状态 |
 |------|------|------|------|
 | G1 | 派系机制修复 | 让设计里的机制真的生效：联盟闪避修复 + T4/T5 断链修复、地下城无效技能 + 享乐舞台补齐、死灵黑魔法常量 DB 化；死建筑清零，均带单测 | ✅ |
-| G2 | 高阶单位技能化 | 终局兵种有差异机制：联盟国王/圣盾守护者/暗影之主等技能配置 + AuraService 支持 Human、死亡天使差异化被动，带单测 | 📋 |
+| G2 | 高阶单位技能化 | 终局兵种有差异机制：联盟国王/圣盾守护者/暗影之主等技能配置 + AuraService 支持 Human、死亡天使差异化被动，带单测 | ✅ 联盟 7 兵种 + 死亡天使全部配置生效（1221e77 / 1195fcd）；两处设计脱节转 todo |
 | G3 | 可玩性打磨 + 操作 QOL | 数值实测调优、商店夜晚解锁、属性面板数据缺口补齐、补派系 battle 冒烟；**操作 QOL**：加速面板开放、自动暂停、快捷键、镜头操作、快速重开 | 📋 |
 | G4 | UI 与交互 + 交互/展示 QOL | 标题演示战场、地下城技能三选一正式 UI、文案清理；**交互 QOL**：范围预览/选中反馈/拖拽手感/组合预览；**展示 QOL**：buff 栏/飘字/生产进度/核心告警 | 📋 |
 | G5 | 验收与文档 | 全冒烟 + 单测通过 + dotnet build 零 warning；同步 `c05Milestones.md`、四派系文档、`aiIndex.md` | 📋 |
@@ -570,24 +570,35 @@ v0.7 重新定义为**完善版**（2026-08-25 用户决策）：原「建筑美
 - [x] 四派系所有「设计内机制」实测生效，对应单测通过
 - [x] dotnet test 全绿、dotnet build 零 warning
 
-### G2 高阶单位技能化
+### G2 高阶单位技能化 ✅（1221e77 机制 / 1195fcd 配置）
 
-**联盟终局单位技能配置**（当前 T4/T5 高阶单位零技能）：
-- 国王 King：全员光环（攻击/生命）或主动强化
-- 圣盾守护者 HolyGuardian：护盾/减伤被动、护卫光环
-- 暗影之主 ShadowLord：范围暗影伤害/控制
-- 皇家骑士 RoyalKnight / 皇家射手 RoyalArcher / 皇家斥候 RoyalScout：差异化被动（冲锋/齐射/侦察移速）
-- 龙骑统帅 DragonRiderCommander：龙息/光环
-- 技能以 config.db `skill_defs` 配置为主，运行时经 `SkillSet`/`SkillService` 生效
+**域层新机制**（均带单测，AllianceEndgameSkillTests 7 例）：
+- AuraService 支持 Human：`IsAuraEligibleRace`/`IsReceiverEligible` 增加 Human（联盟光环可对联盟单位生效）
+- damage_reduction 减伤光环：`AuraBonusTypes.DamageReduction` → `GameContext.AuraDamageReductionMultiplier` → `Unit.TakeDamage` 受击乘算（圣盾守护者 -20%）
+- Charge 冲锋首击：`Unit.TryAttack` 首次攻击乘 `damage_mult`（皇家骑士 2x）
+- Summon 召唤：`IUnitEventPort.OnSummon` + `SpecialConfig.UnitType` + `Unit.TickSummon` 按冷却触发，adapter 经 `UnitLogic.OnSummoned` → `UnitSpawnService.SpawnUnitAt` 落地（国王每 30s 召唤皇家卫队）
+- KeepOnAttack 攻击不显形：`SpecialConfig.keep_on_attack` → `TryAttack` 破隐判断（暗影之主）
 
-**AuraService 支持 Human**：
-- 现状 `IsAuraEligibleRace`/`IsReceiverEligible` 仅覆盖 horde/undead/demon → 增加 Human（联盟光环单位可对联盟单位提供光环：圣盾守护者护甲光环、国王攻击光环等）
+**联盟高阶单位技能配置**（config.db，全部生效）：
+| 单位 | 技能 | 效果 |
+| --- | --- | --- |
+| 国王 King | king_aura（全屏光环） | 友军伤害+10% / 攻速+10% / 每秒回1%血 |
+| 国王 King | king_summon | 每 30s 召唤 1 名皇家卫队 |
+| 圣盾守护者 | holy_guardian_aura | 周围友军受伤 -20% |
+| 皇家骑士 | royal_knight_charge | 冲锋首目标 2x |
+| 暗影之主 | shadow_lord_stealth | 潜行且攻击不显形 |
+| 暗影之主 | backstab（复用） | 背刺孤立目标 2x |
+| 皇家斥候 | royal_scout_stealth | 永久潜行，不被远程锁定 |
+| 龙骑统帅 | dragon_rider_kiting | 骑射放风筝（边打边撤） |
+| 皇家神射手 | slowing_strike（复用） | 命中减速 30% |
 
-**死亡天使 DeathAngel 差异化被动**：死灵 T5 专属被动与普通单位区分，带单测
+**死亡天使差异化被动**：终焉狂暴（HP≤30% 攻击+30%，`death_angel_rage`，LowHealth 机制已有）
 
-**验收**：
-- 每个联盟高阶单位至少一个可生效技能（config + 运行时生效）
-- AuraService Human 单测覆盖；dotnet test 全绿
+**记录到 todo 的两处设计-实现脱节**：
+- 皇家神射手「对 Beast +30%」：实现无 Beast 护甲/种族/野怪表，改配减速
+- 暗影之主「被击杀目标不产生战报」：战报为敌方城堡快照式（无击杀记录），NoBattleReport 枚举保留无消费方，改配背刺
+
+**验收**：✅ 联盟 6 兵种 + 死亡天使全部有生效技能；AuraService Human 单测；Domain 625 / Persistence 30 / Application 24 全绿、adapter 零 warning；config_db_dump.sql 已更新
 
 ### G3 可玩性打磨 + 操作 QOL
 
