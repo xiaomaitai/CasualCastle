@@ -695,9 +695,9 @@ INSERT INTO "tech_tree_nodes" VALUES('RitualCircleL5','necromancer',5,0,0,NULL,N
 INSERT INTO "tech_tree_nodes" VALUES('DeathTemple','necromancer',3,1,0,NULL,NULL,0,'死亡圣殿','DeathKnight',400,6.0,12,'Undead',0);
 INSERT INTO "tech_tree_nodes" VALUES('DarkAltar','necromancer',1,3,1,3,8,0,'黑暗祭坛','DarkMage',200,7.0,3,'Human',0);
 INSERT INTO "tech_tree_nodes" VALUES('DarkMageTower','necromancer',2,3,0,NULL,NULL,0,'暗黑法师塔','DarkMage',320,6.0,8,'Human',0);
-INSERT INTO "tech_tree_nodes" VALUES('BloodAltar','necromancer',4,1,0,NULL,NULL,0,'????','BloodKnight',550,5.5,28,'Undead',0);
-INSERT INTO "tech_tree_nodes" VALUES('NecromancySanctum','necromancer',5,1,0,NULL,NULL,0,'??????','NecromancyInstructor',700,5.0,65,'Undead',0);
-INSERT INTO "tech_tree_nodes" VALUES('DeathGate','necromancer',5,2,0,NULL,NULL,0,'????','DeathLord',750,8.0,80,'Undead',0);
+INSERT INTO "tech_tree_nodes" VALUES('BloodAltar','necromancer',4,1,0,NULL,NULL,0,'鲜血祭坛','BloodKnight',550,5.5,28,'Undead',0);
+INSERT INTO "tech_tree_nodes" VALUES('NecromancySanctum','necromancer',5,1,0,NULL,NULL,0,'亡灵巫术禁殿','NecromancyInstructor',700,5.0,65,'Undead',0);
+INSERT INTO "tech_tree_nodes" VALUES('DeathGate','necromancer',5,2,0,NULL,NULL,0,'死者之门','DeathLord',750,8.0,80,'Undead',0);
 INSERT INTO "tech_tree_nodes" VALUES('DungeonThroneL1','dungeon',1,0,0,NULL,NULL,0,'魔王宝座·1级','0',200,10.0,NULL,'Demon',1);
 INSERT INTO "tech_tree_nodes" VALUES('DemonGate','dungeon',1,1,1,3,12,0,'恶魔之门','Imp',200,10.0,3,'Demon',0);
 INSERT INTO "tech_tree_nodes" VALUES('SpikeTrap','dungeon',1,2,1,2,12,0,'尖刺陷阱',NULL,200,10.0,2,'Demon',0);

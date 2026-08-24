@@ -25,6 +25,8 @@ public class RealBugTextCorruptionTests
 				select name as text from shop_catalog
 				union all
 				select name as text from item_catalog
+				union all
+				select display_name as text from tech_tree_nodes
 			) where text like '%?%'";
 		object corrupted = command.ExecuteScalar();
 		Assert.Equal(0L, Convert.ToInt64(corrupted));
