@@ -191,6 +191,15 @@ public partial class HudUiController : Control
 	private void UpdateGoldDisplay(int gold)
 	{
 		GoldLabel.Text = $"金币：{gold}";
+		PlayGoldPop(GoldLabel);
+	}
+
+	private void PlayGoldPop(Label label)
+	{
+		Tween tween = CreateTween();
+		label.PivotOffset = label.Size / 2f;
+		tween.TweenProperty(label, "scale", new Vector2(1.15f, 1.15f), 0.08f);
+		tween.TweenProperty(label, "scale", Vector2.One, 0.14f);
 	}
 
 	private void UpdateBlackMagicDisplay(int value)

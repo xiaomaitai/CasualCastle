@@ -8,6 +8,7 @@ using System;
 public partial class ShopUiController : Control
 {
 	private const string ShopIconPath = "res://assets/art/ui/shop_goods_pile_194.png";
+	private static readonly Color GoldInsufficientColor = new(0.9f, 0.25f, 0.2f, 1f);
 
 	private Button _shopButton;
 	private Panel _shopButtonCircle;
@@ -275,6 +276,8 @@ public partial class ShopUiController : Control
 	{
 		if (_shop.TryPurchase(slotIndex))
 			Sfx.Play(SfxEvents.Buy);
+		else
+			PlayGoldInsufficientFlash();
 	}
 
 	public bool TryBuySlot(int slotIndex)
@@ -337,9 +340,26 @@ public partial class ShopUiController : Control
 	private void UpdateGoldDisplay(int gold)
 	{
 		_shopGoldLabel.Text = $"当前金币：{gold}";
+		PlayGoldPop();
 		RefreshOffers();
 		if (_ready)
 			Sfx.Play(SfxEvents.CoinChange);
+	}
+
+	private void PlayGoldPop()
+	{
+		Tween tween = CreateTween();
+		_shopGoldLabel.PivotOffset = _shopGoldLabel.Size / 2f;
+		tween.TweenProperty(_shopGoldLabel, "scale", new Vector2(1.12f, 1.12f), 0.08f);
+		tween.TweenProperty(_shopGoldLabel, "scale", Vector2.One, 0.12f);
+	}
+
+	private void PlayGoldInsufficientFlash()
+	{
+		Tween tween = CreateTween();
+		_shopGoldLabel.AddThemeColorOverride("font_color", GoldInsufficientColor);
+		tween.TweenInterval(0.5f);
+		tween.TweenCallback(Callable.From(() => _shopGoldLabel.RemoveThemeColorOverride("font_color")));
 	}
 
 	private void UpdateShopButtonAvailability(bool available)
