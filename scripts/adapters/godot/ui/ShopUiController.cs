@@ -1,5 +1,6 @@
 // 商店组件：购买与直接放置（shop_panel.tscn 场景根）
 using CasualCastle.Adapters.Godot;
+using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
 using CasualCastle.Domain.Shared;
 using Godot;
@@ -379,9 +380,27 @@ public partial class ShopUiController : Control
 			if (offer == null)
 				continue;
 
+			_offerLabels[i].TooltipText = BuildOfferTooltip(offer);
 			bool canBuy = _shop.CanAfford(offer.Cost);
 			_buyButtons[i].Disabled = !canBuy;
 			_buyButtons[i].Text = canBuy ? "购买" : "金币不足";
 		}
+	}
+
+	private string BuildOfferTooltip(CardData offer)
+	{
+		string unitTypeId = GameManager.Get<IBuildingRepository>().GetUnitTypeId(offer.BuildingType);
+		if (string.IsNullOrEmpty(unitTypeId))
+			return $"{offer.Name}：不产出单位";
+		UnitStats stats = GameManager.Get<IUnitRepository>().Get(unitTypeId);
+		string attack = stats.HealAmount > 0f
+			? $"治疗 {stats.HealAmount:0}"
+			: $"攻击 {stats.Damage}";
+		string unitName = UnitDisplayName.Get(unitTypeId);
+		string unitLine = $"产出：{unitName}  生命 {stats.Health}  {attack}";
+		string rangeLine = stats.HealAmount > 0f
+			? $"治疗范围 {stats.HealRange:0}  间隔 {stats.HealInterval:0.##}s"
+			: $"射程 {stats.AttackRange:0}  间隔 {stats.AttackCooldown:0.##}s";
+		return $"{unitLine}\n{rangeLine}\n移速 {stats.Speed:0}  生产 {_buildingSystem.GetSpawnInterval(offer.BuildingType):0.##}s";
 	}
 }

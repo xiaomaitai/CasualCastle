@@ -308,6 +308,7 @@ public partial class HandUiController : Control
 				CardData card = _hand.Cards[i];
 				button.Visible = true;
 				button.Text = $"[{i + 1}]\n{card.Name}\n金币 {card.Cost}";
+				button.TooltipText = BuildHandCardTooltip(card);
 				button.Disabled = _inputBlocked;
 			}
 			else
@@ -328,6 +329,21 @@ public partial class HandUiController : Control
 		RefreshHighlight();
 		UpdatePlacementHint();
 		_useItemButton.Visible = CanUseSelectedCrystal();
+	}
+
+	private static string BuildHandCardTooltip(CardData card)
+	{
+		if (card.ItemType == ShopItemTypes.DungeonCrystal)
+			return "经验魔晶：立即为魔王注入经验";
+		string unitTypeId = GameManager.Get<IBuildingRepository>().GetUnitTypeId(card.BuildingType);
+		if (string.IsNullOrEmpty(unitTypeId))
+			return $"{card.Name}：不产出单位";
+		UnitStats stats = GameManager.Get<IUnitRepository>().Get(unitTypeId);
+		string attack = stats.HealAmount > 0f
+			? $"治疗 {stats.HealAmount:0}"
+			: $"攻击 {stats.Damage}";
+		return $"产出：{UnitDisplayName.Get(unitTypeId)}  生命 {stats.Health}  {attack}"
+			+ $"\n射程 {stats.AttackRange:0}  移速 {stats.Speed:0}";
 	}
 
 	private bool CanUseSelectedCrystal()
