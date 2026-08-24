@@ -466,12 +466,12 @@ public class SqliteTechTreeRepository : ITechTreeRepository
 
 		cmd.Parameters.Clear();
 		cmd.CommandText = @"
-            INSERT OR REPLACE INTO shop_catalog (id, name, cost, building_type, weight)
-            SELECT n.type_id, n.display_name, n.gold_cost, n.type_id, n.shop_weight
+            INSERT OR REPLACE INTO shop_catalog (id, name, cost, building_type, weight, unlock_night)
+            SELECT n.type_id, n.display_name, n.gold_cost, n.type_id, n.shop_weight, n.unlock_night
             FROM tech_tree_nodes n
             WHERE n.faction_id = @factionId AND n.shop_available = 1";
 		cmd.Parameters.AddWithValue("@factionId", factionId);
-		GD.Print($"[SyncToGameTables] 同步可购买节点到商店目录: INSERT OR REPLACE INTO shop_catalog (id, name, cost, building_type, weight) SELECT n.type_id, n.display_name, n.gold_cost, n.type_id, n.shop_weight FROM tech_tree_nodes n WHERE n.faction_id = '{factionId}' AND n.shop_available = 1");
+		GD.Print($"[SyncToGameTables] 同步可购买节点到商店目录: INSERT OR REPLACE INTO shop_catalog (id, name, cost, building_type, weight, unlock_night) SELECT n.type_id, n.display_name, n.gold_cost, n.type_id, n.shop_weight, n.unlock_night FROM tech_tree_nodes n WHERE n.faction_id = '{factionId}' AND n.shop_available = 1");
 		cmd.ExecuteNonQuery();
 
 		transaction.Commit();

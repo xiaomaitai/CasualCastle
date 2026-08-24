@@ -101,4 +101,36 @@ public class ShopRulesTests
 
 		Assert.All(offers, card => Assert.True(card.Id == "a" || card.Id == "b"));
 	}
+
+	[Fact]
+	public void UnlockNight_FirstNight_LockedCardNotOffered()
+	{
+		CardData[] catalog = new[]
+		{
+			new CardData { Id = "early", Name = "E", Cost = 2, BuildingType = "Inn", Weight = 1, UnlockNight = 1 },
+			new CardData { Id = "late", Name = "L", Cost = 12, BuildingType = "RoyalStable", Weight = 1, UnlockNight = 2 },
+		};
+		ShopRules rules = new(catalog);
+		rules.SetAvailability(_ => false, _ => false, () => 1, () => 0);
+
+		CardData[] offers = rules.GenerateOffers(new Random(42));
+
+		Assert.All(offers, card => Assert.Equal("early", card.Id));
+	}
+
+	[Fact]
+	public void UnlockNight_SecondNight_LockedCardOffered()
+	{
+		CardData[] catalog = new[]
+		{
+			new CardData { Id = "early", Name = "E", Cost = 2, BuildingType = "Inn", Weight = 1, UnlockNight = 1 },
+			new CardData { Id = "late", Name = "L", Cost = 12, BuildingType = "RoyalStable", Weight = 1, UnlockNight = 2 },
+		};
+		ShopRules rules = new(catalog);
+		rules.SetAvailability(_ => false, _ => false, () => 1, () => 1);
+
+		CardData[] offers = rules.GenerateOffers(new Random(42));
+
+		Assert.Contains(offers, card => card != null && card.Id == "late");
+	}
 }

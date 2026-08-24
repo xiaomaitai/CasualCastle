@@ -33,7 +33,8 @@ public partial class InitManager : Node
 		shopRules.SetAvailability(
 			ritualId => ritualService.IsLearned(ritualId),
 			cardId => IsBookHeld(hand, cardId),
-			() => GetCoreLevel(gm));
+			() => GetCoreLevel(gm),
+			() => gm.CurrentNightIndex);
 		Shop shopService = new Shop(hand, shopRules, player);
 		AdapterRegistry.Register<Shop>(shopService);
 		shopService.SetFaction(gm.SelectedFaction);

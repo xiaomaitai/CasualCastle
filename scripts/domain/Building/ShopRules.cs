@@ -13,6 +13,7 @@ public class ShopRules
 	private Func<string, bool> _isRitualLearned = _ => false;
 	private Func<string, bool> _isBookHeld = _ => false;
 	private Func<int> _getCoreLevel = () => 1;
+	private Func<int> _getNightNumber = () => 0;
 
 	public ShopRules(IReadOnlyList<CardData> catalog)
 	{
@@ -24,12 +25,19 @@ public class ShopRules
 
 	public void SetAvailability(Func<string, bool> isRitualLearned, Func<string, bool> isBookHeld, Func<int> getCoreLevel)
 	{
+		SetAvailability(isRitualLearned, isBookHeld, getCoreLevel, () => 0);
+	}
+
+	public void SetAvailability(Func<string, bool> isRitualLearned, Func<string, bool> isBookHeld, Func<int> getCoreLevel, Func<int> getNightNumber)
+	{
 		if (isRitualLearned != null)
 			_isRitualLearned = isRitualLearned;
 		if (isBookHeld != null)
 			_isBookHeld = isBookHeld;
 		if (getCoreLevel != null)
 			_getCoreLevel = getCoreLevel;
+		if (getNightNumber != null)
+			_getNightNumber = getNightNumber;
 	}
 
 	public void SetFaction(string factionId)
@@ -82,6 +90,8 @@ public class ShopRules
 
 	private bool IsCardOffered(CardData card, HashSet<string> pickedBooks)
 	{
+		if (card.UnlockNight > _getNightNumber() + 1)
+			return false;
 		if (!string.IsNullOrEmpty(card.UnlockRitualId) && !_isRitualLearned(card.UnlockRitualId))
 			return false;
 		if (!DarkMagicBookRules.IsDarkMagicBook(card))
