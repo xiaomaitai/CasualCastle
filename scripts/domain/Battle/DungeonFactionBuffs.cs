@@ -13,6 +13,7 @@ public static class DungeonFactionBuffs
 	public const float FastBreedProductionMultiplier = 1.3f;
 	public const float ManaProductionLabyrinthMultiplier = 1.5f;
 	public const float AuraRangeSkillMultiplier = 1.5f;
+	public const float PleasureStageAttackMultiplier = 1.1f;
 
 	public static bool ActivePatrolEnabled;
 	public static float TrapCooldownMultiplier = 1f;
@@ -26,6 +27,7 @@ public static class DungeonFactionBuffs
 	public static float AuraRangeMultiplier = 1f;
 	public static float LivingRegenPerSecond;
 	public static bool TrapCapDoubled;
+	public static float AttackDamageMultiplier = 1f;
 
 	public static void Reset()
 	{
@@ -41,5 +43,6 @@ public static class DungeonFactionBuffs
 		AuraRangeMultiplier = 1f;
 		LivingRegenPerSecond = 0f;
 		TrapCapDoubled = false;
+		AttackDamageMultiplier = 1f;
 	}
 }

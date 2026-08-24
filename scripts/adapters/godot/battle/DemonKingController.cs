@@ -174,6 +174,9 @@ public partial class DemonKingController : Node
 		DungeonFactionBuffs.AuraRangeMultiplier = _skillSet.Contains("seductive_voice")
 			? DungeonFactionBuffs.AuraRangeSkillMultiplier
 			: 1f;
+		DungeonFactionBuffs.AttackDamageMultiplier = HasBuilding(states, "PleasureStage")
+			? DungeonFactionBuffs.PleasureStageAttackMultiplier
+			: 1f;
 		_xpService.KillXpMultiplier = DungeonFactionBuffs.KillXpMultiplier;
 		float patrolRadius = DungeonFactionBuffs.ActivePatrolEnabled
 			? DungeonFactionBuffs.ActivePatrolRadius

@@ -78,7 +78,7 @@ public class SkillService
 			AuraEffects aura = _auraService.CalculateEffects(unit, allUnits);
 			ctx.AuraAttackSpeedMultiplier = aura.AttackSpeedMultiplier;
 			ctx.AuraMoveSpeedMultiplier = aura.MoveSpeedMultiplier;
-			ctx.AuraAttackDamageMultiplier = aura.AttackDamageMultiplier;
+			ctx.AuraAttackDamageMultiplier = aura.AttackDamageMultiplier * DungeonFactionBuffs.AttackDamageMultiplier;
 			ctx.AuraRegenPerSecond = aura.RegenPerSecond + DungeonFactionBuffs.GlobalRegenPerSecond;
 			ctx.AuraExecuteDamageMultiplier = aura.ExecuteDamageMultiplier;
 			ctx.AuraArmorBonus = aura.ArmorBonus;
