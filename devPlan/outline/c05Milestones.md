@@ -618,7 +618,7 @@ v0.7 重新定义为**完善版**（2026-08-25 用户决策）：原「建筑美
 
 **验收**：✅ 加速/暂停/快捷键/镜头/快速重开/快速购买均可在局内生效；Domain 627 / Persistence 30 / Application 24 全绿、adapter 零 warning
 
-### G4 UI 与交互 + 交互/展示 QOL（部分完成：19bc1d1 / 4c0ae35 / a920f4d / 1628c3f / dff6bec / 22096cb / f154890 / 08eaea0 / 6e0378c / 6a3bee3 / 03aee08 / 164da54 / 2fee885 / 78652e3）
+### G4 UI 与交互 + 交互/展示 QOL（部分完成：19bc1d1 / 4c0ae35 / a920f4d / 1628c3f / dff6bec / 22096cb / f154890 / 08eaea0 / 6e0378c / 6a3bee3 / 03aee08 / 164da54 / 2fee885 / 78652e3 / f2615f8）
 
 **基础 UI**：
 - 标题界面演示战场（`uiDesign.md` §6.2 待重做）：待做
@@ -629,7 +629,7 @@ v0.7 重新定义为**完善版**（2026-08-25 用户决策）：原「建筑美
 **交互 QOL（Interaction）**：
 - 范围/射程预览：✅ 选中单位射程圈已做（RangePreview，22096cb）；✅ 攻击目标红圈标记（TargetRing，f154890）；✅ 选中陷阱显示触发范围圈（TrapRangeView，2fee885）；光环为单位技能属性（AuraService/GameRules.AuraRangeRadius），建筑无半径光环（享乐舞台为全图加成，非范围圈）
 - 选中反馈增强：✅ 单位脚底光圈选中视觉已有；✅ 攻击目标红圈（TargetRing）
-- 放置体验：✅ 占格高亮跟随已有 + 非法红显已有（Castle 双色 PreviewColor）；非法放置微颤待做
+- 放置体验：✅ 占格高亮跟随已有 + 非法红显已有（Castle 双色 PreviewColor）；✅ 非法放置红闪+微颤（过渡到非法态时红色增亮 + 抖动衰减 0.35s，f2615f8）
 - 组合结果预览：✅ 建筑悬停面板显示「可组合成」（BuildingInfoUiController，按派系缓存配方，6e0378c）
 - 拖拽手感：商店直拖已有；✅ 拖出非法区域自动回弹已有（放置失败 CancelDrag 卡/offer 回位）
 - 悬浮浮窗增强：✅ 建筑/单位悬停精简浮窗已有；✅ 商店/手牌卡悬停单位属性提示（08eaea0）；详细面板即左侧属性面板
