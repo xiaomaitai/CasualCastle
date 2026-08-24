@@ -642,6 +642,11 @@ public partial class Unit : IUnitHandle
 		return _skillRuntime?.GetRemaining(skillId) ?? 0f;
 	}
 
+	public IReadOnlyList<ActiveStatusEffect> GetActiveStatusEffects()
+	{
+		return _status.GetActiveEffects();
+	}
+
 	public void StartSkillCooldown(string skillId)
 	{
 		_skillRuntime?.Start(skillId);

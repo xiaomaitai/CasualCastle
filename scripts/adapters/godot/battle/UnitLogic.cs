@@ -6,6 +6,7 @@ using CasualCastle.Domain.Building;
 using CasualCastle.Domain.Shared;
 using Godot;
 using System.Collections.Generic;
+using System.Linq;
 
 
 
@@ -474,7 +475,36 @@ public partial class UnitLogic : Node2D
 			AuraRegenPerSecond,
 			AuraExecuteDamageMultiplier,
 			AuraArmorBonus);
-		_visual?.SetBuffs(buffs);
+		List<string> combined = new(buffs);
+		if (_unit != null)
+		{
+			foreach (ActiveStatusEffect effect in _unit.GetActiveStatusEffects())
+			{
+				string label = FormatStatusEffect(effect);
+				if (label != null)
+					combined.Add(label);
+			}
+		}
+		_visual?.SetBuffs(combined.ToArray());
+	}
+
+	private static string FormatStatusEffect(ActiveStatusEffect effect)
+	{
+		string name = GetStatusEffectName(effect.Kind);
+		if (name == null)
+			return null;
+		return $"{name} {Mathf.CeilToInt(effect.RemainingSeconds)}s";
+	}
+
+	private static string GetStatusEffectName(string kind)
+	{
+		switch (kind)
+		{
+			case StatusEffects.SlowKind: return "减速";
+			case StatusEffects.PoisonKind: return "中毒";
+			case StatusEffects.CurseKind: return "诅咒";
+			default: return null;
+		}
 	}
 
 	public void SetBaseSpriteModulate(Color color)

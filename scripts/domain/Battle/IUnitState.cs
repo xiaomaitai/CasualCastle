@@ -1,4 +1,6 @@
 // 单位状态端口：只读属性查询
+using System.Collections.Generic;
+
 namespace CasualCastle.Domain.Battle;
 
 public interface IUnitState
@@ -36,6 +38,7 @@ public interface IUnitState
 	float HealInterval { get; }
 	SkillSet Skills { get; }
 	float GetSkillCooldownRemaining(string skillId);
+	IReadOnlyList<ActiveStatusEffect> GetActiveStatusEffects();
 	IUnitHandle TargetEnemy { get; }
 	string TargetDescription { get; }
 }

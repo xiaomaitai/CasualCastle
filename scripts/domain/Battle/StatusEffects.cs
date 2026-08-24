@@ -1,10 +1,17 @@
 // 状态效果组件：减速/中毒/诅咒、战斗计时、伏击与再生结算，由 Unit 逐帧驱动
 using CasualCastle.Domain.Shared;
+using System.Collections.Generic;
 
 namespace CasualCastle.Domain.Battle;
 
 public sealed class StatusEffects
 {
+	public const string SlowKind = "slow";
+
+	public const string PoisonKind = "poison";
+
+	public const string CurseKind = "curse";
+
 	private readonly Unit _unit;
 
 	private float _kiteTimer;
@@ -67,6 +74,18 @@ public sealed class StatusEffects
 	public float GetCurseDamageFactor()
 	{
 		return _curseRemaining > 0f ? 1f - _curseFactor : 1f;
+	}
+
+	public IReadOnlyList<ActiveStatusEffect> GetActiveEffects()
+	{
+		List<ActiveStatusEffect> effects = new();
+		if (_slowRemaining > 0f)
+			effects.Add(new ActiveStatusEffect(SlowKind, _slowRemaining));
+		if (_poisonRemaining > 0f)
+			effects.Add(new ActiveStatusEffect(PoisonKind, _poisonRemaining));
+		if (_curseRemaining > 0f)
+			effects.Add(new ActiveStatusEffect(CurseKind, _curseRemaining));
+		return effects;
 	}
 
 	public void MarkKite(float duration)
