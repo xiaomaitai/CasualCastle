@@ -63,8 +63,10 @@ public partial class UnitCardView : Node2D
 	public void SetHealth(int current, int maximum)
 	{
 		_healthRatio = Mathf.Clamp(current / (float)maximum, 0f, 1f);
-		if (IsNodeReady())
-			_healthBar.Fill = _healthRatio;
+		if (!IsNodeReady())
+			return;
+		_healthBar.Fill = _healthRatio;
+		_healthBar.Ping(current >= maximum);
 	}
 
 	public void SetSelected(bool selected)

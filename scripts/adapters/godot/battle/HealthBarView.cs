@@ -1,8 +1,13 @@
-// 血条视图：单位血量显示
+// 血条视图：单位血量显示，满血时短暂显示后淡出
 using Godot;
 
 public partial class HealthBarView : Node2D
 {
+	private const float FadeDelaySeconds = 1.2f;
+	private const float FadeSeconds = 0.6f;
+	private const float VisibleAlpha = 1f;
+	private const float HiddenAlpha = 0f;
+
 	private Sprite2D _empty;
 	private Sprite2D _full;
 	private bool _ready;
@@ -11,6 +16,8 @@ public partial class HealthBarView : Node2D
 	private float _fullTexWidth;
 	private float _fullHeight;
 	private float _emptyLeft;
+	private bool _persistent;
+	private Tween _fadeTween;
 
 	public override void _Ready()
 	{
@@ -27,6 +34,11 @@ public partial class HealthBarView : Node2D
 		ApplyFill();
 	}
 
+	public override void _ExitTree()
+	{
+		_fadeTween?.Kill();
+	}
+
 	public float Fill
 	{
 		set
@@ -35,6 +47,18 @@ public partial class HealthBarView : Node2D
 			if (_ready)
 				ApplyFill();
 		}
+	}
+
+	public void Ping(bool persistent)
+	{
+		_persistent = persistent;
+		_fadeTween?.Kill();
+		Modulate = new Color(1f, 1f, 1f, VisibleAlpha);
+		if (_persistent)
+			return;
+		_fadeTween = CreateTween();
+		_fadeTween.TweenInterval(FadeDelaySeconds);
+		_fadeTween.TweenProperty(this, "modulate:a", HiddenAlpha, FadeSeconds);
 	}
 
 	private void ApplyFill()

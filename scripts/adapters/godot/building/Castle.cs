@@ -42,6 +42,9 @@ public partial class Castle : Node2D
 
 	public bool IsAlive => Heart != null && Heart.Health > 0;
 
+	private const float HealthBarFlashSeconds = 0.5f;
+	private static readonly Color HealthBarFlashTint = new(1f, 0.92f, 0.92f, 1f);
+
 	private OccupancyGrid _occupancy;
 
 	private bool _showPlacementPreview;
@@ -56,6 +59,10 @@ public partial class Castle : Node2D
 
 	private BuildingSystem _buildingSystem;
 
+	private int _lastHeartHealth;
+
+	private Tween _healthBarTween;
+
 	public override void _Ready()
 	{
 		_buildingSystem = AdapterRegistry.Resolve<BuildingSystem>();
@@ -66,6 +73,7 @@ public partial class Castle : Node2D
 		SetupHighlightOverlay();
 		SetupCastleHeart();
 		SetupBarracks();
+		_lastHeartHealth = Heart?.Health ?? 0;
 		UpdateHealthBar();
 	}
 
@@ -362,6 +370,19 @@ public partial class Castle : Node2D
 	private void OnHeartHealthChanged(int health, int maxHealth)
 	{
 		UpdateHealthBar();
+		if (health < _lastHeartHealth)
+			FlashHealthBar();
+		_lastHeartHealth = health;
+	}
+
+	private void FlashHealthBar()
+	{
+		if (_healthBar == null)
+			return;
+		_healthBarTween?.Kill();
+		_healthBar.Modulate = HealthBarFlashTint;
+		_healthBarTween = _healthBar.CreateTween();
+		_healthBarTween.TweenProperty(_healthBar, "modulate", Colors.White, HealthBarFlashSeconds);
 	}
 
 	private void UpdateHealthBar()
