@@ -6,9 +6,9 @@
 ## 范围拆分
 
 ### 基础 UI
+- [x] 标题界面演示战场：title_screen.tscn 底层实时演示战场（TitleDemoBattlefield，9aadb18）——两座预设 Castle + 自动出兵交战 + 摄像机往返；fail-safe 需实机验证
 - [x] 地下城技能三选一 + 魔王 HUD 正式 UI：dungeon_skill_pick.tscn + dungeon_king_hud.tscn 场景化（6a3bee3）
 - [x] 色孽恩赐主动技：HUD 按钮 + 8s 减半窗口 + 30s 冷却（命名常量可调，164da54）
-- [ ] 标题界面演示战场（`uiDesign.md` §6.2 待重做）——独立场景工作
 - [x] 文案清理：死灵 `????` 建筑名 + 4 个技能名 + 20 条乱码技能描述重写；RealBugTextCorruptionTests 3 例（19bc1d1 / 4c0ae35）
 
 ### 交互 QOL（Interaction）
@@ -30,7 +30,7 @@
 - [x] buff 状态栏：`IUnitState.GetActiveStatusEffects()` 只读端口（减速/中毒/诅咒+剩余秒数）+ 单位卡计时标签（78652e3，兼 A2 缺口 #5）
 
 ## 验收标准
-- 标题演示战场可运行且可返回
-- 技能三选一与魔王 HUD 为正式场景 UI（✅ 已完成，非临时代码）
-- 交互/展示 QOL 各项局内可见可操作（已完成项见上）
-- 全冒烟 + 单测通过 + dotnet build 零 warning
+- ✅ 标题演示战场已实现（需实机验证视觉效果）
+- ✅ 技能三选一与魔王 HUD 为正式场景 UI（非临时代码）
+- ✅ 交互/展示 QOL 各项局内可见可操作（已完成项见上）
+- 全冒烟 + 单测通过 + dotnet build 零 warning（单测/build 已持续通过；全冒烟需 Godot 实机）

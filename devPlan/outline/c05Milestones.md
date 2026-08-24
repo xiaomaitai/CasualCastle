@@ -618,10 +618,10 @@ v0.7 重新定义为**完善版**（2026-08-25 用户决策）：原「建筑美
 
 **验收**：✅ 加速/暂停/快捷键/镜头/快速重开/快速购买均可在局内生效；Domain 627 / Persistence 30 / Application 24 全绿、adapter 零 warning
 
-### G4 UI 与交互 + 交互/展示 QOL（部分完成：19bc1d1 / 4c0ae35 / a920f4d / 1628c3f / dff6bec / 22096cb / f154890 / 08eaea0 / 6e0378c / 6a3bee3 / 03aee08 / 164da54 / 2fee885 / 78652e3 / f2615f8）
+### G4 UI 与交互 + 交互/展示 QOL（部分完成：19bc1d1 / 4c0ae35 / a920f4d / 1628c3f / dff6bec / 22096cb / f154890 / 08eaea0 / 6e0378c / 6a3bee3 / 03aee08 / 164da54 / 2fee885 / 78652e3 / f2615f8 / 9aadb18）
 
 **基础 UI**：
-- 标题界面演示战场（`uiDesign.md` §6.2 待重做）：待做
+- ✅ 标题界面演示战场：title_screen.tscn 底层新增实时演示战场（TitleDemoBattlefield）——两座预设 Castle + 每 2.5s 双侧出兵（OrcWarrior/Archer vs GoblinSlinger/Skeleton）守卫巡线在中间交战、摄像机在 500~3500 区间缓慢往返；独立简化数据、不污染对局；fail-safe（初始化异常时仅退化为纯色标题，不阻塞入口）需实机验证（9aadb18，uiDesign §6.2 主项落地，残留演示战斗调试标记待做）
 - ✅ 地下城技能三选一 + 魔王 HUD 正式 UI：dungeon_skill_pick.tscn + dungeon_king_hud.tscn 场景化（DemonKingController 委托），替换临时代码面板/代码 Label（6a3bee3）
 - ✅ 色孽恩赐主动技：HUD 按钮激活 8s 舒适度消耗减半窗口 + 30s 冷却（命名常量可调，DemonKingController 事件驱动按钮状态，164da54）
 - ✅ 文案清理：死灵 `????` 建筑名（BloodAltar→鲜血祭坛 / NecromancySanctum→亡灵巫术禁殿 / DeathGate→死者之门，building_defs + tech_tree_nodes 双表）、4 个技能名（吸血光环/反魔法护罩/稳定光环/色孽恩赐）、20 条乱码技能描述按设计与 config 重写；RealBugTextCorruptionTests 3 例（19bc1d1 / 4c0ae35）
@@ -644,7 +644,7 @@ v0.7 重新定义为**完善版**（2026-08-25 用户决策）：原「建筑美
 - ✅ 核心受袭红边告警（G3-B4 f44fb91）+ ✅ 昼夜色调区分（CanvasModulate 夜晚蓝调，1628c3f）
 
 **验收**：
-- 标题演示战场可运行且可返回：待做
+- ✅ 标题演示战场可运行且可返回（实现完成，需用户实机验证视觉效果后确认）
 - ✅ 技能三选一与魔王 HUD 为正式场景 UI（非临时代码）
 - 交互/展示 QOL 各项局内可见可操作：完成项见上
 
