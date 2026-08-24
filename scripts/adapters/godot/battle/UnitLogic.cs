@@ -349,10 +349,21 @@ public partial class UnitLogic : Node2D
 	{
 		_visual.SetHealth(Health, MaxHealth);
 		_visual?.StartHitFlash();
+		SpawnFloatingDamage();
 		Sfx.Play(UnitSfx.GetHitSfxEvent(_eventRelay.LastAttacker));
 		IUnitHandle attacker = _eventRelay.LastAttacker;
 		if (attacker != null && attacker.IsAlive)
 			_tactical.PropagateRetaliation(_unit, attacker);
+	}
+
+	private void SpawnFloatingDamage()
+	{
+		if (_body == null || _eventRelay == null)
+			return;
+		Node root = GetTree().CurrentScene;
+		if (root == null || _eventRelay.LastDamageAmount <= 0)
+			return;
+		FloatingText.Spawn(root, _body.GlobalPosition, _eventRelay.LastDamageAmount, false);
 	}
 
 	private void OnDied()
@@ -381,6 +392,14 @@ public partial class UnitLogic : Node2D
 			GameCoordinatesAdapter.GameUnitsToPixels(_eventRelay.LastHealTargetX),
 			GameCoordinatesAdapter.GameUnitsToPixels(_eventRelay.LastHealTargetY));
 		_projectiles.SpawnHeal(root, fromPos, toPos);
+		SpawnFloatingHeal(root, toPos);
+	}
+
+	private void SpawnFloatingHeal(Node root, Vector2 position)
+	{
+		if (_eventRelay.LastHealAmount <= 0)
+			return;
+		FloatingText.Spawn(root, position, _eventRelay.LastHealAmount, true);
 	}
 
 	private void OnSummoned()
