@@ -11,6 +11,7 @@ public static class AuraBonusTypes
 	public const string Armor = "armor";
 	public const string Lifesteal = "lifesteal";
 	public const string DispelResist = "dispel_resist";
+	public const string DamageReduction = "damage_reduction";
 }
 
 public static class HitEffectTypes

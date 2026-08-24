@@ -209,6 +209,7 @@ public partial class UnitLogic : Node2D
 			_eventRelay.Damaged += OnDamaged;
 			_eventRelay.Died += OnDied;
 			_eventRelay.Healed += OnHealed;
+			_eventRelay.Summoned += OnSummoned;
 		}
 
 		UpdateSleepVisual();
@@ -224,6 +225,8 @@ public partial class UnitLogic : Node2D
 
 		if (_eventRelay != null)
 			_eventRelay.Healed -= OnHealed;
+		if (_eventRelay != null)
+			_eventRelay.Summoned -= OnSummoned;
 	}
 
 	private void OnPhaseChanged(MatchPhase phase)
@@ -378,6 +381,19 @@ public partial class UnitLogic : Node2D
 			GameCoordinatesAdapter.GameUnitsToPixels(_eventRelay.LastHealTargetX),
 			GameCoordinatesAdapter.GameUnitsToPixels(_eventRelay.LastHealTargetY));
 		_projectiles.SpawnHeal(root, fromPos, toPos);
+	}
+
+	private void OnSummoned()
+	{
+		if (_isDead || _eventRelay == null || _body == null)
+			return;
+		GameManager gameManager = AdapterRegistry.Resolve<GameManager>();
+		UnitSpawnService spawnService = AdapterRegistry.Resolve<UnitSpawnService>();
+		if (gameManager == null || gameManager.Battlefield == null || spawnService == null)
+			return;
+		float pixelX = GameCoordinatesAdapter.GameUnitsToPixels(_eventRelay.LastSummonX);
+		float pixelY = GameCoordinatesAdapter.GameUnitsToPixels(_eventRelay.LastSummonY);
+		spawnService.SpawnUnitAt(gameManager.Battlefield, _eventRelay.LastSummonUnitType, new Vector2(pixelX, pixelY), IsPlayerUnit);
 	}
 
 	private void OnAttack()

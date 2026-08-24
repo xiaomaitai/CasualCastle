@@ -196,6 +196,7 @@ public class SpecialConfig
 	public float Cooldown { get; set; }
 	public int Cost { get; set; }
 	public float Value { get; set; }
+	public string UnitType { get; set; }
 
 	public static SpecialConfig Parse(string json)
 	{
@@ -222,7 +223,8 @@ public class SpecialConfig
 			DamageMult = root.TryGetProperty("damage_mult", out JsonElement d) ? d.GetSingle() : 1f,
 			Cooldown = root.TryGetProperty("cooldown", out JsonElement c) ? c.GetSingle() : 0f,
 			Cost = root.TryGetProperty("cost", out JsonElement cost) ? cost.GetInt32() : 0,
-			Value = root.TryGetProperty("value", out JsonElement value) ? value.GetSingle() : 0f
+			Value = root.TryGetProperty("value", out JsonElement value) ? value.GetSingle() : 0f,
+			UnitType = root.TryGetProperty("unit_type", out JsonElement unit) ? unit.GetString() : ""
 		};
 	}
 }

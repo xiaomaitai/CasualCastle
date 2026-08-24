@@ -6,6 +6,8 @@ namespace CasualCastle.Domain.Battle;
 
 public class AuraService
 {
+	private const string HumanRace = "Human";
+
 	public AuraEffects CalculateEffects(IUnitHandle unit, IReadOnlyList<IUnitHandle> allUnits)
 	{
 		AuraEffects result = new();
@@ -37,7 +39,7 @@ public class AuraService
 
 	private static bool IsAuraEligibleRace(string race)
 	{
-		return HordeRaces.IsHordeRace(race) || UndeadRules.IsUndead(race) || DemonKingRules.IsDemonRace(race);
+		return HordeRaces.IsHordeRace(race) || UndeadRules.IsUndead(race) || DemonKingRules.IsDemonRace(race) || race == HumanRace;
 	}
 
 	private static bool IsReceiverEligible(string receiverRace, string auraRace)
@@ -48,6 +50,8 @@ public class AuraService
 			return UndeadRules.IsUndead(auraRace);
 		if (DemonKingRules.IsDemonRace(receiverRace))
 			return DemonKingRules.IsDemonRace(auraRace);
+		if (receiverRace == HumanRace)
+			return auraRace == HumanRace;
 		return false;
 	}
 
@@ -87,6 +91,9 @@ public class AuraService
 				break;
 			case AuraBonusTypes.DispelResist:
 				result.DispelResistFraction = System.Math.Min(1f, result.DispelResistFraction + value);
+				break;
+			case AuraBonusTypes.DamageReduction:
+				result.DamageReductionMultiplier *= 1f - value;
 				break;
 		}
 	}

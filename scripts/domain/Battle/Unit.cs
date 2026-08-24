@@ -56,6 +56,8 @@ public partial class Unit : IUnitHandle
 
 	public bool IsStealthed { get; private set; }
 
+	private bool _chargeUsed;
+
 	public bool CanDetectStealth { get; set; }
 
 	public bool HasNightCombat { get; set; }
@@ -300,6 +302,8 @@ public partial class Unit : IUnitHandle
 		}
 
 		int remaining = amount;
+		if (GameCtx != null && GameCtx.AuraDamageReductionMultiplier != 1f)
+			remaining = (int)(remaining * GameCtx.AuraDamageReductionMultiplier);
 		if (ShieldHealth > 0)
 		{
 			int absorbed = System.Math.Min(ShieldHealth, remaining);
@@ -434,6 +438,7 @@ public partial class Unit : IUnitHandle
 			return;
 
 		TickSkillCooldowns(dt);
+		TickSummon(dt);
 		_status?.Tick(dt);
 
 		float effectiveAttackCooldown = AttackCooldown;
@@ -563,6 +568,12 @@ public partial class Unit : IUnitHandle
 			SpecialConfig kiting = Skills.GetSpecial(SpecialBehavior.Kiting);
 			if (kiting != null && _status != null)
 				_status.MarkKite(kiting.Param);
+			SpecialConfig charge = Skills.GetSpecial(SpecialBehavior.Charge);
+			if (!_chargeUsed && charge != null)
+			{
+				effectiveDamage = (int)(effectiveDamage * charge.DamageMult);
+				_chargeUsed = true;
+			}
 		}
 		effectiveDamage = (int)(effectiveDamage * GameCtx.AuraAttackDamageMultiplier * GetCurseDamageFactor());
 		if (UndeadRules.IsUndead(Race))
@@ -636,6 +647,17 @@ public partial class Unit : IUnitHandle
 	public void TickSkillCooldowns(float dt)
 	{
 		_skillRuntime?.Tick(dt);
+	}
+
+	private void TickSummon(float dt)
+	{
+		if (Skills == null || EventPort == null)
+			return;
+		SpecialConfig summon = Skills.GetSpecial(SpecialBehavior.Summon);
+		if (summon == null || string.IsNullOrEmpty(summon.UnitType) || GetSkillCooldownRemaining(summon.SkillId) > 0f)
+			return;
+		EventPort.OnSummon(summon.UnitType, GameX, GameY);
+		StartSkillCooldown(summon.SkillId);
 	}
 
 	private void StartStealthCooldown()

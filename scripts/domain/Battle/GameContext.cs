@@ -19,5 +19,6 @@ public class GameContext
 	public int AuraArmorBonus;
 	public float AuraLifestealFraction;
 	public float AuraDispelResistFraction;
+	public float AuraDamageReductionMultiplier = 1f;
 	public float UndeadDamageMultiplier = 1f;
 }
