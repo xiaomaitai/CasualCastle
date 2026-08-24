@@ -9,8 +9,6 @@ public partial class DemonKingController : Node
 {
 	private const string UnitPrefabPath = "res://prefabs/Unit.tscn";
 	private const float KingSpawnOffsetY = 70f;
-	private const float PanelWidth = 760f;
-	private const float PanelHeight = 460f;
 
 	private GameManager _gameManager;
 	private KingExperienceService _xpService;
@@ -18,9 +16,8 @@ public partial class DemonKingController : Node
 	private KingSkillSet _skillSet;
 	private UnitLogic _kingLogic;
 	private bool _spawned;
-	private Control _skillPanel;
-	private ProgressBar _comfortBar;
-	private Label _statusLabel;
+	private DungeonSkillPickUiController _skillPick;
+	private DungeonKingHudUiController _kingHud;
 	private List<string> _pendingChoices = new();
 
 	public override void _Ready()
@@ -37,8 +34,12 @@ public partial class DemonKingController : Node
 	{
 		if (_xpService != null)
 			_xpService.LevelUp -= OnKingLevelUp;
-		HideSkillPanel();
+		_skillPick?.HidePanel();
 	}
+
+	private DungeonSkillPickUiController SkillPick => _skillPick ??= AdapterRegistry.Resolve<DungeonSkillPickUiController>();
+
+	private DungeonKingHudUiController KingHud => _kingHud ??= AdapterRegistry.Resolve<DungeonKingHudUiController>();
 
 	public override void _Process(double delta)
 	{
@@ -53,11 +54,11 @@ public partial class DemonKingController : Node
 			TrySpawnKing();
 			if (!_spawned)
 				return;
+			KingHud.SetSkillCount(_skillSet.Count);
 		}
 
 		UpdateKingState((float)delta);
 		UpdateFactionBuffs();
-		UpdateHud();
 	}
 
 	private void TrySpawnKing()
@@ -88,7 +89,6 @@ public partial class DemonKingController : Node
 		_kingLogic = logic;
 		_spawned = true;
 		ApplyLearnedSkills();
-		CreateHud(shell);
 		GD.Print($"魔王已生成 Lv{_xpService.Level}");
 	}
 
@@ -198,7 +198,7 @@ public partial class DemonKingController : Node
 		ReapplyKingSkills();
 		_pendingChoices = DemonKingSkillPool.GenerateChoices(System.Random.Shared, level, _skillSet.GetAll());
 		UpgradeThroneToLevel(level);
-		ShowSkillPanel(level);
+		SkillPick.ShowChoices(level, _pendingChoices, OnSkillChosen);
 	}
 
 	private void ReapplyKingSkills()
@@ -228,54 +228,6 @@ public partial class DemonKingController : Node
 		castle.ReplaceHeart(typeId, castle.Heart.Health);
 	}
 
-	private void ShowSkillPanel(int level)
-	{
-		if (_skillPanel != null)
-			return;
-
-		CanvasLayer layer = new CanvasLayer { Layer = 100 };
-		AddChild(layer);
-		Panel panel = new Panel { Size = new Vector2(PanelWidth, PanelHeight) };
-		panel.Position = new Vector2((1920f - PanelWidth) * 0.5f, (1080f - PanelHeight) * 0.5f);
-		layer.AddChild(panel);
-
-		Label title = new Label { Text = $"魔王升级至 Lv{level}，选择一项技能" };
-		title.Position = new Vector2(40f, 28f);
-		title.Size = new Vector2(PanelWidth - 80f, 60f);
-		title.AddThemeFontSizeOverride("font_size", 34);
-		panel.AddChild(title);
-
-		VBoxContainer list = new VBoxContainer();
-		list.Position = new Vector2(40f, 108f);
-		list.Size = new Vector2(PanelWidth - 80f, PanelHeight - 140f);
-		list.AddThemeConstantOverride("separation", 14);
-		panel.AddChild(list);
-
-		ISkillRepository skillRepo = GameManager.Get<ISkillRepository>();
-		foreach (string skillId in _pendingChoices)
-		{
-			SkillDef def = skillRepo == null ? null : skillRepo.Get(skillId);
-			if (def == null)
-				continue;
-			string godName = GetGodName(DemonKingSkillPool.GetGod(skillId));
-			string ultimateMark = DemonKingSkillPool.IsUltimate(skillId) ? "【终极】" : "";
-			Button button = new Button
-			{
-				Text = $"{ultimateMark}{def.DisplayName}（{godName}）{GetSkillDescription(def)}"
-			};
-			button.CustomMinimumSize = new Vector2(0f, 70f);
-			button.AddThemeFontSizeOverride("font_size", 26);
-			button.Pressed += () => OnSkillChosen(skillId);
-			list.AddChild(button);
-		}
-		_skillPanel = panel;
-	}
-
-	private static string GetSkillDescription(SkillDef def)
-	{
-		return string.IsNullOrEmpty(def.Description) ? "" : $"\n{def.Description}";
-	}
-
 	private void OnSkillChosen(string skillId)
 	{
 		_skillSet.Add(skillId, _xpService.Level);
@@ -289,7 +241,8 @@ public partial class DemonKingController : Node
 		if (SummonedBuildings.TryGetValue(skillId, out string buildingType))
 			TryPlaceBuildingNearThrone(buildingType);
 		Sfx.Play(SfxEvents.Upgrade);
-		HideSkillPanel();
+		SkillPick.HidePanel();
+		KingHud.SetSkillCount(_skillSet.Count);
 	}
 
 	private static readonly Dictionary<string, string> SummonedBuildings = new()
@@ -324,55 +277,5 @@ public partial class DemonKingController : Node
 		if (!_skillSet.Contains("tzeentch_rune"))
 			return;
 		GameManager.Get<ManaService>()?.Add(2f * delta);
-	}
-
-	private void HideSkillPanel()
-	{
-		if (_skillPanel == null)
-			return;
-		Node parent = _skillPanel.GetParent();
-		parent?.RemoveChild(_skillPanel);
-		_skillPanel.QueueFree();
-		_skillPanel = null;
-		_pendingChoices.Clear();
-	}
-
-	private void CreateHud(Unit shell)
-	{
-		Label label = new Label { Text = "Lv1" };
-		label.Position = new Vector2(-80f, -150f);
-		label.Size = new Vector2(180f, 30f);
-		label.HorizontalAlignment = HorizontalAlignment.Center;
-		label.AddThemeFontSizeOverride("font_size", 22);
-		shell.AddChild(label);
-
-		ProgressBar bar = new ProgressBar { MaxValue = DemonKingRules.MaxComfort };
-		bar.Position = new Vector2(-70f, -122f);
-		bar.Size = new Vector2(140f, 14f);
-		shell.AddChild(bar);
-		_comfortBar = bar;
-		_statusLabel = label;
-	}
-
-	private void UpdateHud()
-	{
-		if (_comfortBar != null)
-			_comfortBar.Value = _comfortService.Value;
-		if (_statusLabel == null)
-			return;
-		string skillText = _skillSet.Count > 0 ? $" · 技能{_skillSet.Count}" : "";
-		_statusLabel.Text = $"Lv{_xpService.Level} · 舒适{_comfortService.Value:F0}{skillText}";
-	}
-
-	private static string GetGodName(string godId)
-	{
-		switch (godId)
-		{
-			case DemonKingSkillPool.Khorne: return "恐虐";
-			case DemonKingSkillPool.Tzeentch: return "奸奇";
-			case DemonKingSkillPool.Slaanesh: return "色孽";
-			case DemonKingSkillPool.Nurgle: return "纳垢";
-			default: return "未知";
-		}
 	}
 }
