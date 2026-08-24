@@ -152,7 +152,7 @@ public partial class DemonKingController : Node
 			: 0f;
 		DungeonFactionBuffs.AutoBreedEnabled = garden || gardenSkill;
 
-		SlaaneshComfortBuffs slaanesh = SlaaneshServiceRules.CalculateComfortBuffs(states, GameManager.Get<IBuildingRepository>());
+		SlaaneshComfortBuffs slaanesh = SlaaneshServiceRules.CalculateComfortBuffs(states, GameManager.Get<IBuildingRepository>(), paradise || paradiseSkill);
 		_comfortService.RestoreMultiplier = slaanesh.RestoreMultiplier;
 		_comfortService.AttackCostMultiplier = slaanesh.AttackCostMultiplier;
 		_comfortService.HitCostMultiplier = slaanesh.HitCostMultiplier;
@@ -169,6 +169,10 @@ public partial class DemonKingController : Node
 			: 0f;
 		DungeonFactionBuffs.ManaProductionMultiplier = labyrinth || labyrinthSkill
 			? DungeonFactionBuffs.ManaProductionLabyrinthMultiplier
+			: 1f;
+		DungeonFactionBuffs.TrapCapDoubled = labyrinth || labyrinthSkill;
+		DungeonFactionBuffs.AuraRangeMultiplier = _skillSet.Contains("seductive_voice")
+			? DungeonFactionBuffs.AuraRangeSkillMultiplier
 			: 1f;
 		_xpService.KillXpMultiplier = DungeonFactionBuffs.KillXpMultiplier;
 		float patrolRadius = DungeonFactionBuffs.ActivePatrolEnabled

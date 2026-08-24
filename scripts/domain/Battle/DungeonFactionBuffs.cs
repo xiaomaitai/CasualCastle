@@ -12,6 +12,7 @@ public static class DungeonFactionBuffs
 	public const float PlagueSpreadRange = 90f;
 	public const float FastBreedProductionMultiplier = 1.3f;
 	public const float ManaProductionLabyrinthMultiplier = 1.5f;
+	public const float AuraRangeSkillMultiplier = 1.5f;
 
 	public static bool ActivePatrolEnabled;
 	public static float TrapCooldownMultiplier = 1f;

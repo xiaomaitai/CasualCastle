@@ -25,7 +25,7 @@ public static class SlaaneshServiceRules
 	public const float HeartPortalAttackCostMultiplier = 0.8f;
 	public const float MaidResidenceHitCostMultiplier = 0.75f;
 
-	public static SlaaneshComfortBuffs CalculateComfortBuffs(IReadOnlyList<IBuildingState> buildings, IBuildingRepository buildingRepo)
+	public static SlaaneshComfortBuffs CalculateComfortBuffs(IReadOnlyList<IBuildingState> buildings, IBuildingRepository buildingRepo, bool doubled = false)
 	{
 		SlaaneshComfortBuffs buffs = new();
 		IBuildingState throne = FindThrone(buildings);
@@ -53,6 +53,13 @@ public static class SlaaneshServiceRules
 					buffs.HalfCostBelowHalfComfort = true;
 					break;
 			}
+		}
+		if (doubled)
+		{
+			buffs.RestoreMultiplier = 1f + (buffs.RestoreMultiplier - 1f) * 2f;
+			buffs.MaxComfortBonus *= 2f;
+			buffs.AttackCostMultiplier = 1f - (1f - buffs.AttackCostMultiplier) * 2f;
+			buffs.HitCostMultiplier = 1f - (1f - buffs.HitCostMultiplier) * 2f;
 		}
 		return buffs;
 	}
