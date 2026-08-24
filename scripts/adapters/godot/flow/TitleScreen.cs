@@ -30,7 +30,7 @@ public partial class TitleScreen : Control
 	public override void _Ready()
 	{
 		ResetGameManagerToTitleState();
-		VBoxContainer ui = GetNode<VBoxContainer>("UI");
+		VBoxContainer ui = GetNode<VBoxContainer>("ScreenUI/UI");
 		_startButton = ui.GetNode<Button>("StartButton");
 		_settingsButton = ui.GetNode<Button>("SettingsButton");
 		_exitButton = ui.GetNode<Button>("ExitButton");
@@ -56,7 +56,7 @@ public partial class TitleScreen : Control
 		_settingsButton.Pressed += OnSettingsPressed;
 		_devToolsButton.Pressed += OnDevToolsPressed;
 
-		_settingsUi = GetNode<SettingsUiController>("SettingsPanel");
+		_settingsUi = GetNode<SettingsUiController>("ScreenUI/SettingsPanel");
 		BuildReportOptions();
 		BuildFactionOptions();
 
@@ -64,7 +64,7 @@ public partial class TitleScreen : Control
 		_continueButton.Disabled = !saveRepo.HasSave(0);
 	UiSfx.Bind(this);
 	AudioManager.Instance?.PlayTitleMusic();
-	_bgmInfo = new BgmInfoController { Label = GetNode<Label>("BgmInfoLabel") };
+	_bgmInfo = new BgmInfoController { Label = GetNode<Label>("ScreenUI/BgmInfoLabel") };
 	AddChild(_bgmInfo);
 	if (DisplaySettingsManager.DevModeEnabled)
 		CreateDemoStateMarker();
@@ -101,7 +101,7 @@ public partial class TitleScreen : Control
 		_demoStateLabel.OffsetRight = 0f;
 		_demoStateLabel.OffsetBottom = -10f;
 		_demoStateLabel.HorizontalAlignment = HorizontalAlignment.Right;
-		AddChild(_demoStateLabel);
+		GetNode("ScreenUI").AddChild(_demoStateLabel);
 	}
 
 	public override void _Input(InputEvent @event)

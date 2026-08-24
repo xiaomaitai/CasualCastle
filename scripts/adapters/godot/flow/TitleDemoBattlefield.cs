@@ -25,9 +25,9 @@ public partial class TitleDemoBattlefield : Node2D
 	private const float EnemyCastleX = 2870f;
 	private const float CastleY = 1210f;
 
-	private static readonly string[] PlayerUnits = { "OrcWarrior", "Archer" };
+	private static readonly string[] PlayerUnits = { "Knight", "Crossbowman" };
 
-	private static readonly string[] EnemyUnits = { "GoblinSlinger", "Skeleton" };
+	private static readonly string[] EnemyUnits = { "LizardStalker", "DarkMage" };
 
 	private UnitSpawnService _spawnService;
 	private Camera2D _camera;
@@ -90,6 +90,8 @@ public partial class TitleDemoBattlefield : Node2D
 		castle.IsPlayerCastle = isPlayer;
 		AddChild(castle);
 		castle.GlobalPosition = new Vector2(x, CastleY);
+		if (isPlayer)
+			castle.SetProductionPaused(true);
 	}
 
 	private void SpawnWave()

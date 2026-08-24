@@ -136,6 +136,12 @@ public partial class Castle : Node2D
 		return buildings;
 	}
 
+	public void SetProductionPaused(bool paused)
+	{
+		foreach (Building building in GetBuildings())
+			building.SetManuallyPaused(paused);
+	}
+
 	public List<IBuildingState> GetBuildingStates()
 	{
 		List<IBuildingState> states = new();
