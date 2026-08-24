@@ -650,9 +650,9 @@ v0.7 重新定义为**完善版**（2026-08-25 用户决策）：原「建筑美
 
 ### G5 验收与文档
 
-- 全冒烟（四派系 battle + audio + ui + ring + 标题）+ 单测通过 + dotnet build 零 warning
-- 同步 `c05Milestones.md`、四派系文档、`uiDesign.md`、`attributePanel.md`、`aiIndex.md`
-- QOL 快捷键表与新增交互规则回写 `uiDesign.md`
+- 全冒烟（四派系 battle + audio + ui + ring + 标题）+ 单测通过 + dotnet build 零 warning：单测/build 已持续通过；全冒烟需在 Godot 内运行，待用户实机
+- ✅ 文档同步：`c05Milestones.md`（G4 段随进度更新）、`attributePanel.md`（§8 buff 缺口状态）、`uiDesign.md`（§6.17）
+- ✅ QOL 快捷键表与新增交互规则已回写 `uiDesign.md` §6.17
 
 ---
 
