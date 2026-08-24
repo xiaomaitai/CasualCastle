@@ -1,5 +1,6 @@
 // 单位选择控制：点击拾取与属性面板联动
 using CasualCastle.Adapters.Godot;
+using CasualCastle.Domain.Battle;
 using Godot;
 
 public partial class UnitSelectionController : Node
@@ -9,6 +10,7 @@ public partial class UnitSelectionController : Node
 	private Castle _enemyCastle;
 	private UnitLogic _selectedUnit;
 	private Building _selectedBuilding;
+	private TrapRangeView _trapRange;
 	private bool _inputBlocked;
 
 	public UnitLogic SelectedUnit => _selectedUnit;
@@ -70,6 +72,7 @@ public partial class UnitSelectionController : Node
 				return true;
 			ClearSelection();
 			_selectedBuilding = pickedBuilding;
+			ShowTrapRange(pickedBuilding);
 			Sfx.Play(SfxEvents.BuildingSelect);
 			return true;
 		}
@@ -113,11 +116,33 @@ public partial class UnitSelectionController : Node
 		return null;
 	}
 
+	private void ShowTrapRange(Building building)
+	{
+		HideTrapRange();
+		if (!TrapRules.IsTrap(building.TypeId))
+			return;
+
+		float rangeUnits = TrapRules.GetConfig(building.TypeId).Range;
+		_trapRange = new TrapRangeView();
+		_trapRange.Configure(GameCoordinatesAdapter.GameUnitsToPixels(rangeUnits));
+		_battlefield.AddChild(_trapRange);
+		_trapRange.GlobalPosition = building.GetCastle().ToGlobal(building.GetMainCellLocalPosition());
+	}
+
+	private void HideTrapRange()
+	{
+		if (_trapRange == null)
+			return;
+		_trapRange.QueueFree();
+		_trapRange = null;
+	}
+
 	private void ClearSelection()
 	{
 		if (_selectedUnit != null && GodotObject.IsInstanceValid(_selectedUnit))
 			_selectedUnit.SetSelected(false);
 		_selectedUnit = null;
 		_selectedBuilding = null;
+		HideTrapRange();
 	}
 }
