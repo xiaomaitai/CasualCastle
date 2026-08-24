@@ -3,12 +3,17 @@ using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
 using Godot;
+using System;
 using System.Collections.Generic;
 
 public partial class DemonKingController : Node
 {
 	private const string UnitPrefabPath = "res://prefabs/Unit.tscn";
 	private const float KingSpawnOffsetY = 70f;
+	private const string SlaaneshGraceSkillId = "slaanesh_grace";
+	private const float GraceDurationSeconds = 8f;
+	private const float GraceCooldownSeconds = 30f;
+	private const float GraceCostMultiplier = 0.5f;
 
 	private GameManager _gameManager;
 	private KingExperienceService _xpService;
@@ -19,6 +24,9 @@ public partial class DemonKingController : Node
 	private DungeonSkillPickUiController _skillPick;
 	private DungeonKingHudUiController _kingHud;
 	private List<string> _pendingChoices = new();
+	private bool _graceActive;
+	private float _graceRemaining;
+	private float _graceCooldownRemaining;
 
 	public override void _Ready()
 	{
@@ -28,6 +36,7 @@ public partial class DemonKingController : Node
 		_skillSet = GameManager.Get<KingSkillSet>();
 		if (_xpService != null)
 			_xpService.LevelUp += OnKingLevelUp;
+		AdapterRegistry.Register<DemonKingController>(this);
 	}
 
 	public override void _ExitTree()
@@ -35,6 +44,7 @@ public partial class DemonKingController : Node
 		if (_xpService != null)
 			_xpService.LevelUp -= OnKingLevelUp;
 		_skillPick?.HidePanel();
+		AdapterRegistry.Unregister<DemonKingController>(this);
 	}
 
 	private DungeonSkillPickUiController SkillPick => _skillPick ??= AdapterRegistry.Resolve<DungeonSkillPickUiController>();
@@ -59,6 +69,58 @@ public partial class DemonKingController : Node
 
 		UpdateKingState((float)delta);
 		UpdateFactionBuffs();
+		TickGrace((float)delta);
+	}
+
+	public event Action GraceStateChanged;
+
+	public bool CanActivateGrace
+	{
+		get
+		{
+			if (_graceActive || _graceCooldownRemaining > 0f)
+				return false;
+			return _skillSet.Contains(SlaaneshGraceSkillId);
+		}
+	}
+
+	public float GraceCooldownRemaining => _graceCooldownRemaining;
+
+	public bool IsGraceActive => _graceActive;
+
+	public void TryActivateGrace()
+	{
+		if (!CanActivateGrace)
+			return;
+		_graceActive = true;
+		_graceRemaining = GraceDurationSeconds;
+		_graceCooldownRemaining = GraceCooldownSeconds;
+		GraceStateChanged?.Invoke();
+		Sfx.Play(SfxEvents.Upgrade);
+	}
+
+	private void TickGrace(float delta)
+	{
+		bool changed = false;
+		if (_graceActive)
+		{
+			_graceRemaining -= delta;
+			if (_graceRemaining <= 0f)
+			{
+				_graceActive = false;
+				changed = true;
+			}
+		}
+
+		if (_graceCooldownRemaining > 0f)
+		{
+			_graceCooldownRemaining = Mathf.Max(0f, _graceCooldownRemaining - delta);
+			if (_graceCooldownRemaining <= 0f)
+				changed = true;
+		}
+
+		if (changed)
+			GraceStateChanged?.Invoke();
 	}
 
 	private void TrySpawnKing()
@@ -160,6 +222,8 @@ public partial class DemonKingController : Node
 		if (slaanesh.HalfCostBelowHalfComfort && _comfortService.Value < _comfortService.MaxComfort * 0.5f)
 			globalCost *= 0.5f;
 		_comfortService.GlobalCostMultiplier = globalCost;
+		if (_graceActive)
+			_comfortService.GlobalCostMultiplier = globalCost * GraceCostMultiplier;
 		_comfortService.SetMaxComfort(DemonKingRules.MaxComfort + DungeonFactionBuffs.ComfortMaxBonus + slaanesh.MaxComfortBonus);
 		DungeonFactionBuffs.ProductionSpeedMultiplier = _skillSet.Contains("fast_breed")
 			? DungeonFactionBuffs.FastBreedProductionMultiplier

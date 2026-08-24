@@ -31,3 +31,10 @@ offset_top = 36.0
 offset_right = 322.0
 offset_bottom = 56.0
 show_percentage = false
+
+[node name="GraceButton" type="Button" parent="."]
+offset_left = 1132.0
+offset_top = 8.0
+offset_right = 1330.0
+offset_bottom = 52.0
+text = "色孽恩赐"
