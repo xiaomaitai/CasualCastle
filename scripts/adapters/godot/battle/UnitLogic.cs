@@ -431,6 +431,7 @@ public partial class UnitLogic : Node2D
 		float targetPixelY = GameCoordinatesAdapter.GameUnitsToPixels(_eventRelay.LastAttackTargetY);
 		Vector2 toPos = new Vector2(targetPixelX, targetPixelY);
 		_projectiles.SpawnAttack(root, fromPos, toPos, AttackType, DamageType, AttackType == AttackType.Ranged);
+		TargetRing.Spawn(root, toPos);
 	}
 
 	private static float ComputeDisplaySize(UnitSize size)
