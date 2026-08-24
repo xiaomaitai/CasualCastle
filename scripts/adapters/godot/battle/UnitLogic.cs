@@ -12,6 +12,7 @@ using System.Collections.Generic;
 public partial class UnitLogic : Node2D
 {
 	internal CasualCastle.Domain.Battle.Unit _unit;
+	private RangePreview _rangePreview;
 
 	public IUnitHandle Handle => _unit;
 
@@ -485,6 +486,29 @@ public partial class UnitLogic : Node2D
 	{
 		IsSelected = selected;
 		_visual.SetSelected(selected);
+		UpdateRangePreview(selected);
+	}
+
+	private void UpdateRangePreview(bool selected)
+	{
+		if (_body == null)
+			return;
+		if (selected)
+		{
+			if (_rangePreview != null)
+				return;
+			float radius = GameCoordinatesAdapter.GameUnitsToPixels(Mathf.Max(_unit.AttackRange, _unit.HealRange));
+			RangePreview preview = new RangePreview();
+			preview.ZIndex = -1;
+			preview.Configure(radius);
+			_body.AddChild(preview);
+			_rangePreview = preview;
+		}
+		else if (_rangePreview != null)
+		{
+			_rangePreview.QueueFree();
+			_rangePreview = null;
+		}
 	}
 
 }
