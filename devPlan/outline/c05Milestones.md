@@ -618,12 +618,12 @@ v0.7 重新定义为**完善版**（2026-08-25 用户决策）：原「建筑美
 
 **验收**：✅ 加速/暂停/快捷键/镜头/快速重开/快速购买均可在局内生效；Domain 627 / Persistence 30 / Application 24 全绿、adapter 零 warning
 
-### G4 UI 与交互 + 交互/展示 QOL（部分完成：19bc1d1 / 4c0ae35 / a920f4d / 1628c3f / dff6bec / 22096cb / f154890 / 08eaea0 / 6e0378c）
+### G4 UI 与交互 + 交互/展示 QOL（部分完成：19bc1d1 / 4c0ae35 / a920f4d / 1628c3f / dff6bec / 22096cb / f154890 / 08eaea0 / 6e0378c / 6a3bee3 / 03aee08）
 
 **基础 UI**：
 - 标题界面演示战场（`uiDesign.md` §6.2 待重做）：待做
-- 地下城技能三选一 + 魔王 HUD 正式 UI（替换临时代码面板/代码 Label）：待做
-- 色孽恩赐主动技落地（随魔王技能 UI 一并做，见 G1 遗留）：待做
+- ✅ 地下城技能三选一 + 魔王 HUD 正式 UI：dungeon_skill_pick.tscn + dungeon_king_hud.tscn 场景化（DemonKingController 委托），替换临时代码面板/代码 Label（6a3bee3）
+- 色孽恩赐主动技落地：**死技能**（skill_defs `slaanesh_grace` modifiers 为空）；设计为"主动技：舒适度消耗减半"，缺冷却/时长/触发 UI 参数，需用户细化
 - ✅ 文案清理：死灵 `????` 建筑名（BloodAltar→鲜血祭坛 / NecromancySanctum→亡灵巫术禁殿 / DeathGate→死者之门，building_defs + tech_tree_nodes 双表）、4 个技能名（吸血光环/反魔法护罩/稳定光环/色孽恩赐）、20 条乱码技能描述按设计与 config 重写；RealBugTextCorruptionTests 3 例（19bc1d1 / 4c0ae35）
 
 **交互 QOL（Interaction）**：
@@ -638,14 +638,14 @@ v0.7 重新定义为**完善版**（2026-08-25 用户决策）：原「建筑美
 - buff 状态栏（单位头顶 buff 图标 + 剩余时间）：待做（依赖 A2 的 buff 只读端口，见 todo）
 - ✅ 飘字系统：单位受击伤害/治疗数值上浮淡出（FloatingText + IUnitEventPort 挂接，dff6bec）；金币变化/击杀飘字待做
 - 生产进度：✅ 建筑产兵倒计时已由 building_work.gdshader 填充上浮体现（BuildingView.UpdateWorkEffectFromProgress）+ 属性面板剩余秒数；产兵倒计时圆环待做（可选）
-- 血条改进：单位血条随伤害淡出、建筑耐久条、核心血条醒目化：待做
+- ✅ 血条改进：单位血条满血短暂显示后淡出（HealthBarView.Ping）；城堡核心血条受损闪白（Castle.FlashHealthBar，03aee08）；建筑耐久条待做
 - 卡牌信息卡片：✅ 商店 offer / 手牌卡悬停显示产出单位属性（08eaea0）
 - ✅ 金币反馈：金币变化闪烁跳动、不足变红（a920f4d，uiDesign.md §6.4）
 - ✅ 核心受袭红边告警（G3-B4 f44fb91）+ ✅ 昼夜色调区分（CanvasModulate 夜晚蓝调，1628c3f）
 
 **验收**：
 - 标题演示战场可运行且可返回：待做
-- 技能三选一与魔王 HUD 为正式场景 UI（非临时代码）：待做
+- ✅ 技能三选一与魔王 HUD 为正式场景 UI（非临时代码）
 - 交互/展示 QOL 各项局内可见可操作：完成项见上
 
 ### G5 验收与文档
