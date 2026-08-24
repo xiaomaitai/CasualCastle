@@ -362,7 +362,7 @@ process/fix_alpha_border=true
 
 ## AI 素材管线
 
-游戏素材（单位、建筑、图标等）通过 AI 生成，可选抠图。两个阶段均由 Codex 版 skill 驱动（`$CODEX_HOME/skills/generate-image` 与 `$CODEX_HOME/skills/remove-bg`，源自 `.claude/skills/`）。
+游戏素材（单位、建筑、图标等）通过 AI 生成，可选抠图。两个阶段均由 Codex 版 skill 驱动（`$CODEX_HOME/skills/generate-image` 与 `$CODEX_HOME/skills/remove-bg`）。
 
 ### 阶段一：生图（generate-image）
 
