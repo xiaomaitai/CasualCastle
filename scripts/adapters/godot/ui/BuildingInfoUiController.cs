@@ -18,6 +18,8 @@ public partial class BuildingInfoUiController : Control
 	private ShopUiController _shopUi;
 	private PauseMenuUiController _pauseMenuUi;
 	private SettingsUiController _settingsUi;
+	private readonly Dictionary<string, List<CombineRecipe>> _factionRecipes = new();
+	private readonly Dictionary<string, string> _combinePreviewCache = new();
 
 	private HandUiController HandUi => _handUi ??= AdapterRegistry.Resolve<HandUiController>();
 	private ShopUiController ShopUi => _shopUi ??= AdapterRegistry.Resolve<ShopUiController>();
@@ -96,6 +98,36 @@ public partial class BuildingInfoUiController : Control
 		_nameLabel.Text = building.DisplayName;
 		_healthLabel.Text = $"生命：{building.Health}/{building.MaxHealth}";
 		_statusLabel.Text = GetStatusText(building);
+		string combinePreview = GetCombinePreview(building);
+		if (combinePreview != null)
+			_statusLabel.Text += "\n" + combinePreview;
+	}
+
+	private string GetCombinePreview(Building building)
+	{
+		if (_combinePreviewCache.TryGetValue(building.TypeId, out string cached))
+			return cached;
+
+		string factionId = AdapterRegistry.Resolve<BuildingSystem>().GetFactionId(building.TypeId);
+		if (!_factionRecipes.TryGetValue(factionId, out List<CombineRecipe> recipes))
+		{
+			recipes = GameManager.Get<ITechTreeRepository>().LoadEdges(factionId);
+			_factionRecipes[factionId] = recipes;
+		}
+
+		List<string> results = new();
+		foreach (CombineRecipe recipe in recipes)
+		{
+			if (recipe.MainTypeId != building.TypeId && recipe.MaterialTypeId != building.TypeId)
+				continue;
+			string resultName = AdapterRegistry.Resolve<BuildingSystem>().GetDisplayName(recipe.ResultTypeId);
+			if (!results.Contains(resultName))
+				results.Add(resultName);
+		}
+
+		string preview = results.Count == 0 ? null : "可组合成：" + string.Join("、", results);
+		_combinePreviewCache[building.TypeId] = preview;
+		return preview;
 	}
 
 	private static string GetStatusText(Building building)
