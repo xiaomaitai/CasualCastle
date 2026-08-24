@@ -42,6 +42,18 @@ public class AllianceEndgameSkillTests
 		};
 	}
 
+	private static SkillDef CreateStealthSkillKeepOnAttack()
+	{
+		string json = "{\"behavior\":\"stealth\",\"param\":180,\"speed_mult\":0.85,\"cooldown\":3.0,\"keep_on_attack\":true}";
+		return new SkillDef
+		{
+			Id = "shadow_lord_stealth",
+			DisplayName = "潜行",
+			Type = SkillType.Special,
+			ConfigJson = json
+		};
+	}
+
 	private static string ValueText(float value)
 	{
 		return value.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
@@ -143,6 +155,40 @@ public class AllianceEndgameSkillTests
 		king.UpdateBehavior(1f, 0f, 0f);
 
 		Assert.Equal(1, port.SummonCount);
+	}
+
+	[Fact]
+	public void Stealth_KeepOnAttack_StaysHiddenAfterAttack()
+	{
+		Unit shadow = CreateHumanUnit(true);
+		shadow.Skills.Add(CreateStealthSkillKeepOnAttack());
+		shadow.SetStealth(true);
+		Unit target = UnitTestFactory.CreateUnit(AttackType.Melee, false);
+		shadow.SetPosition(0, 0);
+		target.SetPosition(20, 0);
+		shadow.SetEnemyTarget(target);
+		shadow.UpdateTargeting(target);
+
+		shadow.UpdateBehavior(1f, 0f, 0f);
+
+		Assert.True(shadow.IsStealthed);
+	}
+
+	[Fact]
+	public void Stealth_WithoutKeepOnAttack_BreaksOnAttack()
+	{
+		Unit shadow = CreateHumanUnit(true);
+		shadow.Skills.Add(UnitTestFactory.CreateStealthSkill(180f, 0.85f, 3f));
+		shadow.SetStealth(true);
+		Unit target = UnitTestFactory.CreateUnit(AttackType.Melee, false);
+		shadow.SetPosition(0, 0);
+		target.SetPosition(20, 0);
+		shadow.SetEnemyTarget(target);
+		shadow.UpdateTargeting(target);
+
+		shadow.UpdateBehavior(1f, 0f, 0f);
+
+		Assert.False(shadow.IsStealthed);
 	}
 
 	private sealed class FakeEventPort : IUnitEventPort

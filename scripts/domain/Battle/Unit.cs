@@ -539,8 +539,11 @@ public partial class Unit : IUnitHandle
 		if (_attackTimer > 0)
 			return;
 
-		IsStealthed = false;
-		StartStealthCooldown();
+		if (!KeepsStealthOnAttack())
+		{
+			IsStealthed = false;
+			StartStealthCooldown();
+		}
 		_status?.NotifyCombat();
 		if (DemonKingRules.IsDemonKing(Race))
 			Resources?.Comfort?.SpendAttack();
@@ -647,6 +650,14 @@ public partial class Unit : IUnitHandle
 	public void TickSkillCooldowns(float dt)
 	{
 		_skillRuntime?.Tick(dt);
+	}
+
+	private bool KeepsStealthOnAttack()
+	{
+		if (Skills == null)
+			return false;
+		SpecialConfig stealth = Skills.GetSpecial(SpecialBehavior.Stealth);
+		return stealth != null && stealth.KeepOnAttack;
 	}
 
 	private void TickSummon(float dt)

@@ -611,6 +611,14 @@ INSERT INTO "skill_defs" VALUES('demon_scholar_aura','学者鼓舞','aura','{"ta
 INSERT INTO "skill_defs" VALUES('plague_behemoth_regen','巨兽再生','special','{"behavior":"regen","param":3.0}','脱战后缓慢再生',NULL);
 INSERT INTO "skill_defs" VALUES('khorne_avatar_cleave','恐虐化身·顺砍','on_hit','{"effects":[{"type":"explosion","value":40,"range":80}]}','攻击附带范围伤害',NULL);
 INSERT INTO "skill_defs" VALUES('bard_inspiration','吟游鼓舞','aura','{"target":"nearby_allies","range":180,"race":"Demon","effects":[{"bonus_type":"attack_damage","value":0.10},{"bonus_type":"move_speed","value":0.10}]}','周围友军恶魔攻击与移速 +10%',NULL);
+INSERT INTO "skill_defs" VALUES('king_aura','王者领域','aura','{"target":"all_allies","range":5000,"race":"Human","effects":[{"bonus_type":"attack_damage","value":0.10},{"bonus_type":"attack_speed","value":0.10},{"bonus_type":"regen","value":0.01}]}','全屏光环：友军伤害+10%、攻速+10%、每秒回复1%生命',NULL);
+INSERT INTO "skill_defs" VALUES('king_summon','禁卫号令','special','{"behavior":"summon","unit_type":"RoyalGuard","cooldown":30.0}','每30秒召唤1名皇家禁卫',NULL);
+INSERT INTO "skill_defs" VALUES('holy_guardian_aura','圣壁庇护','aura','{"target":"nearby_allies","range":200,"race":"Human","effects":[{"bonus_type":"damage_reduction","value":0.20}]}','周围友军受到伤害-20%',NULL);
+INSERT INTO "skill_defs" VALUES('royal_knight_charge','皇家冲锋','special','{"behavior":"charge","damage_mult":2.0}','冲锋首目标造成2倍伤害',NULL);
+INSERT INTO "skill_defs" VALUES('shadow_lord_stealth','影遁','special','{"behavior":"stealth","param":180,"speed_mult":0.85,"cooldown":3.0,"keep_on_attack":true}','潜行且攻击不显形',NULL);
+INSERT INTO "skill_defs" VALUES('royal_scout_stealth','斥候潜行','special','{"behavior":"stealth","param":220,"speed_mult":0.9,"cooldown":1.0}','永久潜行，不被远程锁定',NULL);
+INSERT INTO "skill_defs" VALUES('dragon_rider_kiting','骑射放风筝','special','{"behavior":"kiting","param":2.0,"speed_mult":1.3}','边打边撤，保持距离',NULL);
+INSERT INTO "skill_defs" VALUES('death_angel_rage','终焉狂暴','stat_modifier','{"trigger":"low_health","trigger_param":0.3,"modifiers":{"attack_damage_mult":1.30}}','生命低于30%时攻击力+30%',NULL);
 CREATE TABLE tech_tree_nodes (
     type_id TEXT PRIMARY KEY,
     faction_id TEXT NOT NULL REFERENCES "faction_defs"(id),
@@ -787,6 +795,16 @@ INSERT INTO "unit_skills" VALUES('SuccubusMaid','succubus_aura');
 INSERT INTO "unit_skills" VALUES('SuccubusMaid','demon_maid_armor_aura');
 INSERT INTO "unit_skills" VALUES('PlagueBehemoth','plague_behemoth_regen');
 INSERT INTO "unit_skills" VALUES('Bard','bard_inspiration');
+INSERT INTO "unit_skills" VALUES('King','king_aura');
+INSERT INTO "unit_skills" VALUES('King','king_summon');
+INSERT INTO "unit_skills" VALUES('HolyShieldGuardian','holy_guardian_aura');
+INSERT INTO "unit_skills" VALUES('RoyalKnight','royal_knight_charge');
+INSERT INTO "unit_skills" VALUES('ShadowLord','shadow_lord_stealth');
+INSERT INTO "unit_skills" VALUES('RoyalScout','royal_scout_stealth');
+INSERT INTO "unit_skills" VALUES('DragonRiderCommander','dragon_rider_kiting');
+INSERT INTO "unit_skills" VALUES('RoyalSharpshooter','slowing_strike');
+INSERT INTO "unit_skills" VALUES('DeathAngel','death_angel_rage');
+INSERT INTO "unit_skills" VALUES('ShadowLord','backstab');
 CREATE TABLE unit_stats (
     type_id          TEXT PRIMARY KEY,
     size             INTEGER NOT NULL,
