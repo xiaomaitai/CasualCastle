@@ -20,7 +20,7 @@
 | 架构 P6 | 领域服务层迁移（6 个 System → Service） | ✅ |
 | 架构 P7 | 战斗系统 B1-B6（多兵种/远程/克制/表现/SQLite） | ✅ |
 | 架构 P8 | 领域边界与 Infrastructure 隔离：反腐败映射、存档映射集中、唯一网格归属、端口方向审核、Persistence 纯 C#、MS DI 纯度、契约测试（单测 612+5+24） | ✅ |
-| v0.7 | 完善版：四派系机制修复 + 高阶单位技能化 + 可玩性/数值 + UI/交互 | 📋 |
+| v0.7 | 完善版：四派系机制修复 + 高阶单位技能化 + 可玩性/数值 + UI/交互 | ✅ |
 
 ## v0.1 版本目标
 
@@ -544,8 +544,8 @@ v0.7 重新定义为**完善版**（2026-08-25 用户决策）：原「建筑美
 | G1 | 派系机制修复 | 让设计里的机制真的生效：联盟闪避修复 + T4/T5 断链修复、地下城无效技能 + 享乐舞台补齐、死灵黑魔法常量 DB 化；死建筑清零，均带单测 | ✅ |
 | G2 | 高阶单位技能化 | 终局兵种有差异机制：联盟国王/圣盾守护者/暗影之主等技能配置 + AuraService 支持 Human、死亡天使差异化被动，带单测 | ✅ 联盟 7 兵种 + 死亡天使全部配置生效（1221e77 / 1195fcd）；两处设计脱节转 todo |
 | G3 | 可玩性打磨 + 操作 QOL | 数值实测调优、商店夜晚解锁、属性面板数据缺口补齐、补派系 battle 冒烟；**操作 QOL**：加速面板开放、自动暂停、快捷键、镜头操作、快速重开 | ✅ 见下方 G3 段 |
-| G4 | UI 与交互 + 交互/展示 QOL | 标题演示战场、地下城技能三选一正式 UI、文案清理；**交互 QOL**：范围预览/选中反馈/拖拽手感/组合预览；**展示 QOL**：buff 栏/飘字/生产进度/核心告警 | 📋 |
-| G5 | 验收与文档 | 全冒烟 + 单测通过 + dotnet build 零 warning；同步 `c05Milestones.md`、四派系文档、`aiIndex.md` | 📋 |
+| G4 | UI 与交互 + 交互/展示 QOL | 标题演示战场、地下城技能三选一正式 UI、文案清理；**交互 QOL**：范围预览/选中反馈/拖拽手感/组合预览；**展示 QOL**：buff 栏/飘字/生产进度/核心告警 | ✅ |
+| G5 | 验收与文档 | 全冒烟 + 单测通过 + dotnet build 零 warning；同步 `c05Milestones.md`、四派系文档、`aiIndex.md` | ✅ |
 
 ### G1 派系机制修复
 
@@ -648,11 +648,15 @@ v0.7 重新定义为**完善版**（2026-08-25 用户决策）：原「建筑美
 - ✅ 技能三选一与魔王 HUD 为正式场景 UI（非临时代码）
 - 交互/展示 QOL 各项局内可见可操作：完成项见上
 
-### G5 验收与文档
+### G5 验收与文档 ✅
 
-- 全冒烟（四派系 battle + audio + ui + ring + 标题）+ 单测通过 + dotnet build 零 warning：单测/build 已持续通过；全冒烟需在 Godot 内运行，待用户实机
-- ✅ 文档同步：`c05Milestones.md`（G4 段随进度更新）、`attributePanel.md`（§8 buff 缺口状态）、`uiDesign.md`（§6.17）
-- ✅ QOL 快捷键表与新增交互规则已回写 `uiDesign.md` §6.17
+- ✅ 单测全绿（Domain 630 / Persistence 33 / Application 28）+ dotnet build 零 warning
+- ✅ 全冒烟 8 项全 PASS：audio / ui / building_action_ring / dungeon / necromancer / necromancer_battle / **alliance_battle** / **horde_battle**（本机 Godot 4.6.2 无头运行）
+- ✅ 补建联盟/部落 battle 冒烟场景入口：`alliance_battle_smoke.tscn` / `horde_battle_smoke.tscn`（+ `.uid` 侧车，5020f6d 只加了脚本未建场景，导致 G3 派系 battle 冒烟从未运行）；并修复首次运行暴露的断言问题——部落升级链需先升核心（L1→L2，1 兽穴前置）且核心等级规则应用 `HordeCoreRules`、升级后新建筑需补产兵加速、升级等待时长覆盖产兵间隔
+- ✅ 修复物品卡悬停回归：`CardTooltipBuilder` 统一处理商店/手牌物品卡（魔法书/水晶）提示，不再查询建筑单位属性——修复卖出流程被事件链 `KeyNotFoundException` 中断（金币已加建筑未删的脏状态）与魔法书卡悬停崩溃
+- ✅ check_uids 全绿：清理 13 个 `.uid` 侧车 UTF-8 BOM + 19 处非规范 uid 文本替换为 canonical（场景头与 `ext_resource` 引用同步），Godot import 与全量冒烟验证无冲突
+- ✅ 标题演示战场经用户实机验证
+- ✅ 文档同步：`c05Milestones.md`、`attributePanel.md`（§8 buff 缺口状态）、`uiDesign.md`（§6.17 快捷键表）、`aiIndex.md`（§2.2/§3 新文件）、`behaviorInventory.md`（冒烟清单基线）
 
 ---
 

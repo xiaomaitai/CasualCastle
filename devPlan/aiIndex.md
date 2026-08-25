@@ -117,11 +117,11 @@
 | `combine/` | 组合结果实例化 | `CombineBuildingFactory.cs` |
 | `upgrade/` | 升级结果实例化 | `UpgradeBuildingFactory.cs` |
 | `replay/` | 敌方复刻目标 | `ReplayTarget.cs` |
-| `ui/` | UIManager 与各面板控制器 | `UIManager.cs`、`HudUiController.cs`、`ShopUiController.cs`、`HandUiController.cs`、`BuildingManageUiController.cs`、`BuildingActionRingController.cs`、`BuildingActionRing.cs`、`PauseMenuUiController.cs`、`GameOverUiController.cs`、`SettingsUiController.cs` |
+| `ui/` | UIManager 与各面板控制器 | `UIManager.cs`、`HudUiController.cs`、`ShopUiController.cs`、`HandUiController.cs`、`CardTooltipBuilder.cs`（卡牌悬停提示）、`BuildingManageUiController.cs`、`BuildingActionRingController.cs`、`BuildingActionRing.cs`、`PauseMenuUiController.cs`、`GameOverUiController.cs`、`SettingsUiController.cs` |
 | `flow/` | 场景流程与会话桥接 | `TitleScreen.cs`、`MainGameController.cs`、`GameSessionBridge.cs`、`CameraController.cs` |
 | `core/` | 战场尺寸换算 | `BattlefieldMetrics.cs` |
 | `audio/` | 音频总线、BGM/SFX | `AudioManager.cs`、`Sfx.cs`、`SfxEvents.cs`、`UiSfx.cs` |
-| `dev/` | 开发者工具与冒烟（不走单测） | `DevToolsMenu.cs`、`TechTreeEditorController.cs`、`DamageMatrixEditor.cs`、`SmokeTestBase.cs`、`AudioSmoke.cs`、`UiSmoke.cs`、`RuntimeInfoPanelController.cs` |
+| `dev/` | 开发者工具与冒烟（不走单测） | `DevToolsMenu.cs`、`TechTreeEditorController.cs`、`DamageMatrixEditor.cs`、`SmokeTestBase.cs`、`AudioSmoke.cs`、`UiSmoke.cs`、`AllianceBattleSmoke.cs`、`HordeBattleSmoke.cs`、`NecromancerSmoke.cs`、`NecromancerBattleSmoke.cs`、`BuildingActionRingSmoke.cs`、`DungeonSmoke.cs`、`RuntimeInfoPanelController.cs` |
 | `cheat/` | 作弊状态 | `CheatState.cs` |
 
 ### 2.3 adapters/persistence — 存储
@@ -161,7 +161,7 @@
 | `scenes/main/main_game.tscn` | 主战场场景，系统挂载点 |
 | `scenes/ui/settings_panel.tscn` | 设置面板 |
 | `scenes/dev/tech_tree_editor.tscn` | 科技树编辑器 |
-| `scenes/ui/dev_tools/*.tscn` | 开发者工具与冒烟场景（audio_smoke、ui_smoke、dungeon_smoke、damage_matrix_editor、dev_tools_menu、runtime_info_panel、necromancer_smoke、necromancer_battle_smoke、building_action_ring_smoke、phase_cycle_probe 等），冒烟一律经 `tools/run_smoke.sh` 运行 |
+| `scenes/ui/dev_tools/*.tscn` | 开发者工具与冒烟场景（audio_smoke、ui_smoke、dungeon_smoke、damage_matrix_editor、dev_tools_menu、runtime_info_panel、necromancer_smoke、necromancer_battle_smoke、alliance_battle_smoke、horde_battle_smoke、building_action_ring_smoke、phase_cycle_probe 等），冒烟一律经 `tools/run_smoke.sh` 运行 |
 | `prefabs/Building.tscn`、`Castle.tscn`、`Unit.tscn`、`UnitCard.tscn`、`HealthBar.tscn`、`CardArt.tscn` | 动态实体预制体 |
 
 ## 4. 素材与数据（assets/）
