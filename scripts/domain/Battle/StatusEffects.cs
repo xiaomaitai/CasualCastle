@@ -173,7 +173,7 @@ public sealed class StatusEffects
 		if (poisonDamage > 0)
 		{
 			_poisonAccumulator -= poisonDamage;
-			_unit.TakeDamage(poisonDamage, null, _unit.GameX, _unit.GameY);
+			_unit.TakeDamage(poisonDamage, null, _unit.GameX, _unit.GameY, isDot: true);
 		}
 		if (_poisonRemaining <= 0f)
 		{

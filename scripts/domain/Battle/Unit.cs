@@ -276,7 +276,7 @@ public partial class Unit : IUnitHandle
 		Health += amount;
 	}
 
-	public void TakeDamage(int amount, IUnitHandle attacker, float attackerGameX, float attackerGameY, bool isAoe = false)
+	public void TakeDamage(int amount, IUnitHandle attacker, float attackerGameX, float attackerGameY, bool isAoe = false, bool isDot = false, bool isHeavy = false)
 	{
 		if (!IsAlive)
 			return;
@@ -287,7 +287,7 @@ public partial class Unit : IUnitHandle
 			Resources?.Comfort?.SpendHit();
 			if (Skills != null && Skills.HasTrigger(StatModifierTrigger.OnDamaged))
 				IsFurious = true;
-			EventPort?.OnDamaged(amount, attacker);
+			EventPort?.OnDamaged(amount, attacker, isDot, isHeavy);
 			return;
 		}
 
@@ -321,7 +321,7 @@ public partial class Unit : IUnitHandle
 			StartStealthCooldown();
 		}
 
-		EventPort?.OnDamaged(amount, attacker);
+		EventPort?.OnDamaged(amount, attacker, isDot, isHeavy);
 
 		if (Health <= 0)
 		{
@@ -556,6 +556,7 @@ public partial class Unit : IUnitHandle
 
 		int effectiveDamage = Damage;
 		float executeMultiplier = 1f;
+		bool isHeavy = false;
 		if (TargetEnemy.MaxHealth > 0 && TargetEnemy.Health / (float)TargetEnemy.MaxHealth <= GameRules.WildCovenantExecuteThreshold)
 			executeMultiplier = GameCtx.AuraExecuteDamageMultiplier;
 		if (Skills != null)
@@ -567,6 +568,7 @@ public partial class Unit : IUnitHandle
 			{
 				effectiveDamage = (int)(effectiveDamage * ambush.DamageMult);
 				IsAmbushing = false;
+				isHeavy = true;
 			}
 			SpecialConfig kiting = Skills.GetSpecial(SpecialBehavior.Kiting);
 			if (kiting != null && _status != null)
@@ -576,16 +578,20 @@ public partial class Unit : IUnitHandle
 			{
 				effectiveDamage = (int)(effectiveDamage * charge.DamageMult);
 				_chargeUsed = true;
+				isHeavy = true;
 			}
 		}
 		effectiveDamage = (int)(effectiveDamage * GameCtx.AuraAttackDamageMultiplier * GetCurseDamageFactor());
 		if (UndeadRules.IsUndead(Race))
 			effectiveDamage = (int)(effectiveDamage * GameCtx.UndeadDamageMultiplier);
 		if (executeMultiplier != 1f)
+		{
 			effectiveDamage = (int)(effectiveDamage * executeMultiplier);
+			isHeavy = true;
+		}
 		int finalDamage = CombatRules.CalculateDamage(effectiveDamage, DamageType, TargetEnemy.ArmorType, TargetEnemy.EffectiveArmorValue, _damageMatrix);
 		finalDamage = UndeadRules.ApplyDispelMultiplier(finalDamage, DamageType, TargetEnemy.Race, TargetEnemy.AuraDispelResistFraction);
-		TargetEnemy.TakeDamage(finalDamage, this, GameX, GameY);
+		TargetEnemy.TakeDamage(finalDamage, this, GameX, GameY, isHeavy: isHeavy);
 		if (GameCtx.AuraLifestealFraction > 0f)
 			Heal((int)(finalDamage * GameCtx.AuraLifestealFraction));
 

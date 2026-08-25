@@ -4,7 +4,7 @@ namespace CasualCastle.Domain.Battle;
 public interface IUnitHandle : IUnitState
 {
 	void TeleportTo(float gameX, float gameY);
-	void TakeDamage(int amount, IUnitHandle attacker, float attackerGameX, float attackerGameY, bool isAoe = false);
+	void TakeDamage(int amount, IUnitHandle attacker, float attackerGameX, float attackerGameY, bool isAoe = false, bool isDot = false, bool isHeavy = false);
 	int Heal(int amount);
 	void SetEnemyTarget(IUnitHandle target);
 	void SetStealth(bool stealthed);

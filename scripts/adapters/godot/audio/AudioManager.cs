@@ -19,14 +19,17 @@ public partial class AudioManager : Node
 	private const float CrossfadeSeconds = 1.0f;
 	private const double MinGapSeconds = 3.0;
 	private const double MaxGapSeconds = 6.0;
-	private const ulong SfxDedupeMs = 50;
+	private const ulong SfxSecondMs = 1000;
 
 	private readonly Dictionary<string, List<BgmDef>> _bgmPoolDefs = new();
 
 	private readonly Dictionary<string, AudioStream> _bgmStreams = new();
 	private readonly Dictionary<string, AudioStream> _sfxStreams = new();
 	private readonly Dictionary<string, AudioStreamPlayer> _sfxPlayers = new();
-	private readonly Dictionary<string, ulong> _lastSfxTick = new();
+	private readonly Dictionary<string, ulong> _lastGroupTick = new();
+	private int _playsThisSecond;
+	private ulong _secondWindowStartMs;
+	private int _importanceFloor;
 
 	private AudioStreamPlayer _musicA;
 	private AudioStreamPlayer _musicB;
@@ -116,11 +119,14 @@ public partial class AudioManager : Node
 		if (string.IsNullOrEmpty(eventName))
 			return;
 
+		string group = SfxPolicy.GetGroup(eventName);
 		ulong now = Time.GetTicksMsec();
-		if (_lastSfxTick.TryGetValue(eventName, out ulong last) && now - last < SfxDedupeMs)
+		if (_lastGroupTick.TryGetValue(group, out ulong last) && now - last < (ulong)SfxPolicy.GroupMinIntervalMs)
+			return;
+		if (!CanPlayInBudget(now, SfxPolicy.GetPriority(eventName)))
 			return;
 
-		_lastSfxTick[eventName] = now;
+		_lastGroupTick[group] = now;
 
 		AudioStream stream = LoadSfxStream(eventName);
 		if (stream == null)
@@ -129,6 +135,24 @@ public partial class AudioManager : Node
 		AudioStreamPlayer player = GetSfxPlayer(eventName);
 		player.Stream = stream;
 		player.Play();
+	}
+
+	private bool CanPlayInBudget(ulong now, int priority)
+	{
+		if (_secondWindowStartMs == 0 || now - _secondWindowStartMs >= SfxSecondMs)
+		{
+			_secondWindowStartMs = now;
+			_playsThisSecond = 0;
+			_importanceFloor = Math.Max(0, _importanceFloor - SfxPolicy.ThresholdDecayPerSecond);
+		}
+		if (_playsThisSecond >= SfxPolicy.MaxPlaysPerSecond)
+		{
+			if (priority < _importanceFloor)
+				return false;
+			_importanceFloor = Math.Min(100, Math.Max(_importanceFloor, SfxPolicy.OverloadThreshold));
+		}
+		_playsThisSecond++;
+		return true;
 	}
 
 	public void SetMusicVolume(float volume)

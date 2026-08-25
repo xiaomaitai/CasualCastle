@@ -21,6 +21,8 @@ public partial class UnitEventRelay : Node, IUnitEventPort
 
 	public int LastDamageAmount { get; private set; }
 	public IUnitHandle LastAttacker { get; private set; }
+	public bool LastIsDot { get; private set; }
+	public bool LastIsHeavy { get; private set; }
 	public IUnitHandle LastAttackTarget { get; private set; }
 	public float LastAttackTargetX { get; private set; }
 	public float LastAttackTargetY { get; private set; }
@@ -32,10 +34,12 @@ public partial class UnitEventRelay : Node, IUnitEventPort
 	public float LastSummonX { get; private set; }
 	public float LastSummonY { get; private set; }
 
-	public void OnDamaged(int amount, IUnitHandle attacker)
+	public void OnDamaged(int amount, IUnitHandle attacker, bool isDot, bool isHeavy)
 	{
 		LastDamageAmount = amount;
 		LastAttacker = attacker;
+		LastIsDot = isDot;
+		LastIsHeavy = isHeavy;
 		EmitSignal(SignalName.Damaged);
 	}
 

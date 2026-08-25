@@ -16,6 +16,7 @@ public partial class SettingsUiController : Control
 	private CheckBox _confirmSellCheck;
 	private CheckBox _autoPauseNightCheck;
 	private CheckBox _autoResumePlaceCheck;
+	private CheckBox _showDamageNumbersCheck;
 	private HSlider _dragSpeedSlider;
 	private Label _dragSpeedValueLabel;
 	private HSlider _musicVolumeSlider;
@@ -41,6 +42,7 @@ public partial class SettingsUiController : Control
 		_confirmSellCheck = GetNode<CheckBox>("Panel/ConfirmSellCheck");
 		_autoPauseNightCheck = GetNode<CheckBox>("Panel/AutoPauseNightCheck");
 		_autoResumePlaceCheck = GetNode<CheckBox>("Panel/AutoResumePlaceCheck");
+		_showDamageNumbersCheck = GetNode<CheckBox>("Panel/ShowDamageNumbersCheck");
 		_dragSpeedSlider = GetNode<HSlider>("Panel/DragSpeedSlider");
 		_dragSpeedValueLabel = GetNode<Label>("Panel/DragSpeedValueLabel");
 		_musicVolumeSlider = GetNode<HSlider>("Panel/MusicVolumeSlider");
@@ -130,6 +132,7 @@ public partial class SettingsUiController : Control
 		_confirmSellCheck.ButtonPressed = DisplaySettingsManager.ConfirmSellEnabled;
 		_autoPauseNightCheck.ButtonPressed = DisplaySettingsManager.AutoPauseNightEnabled;
 		_autoResumePlaceCheck.ButtonPressed = DisplaySettingsManager.AutoResumeAfterPlaceEnabled;
+		_showDamageNumbersCheck.ButtonPressed = DisplaySettingsManager.ShowDamageNumbersEnabled;
 		_dragSpeed = settings.CameraDragSpeed;
 		_dragSpeedSlider.Value = _dragSpeed;
 		_musicVolume = settings.MusicVolume;
@@ -210,6 +213,7 @@ public partial class SettingsUiController : Control
 		DisplaySettingsManager.ConfirmSellEnabled = _confirmSellCheck.ButtonPressed;
 		DisplaySettingsManager.AutoPauseNightEnabled = _autoPauseNightCheck.ButtonPressed;
 		DisplaySettingsManager.AutoResumeAfterPlaceEnabled = _autoResumePlaceCheck.ButtonPressed;
+		DisplaySettingsManager.ShowDamageNumbersEnabled = _showDamageNumbersCheck.ButtonPressed;
 		UiProfileKind profile = (UiProfileKind)_uiProfileOption.GetSelectedId();
 		DisplaySettingsManager settings = AdapterRegistry.Resolve<DisplaySettingsManager>();
 		settings.SaveAndApply(mode, resolution, _dragSpeed, _musicVolume, _sfxVolume, profile);

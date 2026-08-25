@@ -91,6 +91,10 @@ public partial class UnitLogic : Node2D
 
 	private const float BodySyncEpsilonSq = 0.01f;
 
+	private const long DotFloatIntervalMs = 1000;
+
+	private long _lastDotFloatMs = -1;
+
 	public void InitializeFromStats(UnitStats stats)
 	{
 		if (_unit == null)
@@ -350,6 +354,11 @@ public partial class UnitLogic : Node2D
 	private void OnDamaged()
 	{
 		_visual.SetHealth(Health, MaxHealth);
+		if (_eventRelay.LastIsDot)
+		{
+			SpawnDotFloatingDamage();
+			return;
+		}
 		_visual?.StartHitFlash();
 		SpawnFloatingDamage();
 		Sfx.Play(UnitSfx.GetHitSfxEvent(_eventRelay.LastAttacker));
@@ -358,14 +367,38 @@ public partial class UnitLogic : Node2D
 			_tactical.PropagateRetaliation(_unit, attacker);
 	}
 
-	private void SpawnFloatingDamage()
+	private void SpawnDotFloatingDamage()
 	{
-		if (_body == null || _eventRelay == null)
+		if (!DisplaySettingsManager.ShowDamageNumbersEnabled)
+			return;
+		long now = (long)Time.GetTicksMsec();
+		if (_lastDotFloatMs >= 0 && now - _lastDotFloatMs < DotFloatIntervalMs)
+			return;
+		_lastDotFloatMs = now;
+		if (_body == null || _eventRelay == null || _eventRelay.LastDamageAmount <= 0)
 			return;
 		Node root = GetTree().CurrentScene;
-		if (root == null || _eventRelay.LastDamageAmount <= 0)
+		if (root == null)
 			return;
 		FloatingText.Spawn(root, _body.GlobalPosition, _eventRelay.LastDamageAmount, false);
+	}
+
+	private void SpawnFloatingDamage()
+	{
+		if (!DisplaySettingsManager.ShowDamageNumbersEnabled)
+			return;
+		if (_body == null || _eventRelay == null || _eventRelay.LastDamageAmount <= 0)
+			return;
+		Node root = GetTree().CurrentScene;
+		if (root == null)
+			return;
+		FloatingText.Spawn(
+			root,
+			_body.GlobalPosition,
+			_eventRelay.LastDamageAmount,
+			false,
+			_eventRelay.LastIsHeavy,
+			_eventRelay.LastAttacker?.DamageType);
 	}
 
 	private void OnDied()
@@ -399,6 +432,8 @@ public partial class UnitLogic : Node2D
 
 	private void SpawnFloatingHeal(Node root, Vector2 position)
 	{
+		if (!DisplaySettingsManager.ShowDamageNumbersEnabled)
+			return;
 		if (_eventRelay.LastHealAmount <= 0)
 			return;
 		FloatingText.Spawn(root, position, _eventRelay.LastHealAmount, true);

@@ -33,14 +33,14 @@ anchor_bottom = 0.5
 offset_left = -300.0
 offset_top = -360.0
 offset_right = 300.0
-offset_bottom = 360.0
+offset_bottom = 460.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="PanelBackground" type="ColorRect" parent="Panel"]
 layout_mode = 0
 offset_right = 600.0
-offset_bottom = 680.0
+offset_bottom = 780.0
 color = Color(0.12, 0.16, 0.22, 0.96)
 
 [node name="TitleLabel" type="Label" parent="Panel"]
@@ -239,18 +239,34 @@ offset_top = 644.0
 offset_right = 350.0
 offset_bottom = 688.0
 
+[node name="ShowDamageNumbersLabel" type="Label" parent="Panel"]
+layout_mode = 0
+offset_left = 48.0
+offset_top = 700.0
+offset_right = 250.0
+offset_bottom = 736.0
+theme_override_font_sizes/font_size = 20
+text = "伤害飘字"
+
+[node name="ShowDamageNumbersCheck" type="CheckBox" parent="Panel"]
+layout_mode = 0
+offset_left = 270.0
+offset_top = 696.0
+offset_right = 350.0
+offset_bottom = 740.0
+
 [node name="ApplyButton" type="Button" parent="Panel"]
 layout_mode = 0
 offset_left = 96.0
-offset_top = 708.0
+offset_top = 768.0
 offset_right = 296.0
-offset_bottom = 764.0
+offset_bottom = 824.0
 text = "应用"
 
 [node name="BackButton" type="Button" parent="Panel"]
 layout_mode = 0
 offset_left = 304.0
-offset_top = 708.0
+offset_top = 768.0
 offset_right = 504.0
-offset_bottom = 764.0
+offset_bottom = 824.0
 text = "返回"

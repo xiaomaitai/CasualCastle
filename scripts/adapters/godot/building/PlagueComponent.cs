@@ -34,6 +34,6 @@ public sealed class PlagueComponent : IBuildingComponent
 		float centerX = GameCoordinatesAdapter.PixelsToGameUnits(_owner.GlobalPosition.X);
 		float centerY = GameCoordinatesAdapter.PixelsToGameUnits(_owner.GlobalPosition.Y);
 		foreach (IUnitHandle enemy in tactical.FindEnemiesNearPoint(_trapSource, centerX, centerY, DungeonFactionBuffs.PlagueSpreadRange))
-			enemy.TakeDamage(damage, null, centerX, centerY);
+			enemy.TakeDamage(damage, null, centerX, centerY, isDot: true);
 	}
 }

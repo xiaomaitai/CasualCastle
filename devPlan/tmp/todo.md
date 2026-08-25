@@ -2,6 +2,10 @@
 
 以下均为「当前不做、以后可能做」的待办项：某项确定要做时移出细化；确定不做时删除该项。
 
+## SFX 变体（2026-08-27 记录）
+
+每类音效需要几个变体（如 `hit` 的 hit_1/hit_2/hit_3），SoundGroup 已按组抽象（`scripts/adapters/godot/audio/SfxPolicy.cs` 的 `GetGroup`），变体归入同一组共享 0.1s 最小播放间隔；实现时变体流挂在组下轮播，不增加事件数。音频需求清单见 `devPlan/design/audioRequirements.md`（高频事件 S1/S15/S18/S19 优先加变体）。
+
 ## 设计与实现脱节（G2 发现，2026-08-25）
 
 - **「对 Beast +30%」（皇家神射手）无落地载体**：实现中 `ArmorType` 无 Beast、`unit_stats` 无野兽种族、config.db 无野怪/敌波表；联盟伤害矩阵里的 Beast 列是早期设计遗留。皇家神射手当前差异化改为复用 `slowing_strike`（命中减速）。待野怪/敌方波次体系落地后再实现按种族克制。

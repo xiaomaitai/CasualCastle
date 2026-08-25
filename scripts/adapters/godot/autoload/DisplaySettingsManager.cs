@@ -16,6 +16,7 @@ public partial class DisplaySettingsManager : Node
 	public static bool ConfirmSellEnabled { get; set; }
 	public static bool AutoPauseNightEnabled { get; set; }
 	public static bool AutoResumeAfterPlaceEnabled { get; set; }
+	public static bool ShowDamageNumbersEnabled { get; set; } = true;
 	public event Action<UiProfileKind> UiProfileChanged;
 
 	private const int DesignWidth = 1920;
@@ -141,6 +142,7 @@ public partial class DisplaySettingsManager : Node
 		ConfirmSellEnabled = (bool)config.GetValue(Section, "confirm_sell", false);
 		AutoPauseNightEnabled = (bool)config.GetValue(Section, "auto_pause_night", false);
 		AutoResumeAfterPlaceEnabled = (bool)config.GetValue(Section, "auto_resume_after_place", false);
+		ShowDamageNumbersEnabled = (bool)config.GetValue(Section, "show_damage_numbers", true);
 		int legacyUiProfile = (int)config.GetValue(Section, "attribute_panel_profile", (int)UiProfile);
 		UiProfile = (UiProfileKind)(int)config.GetValue(Section, "ui_profile", legacyUiProfile);
 		CameraDragSpeed = Mathf.Clamp(
@@ -171,6 +173,7 @@ public partial class DisplaySettingsManager : Node
 		config.SetValue(Section, "confirm_sell", ConfirmSellEnabled);
 		config.SetValue(Section, "auto_pause_night", AutoPauseNightEnabled);
 		config.SetValue(Section, "auto_resume_after_place", AutoResumeAfterPlaceEnabled);
+		config.SetValue(Section, "show_damage_numbers", ShowDamageNumbersEnabled);
 		config.SetValue(Section, "ui_profile", (int)UiProfile);
 		config.SetValue(Section, "camera_drag_speed", CameraDragSpeed);
 		config.SetValue(Section, "game_speed", GameSpeed);

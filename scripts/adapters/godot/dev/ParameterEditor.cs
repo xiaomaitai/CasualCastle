@@ -14,6 +14,7 @@ public sealed class ParameterEditor
 	private const string EconomyModule = "经济";
 	private const string CombatModule = "战斗";
 	private const string DisplayModule = "显示/像素换算";
+	private const string AudioModule = "音频";
 	private const float NameWidth = 240f;
 	private const float EditWidth = 160f;
 	private const float ResetWidth = 72f;
@@ -54,6 +55,22 @@ public sealed class ParameterEditor
 			() => GameCoordinatesAdapter.PixelsPerCell.ToString(),
 			text => TrySetInt(text, value => GameCoordinatesAdapter.PixelsPerCell = value),
 			GameCoordinatesAdapter.PixelsPerCellDefault.ToString()),
+		new ParameterDef("音效每秒播放上限", AudioModule,
+			() => SfxPolicy.MaxPlaysPerSecond.ToString(),
+			text => TrySetInt(text, value => SfxPolicy.MaxPlaysPerSecond = value),
+			SfxPolicy.MaxPlaysPerSecondDefault.ToString()),
+		new ParameterDef("同类声音最小间隔（毫秒）", AudioModule,
+			() => SfxPolicy.GroupMinIntervalMs.ToString(),
+			text => TrySetInt(text, value => SfxPolicy.GroupMinIntervalMs = value),
+			SfxPolicy.GroupMinIntervalMsDefault.ToString()),
+		new ParameterDef("超载重要性阈值", AudioModule,
+			() => SfxPolicy.OverloadThreshold.ToString(),
+			text => TrySetInt(text, value => SfxPolicy.OverloadThreshold = value),
+			SfxPolicy.OverloadThresholdDefault.ToString()),
+		new ParameterDef("阈值回落速度（每1000ms）", AudioModule,
+			() => SfxPolicy.ThresholdDecayPerSecond.ToString(),
+			text => TrySetInt(text, value => SfxPolicy.ThresholdDecayPerSecond = value),
+			SfxPolicy.ThresholdDecayPerSecondDefault.ToString()),
 	};
 
 	public ParameterEditor(Control root)

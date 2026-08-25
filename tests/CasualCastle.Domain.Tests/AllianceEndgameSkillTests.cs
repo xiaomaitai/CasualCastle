@@ -202,7 +202,7 @@ public class AllianceEndgameSkillTests
 			LastSummonType = unitTypeId;
 		}
 
-		public void OnDamaged(int amount, IUnitHandle attacker) { }
+		public void OnDamaged(int amount, IUnitHandle attacker, bool isDot, bool isHeavy) { }
 		public void OnDied() { }
 		public void OnAttack(IUnitHandle target, float targetGameX, float targetGameY) { }
 		public void OnHeal(IUnitHandle target, int amount) { }
