@@ -69,10 +69,11 @@
 - 可替换：现有及未来工作流只依赖"源"抽象，不写死具体服务，通过配置/环境变量切换
 - 覆盖：生图源与视频生成源分别抽离，供"动画工作流构建"等任务复用
 
-## Godot MCP 接口接入
+## Godot MCP 接口接入（验证完成，待启用）
 
-接入 Godot MCP（Model Context Protocol），让 DSH/AI agent 能直接与 Godot 编辑器及运行实例通信，替代人工在编辑器内操作。
+接入 Godot MCP，让 DSH/AI agent 能直接与 Godot 编辑器及运行实例通信，替代人工在编辑器内操作。方案与评估见 `devPlan/design/godotMcpIntegration.md`。
 
-- 能力范围：读取/修改场景树与节点属性、启动/运行游戏、截图取景、触发素材导入与保存等
-- 配合：与现有 godot-import skill、动画工作流构建、参数编辑器等任务打通，agent 可直接操作 Godot 而无需用户手动点按
-- 待定：所选 MCP server 实现（社区方案）及其与 Godot 4.6 / .NET 的兼容性、授权与安全边界
+- ✅ 选型 Coding-Solo/godot-mcp（v0.1.1，MIT）+ 本机 Godot 4.6.2 mono 兼容性实测：14 工具全发现，`get_godot_version` / `get_project_info` 通过
+- ✅ 冒烟简化评估：**不能替代现有 `run_smoke.sh`**——`run_project` 不支持 `--headless`、无超时参数、单 `activeProcess` 无进程隔离、MCP server 长驻为单点故障；MCP 仅作开发辅助（编辑器/场景操作、UID 管理、调试输出）
+- ⏳ 实际启用：DSH 内置 `@deepseek-ai/dsh-mcp-client` 桥接（stdio），在 `cordis.patch.yml` 插入插件实例 + 重启 DSH；重启会中断会话，待用户确认
+- 已知小问题：MCP `get_uid` 对 `res://` 前缀 `filePath` 报「File does not exist」（路径解析 bug，不影响其他工具）

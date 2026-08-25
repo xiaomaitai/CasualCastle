@@ -75,6 +75,7 @@
 | `audioSmokeTest.md` | 音频冒烟测试说明 |
 | `smokeTestGuidelines.md` | 冒烟测试编写与运行规范（防卡死四层机制、PASS/FAIL 契约、统一运行器） |
 | `devTools.md` | 开发者工具说明 |
+| `godotMcpIntegration.md` | Godot MCP 接入方案（DSH 桥接）与冒烟简化评估 |
 | `factions/allianceFaction.md`、`dungeonFaction.md`、`hordeFaction.md`、`necromancerFaction.md` | 四大派系设计 |
 
 ### 施工进度（devPlan/tmp/）
