@@ -1,5 +1,6 @@
 // 建筑节点：领域状态接口、产兵工作、仪式与表现
 using CasualCastle.Adapters.Godot;
+using CasualCastle.Adapters.Godot.Dev;
 using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
 using CasualCastle.Domain.Shared;
@@ -50,6 +51,8 @@ public partial class Building : Area2D
 	private readonly List<IBuildingComponent> _components = new();
 
 	private LivingComponent _living;
+
+	private CollisionOverlay _collisionOverlay;
 
 	private BuildingSystem _buildingSystemBacking;
 
@@ -401,6 +404,9 @@ public partial class Building : Area2D
 			SetWorkSpeedMultiplier(10f);
 		CheatState.FastProductionChanged += OnFastProductionChanged;
 
+		CheatState.ShowCollisionChanged += OnShowCollisionChanged;
+		ApplyCollisionOverlay();
+
 		if (BuildingSys.GetProductionRate(TypeId) > 0f)
 		{
 			_battlefield = _gameManager?.Battlefield;
@@ -433,6 +439,7 @@ public partial class Building : Area2D
 		if (_gameManager != null)
 			_gameManager.PhaseChanged -= OnPhaseChanged;
 		CheatState.FastProductionChanged -= OnFastProductionChanged;
+		CheatState.ShowCollisionChanged -= OnShowCollisionChanged;
 		_production.Stop();
 	}
 
@@ -442,6 +449,30 @@ public partial class Building : Area2D
 		if (shape?.Shape is RectangleShape2D rect)
 			return rect.Size;
 		return Vector2.Zero;
+	}
+
+	private void ApplyCollisionOverlay()
+	{
+		if (_collisionOverlay != null)
+		{
+			_collisionOverlay.QueueFree();
+			_collisionOverlay = null;
+		}
+		if (!CheatState.ShowCollisionEnabled)
+			return;
+		Vector2 size = GetBuildingSize();
+		if (size.X <= 0f || size.Y <= 0f)
+			return;
+		Color color = IsPlayerOwned ? CollisionOverlay.FriendlyColor : CollisionOverlay.EnemyColor;
+		CollisionOverlay overlay = new CollisionOverlay();
+		overlay.ConfigureRect(size, color);
+		AddChild(overlay);
+		_collisionOverlay = overlay;
+	}
+
+	private void OnShowCollisionChanged()
+	{
+		ApplyCollisionOverlay();
 	}
 
 

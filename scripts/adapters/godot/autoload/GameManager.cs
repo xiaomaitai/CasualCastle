@@ -111,6 +111,7 @@ public partial class GameManager : Node2D, IGameState
 
 	public void StartGameSession(Node2D battlefield, Castle playerCastle, Castle enemyCastle)
 	{
+		CheatState.ResetAll();
 		_battlefield = battlefield;
 		_playerCastle = playerCastle;
 		_enemyCastle = enemyCastle;

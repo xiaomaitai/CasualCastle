@@ -8,6 +8,7 @@ public partial class CheatMenuUiController : Control
 	private Panel _panel;
 	private Button _openButton;
 	private CheckBox _fastProductionCheck;
+	private CheckBox _showCollisionCheck;
 	private Button _closeButton;
 	private bool _gameOver;
 
@@ -19,10 +20,12 @@ public partial class CheatMenuUiController : Control
 		_overlay = GetNode<ColorRect>("CheatOverlay");
 		_panel = GetNode<Panel>("CheatPanel");
 		_fastProductionCheck = GetNode<CheckBox>("CheatPanel/FastProductionCheck");
+		_showCollisionCheck = GetNode<CheckBox>("CheatPanel/ShowCollisionCheck");
 		_closeButton = GetNode<Button>("CheatPanel/CloseButton");
 
 		_openButton.Pressed += OnOpenButtonPressed;
 		_fastProductionCheck.Toggled += OnFastProductionToggled;
+		_showCollisionCheck.Toggled += OnShowCollisionToggled;
 		_closeButton.Pressed += Close;
 
 		_openButton.Visible = DisplaySettingsManager.DevModeEnabled;
@@ -33,6 +36,7 @@ public partial class CheatMenuUiController : Control
 	{
 		_openButton.Pressed -= OnOpenButtonPressed;
 		_fastProductionCheck.Toggled -= OnFastProductionToggled;
+		_showCollisionCheck.Toggled -= OnShowCollisionToggled;
 		_closeButton.Pressed -= Close;
 	}
 
@@ -87,10 +91,16 @@ public partial class CheatMenuUiController : Control
 	private void SyncFromState()
 	{
 		_fastProductionCheck.ButtonPressed = CheatState.FastProductionEnabled;
+		_showCollisionCheck.ButtonPressed = CheatState.ShowCollisionEnabled;
 	}
 
 	private void OnFastProductionToggled(bool enabled)
 	{
 		CheatState.SetFastProduction(enabled);
+	}
+
+	private void OnShowCollisionToggled(bool enabled)
+	{
+		CheatState.SetShowCollision(enabled);
 	}
 }

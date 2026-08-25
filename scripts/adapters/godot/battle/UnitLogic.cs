@@ -1,6 +1,7 @@
 // 单位逻辑节点：桥接领域单位与战场表现，并在死亡后保留逻辑尸体供其他系统使用
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Adapters.Godot.Battle;
+using CasualCastle.Adapters.Godot.Dev;
 using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Building;
 using CasualCastle.Domain.Shared;
@@ -88,6 +89,8 @@ public partial class UnitLogic : Node2D
 	private readonly ProjectilePresenter _projectiles = new();
 
 	private DeathSideEffects _deathSideEffects;
+
+	private CollisionOverlay _collisionOverlay;
 
 	private const float BodySyncEpsilonSq = 0.01f;
 
@@ -219,6 +222,9 @@ public partial class UnitLogic : Node2D
 		}
 
 		UpdateSleepVisual();
+
+		CheatState.ShowCollisionChanged += OnShowCollisionChanged;
+		ApplyCollisionOverlay();
 	}
 
 	public override void _ExitTree()
@@ -228,6 +234,8 @@ public partial class UnitLogic : Node2D
 
 		if (AdapterRegistry.Resolve<GameManager>() != null)
 			AdapterRegistry.Resolve<GameManager>().PhaseChanged -= OnPhaseChanged;
+
+		CheatState.ShowCollisionChanged -= OnShowCollisionChanged;
 
 		if (_eventRelay != null)
 			_eventRelay.Healed -= OnHealed;
@@ -575,6 +583,28 @@ public partial class UnitLogic : Node2D
 			_rangePreview.QueueFree();
 			_rangePreview = null;
 		}
+	}
+
+	private void ApplyCollisionOverlay()
+	{
+		if (_collisionOverlay != null)
+		{
+			_collisionOverlay.QueueFree();
+			_collisionOverlay = null;
+		}
+		if (!CheatState.ShowCollisionEnabled)
+			return;
+		float radiusPixels = GameCoordinatesAdapter.GameUnitsToPixels(CollisionRadius);
+		Color color = IsPlayerUnit ? CollisionOverlay.FriendlyColor : CollisionOverlay.EnemyColor;
+		CollisionOverlay overlay = new CollisionOverlay();
+		overlay.ConfigureCircle(radiusPixels, color);
+		AddChild(overlay);
+		_collisionOverlay = overlay;
+	}
+
+	private void OnShowCollisionChanged()
+	{
+		ApplyCollisionOverlay();
 	}
 
 }
