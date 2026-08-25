@@ -420,6 +420,8 @@ INSERT INTO "combine_recipes" VALUES('Necropolis','BlightMarsh',1,'DeathTemple')
 INSERT INTO "combine_recipes" VALUES('BloodAltar','DarkAltar',1,'DeathGate');
 INSERT INTO "combine_recipes" VALUES('HeartPortal','MaidResidence',1,'CharmingPalace');
 INSERT INTO "combine_recipes" VALUES('RoyalArcheryRange','RoyalStable',1,'HeavenPunishmentTower');
+INSERT INTO "combine_recipes" VALUES('RoyalBulwark','RoyalBulwark',1,'HolyWall');
+INSERT INTO "combine_recipes" VALUES('RoyalRanger','RoyalRanger',1,'ShadowSanctum');
 CREATE TABLE "damage_matrix" (damage_type INTEGER NOT NULL, armor_type INTEGER NOT NULL, multiplier INTEGER NOT NULL, PRIMARY KEY (damage_type, armor_type));
 INSERT INTO "damage_matrix" VALUES(0,0,150);
 INSERT INTO "damage_matrix" VALUES(0,1,150);
@@ -950,8 +952,6 @@ INSERT INTO "upgrade_recipes" VALUES('Bulwark','RoyalBulwark');
 INSERT INTO "upgrade_recipes" VALUES('CrossbowTower','RoyalArcheryRange');
 INSERT INTO "upgrade_recipes" VALUES('ScoutCamp','RangerPost');
 INSERT INTO "upgrade_recipes" VALUES('RangerPost','RoyalRanger');
-INSERT INTO "upgrade_recipes" VALUES('RoyalBulwark','HolyWall');
-INSERT INTO "upgrade_recipes" VALUES('RoyalRanger','ShadowSanctum');
 DELETE FROM "sqlite_sequence";
 INSERT INTO "sqlite_sequence" VALUES('asset_gen_tasks',195);
 COMMIT;
