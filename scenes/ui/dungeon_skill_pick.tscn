@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://oks2mx2ia8z9k"]
+[gd_scene format=3 uid="uid://cylgusbqlne0a"]
 
 [ext_resource type="Script" path="res://scripts/adapters/godot/ui/DungeonSkillPickUiController.cs" id="1"]
 

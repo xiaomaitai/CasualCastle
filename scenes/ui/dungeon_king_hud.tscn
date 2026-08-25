@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://ccvvsqt9dc5xn"]
+[gd_scene format=3 uid="uid://ccvvsquadc5xn"]
 
 [ext_resource type="Script" path="res://scripts/adapters/godot/ui/DungeonKingHudUiController.cs" id="1"]
 

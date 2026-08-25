@@ -22,8 +22,8 @@
 [ext_resource type="PackedScene" uid="uid://cnovsae0wbuo6" path="res://scenes/ui/dev_tools/runtime_info_panel.tscn" id="33"]
 [ext_resource type="PackedScene" uid="uid://kpmvup6u5f4f" path="res://scenes/ui/spell_bar.tscn" id="34"]
 [ext_resource type="PackedScene" uid="uid://blci4e233c5y2" path="res://scenes/ui/building_action_ring.tscn" id="35"]
-[ext_resource type="PackedScene" uid="uid://ccvvsqt9dc5xn" path="res://scenes/ui/dungeon_king_hud.tscn" id="36"]
-[ext_resource type="PackedScene" uid="uid://oks2mx2ia8z9k" path="res://scenes/ui/dungeon_skill_pick.tscn" id="37"]
+[ext_resource type="PackedScene" uid="uid://ccvvsquadc5xn" path="res://scenes/ui/dungeon_king_hud.tscn" id="36"]
+[ext_resource type="PackedScene" uid="uid://cylgusbqlne0a" path="res://scenes/ui/dungeon_skill_pick.tscn" id="37"]
 
 [node name="MainGame" type="Node2D" unique_id=1]
 script = ExtResource("10")
