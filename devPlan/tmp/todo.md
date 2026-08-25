@@ -75,5 +75,5 @@
 
 - ✅ 选型 Coding-Solo/godot-mcp（v0.1.1，MIT）+ 本机 Godot 4.6.2 mono 兼容性实测：14 工具全发现，`get_godot_version` / `get_project_info` 通过
 - ✅ 冒烟简化评估：**不能替代现有 `run_smoke.sh`**——`run_project` 不支持 `--headless`、无超时参数、单 `activeProcess` 无进程隔离、MCP server 长驻为单点故障；MCP 仅作开发辅助（编辑器/场景操作、UID 管理、调试输出）
-- ⏳ 实际启用：DSH 内置 `@deepseek-ai/dsh-mcp-client` 桥接（stdio），在 `cordis.patch.yml` 插入插件实例 + 重启 DSH；重启会中断会话，待用户确认
+- ⏳ 实际启用：已部署 godot-mcp 至 `~/.dsh/mcp-servers/godot-mcp`，生成自提升脚本 `~/.dsh/enable-godot-mcp.ps1`（备份 + 插入 `cordis.patch.yml` 的 `mcp-godot` 实例）；**待用户以管理员运行脚本 + 重启 DSH**，工具即以 `mcp__godot__*` 生效
 - 已知小问题：MCP `get_uid` 对 `res://` 前缀 `filePath` 报「File does not exist」（路径解析 bug，不影响其他工具）

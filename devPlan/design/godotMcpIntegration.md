@@ -63,4 +63,5 @@ DSH **内置** MCP 客户端桥接插件 `@deepseek-ai/dsh-mcp-client`（`@deeps
 
 - ✅ 选型 + 兼容性验证（本机 Godot 4.6.2 mono）
 - ✅ 冒烟简化评估（结论：不替代）
-- ⏳ **实际启用**：改 `cordis.patch.yml` + 重启 DSH——待用户确认后执行
+- ✅ 部署 godot-mcp 至 `~/.dsh/mcp-servers/godot-mcp`（稳定路径，14 工具实测可用）；启用脚本 `~/.dsh/enable-godot-mcp.ps1`（自提升 UAC：备份 + 插入 `cordis.patch.yml`）
+- ⏳ **激活**：用户以管理员运行上述脚本 + 重启 DSH Desktop → 工具以 `mcp__godot__*` 生效
