@@ -2,7 +2,6 @@
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
 using Godot;
-using System;
 
 public partial class TitleDemoBattlefield : Node2D
 {
@@ -40,14 +39,7 @@ public partial class TitleDemoBattlefield : Node2D
 
 	public override void _Ready()
 	{
-		try
-		{
-			SetupDemo();
-		}
-		catch (Exception)
-		{
-			_demoReady = false;
-		}
+		SetupDemo();
 	}
 
 	public override void _Process(double delta)
@@ -75,8 +67,8 @@ public partial class TitleDemoBattlefield : Node2D
 		{
 			Position = new Vector2(_cameraX, BattleLineY),
 		};
-		_camera.MakeCurrent();
 		AddChild(_camera);
+		_camera.MakeCurrent();
 		AddCastle(PlayerCastleX, true);
 		AddCastle(EnemyCastleX, false);
 		_demoReady = true;
