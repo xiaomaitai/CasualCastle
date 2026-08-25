@@ -10,7 +10,7 @@ public partial class HordeBattleSmoke : SmokeTestBase
 {
 	private const string MainGameScene = "res://scenes/main/main_game.tscn";
 	private const float NightSpawnWait = 4f;
-	private const float UpgradeSpawnWait = 6f;
+	private const float UpgradeSpawnWait = 8f;
 	private const float TotalTimeout = 60f;
 	private const float WorkSpeedBoost = 10f;
 
@@ -18,6 +18,7 @@ public partial class HordeBattleSmoke : SmokeTestBase
 	{
 		WaitNight,
 		WaitSpawns,
+		UpgradeCore,
 		UpgradeGoblinHut,
 		WaitUpgradedSpawns
 	}
@@ -60,6 +61,9 @@ public partial class HordeBattleSmoke : SmokeTestBase
 			case SmokeStep.WaitSpawns:
 				WaitSpawns();
 				break;
+			case SmokeStep.UpgradeCore:
+				UpgradeCore();
+				break;
 			case SmokeStep.UpgradeGoblinHut:
 				UpgradeGoblinHut();
 				break;
@@ -80,6 +84,7 @@ public partial class HordeBattleSmoke : SmokeTestBase
 		TryPlaceBuilding(system, "GoblinHut", 0, 0);
 		TryPlaceBuilding(system, "OrcCamp", 2, 0);
 		TryPlaceBuilding(system, "LizardNest", 0, 2);
+		TryPlaceBuilding(system, "Burrow", 4, 0);
 	}
 
 	private Building TryPlaceBuilding(BuildingSystem system, string typeId, int gridX, int gridY)
@@ -106,6 +111,13 @@ public partial class HordeBattleSmoke : SmokeTestBase
 		if (_elapsed - _stepStartedAt < NightSpawnWait)
 			return;
 		CheckNightSpawns();
+		_stepStartedAt = _elapsed;
+		_step = SmokeStep.UpgradeCore;
+	}
+
+	private void UpgradeCore()
+	{
+		TryUpgradeBuilding("HordeCoreL1", "HordeCoreL2");
 		_stepStartedAt = _elapsed;
 		_step = SmokeStep.UpgradeGoblinHut;
 	}
@@ -184,13 +196,20 @@ public partial class HordeBattleSmoke : SmokeTestBase
 		float healthRatio = source.MaxHealth > 0 ? source.Health / (float)source.MaxHealth : 1f;
 		IUpgradeUseCase useCase = GameManager.Get<IUpgradeUseCase>();
 		List<IBuildingState> states = _playerCastle.GetBuildingStates();
+		int core = HordeCoreRules.GetCoreLevel(states);
+		int burrow = HordeCoreRules.CountBurrows(states);
 		IBuildingState upgraded = useCase.TryUpgrade(
 			source.Bridge, resultTypeId, healthRatio,
 			AdapterRegistry.Resolve<Shop>().TrySpendGold,
 			new UpgradeBuildingFactory(_playerCastle),
-			RitualCircleRules.GetCoreLevel(states));
+			core,
+			burrow);
 		if (upgraded == null)
+		{
 			Fail($"{sourceTypeId} 升级失败");
+			return;
+		}
+		FindBuilding(resultTypeId)?.SetWorkSpeedMultiplier(WorkSpeedBoost);
 	}
 
 	private Building FindBuilding(string typeId)

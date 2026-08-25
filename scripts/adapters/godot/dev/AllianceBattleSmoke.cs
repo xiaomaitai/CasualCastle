@@ -10,7 +10,7 @@ public partial class AllianceBattleSmoke : SmokeTestBase
 {
 	private const string MainGameScene = "res://scenes/main/main_game.tscn";
 	private const float NightSpawnWait = 4f;
-	private const float UpgradeSpawnWait = 6f;
+	private const float UpgradeSpawnWait = 8f;
 	private const float TotalTimeout = 60f;
 	private const float WorkSpeedBoost = 10f;
 
@@ -188,9 +188,13 @@ public partial class AllianceBattleSmoke : SmokeTestBase
 			source.Bridge, resultTypeId, healthRatio,
 			AdapterRegistry.Resolve<Shop>().TrySpendGold,
 			new UpgradeBuildingFactory(_playerCastle),
-			RitualCircleRules.GetCoreLevel(states));
+			HordeCoreRules.GetCoreLevel(states));
 		if (upgraded == null)
+		{
 			Fail($"{sourceTypeId} 升级失败");
+			return;
+		}
+		FindBuilding(resultTypeId)?.SetWorkSpeedMultiplier(WorkSpeedBoost);
 	}
 
 	private Building FindBuilding(string typeId)

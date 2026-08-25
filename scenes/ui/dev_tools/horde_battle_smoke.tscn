@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://c5a2268kablvm"]
+
+[ext_resource type="Script" path="res://scripts/adapters/godot/dev/HordeBattleSmoke.cs" id="1"]
+
+[node name="HordeBattleSmoke" type="Node"]
+script = ExtResource("1")
