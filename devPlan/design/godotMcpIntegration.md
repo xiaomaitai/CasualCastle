@@ -69,11 +69,11 @@ DSH **内置** MCP 客户端桥接插件 `@deepseek-ai/dsh-mcp-client`（`@deeps
 - ✅ 冒烟简化评估（结论：不替代）
 - ✅ 部署 godot-mcp 至 `~/.dsh/mcp-servers/godot-mcp`（稳定路径，14 工具实测可用）
 - ✅ 用户级接入：`~/.dsh/cordis.patch.yml` 已写入 `mcp-godot` 实例，`dsh --dump-config` 验证合成正确（无需管理员）
-- ⏳ **激活**：重启 DSH Desktop → 工具以 `mcp__godot__*` 生效，重启后验证
+- ✅ **已激活**：2026-08-25 23:31 重启 DSH 后 `mcp__godot__*` 生效，`get_godot_version` / `get_project_info` / `get_uid` 实测连通；`get_uid` 用**相对路径** `filePath` 正常（`res://` 前缀会报文件不存在）
 
-## 7. 重启后验证清单
+## 7. 重启后验证清单（已验证）
 
 1. 重启 DSH Desktop（完整退出再启动；home patch 新增不触发 HMR，必须重启）
-2. 新会话中应出现 `mcp__godot__*` 工具（14 个：`get_godot_version` / `get_project_info` / `run_project` / `get_debug_output` / `get_uid` 等）
-3. 调用 `mcp__godot__get_godot_version` → 返回 `4.6.2.stable.mono.official.71f334935` 即连通
+2. 新会话中出现 `mcp__godot__*` 工具（14 个）
+3. `mcp__godot__get_godot_version` → `4.6.2.stable.mono.official.71f334935` ✓
 4. 冒烟仍走 `tools/run_smoke.sh`（MCP 不替代，见 §4）
