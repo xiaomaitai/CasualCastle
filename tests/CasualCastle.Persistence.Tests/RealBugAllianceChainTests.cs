@@ -29,15 +29,16 @@ public class RealBugAllianceChainTests
 	}
 
 	[Fact]
-	public void HeavenPunishmentTower_IsCrossLineCombine_RealBug_MisconfiguredAsUpgrade()
+	public void AllianceT4RecipeGuard_RealBug()
 	{
 		using SqliteConnection connection = OpenConnection();
 		Assert.False(HasUpgrade(connection, "RoyalArcheryRange", "HeavenPunishmentTower"));
 		Assert.True(HasCombine(connection, "RoyalArcheryRange", "RoyalStable", "HeavenPunishmentTower"));
-		Assert.False(HasUpgrade(connection, "RoyalRanger", "ShadowSanctum"));
-		Assert.True(HasCombine(connection, "RoyalRanger", "RoyalRanger", "ShadowSanctum"));
+		Assert.True(HasUpgrade(connection, "RoyalRanger", "ShadowSanctum"));
+		Assert.False(HasCombine(connection, "RoyalRanger", "RoyalRanger", "ShadowSanctum"));
 		Assert.False(HasCombine(connection, "RoyalBulwark", "RoyalArmory", "HolyWall"));
-		Assert.True(HasCombine(connection, "RoyalBulwark", "RoyalBulwark", "HolyWall"));
+		Assert.True(HasUpgrade(connection, "RoyalBulwark", "HolyWall"));
+		Assert.False(HasCombine(connection, "RoyalBulwark", "RoyalBulwark", "HolyWall"));
 	}
 
 	[Fact]
