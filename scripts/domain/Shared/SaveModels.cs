@@ -12,6 +12,7 @@ public class SaveData
 	public int CurrentNightIndex { get; set; }
 	public List<CardSaveEntry> HandCards { get; set; } = new();
 	public string PendingReplayReportId { get; set; } = "";
+	public string BattleReportJson { get; set; } = "";
 	public string SaveTime { get; set; } = "";
 	public int RitualStudyCompletionCount { get; set; }
 	public List<string> LearnedRitualIds { get; set; } = new();

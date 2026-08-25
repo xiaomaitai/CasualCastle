@@ -59,6 +59,17 @@ public class BattleReportService
 		_currentReport = new BattleReport();
 	}
 
+	public IReadOnlyList<CastleSnapshot> ExportCurrentSnapshots()
+	{
+		return _currentReport.Nights.Select(ReportBuilder.CloneSnapshot).ToList();
+	}
+
+	public void ImportCurrentSnapshots(IReadOnlyList<CastleSnapshot> snapshots)
+	{
+		_currentReport.Nights.Clear();
+		_currentReport.Nights.AddRange(snapshots.Select(ReportBuilder.CloneSnapshot));
+	}
+
 	public BattleReport SaveCurrentReport(string displayName, string defaultName, string factionId)
 	{
 		if (_currentReport.Nights.Count == 0)

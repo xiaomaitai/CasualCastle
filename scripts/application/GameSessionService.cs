@@ -1,7 +1,9 @@
 // 对局会话用例：存档采集、持久化与恢复
 using CasualCastle.Domain.Building;
+using CasualCastle.Domain.History;
 using CasualCastle.Domain.Shared;
 using System.Collections.Generic;
+using System.Text.Json;
 
 namespace CasualCastle.Application;
 
@@ -40,6 +42,7 @@ public class GameSessionService : IGameSessionService
 			data.Buildings.Add(SaveDataMapper.ToBuildingEntry(building));
 		foreach (CardData card in query.HandCards)
 			data.HandCards.Add(SaveDataMapper.ToCardEntry(card));
+		data.BattleReportJson = ExportBattleReportJson();
 		_saveRepository.Save(data);
 	}
 
@@ -90,5 +93,29 @@ public class GameSessionService : IGameSessionService
 		command.RestoreKingSkills(data.DungeonLearnedSkillIds, data.DungeonLearnedSkillLevels);
 		_ports.Shop.SetFaction(data.FactionId);
 		command.RefreshPlayerAdjacency();
+		ImportBattleReportJson(data.BattleReportJson);
+	}
+
+	private string ExportBattleReportJson()
+	{
+		IReadOnlyList<CastleSnapshot> snapshots = _ports.BattleReportCapture.ExportCurrentSnapshots();
+		if (snapshots.Count == 0)
+			return "";
+		return JsonSerializer.Serialize(snapshots);
+	}
+
+	private void ImportBattleReportJson(string json)
+	{
+		if (string.IsNullOrWhiteSpace(json))
+			return;
+		try
+		{
+			List<CastleSnapshot> snapshots = JsonSerializer.Deserialize<List<CastleSnapshot>>(json);
+			if (snapshots != null && snapshots.Count > 0)
+				_ports.BattleReportCapture.ImportCurrentSnapshots(snapshots);
+		}
+		catch (JsonException)
+		{
+		}
 	}
 }

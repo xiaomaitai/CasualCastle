@@ -40,6 +40,16 @@ public partial class BattleReportSystem : Node, IBattleReportCapture
 		_service.CapturePhaseSnapshot(buildings, nightIndex, phase, gold, handCards);
 	}
 
+	public IReadOnlyList<CastleSnapshot> ExportCurrentSnapshots()
+	{
+		return _service.ExportCurrentSnapshots();
+	}
+
+	public void ImportCurrentSnapshots(IReadOnlyList<CastleSnapshot> snapshots)
+	{
+		_service.ImportCurrentSnapshots(snapshots);
+	}
+
 	public void DiscardCurrentReport()
 	{
 		_service.DiscardCurrentReport();

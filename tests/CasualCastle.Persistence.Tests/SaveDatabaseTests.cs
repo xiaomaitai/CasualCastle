@@ -67,6 +67,7 @@ public class SaveDatabaseTests : IDisposable
 		Assert.Equal(0, loaded.DungeonKingXp);
 		Assert.Equal(new List<string> { "skill_a" }, loaded.DungeonLearnedSkillIds);
 		Assert.Equal(new List<int> { 1 }, loaded.DungeonLearnedSkillLevels);
+		Assert.Equal("", loaded.BattleReportJson);
 		BuildingSaveEntry building = Assert.Single(loaded.Buildings);
 		Assert.Equal("barracks", building.TypeId);
 		Assert.Equal(4, building.AnchorGridX);
@@ -118,6 +119,7 @@ public class SaveDatabaseTests : IDisposable
 		Assert.Equal(expected.Gold, actual.Gold);
 		Assert.Equal(expected.CurrentNightIndex, actual.CurrentNightIndex);
 		Assert.Equal(expected.PendingReplayReportId, actual.PendingReplayReportId);
+		Assert.Equal(expected.BattleReportJson, actual.BattleReportJson);
 		Assert.Equal(expected.SaveTime, actual.SaveTime);
 		Assert.Equal(expected.RitualStudyCompletionCount, actual.RitualStudyCompletionCount);
 		Assert.Equal(expected.LearnedRitualIds, actual.LearnedRitualIds);
@@ -169,6 +171,7 @@ public class SaveDatabaseTests : IDisposable
 			Gold = 456,
 			CurrentNightIndex = 3,
 			PendingReplayReportId = "report_1",
+			BattleReportJson = "[{\"NightIndex\":1}]",
 			SaveTime = "2099-01-02 03:04:05",
 			RitualStudyCompletionCount = 2,
 			LearnedRitualIds = new List<string> { "ritual_dark", "ritual_fire" },

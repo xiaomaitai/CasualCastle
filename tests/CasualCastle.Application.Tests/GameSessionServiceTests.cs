@@ -1,8 +1,10 @@
 using CasualCastle.Application;
 using CasualCastle.Domain.Building;
+using CasualCastle.Domain.History;
 using CasualCastle.Domain.Shared;
 using Moq;
 using System.Collections.Generic;
+using System.Text.Json;
 using Xunit;
 
 namespace CasualCastle.Application.Tests;
@@ -11,7 +13,12 @@ public class GameSessionServiceTests
 {
 	private static GameSessionService CreateService(RecordingSaveRepository repo, RecordingQuery query, RecordingCommand command, RecordingShop shop, IReadOnlyList<CardData> catalog, Mock<IBuildingRepository> buildingRepo)
 	{
-		GameSessionPorts ports = TestPorts.Create(query, command, shop, new RecordingCapture());
+		return CreateService(repo, query, command, shop, catalog, buildingRepo, new RecordingCapture());
+	}
+
+	private static GameSessionService CreateService(RecordingSaveRepository repo, RecordingQuery query, RecordingCommand command, RecordingShop shop, IReadOnlyList<CardData> catalog, Mock<IBuildingRepository> buildingRepo, RecordingCapture capture)
+	{
+		GameSessionPorts ports = TestPorts.Create(query, command, shop, capture);
 		return new GameSessionService(repo, catalog, buildingRepo.Object, ports);
 	}
 
@@ -62,6 +69,77 @@ public class GameSessionServiceTests
 		Assert.False(card.IsPlaceable);
 		Assert.Equal("dark_book", card.ItemType);
 		Assert.Equal("ritual_fire", card.Attributes["ritual"]);
+		Assert.Equal("", data.BattleReportJson);
+	}
+
+	[Fact]
+	public void SaveGame_ExportsCurrentBattleReportIntoJson()
+	{
+		RecordingCapture capture = new();
+		capture.CurrentSnapshots.Add(new CastleSnapshot
+		{
+			NightIndex = 1,
+			Phase = BattlePhase.Day,
+			Gold = 5,
+			Buildings = new List<BuildingSnapshot> { new() { TypeId = "barracks", AnchorGridX = 1, AnchorGridY = 1, Health = 100 } },
+		});
+		RecordingSaveRepository repo = new();
+		GameSessionService service = CreateService(repo, new RecordingQuery(), new RecordingCommand(), new RecordingShop(), new List<CardData>(), new Mock<IBuildingRepository>(), capture);
+
+		service.SaveGame(0);
+
+		List<CastleSnapshot> roundTripped = JsonSerializer.Deserialize<List<CastleSnapshot>>(repo.LastSaved.BattleReportJson);
+		CastleSnapshot snapshot = Assert.Single(roundTripped);
+		Assert.Equal(1, snapshot.NightIndex);
+		Assert.Equal(BattlePhase.Day, snapshot.Phase);
+		Assert.Equal(5, snapshot.Gold);
+		BuildingSnapshot building = Assert.Single(snapshot.Buildings);
+		Assert.Equal("barracks", building.TypeId);
+	}
+
+	[Fact]
+	public void SaveGame_NoSnapshots_LeavesBattleReportJsonEmpty()
+	{
+		RecordingSaveRepository repo = new();
+		GameSessionService service = CreateService(repo, new RecordingQuery(), new RecordingCommand(), new RecordingShop(), new List<CardData>(), new Mock<IBuildingRepository>());
+
+		service.SaveGame(0);
+
+		Assert.Equal("", repo.LastSaved.BattleReportJson);
+	}
+
+	[Fact]
+	public void RestoreSession_ImportsBattleReportJson()
+	{
+		RecordingCapture capture = new();
+		SaveData data = new()
+		{
+			BattleReportJson = JsonSerializer.Serialize(new List<CastleSnapshot>
+			{
+				new CastleSnapshot { NightIndex = 2, Phase = BattlePhase.Night, Gold = 30 },
+			}),
+		};
+		GameSessionService service = CreateService(new RecordingSaveRepository(), new RecordingQuery(), new RecordingCommand(), new RecordingShop(), new List<CardData>(), new Mock<IBuildingRepository>(), capture);
+
+		service.RestoreSession(data);
+
+		Assert.Equal(1, capture.ImportCalls);
+		CastleSnapshot imported = Assert.Single(capture.CurrentSnapshots);
+		Assert.Equal(2, imported.NightIndex);
+		Assert.Equal(BattlePhase.Night, imported.Phase);
+		Assert.Equal(30, imported.Gold);
+	}
+
+	[Fact]
+	public void RestoreSession_EmptyBattleReportJson_DoesNotImport()
+	{
+		RecordingCapture capture = new();
+		GameSessionService service = CreateService(new RecordingSaveRepository(), new RecordingQuery(), new RecordingCommand(), new RecordingShop(), new List<CardData>(), new Mock<IBuildingRepository>(), capture);
+
+		service.RestoreSession(new SaveData { BattleReportJson = "" });
+
+		Assert.Equal(0, capture.ImportCalls);
+		Assert.Empty(capture.CurrentSnapshots);
 	}
 
 	[Fact]

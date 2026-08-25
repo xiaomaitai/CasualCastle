@@ -4,6 +4,7 @@ using CasualCastle.Domain.History;
 using CasualCastle.Domain.Shared;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CasualCastle.Application.Tests;
 
@@ -181,6 +182,8 @@ internal sealed class RecordingCapture : IBattleReportCapture
 {
 	public string StartedReportId;
 	public List<(List<BuildingSnapshot> Buildings, int Gold, List<CardSnapshot> Hand, int NightIndex, BattlePhase Phase)> Snapshots = new();
+	public List<CastleSnapshot> CurrentSnapshots = new();
+	public int ImportCalls;
 
 	public void StartMatch(string selectedReportId)
 	{
@@ -190,6 +193,25 @@ internal sealed class RecordingCapture : IBattleReportCapture
 	public void CapturePhaseSnapshot(IReadOnlyList<BuildingSnapshot> buildings, int gold, IReadOnlyList<CardSnapshot> handCards, int nightIndex, BattlePhase phase)
 	{
 		Snapshots.Add((new List<BuildingSnapshot>(buildings), gold, new List<CardSnapshot>(handCards), nightIndex, phase));
+		CurrentSnapshots.Add(new CastleSnapshot
+		{
+			NightIndex = nightIndex,
+			Phase = phase,
+			Gold = gold,
+			Buildings = new List<BuildingSnapshot>(buildings),
+			HandCards = new List<CardSnapshot>(handCards),
+		});
+	}
+
+	public IReadOnlyList<CastleSnapshot> ExportCurrentSnapshots()
+	{
+		return CurrentSnapshots.ToList();
+	}
+
+	public void ImportCurrentSnapshots(IReadOnlyList<CastleSnapshot> snapshots)
+	{
+		ImportCalls++;
+		CurrentSnapshots = snapshots.ToList();
 	}
 }
 

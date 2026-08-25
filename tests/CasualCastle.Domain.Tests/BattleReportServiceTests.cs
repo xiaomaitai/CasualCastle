@@ -72,6 +72,44 @@ public class BattleReportServiceTests
 	}
 
 	[Fact]
+	public void ExportCurrentSnapshots_ReturnsClonedNights()
+	{
+		BattleReportService service = CreateService(out FakeReportRepository _);
+		CapturePhase(service, 1, BattlePhase.Day);
+		CapturePhase(service, 2, BattlePhase.Night);
+
+		IReadOnlyList<CastleSnapshot> exported = service.ExportCurrentSnapshots();
+
+		Assert.Equal(2, exported.Count);
+		Assert.Equal(1, exported[0].NightIndex);
+		Assert.Equal(BattlePhase.Day, exported[0].Phase);
+		Assert.Equal(2, exported[1].NightIndex);
+		Assert.Equal(BattlePhase.Night, exported[1].Phase);
+		Assert.True(service.HasCurrentSnapshots);
+	}
+
+	[Fact]
+	public void ImportCurrentSnapshots_RestoresCache()
+	{
+		BattleReportService service = CreateService(out FakeReportRepository _);
+		List<CastleSnapshot> snapshots = new()
+		{
+			new CastleSnapshot { NightIndex = 3, Phase = BattlePhase.Combine },
+			new CastleSnapshot { NightIndex = 4, Phase = BattlePhase.Day },
+		};
+
+		service.ImportCurrentSnapshots(snapshots);
+
+		IReadOnlyList<CastleSnapshot> restored = service.ExportCurrentSnapshots();
+		Assert.Equal(2, restored.Count);
+		Assert.Equal(3, restored[0].NightIndex);
+		Assert.Equal(BattlePhase.Combine, restored[0].Phase);
+		Assert.Equal(4, restored[1].NightIndex);
+		Assert.Equal(BattlePhase.Day, restored[1].Phase);
+		Assert.True(service.HasCurrentSnapshots);
+	}
+
+	[Fact]
 	public void CapturePhaseSnapshot_StoresAllThreePhasesForSameCycle()
 	{
 		BattleReportService service = CreateService(out FakeReportRepository _);

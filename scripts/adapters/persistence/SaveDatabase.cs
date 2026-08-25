@@ -112,6 +112,7 @@ public class SaveDatabase
 		SetMeta(cmd, "gold", data.Gold.ToString());
 		SetMeta(cmd, "current_night_index", data.CurrentNightIndex.ToString());
 		SetMeta(cmd, "pending_replay_report_id", data.PendingReplayReportId);
+		SetMeta(cmd, "battle_report_json", data.BattleReportJson);
 		SetMeta(cmd, "save_time", ResolveSaveTime(data.SaveTime));
 		SetMeta(cmd, "ritual_study_completion_count", data.RitualStudyCompletionCount.ToString());
 		SetMeta(cmd, "learned_rituals", string.Join(",", data.LearnedRitualIds));
@@ -146,6 +147,7 @@ public class SaveDatabase
 		data.Gold = int.Parse(GetMeta(cmd, "gold", "0"));
 		data.CurrentNightIndex = int.Parse(GetMeta(cmd, "current_night_index", "0"));
 		data.PendingReplayReportId = GetMeta(cmd, "pending_replay_report_id", "");
+		data.BattleReportJson = GetMeta(cmd, "battle_report_json", "");
 		data.SaveTime = GetMeta(cmd, "save_time", "");
 		data.RitualStudyCompletionCount = int.Parse(GetMeta(cmd, "ritual_study_completion_count", "0"));
 		AddSplit(data.LearnedRitualIds, GetMeta(cmd, "learned_rituals", ""));
