@@ -66,6 +66,11 @@ custom_minimum_size = Vector2(240, 44)
 layout_mode = 2
 text = "护甲矩阵编辑器"
 
+[node name="ParameterEditorButton" type="Button" parent="Panel/ToolList"]
+custom_minimum_size = Vector2(240, 44)
+layout_mode = 2
+text = "参数编辑器"
+
 [node name="TechTreeButton" type="Button" parent="Panel/ToolList"]
 custom_minimum_size = Vector2(240, 44)
 layout_mode = 2

@@ -14,8 +14,8 @@ public class MatchPhaseMachine
 {
 	public MatchPhase CurrentPhase { get; private set; } = MatchPhase.Combat;
 	public int NightIndex { get; private set; }
-	public float PhaseTimeRemaining { get; private set; } = GameRules.CombatDurationSeconds;
-	public float HoldRemaining { get; private set; } = GameRules.CombatStartTimerHoldSeconds;
+	public float PhaseTimeRemaining { get; private set; } = GameParameters.CombatDurationSeconds;
+	public float HoldRemaining { get; private set; } = GameParameters.CombatStartTimerHoldSeconds;
 
 	public event Action<MatchPhase, MatchPhase> PhaseChanged;
 
@@ -74,11 +74,11 @@ public class MatchPhaseMachine
 	private void ApplyPhaseTimers(MatchPhase phase)
 	{
 		if (phase == MatchPhase.Combine)
-			PhaseTimeRemaining = GameRules.CombineDurationSeconds;
+			PhaseTimeRemaining = GameParameters.CombineDurationSeconds;
 		else if (phase == MatchPhase.Combat)
-			PhaseTimeRemaining = GameRules.CombatDurationSeconds;
+			PhaseTimeRemaining = GameParameters.CombatDurationSeconds;
 		else
 			PhaseTimeRemaining = 0f;
-		HoldRemaining = phase == MatchPhase.Combat ? GameRules.CombatStartTimerHoldSeconds : 0f;
+		HoldRemaining = phase == MatchPhase.Combat ? GameParameters.CombatStartTimerHoldSeconds : 0f;
 	}
 }

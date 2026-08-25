@@ -93,7 +93,7 @@
 
 | 目录 | 职责 | 关键文件 |
 |---|---|---|
-| `domain/Shared/` | 坐标、常量、阶段状态机、存档模型、BGM 目录与选择规则 | `GameVector2.cs`、`GameCoordinateRules.cs`、`GameRules.cs`、`BuildingTypeIds.cs`、`FactionIds.cs`、`MatchPhaseMachine.cs`、`SaveModels.cs`、`IVisualAssetRepository.cs`、`BgmDef.cs`、`BgmSelectionRules.cs` |
+| `domain/Shared/` | 坐标、常量、阶段状态机、存档模型、BGM 目录与选择规则 | `GameVector2.cs`、`GameCoordinateRules.cs`、`GameRules.cs`、`GameParameters.cs`、`BuildingTypeIds.cs`、`FactionIds.cs`、`MatchPhaseMachine.cs`、`SaveModels.cs`、`IVisualAssetRepository.cs`、`BgmDef.cs`、`BgmSelectionRules.cs` |
 | `domain/Building/` | 建筑、卡牌、手牌、商店、组合、升级、仪式、邻接、科技树 | `BuildingData.cs`、`OccupancyGrid.cs`、`BuildingCellOccupancy.cs`、`CardRules.cs`、`Hand.cs`、`ShopRules.cs`、`CombineService.cs`、`UpgradeService.cs`、`RitualService.cs`、`AdjacencyService.cs`、`IBuildingVisualRepository.cs`、`BuildingVisualData.cs`、`TechTreeNode.cs` |
 | `domain/Battle/` | 战斗、单位、技能、光环、隐身、尸体、流场寻路、黑魔法 | `CombatRules.cs`、`Unit.cs`、`UnitState.cs`、`UnitStats.cs`、`SkillService.cs`、`AuraService.cs`、`StealthService.cs`、`CorpseService.cs`、`FlowFieldService.cs`、`NavigationService.cs`、`BlackMagicService.cs` |
 | `domain/History/` | 战报、回放、镜像复刻 | `BattleReportService.cs`、`ReportBuilder.cs`、`ReplayService.cs`、`MirrorRules.cs`、`IHistoryCoreLookup.cs` |
@@ -122,7 +122,7 @@
 | `flow/` | 场景流程与会话桥接 | `TitleScreen.cs`、`MainGameController.cs`、`GameSessionBridge.cs`、`CameraController.cs` |
 | `core/` | 战场尺寸换算 | `BattlefieldMetrics.cs` |
 | `audio/` | 音频总线、BGM/SFX | `AudioManager.cs`、`Sfx.cs`、`SfxEvents.cs`、`UiSfx.cs` |
-| `dev/` | 开发者工具与冒烟（不走单测） | `DevToolsMenu.cs`、`TechTreeEditorController.cs`、`DamageMatrixEditor.cs`、`SmokeTestBase.cs`、`AudioSmoke.cs`、`UiSmoke.cs`、`AllianceBattleSmoke.cs`、`HordeBattleSmoke.cs`、`NecromancerSmoke.cs`、`NecromancerBattleSmoke.cs`、`BuildingActionRingSmoke.cs`、`DungeonSmoke.cs`、`RuntimeInfoPanelController.cs` |
+| `dev/` | 开发者工具与冒烟（不走单测） | `DevToolsMenu.cs`、`TechTreeEditorController.cs`、`DamageMatrixEditor.cs`、`ParameterEditor.cs`、`SmokeTestBase.cs`、`AudioSmoke.cs`、`UiSmoke.cs`、`AllianceBattleSmoke.cs`、`HordeBattleSmoke.cs`、`NecromancerSmoke.cs`、`NecromancerBattleSmoke.cs`、`BuildingActionRingSmoke.cs`、`DungeonSmoke.cs`、`RuntimeInfoPanelController.cs` |
 | `cheat/` | 作弊状态 | `CheatState.cs` |
 
 ### 2.3 adapters/persistence — 存储
@@ -162,7 +162,7 @@
 | `scenes/main/main_game.tscn` | 主战场场景，系统挂载点 |
 | `scenes/ui/settings_panel.tscn` | 设置面板 |
 | `scenes/dev/tech_tree_editor.tscn` | 科技树编辑器 |
-| `scenes/ui/dev_tools/*.tscn` | 开发者工具与冒烟场景（audio_smoke、ui_smoke、dungeon_smoke、damage_matrix_editor、dev_tools_menu、runtime_info_panel、necromancer_smoke、necromancer_battle_smoke、alliance_battle_smoke、horde_battle_smoke、building_action_ring_smoke、phase_cycle_probe 等），冒烟一律经 `tools/run_smoke.sh` 运行 |
+| `scenes/ui/dev_tools/*.tscn` | 开发者工具与冒烟场景（audio_smoke、ui_smoke、dungeon_smoke、damage_matrix_editor、parameter_editor、dev_tools_menu、runtime_info_panel、necromancer_smoke、necromancer_battle_smoke、alliance_battle_smoke、horde_battle_smoke、building_action_ring_smoke、phase_cycle_probe 等），冒烟一律经 `tools/run_smoke.sh` 运行 |
 | `prefabs/Building.tscn`、`Castle.tscn`、`Unit.tscn`、`UnitCard.tscn`、`HealthBar.tscn`、`CardArt.tscn` | 动态实体预制体 |
 
 ## 4. 素材与数据（assets/）

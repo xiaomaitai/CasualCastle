@@ -18,6 +18,14 @@
 
 左侧编辑着色器代码，右侧实时预览，F5 编译，自动注入 time/resolution/mouse 三个 uniform。
 
+## 参数编辑器
+
+从标题界面"开发者工具"菜单进入。集中展示全局参数并按业务模块分组（经济、战斗、显示/像素换算），支持运行时热修改：修改输入框即时生效、无需重新编译；"重置"恢复单个参数默认值，"全部重置"恢复所有参数。
+
+- 可编辑来源：domain 层 `GameParameters`（默认值取自 `GameRules` 常量，热修改供 `Shop`/`MatchPhaseMachine` 等消费）与 adapter 层 `GameCoordinatesAdapter.PixelsPerCell`
+- 当前参数：每局初始金币、修理每点生命花费、战斗/合成阶段时长、战斗开始等待、每格像素
+- 不持久化：每次启动回到 `GameRules` 默认值；跨启动保留自定义参数待后续按需实现
+
 ## 按键日志
 
 开发模式下打印所有按键的 Keycode、Physical、Unicode、修饰键到控制台。

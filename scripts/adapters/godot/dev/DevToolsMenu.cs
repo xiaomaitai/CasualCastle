@@ -10,6 +10,7 @@ public sealed class DevToolsMenu
 	private readonly Control _root;
 	private readonly Button _backButton;
 	private readonly Button _damageMatrixButton;
+	private readonly Button _parameterEditorButton;
 	private readonly Button _techTreeButton;
 
 	public DevToolsMenu(Control root)
@@ -18,10 +19,12 @@ public sealed class DevToolsMenu
 		VBoxContainer list = root.GetNode<VBoxContainer>("Panel/ToolList");
 		_backButton = root.GetNode<Button>("Panel/BackButton");
 		_damageMatrixButton = list.GetNode<Button>("DamageMatrixButton");
+		_parameterEditorButton = list.GetNode<Button>("ParameterEditorButton");
 		_techTreeButton = list.GetNode<Button>("TechTreeButton");
 
 		_backButton.Pressed += OnBackPressed;
 		_damageMatrixButton.Pressed += OnDamageMatrixPressed;
+		_parameterEditorButton.Pressed += OnParameterEditorPressed;
 		_techTreeButton.Pressed += OnTechTreePressed;
 	}
 
@@ -31,6 +34,8 @@ public sealed class DevToolsMenu
 			_backButton.Pressed -= OnBackPressed;
 		if (GodotObject.IsInstanceValid(_damageMatrixButton))
 			_damageMatrixButton.Pressed -= OnDamageMatrixPressed;
+		if (GodotObject.IsInstanceValid(_parameterEditorButton))
+			_parameterEditorButton.Pressed -= OnParameterEditorPressed;
 		if (GodotObject.IsInstanceValid(_techTreeButton))
 			_techTreeButton.Pressed -= OnTechTreePressed;
 	}
@@ -43,6 +48,11 @@ public sealed class DevToolsMenu
 	private void OnDamageMatrixPressed()
 	{
 		_root.GetTree().ChangeSceneToFile("res://scenes/ui/dev_tools/damage_matrix_editor.tscn");
+	}
+
+	private void OnParameterEditorPressed()
+	{
+		_root.GetTree().ChangeSceneToFile("res://scenes/ui/dev_tools/parameter_editor.tscn");
 	}
 
 	private void OnTechTreePressed()

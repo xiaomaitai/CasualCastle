@@ -362,7 +362,7 @@ public partial class Building : Area2D
 		RefreshOperationalState();
 	}
 
-	public int GetRepairCost() => RepairRules.GetRepairCost(MaxHealth, Health, GameRules.RepairGoldPerHealth);
+	public int GetRepairCost() => RepairRules.GetRepairCost(MaxHealth, Health, GameParameters.RepairGoldPerHealth);
 
 	public bool CanWork
 	{

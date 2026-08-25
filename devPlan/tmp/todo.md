@@ -51,15 +51,9 @@
 | 抽帧/精修 | 无 |  |
 | Godot 导入 | godot-import skill、tools/godot_import.py |  |
 
-## 参数编辑器（开发者模式 · 主菜单）
+## 参数编辑器持久化（可选）
 
-主菜单"开发者工具"下新增参数编辑器：把选中的全局参数集中到一处统一修改，支持运行时热修改。
-
-- 覆盖参数示例：每局初始金钱、每回合获得金钱、每游戏单位对应像素（PixelsPerCell）等全局信息
-- 按业务模块分类展示（经济、战斗、显示/像素换算等），纳入参数列表由用户选定
-- 运行时热修改即时生效；是否持久化由用户选择
-- 代码位置：场景 `scenes/ui/dev_tools/`，逻辑 `scripts/adapters/godot/dev/`（开发者工具不走单测）
-- 前置：部分参数当前散落在 domain 常量（GameRules、GameCoordinateRules）与 adapter（GameCoordinatesAdapter）中，需先整理出可编辑来源
+参数编辑器主体已交付（见 `devPlan/design/devTools.md`）：全局参数集中展示、运行时热修改、单参数/全部重置。当前为内存热修改、每次启动回到 `GameRules` 默认值；如需跨启动保留自定义参数，再实现持久化（如 `user://` 配置文件 + 启动加载）。
 
 ## 生图/视频工作流双源（可替换）
 

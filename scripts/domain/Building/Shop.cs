@@ -27,7 +27,7 @@ public class Shop
 		_hand = handService;
 		_shopRules = shopRules;
 		_player = player;
-		_player.Gold = GameRules.InitialGold;
+		_player.Gold = GameParameters.InitialGold;
 		RefreshOffers();
 		GoldChanged?.Invoke(_player.Gold);
 		SetShopAvailable(true);
