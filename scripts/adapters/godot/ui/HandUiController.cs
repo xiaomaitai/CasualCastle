@@ -333,8 +333,8 @@ public partial class HandUiController : Control
 
 	private static string BuildHandCardTooltip(CardData card)
 	{
-		if (card.ItemType == ShopItemTypes.DungeonCrystal)
-			return "经验魔晶：立即为魔王注入经验";
+		if (CardTooltipBuilder.IsItemCard(card))
+			return CardTooltipBuilder.BuildItemTooltip(card);
 		string unitTypeId = GameManager.Get<IBuildingRepository>().GetUnitTypeId(card.BuildingType);
 		if (string.IsNullOrEmpty(unitTypeId))
 			return $"{card.Name}：不产出单位";

@@ -389,6 +389,8 @@ public partial class ShopUiController : Control
 
 	private string BuildOfferTooltip(CardData offer)
 	{
+		if (CardTooltipBuilder.IsItemCard(offer))
+			return CardTooltipBuilder.BuildItemTooltip(offer);
 		string unitTypeId = GameManager.Get<IBuildingRepository>().GetUnitTypeId(offer.BuildingType);
 		if (string.IsNullOrEmpty(unitTypeId))
 			return $"{offer.Name}：不产出单位";
