@@ -55,11 +55,6 @@ public partial class BattleReportSystem : Node, IBattleReportCapture
 		return _service.SaveCurrentReport("", DateTimeOffset.Now.ToString("yyyy-MM-dd HH:mm"), GetCurrentFactionId());
 	}
 
-	public BattleReport SaveCurrentReportDaily()
-	{
-		return _service.SaveCurrentReportDaily(DateTimeOffset.Now.ToString("yyyy-MM-dd HH:mm"), GetCurrentFactionId());
-	}
-
 	private static string GetCurrentFactionId()
 	{
 		return AdapterRegistry.Resolve<GameManager>()?.SelectedFaction ?? FactionIds.Alliance;

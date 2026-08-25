@@ -1,6 +1,5 @@
 // 战报服务：快照记录与战报保存
 using CasualCastle.Domain.Shared;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -13,7 +12,6 @@ public class BattleReportService
 	private readonly List<BattleReport> _savedReports = new();
 	private BattleReport _currentReport = new();
 	private string _selectedReportId = "";
-	private string _inProgressReportId = "";
 
 	public IReadOnlyList<BattleReport> SavedReports => _savedReports;
 	public bool HasCurrentSnapshots => _currentReport.Nights.Count > 0;
@@ -30,7 +28,6 @@ public class BattleReportService
 	{
 		_selectedReportId = selectedReportId ?? "";
 		_currentReport = new BattleReport();
-		_inProgressReportId = "";
 	}
 
 	public void CapturePhaseSnapshot(
@@ -54,42 +51,12 @@ public class BattleReportService
 
 	public void DiscardCurrentReport()
 	{
-		if (!string.IsNullOrEmpty(_inProgressReportId))
-		{
-			_savedReports.RemoveAll(r => r.ReportId == _inProgressReportId);
-			_inProgressReportId = "";
-			_repository.SaveAll(_savedReports);
-		}
-
 		_currentReport = new BattleReport();
 	}
 
 	public void ClearCurrentCache()
 	{
 		_currentReport = new BattleReport();
-	}
-
-	public BattleReport SaveCurrentReportDaily(string displayName, string factionId)
-	{
-		if (_currentReport.Nights.Count == 0)
-			return null;
-
-		BattleReport report = _savedReports.FirstOrDefault(r => r.ReportId == _inProgressReportId);
-		if (report == null)
-		{
-			report = ReportBuilder.CreateReport(_currentReport.Nights, displayName, factionId);
-			_inProgressReportId = report.ReportId;
-			_savedReports.Add(report);
-		}
-		else
-		{
-			report.SavedAtUnix = DateTimeOffset.Now.ToUnixTimeSeconds();
-			report.Nights = _currentReport.Nights.Select(ReportBuilder.CloneSnapshot).ToList();
-			report.FactionId = factionId;
-		}
-
-		PersistSavedReports();
-		return report;
 	}
 
 	public BattleReport SaveCurrentReport(string displayName, string defaultName, string factionId)
@@ -99,24 +66,10 @@ public class BattleReportService
 
 		string name = string.IsNullOrWhiteSpace(displayName) ? defaultName : displayName;
 		BattleReport toSave = ReportBuilder.CreateReport(_currentReport.Nights, name, factionId);
-
-		BattleReport existing = _savedReports.FirstOrDefault(r => r.ReportId == _inProgressReportId);
-		if (existing == null)
-		{
-			_savedReports.Add(toSave);
-		}
-		else
-		{
-			existing.DisplayName = toSave.DisplayName;
-			existing.SavedAtUnix = toSave.SavedAtUnix;
-			existing.Nights = toSave.Nights;
-			existing.FactionId = toSave.FactionId;
-		}
-
-		_inProgressReportId = "";
+		_savedReports.Add(toSave);
 		_currentReport = new BattleReport();
 		PersistSavedReports();
-		return existing ?? toSave;
+		return toSave;
 	}
 
 	private void PersistSavedReports()

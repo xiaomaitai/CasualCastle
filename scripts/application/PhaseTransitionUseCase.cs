@@ -70,10 +70,7 @@ public class PhaseTransitionUseCase
 			if (enemyTarget != null)
 				_nightCombine.ApplyReplaySnapshot(enemyTarget, query.CurrentNightIndex + 1, BattlePhase.Day, _ports.Command.RefreshEnemyAdjacency);
 			if (query.CurrentNightIndex >= 1)
-			{
 				_session.SaveGame(0);
-				_ports.BattleReportCapture.SaveCurrentReportDaily();
-			}
 		}
 	}
 }

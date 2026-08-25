@@ -41,7 +41,7 @@ public class PhaseTransitionUseCaseTests
 	}
 
 	[Fact]
-	public void SamePhaseStart_DoesNotCaptureSnapshotOrAutosave()
+	public void SamePhaseStart_DoesNotCaptureSnapshotOrSaveGame()
 	{
 		RecordingQuery query = new() { CurrentNightIndex = 0 };
 		RecordingCapture capture = new();
@@ -55,7 +55,6 @@ public class PhaseTransitionUseCaseTests
 		useCase.Handle(MatchPhase.Combat, MatchPhase.Combat, target);
 
 		Assert.Empty(capture.Snapshots);
-		Assert.Equal(0, capture.DailyCalls);
 		Assert.True(shop.Available);
 		replay.Verify(r => r.ApplyNightSnapshot(target, 1, BattlePhase.Day), Times.Once);
 	}
@@ -80,7 +79,7 @@ public class PhaseTransitionUseCaseTests
 	}
 
 	[Fact]
-	public void CombineToCombat_CapturesCombineAppliesReplayAndAutosaves()
+	public void CombineToCombat_CapturesCombineAppliesReplayAndSavesGame()
 	{
 		RecordingQuery query = new() { CurrentNightIndex = 2 };
 		RecordingCapture capture = new();
@@ -97,11 +96,10 @@ public class PhaseTransitionUseCaseTests
 		Assert.Equal(BattlePhase.Combine, capture.Snapshots[0].Phase);
 		replay.Verify(r => r.ApplyNightSnapshot(target, 3, BattlePhase.Day), Times.Once);
 		session.Verify(s => s.SaveGame(0), Times.Once);
-		Assert.Equal(1, capture.DailyCalls);
 	}
 
 	[Fact]
-	public void CombineToCombat_NightZero_DoesNotAutosave()
+	public void CombineToCombat_NightZero_DoesNotSaveGame()
 	{
 		RecordingQuery query = new() { CurrentNightIndex = 0 };
 		RecordingCapture capture = new();
@@ -114,6 +112,5 @@ public class PhaseTransitionUseCaseTests
 		useCase.Handle(MatchPhase.Combine, MatchPhase.Combat, null);
 
 		session.Verify(s => s.SaveGame(It.IsAny<int>()), Times.Never);
-		Assert.Equal(0, capture.DailyCalls);
 	}
 }

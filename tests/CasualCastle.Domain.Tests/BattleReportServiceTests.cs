@@ -10,81 +10,32 @@ namespace CasualCastle.Domain.Tests;
 public class BattleReportServiceTests
 {
 	[Fact]
-	public void SaveCurrentReportDaily_FirstCall_CreatesSingleSavedReport()
+	public void CapturingSnapshots_NeverPersistsUntilExplicitSave_RealBug_AutosavedWithoutAsking()
 	{
 		BattleReportService service = CreateService(out FakeReportRepository repository);
-		CapturePhase(service, 1, BattlePhase.Day);
-
-		BattleReport saved = service.SaveCurrentReportDaily("progress name", "alliance");
-
-		Assert.Single(repository.Reports);
-		Assert.Same(saved, repository.Reports[0]);
-		Assert.True(service.HasCurrentSnapshots);
-		Assert.Equal("alliance", saved.FactionId);
-		Assert.Single(saved.Nights);
-		Assert.Equal(1, saved.Nights[0].NightIndex);
-		Assert.Equal(BattlePhase.Day, saved.Nights[0].Phase);
-	}
-
-	[Fact]
-	public void SaveCurrentReportDaily_SecondCall_UpdatesSameReport()
-	{
-		BattleReportService service = CreateService(out FakeReportRepository repository);
+		service.StartMatch("");
 		CapturePhase(service, 1, BattlePhase.Day);
 		CapturePhase(service, 1, BattlePhase.Night);
-		BattleReport first = service.SaveCurrentReportDaily("progress name", "alliance");
 		CapturePhase(service, 2, BattlePhase.Day);
 
-		BattleReport second = service.SaveCurrentReportDaily("progress name", "alliance");
-
-		Assert.Single(repository.Reports);
-		Assert.Equal(first.ReportId, second.ReportId);
-		Assert.Equal(3, second.Nights.Count);
+		Assert.Empty(repository.Reports);
 		Assert.True(service.HasCurrentSnapshots);
 	}
 
 	[Fact]
-	public void SaveCurrentReportDaily_NoSnapshots_ReturnsNullAndSavesNothing()
+	public void SaveCurrentReport_NeverWritesWithoutExplicitCall_RealBug_AutosavedWithoutAsking()
 	{
 		BattleReportService service = CreateService(out FakeReportRepository repository);
+		CapturePhase(service, 1, BattlePhase.Day);
 
-		BattleReport saved = service.SaveCurrentReportDaily("progress name", "alliance");
+		service.DiscardCurrentReport();
 
-		Assert.Null(saved);
 		Assert.Empty(repository.Reports);
-	}
-
-	[Fact]
-	public void SaveCurrentReportDaily_DoesNotChangeSelectedReport()
-	{
-		BattleReportService service = CreateService(out FakeReportRepository _);
-		service.StartMatch("reference-report");
-		CapturePhase(service, 1, BattlePhase.Day);
-
-		service.SaveCurrentReportDaily("progress name", "alliance");
-
-		Assert.Equal("reference-report", service.SelectedReportId);
-	}
-
-	[Fact]
-	public void SaveCurrentReport_AfterDailySave_FinalizesSameReport()
-	{
-		BattleReportService service = CreateService(out FakeReportRepository repository);
-		CapturePhase(service, 1, BattlePhase.Day);
-		CapturePhase(service, 1, BattlePhase.Night);
-		service.SaveCurrentReportDaily("progress name", "alliance");
-		CapturePhase(service, 1, BattlePhase.Combine);
-
-		BattleReport saved = service.SaveCurrentReport("", "final name", "alliance");
-
-		Assert.Single(repository.Reports);
-		Assert.Equal("final name", saved.DisplayName);
-		Assert.Equal(3, saved.Nights.Count);
 		Assert.False(service.HasCurrentSnapshots);
 	}
 
 	[Fact]
-	public void SaveCurrentReport_WithoutDailySave_CreatesSingleReport()
+	public void SaveCurrentReport_CreatesSingleReport()
 	{
 		BattleReportService service = CreateService(out FakeReportRepository repository);
 		CapturePhase(service, 1, BattlePhase.Night);
@@ -93,6 +44,7 @@ public class BattleReportServiceTests
 
 		Assert.Single(repository.Reports);
 		Assert.Same(saved, repository.Reports[0]);
+		Assert.False(service.HasCurrentSnapshots);
 	}
 
 	[Fact]
@@ -108,11 +60,10 @@ public class BattleReportServiceTests
 	}
 
 	[Fact]
-	public void DiscardCurrentReport_RemovesDailySavedReportAndClearsCache()
+	public void DiscardCurrentReport_ClearsCacheWithoutPersisting()
 	{
 		BattleReportService service = CreateService(out FakeReportRepository repository);
 		CapturePhase(service, 1, BattlePhase.Day);
-		service.SaveCurrentReportDaily("progress name", "alliance");
 
 		service.DiscardCurrentReport();
 
@@ -129,7 +80,7 @@ public class BattleReportServiceTests
 		CapturePhase(service, 1, BattlePhase.Night);
 		CapturePhase(service, 1, BattlePhase.Combine);
 
-		BattleReport saved = service.SaveCurrentReportDaily("report name", "alliance");
+		BattleReport saved = service.SaveCurrentReport("", "report name", "alliance");
 
 		Assert.Equal(3, saved.Nights.Count);
 		Assert.All(saved.Nights, s => Assert.Equal(1, s.NightIndex));
@@ -146,7 +97,7 @@ public class BattleReportServiceTests
 		CapturePhase(service, 1, BattlePhase.Night);
 		CapturePhase(service, 1, BattlePhase.Day);
 
-		BattleReport saved = service.SaveCurrentReportDaily("report name", "alliance");
+		BattleReport saved = service.SaveCurrentReport("", "report name", "alliance");
 
 		Assert.Equal(2, saved.Nights.Count);
 	}
@@ -166,7 +117,7 @@ public class BattleReportServiceTests
 			new BuildingSnapshot { TypeId = "Barracks", AnchorGridX = 1, AnchorGridY = 1, Health = 100 },
 		}, 1, BattlePhase.Day, 25, cards);
 
-		BattleReport saved = service.SaveCurrentReportDaily("report name", "alliance");
+		BattleReport saved = service.SaveCurrentReport("", "report name", "alliance");
 
 		Assert.Equal(25, saved.Nights[0].Gold);
 		CardSnapshot card = Assert.Single(saved.Nights[0].HandCards);
@@ -183,7 +134,7 @@ public class BattleReportServiceTests
 		CapturePhase(service, 1, BattlePhase.Night);
 		CapturePhase(service, 1, BattlePhase.Combine);
 		CapturePhase(service, 2, BattlePhase.Day);
-		BattleReport saved = service.SaveCurrentReportDaily("report name", "alliance");
+		BattleReport saved = service.SaveCurrentReport("", "report name", "alliance");
 
 		service.StartMatch(saved.ReportId);
 

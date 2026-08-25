@@ -181,7 +181,6 @@ internal sealed class RecordingCapture : IBattleReportCapture
 {
 	public string StartedReportId;
 	public List<(List<BuildingSnapshot> Buildings, int Gold, List<CardSnapshot> Hand, int NightIndex, BattlePhase Phase)> Snapshots = new();
-	public int DailyCalls;
 
 	public void StartMatch(string selectedReportId)
 	{
@@ -191,12 +190,6 @@ internal sealed class RecordingCapture : IBattleReportCapture
 	public void CapturePhaseSnapshot(IReadOnlyList<BuildingSnapshot> buildings, int gold, IReadOnlyList<CardSnapshot> handCards, int nightIndex, BattlePhase phase)
 	{
 		Snapshots.Add((new List<BuildingSnapshot>(buildings), gold, new List<CardSnapshot>(handCards), nightIndex, phase));
-	}
-
-	public BattleReport SaveCurrentReportDaily()
-	{
-		DailyCalls++;
-		return null;
 	}
 }
 
