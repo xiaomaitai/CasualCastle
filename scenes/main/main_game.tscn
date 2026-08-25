@@ -28,9 +28,6 @@
 [node name="MainGame" type="Node2D" unique_id=1]
 script = ExtResource("10")
 
-[node name="NightTint" type="CanvasModulate" parent="."]
-color = Color(1, 1, 1, 1)
-
 [node name="DevInputLogger" type="Node" parent="."]
 script = ExtResource("6")
 
@@ -42,6 +39,9 @@ script = ExtResource("4")
 
 [node name="Battlefield" type="Node2D" parent="." unique_id=2]
 y_sort_enabled = true
+
+[node name="NightTint" type="CanvasModulate" parent="Battlefield"]
+color = Color(1, 1, 1, 1)
 
 [node name="Camera2D" type="Camera2D" parent="Battlefield"]
 position = Vector2(960, 1610)
