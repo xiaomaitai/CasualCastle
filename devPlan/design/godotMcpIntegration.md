@@ -23,24 +23,28 @@
 | 场景操作 | `create_scene` / `add_node` / `load_sprite` / `save_scene` | 经 `--headless --script godot_operations.gd` 无头操作场景文件 |
 | 网格/UID | `export_mesh_library` / `get_uid` / `update_project_uids` | MeshLibrary 导出、UID 查询与重存（Godot 4.4+） |
 
-## 3. DSH 接入方式
+## 3. DSH 接入方式（用户级配置，无需管理员）
 
-DSH **内置** MCP 客户端桥接插件 `@deepseek-ai/dsh-mcp-client`（`@deepseek-ai/dsh` 的正式依赖，stdio / streamable-http 两种传输）。每个 MCP server 一个插件实例，配置在 cordis 配置（Desktop 版为安装目录 `resources/app.asar.unpacked/cordis.patch.yml` 的 `- insert:` 段），工具以 `mcp__<serverName>__<rawName>` 形式注册为原生工具（与 Claude Code / Codex 命名一致）。
+DSH **内置** MCP 客户端桥接插件 `@deepseek-ai/dsh-mcp-client`（`@deepseek-ai/dsh` 的正式依赖，stdio / streamable-http 两种传输）。工具以 `mcp__<serverName>__<rawName>` 形式注册为原生工具（与 Claude Code / Codex 命名一致）。
+
+接入点在 **home 级用户补丁层 `$DSH_HOME/cordis.patch.yml`**（即 `~/.dsh/cordis.patch.yml`，叠加在所有 profile 之上，无需管理员权限、不碰安装目录）。已写入：
 
 ```yaml
-# cordis.patch.yml（Program Files）追加到 insert 列表：
-- id: mcp-godot
-  name: '@deepseek-ai/dsh-mcp-client'
-  config:
-    serverName: godot
-    transport: stdio
-    command: node
-    args: ['<path-to>/godot-mcp/build/index.js']
-    env:
-      GODOT_PATH: 'C:\Program Files (x86)\Godot_v4.6.2-stable_mono_win64\Godot_v4.6.2-stable_mono_win64_console.exe'
+- insert:
+    - id: mcp-godot
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: godot
+        transport: stdio
+        command: node
+        args: ['C:/Users/zhouy/.dsh/mcp-servers/godot-mcp/build/index.js']
+        env:
+          GODOT_PATH: 'C:\Program Files (x86)\Godot_v4.6.2-stable_mono_win64\Godot_v4.6.2-stable_mono_win64_console.exe'
 ```
 
-**生效条件**：修改后需**重启 DSH Desktop**（HMR 对配置变更热重连，但 Host 重启最稳）。重启会中断当前会话，属破坏性操作——是否立即启用由用户决定。
+已用 `dsh --profile web --dump-config` 验证：合成配置树含 `mcp-godot` 实例（serverName/stdio/路径/env 正确）。
+
+**生效条件**：重启 DSH Desktop（启动时加载补丁栈）。重启会中断当前会话，会话可恢复。
 
 ## 4. 冒烟测试能否改用 MCP 简化 —— 结论：不能替代，保留 `run_smoke.sh`
 
@@ -63,5 +67,6 @@ DSH **内置** MCP 客户端桥接插件 `@deepseek-ai/dsh-mcp-client`（`@deeps
 
 - ✅ 选型 + 兼容性验证（本机 Godot 4.6.2 mono）
 - ✅ 冒烟简化评估（结论：不替代）
-- ✅ 部署 godot-mcp 至 `~/.dsh/mcp-servers/godot-mcp`（稳定路径，14 工具实测可用）；启用脚本 `~/.dsh/enable-godot-mcp.ps1`（自提升 UAC：备份 + 插入 `cordis.patch.yml`）
-- ⏳ **激活**：用户以管理员运行上述脚本 + 重启 DSH Desktop → 工具以 `mcp__godot__*` 生效
+- ✅ 部署 godot-mcp 至 `~/.dsh/mcp-servers/godot-mcp`（稳定路径，14 工具实测可用）
+- ✅ 用户级接入：`~/.dsh/cordis.patch.yml` 已写入 `mcp-godot` 实例，`dsh --dump-config` 验证合成正确（无需管理员）
+- ⏳ **激活**：重启 DSH Desktop → 工具以 `mcp__godot__*` 生效，重启后验证
