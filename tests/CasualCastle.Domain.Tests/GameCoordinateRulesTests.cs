@@ -1,3 +1,4 @@
+using CasualCastle.Domain.Battle;
 using CasualCastle.Domain.Shared;
 using Xunit;
 
@@ -67,17 +68,17 @@ public class GameCoordinateRulesTests
 	}
 
 	[Fact]
-	public void GetBuildingCollisionSize_SingleCell_ReturnsBlockSize()
+	public void GetBuildingCollisionSize_SingleCell_ClampsToMinimum()
 	{
 		GridCellOffset[] footprint = new[] { new GridCellOffset(0, 0) };
 		GameVector2 size = GameCoordinateRules.GetBuildingCollisionSize(footprint);
 
-		Assert.Equal(GameCoordinateRules.CellBlockSize, size.X);
-		Assert.Equal(GameCoordinateRules.CellBlockSize, size.Y);
+		Assert.Equal(GameCoordinateRules.MinBuildingCollisionSize, size.X);
+		Assert.Equal(GameCoordinateRules.MinBuildingCollisionSize, size.Y);
 	}
 
 	[Fact]
-	public void GetBuildingCollisionSize_MultiCell_ScalesWithFootprint()
+	public void GetBuildingCollisionSize_MultiCell_LeavesCorridorGap()
 	{
 		GridCellOffset[] footprint = new[]
 		{
@@ -88,8 +89,8 @@ public class GameCoordinateRulesTests
 		};
 		GameVector2 size = GameCoordinateRules.GetBuildingCollisionSize(footprint);
 
-		Assert.Equal(2 * GameCoordinateRules.UnitsPerCell - GameCoordinateRules.CellGapSize, size.X);
-		Assert.Equal(2 * GameCoordinateRules.UnitsPerCell - GameCoordinateRules.CellGapSize, size.Y);
+		Assert.Equal(2 * GameCoordinateRules.UnitsPerCell - GameCoordinateRules.BuildingCorridorGap, size.X);
+		Assert.Equal(2 * GameCoordinateRules.UnitsPerCell - GameCoordinateRules.BuildingCorridorGap, size.Y);
 	}
 
 	[Fact]
@@ -104,7 +105,50 @@ public class GameCoordinateRulesTests
 		};
 		GameVector2 size = GameCoordinateRules.GetBuildingCollisionSize(footprint);
 
+		Assert.Equal(2 * GameCoordinateRules.UnitsPerCell - GameCoordinateRules.BuildingCorridorGap, size.X);
+		Assert.Equal(3 * GameCoordinateRules.UnitsPerCell - GameCoordinateRules.BuildingCorridorGap, size.Y);
+	}
+
+	[Fact]
+	public void GetBuildingCollisionSize_AdjacentCorridorExceedsLargestUnitDiameter()
+	{
+		Assert.True(GameCoordinateRules.BuildingCorridorGap > 2 * UnitStats.HugeCollisionRadius);
+
+		GridCellOffset[] footprint = new[]
+		{
+			new GridCellOffset(0, 0),
+			new GridCellOffset(1, 0),
+			new GridCellOffset(0, 1),
+			new GridCellOffset(1, 1),
+		};
+		GameVector2 size = GameCoordinateRules.GetBuildingCollisionSize(footprint);
+
+		Assert.True(2 * GameCoordinateRules.UnitsPerCell - size.X > 2 * UnitStats.HugeCollisionRadius);
+	}
+
+	[Fact]
+	public void GetBuildingVisualSize_MultiCell_KeepsOriginalAppearance()
+	{
+		GridCellOffset[] footprint = new[]
+		{
+			new GridCellOffset(0, 0),
+			new GridCellOffset(1, 0),
+			new GridCellOffset(0, 1),
+			new GridCellOffset(1, 1),
+		};
+		GameVector2 size = GameCoordinateRules.GetBuildingVisualSize(footprint);
+
 		Assert.Equal(2 * GameCoordinateRules.UnitsPerCell - GameCoordinateRules.CellGapSize, size.X);
-		Assert.Equal(3 * GameCoordinateRules.UnitsPerCell - GameCoordinateRules.CellGapSize, size.Y);
+		Assert.Equal(2 * GameCoordinateRules.UnitsPerCell - GameCoordinateRules.CellGapSize, size.Y);
+	}
+
+	[Fact]
+	public void GetBuildingVisualSize_SingleCell_ReturnsBlockSize()
+	{
+		GridCellOffset[] footprint = new[] { new GridCellOffset(0, 0) };
+		GameVector2 size = GameCoordinateRules.GetBuildingVisualSize(footprint);
+
+		Assert.Equal(GameCoordinateRules.CellBlockSize, size.X);
+		Assert.Equal(GameCoordinateRules.CellBlockSize, size.Y);
 	}
 }

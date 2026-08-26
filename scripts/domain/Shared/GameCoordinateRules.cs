@@ -1,4 +1,5 @@
 // 网格坐标规则：格子中心与出生点
+using System;
 using System.Collections.Generic;
 
 namespace CasualCastle.Domain.Shared;
@@ -10,6 +11,9 @@ public static class GameCoordinateRules
 	public const int CellGapSize = 14;
 	public const int CellBlockSize = UnitsPerCell - CellGapSize;
 	public const int CellBlockInset = CellGapSize / 2;
+
+	public const int BuildingCorridorGap = 112;
+	public const int MinBuildingCollisionSize = 24;
 
 	public const int UnitSpawnCornerInset = 3;
 	public const int UnitSpawnSpreadCount = 3;
@@ -27,6 +31,24 @@ public static class GameCoordinateRules
 
 	public static GameVector2 GetBuildingCollisionSize(IReadOnlyList<GridCellOffset> footprint)
 	{
+		GetFootprintCellSpan(footprint, out int cellsWide, out int cellsTall);
+		return new GameVector2(
+			Math.Max(cellsWide * UnitsPerCell - BuildingCorridorGap, MinBuildingCollisionSize),
+			Math.Max(cellsTall * UnitsPerCell - BuildingCorridorGap, MinBuildingCollisionSize)
+		);
+	}
+
+	public static GameVector2 GetBuildingVisualSize(IReadOnlyList<GridCellOffset> footprint)
+	{
+		GetFootprintCellSpan(footprint, out int cellsWide, out int cellsTall);
+		return new GameVector2(
+			cellsWide * UnitsPerCell - CellGapSize,
+			cellsTall * UnitsPerCell - CellGapSize
+		);
+	}
+
+	private static void GetFootprintCellSpan(IReadOnlyList<GridCellOffset> footprint, out int cellsWide, out int cellsTall)
+	{
 		int minX = footprint[0].X;
 		int maxX = footprint[0].X;
 		int minY = footprint[0].Y;
@@ -38,13 +60,8 @@ public static class GameCoordinateRules
 			if (footprint[i].Y < minY) minY = footprint[i].Y;
 			if (footprint[i].Y > maxY) maxY = footprint[i].Y;
 		}
-
-		int cellsWide = maxX - minX + 1;
-		int cellsTall = maxY - minY + 1;
-		return new GameVector2(
-			cellsWide * UnitsPerCell - CellGapSize,
-			cellsTall * UnitsPerCell - CellGapSize
-		);
+		cellsWide = maxX - minX + 1;
+		cellsTall = maxY - minY + 1;
 	}
 
 	public static GameVector2 GetBuildingFootprintSpawnPoint(

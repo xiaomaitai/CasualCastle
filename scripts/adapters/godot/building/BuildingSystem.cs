@@ -135,14 +135,26 @@ public partial class BuildingSystem : Node
 		unit.InitializeFromStats(stats);
 	}
 
+	public Vector2 GetBuildingVisualSizePixels(string buildingType)
+	{
+		IReadOnlyList<GridCellOffset> footprint = _buildingRepo.GetFootprint(buildingType);
+		GameVector2 visualSize = GameCoordinateRules.GetBuildingVisualSize(footprint);
+		return new Vector2(
+			GameCoordinatesAdapter.GameUnitsToPixels(visualSize.X),
+			GameCoordinatesAdapter.GameUnitsToPixels(visualSize.Y));
+	}
+
 	public void ApplyVisual(Building building)
 	{
 		string buildingType = building.TypeId;
 		IReadOnlyList<GridCellOffset> footprint = _buildingRepo.GetFootprint(buildingType);
+		GameVector2 visualSize = GameCoordinateRules.GetBuildingVisualSize(footprint);
 		GameVector2 collisionSize = GameCoordinateRules.GetBuildingCollisionSize(footprint);
-		float pixelW = GameCoordinatesAdapter.GameUnitsToPixels(collisionSize.X);
-		float pixelH = GameCoordinatesAdapter.GameUnitsToPixels(collisionSize.Y);
-		Vector2 pixelSize = new(pixelW, pixelH);
+		float visualW = GameCoordinatesAdapter.GameUnitsToPixels(visualSize.X);
+		float visualH = GameCoordinatesAdapter.GameUnitsToPixels(visualSize.Y);
+		float collisionW = GameCoordinatesAdapter.GameUnitsToPixels(collisionSize.X);
+		float collisionH = GameCoordinatesAdapter.GameUnitsToPixels(collisionSize.Y);
+		Vector2 collisionPixelSize = new(collisionW, collisionH);
 
 		Sprite2D sprite = building.GetNodeOrNull<Sprite2D>("View/Sprite");
 		if (sprite != null)
@@ -156,7 +168,7 @@ public partial class BuildingSystem : Node
 				if (texture != null)
 				{
 					sprite.Texture = texture;
-					float uniformScale = Mathf.Min(pixelW / texture.GetWidth(), pixelH / texture.GetHeight());
+					float uniformScale = Mathf.Min(visualW / texture.GetWidth(), visualH / texture.GetHeight());
 					sprite.Scale = new Vector2(uniformScale, uniformScale);
 				}
 			}
@@ -171,11 +183,11 @@ public partial class BuildingSystem : Node
 
 		CollisionShape2D shapeNode = building.GetNodeOrNull<CollisionShape2D>("Logic/CollisionShape");
 		if (shapeNode?.Shape is RectangleShape2D rect)
-			rect.Size = pixelSize;
+			rect.Size = collisionPixelSize;
 
 		CollisionShape2D navShapeNode = building.GetNodeOrNull<CollisionShape2D>("Logic/NavigationObstacle/CollisionShape");
 		if (navShapeNode?.Shape is RectangleShape2D navRect)
-			navRect.Size = pixelSize;
+			navRect.Size = collisionPixelSize;
 	}
 
 	public bool CanPlace(Castle castle, string buildingType, int anchorX, int anchorY)

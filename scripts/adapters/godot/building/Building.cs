@@ -451,6 +451,8 @@ public partial class Building : Area2D
 		return Vector2.Zero;
 	}
 
+	public Vector2 GetBuildingVisualSize() => BuildingSys.GetBuildingVisualSizePixels(TypeId);
+
 	private void ApplyCollisionOverlay()
 	{
 		if (_collisionOverlay != null)

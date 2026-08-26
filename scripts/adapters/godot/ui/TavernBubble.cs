@@ -107,7 +107,7 @@ public partial class TavernBubble : Node2D
 			Padding * 2 + slotCount * SlotSize + (slotCount - 1) * SlotGap,
 			Padding * 2 + SlotSize + TailHeight);
 		Position = new Vector2(0f,
-			-(building.GetBuildingSize().Y * 0.5f + _bubbleSize.Y * 0.5f + BubbleLift));
+			-(building.GetBuildingVisualSize().Y * 0.5f + _bubbleSize.Y * 0.5f + BubbleLift));
 		_slotRects.Clear();
 		for (int i = 0; i < slotCount; i++)
 		{
