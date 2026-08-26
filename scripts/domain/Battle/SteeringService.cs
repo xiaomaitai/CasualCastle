@@ -1,4 +1,4 @@
-// 转向服务：流场跟随、软分离、硬去重叠、到达刹车与贴墙滑动
+// 转向服务：流场跟随、各向异性分离、前方拥堵绕行、硬去重叠、到达刹车与贴墙滑动
 using System;
 using System.Collections.Generic;
 
@@ -8,10 +8,14 @@ public sealed class SteeringService
 {
 	public const float SeparationRadiusMultiplier = 1.6f;
 	private const float ArrivalRadius = 8f;
-	private const float SeparationScale = 0.7f;
 	private const float VelocitySmoothing = 12f;
 	private const float MaxOverlapPush = 24f;
 	private const float Epsilon = 0.001f;
+	private const float LateralScale = 1.8f;
+	private const float ForwardShoveScale = 0.5f;
+	private const float BackwardSlipScale = 0.1f;
+	private const float BlockedAheadCos = 0.3f;
+	private const float SlipScale = 1.4f;
 
 	public void Steer(IUnitHandle unit, NavGrid grid, FlowField field, IReadOnlyList<IUnitHandle> neighbors, float dt)
 	{
@@ -54,10 +58,12 @@ public sealed class SteeringService
 		SampleFlow(unit, grid, field, out flowX, out flowY);
 		if (flowX == 0f && flowY == 0f)
 			FlowTowardGoal(unit, out flowX, out flowY);
+		float fx, fy;
+		Normalize(flowX, flowY, out fx, out fy);
 		float sepX, sepY;
-		SampleSeparation(unit, neighbors, out sepX, out sepY);
-		float tx = flowX + sepX * SeparationScale;
-		float ty = flowY + sepY * SeparationScale;
+		SampleSeparation(unit, neighbors, fx, fy, out sepX, out sepY);
+		float tx = fx + sepX;
+		float ty = fy + sepY;
 		float length = MathF.Sqrt(tx * tx + ty * ty);
 		if (length <= Epsilon)
 		{
@@ -67,6 +73,75 @@ public sealed class SteeringService
 		}
 		desiredX = tx / length * speed;
 		desiredY = ty / length * speed;
+	}
+
+	private static void SampleSeparation(IUnitHandle unit, IReadOnlyList<IUnitHandle> neighbors, float fx, float fy, out float sepX, out float sepY)
+	{
+		sepX = 0f;
+		sepY = 0f;
+		foreach (IUnitHandle other in neighbors)
+		{
+			if (other == unit || !other.IsAlive)
+				continue;
+			float dx = unit.GameX - other.GameX;
+			float dy = unit.GameY - other.GameY;
+			float dist = MathF.Sqrt(dx * dx + dy * dy);
+			float minDist = (unit.CollisionRadius + other.CollisionRadius) * SeparationRadiusMultiplier;
+			if (dist >= minDist || dist <= Epsilon)
+				continue;
+			float strength = (minDist - dist) / minDist;
+			AddAnisotropic(dx / dist, dy / dist, strength, fx, fy, ref sepX, ref sepY);
+		}
+		AddBlockedAheadSlip(unit, neighbors, fx, fy, ref sepX, ref sepY);
+	}
+
+	private static void AddAnisotropic(float px, float py, float strength, float fx, float fy, ref float sepX, ref float sepY)
+	{
+		float par = px * fx + py * fy;
+		float parallelScale = par > 0f ? ForwardShoveScale : BackwardSlipScale;
+		sepX += (px - par * fx) * LateralScale + fx * par * parallelScale;
+		sepY += (py - par * fy) * LateralScale + fy * par * parallelScale;
+	}
+
+	private static void AddBlockedAheadSlip(IUnitHandle unit, IReadOnlyList<IUnitHandle> neighbors, float fx, float fy, ref float sepX, ref float sepY)
+	{
+		float crowd;
+		bool hasBlocker = ComputeBlockedCrowd(unit, neighbors, fx, fy, out crowd);
+		if (!hasBlocker)
+			return;
+		float side = MathF.Abs(crowd) <= Epsilon ? StableSide(unit) : -crowd;
+		sepX += -fy * side * SlipScale;
+		sepY += fx * side * SlipScale;
+	}
+
+	private static bool ComputeBlockedCrowd(IUnitHandle unit, IReadOnlyList<IUnitHandle> neighbors, float fx, float fy, out float crowd)
+	{
+		float leftX = -fy;
+		float leftY = fx;
+		crowd = 0f;
+		bool hasBlocker = false;
+		foreach (IUnitHandle other in neighbors)
+		{
+			if (other == unit || !other.IsAlive)
+				continue;
+			float ox = other.GameX - unit.GameX;
+			float oy = other.GameY - unit.GameY;
+			float dist = MathF.Sqrt(ox * ox + oy * oy);
+			float minDist = (unit.CollisionRadius + other.CollisionRadius) * SeparationRadiusMultiplier;
+			if (dist >= minDist || dist <= Epsilon)
+				continue;
+			if ((ox * fx + oy * fy) / dist < BlockedAheadCos)
+				continue;
+			hasBlocker = true;
+			float strength = (minDist - dist) / minDist;
+			crowd += strength * (ox * leftX + oy * leftY) / dist;
+		}
+		return hasBlocker;
+	}
+
+	private static float StableSide(IUnitHandle unit)
+	{
+		return ((uint)unit.GetHashCode() & 1u) == 0u ? 1f : -1f;
 	}
 
 	private static void SampleFlow(IUnitHandle unit, NavGrid grid, FlowField field, out float flowX, out float flowY)
@@ -113,26 +188,6 @@ public sealed class SteeringService
 		float dx = unit.MoveGoalX - unit.GameX;
 		float dy = unit.MoveGoalY - unit.GameY;
 		Normalize(dx, dy, out flowX, out flowY);
-	}
-
-	private static void SampleSeparation(IUnitHandle unit, IReadOnlyList<IUnitHandle> neighbors, out float sepX, out float sepY)
-	{
-		sepX = 0f;
-		sepY = 0f;
-		foreach (IUnitHandle other in neighbors)
-		{
-			if (other == unit || !other.IsAlive)
-				continue;
-			float dx = unit.GameX - other.GameX;
-			float dy = unit.GameY - other.GameY;
-			float dist = MathF.Sqrt(dx * dx + dy * dy);
-			float minDist = (unit.CollisionRadius + other.CollisionRadius) * SeparationRadiusMultiplier;
-			if (dist >= minDist || dist <= Epsilon)
-				continue;
-			float strength = (minDist - dist) / minDist;
-			sepX += dx / dist * strength;
-			sepY += dy / dist * strength;
-		}
 	}
 
 	private static void ResolveOverlap(IUnitHandle unit, NavGrid grid, IReadOnlyList<IUnitHandle> neighbors, ref float nx, ref float ny)
