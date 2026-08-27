@@ -1,5 +1,6 @@
 // 参数编辑器逻辑：把全局参数集中展示、热修改与重置（parameter_editor.tscn 场景）
 using CasualCastle.Adapters.Godot;
+using CasualCastle.Adapters.Persistence;
 using CasualCastle.Domain.Shared;
 using Godot;
 using System;
@@ -21,6 +22,7 @@ public sealed class ParameterEditor
 	private const float RowHeight = 36f;
 	private const float SectionHeight = 32f;
 	private const int RowSeparation = 8;
+	private const string ConfigDbPath = "res://assets/data/config.db";
 
 	private readonly Control _root;
 	private readonly VBoxContainer _list;
@@ -28,46 +30,47 @@ public sealed class ParameterEditor
 	private readonly Button _backButton;
 	private readonly Label _statusBar;
 	private readonly List<ParameterRow> _rows = new();
+	private readonly SqliteConfigRepository _repo;
 
 	private static readonly ParameterDef[] Defs =
 	{
-		new ParameterDef("每局初始金币", EconomyModule,
+		new ParameterDef("initial_gold", SqliteConfigRepository.EconomyConfig, "每局初始金币", EconomyModule,
 			() => GameParameters.InitialGold.ToString(),
 			text => TrySetInt(text, value => GameParameters.InitialGold = value),
 			GameRules.InitialGold.ToString()),
-		new ParameterDef("修理每点生命花费", EconomyModule,
+		new ParameterDef("repair_gold_per_health", SqliteConfigRepository.EconomyConfig, "修理每点生命花费", EconomyModule,
 			() => GameParameters.RepairGoldPerHealth.ToString(),
 			text => TrySetInt(text, value => GameParameters.RepairGoldPerHealth = value),
 			GameRules.RepairGoldPerHealth.ToString()),
-		new ParameterDef("战斗阶段时长（秒）", CombatModule,
+		new ParameterDef("combat_duration_seconds", SqliteConfigRepository.BattleConfig, "战斗阶段时长（秒）", CombatModule,
 			() => FormatFloat(GameParameters.CombatDurationSeconds),
 			text => TrySetFloat(text, value => GameParameters.CombatDurationSeconds = value),
 			FormatFloat(GameRules.CombatDurationSeconds)),
-		new ParameterDef("合成阶段时长（秒）", CombatModule,
+		new ParameterDef("combine_duration_seconds", SqliteConfigRepository.BattleConfig, "合成阶段时长（秒）", CombatModule,
 			() => FormatFloat(GameParameters.CombineDurationSeconds),
 			text => TrySetFloat(text, value => GameParameters.CombineDurationSeconds = value),
 			FormatFloat(GameRules.CombineDurationSeconds)),
-		new ParameterDef("战斗开始等待（秒）", CombatModule,
+		new ParameterDef("combat_start_hold_seconds", SqliteConfigRepository.BattleConfig, "战斗开始等待（秒）", CombatModule,
 			() => FormatFloat(GameParameters.CombatStartTimerHoldSeconds),
 			text => TrySetFloat(text, value => GameParameters.CombatStartTimerHoldSeconds = value),
 			FormatFloat(GameRules.CombatStartTimerHoldSeconds)),
-		new ParameterDef("每格像素（PixelsPerCell）", DisplayModule,
+		new ParameterDef("pixels_per_cell", SqliteConfigRepository.DisplayConfig, "每格像素（PixelsPerCell）", DisplayModule,
 			() => GameCoordinatesAdapter.PixelsPerCell.ToString(),
 			text => TrySetInt(text, value => GameCoordinatesAdapter.PixelsPerCell = value),
 			GameCoordinatesAdapter.PixelsPerCellDefault.ToString()),
-		new ParameterDef("音效每秒播放上限", AudioModule,
+		new ParameterDef("sfx_max_plays_per_second", SqliteConfigRepository.SoundConfig, "音效每秒播放上限", AudioModule,
 			() => SfxPolicy.MaxPlaysPerSecond.ToString(),
 			text => TrySetInt(text, value => SfxPolicy.MaxPlaysPerSecond = value),
 			SfxPolicy.MaxPlaysPerSecondDefault.ToString()),
-		new ParameterDef("同类声音最小间隔（毫秒）", AudioModule,
+		new ParameterDef("sfx_group_min_interval_ms", SqliteConfigRepository.SoundConfig, "同类声音最小间隔（毫秒）", AudioModule,
 			() => SfxPolicy.GroupMinIntervalMs.ToString(),
 			text => TrySetInt(text, value => SfxPolicy.GroupMinIntervalMs = value),
 			SfxPolicy.GroupMinIntervalMsDefault.ToString()),
-		new ParameterDef("超载重要性阈值", AudioModule,
+		new ParameterDef("sfx_overload_threshold", SqliteConfigRepository.SoundConfig, "超载重要性阈值", AudioModule,
 			() => SfxPolicy.OverloadThreshold.ToString(),
 			text => TrySetInt(text, value => SfxPolicy.OverloadThreshold = value),
 			SfxPolicy.OverloadThresholdDefault.ToString()),
-		new ParameterDef("阈值回落速度（每1000ms）", AudioModule,
+		new ParameterDef("sfx_threshold_decay_per_second", SqliteConfigRepository.SoundConfig, "阈值回落速度（每1000ms）", AudioModule,
 			() => SfxPolicy.ThresholdDecayPerSecond.ToString(),
 			text => TrySetInt(text, value => SfxPolicy.ThresholdDecayPerSecond = value),
 			SfxPolicy.ThresholdDecayPerSecondDefault.ToString()),
@@ -83,6 +86,7 @@ public sealed class ParameterEditor
 
 		_resetAllButton.Pressed += OnResetAllPressed;
 		_backButton.Pressed += OnBackPressed;
+		_repo = new SqliteConfigRepository(ProjectSettings.GlobalizePath(ConfigDbPath));
 		BuildList();
 	}
 
@@ -158,7 +162,10 @@ public sealed class ParameterEditor
 	private void OnTextChanged(ParameterRow row, string text)
 	{
 		if (row.Def.Apply(text))
+		{
 			ShowStatus($"已应用 {row.Def.Name} = {row.Edit.Text}");
+			WriteToDb(row.Def);
+		}
 	}
 
 	private void OnResetPressed(ParameterRow row)
@@ -166,6 +173,7 @@ public sealed class ParameterEditor
 		row.Def.Apply(row.Def.Default);
 		row.Edit.Text = row.Def.Default;
 		ShowStatus($"已重置 {row.Def.Name} = {row.Def.Default}");
+		WriteToDb(row.Def);
 	}
 
 	private void OnResetAllPressed()
@@ -174,6 +182,7 @@ public sealed class ParameterEditor
 		{
 			row.Def.Apply(row.Def.Default);
 			row.Edit.Text = row.Def.Default;
+			WriteToDb(row.Def);
 		}
 		ShowStatus("已全部重置为默认值");
 	}
@@ -186,6 +195,12 @@ public sealed class ParameterEditor
 	private void ShowStatus(string message)
 	{
 		_statusBar.Text = message;
+	}
+
+	private void WriteToDb(ParameterDef def)
+	{
+		if (double.TryParse(def.Read(), NumberStyles.Float, CultureInfo.InvariantCulture, out double value))
+			_repo.Write(def.Table, def.Key, value);
 	}
 
 	private static bool TrySetInt(string text, Action<int> setter)
@@ -209,14 +224,18 @@ public sealed class ParameterEditor
 
 	private sealed class ParameterDef
 	{
+		public readonly string Key;
+		public readonly string Table;
 		public readonly string Name;
 		public readonly string Module;
 		public readonly Func<string> Read;
 		public readonly Func<string, bool> Apply;
 		public readonly string Default;
 
-		public ParameterDef(string name, string module, Func<string> read, Func<string, bool> apply, string defaultValue)
+		public ParameterDef(string key, string table, string name, string module, Func<string> read, Func<string, bool> apply, string defaultValue)
 		{
+			Key = key;
+			Table = table;
 			Name = name;
 			Module = module;
 			Read = read;

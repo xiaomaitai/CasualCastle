@@ -41,27 +41,6 @@
 - 开启 `trim_alpha_border_from_region`；注意图集区域与 mipmap 冲突（当前已关 mipmap）
 - 先试点（如联盟建筑）验证导入流程与批处理收益，再铺开
 
-## 动画工作流构建（DSH 工具 + Skill 编排）
-
-以 DeepSeek Harness 工具 + Skill 结合的方式构建端到端动画工作流：输入开发者文字描述，输出游戏内可用的动画（默认首尾无缝循环，个别可不循环）。
-
-- 输入：开发者描述（对象、动作意图、时长、是否循环）
-- 中间步骤（含但不限于）：AI 生成单位主图/建筑主图等静态效果图 → AI 生成视频 → 必要时抽帧或精修（去背景、裁边、补帧、循环对齐）→ 接入 Godot（SpriteFrames / AnimatedSprite2D，经 godot-import 导入）
-- 输出：游戏内可用动画，多数首尾循环，个别可不循环
-- 中间所需软件/API（需求暂空，待用户补充）：
-
-| 环节 | 现状 | 需求/备选（待补充） |
-|------|------|--------------------|
-| 生图 | Liblib.art（generate-image skill、tools/liblib_gen.py） |  |
-| 抠图 | Liblib remove-bg（tools/liblib_remove_bg.py，nodeId=17） |  |
-| 视频生成 | 无 |  |
-| 抽帧/精修 | 无 |  |
-| Godot 导入 | godot-import skill、tools/godot_import.py |  |
-
-## 参数编辑器持久化（可选）
-
-参数编辑器主体已交付（见 `devPlan/design/devTools.md`）：全局参数集中展示、运行时热修改、单参数/全部重置。当前为内存热修改、每次启动回到 `GameRules` 默认值；如需跨启动保留自定义参数，再实现持久化（如 `user://` 配置文件 + 启动加载）。
-
 ## 生图/视频工作流双源（可替换）
 
 生图工作流与视频工作流各准备两个源：早期开发用 affordable 源，最终版用高质量源；源独立抽出、可替换。

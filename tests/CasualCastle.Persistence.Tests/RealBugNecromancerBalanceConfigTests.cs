@@ -8,20 +8,20 @@ namespace CasualCastle.Persistence.Tests;
 public class RealBugNecromancerBalanceConfigTests
 {
 	[Fact]
-	public void GameBalance_HasBlackMagicYields_RealBug_HardcodedValues()
+	public void BattleConfig_HasBlackMagicYields_RealBug_HardcodedValues()
 	{
 		string db = FindConfigDb();
 		using SqliteConnection connection = new SqliteConnection($"Data Source={db}");
 		connection.Open();
 		using SqliteCommand command = connection.CreateCommand();
-		command.CommandText = "select config_key, config_value from game_balance where config_key in ('friendly_death_yield', 'enemy_death_yield')";
+		command.CommandText = "select config_key, config_value from battle_config where config_key in ('friendly_death_yield', 'enemy_death_yield')";
 		using SqliteDataReader reader = command.ExecuteReader();
 		int found = 0;
 		while (reader.Read())
 		{
 			found++;
 			string key = reader.GetString(0);
-			int value = reader.GetInt32(1);
+			double value = reader.GetDouble(1);
 			if (key == "friendly_death_yield")
 				Assert.Equal(25, value);
 			if (key == "enemy_death_yield")

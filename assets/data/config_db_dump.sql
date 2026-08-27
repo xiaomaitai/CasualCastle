@@ -269,6 +269,12 @@ INSERT INTO "asset_gen_tasks" VALUES(192,'f3bff14d0c7e4e12a0c1bbf52777035c','com
 INSERT INTO "asset_gen_tasks" VALUES(193,'840ddf6d8e094fb3801de955136b6735','completed','Redesign the referenced panel while preserving its exact visual language: coral-orange irregular rounded outer frame, solid deep navy interior, very thick near-black hand-drawn outlines, cream content cards, flat colorful vector pictograms, playful chunky shapes, bright limited palette, pure flat 2D animation style. Replace only the information layout with a dense classic RPG attribute layout. One standalone compact 16:9 display-only panel filling the canvas. Top area: square cartoon knight portrait at left, large Chinese name 王国剑士, subtitle 我方·人类, yellow cost badge 费用 3 at right; directly beneath identity is a wide green health bar reading 820/1000. Middle area: one large cream rounded rectangle divided by thin dark horizontal lines into exactly five full-width rows. Every row starts with a colorful flat icon and bold Chinese label, with compact value text: 攻击 48·近战·物理; 元素 神圣; 护甲 12·重甲; 攻击间隔 1.2秒; 射程 60. Bottom area: three large colorful square skill icons aligned horizontally. Strong hierarchy, dense but clean spacing, consistent thick outlines, polished cartoon RPG HUD. No title banner, no close icon, no interaction controls. Render only intended Chinese labels and values, never render design instructions or English words','3D, depth, bevel, embossed, extrusion, realistic material, wood grain, leather texture, metal texture, lighting, cast shadow, glossy, highlights, gradient, painterly, photorealistic, perspective, black stone frame, blue stone frame, game screenshot, battlefield, inventory screen, multiple panels, tooltip, building panel, close button, X icon, title tab, ornate decoration, thin outlines, English text, design notes, layout instruction, gibberish, watermark, logo, upgrade button, sell button',1024,576,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/569a9d216a52457fb36280f3048482c2/dbc19c287beef933755fe3cb543742272c12d69fbd7cba27142e8a5b2c48bd86.png','assets\art\ui\attribute_panel_flat_detailed_concept_193.png','2026-08-12T13:50:43Z','2026-08-12T13:51:49Z',NULL);
 INSERT INTO "asset_gen_tasks" VALUES(194,'85665b68c5064d65af0a2b4b267a7a2a','completed','2D cartoon fantasy medieval shop goods pile game UI icon, a bulging golden coin pouch, crossed short sword and dagger, glowing red and blue potion bottles, rings necklaces and jeweled accessories stacked together in one compact abundant merchandise heap, warm gold burgundy and steel palette matching a dark black-gold medieval interface, centered composition, bold silhouette, thick black outlines, simple flat colors, high contrast, polished anime game art, frameless full-bleed artwork, readable at very small size, no text','text, lettering, logo, watermark, character, people, empty background, white background, border, frame, badge, photorealistic, 3D render, blurry, scattered separate objects',512,512,1,1,30,4.0,-1,'bf085132c7134622895b783b520b39ff','75e0be0c93b34dd8baeec9c968013e0c',5,'https://liblibai-tmp-image.liblib.cloud/img/569a9d216a52457fb36280f3048482c2/5c2ce570f4d921ef370736f0fd917da43ad09cc1b3d93c70b7a297eda1a5b941.png','assets\art\ui\shop_goods_pile_194.png','2026-08-12T15:36:45Z','2026-08-12T15:37:34Z',NULL);
 INSERT INTO "asset_gen_tasks" VALUES(195,'f696e30938dd4e1c85d3807c07ff1c1b','completed','remove_bg',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'4df2efa0f18d46dc9758803e478eb51c',NULL,5,'https://liblibai-tmp-image.liblib.cloud/img/569a9d216a52457fb36280f3048482c2/78c6da6f2aea96a5c1e2972eb3c4453882d3079c9e625825aa68dc7532fb5269.png','assets\art\ui\shop_goods_pile_194.png','2026-08-12T15:44:16Z','2026-08-12T15:44:31Z',NULL);
+CREATE TABLE battle_config (config_key text primary key, config_value real not null);
+INSERT INTO "battle_config" VALUES('combat_duration_seconds',60.0);
+INSERT INTO "battle_config" VALUES('combine_duration_seconds',1.0);
+INSERT INTO "battle_config" VALUES('combat_start_hold_seconds',1.0);
+INSERT INTO "battle_config" VALUES('friendly_death_yield',25.0);
+INSERT INTO "battle_config" VALUES('enemy_death_yield',10.0);
 CREATE TABLE bgm_defs (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL,
@@ -470,6 +476,11 @@ INSERT INTO "damage_matrix" VALUES(6,3,100);
 INSERT INTO "damage_matrix" VALUES(6,4,150);
 INSERT INTO "damage_matrix" VALUES(6,5,150);
 INSERT INTO "damage_matrix" VALUES(6,6,100);
+CREATE TABLE display_config (config_key text primary key, config_value real not null);
+INSERT INTO "display_config" VALUES('pixels_per_cell',100.0);
+CREATE TABLE economy_config (config_key text primary key, config_value real not null);
+INSERT INTO "economy_config" VALUES('initial_gold',3000.0);
+INSERT INTO "economy_config" VALUES('repair_gold_per_health',1.0);
 CREATE TABLE "faction_defs" (
     id TEXT PRIMARY KEY,
     display_name TEXT NOT NULL,
@@ -479,9 +490,6 @@ INSERT INTO "faction_defs" VALUES('alliance','联盟',0);
 INSERT INTO "faction_defs" VALUES('horde','部落',1);
 INSERT INTO "faction_defs" VALUES('necromancer','死灵法师',2);
 INSERT INTO "faction_defs" VALUES('dungeon','地下城',3);
-CREATE TABLE game_balance (config_key text primary key, config_value integer not null);
-INSERT INTO "game_balance" VALUES('friendly_death_yield',25);
-INSERT INTO "game_balance" VALUES('enemy_death_yield',10);
 CREATE TABLE item_catalog (id TEXT PRIMARY KEY, name TEXT NOT NULL, cost INTEGER NOT NULL, weight INTEGER NOT NULL DEFAULT 1, faction_id TEXT NOT NULL DEFAULT '', item_type TEXT NOT NULL DEFAULT '', attributes TEXT NOT NULL DEFAULT '');
 INSERT INTO "item_catalog" VALUES('DarkMagicBook_BlackMagicCharge','黑魔法充能之书',4,6,'necromancer','dark_magic_book','{"ritual_id": "black_magic_charge"}');
 INSERT INTO "item_catalog" VALUES('DarkMagicBook_UndeadSummon','亡灵召唤之书',4,6,'necromancer','dark_magic_book','{"ritual_id": "undead_summon"}');
@@ -617,6 +625,11 @@ INSERT INTO "skill_defs" VALUES('shadow_lord_stealth','影遁','special','{"beha
 INSERT INTO "skill_defs" VALUES('royal_scout_stealth','斥候潜行','special','{"behavior":"stealth","param":220,"speed_mult":0.9,"cooldown":1.0}','永久潜行，不被远程锁定',NULL);
 INSERT INTO "skill_defs" VALUES('dragon_rider_kiting','骑射放风筝','special','{"behavior":"kiting","param":2.0,"speed_mult":1.3}','边打边撤，保持距离',NULL);
 INSERT INTO "skill_defs" VALUES('death_angel_rage','终焉狂暴','stat_modifier','{"trigger":"low_health","trigger_param":0.3,"modifiers":{"attack_damage_mult":1.30}}','生命低于30%时攻击力+30%',NULL);
+CREATE TABLE sound_config (config_key text primary key, config_value real not null);
+INSERT INTO "sound_config" VALUES('sfx_max_plays_per_second',30.0);
+INSERT INTO "sound_config" VALUES('sfx_group_min_interval_ms',100.0);
+INSERT INTO "sound_config" VALUES('sfx_overload_threshold',50.0);
+INSERT INTO "sound_config" VALUES('sfx_threshold_decay_per_second',20.0);
 CREATE TABLE tech_tree_nodes (
     type_id TEXT PRIMARY KEY,
     faction_id TEXT NOT NULL REFERENCES "faction_defs"(id),

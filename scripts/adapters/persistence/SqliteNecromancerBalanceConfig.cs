@@ -24,7 +24,7 @@ public class SqliteNecromancerBalanceConfig : INecromancerBalanceConfig
 		using SqliteConnection connection = new($"Data Source={dbPath}");
 		connection.Open();
 		using SqliteCommand cmd = connection.CreateCommand();
-		cmd.CommandText = "SELECT config_value FROM game_balance WHERE config_key = $key";
+		cmd.CommandText = $"SELECT config_value FROM {SqliteConfigRepository.BattleConfig} WHERE config_key = $key";
 		cmd.Parameters.AddWithValue("$key", key);
 		object result = cmd.ExecuteScalar();
 		if (result == null || result is DBNull)
