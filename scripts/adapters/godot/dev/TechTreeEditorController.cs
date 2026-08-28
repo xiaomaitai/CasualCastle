@@ -17,6 +17,7 @@ public class TechTreeEditorController
 	private readonly Button _closeButton;
 	private readonly Control _cardCanvas;
 	private readonly VBoxContainer _tierLabelColumn;
+	private readonly Control _editorArea;
 	private readonly Control _libraryPanel;
 	private readonly VBoxContainer _libraryList;
 	private readonly Button _buildingEditorButton;
@@ -37,6 +38,7 @@ public class TechTreeEditorController
 	private Panel _dragPreview;
 	private Vector2 _dragOffset;
 	private bool _dragActive;
+	private float _gridScale = 1f;
 
 	private const float CardWidth = 160;
 	private const float CardHeight = 96;
@@ -44,9 +46,22 @@ public class TechTreeEditorController
 	private const float TierRowHeight = 200;
 	private const int TierCount = 5;
 	private const float LeftLabelWidth = 48;
+	private const float LabelFontSize = 24;
+	private const float CardFontSize = 16;
+	private const float CardTextInset = 4;
+	private const float CardLeftPadding = 10;
+	private const float EdgeCurveHeight = 30;
+	private const float EdgeHitTolerance = 10;
 	private const int DefaultBuildingValue = 1;
 	private const string DevToolsMenuScene = "res://scenes/ui/dev_tools/dev_tools_menu.tscn";
 	private const string BuildingEditorScene = "res://scenes/ui/dev_tools/building_editor.tscn";
+
+	private float RowHeight => TierRowHeight * _gridScale;
+	private float CardW => CardWidth * _gridScale;
+	private float CardH => CardHeight * _gridScale;
+	private float ColStep => ColSpacing * _gridScale;
+	private float LeftMargin => CardLeftPadding * _gridScale;
+	private float CardInset => CardTextInset * _gridScale;
 
 	public TechTreeEditorController(Control root, ITechTreeRepository repo)
 	{
@@ -58,6 +73,7 @@ public class TechTreeEditorController
 		_closeButton = root.GetNode<Button>("TopBar/CloseButton");
 		_cardCanvas = root.GetNode<Control>("EditorArea/CanvasScroll/CardCanvas");
 		_tierLabelColumn = root.GetNode<VBoxContainer>("EditorArea/LeftLabels");
+		_editorArea = root.GetNode<Control>("EditorArea");
 		_libraryPanel = root.GetNode<Control>("EditorArea/LibraryPanel");
 		_libraryList = root.GetNode<VBoxContainer>("EditorArea/LibraryPanel/LibraryScroll/LibraryList");
 		_buildingEditorButton = root.GetNode<Button>("TopBar/BuildingEditorButton");
@@ -74,6 +90,7 @@ public class TechTreeEditorController
 		_resetButton.Pressed += OnResetPressed;
 		_cardCanvas.Draw += OnCardCanvasDraw;
 		_cardCanvas.GuiInput += OnCardCanvasGuiInput;
+		_editorArea.Resized += OnEditorAreaResized;
 	}
 
 	public void LoadInitialData()
@@ -110,6 +127,8 @@ public class TechTreeEditorController
 			_cardCanvas.Draw -= OnCardCanvasDraw;
 		if (GodotObject.IsInstanceValid(_cardCanvas))
 			_cardCanvas.GuiInput -= OnCardCanvasGuiInput;
+		if (GodotObject.IsInstanceValid(_editorArea))
+			_editorArea.Resized -= OnEditorAreaResized;
 	}
 
 	public void Process()
@@ -268,9 +287,12 @@ public class TechTreeEditorController
 				child.QueueFree();
 		}
 
+		_gridScale = GetGridScale();
 		float contentHeight = GetCanvasContentHeight();
-		_cardCanvas.CustomMinimumSize = new Vector2(GetCanvasContentWidth(), contentHeight);
-		_tierLabelColumn.CustomMinimumSize = new Vector2(LeftLabelWidth, contentHeight);
+		float scaledHeight = contentHeight * _gridScale;
+		_cardCanvas.CustomMinimumSize = new Vector2(GetCanvasContentWidth() * _gridScale, scaledHeight);
+		_tierLabelColumn.CustomMinimumSize = new Vector2(LeftLabelWidth * _gridScale, scaledHeight);
+		UpdateLabelFonts();
 
 		if (_nodes.Count == 0)
 		{
@@ -278,18 +300,39 @@ public class TechTreeEditorController
 			return;
 		}
 
-		float rowHeight = TierRowHeight;
+		float rowHeight = RowHeight;
 
 		foreach (TechTreeNode node in _nodes)
 		{
 			Panel card = CreateCardView(node);
-			float x = node.Col * ColSpacing + 10;
-			float y = (TierCount - 1 - (node.Tier - 1)) * rowHeight + (rowHeight - CardHeight) / 2;
+			float x = node.Col * ColStep + LeftMargin;
+			float y = (TierCount - 1 - (node.Tier - 1)) * rowHeight + (rowHeight - CardH) / 2;
 			card.Position = new Vector2(x, y);
 			_cardCanvas.AddChild(card);
 		}
 
 		_cardCanvas.QueueRedraw();
+	}
+
+	private float GetGridScale()
+	{
+		float areaHeight = _editorArea.Size.Y;
+		return areaHeight > 0 ? areaHeight / (TierRowHeight * TierCount) : 1f;
+	}
+
+	private void OnEditorAreaResized()
+	{
+		LayoutCards();
+	}
+
+	private void UpdateLabelFonts()
+	{
+		int fontSize = (int)Math.Round(LabelFontSize * _gridScale);
+		foreach (Node child in _tierLabelColumn.GetChildren())
+		{
+			if (child is Label label)
+				label.AddThemeFontSizeOverride("font_size", fontSize);
+		}
 	}
 
 	private float GetCanvasContentWidth()
@@ -312,8 +355,8 @@ public class TechTreeEditorController
 	{
 		Panel panel = new()
 		{
-			CustomMinimumSize = new Vector2(CardWidth, CardHeight),
-			Size = new Vector2(CardWidth, CardHeight),
+			CustomMinimumSize = new Vector2(CardW, CardH),
+			Size = new Vector2(CardW, CardH),
 			MouseFilter = Control.MouseFilterEnum.Stop
 		};
 
@@ -327,11 +370,12 @@ public class TechTreeEditorController
 		Label nameLabel = new()
 		{
 			Text = node.DisplayName,
-			Position = new Vector2(4, 0),
-			Size = new Vector2(CardWidth - 8, CardHeight),
+			Position = new Vector2(CardInset, 0),
+			Size = new Vector2(CardW - 2 * CardInset, CardH),
 			HorizontalAlignment = HorizontalAlignment.Center,
 			VerticalAlignment = VerticalAlignment.Center
 		};
+		nameLabel.AddThemeFontSizeOverride("font_size", (int)Math.Round(CardFontSize * _gridScale));
 		panel.AddChild(nameLabel);
 
 		panel.SetMeta("type_id", node.TypeId);
@@ -481,9 +525,9 @@ public class TechTreeEditorController
 		}
 
 		Vector2 localPos = _cardCanvas.GetLocalMousePosition();
-		float rowHeight = TierRowHeight;
+		float rowHeight = RowHeight;
 		int newTier = Math.Clamp(TierCount - (int)(localPos.Y / rowHeight), 1, TierCount);
-		int newCol = Math.Max(0, (int)Math.Round((_cardCanvas.GetGlobalMousePosition().X - _dragOffset.X - _cardCanvas.GlobalPosition.X - 10) / ColSpacing));
+		int newCol = Math.Max(0, (int)Math.Round((_cardCanvas.GetGlobalMousePosition().X - _dragOffset.X - _cardCanvas.GlobalPosition.X - LeftMargin) / ColStep));
 
 		TechTreeNode node = _nodes.Find(n => n.TypeId == _dragSource.GetMeta("type_id").AsString());
 		if (node != null)
@@ -593,7 +637,7 @@ public class TechTreeEditorController
 			return;
 		}
 
-		float rowHeight = TierRowHeight;
+		float rowHeight = RowHeight;
 		int tier = Math.Clamp(TierCount - (int)(localPos.Y / rowHeight), 1, TierCount);
 
 		int maxCol = -1;
@@ -643,8 +687,8 @@ public class TechTreeEditorController
 
 	private void TryDeleteEdgeAt(Vector2 canvasPos)
 	{
-		float rowHeight = TierRowHeight;
-		float tolerance = 10f;
+		float rowHeight = RowHeight;
+		float tolerance = EdgeHitTolerance * _gridScale;
 
 		TechTreeEdge toDelete = null;
 		foreach (TechTreeEdge edge in _edges)
@@ -707,9 +751,9 @@ public class TechTreeEditorController
 		_cardCanvas.QueueRedraw();
 	}
 
-	private static int GetNodeCol(Panel card)
+	private int GetNodeCol(Panel card)
 	{
-		return (int)Math.Round((card.Position.X - 10) / ColSpacing);
+		return (int)Math.Round((card.Position.X - LeftMargin) / ColStep);
 	}
 
 	private float DistanceToBezier(Vector2 point, Vector2 from, Vector2 to)
@@ -734,7 +778,7 @@ public class TechTreeEditorController
 		if (node == null)
 			return Vector2.Zero;
 
-		float x = node.Col * ColSpacing + 10 + CardWidth / 2;
+		float x = node.Col * ColStep + LeftMargin + CardW / 2;
 		float y = (TierCount - 1 - (node.Tier - 1)) * rowHeight + rowHeight / 2;
 		return new Vector2(x, y);
 	}
@@ -814,7 +858,8 @@ public class TechTreeEditorController
 	{
 		float canvasWidth = _cardCanvas.Size.X;
 		float canvasHeight = _cardCanvas.Size.Y;
-		float rowHeight = TierRowHeight;
+		float rowHeight = RowHeight;
+		float curveOffset = EdgeCurveHeight * _gridScale;
 		Color gridColor = new(0.4f, 0.4f, 0.4f);
 
 		for (int i = 1; i < TierCount; i++)
@@ -838,8 +883,8 @@ public class TechTreeEditorController
 			bool isUpgradeEdge = _edges.Count(e => e.ToTypeId == edge.ToTypeId) == 1;
 			Color lineColor = isUpgradeEdge ? new Color(0.2f, 0.8f, 0.9f) : new Color(1f, 0.6f, 0f);
 
-			Vector2 c1 = fromCenter + new Vector2(0, 30);
-			Vector2 c2 = toCenter - new Vector2(0, 30);
+			Vector2 c1 = fromCenter + new Vector2(0, curveOffset);
+			Vector2 c2 = toCenter - new Vector2(0, curveOffset);
 
 			for (int i = 0; i < 19; i++)
 			{
@@ -854,7 +899,7 @@ public class TechTreeEditorController
 
 		if (_dragMode == DragMode.CreateConnection && _dragSource != null)
 		{
-			Vector2 from = _dragSource.Position + new Vector2(CardWidth / 2, CardHeight / 2);
+			Vector2 from = _dragSource.Position + new Vector2(CardW / 2, CardH / 2);
 			Vector2 to = _cardCanvas.GetLocalMousePosition();
 			_cardCanvas.DrawLine(from, to, new Color(1f, 1f, 0f), 2);
 		}
