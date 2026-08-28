@@ -27,6 +27,7 @@ public sealed class ParameterEditor
 	private readonly Control _root;
 	private readonly VBoxContainer _list;
 	private readonly Button _resetAllButton;
+	private readonly Button _resetButton;
 	private readonly Button _backButton;
 	private readonly Label _statusBar;
 	private readonly List<ParameterRow> _rows = new();
@@ -81,10 +82,12 @@ public sealed class ParameterEditor
 		_root = root;
 		_list = root.GetNode<VBoxContainer>("ScrollArea/ScrollContainer/ParamList");
 		_resetAllButton = root.GetNode<Button>("BottomBar/ResetAllButton");
+		_resetButton = root.GetNode<Button>("BottomBar/ResetButton");
 		_backButton = root.GetNode<Button>("BottomBar/BackButton");
 		_statusBar = root.GetNode<Label>("StatusBar");
 
 		_resetAllButton.Pressed += OnResetAllPressed;
+		_resetButton.Pressed += OnResetPressed;
 		_backButton.Pressed += OnBackPressed;
 		_repo = new SqliteConfigRepository(ProjectSettings.GlobalizePath(ConfigDbPath));
 		BuildList();
@@ -94,6 +97,8 @@ public sealed class ParameterEditor
 	{
 		if (GodotObject.IsInstanceValid(_resetAllButton))
 			_resetAllButton.Pressed -= OnResetAllPressed;
+		if (GodotObject.IsInstanceValid(_resetButton))
+			_resetButton.Pressed -= OnResetPressed;
 		if (GodotObject.IsInstanceValid(_backButton))
 			_backButton.Pressed -= OnBackPressed;
 	}
@@ -152,7 +157,7 @@ public sealed class ParameterEditor
 		row.AddChild(edit);
 		row.AddChild(reset);
 
-		ParameterRow parameterRow = new(def, edit);
+		ParameterRow parameterRow = new(def, edit, def.Read());
 		_rows.Add(parameterRow);
 		edit.TextChanged += value => OnTextChanged(parameterRow, value);
 		reset.Pressed += () => OnResetPressed(parameterRow);
@@ -185,6 +190,17 @@ public sealed class ParameterEditor
 			WriteToDb(row.Def);
 		}
 		ShowStatus("已全部重置为默认值");
+	}
+
+	private void OnResetPressed()
+	{
+		foreach (ParameterRow row in _rows)
+		{
+			row.Def.Apply(row.EntryValue);
+			row.Edit.Text = row.EntryValue;
+			WriteToDb(row.Def);
+		}
+		ShowStatus("已恢复为进入时的参数");
 	}
 
 	private void OnBackPressed()
@@ -248,11 +264,13 @@ public sealed class ParameterEditor
 	{
 		public readonly ParameterDef Def;
 		public readonly LineEdit Edit;
+		public readonly string EntryValue;
 
-		public ParameterRow(ParameterDef def, LineEdit edit)
+		public ParameterRow(ParameterDef def, LineEdit edit, string entryValue)
 		{
 			Def = def;
 			Edit = edit;
+			EntryValue = entryValue;
 		}
 	}
 }

@@ -225,6 +225,10 @@ max_value = 999.0
 layout_mode = 2
 text = "保存"
 
+[node name="ResetButton" type="Button" parent="EditorArea/EditPanel"]
+layout_mode = 2
+text = "重置"
+
 [node name="InventoryRow" type="HBoxContainer" parent="EditorArea/EditPanel"]
 layout_mode = 2
 

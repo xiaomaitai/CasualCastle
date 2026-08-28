@@ -19,6 +19,7 @@ public class TechTreeEditorController
 	private readonly Control _libraryPanel;
 	private readonly VBoxContainer _libraryList;
 	private readonly Button _buildingEditorButton;
+	private readonly Button _resetButton;
 	private readonly Label _statusBar;
 
 	private readonly ITechTreeRepository _repo;
@@ -57,6 +58,7 @@ public class TechTreeEditorController
 		_libraryPanel = root.GetNode<Control>("EditorArea/LibraryPanel");
 		_libraryList = root.GetNode<VBoxContainer>("EditorArea/LibraryPanel/LibraryScroll/LibraryList");
 		_buildingEditorButton = root.GetNode<Button>("TopBar/BuildingEditorButton");
+		_resetButton = root.GetNode<Button>("TopBar/ResetButton");
 		_statusBar = root.GetNode<Label>("StatusBar");
 
 		_repo = repo;
@@ -66,6 +68,7 @@ public class TechTreeEditorController
 		_saveButton.Pressed += OnSavePressed;
 		_closeButton.Pressed += OnClosePressed;
 		_buildingEditorButton.Pressed += OnBuildingEditorPressed;
+		_resetButton.Pressed += OnResetPressed;
 		_cardCanvas.Draw += OnCardCanvasDraw;
 		_cardCanvas.GuiInput += OnCardCanvasGuiInput;
 	}
@@ -98,6 +101,8 @@ public class TechTreeEditorController
 			_closeButton.Pressed -= OnClosePressed;
 		if (GodotObject.IsInstanceValid(_buildingEditorButton))
 			_buildingEditorButton.Pressed -= OnBuildingEditorPressed;
+		if (GodotObject.IsInstanceValid(_resetButton))
+			_resetButton.Pressed -= OnResetPressed;
 		if (GodotObject.IsInstanceValid(_cardCanvas))
 			_cardCanvas.Draw -= OnCardCanvasDraw;
 		if (GodotObject.IsInstanceValid(_cardCanvas))
@@ -240,6 +245,19 @@ public class TechTreeEditorController
 		while (usedCols.Contains(nextCol))
 			nextCol++;
 		return nextCol;
+	}
+
+	private int ResolveDropColumn(int tier, int desiredCol, string dragTypeId)
+	{
+		List<int> usedCols = new();
+		foreach (TechTreeNode n in _nodes)
+		{
+			if (n.Tier == tier && n.TypeId != dragTypeId)
+				usedCols.Add(n.Col);
+		}
+		if (!usedCols.Contains(desiredCol))
+			return desiredCol;
+		return GetNextFreeColumn(usedCols, desiredCol);
 	}
 
 	private void LayoutCards()
@@ -469,8 +487,12 @@ public class TechTreeEditorController
 		if (node != null)
 		{
 			int oldTier = node.Tier;
+			int resolvedCol = ResolveDropColumn(newTier, newCol, node.TypeId);
 			node.Tier = newTier;
-			node.Col = newCol;
+			node.Col = resolvedCol;
+
+			if (resolvedCol != newCol)
+				ShowStatus("目标位置已有建筑，已放置到同层右侧空位");
 
 			if (newTier != oldTier)
 				RemoveInvalidEdges(node);
@@ -722,6 +744,11 @@ public class TechTreeEditorController
 	{
 		SaveAll();
 		ShowStatus("保存成功");
+	}
+
+	private void OnResetPressed()
+	{
+		LoadFactionAtIndex(_currentFactionIndex);
 	}
 
 	private void SaveAll()

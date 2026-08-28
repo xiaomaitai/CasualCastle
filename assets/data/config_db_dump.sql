@@ -781,7 +781,7 @@ INSERT INTO "tech_tree_nodes" VALUES('SlaaneshParadise','dungeon',5,5,0,NULL,NUL
 INSERT INTO "tech_tree_nodes" VALUES('NurgleGarden','dungeon',5,6,0,NULL,NULL,0,'纳垢花园','PlagueBehemoth',200,10.0,70,'Demon',0);
 INSERT INTO "tech_tree_nodes" VALUES('CrystalMine','dungeon',1,3,1,3,8,0,'魔晶矿井',NULL,200,10.0,3,'Demon',0);
 INSERT INTO "tech_tree_nodes" VALUES('TreasureBox','dungeon',1,2,1,3,8,0,'宝箱',NULL,200,10.0,3,'Demon',0);
-INSERT INTO "tech_tree_nodes" VALUES('HordeCoreL1','horde',1,0,0,NULL,NULL,0,'部落大厅·1级',NULL,800,0.0,0,'',1);
+INSERT INTO "tech_tree_nodes" VALUES('HordeCoreL1','horde',1,0,0,NULL,NULL,0,'部落大厅·1级',NULL,800,0.0,NULL,'',1);
 INSERT INTO "tech_tree_nodes" VALUES('OrcCamp','horde',1,1,1,3,12,0,'兽人营地','OrcWarrior',260,9.0,3,'Orc',0);
 INSERT INTO "tech_tree_nodes" VALUES('GoblinHut','horde',1,2,1,2,14,0,'哥布林窝棚','GoblinSlinger',120,4.5,2,'Goblin',0);
 INSERT INTO "tech_tree_nodes" VALUES('Burrow','horde',1,3,1,2,10,0,'地洞',NULL,150,0.0,2,'Burrow',0);

@@ -36,6 +36,7 @@ public sealed class DamageMatrixEditor
 
 	private readonly Control _root;
 	private readonly Button _saveButton;
+	private readonly Button _resetButton;
 	private readonly Button _backButton;
 	private readonly Control _gridContainer;
 	private readonly Dictionary<(int, int), LineEdit> _cells = new();
@@ -44,10 +45,12 @@ public sealed class DamageMatrixEditor
 	{
 		_root = root;
 		_saveButton = root.GetNode<Button>("BottomBar/SaveButton");
+		_resetButton = root.GetNode<Button>("BottomBar/ResetButton");
 		_backButton = root.GetNode<Button>("BottomBar/BackButton");
 		_gridContainer = root.GetNode<Control>("GridArea/GridPanel");
 
 		_saveButton.Pressed += OnSavePressed;
+		_resetButton.Pressed += OnResetPressed;
 		_backButton.Pressed += OnBackPressed;
 		_gridContainer.Draw += OnGridDraw;
 
@@ -59,6 +62,8 @@ public sealed class DamageMatrixEditor
 	{
 		if (GodotObject.IsInstanceValid(_saveButton))
 			_saveButton.Pressed -= OnSavePressed;
+		if (GodotObject.IsInstanceValid(_resetButton))
+			_resetButton.Pressed -= OnResetPressed;
 		if (GodotObject.IsInstanceValid(_backButton))
 			_backButton.Pressed -= OnBackPressed;
 		if (GodotObject.IsInstanceValid(_gridContainer))
@@ -187,6 +192,12 @@ public sealed class DamageMatrixEditor
 		}
 
 		ShowStatus("保存成功");
+	}
+
+	private void OnResetPressed()
+	{
+		LoadFromDatabase();
+		ShowStatus("已重置为进入时的状态");
 	}
 
 	private void OnBackPressed()

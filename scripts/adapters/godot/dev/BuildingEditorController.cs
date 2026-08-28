@@ -40,10 +40,12 @@ public sealed class BuildingEditorController
 	private readonly Button _saveButton;
 	private readonly Button _addToInventoryButton;
 	private readonly Button _removeFromInventoryButton;
+	private readonly Button _resetButton;
 	private readonly Label _inventoryStatusLabel;
 	private readonly Label _statusBar;
 
 	private readonly ITechTreeRepository _repo;
+	private readonly Dictionary<string, Dictionary<string, bool>> _inventorySnapshots = new();
 	private List<FactionDef> _factions = new();
 	private List<BuildingTypeSummary> _buildings = new();
 	private string _currentFactionId = "";
@@ -76,6 +78,7 @@ public sealed class BuildingEditorController
 		_addToInventoryButton = root.GetNode<Button>("EditorArea/EditPanel/InventoryRow/AddToInventoryButton");
 		_removeFromInventoryButton = root.GetNode<Button>("EditorArea/EditPanel/InventoryRow/RemoveFromInventoryButton");
 		_inventoryStatusLabel = root.GetNode<Label>("EditorArea/EditPanel/InventoryStatusLabel");
+		_resetButton = root.GetNode<Button>("EditorArea/EditPanel/ResetButton");
 		_statusBar = root.GetNode<Label>("StatusBar");
 
 		_repo = repo;
@@ -91,6 +94,7 @@ public sealed class BuildingEditorController
 		_saveButton.Pressed += OnSavePressed;
 		_addToInventoryButton.Pressed += OnAddToInventoryPressed;
 		_removeFromInventoryButton.Pressed += OnRemoveFromInventoryPressed;
+		_resetButton.Pressed += OnResetPressed;
 	}
 
 	public void Dispose()
@@ -111,6 +115,8 @@ public sealed class BuildingEditorController
 			_addToInventoryButton.Pressed -= OnAddToInventoryPressed;
 		if (GodotObject.IsInstanceValid(_removeFromInventoryButton))
 			_removeFromInventoryButton.Pressed -= OnRemoveFromInventoryPressed;
+		if (GodotObject.IsInstanceValid(_resetButton))
+			_resetButton.Pressed -= OnResetPressed;
 	}
 
 	public void LoadInitialData()
@@ -146,6 +152,8 @@ public sealed class BuildingEditorController
 		_currentFactionIndex = index;
 		FactionDef faction = _factions[index];
 		_currentFactionId = faction.Id;
+		if (!_inventorySnapshots.ContainsKey(faction.Id))
+			_inventorySnapshots[faction.Id] = SnapshotInventory(faction.Id);
 		_factionNameLabel.Text = faction.DisplayName;
 		_buildings = _repo.LoadAllBuildingTypes(faction.Id);
 		RefreshBuildingList();
@@ -347,6 +355,38 @@ public sealed class BuildingEditorController
 		UpdateInventoryStatus();
 		RefreshBuildingList();
 		ShowStatus("已从库存移除");
+	}
+
+	private void OnResetPressed()
+	{
+		RestoreEntryInventory(_currentFactionId);
+		LoadFactionAtIndex(_currentFactionIndex);
+		ShowStatus("已重置为进入时的状态");
+	}
+
+	private Dictionary<string, bool> SnapshotInventory(string factionId)
+	{
+		Dictionary<string, bool> snapshot = new();
+		foreach (BuildingTypeSummary building in _repo.LoadAllBuildingTypes(factionId))
+			snapshot[building.TypeId] = _repo.IsInInventory(factionId, building.TypeId);
+		return snapshot;
+	}
+
+	private void RestoreEntryInventory(string factionId)
+	{
+		if (!_inventorySnapshots.TryGetValue(factionId, out Dictionary<string, bool> snapshot))
+			return;
+		Dictionary<string, bool> current = SnapshotInventory(factionId);
+		foreach (KeyValuePair<string, bool> pair in snapshot)
+		{
+			bool inCurrent = current.TryGetValue(pair.Key, out bool value) && value;
+			if (inCurrent == pair.Value)
+				continue;
+			if (pair.Value)
+				_repo.AddToInventory(factionId, pair.Key);
+			else
+				_repo.RemoveFromInventory(factionId, pair.Key);
+		}
 	}
 
 	private void UpdateInventoryStatus()

@@ -44,6 +44,10 @@ text = "建筑编辑器"
 layout_mode = 2
 text = "保存"
 
+[node name="ResetButton" type="Button" parent="TopBar"]
+layout_mode = 2
+text = "重置"
+
 [node name="CloseButton" type="Button" parent="TopBar" unique_id=95754733]
 layout_mode = 2
 text = "关闭"
