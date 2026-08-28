@@ -247,17 +247,14 @@ public class TechTreeEditorController
 		return nextCol;
 	}
 
-	private int ResolveDropColumn(int tier, int desiredCol, string dragTypeId)
+	private bool IsCellOccupied(int tier, int col, string excludeTypeId)
 	{
-		List<int> usedCols = new();
 		foreach (TechTreeNode n in _nodes)
 		{
-			if (n.Tier == tier && n.TypeId != dragTypeId)
-				usedCols.Add(n.Col);
+			if (n.TypeId != excludeTypeId && n.Tier == tier && n.Col == col)
+				return true;
 		}
-		if (!usedCols.Contains(desiredCol))
-			return desiredCol;
-		return GetNextFreeColumn(usedCols, desiredCol);
+		return false;
 	}
 
 	private void LayoutCards()
@@ -486,13 +483,16 @@ public class TechTreeEditorController
 		TechTreeNode node = _nodes.Find(n => n.TypeId == _dragSource.GetMeta("type_id").AsString());
 		if (node != null)
 		{
-			int oldTier = node.Tier;
-			int resolvedCol = ResolveDropColumn(newTier, newCol, node.TypeId);
-			node.Tier = newTier;
-			node.Col = resolvedCol;
+			if (IsCellOccupied(newTier, newCol, node.TypeId))
+			{
+				ShowStatus("目标位置已有建筑，已取消移动");
+				CancelDrag();
+				return;
+			}
 
-			if (resolvedCol != newCol)
-				ShowStatus("目标位置已有建筑，已放置到同层右侧空位");
+			int oldTier = node.Tier;
+			node.Tier = newTier;
+			node.Col = newCol;
 
 			if (newTier != oldTier)
 				RemoveInvalidEdges(node);
