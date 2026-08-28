@@ -39,6 +39,8 @@ public class TechTreeEditorController
 	private const float CardWidth = 120;
 	private const float CardHeight = 56;
 	private const float ColSpacing = 140;
+	private const float TierRowHeight = 100;
+	private const int TierCount = 5;
 	private const int DefaultBuildingValue = 1;
 	private const string DevToolsMenuScene = "res://scenes/ui/dev_tools/dev_tools_menu.tscn";
 	private const string BuildingEditorScene = "res://scenes/ui/dev_tools/building_editor.tscn";
@@ -248,7 +250,7 @@ public class TechTreeEditorController
 				child.QueueFree();
 		}
 
-		_cardCanvas.CustomMinimumSize = new Vector2(GetCanvasContentWidth(), 0);
+		_cardCanvas.CustomMinimumSize = new Vector2(GetCanvasContentWidth(), GetCanvasContentHeight());
 
 		if (_nodes.Count == 0)
 		{
@@ -256,14 +258,13 @@ public class TechTreeEditorController
 			return;
 		}
 
-		float canvasHeight = _cardCanvas.Size.Y;
-		float rowHeight = canvasHeight / 5;
+		float rowHeight = TierRowHeight;
 
 		foreach (TechTreeNode node in _nodes)
 		{
 			Panel card = CreateCardView(node);
 			float x = node.Col * ColSpacing + 10;
-			float y = (4 - (node.Tier - 1)) * rowHeight + (rowHeight - CardHeight) / 2;
+			float y = (TierCount - 1 - (node.Tier - 1)) * rowHeight + (rowHeight - CardHeight) / 2;
 			card.Position = new Vector2(x, y);
 			_cardCanvas.AddChild(card);
 		}
@@ -280,6 +281,11 @@ public class TechTreeEditorController
 				maxCol = node.Col;
 		}
 		return (maxCol + 2) * ColSpacing + 20;
+	}
+
+	private float GetCanvasContentHeight()
+	{
+		return TierRowHeight * TierCount;
 	}
 
 	private Panel CreateCardView(TechTreeNode node)
@@ -455,9 +461,8 @@ public class TechTreeEditorController
 		}
 
 		Vector2 localPos = _cardCanvas.GetLocalMousePosition();
-		float canvasHeight = _cardCanvas.Size.Y;
-		float rowHeight = canvasHeight / 5;
-		int newTier = Math.Clamp(5 - (int)(localPos.Y / rowHeight), 1, 5);
+		float rowHeight = TierRowHeight;
+		int newTier = Math.Clamp(TierCount - (int)(localPos.Y / rowHeight), 1, TierCount);
 		int newCol = Math.Max(0, (int)Math.Round((_cardCanvas.GetGlobalMousePosition().X - _dragOffset.X - _cardCanvas.GlobalPosition.X - 10) / ColSpacing));
 
 		TechTreeNode node = _nodes.Find(n => n.TypeId == _dragSource.GetMeta("type_id").AsString());
@@ -561,9 +566,8 @@ public class TechTreeEditorController
 			return;
 		}
 
-		float canvasHeight = _cardCanvas.Size.Y;
-		float rowHeight = canvasHeight / 5;
-		int tier = Math.Clamp(5 - (int)(localPos.Y / rowHeight), 1, 5);
+		float rowHeight = TierRowHeight;
+		int tier = Math.Clamp(TierCount - (int)(localPos.Y / rowHeight), 1, TierCount);
 
 		int maxCol = -1;
 		foreach (TechTreeNode n in _nodes.Where(n => n.Tier == tier))
@@ -612,8 +616,7 @@ public class TechTreeEditorController
 
 	private void TryDeleteEdgeAt(Vector2 canvasPos)
 	{
-		float canvasHeight = _cardCanvas.Size.Y;
-		float rowHeight = canvasHeight / 5;
+		float rowHeight = TierRowHeight;
 		float tolerance = 10f;
 
 		TechTreeEdge toDelete = null;
@@ -705,7 +708,7 @@ public class TechTreeEditorController
 			return Vector2.Zero;
 
 		float x = node.Col * ColSpacing + 10 + CardWidth / 2;
-		float y = (4 - (node.Tier - 1)) * rowHeight + rowHeight / 2;
+		float y = (TierCount - 1 - (node.Tier - 1)) * rowHeight + rowHeight / 2;
 		return new Vector2(x, y);
 	}
 
@@ -779,10 +782,10 @@ public class TechTreeEditorController
 	{
 		float canvasWidth = _cardCanvas.Size.X;
 		float canvasHeight = _cardCanvas.Size.Y;
-		float rowHeight = canvasHeight / 5;
+		float rowHeight = TierRowHeight;
 		Color gridColor = new(0.4f, 0.4f, 0.4f);
 
-		for (int i = 1; i < 5; i++)
+		for (int i = 1; i < TierCount; i++)
 		{
 			float y = i * rowHeight;
 			_cardCanvas.DrawLine(new Vector2(0, y - 1), new Vector2(canvasWidth, y - 1), gridColor);
