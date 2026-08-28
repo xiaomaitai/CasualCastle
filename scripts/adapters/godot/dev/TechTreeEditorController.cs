@@ -51,7 +51,7 @@ public class TechTreeEditorController
 		_nextFactionButton = root.GetNode<Button>("TopBar/NextFactionButton");
 		_saveButton = root.GetNode<Button>("TopBar/SaveButton");
 		_closeButton = root.GetNode<Button>("TopBar/CloseButton");
-		_cardCanvas = root.GetNode<Control>("EditorArea/CardCanvas");
+		_cardCanvas = root.GetNode<Control>("EditorArea/CanvasScroll/CardCanvas");
 		_libraryPanel = root.GetNode<Control>("EditorArea/LibraryPanel");
 		_libraryList = root.GetNode<VBoxContainer>("EditorArea/LibraryPanel/LibraryScroll/LibraryList");
 		_buildingEditorButton = root.GetNode<Button>("TopBar/BuildingEditorButton");
@@ -241,6 +241,8 @@ public class TechTreeEditorController
 				child.QueueFree();
 		}
 
+		_cardCanvas.CustomMinimumSize = new Vector2(GetCanvasContentWidth(), 0);
+
 		if (_nodes.Count == 0)
 		{
 			_cardCanvas.QueueRedraw();
@@ -260,6 +262,17 @@ public class TechTreeEditorController
 		}
 
 		_cardCanvas.QueueRedraw();
+	}
+
+	private float GetCanvasContentWidth()
+	{
+		int maxCol = 0;
+		foreach (TechTreeNode node in _nodes)
+		{
+			if (node.Col > maxCol)
+				maxCol = node.Col;
+		}
+		return (maxCol + 2) * ColSpacing + 20;
 	}
 
 	private Panel CreateCardView(TechTreeNode node)
