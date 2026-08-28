@@ -56,7 +56,7 @@ anchor_right = 0.5
 offset_left = -140.0
 offset_top = 64.0
 offset_right = 140.0
-offset_bottom = 240.0
+offset_bottom = 256.0
 grow_horizontal = 2
 theme_override_constants/separation = 12
 alignment = 1
@@ -75,6 +75,11 @@ text = "参数编辑器"
 custom_minimum_size = Vector2(240, 44)
 layout_mode = 2
 text = "科技树编辑器"
+
+[node name="BuildingEditorButton" type="Button" parent="Panel/ToolList"]
+custom_minimum_size = Vector2(240, 44)
+layout_mode = 2
+text = "建筑编辑器"
 
 [node name="BackButton" type="Button" parent="Panel"]
 layout_mode = 1

@@ -18,13 +18,14 @@ public class TechTreeEditorController
 	private readonly Control _cardCanvas;
 	private readonly Control _libraryPanel;
 	private readonly VBoxContainer _libraryList;
-	private readonly Button _newBuildingButton;
+	private readonly Button _buildingEditorButton;
 	private readonly Label _statusBar;
 
 	private readonly ITechTreeRepository _repo;
 	private List<FactionDef> _factions = new();
 	private List<TechTreeNode> _nodes = new();
 	private List<TechTreeEdge> _edges = new();
+	private List<BuildingTypeSummary> _inventory = new();
 	private string _currentFactionId = "";
 	private int _currentFactionIndex = 0;
 
@@ -40,6 +41,7 @@ public class TechTreeEditorController
 	private const float ColSpacing = 140;
 	private const int DefaultBuildingValue = 1;
 	private const string DevToolsMenuScene = "res://scenes/ui/dev_tools/dev_tools_menu.tscn";
+	private const string BuildingEditorScene = "res://scenes/ui/dev_tools/building_editor.tscn";
 
 	public TechTreeEditorController(Control root, ITechTreeRepository repo)
 	{
@@ -52,7 +54,7 @@ public class TechTreeEditorController
 		_cardCanvas = root.GetNode<Control>("EditorArea/CardCanvas");
 		_libraryPanel = root.GetNode<Control>("EditorArea/LibraryPanel");
 		_libraryList = root.GetNode<VBoxContainer>("EditorArea/LibraryPanel/LibraryScroll/LibraryList");
-		_newBuildingButton = root.GetNode<Button>("EditorArea/LibraryPanel/NewBuildingButton");
+		_buildingEditorButton = root.GetNode<Button>("TopBar/BuildingEditorButton");
 		_statusBar = root.GetNode<Label>("StatusBar");
 
 		_repo = repo;
@@ -61,7 +63,7 @@ public class TechTreeEditorController
 		_nextFactionButton.Pressed += OnNextFactionPressed;
 		_saveButton.Pressed += OnSavePressed;
 		_closeButton.Pressed += OnClosePressed;
-		_newBuildingButton.Pressed += OnNewBuildingPressed;
+		_buildingEditorButton.Pressed += OnBuildingEditorPressed;
 		_cardCanvas.Draw += OnCardCanvasDraw;
 		_cardCanvas.GuiInput += OnCardCanvasGuiInput;
 	}
@@ -71,8 +73,15 @@ public class TechTreeEditorController
 		_factions = _repo.LoadFactions();
 		if (_factions.Count == 0)
 			return;
-		_currentFactionIndex = 0;
-		LoadFactionAtIndex(0);
+		int startIndex = 0;
+		if (!string.IsNullOrEmpty(DevEditorContext.CurrentFactionId))
+		{
+			int contextIndex = _factions.FindIndex(f => f.Id == DevEditorContext.CurrentFactionId);
+			if (contextIndex >= 0)
+				startIndex = contextIndex;
+		}
+		_currentFactionIndex = startIndex;
+		LoadFactionAtIndex(startIndex);
 	}
 
 	public void Dispose()
@@ -81,7 +90,7 @@ public class TechTreeEditorController
 		_nextFactionButton.Pressed -= OnNextFactionPressed;
 		_saveButton.Pressed -= OnSavePressed;
 		_closeButton.Pressed -= OnClosePressed;
-		_newBuildingButton.Pressed -= OnNewBuildingPressed;
+		_buildingEditorButton.Pressed -= OnBuildingEditorPressed;
 		_cardCanvas.Draw -= OnCardCanvasDraw;
 		_cardCanvas.GuiInput -= OnCardCanvasGuiInput;
 	}
@@ -296,54 +305,47 @@ public class TechTreeEditorController
 			child.QueueFree();
 		}
 
-		List<BuildingTypeSummary> allTypes = _repo.LoadAllBuildingTypes(_currentFactionId);
-		int placedCount = 0;
-		GD.Print($"[TechTreeEditor] RefreshLibrary: 建筑总数={allTypes.Count}, 当前派系节点数={_nodes.Count}");
+		_inventory = _repo.LoadInventory(_currentFactionId);
+		int availableCount = 0;
+		GD.Print($"[TechTreeEditor] RefreshLibrary: 库存总数={_inventory.Count}, 当前派系节点数={_nodes.Count}");
 
-		foreach (BuildingTypeSummary type in allTypes)
+		foreach (BuildingTypeSummary type in _inventory)
 		{
-			bool placed = _nodes.Exists(n => n.TypeId == type.TypeId);
-			if (placed) placedCount++;
-			Panel item = CreateLibraryItem(type.TypeId, type.DisplayName, placed);
+			if (_nodes.Exists(n => n.TypeId == type.TypeId))
+				continue;
+			availableCount++;
+			Panel item = CreateLibraryItem(type);
 			_libraryList.AddChild(item);
 		}
-		GD.Print($"[TechTreeEditor] RefreshLibrary 完成: 已放置={placedCount}, 未放置={allTypes.Count - placedCount}");
+		GD.Print($"[TechTreeEditor] RefreshLibrary 完成: 可用库存={availableCount}, 已放置={_inventory.Count - availableCount}");
 	}
 
-	private Panel CreateLibraryItem(string typeId, string displayName, bool placed)
+	private Panel CreateLibraryItem(BuildingTypeSummary type)
 	{
 		Panel panel = new()
 		{
 			CustomMinimumSize = new Vector2(180, 36),
 			Size = new Vector2(180, 36),
-			MouseFilter = placed ? Control.MouseFilterEnum.Ignore : Control.MouseFilterEnum.Stop
+			MouseFilter = Control.MouseFilterEnum.Stop
 		};
 
 		StyleBoxFlat styleBox = new();
-		styleBox.BgColor = placed
-			? new Color(0.25f, 0.25f, 0.25f)
-			: new Color(0.2f, 0.4f, 0.55f);
+		styleBox.BgColor = new Color(0.2f, 0.4f, 0.55f);
 		panel.AddThemeStyleboxOverride("panel", styleBox);
-
-		Color labelColor = placed
-			? new Color(0.5f, 0.5f, 0.5f)
-			: new Color(1f, 1f, 1f);
 
 		Label label = new()
 		{
-			Text = displayName,
+			Text = type.DisplayName,
 			Position = new Vector2(4, 8),
 			Size = new Vector2(172, 20),
 			HorizontalAlignment = HorizontalAlignment.Center,
-			Modulate = labelColor
+			Modulate = new Color(1f, 1f, 1f)
 		};
 		panel.AddChild(label);
 
-		panel.SetMeta("type_id", typeId);
-		panel.SetMeta("display_name", displayName);
+		panel.SetMeta("type_id", type.TypeId);
 
-		if (!placed)
-			panel.GuiInput += e => OnLibraryItemGuiInput(panel, e);
+		panel.GuiInput += e => OnLibraryItemGuiInput(panel, e);
 
 		return panel;
 	}
@@ -354,12 +356,6 @@ public class TechTreeEditorController
 		{
 			if (mouseButton.ButtonIndex == MouseButton.Left)
 			{
-				if (mouseButton.DoubleClick)
-				{
-					OnCardDoubleClick(card);
-					return;
-				}
-
 				_dragMode = DragMode.MoveCard;
 				_dragSource = card;
 				_dragActive = true;
@@ -556,8 +552,7 @@ public class TechTreeEditorController
 				maxCol = n.Col;
 		}
 
-		List<BuildingTypeSummary> allTypes = _repo.LoadAllBuildingTypes(_currentFactionId);
-		BuildingTypeSummary typeInfo = allTypes.Find(t => t.TypeId == typeId);
+		BuildingTypeSummary typeInfo = _inventory.Find(t => t.TypeId == typeId);
 		string displayName = typeInfo?.DisplayName ?? typeId;
 
 		TechTreeNode newNode = new()
@@ -566,11 +561,13 @@ public class TechTreeEditorController
 			FactionId = _currentFactionId,
 			Tier = tier,
 			Col = maxCol + 1,
-			ShopAvailable = false,
+			ShopAvailable = typeInfo?.ShopAvailable ?? false,
+			GoldCost = typeInfo?.GoldCost ?? 0,
+			ShopWeight = typeInfo?.ShopWeight ?? 1,
 			DisplayName = displayName,
-			UnitTypeId = typeId,
-			MaxHealth = 200,
-			SpawnInterval = 10.0f,
+			UnitTypeId = typeInfo?.UnitTypeId ?? typeId,
+			MaxHealth = typeInfo?.MaxHealth ?? 200,
+			SpawnInterval = typeInfo?.SpawnInterval ?? 10.0f,
 			Value = typeInfo?.Value ?? DefaultBuildingValue
 		};
 
@@ -578,7 +575,7 @@ public class TechTreeEditorController
 		LayoutCards();
 		RefreshLibrary();
 		CancelDrag();
-		ShowStatus($"已添加: {displayName} (T{tier})");
+		ShowStatus($"已放置: {displayName} (T{tier})，已从库存扣除");
 	}
 
 	private void CanvasToLibrary(Panel card)
@@ -590,7 +587,7 @@ public class TechTreeEditorController
 		_nodes.RemoveAll(n => n.TypeId == typeId);
 		LayoutCards();
 		RefreshLibrary();
-		ShowStatus($"已移除: {typeId}");
+		ShowStatus($"已移除: {typeId}（已回到库存）");
 	}
 
 	private void TryDeleteEdgeAt(Vector2 canvasPos)
@@ -621,157 +618,6 @@ public class TechTreeEditorController
 			LayoutCards();
 			ShowStatus($"连线已删除: {toDelete.FromTypeId} → {toDelete.ToTypeId}");
 		}
-	}
-
-	private void OnCardDoubleClick(Panel card)
-	{
-		string typeId = card.GetMeta("type_id").AsString();
-		TechTreeNode node = _nodes.Find(n => n.TypeId == typeId);
-		if (node == null)
-			return;
-
-		AcceptDialog dialog = new()
-		{
-			Title = $"编辑: {node.DisplayName}",
-			Size = new Vector2I(300, 280)
-		};
-
-		VBoxContainer content = new() { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
-
-		HBoxContainer nameRow = CreateEditRow("名称", out LineEdit nameEdit);
-		nameEdit.Text = node.DisplayName;
-		content.AddChild(nameRow);
-
-		HBoxContainer costRow = CreateEditRow("费用", out SpinBox costSpin);
-		costSpin.MinValue = 0;
-		costSpin.MaxValue = 99;
-		costSpin.Value = node.GoldCost;
-		content.AddChild(costRow);
-
-		HBoxContainer valueRow = CreateEditRow("价值", out SpinBox valueSpin);
-		valueSpin.MinValue = 0;
-		valueSpin.MaxValue = 999;
-		valueSpin.Value = node.Value;
-		content.AddChild(valueRow);
-
-		HBoxContainer weightRow = CreateEditRow("权重", out SpinBox weightSpin);
-		weightSpin.MinValue = 0;
-		weightSpin.MaxValue = 99;
-		weightSpin.Value = node.ShopWeight;
-		content.AddChild(weightRow);
-
-		HBoxContainer tierRow = CreateEditRow("层级", out SpinBox tierSpin);
-		tierSpin.MinValue = 1;
-		tierSpin.MaxValue = 5;
-		tierSpin.Value = node.Tier;
-		content.AddChild(tierRow);
-
-		CheckBox shopCheck = new() { Text = "商店可买", ButtonPressed = node.ShopAvailable };
-		content.AddChild(shopCheck);
-
-		Label upgradeCostLabel = new();
-		content.AddChild(upgradeCostLabel);
-		UpdateUpgradeCostLabel(upgradeCostLabel, node.TypeId, node.Value);
-		valueSpin.ValueChanged += _ => UpdateUpgradeCostLabel(upgradeCostLabel, node.TypeId, (int)valueSpin.Value);
-
-		dialog.AddChild(content);
-		_root.AddChild(dialog);
-
-		dialog.Confirmed += () =>
-		{
-			int oldTier = node.Tier;
-			node.DisplayName = nameEdit.Text;
-			node.GoldCost = (int)costSpin.Value;
-			node.Value = (int)valueSpin.Value;
-			node.ShopWeight = (int)weightSpin.Value;
-			node.Tier = (int)tierSpin.Value;
-			node.ShopAvailable = shopCheck.ButtonPressed;
-			if (node.Tier != oldTier)
-				RemoveInvalidEdges(node);
-			LayoutCards();
-			RefreshLibrary();
-			dialog.QueueFree();
-		};
-
-		dialog.Canceled += () => dialog.QueueFree();
-		dialog.PopupCentered();
-	}
-
-	private void OnNewBuildingPressed()
-	{
-		AcceptDialog dialog = new()
-		{
-			Title = "新建建筑",
-			Size = new Vector2I(300, 180)
-		};
-
-		VBoxContainer content = new() { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
-
-		HBoxContainer idRow = CreateEditRow("TypeID", out LineEdit idEdit);
-		idEdit.Text = "NewBuilding";
-		content.AddChild(idRow);
-
-		HBoxContainer nameRow = CreateEditRow("名称", out LineEdit nameEdit);
-		nameEdit.Text = "新建筑";
-		content.AddChild(nameRow);
-
-		HBoxContainer valueRow = CreateEditRow("价值", out SpinBox valueSpin);
-		valueSpin.MinValue = 0;
-		valueSpin.MaxValue = 999;
-		valueSpin.Value = DefaultBuildingValue;
-		content.AddChild(valueRow);
-
-		dialog.AddChild(content);
-		_root.AddChild(dialog);
-
-		dialog.Confirmed += () =>
-		{
-			string typeId = idEdit.Text.Trim();
-			string displayName = nameEdit.Text.Trim();
-			if (string.IsNullOrEmpty(typeId) || string.IsNullOrEmpty(displayName))
-			{
-				dialog.QueueFree();
-				return;
-			}
-
-			string dbPath = global::Godot.ProjectSettings.GlobalizePath("res://assets/data/config.db");
-			using Microsoft.Data.Sqlite.SqliteConnection conn = new($"Data Source={dbPath}");
-			conn.Open();
-			using Microsoft.Data.Sqlite.SqliteCommand insertCmd = conn.CreateCommand();
-			insertCmd.CommandText = "INSERT OR IGNORE INTO building_defs (type_id, display_name, faction_id, max_health, spawn_interval, footprint_json, collision_width, collision_height, value) VALUES (@id, @name, @factionId, 200, 10.0, '[[0,0],[1,0],[0,1],[1,1]]', 188, 188, @value)";
-			insertCmd.Parameters.AddWithValue("@id", typeId);
-			insertCmd.Parameters.AddWithValue("@name", displayName);
-			insertCmd.Parameters.AddWithValue("@factionId", _currentFactionId);
-			insertCmd.Parameters.AddWithValue("@value", (int)valueSpin.Value);
-			insertCmd.ExecuteNonQuery();
-
-			RefreshLibrary();
-			ShowStatus($"新建建筑: {displayName}");
-			dialog.QueueFree();
-		};
-
-		dialog.Canceled += () => dialog.QueueFree();
-		dialog.PopupCentered();
-	}
-
-	private static HBoxContainer CreateEditRow(string labelText, out LineEdit lineEdit)
-	{
-		HBoxContainer row = new();
-		Label label = new() { Text = labelText, CustomMinimumSize = new Vector2(60, 0) };
-		row.AddChild(label);
-		lineEdit = new() { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
-		row.AddChild(lineEdit);
-		return row;
-	}
-
-	private static HBoxContainer CreateEditRow(string labelText, out SpinBox spinBox)
-	{
-		HBoxContainer row = new();
-		Label label = new() { Text = labelText, CustomMinimumSize = new Vector2(60, 0) };
-		row.AddChild(label);
-		spinBox = new() { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
-		row.AddChild(spinBox);
-		return row;
 	}
 
 	private Panel FindCardAtPosition(Vector2 canvasPos)
@@ -973,22 +819,11 @@ public class TechTreeEditorController
 		return edges;
 	}
 
-	private void UpdateUpgradeCostLabel(Label label, string nodeTypeId, int nodeValue)
+	private void OnBuildingEditorPressed()
 	{
-		List<TechTreeEdge> incoming = _edges.Where(e => e.ToTypeId == nodeTypeId).ToList();
-		if (incoming.Count != 1)
-		{
-			label.Text = "升级费用: -";
-			return;
-		}
-
-		TechTreeNode sourceNode = _nodes.Find(n => n.TypeId == incoming[0].FromTypeId);
-		if (sourceNode == null)
-		{
-			label.Text = "升级费用: -";
-			return;
-		}
-		label.Text = $"升级费用: {nodeValue - sourceNode.Value}（{sourceNode.Value} → {nodeValue}）";
+		SaveAll();
+		DevEditorContext.CurrentFactionId = _currentFactionId;
+		_root.GetTree().ChangeSceneToFile(BuildingEditorScene);
 	}
 
 	private async void ShowStatus(string message)

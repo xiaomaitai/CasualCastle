@@ -88,6 +88,8 @@ public class SqliteTechTreeRepository : ITechTreeRepository
 		MigrateRaceColumns(connection);
 		MigrateValueColumns(connection);
 		MigrateUpgradeRecipes(connection);
+		MigrateFactionInventory(connection);
+		MigrateBuildingShopColumns(connection);
 
 		cmd.CommandText = "SELECT COUNT(*) FROM tech_tree_nodes";
 		long nodeCount = (long)cmd.ExecuteScalar();
@@ -283,19 +285,139 @@ public class SqliteTechTreeRepository : ITechTreeRepository
 		List<BuildingTypeSummary> types = new();
 		using SqliteConnection connection = OpenConnection();
 		using SqliteCommand cmd = connection.CreateCommand();
-		cmd.CommandText = "SELECT type_id, display_name, value FROM building_defs WHERE is_core = 0 AND faction_id = @factionId ORDER BY display_name";
+		cmd.CommandText = "SELECT type_id, display_name, value, max_health, spawn_interval, unit_type_id, shop_available, gold_cost, shop_weight FROM building_defs WHERE is_core = 0 AND faction_id = @factionId ORDER BY display_name";
 		cmd.Parameters.AddWithValue("@factionId", factionId);
 		using SqliteDataReader reader = cmd.ExecuteReader();
 		while (reader.Read())
 		{
-			types.Add(new BuildingTypeSummary
-			{
-				TypeId = reader.GetString(0),
-				DisplayName = reader.GetString(1),
-				Value = reader.IsDBNull(2) ? 0 : reader.GetInt32(2)
-			});
+			types.Add(ReadBuildingSummary(reader));
 		}
 		return types;
+	}
+
+	private static BuildingTypeSummary ReadBuildingSummary(SqliteDataReader reader)
+	{
+		return new BuildingTypeSummary
+		{
+			TypeId = reader.GetString(0),
+			DisplayName = reader.GetString(1),
+			Value = reader.IsDBNull(2) ? 0 : reader.GetInt32(2),
+			MaxHealth = reader.IsDBNull(3) ? 0 : reader.GetInt32(3),
+			SpawnInterval = reader.IsDBNull(4) ? 0 : reader.GetFloat(4),
+			UnitTypeId = reader.IsDBNull(5) ? "" : reader.GetString(5),
+			ShopAvailable = reader.IsDBNull(6) ? false : reader.GetInt32(6) != 0,
+			GoldCost = reader.IsDBNull(7) ? 0 : reader.GetInt32(7),
+			ShopWeight = reader.IsDBNull(8) ? 0 : reader.GetInt32(8)
+		};
+	}
+
+	public List<BuildingTypeSummary> LoadInventory(string factionId)
+	{
+		List<BuildingTypeSummary> types = new();
+		using SqliteConnection connection = OpenConnection();
+		using SqliteCommand cmd = connection.CreateCommand();
+		cmd.CommandText = @"
+            SELECT b.type_id, b.display_name, b.value, b.max_health, b.spawn_interval, b.unit_type_id, b.shop_available, b.gold_cost, b.shop_weight
+            FROM faction_inventory i
+            INNER JOIN building_defs b ON b.type_id = i.type_id
+            WHERE i.faction_id = @factionId AND b.is_core = 0
+            ORDER BY b.display_name";
+		cmd.Parameters.AddWithValue("@factionId", factionId);
+		using SqliteDataReader reader = cmd.ExecuteReader();
+		while (reader.Read())
+		{
+			types.Add(ReadBuildingSummary(reader));
+		}
+		return types;
+	}
+
+	public bool IsInInventory(string factionId, string typeId)
+	{
+		using SqliteConnection connection = OpenConnection();
+		using SqliteCommand cmd = connection.CreateCommand();
+		cmd.CommandText = "SELECT COUNT(*) FROM faction_inventory WHERE faction_id = @factionId AND type_id = @typeId";
+		cmd.Parameters.AddWithValue("@factionId", factionId);
+		cmd.Parameters.AddWithValue("@typeId", typeId);
+		return (long)cmd.ExecuteScalar() > 0;
+	}
+
+	public void AddToInventory(string factionId, string typeId)
+	{
+		using SqliteConnection connection = OpenConnection();
+		using SqliteCommand cmd = connection.CreateCommand();
+		cmd.CommandText = "INSERT OR IGNORE INTO faction_inventory (faction_id, type_id) VALUES (@factionId, @typeId)";
+		cmd.Parameters.AddWithValue("@factionId", factionId);
+		cmd.Parameters.AddWithValue("@typeId", typeId);
+		cmd.ExecuteNonQuery();
+	}
+
+	public void RemoveFromInventory(string factionId, string typeId)
+	{
+		using SqliteConnection connection = OpenConnection();
+		using SqliteCommand cmd = connection.CreateCommand();
+		cmd.CommandText = "DELETE FROM faction_inventory WHERE faction_id = @factionId AND type_id = @typeId";
+		cmd.Parameters.AddWithValue("@factionId", factionId);
+		cmd.Parameters.AddWithValue("@typeId", typeId);
+		cmd.ExecuteNonQuery();
+	}
+
+	public BuildingEditData LoadBuilding(string typeId)
+	{
+		using SqliteConnection connection = OpenConnection();
+		using SqliteCommand cmd = connection.CreateCommand();
+		cmd.CommandText = "SELECT type_id, display_name, faction_id, max_health, spawn_interval, value, unit_type_id, shop_available, gold_cost, shop_weight, collision_width, collision_height FROM building_defs WHERE type_id = @typeId";
+		cmd.Parameters.AddWithValue("@typeId", typeId);
+		using SqliteDataReader reader = cmd.ExecuteReader();
+		if (!reader.Read())
+			throw new System.Collections.Generic.KeyNotFoundException($"Building type '{typeId}' not found");
+		return new BuildingEditData
+		{
+			TypeId = reader.GetString(0),
+			DisplayName = reader.GetString(1),
+			FactionId = reader.GetString(2),
+			MaxHealth = reader.GetInt32(3),
+			SpawnInterval = reader.IsDBNull(4) ? 0 : reader.GetFloat(4),
+			Value = reader.IsDBNull(5) ? 0 : reader.GetInt32(5),
+			UnitTypeId = reader.IsDBNull(6) ? "" : reader.GetString(6),
+			ShopAvailable = reader.GetInt32(7) != 0,
+			GoldCost = reader.GetInt32(8),
+			ShopWeight = reader.GetInt32(9),
+			CollisionWidth = reader.GetInt32(10),
+			CollisionHeight = reader.GetInt32(11)
+		};
+	}
+
+	public void SaveBuilding(BuildingEditData building)
+	{
+		using SqliteConnection connection = OpenConnection();
+		using SqliteCommand cmd = connection.CreateCommand();
+		cmd.CommandText = @"
+            INSERT INTO building_defs (type_id, display_name, faction_id, max_health, spawn_interval, value, unit_type_id, shop_available, gold_cost, shop_weight, collision_width, collision_height, main_cell_x, main_cell_y, spawn_cell_x, spawn_cell_y, has_night_combat, combine_tier, is_core, footprint_json, production_rate, texture_path, sprite_modulate_r, sprite_modulate_g, sprite_modulate_b, sprite_modulate_a, material_path, race_id, texture_uid)
+            VALUES (@typeId, @displayName, @factionId, @maxHealth, @spawnInterval, @value, @unitTypeId, @shopAvailable, @goldCost, @shopWeight, @collisionWidth, @collisionHeight, 0, 0, 1, 1, 0, 0, 0, '[[0,0],[1,0],[0,1],[1,1]]', 100.0, 'res://assets/art/placeholders/test_image.png', 1.0, 1.0, 1.0, 1.0, '', '', '')
+            ON CONFLICT(type_id) DO UPDATE SET
+                display_name = @displayName,
+                max_health = @maxHealth,
+                spawn_interval = @spawnInterval,
+                value = @value,
+                unit_type_id = @unitTypeId,
+                shop_available = @shopAvailable,
+                gold_cost = @goldCost,
+                shop_weight = @shopWeight,
+                collision_width = @collisionWidth,
+                collision_height = @collisionHeight";
+		cmd.Parameters.AddWithValue("@typeId", building.TypeId);
+		cmd.Parameters.AddWithValue("@displayName", building.DisplayName);
+		cmd.Parameters.AddWithValue("@factionId", building.FactionId);
+		cmd.Parameters.AddWithValue("@maxHealth", building.MaxHealth);
+		cmd.Parameters.AddWithValue("@spawnInterval", building.SpawnInterval);
+		cmd.Parameters.AddWithValue("@value", building.Value);
+		cmd.Parameters.AddWithValue("@unitTypeId", string.IsNullOrEmpty(building.UnitTypeId) ? DBNull.Value : building.UnitTypeId);
+		cmd.Parameters.AddWithValue("@shopAvailable", building.ShopAvailable ? 1 : 0);
+		cmd.Parameters.AddWithValue("@goldCost", building.GoldCost);
+		cmd.Parameters.AddWithValue("@shopWeight", building.ShopWeight);
+		cmd.Parameters.AddWithValue("@collisionWidth", building.CollisionWidth);
+		cmd.Parameters.AddWithValue("@collisionHeight", building.CollisionHeight);
+		cmd.ExecuteNonQuery();
 	}
 
 	public void SaveNodes(string factionId, List<TechTreeNode> nodes)
@@ -439,20 +561,29 @@ public class SqliteTechTreeRepository : ITechTreeRepository
 		using SqliteCommand cmd = connection.CreateCommand();
 
 		cmd.CommandText = @"
-            INSERT OR REPLACE INTO building_defs (type_id, display_name, max_health, spawn_interval, main_cell_x, main_cell_y, spawn_cell_x, spawn_cell_y, unit_type_id, combine_tier, is_core, faction_id, race_id, footprint_json, collision_width, collision_height, production_rate, value)
+            INSERT INTO building_defs (type_id, display_name, max_health, spawn_interval, main_cell_x, main_cell_y, spawn_cell_x, spawn_cell_y, unit_type_id, has_night_combat, combine_tier, is_core, faction_id, race_id, footprint_json, collision_width, collision_height, production_rate, value)
             SELECT n.type_id, n.display_name, n.max_health, n.spawn_interval,
                    0, 0, 1, 1,
-                   n.unit_type_id, n.tier - 1, n.is_core, @factionId, COALESCE(n.race_id, ''),
-                   COALESCE(b.footprint_json, '[[0,0],[1,0],[0,1],[1,1]]'),
-                   COALESCE(b.collision_width, 188),
-                   COALESCE(b.collision_height, 188),
-                   COALESCE(b.production_rate, 100.0),
-                   COALESCE(NULLIF(n.value, 0), b.value, n.gold_cost, 0)
+                   n.unit_type_id, 0, n.tier - 1, n.is_core, @factionId, COALESCE(n.race_id, ''),
+                   '[[0,0],[1,0],[0,1],[1,1]]', 188, 188, 100.0,
+                   COALESCE(NULLIF(n.value, 0), n.gold_cost, 0)
             FROM tech_tree_nodes n
-            LEFT JOIN building_defs b ON b.type_id = n.type_id
-            WHERE n.faction_id = @factionId";
+            WHERE n.faction_id = @factionId
+              AND NOT EXISTS (SELECT 1 FROM building_defs b WHERE b.type_id = n.type_id)";
 		cmd.Parameters.AddWithValue("@factionId", factionId);
-		GD.Print($"[SyncToGameTables] 同步科技树节点到建筑定义表(faction_id={factionId}): INSERT OR REPLACE INTO building_defs (..., faction_id, value) SELECT ..., @factionId, value FROM tech_tree_nodes n LEFT JOIN building_defs b ON b.type_id = n.type_id WHERE n.faction_id = '{factionId}'");
+		GD.Print($"[SyncToGameTables] 补齐缺失建筑定义(faction_id={factionId}): INSERT INTO building_defs SELECT ... FROM tech_tree_nodes n WHERE n.faction_id = '{factionId}' AND NOT EXISTS(...)");
+		cmd.ExecuteNonQuery();
+
+		cmd.Parameters.Clear();
+		cmd.CommandText = @"
+            UPDATE building_defs
+            SET combine_tier = (SELECT n.tier - 1 FROM tech_tree_nodes n WHERE n.type_id = building_defs.type_id),
+                faction_id = @factionId,
+                is_core = (SELECT n.is_core FROM tech_tree_nodes n WHERE n.type_id = building_defs.type_id),
+                race_id = (SELECT COALESCE(n.race_id, '') FROM tech_tree_nodes n WHERE n.type_id = building_defs.type_id)
+            WHERE type_id IN (SELECT type_id FROM tech_tree_nodes WHERE faction_id = @factionId)";
+		cmd.Parameters.AddWithValue("@factionId", factionId);
+		GD.Print($"[SyncToGameTables] 更新放置字段(faction_id={factionId}): UPDATE building_defs SET combine_tier=..., faction_id='{factionId}' ... 保留建筑编辑器维护的数值字段");
 		cmd.ExecuteNonQuery();
 
 		cmd.Parameters.Clear();
@@ -516,6 +647,52 @@ public class SqliteTechTreeRepository : ITechTreeRepository
 		cmd.ExecuteNonQuery();
 
 		cmd.CommandText = "DELETE FROM combine_recipes WHERE main_type_id = material_type_id";
+		cmd.ExecuteNonQuery();
+	}
+
+	private static void MigrateFactionInventory(SqliteConnection connection)
+	{
+		using SqliteCommand cmd = connection.CreateCommand();
+		cmd.CommandText = "SELECT name FROM sqlite_master WHERE type='table' AND name='faction_inventory'";
+		if (cmd.ExecuteScalar() != null)
+			return;
+
+		cmd.CommandText = @"
+            CREATE TABLE faction_inventory (
+                faction_id TEXT NOT NULL,
+                type_id TEXT NOT NULL,
+                PRIMARY KEY (faction_id, type_id)
+            );
+            INSERT OR IGNORE INTO faction_inventory (faction_id, type_id)
+            SELECT faction_id, type_id FROM building_defs WHERE is_core = 0";
+		cmd.ExecuteNonQuery();
+	}
+
+	private static void MigrateBuildingShopColumns(SqliteConnection connection)
+	{
+		using SqliteCommand cmd = connection.CreateCommand();
+		AddShopColumn(cmd, "shop_available");
+		AddShopColumn(cmd, "gold_cost");
+		AddShopColumn(cmd, "shop_weight");
+
+		cmd.CommandText = @"
+            UPDATE building_defs
+            SET shop_available = COALESCE((SELECT shop_available FROM tech_tree_nodes WHERE type_id = building_defs.type_id), 0),
+                gold_cost = COALESCE((SELECT gold_cost FROM tech_tree_nodes WHERE type_id = building_defs.type_id), 0),
+                shop_weight = COALESCE((SELECT shop_weight FROM tech_tree_nodes WHERE type_id = building_defs.type_id), 1)
+            WHERE type_id IN (SELECT type_id FROM tech_tree_nodes)";
+		cmd.ExecuteNonQuery();
+	}
+
+	private static void AddShopColumn(SqliteCommand cmd, string name)
+	{
+		cmd.CommandText = $"SELECT COUNT(*) FROM pragma_table_info('building_defs') WHERE name = '{name}'";
+		long hasColumn = (long)cmd.ExecuteScalar();
+		if (hasColumn > 0)
+			return;
+
+		string defaultVal = name == "shop_available" ? "0" : name == "shop_weight" ? "1" : "0";
+		cmd.CommandText = $"ALTER TABLE building_defs ADD COLUMN {name} INTEGER NOT NULL DEFAULT {defaultVal}";
 		cmd.ExecuteNonQuery();
 	}
 

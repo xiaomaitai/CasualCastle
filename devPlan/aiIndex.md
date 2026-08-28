@@ -162,6 +162,7 @@
 | `scenes/main/main_game.tscn` | 主战场场景，系统挂载点 |
 | `scenes/ui/settings_panel.tscn` | 设置面板 |
 | `scenes/dev/tech_tree_editor.tscn` | 科技树编辑器 |
+| `scenes/ui/dev_tools/building_editor.tscn` | 建筑编辑器（编辑建筑定义与派系库存） |
 | `scenes/ui/dev_tools/*.tscn` | 开发者工具与冒烟场景（audio_smoke、ui_smoke、dungeon_smoke、damage_matrix_editor、parameter_editor、dev_tools_menu、runtime_info_panel、necromancer_smoke、necromancer_battle_smoke、alliance_battle_smoke、horde_battle_smoke、building_action_ring_smoke、phase_cycle_probe 等），冒烟一律经 `tools/run_smoke.sh` 运行 |
 | `prefabs/Building.tscn`、`Castle.tscn`、`Unit.tscn`、`UnitCard.tscn`、`HealthBar.tscn`、`CardArt.tscn` | 动态实体预制体 |
 

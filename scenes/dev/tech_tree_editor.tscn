@@ -36,6 +36,10 @@ text = ">"
 layout_mode = 2
 size_flags_horizontal = 3
 
+[node name="BuildingEditorButton" type="Button" parent="TopBar"]
+layout_mode = 2
+text = "建筑编辑器"
+
 [node name="SaveButton" type="Button" parent="TopBar" unique_id=908972237]
 layout_mode = 2
 text = "保存"
@@ -99,12 +103,8 @@ layout_mode = 2
 
 [node name="LibraryTitle" type="Label" parent="EditorArea/LibraryPanel" unique_id=650224133]
 layout_mode = 2
-text = "建筑列表"
+text = "库存"
 horizontal_alignment = 1
-
-[node name="NewBuildingButton" type="Button" parent="EditorArea/LibraryPanel" unique_id=100874663]
-layout_mode = 2
-text = "新建建筑"
 
 [node name="LibraryScroll" type="ScrollContainer" parent="EditorArea/LibraryPanel" unique_id=1692371736]
 layout_mode = 2

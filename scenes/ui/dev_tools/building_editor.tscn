@@ -1,0 +1,252 @@
+[gd_scene format=3 uid="uid://ca1t5hchcxre"]
+
+[ext_resource type="Script" uid="uid://b3jyknpbekrgc" path="res://scripts/adapters/godot/dev/BuildingEditorScene.cs" id="1"]
+
+[node name="BuildingEditor" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="TopBar" type="HBoxContainer" parent="."]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+grow_horizontal = 2
+
+[node name="PrevFactionButton" type="Button" parent="TopBar"]
+layout_mode = 2
+text = "<"
+
+[node name="FactionNameLabel" type="Label" parent="TopBar"]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+text = "联盟"
+horizontal_alignment = 1
+
+[node name="NextFactionButton" type="Button" parent="TopBar"]
+layout_mode = 2
+text = ">"
+
+[node name="Spacer" type="Control" parent="TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TechTreeButton" type="Button" parent="TopBar"]
+layout_mode = 2
+text = "科技树编辑器"
+
+[node name="CloseButton" type="Button" parent="TopBar"]
+layout_mode = 2
+text = "关闭"
+
+[node name="EditorArea" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 48.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BuildingListPanel" type="VBoxContainer" parent="EditorArea"]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+
+[node name="ListTitle" type="Label" parent="EditorArea/BuildingListPanel"]
+layout_mode = 2
+text = "建筑列表"
+horizontal_alignment = 1
+
+[node name="NewBuildingButton" type="Button" parent="EditorArea/BuildingListPanel"]
+layout_mode = 2
+text = "新建建筑"
+
+[node name="BuildingScroll" type="ScrollContainer" parent="EditorArea/BuildingListPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BuildingList" type="VBoxContainer" parent="EditorArea/BuildingListPanel/BuildingScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="EditPanel" type="VBoxContainer" parent="EditorArea"]
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="EditTitle" type="Label" parent="EditorArea/EditPanel"]
+layout_mode = 2
+text = "建筑属性"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 20
+
+[node name="TypeIdRow" type="HBoxContainer" parent="EditorArea/EditPanel"]
+layout_mode = 2
+
+[node name="TypeIdLabel" type="Label" parent="EditorArea/EditPanel/TypeIdRow"]
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+text = "TypeID"
+
+[node name="TypeIdEdit" type="LineEdit" parent="EditorArea/EditPanel/TypeIdRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="NameRow" type="HBoxContainer" parent="EditorArea/EditPanel"]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="EditorArea/EditPanel/NameRow"]
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+text = "名称"
+
+[node name="NameEdit" type="LineEdit" parent="EditorArea/EditPanel/NameRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ValueRow" type="HBoxContainer" parent="EditorArea/EditPanel"]
+layout_mode = 2
+
+[node name="ValueLabel" type="Label" parent="EditorArea/EditPanel/ValueRow"]
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+text = "价值"
+
+[node name="ValueSpin" type="SpinBox" parent="EditorArea/EditPanel/ValueRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 999.0
+
+[node name="HealthRow" type="HBoxContainer" parent="EditorArea/EditPanel"]
+layout_mode = 2
+
+[node name="HealthLabel" type="Label" parent="EditorArea/EditPanel/HealthRow"]
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+text = "最大生命"
+
+[node name="HealthSpin" type="SpinBox" parent="EditorArea/EditPanel/HealthRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 99999.0
+
+[node name="SpawnRow" type="HBoxContainer" parent="EditorArea/EditPanel"]
+layout_mode = 2
+
+[node name="SpawnLabel" type="Label" parent="EditorArea/EditPanel/SpawnRow"]
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+text = "产兵间隔"
+
+[node name="SpawnSpin" type="SpinBox" parent="EditorArea/EditPanel/SpawnRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 999.0
+
+[node name="UnitTypeRow" type="HBoxContainer" parent="EditorArea/EditPanel"]
+layout_mode = 2
+
+[node name="UnitTypeLabel" type="Label" parent="EditorArea/EditPanel/UnitTypeRow"]
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+text = "兵种ID"
+
+[node name="UnitTypeEdit" type="LineEdit" parent="EditorArea/EditPanel/UnitTypeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ShopRow" type="HBoxContainer" parent="EditorArea/EditPanel"]
+layout_mode = 2
+
+[node name="ShopCheck" type="CheckBox" parent="EditorArea/EditPanel/ShopRow"]
+layout_mode = 2
+text = "商店可买"
+
+[node name="CostRow" type="HBoxContainer" parent="EditorArea/EditPanel"]
+layout_mode = 2
+
+[node name="CostLabel" type="Label" parent="EditorArea/EditPanel/CostRow"]
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+text = "费用"
+
+[node name="CostSpin" type="SpinBox" parent="EditorArea/EditPanel/CostRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 99.0
+
+[node name="WeightRow" type="HBoxContainer" parent="EditorArea/EditPanel"]
+layout_mode = 2
+
+[node name="WeightLabel" type="Label" parent="EditorArea/EditPanel/WeightRow"]
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+text = "权重"
+
+[node name="WeightSpin" type="SpinBox" parent="EditorArea/EditPanel/WeightRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 99.0
+
+[node name="CollisionWidthRow" type="HBoxContainer" parent="EditorArea/EditPanel"]
+layout_mode = 2
+
+[node name="CollisionWidthLabel" type="Label" parent="EditorArea/EditPanel/CollisionWidthRow"]
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+text = "碰撞宽"
+
+[node name="CollisionWidthSpin" type="SpinBox" parent="EditorArea/EditPanel/CollisionWidthRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 999.0
+
+[node name="CollisionHeightRow" type="HBoxContainer" parent="EditorArea/EditPanel"]
+layout_mode = 2
+
+[node name="CollisionHeightLabel" type="Label" parent="EditorArea/EditPanel/CollisionHeightRow"]
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+text = "碰撞高"
+
+[node name="CollisionHeightSpin" type="SpinBox" parent="EditorArea/EditPanel/CollisionHeightRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 999.0
+
+[node name="SaveButton" type="Button" parent="EditorArea/EditPanel"]
+layout_mode = 2
+text = "保存"
+
+[node name="InventoryRow" type="HBoxContainer" parent="EditorArea/EditPanel"]
+layout_mode = 2
+
+[node name="AddToInventoryButton" type="Button" parent="EditorArea/EditPanel/InventoryRow"]
+layout_mode = 2
+text = "加入库存"
+
+[node name="RemoveFromInventoryButton" type="Button" parent="EditorArea/EditPanel/InventoryRow"]
+layout_mode = 2
+text = "从库存移除"
+
+[node name="InventoryStatusLabel" type="Label" parent="EditorArea/EditPanel"]
+layout_mode = 2
+text = "未选择建筑"
+
+[node name="StatusBar" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -24.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "就绪"
