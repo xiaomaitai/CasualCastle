@@ -86,13 +86,20 @@ public class TechTreeEditorController
 
 	public void Dispose()
 	{
-		_prevFactionButton.Pressed -= OnPrevFactionPressed;
-		_nextFactionButton.Pressed -= OnNextFactionPressed;
-		_saveButton.Pressed -= OnSavePressed;
-		_closeButton.Pressed -= OnClosePressed;
-		_buildingEditorButton.Pressed -= OnBuildingEditorPressed;
-		_cardCanvas.Draw -= OnCardCanvasDraw;
-		_cardCanvas.GuiInput -= OnCardCanvasGuiInput;
+		if (GodotObject.IsInstanceValid(_prevFactionButton))
+			_prevFactionButton.Pressed -= OnPrevFactionPressed;
+		if (GodotObject.IsInstanceValid(_nextFactionButton))
+			_nextFactionButton.Pressed -= OnNextFactionPressed;
+		if (GodotObject.IsInstanceValid(_saveButton))
+			_saveButton.Pressed -= OnSavePressed;
+		if (GodotObject.IsInstanceValid(_closeButton))
+			_closeButton.Pressed -= OnClosePressed;
+		if (GodotObject.IsInstanceValid(_buildingEditorButton))
+			_buildingEditorButton.Pressed -= OnBuildingEditorPressed;
+		if (GodotObject.IsInstanceValid(_cardCanvas))
+			_cardCanvas.Draw -= OnCardCanvasDraw;
+		if (GodotObject.IsInstanceValid(_cardCanvas))
+			_cardCanvas.GuiInput -= OnCardCanvasGuiInput;
 	}
 
 	public void Process()
