@@ -16,6 +16,7 @@ public class TechTreeEditorController
 	private readonly Button _saveButton;
 	private readonly Button _closeButton;
 	private readonly Control _cardCanvas;
+	private readonly VBoxContainer _tierLabelColumn;
 	private readonly Control _libraryPanel;
 	private readonly VBoxContainer _libraryList;
 	private readonly Button _buildingEditorButton;
@@ -42,6 +43,7 @@ public class TechTreeEditorController
 	private const float ColSpacing = 140;
 	private const float TierRowHeight = 100;
 	private const int TierCount = 5;
+	private const float LeftLabelWidth = 40;
 	private const int DefaultBuildingValue = 1;
 	private const string DevToolsMenuScene = "res://scenes/ui/dev_tools/dev_tools_menu.tscn";
 	private const string BuildingEditorScene = "res://scenes/ui/dev_tools/building_editor.tscn";
@@ -55,6 +57,7 @@ public class TechTreeEditorController
 		_saveButton = root.GetNode<Button>("TopBar/SaveButton");
 		_closeButton = root.GetNode<Button>("TopBar/CloseButton");
 		_cardCanvas = root.GetNode<Control>("EditorArea/CanvasScroll/CardCanvas");
+		_tierLabelColumn = root.GetNode<VBoxContainer>("EditorArea/LeftLabels");
 		_libraryPanel = root.GetNode<Control>("EditorArea/LibraryPanel");
 		_libraryList = root.GetNode<VBoxContainer>("EditorArea/LibraryPanel/LibraryScroll/LibraryList");
 		_buildingEditorButton = root.GetNode<Button>("TopBar/BuildingEditorButton");
@@ -266,6 +269,7 @@ public class TechTreeEditorController
 		}
 
 		_cardCanvas.CustomMinimumSize = new Vector2(GetCanvasContentWidth(), GetCanvasContentHeight());
+		_tierLabelColumn.CustomMinimumSize = new Vector2(LeftLabelWidth, GetCanvasContentHeight());
 
 		if (_nodes.Count == 0)
 		{

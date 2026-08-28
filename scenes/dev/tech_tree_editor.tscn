@@ -65,36 +65,42 @@ grow_vertical = 2
 [node name="LeftLabels" type="VBoxContainer" parent="EditorArea" unique_id=1082637381]
 custom_minimum_size = Vector2(40, 0)
 layout_mode = 2
+size_flags_vertical = 0
 
 [node name="T5Label" type="Label" parent="EditorArea/LeftLabels" unique_id=839945510]
 layout_mode = 2
 size_flags_vertical = 3
 text = "T5"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="T4Label" type="Label" parent="EditorArea/LeftLabels" unique_id=907068129]
 layout_mode = 2
 size_flags_vertical = 3
 text = "T4"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="T3Label" type="Label" parent="EditorArea/LeftLabels" unique_id=1874992272]
 layout_mode = 2
 size_flags_vertical = 3
 text = "T3"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="T2Label" type="Label" parent="EditorArea/LeftLabels" unique_id=577623956]
 layout_mode = 2
 size_flags_vertical = 3
 text = "T2"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="T1Label" type="Label" parent="EditorArea/LeftLabels" unique_id=1579594065]
 layout_mode = 2
 size_flags_vertical = 3
 text = "T1"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="CanvasScroll" type="ScrollContainer" parent="EditorArea"]
 layout_mode = 2
