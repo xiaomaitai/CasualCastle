@@ -202,7 +202,8 @@
 | `tools/liblib_gen.py` | AI 生图（Liblib.art） |
 | `tools/liblib_remove_bg.py` | 抠图（ComfyUI 去背景） |
 | `tools/godot_import.py` | Godot 无头导入，生成 `.import`/`.uid` |
-| `tools/slice_spritesheet.py` | 像素角色图集切片为逐帧动画（自动网格识别 + 白底转透明） |
+| `tools/slice_spritesheet.py` | 像素角色图集切片为逐帧动画（自动网格识别 + 白底转透明 + 统一单元格） |
+| `tools/pack_sprite_atlas.py` | 把切片帧打包为单张图集 + `atlas.json` 区域元数据 |
 | `tools/build_game_texture.py` | 建筑贴图裁边/缩放构建 |
 | `tools/check_uids.py` | 校验 `.uid` 文件 |
 | `tools/check_architecture.py` | 校验分层架构约束（domain 零 Godot/零 SQLite、依赖方向），已接入 pre-commit |

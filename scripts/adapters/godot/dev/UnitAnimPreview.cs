@@ -1,4 +1,4 @@
-// 单位动画预览：加载剑士帧动画按状态循环播放，数字键切换
+// 单位动画预览：加载剑士帧动画并按状态循环播放，数字键 1-5 切换
 using Godot;
 using System.Collections.Generic;
 
@@ -48,23 +48,42 @@ public partial class UnitAnimPreview : Node2D
 
 	private SpriteFrames BuildFrames()
 	{
+		Texture2D atlas = GD.Load<Texture2D>($"{FramesDirectory}/atlas.png");
+		Dictionary<string, Rect2> regions = LoadRegions($"{FramesDirectory}/atlas.json");
 		SpriteFrames frames = new SpriteFrames();
-		for (int i = 0; i < _states.Length; i++) AddAnimation(frames, _states[i]);
+		foreach (string state in _states) AddAnimation(frames, atlas, regions, state, _stateFps[state]);
 		return frames;
 	}
 
-	private void AddAnimation(SpriteFrames frames, string state)
+	private static void AddAnimation(SpriteFrames frames, Texture2D atlas, Dictionary<string, Rect2> regions, string name, float fps)
 	{
-		frames.AddAnimation(state);
-		frames.SetAnimationSpeed(state, _stateFps[state]);
-		frames.SetAnimationLoop(state, state != "death");
+		if (!regions.ContainsKey($"{name}_00")) return;
+		frames.AddAnimation(name);
+		frames.SetAnimationSpeed(name, fps);
+		frames.SetAnimationLoop(name, name != "death");
 		int index = 0;
-		while (ResourceLoader.Exists(FramePath(state, index)))
+		while (regions.ContainsKey($"{name}_{index:00}"))
 		{
-			frames.AddFrame(state, GD.Load<Texture2D>(FramePath(state, index)));
+			AtlasTexture frame = new AtlasTexture { Atlas = atlas, Region = regions[$"{name}_{index:00}"] };
+			frames.AddFrame(name, frame);
 			index++;
 		}
 	}
 
-	private static string FramePath(string state, int index) => $"{FramesDirectory}/{state}_{index:00}.png";
+	private static Dictionary<string, Rect2> LoadRegions(string metaPath)
+	{
+		Dictionary<string, Rect2> regions = new Dictionary<string, Rect2>();
+		using FileAccess file = FileAccess.Open(metaPath, FileAccess.ModeFlags.Read);
+		if (file == null) return regions;
+		Variant root = Json.ParseString(file.GetAsText());
+		if (root.VariantType == Variant.Type.Nil) return regions;
+		Godot.Collections.Dictionary dict = root.AsGodotDictionary();
+		Godot.Collections.Dictionary frames = dict["frames"].AsGodotDictionary();
+		foreach (string key in frames.Keys)
+		{
+			Godot.Collections.Array r = frames[key].AsGodotArray();
+			regions[key] = new Rect2((float)r[0].AsDouble(), (float)r[1].AsDouble(), (float)r[2].AsDouble(), (float)r[3].AsDouble());
+		}
+		return regions;
+	}
 }

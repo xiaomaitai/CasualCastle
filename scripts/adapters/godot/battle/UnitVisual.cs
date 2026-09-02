@@ -1,5 +1,6 @@
 // 单位视觉：血条、状态图标、受击闪白与翻转
 using Godot;
+using System.Collections.Generic;
 
 public class UnitVisual
 {
@@ -49,8 +50,9 @@ public class UnitVisual
 	private void ConfigureFrameBody(string typeId, float displaySize)
 	{
 		if (_bodyAnim == null) return;
-		string framesPath = $"res://assets/art/units/{typeId.ToLowerInvariant()}/frames";
-		if (!ResourceLoader.Exists($"{framesPath}/run_00.png"))
+		string folder = $"res://assets/art/units/{typeId.ToLowerInvariant()}/frames";
+		string atlasPath = $"{folder}/atlas.png";
+		if (!ResourceLoader.Exists(atlasPath))
 		{
 			_bodyAnimated = false;
 			ApplyBodyVisible(false);
@@ -58,11 +60,14 @@ public class UnitVisual
 			return;
 		}
 		_bodyAnimated = true;
-		_bodyAnim.SpriteFrames = BuildFrames(framesPath);
+		Texture2D atlas = GD.Load<Texture2D>(atlasPath);
+		Dictionary<string, Rect2> regions = LoadRegions($"{folder}/atlas.json", out Vector2 cell);
+		_bodyAnim.SpriteFrames = BuildFrames(atlas, regions);
 		_bodyAnim.Centered = true;
-		Texture2D runTex = GD.Load<Texture2D>($"{framesPath}/run_00.png");
-		_bodyAnim.Offset = new Vector2(0f, -runTex.GetHeight() * 0.5f);
-		float contentHeight = ComputeContentHeight(runTex);
+		_bodyAnim.Offset = new Vector2(0f, -cell.Y * 0.5f);
+		float contentHeight = regions.TryGetValue("run_00", out Rect2 run0)
+			? ComputeRegionContentHeight(atlas, run0)
+			: cell.Y;
 		_bodyAnim.Scale = Vector2.One * (displaySize / Mathf.Max(1f, contentHeight));
 		_bodyAnim.Position = Vector2.Zero;
 		_bodyAnim.Visible = true;
@@ -92,40 +97,62 @@ public class UnitVisual
 		if (_bodyHealth != null) _bodyHealth.Visible = visible;
 	}
 
-	private static SpriteFrames BuildFrames(string framesPath)
+	private static SpriteFrames BuildFrames(Texture2D atlas, Dictionary<string, Rect2> regions)
 	{
 		SpriteFrames frames = new SpriteFrames();
-		AddAnimation(frames, "run", framesPath, RunFps, true, GenericFrameLimit);
-		AddAnimation(frames, "attack", framesPath, AttackFps, false, GenericFrameLimit);
-		AddAnimation(frames, "hurt", framesPath, HurtFps, false, HurtFrameLimit);
-		AddAnimation(frames, "death", framesPath, DeathFps, false, GenericFrameLimit);
+		AddAnimation(frames, atlas, regions, "run", RunFps, true, GenericFrameLimit);
+		AddAnimation(frames, atlas, regions, "attack", AttackFps, false, GenericFrameLimit);
+		AddAnimation(frames, atlas, regions, "hurt", HurtFps, false, HurtFrameLimit);
+		AddAnimation(frames, atlas, regions, "death", DeathFps, false, GenericFrameLimit);
 		return frames;
 	}
 
-	private static void AddAnimation(SpriteFrames frames, string name, string framesPath, float fps, bool loop, int frameLimit)
+	private static void AddAnimation(SpriteFrames frames, Texture2D atlas, Dictionary<string, Rect2> regions, string name, float fps, bool loop, int frameLimit)
 	{
-		if (!ResourceLoader.Exists($"{framesPath}/{name}_00.png")) return;
+		if (!regions.ContainsKey($"{name}_00")) return;
 		frames.AddAnimation(name);
 		frames.SetAnimationSpeed(name, fps);
 		frames.SetAnimationLoop(name, loop);
 		int index = 0;
-		while (index < frameLimit && ResourceLoader.Exists($"{framesPath}/{name}_{index:00}.png"))
+		while (index < frameLimit && regions.ContainsKey($"{name}_{index:00}"))
 		{
-			frames.AddFrame(name, GD.Load<Texture2D>($"{framesPath}/{name}_{index:00}.png"));
+			AtlasTexture frame = new AtlasTexture { Atlas = atlas, Region = regions[$"{name}_{index:00}"] };
+			frames.AddFrame(name, frame);
 			index++;
 		}
 	}
 
-	private static float ComputeContentHeight(Texture2D tex)
+	private static Dictionary<string, Rect2> LoadRegions(string metaPath, out Vector2 cell)
 	{
-		Image image = tex.GetImage();
-		int top = image.GetHeight();
-		int bottom = 0;
-		for (int y = 0; y < image.GetHeight(); y++)
+		Dictionary<string, Rect2> regions = new Dictionary<string, Rect2>();
+		cell = Vector2.Zero;
+		using FileAccess file = FileAccess.Open(metaPath, FileAccess.ModeFlags.Read);
+		if (file == null) return regions;
+		Variant root = Json.ParseString(file.GetAsText());
+		if (root.VariantType == Variant.Type.Nil) return regions;
+		Godot.Collections.Dictionary dict = root.AsGodotDictionary();
+		Godot.Collections.Array cellArr = dict["cell"].AsGodotArray();
+		cell = new Vector2((float)cellArr[0].AsDouble(), (float)cellArr[1].AsDouble());
+		Godot.Collections.Dictionary frames = dict["frames"].AsGodotDictionary();
+		foreach (string key in frames.Keys)
 		{
-			for (int x = 0; x < image.GetWidth(); x++)
+			Godot.Collections.Array r = frames[key].AsGodotArray();
+			regions[key] = new Rect2((float)r[0].AsDouble(), (float)r[1].AsDouble(), (float)r[2].AsDouble(), (float)r[3].AsDouble());
+		}
+		return regions;
+	}
+
+	private static float ComputeRegionContentHeight(Texture2D atlas, Rect2 region)
+	{
+		Image full = atlas.GetImage();
+		Image sub = full.GetRegion(new Rect2I((int)region.Position.X, (int)region.Position.Y, (int)region.Size.X, (int)region.Size.Y));
+		int top = sub.GetHeight();
+		int bottom = 0;
+		for (int y = 0; y < sub.GetHeight(); y++)
+		{
+			for (int x = 0; x < sub.GetWidth(); x++)
 			{
-				if (image.GetPixel(x, y).A > 0f)
+				if (sub.GetPixel(x, y).A > 0f)
 				{
 					if (y < top) top = y;
 					if (y > bottom) bottom = y;
