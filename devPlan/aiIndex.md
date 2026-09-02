@@ -71,6 +71,7 @@
 | `nodeStructure.md` | 实体节点 Logic/View/Effects 三层结构 |
 | `navigationSystem.md` | 流场寻路 + 局部转向（SC2 式） |
 | `assetSpecs.md` | 素材尺寸规格（以游戏单位定义） |
+| `animationWorkflow.md` | 帧动画工作流（像素图集切片、Swordsman 试点、AnimatedSprite2D 接入；Spine 已弃用） |
 | `audioRequirements.md` | 音频需求清单（v0.6 采购/实现唯一依据） |
 | `audioSmokeTest.md` | 音频冒烟测试说明 |
 | `smokeTestGuidelines.md` | 冒烟测试编写与运行规范（防卡死四层机制、PASS/FAIL 契约、统一运行器） |
@@ -173,6 +174,7 @@
 | `assets/art/cards/` | 单位卡图 `{Name}_{id}.png`（如 `Archer_24.png`）；`card_base`/`card_art_frame`/`card_art_mask` 为卡面框架 |
 | `assets/art/buildings/` | 建筑图：`{Name}_128_cut.png`（裁边透明原图）与 `{Name}_128_game.png`（游戏用） |
 | `assets/art/units/` | 单位立绘 |
+| `assets/art/units/swordsman_sheet_out.png` + `swordsman/frames/` | 剑士帧动画图集与切片帧（attack/attack_combo/run/hurt/death） |
 | `assets/art/skills/` | 技能图标 `{skill_name}_{id}.png` |
 | `assets/art/projectiles/` | 弹道：arrow、spear、sword、magic_ball |
 | `assets/art/tiles/` | 地块贴图 `cell_dirt_01..04`、`kenney_medieval_rts` 图集 |
@@ -200,6 +202,7 @@
 | `tools/liblib_gen.py` | AI 生图（Liblib.art） |
 | `tools/liblib_remove_bg.py` | 抠图（ComfyUI 去背景） |
 | `tools/godot_import.py` | Godot 无头导入，生成 `.import`/`.uid` |
+| `tools/slice_spritesheet.py` | 像素角色图集切片为逐帧动画（自动网格识别 + 白底转透明） |
 | `tools/build_game_texture.py` | 建筑贴图裁边/缩放构建 |
 | `tools/check_uids.py` | 校验 `.uid` 文件 |
 | `tools/check_architecture.py` | 校验分层架构约束（domain 零 Godot/零 SQLite、依赖方向），已接入 pre-commit |
