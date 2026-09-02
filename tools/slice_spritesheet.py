@@ -1,15 +1,4 @@
-#!/usr/bin/env python3
-"""Slice a character sprite sheet into per-animation transparent frames.
-
-Detects the grid (row bands + per-row column segments) automatically, crops each
-frame to its content box, converts the near-white background to transparency by
-flood-filling from the image border, and writes each frame onto a uniform cell
-canvas (bottom-center anchored) so the animation stays stable in AnimatedSprite2D.
-
-Usage:
-    python tools/slice_spritesheet.py --input <sheet.png> --output <dir> \
-        --anims idle,attack,run,hurt,death --bg-thresh 235 --pad 4
-"""
+# Slice a character sprite sheet into per-animation transparent frames.
 import argparse
 import json
 import os
@@ -97,7 +86,6 @@ def tight_bbox(im, x0, x1, y0, y1, thresh):
 
 
 def remove_bg(img, thresh):
-    """Flood-fill near-white background from the border to alpha=0."""
     img = img.convert("RGBA")
     w, h = img.size
     px = img.load()
@@ -142,6 +130,7 @@ def main():
     parser.add_argument("--bg-thresh", type=int, default=235)
     parser.add_argument("--pad", type=int, default=4)
     parser.add_argument("--manifest", default=None)
+    parser.add_argument("--global-cell", action="store_true", help="Use one uniform cell for every frame (clean feet pivot)")
     args = parser.parse_args()
 
     im = Image.open(args.input).convert("RGB")
@@ -150,27 +139,37 @@ def main():
     if len(bands) != len(anims):
         raise SystemExit(f"detected {len(bands)} rows but {len(anims)} anims given")
 
-    os.makedirs(args.output, exist_ok=True)
-    manifest = {"input": os.path.basename(args.input), "animations": {}}
-    frames_written = 0
-
-    for anim, (y0, y1) in zip(anims, bands):
+    per_anim_boxes = []
+    for (y0, y1) in bands:
         segs = detect_col_segments(im, y0, y1, args.bg_thresh)
         boxes = []
         for (x0, x1) in segs:
             bb = tight_bbox(im, x0, x1, y0, y1, args.bg_thresh)
             if bb:
                 boxes.append(bb)
+        per_anim_boxes.append((y0, y1, boxes))
+
+    if args.global_cell:
+        all_w = max(b[2] - b[0] for (_, _, boxes) in per_anim_boxes for b in boxes) + 2 * args.pad
+        all_h = max(b[3] - b[1] for (_, _, boxes) in per_anim_boxes for b in boxes) + 2 * args.pad
+        cell_w, cell_h = all_w, all_h
+    else:
+        cell_w = cell_h = None
+
+    os.makedirs(args.output, exist_ok=True)
+    manifest = {"input": os.path.basename(args.input), "animations": {}}
+    frames_written = 0
+
+    for anim, (y0, y1, boxes) in zip(anims, per_anim_boxes):
         if not boxes:
             continue
-        cell_w = max(b[2] - b[0] for b in boxes) + 2 * args.pad
-        cell_h = max(b[3] - b[1] for b in boxes) + 2 * args.pad
-        manifest["animations"][anim] = {
-            "row": [y0, y1], "cell": [cell_w, cell_h], "frames": []
-        }
+        if cell_w is None:
+            cell_w = max(b[2] - b[0] for b in boxes) + 2 * args.pad
+            cell_h = max(b[3] - b[1] for b in boxes) + 2 * args.pad
+        manifest["animations"][anim] = {"row": [y0, y1], "cell": [cell_w, cell_h], "frames": []}
         for idx, bb in enumerate(boxes):
-            x0, y0b, x1, y1b = bb
-            crop = im.crop((x0, y0b, x1, y1b))
+            x0, yb, x1, y1b = bb
+            crop = im.crop((x0, yb, x1, y1b))
             frame = remove_bg(crop, args.bg_thresh)
             fw, fh = frame.size
             cell = Image.new("RGBA", (cell_w, cell_h), (0, 0, 0, 0))
@@ -179,9 +178,9 @@ def main():
             cell.paste(frame, (px, py), frame)
             name = f"{anim}_{idx:02d}.png"
             cell.save(os.path.join(args.output, name))
-            manifest["animations"][anim]["frames"].append({
-                "file": name, "src_box": [x0, y0b, x1, y1b], "cell_pos": [px, py]
-            })
+            manifest["animations"][anim]["frames"].append(
+                {"file": name, "src_box": [x0, yb, x1, y1b], "cell_pos": [px, py]}
+            )
             frames_written += 1
         print(f"[{anim}] {len(boxes)} frames -> cell {cell_w}x{cell_h}")
 

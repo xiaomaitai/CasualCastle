@@ -83,6 +83,7 @@ public partial class UnitLogic : Node2D
 	private bool _statsPending;
 
 	private Node2D _body;
+	private bool _bodyAnimated;
 
 	private bool _isDead;
 
@@ -142,6 +143,7 @@ public partial class UnitLogic : Node2D
 			_unit.TypeId,
 			GameCoordinatesAdapter.GameUnitsToPixels(DisplaySize));
 		_visual.SetHealth(Health, MaxHealth);
+		_bodyAnimated = _visual.IsBodyAnimated;
 	}
 
 	public void SetComfort(ComfortService comfort)
@@ -281,6 +283,7 @@ public partial class UnitLogic : Node2D
 		SyncBodyPosition();
 		UpdateSleepVisual();
 		UpdateStealthVisual();
+		UpdateBodyAnimation();
 		if (!IsActive) return;
 		if (_fieldRepo == null || _body == null) return;
 
@@ -311,6 +314,12 @@ public partial class UnitLogic : Node2D
 			_body.GlobalPosition = target;
 		if (Mathf.Abs(_unit.NavVelX) > FlipThresholdSpeed)
 			_visual.SetFlipH(_unit.NavVelX < 0);
+	}
+	
+	private void UpdateBodyAnimation()
+	{
+		if (!_bodyAnimated) return;
+		_visual?.SetMoving(_unit != null && _unit.HasMoveGoal);
 	}
 
 	public void TakeDamage(int amount, UnitLogic attacker = null, bool isAoe = false)
@@ -368,6 +377,7 @@ public partial class UnitLogic : Node2D
 			return;
 		}
 		_visual?.StartHitFlash();
+		_visual?.PlayAnimation("hurt");
 		SpawnFloatingDamage();
 		Sfx.Play(UnitSfx.GetHitSfxEvent(_eventRelay.LastAttacker));
 		IUnitHandle attacker = _eventRelay.LastAttacker;
@@ -414,6 +424,7 @@ public partial class UnitLogic : Node2D
 		_isDead = true;
 		(_deathSideEffects ??= new DeathSideEffects(this)).Process();
 		_visual?.UpdateSleepVisual(false, false);
+		_visual?.PlayAnimation("death");
 		_lifecycle?.PlayDeathAnimation(_body);
 		Sfx.Play(SfxEvents.UnitDeath);
 		TavernPartyService tavernParty = GameManager.Get<TavernPartyService>();
@@ -476,6 +487,7 @@ public partial class UnitLogic : Node2D
 		Vector2 toPos = new Vector2(targetPixelX, targetPixelY);
 		_projectiles.SpawnAttack(root, fromPos, toPos, AttackType, DamageType, AttackType == AttackType.Ranged);
 		TargetRing.Spawn(root, toPos);
+		_visual?.PlayAnimation("attack");
 	}
 
 	private static float ComputeDisplaySize(UnitSize size)

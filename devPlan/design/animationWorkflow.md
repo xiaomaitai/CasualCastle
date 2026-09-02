@@ -17,11 +17,13 @@
 
 | 动画 | 帧数 | 单元格 | 说明 |
 |------|------|--------|------|
-| `attack` | 8 | 258×149 | 基础挥砍（起手→突刺→横扫→刀光） |
-| `attack_combo` | 8 | 196×170 | 连击/重击（月牙→跃斩→下劈溅水） |
-| `run` | 9 | 150×117 | 奔跑（含扬尘） |
-| `hurt` | 9 | 143×129 | 受击（红色受伤粒子） |
-| `death` | 8 | 168×114 | 倒地→俯卧 |
+| `attack` | 8 | 258×170 | 基础挥砍（起手→突刺→横扫→刀光） |
+| `attack_combo` | 8 | 258×170 | 连击/重击（月牙→跃斩→下劈溅水） |
+| `run` | 9 | 258×170 | 奔跑（含扬尘） |
+| `hurt` | 9 | 258×170 | 受击（红色受伤粒子） |
+| `death` | 8 | 258×170 | 倒地→俯卧 |
+
+> 所有帧使用**统一全局单元格 258×170**（底部居中对齐，`--global-cell`），保证切换动画时脚底锚点稳定不跳变。
 
 - ⚠️ 该图集**无独立 idle 行**（第 1、2 行均为攻击变体）；`idle` 待补（或临时用 `attack_00` 站姿做单帧待机）。
 
@@ -39,12 +41,13 @@ python tools/slice_spritesheet.py --input <sheet.png> --output <帧目录> --ani
 ## 4. Godot 接入
 
 - 帧资源：`AnimatedSprite2D` + `SpriteFrames`；帧为独立 PNG，运行时按路径组帧，避免手写 `.tres` 的 uid 依赖。
-- 状态切换：按 `UnitState` 映射到动画名（`attack`/`attack_combo`/`run`/`hurt`/`death`）；`run` 循环，`attack`/`attack_combo`/`hurt` 播放一次，`death` 停在末帧。
+- 战场接入（2026-09-02）：`Unit.tscn` 新增 `View/Body`（AnimatedSprite2D）与 `View/BodyHealth`（独立血条）；`UnitVisual` 检测单位是否有帧目录 `res://assets/art/units/{typeId_lower}/frames`，有则隐藏卡面、显示帧动画身体，无则保留卡面占位。
 - 预览场景：`scenes/ui/dev_tools/unit_anim_preview.tscn` + `scripts/adapters/godot/dev/UnitAnimPreview.cs`（数字键 `1-5` 切换状态）。
 
 ## 5. 状态
 
 - ✅ 图集切片 + 素材入库（`assets/art/units/swordsman_sheet_out.png` + `frames/`）
 - ✅ 预览场景与状态切换（`unit_anim_preview`）
-- ⬜ 接入正式单位（`Unit.tscn` + `UnitVisual` + 单位状态机驱动）
-- ⬜ 补充 `idle` 待机动画
+- ✅ 接入正式单位（`Unit.tscn` + `UnitVisual` + `UnitLogic` 状态驱动：移动→`run`、攻击→`attack`、受击→`hurt`、死亡→`death`；无 idle，站定冻结当前帧）
+- ✅ 按需扩展其他兵种（有帧目录即自动启用身体，无则保留卡面）
+- ⬜ 身体缩放 / 血条位置微调、按单位体型差异化；站定帧细化
