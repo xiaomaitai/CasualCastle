@@ -361,6 +361,15 @@ public class SqliteTechTreeRepository : ITechTreeRepository
 		cmd.ExecuteNonQuery();
 	}
 
+	public void SyncInventoryToTechTree(string factionId)
+	{
+		using SqliteConnection connection = OpenConnection();
+		using SqliteCommand cmd = connection.CreateCommand();
+		cmd.CommandText = "DELETE FROM faction_inventory WHERE faction_id = @factionId AND type_id IN (SELECT type_id FROM tech_tree_nodes WHERE faction_id = @factionId)";
+		cmd.Parameters.AddWithValue("@factionId", factionId);
+		cmd.ExecuteNonQuery();
+	}
+
 	public BuildingEditData LoadBuilding(string typeId)
 	{
 		using SqliteConnection connection = OpenConnection();
@@ -664,7 +673,8 @@ public class SqliteTechTreeRepository : ITechTreeRepository
                 PRIMARY KEY (faction_id, type_id)
             );
             INSERT OR IGNORE INTO faction_inventory (faction_id, type_id)
-            SELECT faction_id, type_id FROM building_defs WHERE is_core = 0";
+            SELECT b.faction_id, b.type_id FROM building_defs b WHERE b.is_core = 0
+                AND NOT EXISTS (SELECT 1 FROM tech_tree_nodes t WHERE t.type_id = b.type_id)";
 		cmd.ExecuteNonQuery();
 	}
 

@@ -18,6 +18,7 @@ public interface ITechTreeRepository
 	void SyncToGameTables(string factionId);
 	List<BuildingTypeSummary> LoadInventory(string factionId);
 	bool IsInInventory(string factionId, string typeId);
+	void SyncInventoryToTechTree(string factionId);
 	void AddToInventory(string factionId, string typeId);
 	void RemoveFromInventory(string factionId, string typeId);
 	BuildingEditData LoadBuilding(string typeId);

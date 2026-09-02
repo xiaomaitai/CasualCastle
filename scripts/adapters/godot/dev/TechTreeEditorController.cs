@@ -680,6 +680,7 @@ public class TechTreeEditorController
 		_edges.RemoveAll(e => e.FromTypeId == typeId || e.ToTypeId == typeId);
 
 		_nodes.RemoveAll(n => n.TypeId == typeId);
+		_repo.AddToInventory(_currentFactionId, typeId);
 		LayoutCards();
 		RefreshLibrary();
 		ShowStatus($"已移除: {typeId}（已回到库存）");
@@ -805,6 +806,7 @@ public class TechTreeEditorController
 		_repo.SaveNodes(_currentFactionId, _nodes);
 		SaveEdgesByIncomingCount();
 		_repo.SyncToGameTables(_currentFactionId);
+		_repo.SyncInventoryToTechTree(_currentFactionId);
 	}
 
 	private void SaveEdgesByIncomingCount()

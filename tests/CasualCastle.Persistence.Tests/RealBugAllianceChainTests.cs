@@ -9,24 +9,37 @@ namespace CasualCastle.Persistence.Tests;
 public class RealBugAllianceChainTests
 {
 	[Fact]
-	public void AllianceChain_EveryAdvancedBuildingReachable_RealBug_DeadBuildings()
+	public void AllianceChain_EveryOnTreeAdvancedBuildingReachable_RealBug_DeadBuildings()
 	{
 		HashSet<string> reachable = ReadReachableTypeIds();
-		HashSet<string> inventory = ReadInventoryTypeIds();
 
 		using SqliteConnection connection = OpenConnection();
 		using SqliteCommand command = connection.CreateCommand();
-		command.CommandText = "select b.type_id, b.combine_tier, b.is_core from building_defs b where b.faction_id = 'alliance'";
+		command.CommandText = "select b.type_id from building_defs b where b.faction_id = 'alliance' and b.combine_tier >= 1 and b.is_core = 0 and exists (select 1 from tech_tree_nodes t where t.type_id = b.type_id)";
 		using SqliteDataReader reader = command.ExecuteReader();
 		while (reader.Read())
 		{
-			int tier = reader.GetInt32(1);
-			int core = reader.GetInt32(2);
-			if (tier < 1 || core == 1)
-				continue;
 			string typeId = reader.GetString(0);
-			Assert.True(reachable.Contains(typeId) || inventory.Contains(typeId), typeId);
+			Assert.True(reachable.Contains(typeId), typeId);
 		}
+	}
+
+	[Fact]
+	public void FactionInventory_DoesNotOverlapTechTree()
+	{
+		using SqliteConnection connection = OpenConnection();
+		using SqliteCommand command = connection.CreateCommand();
+		command.CommandText = "select count(*) from faction_inventory f where exists (select 1 from tech_tree_nodes t where t.faction_id = f.faction_id and t.type_id = f.type_id)";
+		Assert.Equal(0, Convert.ToInt32(command.ExecuteScalar()));
+	}
+
+	[Fact]
+	public void FactionInventory_BuildingsExistInBuildingDefs()
+	{
+		using SqliteConnection connection = OpenConnection();
+		using SqliteCommand command = connection.CreateCommand();
+		command.CommandText = "select count(*) from faction_inventory f where not exists (select 1 from building_defs b where b.type_id = f.type_id)";
+		Assert.Equal(0, Convert.ToInt32(command.ExecuteScalar()));
 	}
 
 	[Fact]
@@ -49,20 +62,6 @@ public class RealBugAllianceChainTests
 		Assert.True(HasBuilding(connection, "RangerPost"));
 		Assert.True(HasUpgrade(connection, "ScoutCamp", "RangerPost"));
 		Assert.True(HasUpgrade(connection, "RangerPost", "RoyalRanger"));
-	}
-
-	private static HashSet<string> ReadInventoryTypeIds()
-	{
-		HashSet<string> inventory = new();
-		using SqliteConnection connection = OpenConnection();
-		using (SqliteCommand command = connection.CreateCommand())
-		{
-			command.CommandText = "select type_id from faction_inventory where faction_id = 'alliance'";
-			using SqliteDataReader reader = command.ExecuteReader();
-			while (reader.Read())
-				inventory.Add(reader.GetString(0));
-		}
-		return inventory;
 	}
 
 	private static HashSet<string> ReadReachableTypeIds()
