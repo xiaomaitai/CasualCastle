@@ -33,7 +33,7 @@
 从标题界面"开发者工具"菜单进入。集中展示全局参数并按业务模块分组（经济、战斗、显示/像素换算），支持运行时热修改：修改输入框即时生效、无需重新编译；"重置"恢复单个参数默认值，"全部重置"恢复所有参数。
 
 - 可编辑来源：domain 层 `GameParameters`（默认值取自 `GameRules` 常量，热修改供 `Shop`/`MatchPhaseMachine` 等消费）、adapter 层 `GameCoordinatesAdapter.PixelsPerCell` 与 `SfxPolicy`
-- 当前参数：每局初始金币、修理每点生命花费、战斗/合成阶段时长、战斗开始等待、每格像素、音效限流 4 项
+- 当前参数：每局初始金币、修理每点生命花费、战斗阶段时长、战斗开始等待、每格像素、音效限流 4 项
 - 持久化：值按业务分别存在 `config.db` 的业务配置表（`economy_config`/`battle_config`/`display_config`/`sound_config`，结构为 key/value），编辑器修改/重置即时写回对应表，核心启动（`CompositionRoot.Build`）从各表读入静态参数；不为编辑器专门建表
 
 ## 按键日志

@@ -16,7 +16,6 @@ public class GameParametersTests
 	{
 		Assert.Equal(GameRules.InitialGold, GameParameters.InitialGold);
 		Assert.Equal(GameRules.CombatDurationSeconds, GameParameters.CombatDurationSeconds);
-		Assert.Equal(GameRules.CombineDurationSeconds, GameParameters.CombineDurationSeconds);
 		Assert.Equal(GameRules.CombatStartTimerHoldSeconds, GameParameters.CombatStartTimerHoldSeconds);
 		Assert.Equal(GameRules.RepairGoldPerHealth, GameParameters.RepairGoldPerHealth);
 	}
@@ -34,13 +33,11 @@ public class GameParametersTests
 	{
 		GameParameters.InitialGold = 1;
 		GameParameters.CombatDurationSeconds = 2f;
-		GameParameters.CombineDurationSeconds = 3f;
 		GameParameters.CombatStartTimerHoldSeconds = 4f;
 		GameParameters.RepairGoldPerHealth = 5;
 		GameParameters.Reset();
 		Assert.Equal(GameRules.InitialGold, GameParameters.InitialGold);
 		Assert.Equal(GameRules.CombatDurationSeconds, GameParameters.CombatDurationSeconds);
-		Assert.Equal(GameRules.CombineDurationSeconds, GameParameters.CombineDurationSeconds);
 		Assert.Equal(GameRules.CombatStartTimerHoldSeconds, GameParameters.CombatStartTimerHoldSeconds);
 		Assert.Equal(GameRules.RepairGoldPerHealth, GameParameters.RepairGoldPerHealth);
 	}

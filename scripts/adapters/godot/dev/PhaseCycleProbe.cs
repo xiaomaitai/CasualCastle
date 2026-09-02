@@ -9,7 +9,6 @@ public partial class PhaseCycleProbe : SmokeTestBase
 	private float _elapsed;
 	private float _lastLog;
 	private bool _advancedShop;
-	private bool _advancedCombine;
 
 	public override void _Ready()
 	{
@@ -36,13 +35,7 @@ public partial class PhaseCycleProbe : SmokeTestBase
 			GD.Print("PROBE advance from shop");
 			gm.AdvancePhase();
 		}
-		else if (gm.CurrentPhase == MatchPhase.Combine && !_advancedCombine)
-		{
-			_advancedCombine = true;
-			GD.Print("PROBE advance from combine");
-			gm.AdvancePhase();
-		}
-		else if (gm.CurrentPhase == MatchPhase.Combat && _advancedCombine && _elapsed > 70f)
+		else if (gm.CurrentPhase == MatchPhase.Combat && _advancedShop && _elapsed > 70f)
 		{
 			GD.Print("PROBE full cycle ok");
 			ReportAndQuit();

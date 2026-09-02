@@ -6,7 +6,6 @@ namespace CasualCastle.Domain.Shared;
 public enum MatchPhase
 {
 	Combat,
-	Combine,
 	Shop
 }
 
@@ -37,12 +36,9 @@ public class MatchPhaseMachine
 			HoldRemaining -= delta;
 			return;
 		}
-		if (CurrentPhase == MatchPhase.Combat || CurrentPhase == MatchPhase.Combine)
-		{
-			PhaseTimeRemaining -= delta;
-			if (PhaseTimeRemaining <= 0f)
-				Advance();
-		}
+		PhaseTimeRemaining -= delta;
+		if (PhaseTimeRemaining <= 0f)
+			Advance();
 	}
 
 	public void Advance()
@@ -63,22 +59,12 @@ public class MatchPhaseMachine
 
 	private static MatchPhase GetNextPhase(MatchPhase phase)
 	{
-		return phase switch
-		{
-			MatchPhase.Combat => MatchPhase.Shop,
-			MatchPhase.Shop => MatchPhase.Combine,
-			_ => MatchPhase.Combat,
-		};
+		return phase == MatchPhase.Shop ? MatchPhase.Combat : MatchPhase.Shop;
 	}
 
 	private void ApplyPhaseTimers(MatchPhase phase)
 	{
-		if (phase == MatchPhase.Combine)
-			PhaseTimeRemaining = GameParameters.CombineDurationSeconds;
-		else if (phase == MatchPhase.Combat)
-			PhaseTimeRemaining = GameParameters.CombatDurationSeconds;
-		else
-			PhaseTimeRemaining = 0f;
+		PhaseTimeRemaining = phase == MatchPhase.Combat ? GameParameters.CombatDurationSeconds : 0f;
 		HoldRemaining = phase == MatchPhase.Combat ? GameParameters.CombatStartTimerHoldSeconds : 0f;
 	}
 }

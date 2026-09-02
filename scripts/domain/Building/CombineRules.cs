@@ -123,6 +123,33 @@ public class CombineRules
 		return null;
 	}
 
+	public CombineGroup FindCombinableGroupForMain(
+		IBuildingState main, IReadOnlyList<IBuildingState> buildings,
+		IBuildingRepository buildingRepo, int coreLevel = int.MaxValue)
+	{
+		if (main == null || !CanParticipate(main, buildingRepo))
+			return null;
+
+		foreach (CombineRecipe recipe in _recipes)
+		{
+			if (main.TypeId != recipe.MainTypeId)
+				continue;
+			if (!IsCoreLevelSatisfied(recipe, buildingRepo, coreLevel))
+				continue;
+
+			List<IBuildingState> materials = PickMaterials(main, recipe, buildings, new HashSet<IBuildingState>(), buildingRepo);
+			if (materials == null)
+				continue;
+
+			if (!CanCombineGroup(main, materials, recipe, buildingRepo))
+				continue;
+
+			return new CombineGroup(main, materials, recipe);
+		}
+
+		return null;
+	}
+
 	public bool IsSameLine(string typeA, string typeB)
 	{
 		if (typeA == typeB)

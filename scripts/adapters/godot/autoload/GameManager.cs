@@ -44,14 +44,8 @@ public partial class GameManager : Node2D, IGameState
 	public MatchPhase CurrentPhase => _phaseMachine.CurrentPhase;
 	public bool IsCombat => CurrentPhase == MatchPhase.Combat;
 	public bool IsShop => CurrentPhase == MatchPhase.Shop;
-	public bool IsCombine => CurrentPhase == MatchPhase.Combine;
 	public bool IsUndeadBattle => SelectedFaction == FactionDef.NecromancerId || _pendingEnemyIsNecromancer;
-	public bool IsNightDisplayed => CurrentPhase switch
-	{
-		MatchPhase.Combat => IsUndeadBattle,
-		MatchPhase.Shop => !IsUndeadBattle,
-		_ => IsUndeadBattle,
-	};
+	public bool IsNightDisplayed => CurrentPhase == MatchPhase.Combat ? IsUndeadBattle : !IsUndeadBattle;
 	public bool IsDayDisplayed => !IsNightDisplayed;
 	public bool IsPaused { get; private set; }
 	public float PhaseTimeRemaining => _phaseMachine.PhaseTimeRemaining;

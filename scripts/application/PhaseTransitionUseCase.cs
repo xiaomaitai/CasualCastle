@@ -63,8 +63,6 @@ public class PhaseTransitionUseCase
 			shop.RefreshOffers();
 			shop.RequestOpenShop();
 		}
-		if (next == MatchPhase.Combine)
-			_nightCombine.ResolveNightCombines(query.PlayerBuildingStates, query.FactionId, true, _gameState.IsPlaying, query.CombineFactory, _ports.Command.RefreshAfterCombine);
 		if (next == MatchPhase.Combat)
 		{
 			if (enemyTarget != null)

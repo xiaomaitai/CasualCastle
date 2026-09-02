@@ -66,24 +66,9 @@ public class MatchPhaseMachineTests
 	}
 
 	[Fact]
-	public void Advance_ShopToCombine_SetsCombineTimer()
+	public void Advance_ShopToCombat_DoesNotIncrementNight()
 	{
 		MatchPhaseMachine machine = new();
-		machine.Advance();
-
-		machine.Advance();
-
-		Assert.Equal(MatchPhase.Combine, machine.CurrentPhase);
-		Assert.Equal(GameRules.CombineDurationSeconds, machine.PhaseTimeRemaining);
-		Assert.Equal(0f, machine.HoldRemaining);
-		Assert.Equal(1, machine.NightIndex);
-	}
-
-	[Fact]
-	public void Advance_CombineToCombat_DoesNotIncrementNight()
-	{
-		MatchPhaseMachine machine = new();
-		machine.Advance();
 		machine.Advance();
 
 		machine.Advance();
@@ -91,6 +76,7 @@ public class MatchPhaseMachineTests
 		Assert.Equal(MatchPhase.Combat, machine.CurrentPhase);
 		Assert.Equal(1, machine.NightIndex);
 		Assert.Equal(GameRules.CombatDurationSeconds, machine.PhaseTimeRemaining);
+		Assert.Equal(GameRules.CombatStartTimerHoldSeconds, machine.HoldRemaining, 4);
 	}
 
 	[Fact]

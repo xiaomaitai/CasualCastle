@@ -146,12 +146,12 @@
 | 建筑放置 | `domain/Building/OccupancyGrid.cs`、`BuildingData.cs` | `adapters/godot/building/Castle.cs`、`CastlePlacementAdapter.cs`、`BuildingSystem.cs` |
 | 商店 | `domain/Building/Shop.cs`、`ShopRules.cs` | `adapters/godot/ui/ShopUiController.cs` |
 | 手牌/打出 | `domain/Building/Hand.cs`、`CardRules.cs` | `adapters/godot/ui/HandUiController.cs` |
-| 组合 | `domain/Building/CombineService.cs`、`CombineRules.cs` | `adapters/godot/combine/CombineBuildingFactory.cs`、`ui/CombineProhibitUiController.cs` |
+| 组合 | `domain/Building/CombineService.cs`、`CombineRules.cs` | `adapters/godot/combine/CombineBuildingFactory.cs`、`ui/BuildingActionRingController.cs`（手动组合） |
 | 升级 | `domain/Building/UpgradeService.cs`、`UpgradeRules.cs` | `adapters/godot/upgrade/UpgradeBuildingFactory.cs` |
-| 建筑行动环 | `domain/Building/UpgradeRules.cs`、`SellRules.cs`、`BuildingActionRules.cs` | `adapters/godot/ui/BuildingActionRingController.cs` |
+| 建筑行动环 | `domain/Building/UpgradeRules.cs`、`SellRules.cs`、`CombineRules.cs`、`BuildingActionRules.cs` | `adapters/godot/ui/BuildingActionRingController.cs` |
 | 战报 | `domain/History/BattleReportService.cs`、`ReportBuilder.cs` | `adapters/godot/battle_report/BattleReportSystem.cs` |
 | 敌方复刻 | `domain/History/ReplayService.cs`、`MirrorRules.cs` | `adapters/godot/replay/ReplayTarget.cs` |
-| 阶段循环 | `domain/Shared/MatchPhaseMachine.cs` | `adapters/godot/autoload/GameManager.cs`、`flow/NightOrchestrator.cs` |
+| 阶段循环 | `domain/Shared/MatchPhaseMachine.cs` | `adapters/godot/autoload/GameManager.cs` |
 | 存档 | `domain/Shared/SaveModels.cs`、`ISaveRepository.cs` | `adapters/persistence/SaveStorage.cs` |
 | 音频 | — | `adapters/godot/audio/AudioManager.cs`、`Sfx.cs` |
 
@@ -213,7 +213,7 @@
 
 - 启动：`project.godot` → `scenes/ui/title_screen.tscn` → `scenes/main/main_game.tscn`
 - Autoload：`GameManager`、`DisplaySettingsManager`、`AudioManager`
-- 主要链路：白天产兵战斗 → 夜晚组合 → 敌方复刻 → 商店 → 阶段循环；任一方城堡血量归零 → 结算（保存战报）
+- 主要链路：白天产兵战斗 → 夜晚商店（购卡/修复）→ 白天开始应用敌方复刻与自动存档 → 阶段循环；任一方城堡血量归零 → 结算（保存战报）
 - 构建/测试/导入/运行命令见 `devPlan/cloudEnvironment.md`
 
 ## 8. 使用提示

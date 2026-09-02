@@ -176,7 +176,7 @@ domain 项目零 `using Godot`，单向无循环。
 | `UnitService` | Battle | 手动 new（每个单位实例，通过 UnitLogic） |
 | `AdjacencyService` | Building | MS DI Singleton |
 | `ShopRules` | Building | MS DI Singleton |
-| `CombineService` | Building | 手动 new（每次合成阶段组合，通过 NightOrchestrator） |
+| `CombineService` | Building | MS DI Singleton（通过 ICombineUseCase） |
 | `Hand` | Building | AdapterRegistry（依赖 Godot 桥接） |
 | `Shop` | Building | AdapterRegistry（依赖 Hand） |
 | `Player` | Building | 手动 new（通过 InitManager） |
@@ -210,7 +210,7 @@ domain 项目零 `using Godot`，单向无循环。
 3. `MainGameController._Ready()` 注册 Battlefield/Castle 到 GameManager
 4. `GameManager.StartGameSession()` → 开始昼夜循环（Day 60s / Night 30s）
 5. 白天：兵营产兵、单位推进战斗（UnitLogic → IFieldUnitRepository → NavigationService 流场寻路 + Steering 避障）
-6. 夜晚：组合 → 敌方复刻 → 开商店 → 全军休眠
+6. 夜晚：开商店（购卡/修复）→ 全军休眠；商店结束进入白天时应用敌方复刻快照并自动存档
 7. 任一方城堡血量归零 → GameOver → 结算弹窗（保存战报/返回标题）
 
 ---

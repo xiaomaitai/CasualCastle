@@ -6,9 +6,9 @@
 
 ## 战报是什么
 
-**战报（Battle Report）** = 一局游戏中，按循环序号排列的**玩家城堡快照**列表；每个循环含作战、商店、合成三张逻辑阶段快照（快照 `Phase` 沿用 `Day / Night / Combine` 命名），战报直接记录对局派系 `FactionId`。
+**战报（Battle Report）** = 一局游戏中，按循环序号排列的**玩家城堡快照**列表；每个循环含作战、商店两张逻辑阶段快照（快照 `Phase` 沿用 `Day / Night` 命名，旧版战报的 `Combine` 快照保留读取兼容），战报直接记录对局派系 `FactionId`。
 
-- 每条快照在对应**阶段结束**时拍摄：作战结束（切商店前）、商店结束（切合成前）、合成结束（切作战前）
+- 每条快照在对应**阶段结束**时拍摄：作战结束（切商店前）、商店结束（切作战前）
 - 快照内容：玩家侧所有已放置建筑（类型、锚点格、生命值、手动暂停、禁止组合等实现所需字段），以及快照时玩家当前金币与手牌（类型、费用）
 - 不包含敌方城堡；金币与手牌只记录玩家侧，不记录敌方
 
@@ -17,18 +17,15 @@
 ## 录制时机
 
 ```text
-作战战斗 / 商店购物与放置 / 合成阶段组合
+作战战斗 / 商店购物与放置
   → 阶段切换：Combat → Shop
       → CapturePhaseSnapshot(playerCastle, nightIndex, Day)   // 作战阶段结束
-  → 阶段切换：Shop → Combine
+  → 阶段切换：Shop → Combat
       → CapturePhaseSnapshot(playerCastle, nightIndex, Night) // 商店阶段结束
-  → CombineSystem.ResolveNightCombines(playerCastle)          // 执行组合
-  → 阶段切换：Combine → Combat
-      → CapturePhaseSnapshot(playerCastle, nightIndex, Combine) // 合成阶段结束
-  → 下一天开始…
+  → 白天开始：应用敌方复刻快照 + 自动存档
 ```
 
-**`NightIndex`：** 本局第几个循环，从 1 起计；同一循环的三个阶段快照共享同一 `NightIndex`，用 `Phase`（Day / Night / Combine）区分。
+**`NightIndex`：** 本局第几个循环，从 1 起计；同一循环的两张快照共享同一 `NightIndex`，用 `Phase`（Day / Night）区分。
 
 局内维护**本局战报缓存**；每次存档（每天开始自动存档 / 暂停菜单手动存档）时把进度快照写入存档 `SaveData.BattleReportJson`，**不进入永久战报库**；结算时选择保留或丢弃。
 

@@ -113,7 +113,7 @@ GameManager._Ready()
 | `BuildingDefinitions` | Domain.Building | BuildingSystem | 建筑类型数据（占地、属性、产出） |
 | `OccupancyGrid` | Domain.Building | Castle._occupied | 网格占用追踪 |
 | `AdjacentRules` | Domain.Building | AdjacentSystem | 邻接检测、兵营加成计算 |
-| `CombineRules` | Domain.Building | CombineSystem | 配方匹配、合成组查找、参与条件 |
+| `CombineRules` | Domain.Building | CombineService | 配方匹配、合成组查找、参与条件 |
 | `ShopRules` | Domain.Building | ShopSystem | 卡牌目录、随机生成商品 |
 | `CardRules` | Domain.Building | CardSystem | 手牌上限、索引校验 |
 | `UnitData` | Domain.Battle | 新建 | 战斗属性数据类 |
@@ -174,8 +174,8 @@ Adapter 类（Godot 节点）委托给上述领域类，自身只保留 Godot �
 | AdjacentSystem | building/AdjacentSystem.cs | Godot Node | 邻接计算委托给 AdjacentRules ✅ |
 | Castle | building/Castle.cs | Godot Node | 网格占用委托给 OccupancyGrid ✅ |
 | Building | building/Building.cs | Godot Node | 实现 IBuildingState + IAdjacencyBuilding ✅ |
-| CombineSystem | combine/CombineSystem.cs | Godot Node | 组合逻辑委托给 CombineRules ✅ |
-| NightOrchestrator | flow/NightOrchestrator.cs | 纯 C# | 合成阶段组合与白天回放快照编排 ✅ |
+| CombineBuildingFactory | combine/CombineBuildingFactory.cs | Godot Node | 手动组合时生成/销毁建筑节点 ✅ |
+| PhaseTransitionUseCase | application/PhaseTransitionUseCase.cs | 纯 C# | 阶段流转：商店刷新、敌方复刻快照应用与自动存档 ✅ |
 | ReplayAiSystem | replay/ReplayAiSystem.cs | Godot Node | 镜像计算委托给 MirrorRules ✅ |
 | BattleReportSystem | battle_report/BattleReportSystem.cs | Godot Node | 战报构建委托给 ReportBuilder ✅ |
 | BattleReportStorage | persistence/BattleReportStorage.cs | 纯 C# | 实现 IBattleReportRepository ✅ |

@@ -60,7 +60,6 @@ public static class CompositionRoot
 		GameParameters.InitialGold = repo.ReadInt(SqliteConfigRepository.EconomyConfig, "initial_gold", GameRules.InitialGold);
 		GameParameters.RepairGoldPerHealth = repo.ReadInt(SqliteConfigRepository.EconomyConfig, "repair_gold_per_health", GameRules.RepairGoldPerHealth);
 		GameParameters.CombatDurationSeconds = repo.ReadFloat(SqliteConfigRepository.BattleConfig, "combat_duration_seconds", GameRules.CombatDurationSeconds);
-		GameParameters.CombineDurationSeconds = repo.ReadFloat(SqliteConfigRepository.BattleConfig, "combine_duration_seconds", GameRules.CombineDurationSeconds);
 		GameParameters.CombatStartTimerHoldSeconds = repo.ReadFloat(SqliteConfigRepository.BattleConfig, "combat_start_hold_seconds", GameRules.CombatStartTimerHoldSeconds);
 		GameCoordinatesAdapter.PixelsPerCell = repo.ReadInt(SqliteConfigRepository.DisplayConfig, "pixels_per_cell", GameCoordinatesAdapter.PixelsPerCellDefault);
 		SfxPolicy.MaxPlaysPerSecond = repo.ReadInt(SqliteConfigRepository.SoundConfig, "sfx_max_plays_per_second", SfxPolicy.MaxPlaysPerSecondDefault);

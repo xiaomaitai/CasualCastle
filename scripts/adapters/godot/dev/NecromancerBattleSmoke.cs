@@ -1,4 +1,4 @@
-// 亡灵派系 v0.4 战斗冒烟：真实对局验证夜战产兵、仪式升级、T2 升级与死亡圣殿组合。
+// 亡灵派系 v0.4 战斗冒烟：真实对局验证夜战产兵、仪式升级、T2 升级与仪式阶段门控。
 using System.Collections.Generic;
 using CasualCastle.Adapters.Godot;
 using CasualCastle.Domain.Battle;
@@ -10,7 +10,6 @@ public partial class NecromancerBattleSmoke : SmokeTestBase
 {
 	private const string MainGameScene = "res://scenes/main/main_game.tscn";
 	private const float NightSpawnWait = 4f;
-	private const float CombineCheckDelay = 0.5f;
 	private const float RitualTickWait = 1.2f;
 	private const float RitualPauseWait = 0.8f;
 	private const float TotalTimeout = 60f;
@@ -23,7 +22,6 @@ public partial class NecromancerBattleSmoke : SmokeTestBase
 		WaitSpawns,
 		WaitFirstRitual,
 		WaitSecondRitual,
-		VerifyCombine,
 		CheckRitualPhaseGate
 	}
 
@@ -95,9 +93,6 @@ public partial class NecromancerBattleSmoke : SmokeTestBase
 				break;
 			case SmokeStep.WaitSecondRitual:
 				WaitSecondRitual();
-				break;
-			case SmokeStep.VerifyCombine:
-				VerifyCombine();
 				break;
 			case SmokeStep.CheckRitualPhaseGate:
 				CheckRitualPhaseGate();
@@ -250,9 +245,6 @@ public partial class NecromancerBattleSmoke : SmokeTestBase
 			case 2:
 				VerifyRitualFrozenInShop();
 				break;
-			case 3:
-				VerifyRitualFrozenInCombine();
-				break;
 		}
 	}
 
@@ -289,21 +281,6 @@ public partial class NecromancerBattleSmoke : SmokeTestBase
 			return;
 		if (_darkAltar.RitualRemainingSeconds != _ritualRemainingAtCombatEnd)
 			Fail("商店阶段仪式不应读条");
-		AdapterRegistry.Resolve<GameManager>().AdvancePhase();
-		_ritualGateStep = 3;
-		_stepStartedAt = _elapsed;
-	}
-
-	private void VerifyRitualFrozenInCombine()
-	{
-		if (_elapsed - _stepStartedAt < RitualPauseWait)
-			return;
-		if (_darkAltar.RitualRemainingSeconds != _ritualRemainingAtCombatEnd)
-		{
-			Fail("组合阶段仪式不应读条");
-			ReportAndQuit();
-			return;
-		}
 		GD.Print("SMOKE: ritual phase gate ok");
 		ReportAndQuit();
 	}
@@ -342,24 +319,6 @@ public partial class NecromancerBattleSmoke : SmokeTestBase
 		if (_playerCastle.Heart == null || _playerCastle.Heart.TypeId != "RitualCircleL3")
 			return;
 		AdapterRegistry.Resolve<GameManager>().AdvancePhase();
-		_stepStartedAt = _elapsed;
-		_step = SmokeStep.VerifyCombine;
-	}
-
-	private void VerifyCombine()
-	{
-		if (AdapterRegistry.Resolve<GameManager>().CurrentPhase != MatchPhase.Combine)
-		{
-			if (_elapsed - _stepStartedAt < CombineCheckDelay)
-				return;
-			AdapterRegistry.Resolve<GameManager>().AdvancePhase();
-			_stepStartedAt = _elapsed;
-			return;
-		}
-		if (_elapsed - _stepStartedAt < CombineCheckDelay)
-			return;
-		if (FindBuilding("DeathTemple") == null)
-			Fail("组合阶段未生成死亡圣殿");
 		_stepStartedAt = _elapsed;
 		_step = SmokeStep.CheckRitualPhaseGate;
 	}

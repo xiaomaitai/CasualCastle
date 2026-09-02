@@ -17,10 +17,4 @@ public class PhaseMappingTests
 	{
 		Assert.Equal(BattlePhase.Night, PhaseMapping.ToBattlePhase(MatchPhase.Shop));
 	}
-
-	[Fact]
-	public void ToBattlePhase_Combine_MapsToCombine()
-	{
-		Assert.Equal(BattlePhase.Combine, PhaseMapping.ToBattlePhase(MatchPhase.Combine));
-	}
 }

@@ -213,7 +213,7 @@ public partial class HudUiController : Control
 	private void UpdatePhaseDisplay()
 	{
 		GameManager gm = AdapterRegistry.Resolve<GameManager>();
-		PhaseLabel.Text = gm.IsCombine ? "合成" : gm.IsNightDisplayed ? "夜晚" : "白天";
+		PhaseLabel.Text = gm.IsNightDisplayed ? "夜晚" : "白天";
 		if (gm.IsCombat)
 		{
 			PhaseTimerLabel.Text = FormatTime(gm.PhaseTimeRemaining);

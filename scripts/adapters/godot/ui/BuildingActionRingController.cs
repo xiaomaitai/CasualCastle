@@ -14,6 +14,7 @@ public partial class BuildingActionRingController : Control
 	private const string SellKind = "Sell";
 	private const string PauseKind = "Pause";
 	private const string UpgradeKind = "Upgrade";
+	private const string CombineKind = "Combine";
 	private const string SpecialKind = "Special";
 
 	private BuildingActionRing _ring;
@@ -169,6 +170,7 @@ public partial class BuildingActionRingController : Control
 		if (CanManage(building))
 			actions.Add(BuildPauseAction(building));
 		AddUpgradeActions(actions, building);
+		AddCombineActions(actions, building);
 		if (building.CanUseSpellBar())
 			actions.Add(BuildSpecialAction());
 		return actions;
@@ -210,6 +212,9 @@ public partial class BuildingActionRingController : Control
 			case UpgradeKind:
 				button.Pressed += () => TryUpgrade(building, action.Recipe);
 				break;
+			case CombineKind:
+				button.Pressed += () => TryCombine(building, action.CombineRecipe);
+				break;
 			case SpecialKind:
 				button.Toggled += ToggleSpellBar;
 				break;
@@ -227,6 +232,8 @@ public partial class BuildingActionRingController : Control
 				_buttons[i].SetPressedNoSignal(!SpellBarUi.IsHiddenByRing);
 			else if (kind == UpgradeKind)
 				_buttons[i].Disabled = !IsUpgradeEnabled(building, _currentActions[i].Recipe);
+			else if (kind == CombineKind)
+				_buttons[i].Disabled = !IsCombineEnabled(building, _currentActions[i].CombineRecipe);
 		}
 	}
 
@@ -305,6 +312,78 @@ public partial class BuildingActionRingController : Control
 	{
 		bool isNecromancer = GameManager.Get<IBuildingRepository>().GetFactionId(building.TypeId) == FactionDef.NecromancerId;
 		return isNecromancer ? RitualCircleRules.GetCoreLevel(states) : HordeCoreRules.GetCoreLevel(states);
+	}
+
+	private static void AddCombineActions(List<RingAction> actions, Building building)
+	{
+		CombineRules rules = GameManager.Get<CombineRules>();
+		Castle castle = building.GetCastle();
+		if (castle == null)
+			return;
+
+		foreach (CombineRecipe recipe in rules.GetRecipes())
+		{
+			if (recipe.MainTypeId != building.TypeId)
+				continue;
+
+			string resultName = AdapterRegistry.Resolve<BuildingSystem>().GetDisplayName(recipe.ResultTypeId);
+			actions.Add(new RingAction
+			{
+				Kind = CombineKind,
+				Icon = BuildingIcons.Combine,
+				Tooltip = $"组合为{resultName}",
+				Enabled = IsCombineEnabled(building, recipe),
+				CombineRecipe = recipe,
+			});
+		}
+	}
+
+	private static bool IsCombineEnabled(Building building, CombineRecipe recipe)
+	{
+		if (recipe == null)
+			return false;
+
+		Castle castle = building.GetCastle();
+		if (castle == null)
+			return false;
+
+		CombineRules rules = GameManager.Get<CombineRules>();
+		IBuildingRepository repo = GameManager.Get<IBuildingRepository>();
+		List<IBuildingState> states = castle.GetBuildingStates();
+		CombineGroup group = rules.FindCombinableGroupForMain(
+			building.Bridge, states, repo, GetCombineCoreLevel(building, states));
+		return group != null;
+	}
+
+	private static int GetCombineCoreLevel(Building building, List<IBuildingState> states)
+	{
+		string faction = GameManager.Get<IBuildingRepository>().GetFactionId(building.TypeId);
+		if (faction == FactionDef.NecromancerId)
+			return RitualCircleRules.GetCoreLevel(states);
+		if (faction == FactionDef.DungeonId)
+			return DungeonCoreRules.GetCoreLevel(states);
+		return int.MaxValue;
+	}
+
+	private void TryCombine(Building building, CombineRecipe recipe)
+	{
+		if (building == null || !GodotObject.IsInstanceValid(building) || recipe == null)
+			return;
+
+		Castle castle = building.GetCastle();
+		if (castle == null)
+			return;
+
+		List<IBuildingState> states = castle.GetBuildingStates();
+		ICombineUseCase useCase = GameManager.Get<ICombineUseCase>();
+		IBuildingState result = useCase.TryCombineMain(
+			states, building.Bridge, new CombineBuildingFactory(castle),
+			GetCombineCoreLevel(building, states));
+		if (result == null)
+			return;
+
+		GameManager.Get<AdjacencyService>()?.RefreshCastle(castle.GetBuildingStates());
+		Sfx.Play(SfxEvents.Combine);
 	}
 
 	private RingAction BuildSpecialAction()
@@ -503,5 +582,6 @@ public partial class BuildingActionRingController : Control
 		public bool Enabled;
 		public bool Toggled;
 		public UpgradeRecipe Recipe;
+		public CombineRecipe CombineRecipe;
 	}
 }

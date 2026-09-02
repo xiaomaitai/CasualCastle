@@ -10,6 +10,7 @@ public static class BuildingIcons
 	private static Texture2D _repair;
 	private static Texture2D _repairBlocked;
 	private static Texture2D _combineProhibit;
+	private static Texture2D _combine;
 	private static Texture2D _burrow;
 	private static Texture2D _sell;
 	private static Texture2D _upgrade;
@@ -22,6 +23,7 @@ public static class BuildingIcons
 	public static Texture2D Repair => _repair ??= CreateRepairIcon();
 	public static Texture2D RepairBlocked => _repairBlocked ??= CreateRepairBlockedIcon();
 	public static Texture2D CombineProhibit => _combineProhibit ??= CreateCombineProhibitIcon();
+	public static Texture2D Combine => _combine ??= CreateCombineIcon();
 	public static Texture2D Burrow => _burrow ??= CreateBurrowIcon();
 	public static Texture2D Sell => _sell ??= CreateSellIcon();
 	public static Texture2D Upgrade => _upgrade ??= CreateUpgradeIcon();
@@ -55,6 +57,20 @@ public static class BuildingIcons
 	{
 		Image image = CreateCanvas();
 		DrawProhibitOverlay(image);
+		return ToTexture(image);
+	}
+
+	private static Texture2D CreateCombineIcon()
+	{
+		Image image = CreateCanvas();
+		Color teal = new(0.25f, 0.85f, 0.8f, 1f);
+		DrawRing(image, 13, 12, 6, 3, teal);
+		DrawRing(image, 35, 12, 6, 3, teal);
+		DrawLine(image, 18, 17, 24, 23, 3, teal);
+		DrawLine(image, 30, 17, 24, 23, 3, teal);
+		FillRect(image, 22, 23, 4, 8, teal);
+		DrawLine(image, 18, 27, 24, 33, 3, teal);
+		DrawLine(image, 30, 27, 24, 33, 3, teal);
 		return ToTexture(image);
 	}
 

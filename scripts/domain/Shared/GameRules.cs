@@ -4,7 +4,6 @@ namespace CasualCastle.Domain.Shared;
 public static class GameRules
 {
 	public const float CombatDurationSeconds = 60f;
-	public const float CombineDurationSeconds = 1f;
 	public const float CombatStartTimerHoldSeconds = 1f;
 	public const int InitialGold = 3000;
 	public const int RepairGoldPerHealth = 1;

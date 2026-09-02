@@ -5,7 +5,6 @@ public static class GameParameters
 {
 	public static int InitialGold = GameRules.InitialGold;
 	public static float CombatDurationSeconds = GameRules.CombatDurationSeconds;
-	public static float CombineDurationSeconds = GameRules.CombineDurationSeconds;
 	public static float CombatStartTimerHoldSeconds = GameRules.CombatStartTimerHoldSeconds;
 	public static int RepairGoldPerHealth = GameRules.RepairGoldPerHealth;
 
@@ -13,7 +12,6 @@ public static class GameParameters
 	{
 		InitialGold = GameRules.InitialGold;
 		CombatDurationSeconds = GameRules.CombatDurationSeconds;
-		CombineDurationSeconds = GameRules.CombineDurationSeconds;
 		CombatStartTimerHoldSeconds = GameRules.CombatStartTimerHoldSeconds;
 		RepairGoldPerHealth = GameRules.RepairGoldPerHealth;
 	}

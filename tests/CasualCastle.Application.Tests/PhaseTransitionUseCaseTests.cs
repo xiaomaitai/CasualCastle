@@ -12,10 +12,10 @@ namespace CasualCastle.Application.Tests;
 
 public class PhaseTransitionUseCaseTests
 {
-	private static PhaseTransitionUseCase CreateUseCase(RecordingQuery query, RecordingCommand command, RecordingShop shop, RecordingCapture capture, Mock<IGameState> gameState, Mock<ICombineUseCase> combine, Mock<IReplayUseCase> replay, Mock<IGameSessionService> session)
+	private static PhaseTransitionUseCase CreateUseCase(RecordingQuery query, RecordingCommand command, RecordingShop shop, RecordingCapture capture, Mock<IGameState> gameState, Mock<IReplayUseCase> replay, Mock<IGameSessionService> session)
 	{
 		GameSessionPorts ports = TestPorts.Create(query, command, shop, capture);
-		NightCombineUseCase nightCombine = new(new Mock<IBuildingRepository>().Object, replay.Object, combine.Object);
+		NightCombineUseCase nightCombine = new(replay.Object);
 		return new PhaseTransitionUseCase(ports, gameState.Object, nightCombine, session.Object);
 	}
 
@@ -27,7 +27,7 @@ public class PhaseTransitionUseCaseTests
 		RecordingCapture capture = new();
 		Mock<IGameState> gameState = new();
 		gameState.SetupGet(s => s.IsPlaying).Returns(true);
-		PhaseTransitionUseCase useCase = CreateUseCase(query, new RecordingCommand(), shop, capture, gameState, new Mock<ICombineUseCase>(), new Mock<IReplayUseCase>(), new Mock<IGameSessionService>());
+		PhaseTransitionUseCase useCase = CreateUseCase(query, new RecordingCommand(), shop, capture, gameState, new Mock<IReplayUseCase>(), new Mock<IGameSessionService>());
 
 		useCase.Handle(MatchPhase.Combat, MatchPhase.Shop, null);
 
@@ -49,7 +49,7 @@ public class PhaseTransitionUseCaseTests
 		Mock<IReplayUseCase> replay = new();
 		Mock<IGameState> gameState = new();
 		gameState.SetupGet(s => s.IsPlaying).Returns(true);
-		PhaseTransitionUseCase useCase = CreateUseCase(query, new RecordingCommand(), shop, capture, gameState, new Mock<ICombineUseCase>(), replay, new Mock<IGameSessionService>());
+		PhaseTransitionUseCase useCase = CreateUseCase(query, new RecordingCommand(), shop, capture, gameState, replay, new Mock<IGameSessionService>());
 		IReplayTarget target = new Mock<IReplayTarget>().Object;
 
 		useCase.Handle(MatchPhase.Combat, MatchPhase.Combat, target);
@@ -60,26 +60,7 @@ public class PhaseTransitionUseCaseTests
 	}
 
 	[Fact]
-	public void ShopToCombine_CapturesNightAndResolvesCombines()
-	{
-		RecordingQuery query = new() { CurrentNightIndex = 1, FactionId = FactionIds.Alliance };
-		query.PlayerBuildingStates.Add(new FakeBuildingState("barracks", 2, 2));
-		query.CombineFactory = new FakeCombineFactory();
-		RecordingCapture capture = new();
-		Mock<ICombineUseCase> combine = new();
-		Mock<IGameState> gameState = new();
-		gameState.SetupGet(s => s.IsPlaying).Returns(true);
-		PhaseTransitionUseCase useCase = CreateUseCase(query, new RecordingCommand(), new RecordingShop(), capture, gameState, combine, new Mock<IReplayUseCase>(), new Mock<IGameSessionService>());
-
-		useCase.Handle(MatchPhase.Shop, MatchPhase.Combine, null);
-
-		Assert.Single(capture.Snapshots);
-		Assert.Equal(BattlePhase.Night, capture.Snapshots[0].Phase);
-		combine.Verify(c => c.ResolveCombines(It.IsAny<List<IBuildingState>>(), true, true, true, It.IsAny<ICombineBuildingFactory>(), It.IsAny<Action<IBuildingState>>(), int.MaxValue), Times.Once);
-	}
-
-	[Fact]
-	public void CombineToCombat_CapturesCombineAppliesReplayAndSavesGame()
+	public void ShopToCombat_CapturesNightAppliesReplayAndSavesGame()
 	{
 		RecordingQuery query = new() { CurrentNightIndex = 2 };
 		RecordingCapture capture = new();
@@ -87,19 +68,19 @@ public class PhaseTransitionUseCaseTests
 		Mock<IGameSessionService> session = new();
 		Mock<IGameState> gameState = new();
 		gameState.SetupGet(s => s.IsPlaying).Returns(true);
-		PhaseTransitionUseCase useCase = CreateUseCase(query, new RecordingCommand(), new RecordingShop(), capture, gameState, new Mock<ICombineUseCase>(), replay, session);
+		PhaseTransitionUseCase useCase = CreateUseCase(query, new RecordingCommand(), new RecordingShop(), capture, gameState, replay, session);
 		IReplayTarget target = new Mock<IReplayTarget>().Object;
 
-		useCase.Handle(MatchPhase.Combine, MatchPhase.Combat, target);
+		useCase.Handle(MatchPhase.Shop, MatchPhase.Combat, target);
 
 		Assert.Single(capture.Snapshots);
-		Assert.Equal(BattlePhase.Combine, capture.Snapshots[0].Phase);
+		Assert.Equal(BattlePhase.Night, capture.Snapshots[0].Phase);
 		replay.Verify(r => r.ApplyNightSnapshot(target, 3, BattlePhase.Day), Times.Once);
 		session.Verify(s => s.SaveGame(0), Times.Once);
 	}
 
 	[Fact]
-	public void CombineToCombat_NightZero_DoesNotSaveGame()
+	public void ShopToCombat_NightZero_DoesNotSaveGame()
 	{
 		RecordingQuery query = new() { CurrentNightIndex = 0 };
 		RecordingCapture capture = new();
@@ -107,9 +88,9 @@ public class PhaseTransitionUseCaseTests
 		Mock<IGameSessionService> session = new();
 		Mock<IGameState> gameState = new();
 		gameState.SetupGet(s => s.IsPlaying).Returns(true);
-		PhaseTransitionUseCase useCase = CreateUseCase(query, new RecordingCommand(), new RecordingShop(), capture, gameState, new Mock<ICombineUseCase>(), replay, session);
+		PhaseTransitionUseCase useCase = CreateUseCase(query, new RecordingCommand(), new RecordingShop(), capture, gameState, replay, session);
 
-		useCase.Handle(MatchPhase.Combine, MatchPhase.Combat, null);
+		useCase.Handle(MatchPhase.Shop, MatchPhase.Combat, null);
 
 		session.Verify(s => s.SaveGame(It.IsAny<int>()), Times.Never);
 	}

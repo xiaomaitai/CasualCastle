@@ -43,6 +43,18 @@ public class CombineService : ICombineUseCase
 		}
 	}
 
+	public IBuildingState TryCombineMain(List<IBuildingState> buildings, IBuildingState main, ICombineBuildingFactory factory, int coreLevel = int.MaxValue)
+	{
+		if (buildings == null || main == null)
+			return null;
+
+		CombineGroup group = _combineRules.FindCombinableGroupForMain(main, buildings, _buildingRepo, coreLevel);
+		if (group == null)
+			return null;
+
+		return TryCombineGroup(buildings, group, factory);
+	}
+
 	private IBuildingState TryCombineGroup(List<IBuildingState> buildings, CombineGroup group, ICombineBuildingFactory factory)
 	{
 		if (!_combineRules.CanCombineGroup(group.Main, group.Materials, group.Recipe, _buildingRepo))

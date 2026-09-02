@@ -7,4 +7,6 @@ namespace CasualCastle.Domain.Building;
 public interface ICombineUseCase
 {
 	void ResolveCombines(List<IBuildingState> buildings, bool isPlayerSide, bool isCombinePhase, bool isPlaying, ICombineBuildingFactory factory, Action<IBuildingState> onCombineCompleted, int coreLevel = int.MaxValue);
+
+	IBuildingState TryCombineMain(List<IBuildingState> buildings, IBuildingState main, ICombineBuildingFactory factory, int coreLevel = int.MaxValue);
 }

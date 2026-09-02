@@ -12,7 +12,6 @@ public static class PhaseMapping
 		{
 			MatchPhase.Combat => BattlePhase.Day,
 			MatchPhase.Shop => BattlePhase.Night,
-			MatchPhase.Combine => BattlePhase.Combine,
 			_ => throw new ArgumentOutOfRangeException(nameof(phase), phase, null),
 		};
 	}
