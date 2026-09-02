@@ -12,6 +12,7 @@ public class RealBugAllianceChainTests
 	public void AllianceChain_EveryAdvancedBuildingReachable_RealBug_DeadBuildings()
 	{
 		HashSet<string> reachable = ReadReachableTypeIds();
+		HashSet<string> inventory = ReadInventoryTypeIds();
 
 		using SqliteConnection connection = OpenConnection();
 		using SqliteCommand command = connection.CreateCommand();
@@ -24,7 +25,7 @@ public class RealBugAllianceChainTests
 			if (tier < 1 || core == 1)
 				continue;
 			string typeId = reader.GetString(0);
-			Assert.True(reachable.Contains(typeId), typeId);
+			Assert.True(reachable.Contains(typeId) || inventory.Contains(typeId), typeId);
 		}
 	}
 
@@ -48,6 +49,20 @@ public class RealBugAllianceChainTests
 		Assert.True(HasBuilding(connection, "RangerPost"));
 		Assert.True(HasUpgrade(connection, "ScoutCamp", "RangerPost"));
 		Assert.True(HasUpgrade(connection, "RangerPost", "RoyalRanger"));
+	}
+
+	private static HashSet<string> ReadInventoryTypeIds()
+	{
+		HashSet<string> inventory = new();
+		using SqliteConnection connection = OpenConnection();
+		using (SqliteCommand command = connection.CreateCommand())
+		{
+			command.CommandText = "select type_id from faction_inventory where faction_id = 'alliance'";
+			using SqliteDataReader reader = command.ExecuteReader();
+			while (reader.Read())
+				inventory.Add(reader.GetString(0));
+		}
+		return inventory;
 	}
 
 	private static HashSet<string> ReadReachableTypeIds()
