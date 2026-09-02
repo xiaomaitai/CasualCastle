@@ -10,6 +10,8 @@ public class UnitVisual
 	private const float RunFps = 10f;
 	private const float HurtFps = 8f;
 	private const float DeathFps = 8f;
+	private const int HurtFrameLimit = 2;
+	private const int GenericFrameLimit = 16;
 	private const float BodyHealthAboveHeadRatio = 0.75f;
 	private const float BodyHealthWidthRatio = 1.15f;
 	private static readonly Color StealthModulate = new(0.72f, 0.82f, 1f, 0.55f);
@@ -93,21 +95,21 @@ public class UnitVisual
 	private static SpriteFrames BuildFrames(string framesPath)
 	{
 		SpriteFrames frames = new SpriteFrames();
-		AddAnimation(frames, "run", framesPath, RunFps, true);
-		AddAnimation(frames, "attack", framesPath, AttackFps, false);
-		AddAnimation(frames, "hurt", framesPath, HurtFps, false);
-		AddAnimation(frames, "death", framesPath, DeathFps, false);
+		AddAnimation(frames, "run", framesPath, RunFps, true, GenericFrameLimit);
+		AddAnimation(frames, "attack", framesPath, AttackFps, false, GenericFrameLimit);
+		AddAnimation(frames, "hurt", framesPath, HurtFps, false, HurtFrameLimit);
+		AddAnimation(frames, "death", framesPath, DeathFps, false, GenericFrameLimit);
 		return frames;
 	}
 
-	private static void AddAnimation(SpriteFrames frames, string name, string framesPath, float fps, bool loop)
+	private static void AddAnimation(SpriteFrames frames, string name, string framesPath, float fps, bool loop, int frameLimit)
 	{
 		if (!ResourceLoader.Exists($"{framesPath}/{name}_00.png")) return;
 		frames.AddAnimation(name);
 		frames.SetAnimationSpeed(name, fps);
 		frames.SetAnimationLoop(name, loop);
 		int index = 0;
-		while (ResourceLoader.Exists($"{framesPath}/{name}_{index:00}.png"))
+		while (index < frameLimit && ResourceLoader.Exists($"{framesPath}/{name}_{index:00}.png"))
 		{
 			frames.AddFrame(name, GD.Load<Texture2D>($"{framesPath}/{name}_{index:00}.png"));
 			index++;
