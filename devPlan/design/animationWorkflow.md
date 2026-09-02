@@ -4,6 +4,16 @@
 
 本文档记录帧动画工作流的规则与接入方式，供后续兵种动画复用。素材规格见 `assetSpecs.md`，工具见 `tools/slice_spritesheet.py`。
 
+## 流程速查（Agent 遵循）
+
+1. 源图集入库 → `assets/art/units/{TypeId_lower}_sheet_out.png`。
+2. 切帧 → `python tools\slice_spritesheet.py --input <sheet>.png --output assets\art\units\{TypeId_lower}\frames --anims <按行顺序，逗号分隔> --global-cell --pad 4`；产物 `{anim}_{NN}.png` + `manifest.json`。
+3. 导入 → `python tools\godot_import.py --project <根> --godot <Godot exe>`；生成 `.import`/`.uid`。
+4. 战场自动启用：`UnitVisual.BuildFrames` 按 `res://assets/art/units/{typeId_lower}/frames` 是否存在切换「动画身体 `View/Body`」/「卡面 `View/UnitCard`」——有目录=身体，无目录=卡面。
+5. 状态映射：`UnitLogic`（`UpdateBodyAnimation` + `OnAttack/OnDamaged/OnDied`）→ `run`/`attack`/`hurt`/`death`；无 idle（站定冻结）。
+6. 调节奏：`UnitVisual.cs` 的 `*Fps` 与 `HurtFrameLimit`/`GenericFrameLimit`。
+7. 预览：`scenes/ui/dev_tools/unit_anim_preview.tscn`（数字键 1-5）。
+
 ## 1. 方案概述
 
 - 单位使用**逐帧序列帧**（帧动画），而非骨骼动画。
