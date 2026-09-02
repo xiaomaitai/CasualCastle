@@ -1054,5 +1054,5 @@ INSERT INTO "upgrade_recipes" VALUES('RangerPost','RoyalRanger');
 INSERT INTO "upgrade_recipes" VALUES('RoyalBulwark','HolyWall');
 INSERT INTO "upgrade_recipes" VALUES('RoyalRanger','ShadowSanctum');
 DELETE FROM "sqlite_sequence";
-INSERT INTO "sqlite_sequence" VALUES('asset_gen_tasks',195);
+INSERT INTO "sqlite_sequence" VALUES('asset_gen_tasks',196);
 COMMIT;
