@@ -485,6 +485,8 @@ public partial class UnitLogic : Node2D
 		float targetPixelX = GameCoordinatesAdapter.GameUnitsToPixels(_eventRelay.LastAttackTargetX);
 		float targetPixelY = GameCoordinatesAdapter.GameUnitsToPixels(_eventRelay.LastAttackTargetY);
 		Vector2 toPos = new Vector2(targetPixelX, targetPixelY);
+		if (AttackType == AttackType.Melee && !_bodyAnimated)
+			_visual?.PlayMeleeLunge(toPos);
 		_projectiles.SpawnAttack(root, fromPos, toPos, AttackType, DamageType, AttackType == AttackType.Ranged);
 		TargetRing.Spawn(root, toPos);
 		_visual?.PlayAnimation("attack");

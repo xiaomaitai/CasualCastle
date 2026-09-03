@@ -1,4 +1,4 @@
-// 单位视觉：血条、状态图标、受击闪白与翻转
+// 单位视觉：血条、状态图标、受击闪白、翻转与近战冲撞
 using Godot;
 using System.Collections.Generic;
 
@@ -11,6 +11,10 @@ public class UnitVisual
 	private const float RunFps = 10f;
 	private const float HurtFps = 8f;
 	private const float DeathFps = 8f;
+	private const float LungeTravelFraction = 0.35f;
+	private const float MaxLungeDistancePixels = 100f;
+	private const float LungeOutSeconds = 0.06f;
+	private const float LungeBackSeconds = 0.12f;
 	private const int HurtFrameLimit = 2;
 	private const int GenericFrameLimit = 16;
 	private const float BodyHealthAboveHeadRatio = 0.75f;
@@ -27,6 +31,8 @@ public class UnitVisual
 	private Color _portraitTint = Colors.White;
 	private float _hitFlashTimer;
 	private bool _isSleeping;
+	private Node2D _view;
+	private Tween _lungeTween;
 
 	public bool IsFlashing => _hitFlashTimer > 0f;
 	public bool IsBodyAnimated => _bodyAnimated;
@@ -34,6 +40,7 @@ public class UnitVisual
 	public void Initialize(Node2D body)
 	{
 		_body = body;
+		_view = body.GetNode<Node2D>("View");
 		_card = body.GetNode<UnitCardView>("View/UnitCard");
 		_bodyAnim = body.GetNodeOrNull<AnimatedSprite2D>(BodyNodePath);
 		_bodyHealth = body.GetNodeOrNull<HealthBarView>(BodyHealthNodePath);
@@ -264,5 +271,22 @@ public class UnitVisual
 	{
 		_card.SetFlipH(flip);
 		if (_bodyAnim != null) _bodyAnim.FlipH = flip;
+	}
+
+	public void PlayMeleeLunge(Vector2 targetPixelPosition)
+	{
+		if (_bodyAnimated || _view == null)
+			return;
+		Vector2 origin = _view.Position;
+		Vector2 delta = targetPixelPosition - _view.GlobalPosition;
+		float distance = delta.Length();
+		if (distance < 1f)
+			return;
+		Vector2 lunge = delta / distance * Mathf.Min(distance * LungeTravelFraction, MaxLungeDistancePixels);
+		if (_lungeTween != null && _lungeTween.IsValid())
+			_lungeTween.Kill();
+		_lungeTween = _view.CreateTween();
+		_lungeTween.TweenProperty(_view, "position", origin + lunge, LungeOutSeconds);
+		_lungeTween.TweenProperty(_view, "position", origin, LungeBackSeconds);
 	}
 }
