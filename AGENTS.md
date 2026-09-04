@@ -73,7 +73,9 @@ Godot **4.6** + **C# / .NET** 的 2.5D RTS 项目（斜视角纸片人，类皇�
 
 ## Skills
 
-- 用户要求生成图片、素材、图标等图像时，使用 **`generate-image` skill**（Codex 版：`$CODEX_HOME/skills/generate-image`）
+- **生图规则与生图源分离**：用户要求生成图片、素材、图标等图像时，先使用 **`game-art-rules` skill**（生图业务规则：源选择、规格、风格、任务登记、后处理），再按选定的生图源 skill 执行（Codex 版：`$CODEX_HOME/skills/game-art-rules`）
+- **默认源**为 **`generate-image`**（Liblib.art 管线，国内直连、额度低，开发期迭代用）；**正式源**为 **`qianwen-image-generation`**（模型固定为 `qwen-image-3.0` / `qwen-image-3.0-pro`，需 `DASHSCOPE_API_KEY`），**仅当用户明确要求时使用**；不确定该用哪个源时**先问用户**
+- `qianwen-image-generation` 由 qianwen CLI 安装于 `~/.codex/skills/qianwen-image-generation`，模型策略已本地定制；执行 `qianwen skills install` 升级会覆盖这些修改，升级后需重新定制
 - 用户要求抠图/去背景时，使用 **`remove-bg` skill**（Codex 版：`$CODEX_HOME/skills/remove-bg`）
 - 用户要求细化任务、准备当前任务时，使用 **`refine-tasks` skill**（Codex 版：`$CODEX_HOME/skills/refine-tasks`）
 - 新增或变更 Godot 素材（PNG/.tscn/.tres/.cs 等）后，使用 **`godot-import` skill**（Codex 版：`$CODEX_HOME/skills/godot-import`）无头导入，自动生成 `.import`/`.uid` 侧车文件，避免用户手动打开编辑器导入
