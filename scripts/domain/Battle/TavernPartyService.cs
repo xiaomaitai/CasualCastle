@@ -169,7 +169,7 @@ public sealed class TavernPartyService
 		float bestDistanceSq = float.MaxValue;
 		foreach (IBuildingRef tavern in taverns)
 		{
-			if (tavern.IsDestroyed || tavern.IsEnemyOf(unit))
+			if (tavern.IsDestroyed || !IsTavernBuilding(tavern.TypeId) || tavern.IsEnemyOf(unit))
 				continue;
 
 			(float targetX, float targetY) = GetTavernStandTarget(unit, tavern);

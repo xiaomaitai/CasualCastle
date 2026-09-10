@@ -18,6 +18,48 @@ public class TavernPartyServiceTests
 	}
 
 	[Fact]
+	public void TryAssignTavern_NoTavernBuilt_FirstAdventurerNotStuckAtRandomBuilding_RealBug()
+	{
+		Unit unit = CreateAdventurer("ElfRanger", "Elf");
+		unit.SetPosition(100f, 100f);
+		FakeBuilding barracks = new()
+		{
+			TypeId = "Barracks",
+			MinX = 0f,
+			MinY = 0f,
+			MaxX = 200f,
+			MaxY = 200f,
+		};
+		TavernPartyService service = new();
+
+		bool assigned = service.TryAssignTavern(unit, Taverns(barracks));
+
+		Assert.False(assigned);
+		Assert.Null(unit.AssignedTavern);
+	}
+
+	[Fact]
+	public void TryAssignTavern_MixedBuildings_IgnoresNonTavernsAndPicksRealInn()
+	{
+		Unit unit = CreateAdventurer("ElfRanger", "Elf");
+		unit.SetPosition(100f, 100f);
+		FakeBuilding guild = new()
+		{
+			TypeId = "RangerGuild",
+			MinX = 0f,
+			MinY = 0f,
+			MaxX = 200f,
+			MaxY = 200f,
+		};
+		FakeBuilding inn = CreateTavern("Inn", 2000f, 0f);
+		TavernPartyService service = new();
+
+		service.TryAssignTavern(unit, Taverns(guild, inn));
+
+		Assert.Same(inn, unit.AssignedTavern);
+	}
+
+	[Fact]
 	public void TryAssignTavern_NonAdventurer_ReturnsFalse()
 	{
 		Unit unit = CreateAdventurer("Spearman", "Human");
