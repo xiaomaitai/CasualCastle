@@ -58,65 +58,66 @@ assets/
 
 ```
 Unit (Area2D)
-├── CollisionCircle     # 碰撞圈：可视化圆圈，我方绿/敌方红
-├── Sprite2D            # 显示体：正方形 sprite
-└── CircleShape2D       # 碰撞体：与 CollisionCircle 同半径
+├── Logic               # UnitLogic：领域单位驱动与表现
+├── CollisionShape      # CircleShape2D 碰撞体，半径 = UnitStats 碰撞半径
+└── View
+    ├── UnitCard        # 卡面占位：无帧图集的单位
+    ├── Body            # 帧动画身体：有 frames/atlas.png 的单位（见 animationWorkflow.md）
+    └── BodyHealth      # 帧动画身体的独立血条
 ```
 
-- **显示体**：正方形 sprite，纯视觉
-- **碰撞体**：`CircleShape2D`，受击判定 + 推挤 + 建筑碰撞
-- **碰撞圈**：`_Draw()` 绘制圆圈，与碰撞体完全重合，游戏内可见
+- **显示体**：卡面（正方形，边长 = 显示体边长）或帧动画身体（高度 = 显示体边长），纯视觉
+- **碰撞体**：`CircleShape2D`，受击判定 + 推挤 + 建筑碰撞；半径由 `UnitStats` 按体型给出
+- **碰撞圈**：`CollisionOverlay` 绘制，仅作弊模式（`CheatState.ShowCollisionEnabled`）可见
 
 ### 碰撞圈颜色
 
 | 阵营 | 颜色 | 绘制 |
 |------|------|------|
-| 我方 | 绿色 | `Color.Green`，半透明 |
-| 敌方 | 红色 | `Color.Red`，半透明 |
-
-在 `Unit._Draw()` 中用 `DrawCircle(Vector2.Zero, collisionRadius, color)` 绘制。
+| 我方 | 绿色 `(0.2, 1, 0.3, 0.9)` | `CollisionOverlay.FriendlyColor` |
+| 敌方 | 红色 `(1, 0.25, 0.2, 0.9)` | `CollisionOverlay.EnemyColor` |
 
 ### 四种体型
 
-每个单位归入一种体型。显示体是正方形，碰撞体是内切圆。
+每个单位归入一种体型。显示体是正方形，碰撞体是内切圆。下表为**当前实现值**（显示体边长见 `UnitLogic` 的 `*DisplaySize` 常量，碰撞半径见 `UnitStats` 的 `*CollisionRadius` 常量）。
 
 | 体型 | 显示体边长 | 碰撞半径 | 适用单位 |
 |------|-----------|---------|---------|
-| **小型** Small | 40 unit | 8 unit | 小怪物、小精灵、蝙蝠等 |
-| **中型** Medium | 60 unit | 12 unit | 剑士、弓箭手、狼人、步兵等类人生物 |
-| **大型** Large | 80 unit | 16 unit | 骑兵、野兽、食人魔等 |
-| **特大型** Huge | 120 unit | 24 unit | 猛犸、黑龙、巨人等巨兽 |
+| **小型** Small | 60 unit | 18 unit | 小怪物、小精灵、蝙蝠等 |
+| **中型** Medium | 90 unit | 27 unit | 剑士、弓箭手、狼人、步兵等类人生物 |
+| **大型** Large | 120 unit | 36 unit | 骑兵、野兽、食人魔等 |
+| **特大型** Huge | 180 unit | 54 unit | 猛犸、黑龙、巨人等巨兽 |
 
-碰撞半径 = 显示体边长 × 0.2，保证单位彼此靠近时视觉紧凑。
+碰撞半径 = 显示体边长 × 0.3，保证单位彼此靠近时视觉紧凑。
 
 ### 体型汇总
 
 | 体型 | 显示体 | 碰撞半径 | 代表兵种 |
 |------|--------|---------|---------|
-| Small | 40×40 | 8 | 小精灵、蝙蝠 |
-| Medium | 60×60 | 12 | 剑士、弓箭手、狼人 |
-| Large | 80×80 | 16 | 骑兵 |
-| Huge | 120×120 | 24 | 猛犸、巨人、黑龙 |
+| Small | 60×60 | 18 | 小精灵、蝙蝠 |
+| Medium | 90×90 | 27 | 剑士、弓箭手、狼人 |
+| Large | 120×120 | 36 | 骑兵 |
+| Huge | 180×180 | 54 | 猛犸、巨人、黑龙 |
 
 ### 有效攻击距离
 
-近战：碰撞圈边缘到碰撞圈边缘 = `AttackRange`。双方单位碰撞圈边缘间距 ≤ AttackRange 时可攻击。
+近战：碰撞圈边缘到碰撞圈边缘 = `AttackRange`。判定由领域完成：`Unit.EdgeDistanceTo(target) ≤ AttackRange` 时结算伤害（`Unit.cs`）。
 
 | 攻击方 | 防守方 | AttackRange | 生效距离（中心距） |
 |--------|--------|-------------|------------------|
-| Medium | Medium | 60 | 84 unit (12+60+12) |
-| Large | Medium | 60 | 88 unit (16+60+12) |
-| Huge | Medium | 80 | 116 unit (24+80+12) |
+| Medium | Medium | 60 | 114 unit (27+60+27) |
+| Large | Medium | 60 | 123 unit (36+60+27) |
+| Huge | Medium | 80 | 161 unit (54+80+27) |
 
-远程：`AttackRange` 从自身中心算，范围内发射弹体。
+远程与近战走同一判定；`Projectile` 只做飞行表现，不参与命中结算。上表 AttackRange 为示例值，实际取 `config.db` 的 `unit_stats.attack_range`。
 
 ### 间距规则
 
 | 规则 | 阈值 | 作用 |
 |------|------|------|
-| 同方推挤 | 间距 < 双方半径之和 + 4 unit | 施加排斥力 |
+| 同方推挤 | 间距 < 双方半径之和 × 1.6 | 施加排斥力（`SteeringService.SeparationRadiusMultiplier`） |
 | 建筑避障 | 碰撞圈边缘触碰建筑碰撞体 | 沿切线滑行 |
-| 弹体命中 | 弹体中心距目标中心 < 目标半径 | 造成伤害 |
+| 伤害结算 | 边缘距离 ≤ `AttackRange` | 领域直接结算，弹体仅表现 |
 
 ---
 

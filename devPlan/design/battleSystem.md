@@ -268,7 +268,7 @@ BattleManager.PropagateRetaliation(center, radius, target):
 - 已摧毁建筑不阻塞，单位可直接穿过
 - 接战/攻城单位无 MoveGoal，原地站定
 
-**单位-单位间距（软分离）**：行军单位对邻近单位（含站定的接战单位）施加软分离，最小间距 = 双方碰撞半径 + 4；接战单位原地站定成为避让障碍，后方单位绕行形成水流式侧面包抄（详见 `navigationSystem.md`）。
+**单位-单位间距（软分离）**：行军单位对邻近单位（含站定的接战单位）施加软分离，影响半径 = 双方碰撞半径和 × `SeparationRadiusMultiplier`（1.6）；接战单位原地站定成为避让障碍，后方单位绕行形成水流式侧面包抄（详见 `navigationSystem.md`）。
 
 ---
 

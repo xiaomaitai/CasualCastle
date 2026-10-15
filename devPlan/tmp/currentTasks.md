@@ -41,4 +41,4 @@
 
 - 代码改动仅 `scripts/adapters/godot/battle/UnitVisual.cs`：新增 `StandReferenceFrame` / `MinBodyContentHeightPixels` / `BodyHealthAboveHeadGapPixels` / `MaxBodyHealthWidthRatio` / `BodyHealthHeightStretch`，拆分出 `ApplyBodyTransform`、`LoadStandBounds`，`ComputeRegionContentHeight`（逐像素）替换为 `ComputeRegionContentBounds`（`Image.GetUsedRect()`）。
 - `UnitLogic.cs` 的 Small 60 / Medium 90 / Large 120 / Huge 180 经复核保持不变。
-- 待用户决策：`assetSpecs.md` §1「四种体型」表为 40/60/80/120 + 碰撞半径 0.2×，与实现（60/90/120/180 + `UnitStats` 的 0.3×）不一致，需确认以哪边为准。
+- 文档同步（用户决策「以代码为准」）：`assetSpecs.md` §1 体型表改为实现值（60/90/120/180、碰撞半径 0.3×），并同步节点结构、碰撞圈可见性（仅作弊模式）、有效攻击距离与间距规则；`battleSystem.md` 软分离阈值改为「半径和 × 1.6」。
