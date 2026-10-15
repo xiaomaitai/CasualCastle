@@ -71,6 +71,13 @@ Godot **4.6** + **C# / .NET** 的 2.5D RTS 项目（斜视角纸片人，类皇�
 - 当用户说"继续当前任务"时，先查 `currentTasks.md`；如果已完成就查大纲找下一个 Phase
 - 当用户要求把新任务细化到当前任务时，先彻底清理 `currentTasks.md` 和 `todo.md` 中已完成的内容
 
+## 实测用例（`devPlan/manualTestCases.md`）
+
+- 自动化覆盖不到、**必须人工实机验证**的项目（视觉观感、手感、音效、平衡、时序节奏）统一登记到 `devPlan/manualTestCases.md`，按 `MT-###` 编号，规则与图例见该文件。
+- 任务细化时把新增实测项写入该文件；**任务不因等待实测而阻塞**——`dotnet build` 零 warning + 单测 + 冒烟通过即视为施工完成并提交，实测项留在清单里等用户验证。
+- 用户实机确认后把状态改 ✅ 并记日期；验证失败改 ❌ 并另开修复任务。
+- 工程性验证（build / 单测 / 冒烟 / `check_uids` / `check_architecture`）属于提交门禁，不登记在该清单。
+
 ## Skills
 
 - **生图规则与生图源分离**：用户要求生成图片、素材、图标等图像时，先使用 **`game-art-rules` skill**（生图业务规则：源选择、规格、风格、任务登记、后处理），再按选定的生图源 skill 执行（Codex 版：`$CODEX_HOME/skills/game-art-rules`）

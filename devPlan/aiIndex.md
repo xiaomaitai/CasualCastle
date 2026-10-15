@@ -10,6 +10,7 @@
 |---|---|
 | 了解术语/游戏规则 | `devPlan/concepts/general.md`（派系概念见同目录各派系文档） |
 | 查看当前任务/验收项 | `devPlan/tmp/currentTasks.md` |
+| 登记/查看需人工实测项 | `devPlan/manualTestCases.md` |
 | 查看架构 backlog | `devPlan/tmp/todo.md` |
 | 查看行为清单与重构基线 | `devPlan/tmp/behaviorInventory.md` |
 | 查看里程碑进度 | `devPlan/outline/c05Milestones.md` |
@@ -39,6 +40,7 @@
 | `devPlan/codeStructure.md` | 当前运行时代码结构：三层目录、依赖方向、双层 DI、系统清单、端口接口表、主要运行链路 | 定位代码或理解系统关系 |
 | `devPlan/dataStructures.md` | 核心 C# 数据结构：卡牌、建筑、组合配方、战报快照、单位、科技树 | 涉及数据结构时；实际数值以 config.db 为准 |
 | `devPlan/cloudEnvironment.md` | 云环境构建/测试/导入/运行命令 | 需要跑构建、测试或游戏时 |
+| `devPlan/manualTestCases.md` | 实测用例清单：需人工实机验证的项目（`MT-###`）、状态与维护规则 | 任务完成后登记实测项、用户验证时 |
 
 ### 里程碑与大纲（devPlan/outline/）
 
