@@ -61,9 +61,9 @@ Unit (Area2D)
 ├── Logic               # UnitLogic：领域单位驱动与表现
 ├── CollisionShape      # CircleShape2D 碰撞体，半径 = UnitStats 碰撞半径
 └── View
-    ├── UnitCard        # 卡面占位：无帧图集的单位
-    ├── Body            # 帧动画身体：有 frames/atlas.png 的单位（见 animationWorkflow.md）
-    └── BodyHealth      # 帧动画身体的独立血条
+	├── UnitCard        # 卡面占位：无帧图集的单位
+	├── Body            # 帧动画身体：有 frames/atlas.png 的单位（见 animationWorkflow.md）
+	└── BodyHealth      # 帧动画身体的独立血条
 ```
 
 - **显示体**：卡面（正方形，边长 = 显示体边长）或帧动画身体（高度 = 显示体边长），纯视觉
