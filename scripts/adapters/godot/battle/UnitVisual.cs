@@ -17,8 +17,11 @@ public class UnitVisual
 	private const float LungeBackSeconds = 0.12f;
 	private const int HurtFrameLimit = 2;
 	private const int GenericFrameLimit = 16;
-	private const float BodyHealthAboveHeadRatio = 0.75f;
-	private const float BodyHealthWidthRatio = 1.15f;
+	private const string StandReferenceFrame = "run_00";
+	private const float MinBodyContentHeightPixels = 1f;
+	private const float BodyHealthAboveHeadGapPixels = 6f;
+	private const float MaxBodyHealthWidthRatio = 1.15f;
+	private const float BodyHealthHeightStretch = 1.1f;
 	private static readonly Color StealthModulate = new(0.72f, 0.82f, 1f, 0.55f);
 	private static readonly Color DimmedModulate = new(0.7f, 0.74f, 0.86f, 0.9f);
 
@@ -71,18 +74,34 @@ public class UnitVisual
 		Dictionary<string, Rect2> regions = LoadRegions($"{folder}/atlas.json", out Vector2 cell);
 		_bodyAnim.SpriteFrames = BuildFrames(atlas, regions);
 		_bodyAnim.Centered = true;
-		_bodyAnim.Offset = new Vector2(0f, -cell.Y * 0.5f);
-		float contentHeight = regions.TryGetValue("run_00", out Rect2 run0)
-			? ComputeRegionContentHeight(atlas, run0)
-			: cell.Y;
-		_bodyAnim.Scale = Vector2.One * (displaySize / Mathf.Max(1f, contentHeight));
 		_bodyAnim.Position = Vector2.Zero;
 		_bodyAnim.Visible = true;
 		_card.Visible = false;
-		ConfigureBodyHealth(displaySize);
+		ApplyBodyTransform(atlas, regions, cell, displaySize);
 	}
 
-	private void ConfigureBodyHealth(float displaySize)
+	private void ApplyBodyTransform(Texture2D atlas, Dictionary<string, Rect2> regions, Vector2 cell, float displaySize)
+	{
+		Rect2 standBounds = LoadStandBounds(atlas, regions, cell);
+		float bodyScale = displaySize / standBounds.Size.Y;
+		float footPadding = cell.Y - standBounds.Position.Y - standBounds.Size.Y;
+		_bodyAnim.Scale = Vector2.One * bodyScale;
+		_bodyAnim.Offset = new Vector2(0f, -cell.Y * 0.5f + footPadding);
+		ConfigureBodyHealth(
+			Mathf.Min(standBounds.Size.X * bodyScale, displaySize * MaxBodyHealthWidthRatio),
+			standBounds.Size.Y * bodyScale);
+	}
+
+	private static Rect2 LoadStandBounds(Texture2D atlas, Dictionary<string, Rect2> regions, Vector2 cell)
+	{
+		Rect2 cellBox = new Rect2(Vector2.Zero, cell);
+		if (!regions.TryGetValue(StandReferenceFrame, out Rect2 region))
+			return cellBox;
+		Rect2 bounds = ComputeRegionContentBounds(atlas, region);
+		return bounds.Size.Y < MinBodyContentHeightPixels ? cellBox : bounds;
+	}
+
+	private void ConfigureBodyHealth(float barTargetWidth, float bodyPixelHeight)
 	{
 		if (_bodyHealth == null) return;
 		Sprite2D empty = _bodyHealth.GetNodeOrNull<Sprite2D>("Empty");
@@ -91,10 +110,10 @@ public class UnitVisual
 			_bodyHealth.Visible = false;
 			return;
 		}
-		float barWidth = empty.Texture.GetWidth();
-		float scale = displaySize * BodyHealthWidthRatio / Mathf.Max(1f, barWidth);
-		_bodyHealth.Scale = new Vector2(scale, scale * 1.1f);
-		_bodyHealth.Position = new Vector2(0f, -displaySize * BodyHealthAboveHeadRatio);
+		float scale = barTargetWidth / empty.Texture.GetWidth();
+		float barHalfHeight = empty.Texture.GetHeight() * scale * BodyHealthHeightStretch * 0.5f;
+		_bodyHealth.Scale = new Vector2(scale, scale * BodyHealthHeightStretch);
+		_bodyHealth.Position = new Vector2(0f, -bodyPixelHeight - BodyHealthAboveHeadGapPixels - barHalfHeight);
 		_bodyHealth.Visible = true;
 	}
 
@@ -149,24 +168,14 @@ public class UnitVisual
 		return regions;
 	}
 
-	private static float ComputeRegionContentHeight(Texture2D atlas, Rect2 region)
+	private static Rect2 ComputeRegionContentBounds(Texture2D atlas, Rect2 region)
 	{
 		Image full = atlas.GetImage();
 		Image sub = full.GetRegion(new Rect2I((int)region.Position.X, (int)region.Position.Y, (int)region.Size.X, (int)region.Size.Y));
-		int top = sub.GetHeight();
-		int bottom = 0;
-		for (int y = 0; y < sub.GetHeight(); y++)
-		{
-			for (int x = 0; x < sub.GetWidth(); x++)
-			{
-				if (sub.GetPixel(x, y).A > 0f)
-				{
-					if (y < top) top = y;
-					if (y > bottom) bottom = y;
-				}
-			}
-		}
-		return bottom - top + 1;
+		Rect2I used = sub.GetUsedRect();
+		if (used.Size.X <= 0 || used.Size.Y <= 0)
+			return new Rect2(Vector2.Zero, Vector2.Zero);
+		return new Rect2(used.Position.X, used.Position.Y, used.Size.X, used.Size.Y);
 	}
 
 	public void PlayAnimation(string name)

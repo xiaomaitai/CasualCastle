@@ -61,4 +61,23 @@ python tools/pack_sprite_atlas.py --frames <帧目录> --atlas <帧目录>/atlas
 - ✅ 预览场景与状态切换（`unit_anim_preview`）
 - ✅ 接入正式单位（`Unit.tscn` + `UnitVisual` + `UnitLogic`：移动→`run`、攻击→`attack`、受击→`hurt`、死亡→`death`；无 idle，站定冻结当前帧）
 - ✅ 按需扩展其他兵种（有 `atlas.png` 即启用身体，无则卡面）
-- ⬜ 身体缩放 / 血条位置微调、按单位体型差异化；站定帧细化
+- ✅ 身体缩放 / 血条位置 / 脚底锚点收尾（2026-09-10，规则见 §6）；站定保持冻结当前帧（无 idle 行）
+
+## 6. 尺寸与锚点规则（2026-09-10 收尾）
+
+`UnitVisual.ApplyBodyTransform` 由 `atlas.json` 单元格与帧内容包围盒推导身体缩放、脚底锚点与血条尺寸，全部为命名常量：
+
+| 项 | 规则 | 常量 |
+| --- | --- | --- |
+| 缩放基准帧 | 站立参考帧，其内容高度被归一为 `displaySize` | `StandReferenceFrame = "run_00"` |
+| 身体缩放 | `scale = displaySize / 基准帧内容高度` | — |
+| 脚底锚点 | 内容底边对齐单位节点原点：`Offset.Y = -cell.Y / 2 + (cell.Y - 内容底边)` | — |
+| 血条宽度 | 身体实测宽度与 `displaySize × 1.15` 取小 | `MaxBodyHealthWidthRatio` |
+| 血条位置 | 身体实测高度之上留 6px 间隙，再抬升半个血条高度 | `BodyHealthAboveHeadGapPixels` |
+| 血条厚度 | 宽度缩放比例的 1.1 倍 | `BodyHealthHeightStretch` |
+| 尺寸兜底 | 基准帧缺失或内容高度 < 1px 时按整格处理 | `MinBodyContentHeightPixels` |
+
+- 内容包围盒由 `Image.GetUsedRect()`（非透明区域）取得，不再逐像素扫描图集。
+- 切片工具 `--pad` 会在内容下方留下空白；脚底锚点用「内容底边到单元格底边」的距离补偿该空白，因此单位脚底落在节点原点上而非悬空。
+- 图集所有帧共享同一单元格且底边对齐（剑士 42 帧底边空白恒为 4px），故 run / attack / hurt / death 切换时脚底锚点与站位不跳变。
+- 体型档位沿用 `UnitLogic` 的 Small 60 / Medium 90 / Large 120 / Huge 180 游戏单位（`PixelsPerCell = UnitsPerCell = 100`，即 1:1 像素）；帧动画身体高度等于 `displaySize`，与卡面渲染宽度一致，两种形态互不突变。
