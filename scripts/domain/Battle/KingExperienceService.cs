@@ -1,4 +1,4 @@
-// 魔王经验服务：阵亡/击杀/魔晶注入经验并升级
+// 魔王经验服务：阵亡/击杀/魔晶注入经验并升级，返回实际生效经验
 using System;
 
 namespace CasualCastle.Domain.Battle;
@@ -14,30 +14,30 @@ public sealed class KingExperienceService
 
 	public float KillXpMultiplier { get; set; } = 1f;
 
-	public void OnUnitDied(bool friendlyToDungeon)
+	public int OnUnitDied(bool friendlyToDungeon)
 	{
-		AddExperience(friendlyToDungeon ? DemonKingRules.FriendlyDeathXp : DemonKingRules.EnemyDeathXp);
+		return AddExperience(friendlyToDungeon ? DemonKingRules.FriendlyDeathXp : DemonKingRules.EnemyDeathXp);
 	}
 
-	public void OnKingKill()
+	public int OnKingKill()
 	{
-		AddExperience((int)(DemonKingRules.KingKillXp * KillXpMultiplier));
+		return AddExperience((int)(DemonKingRules.KingKillXp * KillXpMultiplier));
 	}
 
-	public void OnCrystalUsed()
+	public int OnCrystalUsed()
 	{
-		AddExperience(DemonKingRules.CrystalXp);
+		return AddExperience(DemonKingRules.CrystalXp);
 	}
 
-	public void OnSmallCrystalMined()
+	public int OnSmallCrystalMined()
 	{
-		AddExperience(DemonKingRules.SmallCrystalXp);
+		return AddExperience(DemonKingRules.SmallCrystalXp);
 	}
 
-	public void AddExperience(int amount)
+	public int AddExperience(int amount)
 	{
 		if (amount <= 0 || Level >= 5)
-			return;
+			return 0;
 		Experience += amount;
 		ExperienceChanged?.Invoke(Experience);
 		while (Level < 5 && Experience >= GetRequiredExperience(Level))
@@ -46,6 +46,7 @@ public sealed class KingExperienceService
 			Level++;
 			LevelUp?.Invoke(Level);
 		}
+		return amount;
 	}
 
 	public int GetCumulativeExperience()

@@ -22,6 +22,8 @@ public sealed class BuildingView
 
 	private BuildingStateIcon _stateIcon;
 
+	private BuildingHealthBar _healthBar;
+
 	private HordeAdjacencyIndicator _hordeIndicator;
 
 	private const float WorkBrightenAmount = 0.35f;
@@ -39,6 +41,7 @@ public sealed class BuildingView
 		_stateIcon = new BuildingStateIcon();
 		Node2D effects = _owner.GetNodeOrNull<Node2D>("Effects");
 		effects?.AddChild(_stateIcon);
+		InitializeHealthBar(effects);
 		if (_buildingSystem.GetFactionId(_owner.TypeId) == FactionDef.HordeId)
 		{
 			_hordeIndicator = new HordeAdjacencyIndicator();
@@ -46,6 +49,27 @@ public sealed class BuildingView
 		}
 		SyncStateIconPosition();
 		UpdateStateIcon();
+	}
+
+	private void InitializeHealthBar(Node2D effects)
+	{
+		if (effects == null || _buildingSystem.IsCoreBuilding(_owner.TypeId))
+			return;
+		_healthBar = new BuildingHealthBar();
+		_healthBar.Configure(_buildingSystem.GetBuildingVisualSizePixels(_owner.TypeId));
+		effects.AddChild(_healthBar);
+		_owner.HealthChanged += OnOwnerHealthChanged;
+		UpdateHealthBar();
+	}
+
+	private void OnOwnerHealthChanged(int health, int maxHealth)
+	{
+		_healthBar?.SetDamage(health, maxHealth);
+	}
+
+	private void UpdateHealthBar()
+	{
+		_healthBar?.SetDamage(_owner.Health, _owner.MaxHealth);
 	}
 
 	public void TryApplyVisual()

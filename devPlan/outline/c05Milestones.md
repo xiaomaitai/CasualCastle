@@ -636,9 +636,9 @@ v0.7 重新定义为**完善版**（2026-08-25 用户决策）：原「建筑美
 
 **展示 QOL（Display）**：
 - ✅ buff 状态栏：领域新增只读端口 `IUnitState.GetActiveStatusEffects()`（减速/中毒/诅咒 + 剩余秒数，78652e3），单位卡 buff 区实时显示计时标签（含 A2 缺口 #5，Domain 627→631）
-- ✅ 飘字系统：单位受击伤害/治疗数值上浮淡出（FloatingText + IUnitEventPort 挂接，dff6bec）；金币变化/击杀飘字待做
+- ✅ 飘字系统：单位受击伤害/治疗数值上浮淡出（FloatingText + IUnitEventPort 挂接，dff6bec）；✅ 资源掉落飘字（死亡位置按实际生效量出字：黑魔法/地下城经验/小魔晶，受「显示伤害数字」开关控制）与 ✅ HUD 金币变化飘字（`UiFloatingText` + `Shop.GoldChanged` 差值）；无击杀金币掉落（数据层无该字段），故不出「击杀」字样
 - 生产进度：✅ 建筑产兵倒计时已由 building_work.gdshader 填充上浮体现（BuildingView.UpdateWorkEffectFromProgress）+ 属性面板剩余秒数；产兵倒计时圆环待做（可选）
-- ✅ 血条改进：单位血条满血短暂显示后淡出（HealthBarView.Ping）；城堡核心血条受损闪白（Castle.FlashHealthBar，03aee08）；建筑耐久条待做
+- ✅ 血条改进：单位血条满血短暂显示后淡出（HealthBarView.Ping）；城堡核心血条受损闪白（Castle.FlashHealthBar，03aee08）；✅ 建筑耐久条（非核心建筑受损时显示、满血隐藏，`BuildingHealthBar` 宽度随建筑视觉尺寸缩放）
 - 卡牌信息卡片：✅ 商店 offer / 手牌卡悬停显示产出单位属性（08eaea0）
 - ✅ 金币反馈：金币变化闪烁跳动、不足变红（a920f4d，uiDesign.md §6.4）
 - ✅ 核心受袭红边告警（G3-B4 f44fb91）+ ✅ 昼夜色调区分（CanvasModulate 夜晚蓝调，1628c3f）

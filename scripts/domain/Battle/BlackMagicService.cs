@@ -1,4 +1,4 @@
-// 黑魔法资源服务：单位阵亡时收集，己方阵亡产出高于敌方
+// 黑魔法资源服务：单位阵亡时收集并返回实际获得量，己方阵亡产出高于敌方
 using System;
 
 namespace CasualCastle.Domain.Battle;
@@ -23,19 +23,20 @@ public sealed class BlackMagicService
 	{
 	}
 
-	public void OnUnitDied(bool isFriendlyToNecromancer, string race)
+	public int OnUnitDied(bool isFriendlyToNecromancer, string race)
 	{
 		if (UndeadRules.IsNonLiving(race))
-			return;
-		Add(isFriendlyToNecromancer ? _config.FriendlyDeathYield : _config.EnemyDeathYield);
+			return 0;
+		return Add(isFriendlyToNecromancer ? _config.FriendlyDeathYield : _config.EnemyDeathYield);
 	}
 
-	public void Add(int amount)
+	public int Add(int amount)
 	{
 		if (amount <= 0)
-			return;
+			return 0;
 		Value += amount;
 		ValueChanged?.Invoke(Value);
+		return amount;
 	}
 
 	public bool TrySpend(int amount)

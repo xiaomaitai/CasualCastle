@@ -57,6 +57,44 @@ public class KingExperienceServiceTests
 	}
 
 	[Fact]
+	public void OnUnitDied_ReturnsGrantedXp()
+	{
+		KingExperienceService xp = new();
+
+		Assert.Equal(DemonKingRules.FriendlyDeathXp, xp.OnUnitDied(true));
+		Assert.Equal(DemonKingRules.EnemyDeathXp, xp.OnUnitDied(false));
+	}
+
+	[Fact]
+	public void OnKingKill_ReturnsScaledXp()
+	{
+		KingExperienceService xp = new();
+		xp.KillXpMultiplier = 2f;
+
+		Assert.Equal(DemonKingRules.KingKillXp * 2, xp.OnKingKill());
+	}
+
+	[Fact]
+	public void OnSmallCrystalMined_ReturnsSmallCrystalXp()
+	{
+		KingExperienceService xp = new();
+
+		Assert.Equal(DemonKingRules.SmallCrystalXp, xp.OnSmallCrystalMined());
+	}
+
+	[Fact]
+	public void AddExperience_AtMaxLevel_ReturnsZero()
+	{
+		KingExperienceService xp = new();
+		xp.AddExperience(100000);
+
+		Assert.Equal(5, xp.Level);
+		Assert.Equal(0, xp.OnUnitDied(false));
+		Assert.Equal(0, xp.OnKingKill());
+		Assert.Equal(0, xp.OnSmallCrystalMined());
+	}
+
+	[Fact]
 	public void AddExperience_LevelsUpAndCarriesOverflow()
 	{
 		KingExperienceService xp = new();

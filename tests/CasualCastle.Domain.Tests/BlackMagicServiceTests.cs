@@ -51,6 +51,26 @@ public class BlackMagicServiceTests
 	}
 
 	[Fact]
+	public void OnUnitDied_ReturnsGrantedYield()
+	{
+		BlackMagicService service = new();
+
+		Assert.Equal(BlackMagicService.DefaultFriendlyDeathYield, service.OnUnitDied(true, "Human"));
+		Assert.Equal(BlackMagicService.DefaultEnemyDeathYield, service.OnUnitDied(false, "Orc"));
+		Assert.Equal(0, service.OnUnitDied(true, "Golem"));
+	}
+
+	[Fact]
+	public void Add_NonPositiveAmount_ReturnsZero()
+	{
+		BlackMagicService service = new();
+
+		Assert.Equal(0, service.Add(0));
+		Assert.Equal(0, service.Add(-5));
+		Assert.Equal(0, service.Value);
+	}
+
+	[Fact]
 	public void ValueChanged_FiresOnDeath()
 	{
 		BlackMagicService service = new();

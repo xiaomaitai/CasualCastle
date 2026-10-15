@@ -1,4 +1,4 @@
-// 战场飘字：受击伤害与治疗数值上浮淡出，按伤害类型着色，重击显示大号红字
+// 战场飘字：伤害、治疗与资源掉落数值上浮淡出，按伤害类型或资源着色，重击显示大号红字
 using CasualCastle.Domain.Battle;
 using Godot;
 
@@ -26,19 +26,29 @@ public partial class FloatingText : Node2D
 
 	public static FloatingText Spawn(Node parent, Vector2 position, int amount, bool isHeal, bool isCrit = false, DamageType? damageType = null)
 	{
+		return SpawnText(parent, position, amount.ToString(), ResolveColor(isHeal, isCrit, damageType), isCrit);
+	}
+
+	public static FloatingText SpawnGain(Node parent, Vector2 position, int amount, Color color)
+	{
+		return SpawnText(parent, position, $"+{amount}", color, false);
+	}
+
+	private static FloatingText SpawnText(Node parent, Vector2 position, string text, Color color, bool isCrit)
+	{
 		FloatingText floating = new();
 		parent.AddChild(floating);
 		floating.Position = position;
-		floating.Setup(amount.ToString(), isHeal, isCrit, damageType);
+		floating.Setup(text, color, isCrit);
 		return floating;
 	}
 
-	private void Setup(string text, bool isHeal, bool isCrit, DamageType? damageType)
+	private void Setup(string text, Color color, bool isCrit)
 	{
 		Label label = new();
 		label.Text = text;
 		label.AddThemeFontSizeOverride("font_size", isCrit ? CritFontSize : FontSize);
-		label.AddThemeColorOverride("font_color", ResolveColor(isHeal, isCrit, damageType));
+		label.AddThemeColorOverride("font_color", color);
 		label.Position = new Vector2(LabelOffsetX, LabelOffsetY);
 		label.ZIndex = 10;
 		AddChild(label);

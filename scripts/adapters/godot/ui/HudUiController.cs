@@ -13,6 +13,10 @@ public partial class HudUiController : Control
 	public const float SpeedStep = 1f;
 	public const float SpeedDefault = 1.0f;
 	private const float DangerFlashFadeSeconds = 0.45f;
+	private const float GoldDeltaOffsetY = -18f;
+	private const int UnsetGold = -1;
+	private static readonly Color GoldGainColor = new(0.45f, 0.95f, 0.5f, 1f);
+	private static readonly Color GoldSpendColor = new(1f, 0.45f, 0.4f, 1f);
 
 	private ProgressBar _playerHealthBar;
 	private ProgressBar _enemyHealthBar;
@@ -34,6 +38,7 @@ public partial class HudUiController : Control
 	private Panel _speedPanel;
 	private ColorRect _dangerFlash;
 	private int _lastPlayerHealth = -1;
+	private int _lastGold = UnsetGold;
 
 	public ProgressBar PlayerHealthBar => _playerHealthBar ??= GetNode<ProgressBar>("PlayerHealthBar");
 	public ProgressBar EnemyHealthBar => _enemyHealthBar ??= GetNode<ProgressBar>("EnemyHealthBar");
@@ -192,6 +197,20 @@ public partial class HudUiController : Control
 	{
 		GoldLabel.Text = $"金币：{gold}";
 		PlayGoldPop(GoldLabel);
+		PlayGoldDelta(gold);
+	}
+
+	private void PlayGoldDelta(int gold)
+	{
+		int previous = _lastGold;
+		_lastGold = gold;
+		if (previous == UnsetGold || previous == gold)
+			return;
+		int delta = gold - previous;
+		Color color = delta > 0 ? GoldGainColor : GoldSpendColor;
+		string text = delta > 0 ? $"+{delta}" : $"-{-delta}";
+		Vector2 anchor = GoldLabel.GlobalPosition - GlobalPosition + new Vector2(0f, GoldDeltaOffsetY);
+		UiFloatingText.Spawn(this, anchor, text, color);
 	}
 
 	private void PlayGoldPop(Label label)
