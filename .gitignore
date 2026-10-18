@@ -19,6 +19,11 @@ desktop.ini
 *.user
 *.userprops
 
+# IDE state (编辑器本地状态，不入库)
+.idea/
+.trae/
+.vscode/
+
 # Database binary — tracked via SQL dump instead
 assets/data/config.db
 

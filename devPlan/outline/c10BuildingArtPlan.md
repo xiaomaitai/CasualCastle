@@ -81,5 +81,4 @@
 ## 8. 文档同步
 
 - assetSpecs.md：重写建筑章节（目录、尺寸、无底座与视角规范、生图/抠图流程、锚定规则）
-- c08RenderPerspective.md：勾选「建筑 sprite」待办
 - c05Milestones.md：登记 v0.7

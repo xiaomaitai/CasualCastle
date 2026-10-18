@@ -47,14 +47,9 @@
 | 文档 | 内容 |
 |---|---|
 | `c01Overview.md` | 完整版玩法循环概述 |
-| `c02FullFeatureList.md` | 功能清单与验收状态 |
-| `c03ProjectArchitecture.md` | 项目架构（六边形 + DDD） |
-| `c04DataStructureDesign.md` | 数据结构设计（早期参考） |
-| `c05Milestones.md` | 里程碑状态表 |
+| `c05Milestones.md` | 里程碑状态表（历史与验收记录，唯一进度来源） |
 | `c06TechStack.md` | 技术栈与数据存储约定 |
-| `c08RenderPerspective.md` | 2.5D 渲染视角原理 |
-| `c09AudioPlan.md` | 音频阶段计划 |
-| `c10BuildingArtPlan.md` | 建筑美术阶段计划 |
+| `c10BuildingArtPlan.md` | 建筑美术阶段计划（未完成，backlog 依据） |
 | `*.png` | 界面线框：title、mainBattle、placement、nightShop、pause、gameOver、sceneFlow、battlefieldUi |
 
 ### 系统设计（devPlan/design/）

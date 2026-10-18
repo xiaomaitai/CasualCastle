@@ -302,7 +302,7 @@ UI 元素使用**屏幕像素**，放在 `CanvasLayer` 下。
 
 ## 6. 音频
 
-音频采用统一 AudioManager 管线（v0.6），需求清单见 `devPlan/design/audioRequirements.md`，大纲见 `devPlan/outline/c09AudioPlan.md`。
+音频采用统一 AudioManager 管线（v0.6），需求清单见 `devPlan/design/audioRequirements.md`，该清单是音频素材与实现的唯一依据。
 
 | 类别 | 格式 | 说明 |
 |------|------|------|

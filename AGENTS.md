@@ -81,6 +81,7 @@ Godot **4.6** + **C# / .NET** 的 2.5D RTS 项目（斜视角纸片人，类皇�
 ## Skills
 
 - **生图规则与生图源分离**：用户要求生成图片、素材、图标等图像时，先使用 **`game-art-rules` skill**（生图业务规则：源选择、规格、风格、任务登记、后处理），再按选定的生图源 skill 执行（Codex 版：`$CODEX_HOME/skills/game-art-rules`）
+- **素材管线只有生图源，没有视频生成源**：单位动画走帧动画图集切片（`devPlan/design/animationWorkflow.md` + `tools/slice_spritesheet.py`），不要为素材管线引入视频生成源
 - **默认源**为 **`generate-image`**（Liblib.art 管线，国内直连、额度低，开发期迭代用）；**正式源**为 **`qianwen-image-generation`**（模型固定为 `qwen-image-3.0` / `qwen-image-3.0-pro`，需 `DASHSCOPE_API_KEY`），**仅当用户明确要求时使用**；不确定该用哪个源时**先问用户**
 - `qianwen-image-generation` 由 qianwen CLI 安装于 `~/.codex/skills/qianwen-image-generation`，模型策略已本地定制；执行 `qianwen skills install` 升级会覆盖这些修改，升级后需重新定制
 - 用户要求抠图/去背景时，使用 **`remove-bg` skill**（Codex 版：`$CODEX_HOME/skills/remove-bg`）
