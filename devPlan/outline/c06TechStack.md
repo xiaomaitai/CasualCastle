@@ -2,11 +2,13 @@
 
 | 分类 | 技术 |
 |------|------|
-| 引擎 | Godot 4.6 (C#) |
-| 渲染 | Forward+ |
-| 物理 | Jolt Physics |
-| 语言 | C# / .NET |
+| 引擎 | Godot 4.6.2 (mono / C#) |
+| 渲染 | Forward+（默认；云 VM 无 GPU 时回退 OpenGL3 软件渲染） |
+| 物理 | Jolt Physics（2D 运行时碰撞仍用 Godot 内置物理，项目里 Jolt 配置为 `3d/physics_engine`） |
+| 语言 | C# / .NET 8（`net8.0`） |
 | 数据库 | SQLite（`Microsoft.Data.Sqlite`） |
+| 测试 | xUnit（`tests/` 三个纯 C# 项目） |
+| 素材与运行 | 美术素材走 Git LFS；命令见 `devPlan/cloudEnvironment.md` |
 
 ## 数据存储约定
 

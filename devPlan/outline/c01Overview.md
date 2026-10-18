@@ -1,5 +1,7 @@
 # 一、概述
 
+> 术语与规则以 `devPlan/concepts/general.md` 为准；各版本进度与验收见 `devPlan/outline/c05Milestones.md`。本文件只作快速概览。
+
 这是一个 2.5D RTS 游戏（斜视角纸片人），类似皇室战争的玩法。战场为平面网格，角色以纸片精灵（billboard sprite）渲染，碰撞体位于脚下地面层，显示体略偏上形成立体感。
 
 **核心玩法循环（完整版目标）：**

@@ -39,7 +39,7 @@
 |---|---|---|
 | `devPlan/codeStructure.md` | 当前运行时代码结构：三层目录、依赖方向、双层 DI、系统清单、端口接口表、主要运行链路 | 定位代码或理解系统关系 |
 | `devPlan/dataStructures.md` | 核心 C# 数据结构：卡牌、建筑、组合配方、战报快照、单位、科技树 | 涉及数据结构时；实际数值以 config.db 为准 |
-| `devPlan/cloudEnvironment.md` | 云环境构建/测试/导入/运行命令 | 需要跑构建、测试或游戏时 |
+| `devPlan/cloudEnvironment.md` | 运行环境与命令：本机（Windows/DSH）与云环境两套构建、测试、导入、启动游戏命令 | 需要跑构建、测试或游戏时 |
 | `devPlan/manualTestCases.md` | 实测用例清单：需人工实机验证的项目（`MT-###`）、状态与维护规则 | 任务完成后登记实测项、用户验证时 |
 
 ### 里程碑与大纲（devPlan/outline/）
@@ -206,6 +206,7 @@
 | `tools/check_architecture.py` | 校验分层架构约束（domain 零 Godot/零 SQLite、依赖方向），已接入 pre-commit |
 | `tools/check_smoke_paths.py` | 校验冒烟脚本不硬编码 MainGame/UI 节点路径，已接入 pre-commit |
 | `tools/run_smoke.sh` | 冒烟统一运行器（四层防卡死：基类看门狗 + 线程硬看门狗 + --quit-after + OS timeout），PASS 判定契约 |
+| `tools/run_game.ps1` | 本机启动 Godot：编辑器未运行时一并启动，已运行时只启动游戏 |
 
 ## 7. 入口与运行链路
 

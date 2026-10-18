@@ -23,6 +23,7 @@ desktop.ini
 .idea/
 .trae/
 .vscode/
+.cursor/
 
 # Database binary — tracked via SQL dump instead
 assets/data/config.db

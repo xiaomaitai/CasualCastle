@@ -1,6 +1,7 @@
+﻿# 本机启动 Godot 编辑器与游戏：编辑器未运行时一并启动，已运行时只启动游戏
 param(
     [string]$GodotDir = "C:\Program Files (x86)\Godot_v4.6.2-stable_mono_win64",
-    [string]$ProjectPath = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..\..")).Path,
+    [string]$ProjectPath = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path,
     [string]$MainScene = "res://scenes/ui/title_screen.tscn",
     [int]$EditorStartupSeconds = 3
 )
@@ -12,7 +13,9 @@ function Get-GodotExecutable {
         throw "Godot 安装目录不存在: $Dir"
     }
 
-    $exe = Get-ChildItem -Path $Dir -Filter "Godot*.exe" -ErrorAction Stop | Select-Object -First 1
+    $exe = Get-ChildItem -Path $Dir -Filter "Godot*.exe" -ErrorAction Stop |
+        Where-Object { $_.Name -notlike "*console*" } |
+        Select-Object -First 1
     if (-not $exe) {
         throw "在 $Dir 中找不到 Godot*.exe"
     }

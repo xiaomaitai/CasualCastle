@@ -606,7 +606,7 @@ v0.7 重新定义为**完善版**（2026-08-25 用户决策）：原「建筑美
 - ✅ 商店夜晚解锁：`shop_catalog.unlock_night`（默认 1，T3 皇家套 2），`ShopRules.IsCardOffered` 按夜晚解锁 + `SetAvailability` 注入夜数，4-arg 重载兼容；单测 `UnlockNight_*` 2 例（dd682a9）
 - ✅ 派系 battle 冒烟：AllianceBattleSmoke + HordeBattleSmoke（夜晚产兵 + 升级链验证，5020f6d）
 - 属性面板数据缺口补齐（见 §8）：单位侧「伤害抗性/攻击范围范围/击杀奖励/buff 列表」与建筑侧「攻防/研发成长/陷阱冷却」多为**数据模型尚未存在的字段**（机制缺失非展示缺失），已记录 `devPlan/tmp/todo.md` 待机制到位后补齐展示
-- 四派系占位数值实测调优：需实机对局数据支撑，作为持续项跟进
+- 四派系占位数值实测调优：需实机对局数据支撑，作为持续项跟进（已登记为 `devPlan/manualTestCases.md` 的 MT-007）
 
 **操作 QOL（Operation）**：
 - ✅ 加速面板开放：SpeedPanel 常显 + 1/2/3/4× 档位 + `DisplaySettingsManager.GameSpeed` 记忆（edc37bd）

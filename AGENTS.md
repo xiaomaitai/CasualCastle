@@ -6,6 +6,8 @@ Godot **4.6** + **C# / .NET** 的 2.5D RTS 项目（斜视角纸片人，类皇�
 
 游戏术语（地块、城堡、建筑卡、战场等）以 `devPlan/concepts/general.md` 为准。
 
+- 用户口语「**兵营**」默认指**所有出兵建筑**（`Barracks`/`BarracksT2`、`ArcheryRange`、`Stable`、`WolfDen`/`WolfDenT2` 等有产兵配置的建筑）；仅当明确说「兵营建筑」「Barracks 类型」时才限定为 `Barracks`/`BarracksT2`。
+
 ## 架构与目录归属
 
 项目采用**六边形架构（Hexagonal Architecture）**与 **DDD（领域驱动设计）** 规范开发，代码按三层放在 `scripts/`：
@@ -111,6 +113,8 @@ Godot **4.6** + **C# / .NET** 的 2.5D RTS 项目（斜视角纸片人，类皇�
 - **大的修改、重构或涉及架构的改动**，需先向用户说明并得到确认后再提交
 - 新建 `.cs`、`.tscn`、`.tres` 时，**一并提交**同名 `.uid` 文件
 - 不提交 `.godot/`、`.mono/`、`*.csproj.user` 等缓存（已在 gitignore）
+- 提交说明用 `git commit -m "…"`（较长可分多个 `-m` 段落）；**不要**用 bash heredoc 或 PowerShell here-string 包裹提交说明，命令串联用 `;` 而非 `&&`
+- 默认**不 push**；推送需用户明确要求
 
 ## Git Hooks
 
